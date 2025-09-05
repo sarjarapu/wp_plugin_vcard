@@ -1,97 +1,202 @@
-/**
- * vCard Plugin Admin Styles
- * Version: 1.0.0
- */
+/* vCard Admin Styles */
 
-.vcard-admin-wrap {
-    max-width: 1200px;
-    margin: 20px 0;
-}
-
-.vcard-admin-header {
-    background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
-    padding: 20px;
+/* Tabbed Interface */
+.vcard-meta-tabs .nav-tab-wrapper {
     margin-bottom: 20px;
+    border-bottom: 1px solid #ccd0d4;
 }
 
-.vcard-admin-header h1 {
-    margin: 0 0 10px 0;
-    color: #23282d;
+.vcard-meta-tabs .nav-tab {
+    position: relative;
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-bottom: none;
+    background: #f1f1f1;
+    color: #666;
+    cursor: pointer;
 }
 
-.vcard-admin-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
+.vcard-meta-tabs .nav-tab:hover {
+    background: #fafafa;
+    color: #464646;
 }
 
-.vcard-stat-card {
+.vcard-meta-tabs .nav-tab.nav-tab-active {
     background: #fff;
-    border: 1px solid #ccd0d4;
-    border-radius: 4px;
-    padding: 20px;
-    text-align: center;
+    border-color: #ccd0d4;
+    border-bottom: 1px solid #fff;
+    color: #000;
+    margin-bottom: -1px;
 }
 
-.vcard-stat-number {
-    font-size: 2em;
+.vcard-meta-tabs .tab-content {
+    display: none;
+    padding: 20px 0;
+}
+
+.vcard-meta-tabs .tab-content.active {
+    display: block;
+}
+
+/* Business Hours Styling */
+.business-hours-container {
+    max-width: 600px;
+}
+
+.business-hours-day {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.day-label {
+    display: inline-block;
+    width: 100px;
     font-weight: bold;
-    color: #0073aa;
+    margin-right: 15px;
+}
+
+.business-hours-day input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.time-input {
+    width: 80px;
+    margin: 0 5px;
+    padding: 4px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+.business-hours-day span {
+    margin: 0 5px;
+    font-weight: bold;
+}
+
+/* Services and Products Styling */
+.services-list, .products-list {
+    margin-bottom: 15px;
+}
+
+.service-item, .product-item {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    position: relative;
+}
+
+.service-item h5, .product-item h5 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #23282d;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 8px;
+}
+
+.remove-item {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    color: #a00;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 5px 10px;
+    background: #fff;
+    border: 1px solid #a00;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.remove-item:hover {
+    background: #a00;
+    color: #fff;
+    text-decoration: none;
+}
+
+.service-item p, .product-item p {
+    margin-bottom: 15px;
+}
+
+.service-item label, .product-item label {
+    font-weight: bold;
+    display: block;
     margin-bottom: 5px;
 }
 
-.vcard-stat-label {
-    color: #666;
-    font-size: 14px;
-}
-
-/* Form styles */
-.vcard-form-table {
+.service-item input[type="text"], 
+.product-item input[type="text"],
+.service-item textarea,
+.product-item textarea {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    max-width: 400px;
 }
 
-.vcard-form-table th,
-.vcard-form-table td {
-    padding: 15px;
-    border-bottom: 1px solid #eee;
-    text-align: left;
-}
-
-.vcard-form-table th {
-    width: 200px;
-    font-weight: 600;
-    color: #23282d;
-}
-
-/* Button styles */
-.vcard-button {
+.add-service, .add-product {
     background: #0073aa;
     color: #fff;
     border: none;
-    padding: 10px 20px;
-    border-radius: 4px;
+    padding: 8px 16px;
+    border-radius: 3px;
     cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
 }
 
-.vcard-button:hover {
+.add-service:hover, .add-product:hover {
     background: #005a87;
-    color: #fff;
 }
 
-.vcard-button-secondary {
-    background: #f1f1f1;
-    color: #23282d;
-    border: 1px solid #ccd0d4;
+/* Form Table Enhancements */
+.form-table th {
+    width: 200px;
+    padding: 15px 10px 15px 0;
 }
 
-.vcard-button-secondary:hover {
-    background: #e8e8e8;
-    color: #23282d;
+.form-table td {
+    padding: 15px 10px;
+}
+
+.form-table input[type="color"] {
+    width: 60px;
+    height: 30px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.form-table select.regular-text {
+    max-width: 300px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .business-hours-day {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .day-label {
+        width: auto;
+        margin-bottom: 5px;
+    }
+    
+    .time-input {
+        width: 100px;
+    }
+    
+    .service-item, .product-item {
+        padding: 10px;
+    }
+    
+    .remove-item {
+        position: static;
+        display: inline-block;
+        margin-bottom: 10px;
+    }
 }

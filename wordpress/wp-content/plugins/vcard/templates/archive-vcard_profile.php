@@ -24,7 +24,14 @@ get_header(); ?>
                             <?php 
                             $first_name = get_post_meta(get_the_ID(), '_vcard_first_name', true);
                             $last_name = get_post_meta(get_the_ID(), '_vcard_last_name', true);
-                            echo esc_html($first_name . ' ' . $last_name);
+                            $business_name = get_post_meta(get_the_ID(), '_vcard_business_name', true);
+                            
+                            // Show business name if available, otherwise personal name
+                            if ($business_name) {
+                                echo esc_html($business_name);
+                            } else {
+                                echo esc_html($first_name . ' ' . $last_name);
+                            }
                             ?>
                         </a>
                     </h2>
@@ -32,7 +39,11 @@ get_header(); ?>
                     <?php 
                     $job_title = get_post_meta(get_the_ID(), '_vcard_job_title', true);
                     $company = get_post_meta(get_the_ID(), '_vcard_company', true);
-                    if ($job_title || $company) : ?>
+                    $business_tagline = get_post_meta(get_the_ID(), '_vcard_business_tagline', true);
+                    
+                    if ($business_tagline) : ?>
+                        <p class="vcard-card-tagline"><?php echo esc_html($business_tagline); ?></p>
+                    <?php elseif ($job_title || $company) : ?>
                         <p class="vcard-card-title">
                             <?php echo esc_html($job_title); ?>
                             <?php if ($job_title && $company) echo ' at '; ?>
@@ -44,13 +55,18 @@ get_header(); ?>
                         <?php 
                         $phone = get_post_meta(get_the_ID(), '_vcard_phone', true);
                         $email = get_post_meta(get_the_ID(), '_vcard_email', true);
+                        $website = get_post_meta(get_the_ID(), '_vcard_website', true);
                         
                         if ($phone) : ?>
-                            <div><strong><?php _e('Phone:', 'vcard'); ?></strong> <?php echo esc_html($phone); ?></div>
+                            <div><strong><?php _e('Phone:', 'vcard'); ?></strong> <a href="tel:<?php echo esc_attr(preg_replace('/[^0-9+]/', '', $phone)); ?>"><?php echo esc_html($phone); ?></a></div>
                         <?php endif;
                         
                         if ($email) : ?>
-                            <div><strong><?php _e('Email:', 'vcard'); ?></strong> <?php echo esc_html($email); ?></div>
+                            <div><strong><?php _e('Email:', 'vcard'); ?></strong> <a href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a></div>
+                        <?php endif;
+                        
+                        if ($website) : ?>
+                            <div><strong><?php _e('Website:', 'vcard'); ?></strong> <a href="<?php echo esc_url($website); ?>" target="_blank" rel="noopener"><?php echo esc_html($website); ?></a></div>
                         <?php endif; ?>
                     </div>
                     
