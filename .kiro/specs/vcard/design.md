@@ -72,18 +72,25 @@ graph TB
 
 ### Database Schema
 
-**WordPress Custom Tables:**
-- `wp_vcard_profiles` - Core business profile data
-- `wp_vcard_templates` - Template assignments and customizations
-- `wp_vcard_analytics` - Visit tracking and statistics
+**WordPress Post-Based Architecture (Existing):**
+- Custom Post Type: `vcard_profile` (already implemented)
+- WordPress Post Meta for profile data (using `_vcard_` prefix)
+- WordPress Media Library for image management
+- WordPress Users table for authentication
+
+**Extended Post Meta Fields:**
+- Existing: `_vcard_first_name`, `_vcard_last_name`, `_vcard_company`, `_vcard_job_title`, `_vcard_phone`, `_vcard_email`, `_vcard_website`, `_vcard_address`, `_vcard_city`, `_vcard_state`, `_vcard_zip_code`, `_vcard_country`
+- New Business Fields: `_vcard_business_name`, `_vcard_business_description`, `_vcard_services`, `_vcard_products`, `_vcard_gallery`, `_vcard_social_media`, `_vcard_business_hours`, `_vcard_template_config`
+
+**Minimal Custom Tables (Only for specialized data):**
+- `wp_vcard_analytics` - Visit tracking and statistics (performance-critical data)
 - `wp_vcard_subscriptions` - Billing and subscription management
 - `wp_vcard_saved_contacts` - End user saved business contacts (for registered users)
 
 **WordPress Integration:**
-- Custom Post Type: `vcard_profile`
 - Custom User Roles: `vcard_client`, `vcard_user`
-- Custom Meta Fields for profile data
-- WordPress Media Library for image management
+- Extended capabilities for multi-tenant access control
+- WordPress REST API integration for frontend interactions
 
 ## Components and Interfaces
 
@@ -93,34 +100,10 @@ graph TB
 ```
 vcard/
 ├── vcard.php (Main plugin file)
-├── includes/
-│   ├── class-business-profile.php
-│   ├── class-template-engine.php
-│   ├── class-subscription-manager.php
-│   ├── class-analytics.php
-│   └── class-vcard-export.php
 ├── admin/
 │   ├── admin-dashboard.php
 │   └── business-client-dashboard.php
-├── public/
-│   ├── profile-display.php
-│   └── end-user-interface.php
 ├── templates/
-│   ├── ceo/
-│   ├── freelancer/
-│   ├── restaurant/
-│   ├── construction/
-│   ├── education/
-│   ├── fitness/
-│   ├── coffeebar/
-│   ├── handyman/
-│   ├── healthcare/
-│   ├── immigration/
-│   ├── lawyer/
-│   ├── makeup-artist/
-│   ├── ngo/
-│   ├── saloon/
-│   └── tour/
 └── assets/
     ├── css/
     ├── js/
