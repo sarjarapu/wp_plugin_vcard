@@ -1,0 +1,245 @@
+/* Digi vCard Plugin Styles */
+
+.vcard-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.vcard-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.vcard-profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    overflow: hidden;
+    border: 4px solid rgba(255,255,255,0.3);
+}
+
+.vcard-profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vcard-name {
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.vcard-job-title {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.vcard-company {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.vcard-content {
+    padding: 30px;
+}
+
+.vcard-section {
+    margin-bottom: 30px;
+}
+
+.vcard-section-title {
+    font-size: 1.5rem;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #3498db;
+}
+
+.vcard-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.vcard-contact-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #3498db;
+}
+
+.vcard-contact-icon {
+    width: 40px;
+    height: 40px;
+    background: #3498db;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-right: 15px;
+    font-size: 1.2rem;
+}
+
+.vcard-contact-details h4 {
+    margin: 0 0 5px 0;
+    color: #2c3e50;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.vcard-contact-details a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.vcard-contact-details a:hover {
+    text-decoration: underline;
+}
+
+.vcard-bio {
+    line-height: 1.6;
+    color: #555;
+    font-size: 1rem;
+}
+
+.vcard-actions {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #eee;
+}
+
+.vcard-btn {
+    display: inline-block;
+    padding: 12px 25px;
+    background: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 25px;
+    margin: 0 10px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.vcard-btn:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    color: white;
+    text-decoration: none;
+}
+
+.vcard-btn.secondary {
+    background: #95a5a6;
+}
+
+.vcard-btn.secondary:hover {
+    background: #7f8c8d;
+}
+
+/* Archive Styles */
+.vcard-archive-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin: 30px 0;
+}
+
+.vcard-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease;
+}
+
+.vcard-card:hover {
+    transform: translateY(-5px);
+}
+
+.vcard-card-image {
+    height: 200px;
+    overflow: hidden;
+}
+
+.vcard-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vcard-card-content {
+    padding: 20px;
+}
+
+.vcard-card-title {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+    color: #2c3e50;
+}
+
+.vcard-card-title a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.vcard-card-job {
+    color: #7f8c8d;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.vcard-card-excerpt {
+    color: #666;
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.vcard-card-link {
+    display: inline-block;
+    background: #3498db;
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+.vcard-card-link:hover {
+    background: #2980b9;
+    color: white;
+    text-decoration: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vcard-name {
+        font-size: 1.8rem;
+    }
+    
+    .vcard-content {
+        padding: 20px;
+    }
+    
+    .vcard-contact-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .vcard-btn {
+        display: block;
+        margin: 10px 0;
+    }
+}
