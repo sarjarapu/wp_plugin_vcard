@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This feature will create a comprehensive multi-tenant business directory platform that enables virtual business card exchange. The system serves three distinct user personas: Business Clients who create and manage their business profiles, End Users who discover and save business contacts, and Site Administrators who manage the WordPress-based platform with subscription billing.
+This feature will create BizCard Pro, a comprehensive multi-tenant business directory platform that enables virtual business card exchange. The system serves three distinct user personas: Business Clients who create and manage their business profiles, End Users who discover and save business contacts, and Site Administrators who manage the WordPress-based platform with subscription billing.
 
 ## Requirements
 
@@ -38,7 +38,7 @@ This feature will create a comprehensive multi-tenant business directory platfor
 
 1. WHEN a business client sets up their profile THEN the system SHALL offer template selection from the existing vCard template collection (CEO, Freelancer, Restaurant, etc.)
 2. WHEN a business client selects a template THEN the system SHALL apply the template styling while preserving their content
-3. WHEN a business client customizes their profile THEN the system SHALL allow color scheme modifications and logo uploads
+3. WHEN a business client customizes their profile THEN the system SHALL allow unified styling customization (colors, fonts, themes) while maintaining the same comprehensive layout structure
 4. WHEN template changes are made THEN the system SHALL provide real-time preview functionality
 
 ### Requirement 4 - End User Contact Management
@@ -84,6 +84,7 @@ This feature will create a comprehensive multi-tenant business directory platfor
 #### Acceptance Criteria
 
 1. WHEN users access the platform on mobile devices THEN the system SHALL provide responsive design optimized for touch interaction
-2. WHEN business profiles are shared THEN the system SHALL generate QR codes and provide native mobile sharing options
-3. WHEN end users save contacts on mobile THEN the system SHALL offer integration with device contact lists
+2. WHEN business profiles are shared THEN the system SHALL generate QR codes, provide social media sharing (WhatsApp, LinkedIn, Facebook, Twitter), and offer multiple export formats (VCF, vCard, CSV)
+3. WHEN end users save contacts on mobile THEN the system SHALL offer VCF file downloads and integration with device contact lists
 4. WHEN viewing profiles on mobile THEN the system SHALL optimize image loading and provide smooth navigation between profile sections
+5. WHEN business clients want to share their profiles THEN the system SHALL provide sharing analytics, URL shortening, and NFC tag generation capabilities

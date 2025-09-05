@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Business Directory Platform is a multi-tenant WordPress-based system that enables virtual business card exchange. The platform serves three distinct user personas through a comprehensive web application with subscription billing, template customization, and contact management capabilities.
+The BizCard Pro Platform is a multi-tenant WordPress-based system that enables virtual business card exchange. The platform serves three distinct user personas through a comprehensive web application with subscription billing, template customization, and contact management capabilities.
 
 **Reference Sites Analyzed:**
 - https://mywebcard.co.in/bhagawati-enterprises (Primary reference for comprehensive business sections)
@@ -70,15 +70,15 @@ graph TB
 ### Database Schema
 
 **WordPress Custom Tables:**
-- `wp_business_profiles` - Core business profile data
-- `wp_profile_templates` - Template assignments and customizations
-- `wp_profile_analytics` - Visit tracking and statistics
-- `wp_subscriptions` - Billing and subscription management
-- `wp_saved_contacts` - End user saved business contacts (for registered users)
+- `wp_bizcard_profiles` - Core business profile data
+- `wp_bizcard_templates` - Template assignments and customizations
+- `wp_bizcard_analytics` - Visit tracking and statistics
+- `wp_bizcard_subscriptions` - Billing and subscription management
+- `wp_bizcard_saved_contacts` - End user saved business contacts (for registered users)
 
 **WordPress Integration:**
-- Custom Post Type: `business_profile`
-- Custom User Roles: `business_client`, `end_user`
+- Custom Post Type: `bizcard_profile`
+- Custom User Roles: `bizcard_client`, `bizcard_user`
 - Custom Meta Fields for profile data
 - WordPress Media Library for image management
 
@@ -88,8 +88,8 @@ graph TB
 
 **Main Plugin File Structure:**
 ```
-digi-vcard-pro/
-├── digi-vcard-pro.php (Main plugin file)
+bizcard-pro/
+├── bizcard-pro.php (Main plugin file)
 ├── includes/
 │   ├── class-business-profile.php
 │   ├── class-template-engine.php
