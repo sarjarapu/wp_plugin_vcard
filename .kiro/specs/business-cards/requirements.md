@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This feature will create BizCard Pro, a comprehensive multi-tenant business directory platform that enables virtual business card exchange. The system serves three distinct user personas: Business Clients who create and manage their business profiles, End Users who discover and save business contacts, and Site Administrators who manage the WordPress-based platform with subscription billing.
+This feature will create vCard, a comprehensive multi-tenant business directory platform that enables virtual business card exchange. The system serves three distinct user personas: Business Clients who create and manage their business profiles, End Users who discover and save business contacts, and Site Administrators who manage the WordPress-based platform with subscription billing.
 
 ## Requirements
 

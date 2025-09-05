@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This feature will create a comprehensive multi-tenant vCard platform that enables virtual business card exchange. The system serves three distinct user personas: Business Clients who create and manage their business profiles, End Users who discover and save business contacts, and Site Administrators who manage the WordPress-based platform with subscription billing.
+This feature will create vCard, a comprehensive multi-tenant business directory platform that enables virtual business card exchange. The system serves three distinct user personas: Business Clients who create and manage their business profiles, End Users who discover and save business contacts, and Site Administrators who manage the WordPress-based platform with subscription billing.
 
 ## Requirements
 
@@ -65,19 +65,7 @@ This feature will create a comprehensive multi-tenant vCard platform that enable
 4. WHEN handling support requests THEN the system SHALL provide tools to assist business clients with profile setup and troubleshooting
 5. WHEN monitoring the platform THEN the system SHALL generate reports on user activity, popular profiles, and system performance
 
-### Requirement 6 - Subscription and Billing Management
-
-**User Story:** As a site administrator, I want to implement a yearly subscription model for business clients, so that the platform generates sustainable revenue while remaining free for end users.
-
-#### Acceptance Criteria
-
-1. WHEN a business client completes their profile setup THEN the system SHALL prompt for subscription payment to activate the profile
-2. WHEN processing subscription payments THEN the system SHALL integrate with payment gateways and handle recurring yearly billing
-3. WHEN a subscription expires THEN the system SHALL deactivate the business profile and notify the client of renewal requirements
-4. WHEN end users access any business profile THEN the system SHALL provide free access without any payment requirements
-5. WHEN managing subscriptions THEN the system SHALL provide the administrator with billing reports and subscription status tracking
-
-### Requirement 7 - Mobile Responsiveness and Sharing
+### Requirement 6 - Mobile Responsiveness and Sharing
 
 **User Story:** As both business clients and end users, I want the platform to work seamlessly on mobile devices, so that I can manage profiles and discover businesses while on the go.
 
@@ -88,39 +76,3 @@ This feature will create a comprehensive multi-tenant vCard platform that enable
 3. WHEN end users save contacts on mobile THEN the system SHALL offer VCF file downloads and integration with device contact lists
 4. WHEN viewing profiles on mobile THEN the system SHALL optimize image loading and provide smooth navigation between profile sections
 5. WHEN business clients want to share their profiles THEN the system SHALL provide sharing analytics, URL shortening, and NFC tag generation capabilities
-
-### Requirement 8 - vCard Standard Compliance and Export
-
-**User Story:** As an end user, I want to export business contacts in standard vCard format, so that I can import them into any contact management system.
-
-#### Acceptance Criteria
-
-1. WHEN an end user requests to save a contact THEN the system SHALL generate a standards-compliant vCard (.vcf) file with all available business information
-2. WHEN generating vCard files THEN the system SHALL include all relevant fields (name, organization, phone, email, address, website, social media)
-3. WHEN exporting multiple contacts THEN the system SHALL provide bulk vCard export functionality
-4. WHEN a vCard is generated THEN the system SHALL ensure compatibility with major contact management systems (iPhone Contacts, Google Contacts, Outlook)
-5. WHEN business information is updated THEN the system SHALL automatically update the generated vCard data for future exports
-
-### Requirement 9 - Template Integration and Customization
-
-**User Story:** As a business client, I want to use existing vCard HTML templates as the foundation for my profile, so that I can have a professional-looking business card website.
-
-#### Acceptance Criteria
-
-1. WHEN selecting a template THEN the system SHALL offer all available vCard templates from the template collection (CEO, Freelancer, Restaurant, Construction, Education, Fitness, etc.)
-2. WHEN a template is applied THEN the system SHALL integrate the business data with the template's HTML structure and styling
-3. WHEN customizing the template THEN the system SHALL allow color scheme changes, font selections, and layout modifications while preserving the template's design integrity
-4. WHEN viewing the profile THEN the system SHALL render the template with the business data in a responsive, mobile-friendly format
-5. WHEN switching templates THEN the system SHALL preserve all business data and apply it to the new template structure
-
-### Requirement 10 - Advanced Sharing and Networking Features
-
-**User Story:** As a business client, I want advanced sharing capabilities including QR codes, NFC integration, and social media sharing, so that I can effectively network and promote my business.
-
-#### Acceptance Criteria
-
-1. WHEN generating sharing materials THEN the system SHALL create customizable QR codes with business branding and tracking capabilities
-2. WHEN using NFC technology THEN the system SHALL provide NFC tag programming instructions and data for tap-to-share functionality
-3. WHEN sharing on social media THEN the system SHALL provide optimized sharing content with proper meta tags and preview images
-4. WHEN tracking sharing activity THEN the system SHALL provide analytics on QR code scans, link clicks, and contact saves
-5. WHEN networking at events THEN the system SHALL provide bulk sharing tools and contact collection features
