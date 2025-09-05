@@ -234,6 +234,12 @@ class BizCard_Simple_Test {
             'rewrite'            => ['slug' => self::SLUG],
         ];
         register_post_type(self::CPT, $args);
+        
+        // Force flush rewrite rules (temporary for testing)
+        if (!get_option('bizcard_rewrite_flushed')) {
+            flush_rewrite_rules();
+            update_option('bizcard_rewrite_flushed', true);
+        }
     }
 
     public function load_templates($template) {
