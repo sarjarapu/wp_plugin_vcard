@@ -46,17 +46,11 @@
     text-align: center;
 }
 
-.vcard-card-title,
-.vcard-card-tagline {
+.vcard-card-title {
     color: #666;
     font-size: 0.9em;
     text-align: center;
     margin: 0 0 10px 0;
-}
-
-.vcard-card-tagline {
-    font-style: italic;
-    color: #667eea;
 }
 
 .vcard-card-contact {
@@ -136,23 +130,13 @@
     color: #555;
 }
 
-.vcard-business-info,
 .vcard-contact-info,
-.vcard-address,
-.vcard-social-media,
-.vcard-business-hours,
-.vcard-services,
-.vcard-products {
+.vcard-address {
     margin-bottom: 25px;
 }
 
-.vcard-business-info h3,
 .vcard-contact-info h3,
-.vcard-address h3,
-.vcard-social-media h3,
-.vcard-business-hours h3,
-.vcard-services h3,
-.vcard-products h3 {
+.vcard-address h3 {
     color: #333;
     font-size: 1.3em;
     margin: 0 0 15px 0;
@@ -210,151 +194,6 @@
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-/* Business Information Styles */
-.vcard-business-name,
-.vcard-business-tagline,
-.vcard-business-description {
-    margin: 10px 0;
-}
-
-.vcard-business-description p {
-    margin: 5px 0 0 0;
-    line-height: 1.6;
-    color: #666;
-}
-
-/* Social Media Styles */
-.vcard-social-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-}
-
-.vcard-social-item a {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 15px;
-    background: #f8f9fa;
-    border-radius: 20px;
-    text-decoration: none;
-    color: #333;
-    transition: all 0.2s ease;
-}
-
-.vcard-social-item a:hover {
-    background: #667eea;
-    color: white;
-    transform: translateY(-1px);
-}
-
-.social-icon {
-    font-size: 1.2em;
-}
-
-/* Business Hours Styles */
-.business-hours-list {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
-}
-
-.business-hours-day {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
-    border-bottom: 1px solid #e9ecef;
-}
-
-.business-hours-day:last-child {
-    border-bottom: none;
-}
-
-.day-name {
-    font-weight: 600;
-    color: #333;
-    min-width: 100px;
-}
-
-.day-hours {
-    color: #666;
-}
-
-/* Services and Products Styles */
-.services-list,
-.products-list {
-    display: grid;
-    gap: 15px;
-}
-
-.service-item,
-.product-item {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    border-left: 4px solid #667eea;
-    transition: all 0.2s ease;
-}
-
-.service-item:hover,
-.product-item:hover {
-    background: #e9ecef;
-    transform: translateX(5px);
-}
-
-.service-name,
-.product-name {
-    color: #333;
-    font-size: 1.1em;
-    margin: 0 0 8px 0;
-    font-weight: 600;
-}
-
-.service-description,
-.product-description {
-    color: #666;
-    line-height: 1.5;
-    margin: 0 0 10px 0;
-}
-
-.service-details,
-.product-details {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    font-size: 0.9em;
-}
-
-.service-price,
-.product-price {
-    color: #28a745;
-    font-weight: 600;
-}
-
-.service-category,
-.product-category {
-    color: #6c757d;
-}
-
-.product-stock {
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8em;
-    font-weight: 600;
-}
-
-.product-stock.in-stock {
-    background: #d4edda;
-    color: #155724;
-}
-
-.product-stock.out-of-stock {
-    background: #f8d7da;
-    color: #721c24;
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .vcard-grid {
@@ -381,21 +220,5 @@
     .vcard-contact-item strong {
         min-width: auto;
         margin-bottom: 3px;
-    }
-    
-    .vcard-social-links {
-        flex-direction: column;
-    }
-    
-    .business-hours-day {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 5px;
-    }
-    
-    .service-details,
-    .product-details {
-        flex-direction: column;
-        gap: 5px;
     }
 }

@@ -812,7 +812,14 @@ class VCardPlugin {
     public function enqueue_scripts() {
         // Only enqueue on vCard pages
         if (is_post_type_archive('vcard_profile') || is_singular('vcard_profile')) {
-            wp_enqueue_style('vcard-public-style', VCARD_ASSETS_URL . 'css/public.css', array(), VCARD_VERSION);
+            // Enqueue CSS with cache busting
+            wp_enqueue_style('vcard-public-style', VCARD_ASSETS_URL . 'css/public.css', array(), VCARD_VERSION . '-' . time());
+            
+            // Fallback: also enqueue the main style.css if public.css fails
+            if (file_exists(VCARD_PLUGIN_PATH . 'assets/style.css')) {
+                wp_enqueue_style('vcard-fallback-style', VCARD_ASSETS_URL . 'style.css', array(), VCARD_VERSION . '-' . time());
+            }
+            
             wp_enqueue_script('vcard-public-script', VCARD_ASSETS_URL . 'js/public.js', array('jquery'), VCARD_VERSION, true);
             
             // Localize script for AJAX
@@ -825,6 +832,29 @@ class VCardPlugin {
                     'save_contact' => __('Save Contact', 'vcard'),
                 )
             ));
+            
+            // Debug: Log the CSS URL for troubleshooting
+            error_log('vCard CSS URL: ' . VCARD_ASSETS_URL . 'css/public.css');
+            
+            // Add critical inline CSS as fallback
+            $inline_css = "
+                .vcard-single-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+                .vcard-single { background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
+                .vcard-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
+                .vcard-name { font-size: 2.2em; margin: 0 0 10px 0; font-weight: 300; }
+                .vcard-title { font-size: 1.1em; opacity: 0.9; margin: 0; font-weight: 300; }
+                .vcard-content { padding: 30px; }
+                .vcard-contact-info h3, .vcard-address h3 { color: #333; font-size: 1.3em; margin: 0 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #667eea; }
+                .vcard-contact-item { margin: 8px 0; display: flex; align-items: center; }
+                .vcard-contact-item strong { min-width: 80px; color: #555; }
+                .vcard-contact-item a { color: #667eea; text-decoration: none; }
+                .vcard-contact-item a:hover { text-decoration: underline; }
+                .vcard-address-details { background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #667eea; }
+                .vcard-actions { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+                .vcard-download-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1em; cursor: pointer; transition: transform 0.2s ease; }
+                .vcard-download-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+            ";
+            wp_add_inline_style('vcard-public-style', $inline_css);
         }
     }
     
