@@ -235,11 +235,8 @@ class BizCard_Simple_Test {
         ];
         register_post_type(self::CPT, $args);
         
-        // Force flush rewrite rules (temporary for testing)
-        if (!get_option('bizcard_rewrite_flushed')) {
-            flush_rewrite_rules();
-            update_option('bizcard_rewrite_flushed', true);
-        }
+        // Force flush rewrite rules every time for now
+        flush_rewrite_rules();
     }
 
     public function load_templates($template) {
