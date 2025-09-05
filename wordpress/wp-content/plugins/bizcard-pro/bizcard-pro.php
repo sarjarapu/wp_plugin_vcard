@@ -209,3 +209,48 @@ class BizCardPro {
 
 // Initialize the plugin
 BizCardPro::get_instance();
+
+// TEMPORARY: Simple test following movies plugin exactly
+class BizCard_Simple_Test {
+    const CPT  = 'bizcard_profile';
+    const SLUG = 'bizcard';
+
+    public function __construct() {
+        add_action('init', [$this, 'register_cpt']);
+        add_filter('template_include', [$this, 'load_templates']);
+    }
+
+    public function register_cpt() {
+        $args = [
+            'labels' => [
+                'name' => 'Business Profiles Test',
+                'singular_name' => 'Business Profile Test',
+            ],
+            'public'             => true,
+            'show_in_rest'       => true,
+            'menu_icon'          => 'dashicons-businessperson',
+            'supports'           => ['title', 'editor', 'excerpt', 'thumbnail'],
+            'has_archive'        => true,
+            'rewrite'            => ['slug' => self::SLUG],
+        ];
+        register_post_type(self::CPT, $args);
+    }
+
+    public function load_templates($template) {
+        if (is_post_type_archive(self::CPT)) {
+            $plugin_template = plugin_dir_path(__FILE__) . 'templates/archive-' . self::CPT . '.php';
+            if (file_exists($plugin_template)) {
+                return $plugin_template;
+            }
+        }
+        if (is_singular(self::CPT)) {
+            $plugin_template = plugin_dir_path(__FILE__) . 'templates/single-' . self::CPT . '.php';
+            if (file_exists($plugin_template)) {
+                return $plugin_template;
+            }
+        }
+        return $template;
+    }
+}
+
+new BizCard_Simple_Test();

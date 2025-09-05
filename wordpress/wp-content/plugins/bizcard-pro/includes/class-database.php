@@ -71,6 +71,7 @@ class BizCard_Pro_Database {
         $tables['profiles'] = "CREATE TABLE {$wpdb->prefix}bizcard_profiles (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             user_id bigint(20) NOT NULL,
+            post_id bigint(20),
             business_name varchar(255) NOT NULL,
             business_tagline varchar(500),
             owner_name varchar(255),

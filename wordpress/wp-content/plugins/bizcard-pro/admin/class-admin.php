@@ -96,16 +96,32 @@ class BizCard_Pro_Admin {
             <div class="card">
                 <h2><?php _e('Test Profile Creation', 'bizcard-pro'); ?></h2>
                 <p><?php _e('Click the button below to create a test business profile:', 'bizcard-pro'); ?></p>
-                <form method="post" action="">
+                <form method="post" action="" style="display: inline-block; margin-right: 10px;">
                     <?php wp_nonce_field('create_test_profile', 'test_profile_nonce'); ?>
                     <input type="submit" name="create_test_profile" class="button button-primary" value="<?php _e('Create Test Profile', 'bizcard-pro'); ?>">
+                </form>
+                
+                <form method="post" action="" style="display: inline-block;">
+                    <?php wp_nonce_field('flush_rewrite_rules', 'flush_rules_nonce'); ?>
+                    <input type="submit" name="flush_rewrite_rules" class="button button-secondary" value="<?php _e('Fix Profile URLs', 'bizcard-pro'); ?>">
                 </form>
                 
                 <?php
                 if (isset($_POST['create_test_profile']) && wp_verify_nonce($_POST['test_profile_nonce'], 'create_test_profile')) {
                     $this->create_test_profile();
                 }
+                
+                if (isset($_POST['flush_rewrite_rules']) && wp_verify_nonce($_POST['flush_rules_nonce'], 'flush_rewrite_rules')) {
+                    flush_rewrite_rules();
+                    update_option('bizcard_pro_flush_rewrite_rules', true);
+                    echo '<div class="notice notice-success"><p>' . __('Profile URLs have been refreshed! Try viewing your profile again.', 'bizcard-pro') . '</p></div>';
+                }
                 ?>
+            </div>
+            
+            <div class="card">
+                <h2><?php _e('URL Rewrite Debug', 'bizcard-pro'); ?></h2>
+                <?php $this->debug_rewrite_rules(); ?>
             </div>
             
             <div class="card">
@@ -160,20 +176,32 @@ class BizCard_Pro_Admin {
             // Flush rewrite rules to ensure URLs work
             flush_rewrite_rules();
             
+            // Get the created post
+            $profile = BizCard_Pro_Business_Profile::get_profile($profile_id);
+            if ($profile && $profile->post_id) {
+                $post_url = get_permalink($profile->post_id);
+                echo '<div style="background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 10px 0;">';
+                echo '<h4>' . __('WordPress Post Created:', 'bizcard-pro') . '</h4>';
+                echo '<p><strong>Post URL:</strong> <a href="' . esc_url($post_url) . '" target="_blank">' . esc_html($post_url) . '</a></p>';
+                echo '<p><em>' . __('This uses the WordPress template system with single-business_profile.php', 'bizcard-pro') . '</em></p>';
+                echo '</div>';
+            }
+            
             echo '<div class="notice notice-success"><p>' . sprintf(__('Test profile created successfully! Profile ID: %d', 'bizcard-pro'), $profile_id) . '</p></div>';
             
-            // Show multiple URL options
+            // Show working URL options
             $profile_urls = array(
-                home_url('/profile/test-business'),
-                home_url('/profile/Test-Business'),
-                home_url('/profile/Test%20Business')
+                'By ID: ' . home_url('?bizcard_id=' . $profile_id),
+                'By Name: ' . home_url('?bizcard_profile=Test%20Business')
             );
             
             echo '<div style="background: #f0f0f1; padding: 15px; border-radius: 5px; margin: 10px 0;">';
-            echo '<h4>' . __('Try these URLs to view your test profile:', 'bizcard-pro') . '</h4>';
-            foreach ($profile_urls as $url) {
-                echo '<p><a href="' . esc_url($url) . '" target="_blank">' . esc_html($url) . '</a></p>';
+            echo '<h4>' . __('View your test profile:', 'bizcard-pro') . '</h4>';
+            foreach ($profile_urls as $url_desc) {
+                list($desc, $url) = explode(': ', $url_desc, 2);
+                echo '<p><strong>' . $desc . ':</strong> <a href="' . esc_url($url) . '" target="_blank">' . esc_html($url) . '</a></p>';
             }
+            echo '<p><em>' . __('Note: These URLs use query parameters which work reliably with any WordPress setup.', 'bizcard-pro') . '</em></p>';
             echo '</div>';
         }
     }
@@ -202,18 +230,52 @@ class BizCard_Pro_Admin {
         echo '</tr></thead><tbody>';
         
         foreach ($profiles as $profile) {
-            $profile_slug = strtolower(str_replace(' ', '-', $profile->business_name));
-            $profile_url = home_url('/profile/' . $profile_slug);
+            // Use query parameter approach (more reliable)
+            $profile_url = home_url('?bizcard_id=' . $profile->id);
+            $profile_url_name = home_url('?bizcard_profile=' . urlencode($profile->business_name));
             
             echo '<tr>';
             echo '<td>' . esc_html($profile->id) . '</td>';
             echo '<td><strong>' . esc_html($profile->business_name) . '</strong></td>';
             echo '<td>' . esc_html($profile->profile_status) . '</td>';
             echo '<td>' . esc_html($profile->created_at) . '</td>';
-            echo '<td><a href="' . esc_url($profile_url) . '" target="_blank">' . __('View Profile', 'bizcard-pro') . '</a></td>';
+            echo '<td>';
+            echo '<a href="' . esc_url($profile_url) . '" target="_blank">' . __('View by ID', 'bizcard-pro') . '</a> | ';
+            echo '<a href="' . esc_url($profile_url_name) . '" target="_blank">' . __('View by Name', 'bizcard-pro') . '</a>';
+            echo '</td>';
             echo '</tr>';
         }
         
         echo '</tbody></table>';
+    }
+    
+    /**
+     * Debug rewrite rules
+     */
+    private function debug_rewrite_rules() {
+        global $wp_rewrite;
+        
+        echo '<p><strong>' . __('Current Permalink Structure:', 'bizcard-pro') . '</strong> ' . get_option('permalink_structure') . '</p>';
+        
+        // Check if our rewrite rule exists
+        $rules = get_option('rewrite_rules');
+        $our_rule_exists = false;
+        
+        if (is_array($rules)) {
+            foreach ($rules as $pattern => $replacement) {
+                if (strpos($pattern, 'profile') !== false) {
+                    echo '<p style="color: green;">✅ ' . __('Profile rewrite rule found:', 'bizcard-pro') . ' <code>' . $pattern . ' → ' . $replacement . '</code></p>';
+                    $our_rule_exists = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!$our_rule_exists) {
+            echo '<p style="color: red;">❌ ' . __('Profile rewrite rule not found. Click "Fix Profile URLs" button above.', 'bizcard-pro') . '</p>';
+        }
+        
+        // Test URL
+        echo '<p><strong>' . __('Test Profile URL:', 'bizcard-pro') . '</strong> <a href="' . home_url('/profile/test-business') . '" target="_blank">' . home_url('/profile/test-business') . '</a></p>';
     }
 }

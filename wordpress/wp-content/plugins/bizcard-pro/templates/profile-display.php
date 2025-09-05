@@ -11,41 +11,77 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-global $bizcard_profile, $bizcard_styling;
+// Get profile data from query
+global $wp_query, $wpdb;
+
+$profile = null;
+$styling = null;
+
+// Get profile based on query parameters
+if ($wp_query->get('bizcard_profile_id')) {
+    $profile_id = $wp_query->get('bizcard_profile_id');
+    $table_name = BizCard_Pro_Database::get_table_name('profiles');
+    $profile = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM {$table_name} WHERE id = %d AND is_public = 1",
+        $profile_id
+    ));
+} elseif ($wp_query->get('bizcard_profile_name')) {
+    $profile_name = $wp_query->get('bizcard_profile_name');
+    $table_name = BizCard_Pro_Database::get_table_name('profiles');
+    $profile = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM {$table_name} WHERE business_name = %s AND is_public = 1",
+        $profile_name
+    ));
+}
+
+// If no profile found, show 404
+if (!$profile) {
+    status_header(404);
+    nocache_headers();
+    include(get_query_template('404'));
+    exit;
+}
+
+// Get styling
+$styling_table = BizCard_Pro_Database::get_table_name('styling');
+$styling = $wpdb->get_row($wpdb->prepare(
+    "SELECT * FROM {$styling_table} WHERE profile_id = %d",
+    $profile->id
+));
 
 // Parse JSON data
-$contact_info = json_decode($bizcard_profile->contact_info, true) ?: array();
-$business_hours = json_decode($bizcard_profile->business_hours, true) ?: array();
-$social_media = json_decode($bizcard_profile->social_media, true) ?: array();
+$contact_info = json_decode($profile->contact_info, true) ?: array();
+$business_hours = json_decode($profile->business_hours, true) ?: array();
+$social_media = json_decode($profile->social_media, true) ?: array();
 
 // Get styling or use defaults
-$theme = $bizcard_styling->style_theme ?? 'professional';
-$primary_color = $bizcard_styling->primary_color ?? '#667eea';
-$secondary_color = $bizcard_styling->secondary_color ?? '#764ba2';
+$theme = $styling->style_theme ?? 'professional';
+$primary_color = $styling->primary_color ?? '#667eea';
+$secondary_color = $styling->secondary_color ?? '#764ba2';
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>
     <meta charset="<?php bloginfo('charset'); ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?php echo esc_html($bizcard_profile->business_name); ?> - Business Profile</title>
+    <title><?php echo esc_html($profile->business_name); ?> - Business Profile</title>
     
     <!-- SEO Meta Tags -->
-    <?php if ($bizcard_profile->meta_title): ?>
-        <meta name="title" content="<?php echo esc_attr($bizcard_profile->meta_title); ?>">
+    <?php if ($profile->meta_title): ?>
+        <meta name="title" content="<?php echo esc_attr($profile->meta_title); ?>">
     <?php endif; ?>
     
-    <?php if ($bizcard_profile->meta_description): ?>
-        <meta name="description" content="<?php echo esc_attr($bizcard_profile->meta_description); ?>">
+    <?php if ($profile->meta_description): ?>
+        <meta name="description" content="<?php echo esc_attr($profile->meta_description); ?>">
     <?php endif; ?>
     
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="<?php echo esc_attr($bizcard_profile->business_name); ?>">
-    <meta property="og:description" content="<?php echo esc_attr($bizcard_profile->business_tagline ?: $bizcard_profile->business_description); ?>">
+    <meta property="og:title" content="<?php echo esc_attr($profile->business_name); ?>">
+    <meta property="og:description" content="<?php echo esc_attr($profile->business_tagline ?: $profile->business_description); ?>">
     <meta property="og:type" content="business.business">
     
-    <?php if ($bizcard_profile->business_logo): ?>
-        <meta property="og:image" content="<?php echo esc_url($bizcard_profile->business_logo); ?>">
+    <?php if ($profile->business_logo): ?>
+        <meta property="og:image" content="<?php echo esc_url($profile->business_logo); ?>">
     <?php endif; ?>
     
     <!-- Inline CSS for styling -->
@@ -329,26 +365,26 @@ $secondary_color = $bizcard_styling->secondary_color ?? '#764ba2';
     <div class="bizcard-profile-container">
         <!-- Profile Header -->
         <div class="profile-header">
-            <?php if ($bizcard_profile->business_logo): ?>
+            <?php if ($profile->business_logo): ?>
                 <div class="business-logo">
-                    <img src="<?php echo esc_url($bizcard_profile->business_logo); ?>" alt="<?php echo esc_attr($bizcard_profile->business_name); ?> Logo">
+                    <img src="<?php echo esc_url($profile->business_logo); ?>" alt="<?php echo esc_attr($profile->business_name); ?> Logo">
                 </div>
             <?php endif; ?>
             
-            <h1 class="business-name"><?php echo esc_html($bizcard_profile->business_name); ?></h1>
+            <h1 class="business-name"><?php echo esc_html($profile->business_name); ?></h1>
             
-            <?php if ($bizcard_profile->business_tagline): ?>
-                <p class="business-tagline"><?php echo esc_html($bizcard_profile->business_tagline); ?></p>
+            <?php if ($profile->business_tagline): ?>
+                <p class="business-tagline"><?php echo esc_html($profile->business_tagline); ?></p>
             <?php endif; ?>
         </div>
 
         <div class="profile-content">
             <!-- About Section -->
-            <?php if ($bizcard_profile->business_description): ?>
+            <?php if ($profile->business_description): ?>
                 <div class="section">
                     <h2 class="section-title">About Us</h2>
                     <div class="description">
-                        <?php echo wp_kses_post(wpautop($bizcard_profile->business_description)); ?>
+                        <?php echo wp_kses_post(wpautop($profile->business_description)); ?>
                     </div>
                 </div>
             <?php endif; ?>
@@ -389,14 +425,14 @@ $secondary_color = $bizcard_styling->secondary_color ?? '#764ba2';
                             </div>
                         <?php endif; ?>
 
-                        <?php if ($bizcard_profile->address_street): ?>
+                        <?php if ($profile->address_street): ?>
                             <div class="contact-item">
                                 <div class="contact-icon">📍</div>
                                 <div class="contact-details">
                                     <h4>Address</h4>
                                     <div>
-                                        <?php echo esc_html($bizcard_profile->address_street); ?><br>
-                                        <?php echo esc_html($bizcard_profile->address_city . ', ' . $bizcard_profile->address_state . ' ' . $bizcard_profile->address_zip); ?>
+                                        <?php echo esc_html($profile->address_street); ?><br>
+                                        <?php echo esc_html($profile->address_city . ', ' . $profile->address_state . ' ' . $profile->address_zip); ?>
                                     </div>
                                 </div>
                             </div>
@@ -438,11 +474,11 @@ $secondary_color = $bizcard_styling->secondary_color ?? '#764ba2';
         // Simple vCard generation
         function downloadVCard() {
             const profile = <?php echo json_encode(array(
-                'name' => $bizcard_profile->business_name,
+                'name' => $profile->business_name,
                 'email' => $contact_info['email'] ?? '',
                 'phone' => $contact_info['phone'] ?? '',
                 'website' => $contact_info['website'] ?? '',
-                'address' => $bizcard_profile->address_street ?? ''
+                'address' => $profile->address_street ?? ''
             )); ?>;
             
             let vcard = 'BEGIN:VCARD\n';
@@ -471,7 +507,7 @@ $secondary_color = $bizcard_styling->secondary_color ?? '#764ba2';
         function shareProfile() {
             if (navigator.share) {
                 navigator.share({
-                    title: '<?php echo esc_js($bizcard_profile->business_name); ?>',
+                    title: '<?php echo esc_js($profile->business_name); ?>',
                     text: 'Check out this business profile',
                     url: window.location.href
                 });
