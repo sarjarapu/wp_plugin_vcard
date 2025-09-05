@@ -1,0 +1,97 @@
+/**
+ * vCard Plugin Admin Styles
+ * Version: 1.0.0
+ */
+
+.vcard-admin-wrap {
+    max-width: 1200px;
+    margin: 20px 0;
+}
+
+.vcard-admin-header {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.vcard-admin-header h1 {
+    margin: 0 0 10px 0;
+    color: #23282d;
+}
+
+.vcard-admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.vcard-stat-card {
+    background: #fff;
+    border: 1px solid #ccd0d4;
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+}
+
+.vcard-stat-number {
+    font-size: 2em;
+    font-weight: bold;
+    color: #0073aa;
+    margin-bottom: 5px;
+}
+
+.vcard-stat-label {
+    color: #666;
+    font-size: 14px;
+}
+
+/* Form styles */
+.vcard-form-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.vcard-form-table th,
+.vcard-form-table td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+.vcard-form-table th {
+    width: 200px;
+    font-weight: 600;
+    color: #23282d;
+}
+
+/* Button styles */
+.vcard-button {
+    background: #0073aa;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.vcard-button:hover {
+    background: #005a87;
+    color: #fff;
+}
+
+.vcard-button-secondary {
+    background: #f1f1f1;
+    color: #23282d;
+    border: 1px solid #ccd0d4;
+}
+
+.vcard-button-secondary:hover {
+    background: #e8e8e8;
+    color: #23282d;
+}

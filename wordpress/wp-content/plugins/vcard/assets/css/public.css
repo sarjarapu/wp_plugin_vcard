@@ -1,0 +1,204 @@
+/**
+ * vCard Plugin Public Styles
+ * Version: 1.0.0
+ */
+
+/* vCard Profile Styles */
+.vcard-profile {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.vcard-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.vcard-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    overflow: hidden;
+}
+
+.vcard-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.vcard-name {
+    font-size: 2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.vcard-title {
+    font-size: 1.2em;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.vcard-company {
+    font-size: 1.1em;
+    color: #0073aa;
+    font-weight: 500;
+}
+
+/* Contact Information */
+.vcard-contact {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.vcard-contact-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.vcard-contact-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    color: #0073aa;
+}
+
+.vcard-contact-text {
+    flex: 1;
+    color: #333;
+}
+
+.vcard-contact-text a {
+    color: #0073aa;
+    text-decoration: none;
+}
+
+.vcard-contact-text a:hover {
+    text-decoration: underline;
+}
+
+/* Action Buttons */
+.vcard-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.vcard-button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vcard-button-primary {
+    background: #0073aa;
+    color: #fff;
+}
+
+.vcard-button-primary:hover {
+    background: #005a87;
+    color: #fff;
+}
+
+.vcard-button-secondary {
+    background: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.vcard-button-secondary:hover {
+    background: #e8e8e8;
+    color: #333;
+}
+
+/* QR Code */
+.vcard-qr {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.vcard-qr-code {
+    max-width: 200px;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Social Media Links */
+.vcard-social {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.vcard-social-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #fff;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+}
+
+.vcard-social-link:hover {
+    transform: scale(1.1);
+    color: #fff;
+}
+
+.vcard-social-facebook { background: #1877f2; }
+.vcard-social-twitter { background: #1da1f2; }
+.vcard-social-linkedin { background: #0077b5; }
+.vcard-social-instagram { background: #e4405f; }
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vcard-profile {
+        margin: 10px;
+        padding: 15px;
+    }
+    
+    .vcard-name {
+        font-size: 1.5em;
+    }
+    
+    .vcard-contact {
+        grid-template-columns: 1fr;
+    }
+    
+    .vcard-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .vcard-button {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+}
