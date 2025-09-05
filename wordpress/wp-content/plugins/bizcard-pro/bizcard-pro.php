@@ -74,20 +74,35 @@ class BizCardPro {
      * Load plugin dependencies
      */
     private function load_dependencies() {
-        // Core classes
-        require_once BIZCARD_PRO_PLUGIN_PATH . 'includes/class-database.php';
-        require_once BIZCARD_PRO_PLUGIN_PATH . 'includes/class-business-profile.php';
-        require_once BIZCARD_PRO_PLUGIN_PATH . 'includes/class-template-engine.php';
-        require_once BIZCARD_PRO_PLUGIN_PATH . 'includes/class-subscription-manager.php';
-        require_once BIZCARD_PRO_PLUGIN_PATH . 'includes/class-analytics.php';
+        // Core classes - only load if they exist
+        $core_files = array(
+            'includes/class-database.php',
+            'includes/class-business-profile.php',
+            'includes/class-template-engine.php',
+            'includes/class-subscription-manager.php',
+            'includes/class-analytics.php'
+        );
+        
+        foreach ($core_files as $file) {
+            $file_path = BIZCARD_PRO_PLUGIN_PATH . $file;
+            if (file_exists($file_path)) {
+                require_once $file_path;
+            }
+        }
         
         // Admin classes
         if (is_admin()) {
-            require_once BIZCARD_PRO_PLUGIN_PATH . 'admin/class-admin.php';
+            $admin_file = BIZCARD_PRO_PLUGIN_PATH . 'admin/class-admin.php';
+            if (file_exists($admin_file)) {
+                require_once $admin_file;
+            }
         }
         
         // Public classes
-        require_once BIZCARD_PRO_PLUGIN_PATH . 'public/class-public.php';
+        $public_file = BIZCARD_PRO_PLUGIN_PATH . 'public/class-public.php';
+        if (file_exists($public_file)) {
+            require_once $public_file;
+        }
     }
     
     /**
@@ -95,18 +110,24 @@ class BizCardPro {
      */
     private function init_components() {
         // Initialize database
-        BizCard_Pro_Database::get_instance();
+        if (class_exists('BizCard_Pro_Database')) {
+            BizCard_Pro_Database::get_instance();
+        }
         
         // Initialize business profiles
-        BizCard_Pro_Business_Profile::get_instance();
+        if (class_exists('BizCard_Pro_Business_Profile')) {
+            BizCard_Pro_Business_Profile::get_instance();
+        }
         
         // Initialize admin area
-        if (is_admin()) {
+        if (is_admin() && class_exists('BizCard_Pro_Admin')) {
             BizCard_Pro_Admin::get_instance();
         }
         
         // Initialize public area
-        BizCard_Pro_Public::get_instance();
+        if (class_exists('BizCard_Pro_Public')) {
+            BizCard_Pro_Public::get_instance();
+        }
     }
     
     /**
@@ -124,6 +145,9 @@ class BizCardPro {
      * Plugin activation
      */
     public function activate() {
+        // Load database class first
+        require_once BIZCARD_PRO_PLUGIN_PATH . 'includes/class-database.php';
+        
         // Create database tables
         BizCard_Pro_Database::create_tables();
         
