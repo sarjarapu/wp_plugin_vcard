@@ -314,7 +314,9 @@ class DigiVCard {
      */
     public function enqueue_scripts() {
         if (is_singular('vcard') || is_post_type_archive('vcard')) {
-            wp_enqueue_style('digi-vcard-style', DIGI_VCARD_PLUGIN_URL . 'assets/style.css', array(), DIGI_VCARD_VERSION);
+            // Enqueue Font Awesome
+            wp_enqueue_style('font-awesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css', array(), '6.4.0');
+            wp_enqueue_style('digi-vcard-style', DIGI_VCARD_PLUGIN_URL . 'assets/style.css', array('font-awesome'), DIGI_VCARD_VERSION);
             wp_enqueue_script('digi-vcard-script', DIGI_VCARD_PLUGIN_URL . 'assets/vcard.js', array(), DIGI_VCARD_VERSION, true);
         }
     }

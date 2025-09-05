@@ -54,7 +54,9 @@ $address = get_vcard_meta($post_id, 'address');
                     
                     <?php if ($email) : ?>
                         <div class="vcard-contact-item">
-                            <div class="vcard-contact-icon">📧</div>
+                            <div class="vcard-contact-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
                             <div class="vcard-contact-details">
                                 <h4>Email</h4>
                                 <a href="mailto:<?php echo esc_attr($email); ?>"><?php echo esc_html($email); ?></a>
@@ -64,7 +66,9 @@ $address = get_vcard_meta($post_id, 'address');
 
                     <?php if ($phone) : ?>
                         <div class="vcard-contact-item">
-                            <div class="vcard-contact-icon">📱</div>
+                            <div class="vcard-contact-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
                             <div class="vcard-contact-details">
                                 <h4>Phone</h4>
                                 <a href="tel:<?php echo esc_attr($phone); ?>"><?php echo esc_html($phone); ?></a>
@@ -74,7 +78,9 @@ $address = get_vcard_meta($post_id, 'address');
 
                     <?php if ($office_phone) : ?>
                         <div class="vcard-contact-item">
-                            <div class="vcard-contact-icon">🏢</div>
+                            <div class="vcard-contact-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
                             <div class="vcard-contact-details">
                                 <h4>Office</h4>
                                 <a href="tel:<?php echo esc_attr($office_phone); ?>"><?php echo esc_html($office_phone); ?></a>
@@ -84,7 +90,9 @@ $address = get_vcard_meta($post_id, 'address');
 
                     <?php if ($address) : ?>
                         <div class="vcard-contact-item">
-                            <div class="vcard-contact-icon">📍</div>
+                            <div class="vcard-contact-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
                             <div class="vcard-contact-details">
                                 <h4>Address</h4>
                                 <div><?php echo wp_kses_post(nl2br($address)); ?></div>
@@ -99,11 +107,13 @@ $address = get_vcard_meta($post_id, 'address');
 
     <!-- Actions -->
     <div class="vcard-actions">
-        <button class="vcard-btn" onclick="downloadVCard()">
-            📱 Add to Contacts
+        <button class="vcard-btn primary" onclick="downloadVCard()">
+            <i class="fas fa-download"></i>
+            <span>Add to Contacts</span>
         </button>
         <button class="vcard-btn secondary" onclick="shareVCard()">
-            📤 Share vCard
+            <i class="fas fa-share-alt"></i>
+            <span>Share vCard</span>
         </button>
     </div>
 </div>
