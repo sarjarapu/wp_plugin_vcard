@@ -22,6 +22,12 @@ jQuery(document).ready(function($) {
          * Initialize customizer
          */
         init: function() {
+            // Debug: Check if vcardCustomizer is loaded
+            console.log('vcardCustomizer object:', vcardCustomizer);
+            console.log('Post ID:', vcardCustomizer.postId);
+            console.log('AJAX URL:', vcardCustomizer.ajaxUrl);
+            console.log('Nonce:', vcardCustomizer.nonce);
+            
             this.bindEvents();
             this.loadInitialPreview();
         },
@@ -60,6 +66,12 @@ jQuery(document).ready(function($) {
             $('#refresh-preview').on('click', function(e) {
                 e.preventDefault();
                 self.loadPreview();
+            });
+            
+            // Test AJAX button
+            $('#test-ajax').on('click', function(e) {
+                e.preventDefault();
+                self.testAjax();
             });
             
             // Device toggle
@@ -238,7 +250,26 @@ jQuery(document).ready(function($) {
         loadInitialPreview: function() {
             var self = this;
             
-            // Small delay to ensure DOM is ready
+            // Check if we have the required elements
+            if (this.$previewFrame.length === 0) {
+                console.error('Preview frame not found');
+                return;
+            }
+            
+            // Check if we have basic data
+            if (typeof vcardCustomizer === 'undefined') {
+                console.error('vcardCustomizer not loaded, showing static preview');
+                this.showStaticPreview('JavaScript configuration not loaded');
+                return;
+            }
+            
+            if (!vcardCustomizer.postId || vcardCustomizer.postId === 0) {
+                console.error('No post ID available, showing static preview');
+                this.showStaticPreview('No post ID available');
+                return;
+            }
+            
+            // Small delay to ensure DOM is ready, then try AJAX preview
             setTimeout(function() {
                 self.loadPreview();
             }, 1000);
@@ -254,6 +285,13 @@ jQuery(document).ready(function($) {
             this.$previewLoading.show();
             this.$previewFrame.hide();
             
+            // Debug log
+            console.log('Loading preview with:', {
+                template: this.currentTemplate,
+                color_scheme: this.currentColorScheme,
+                post_id: vcardCustomizer.postId
+            });
+            
             $.ajax({
                 url: vcardCustomizer.ajaxUrl,
                 type: 'POST',
@@ -265,14 +303,18 @@ jQuery(document).ready(function($) {
                     color_scheme: this.currentColorScheme
                 },
                 success: function(response) {
+                    console.log('Preview response:', response);
                     if (response.success) {
                         self.renderPreview(response.data.html);
                     } else {
-                        self.showPreviewError(response.data || vcardCustomizer.strings.previewError);
+                        console.error('Preview error:', response.data);
+                        self.showPreviewError(response.data || (vcardCustomizer.strings && vcardCustomizer.strings.previewError) || 'Error loading preview');
                     }
                 },
-                error: function() {
-                    self.showPreviewError(vcardCustomizer.strings.previewError);
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', {xhr: xhr, status: status, error: error});
+                    var errorMsg = (vcardCustomizer.strings && vcardCustomizer.strings.previewError) || 'Error loading preview';
+                    self.showPreviewError(errorMsg + ' (' + status + ')');
                 },
                 complete: function() {
                     self.$previewLoading.hide();
@@ -308,12 +350,68 @@ jQuery(document).ready(function($) {
          * Show preview error
          */
         showPreviewError: function(message) {
-            var errorHtml = '<div style="padding: 40px; text-align: center; color: #666;">';
-            errorHtml += '<p>' + message + '</p>';
-            errorHtml += '<button type="button" onclick="location.reload()" style="margin-top: 10px; padding: 8px 16px; background: #0073aa; color: white; border: none; border-radius: 4px; cursor: pointer;">Retry</button>';
-            errorHtml += '</div>';
+            console.log('Showing preview error:', message);
             
-            this.renderPreview('<!DOCTYPE html><html><head><title>Preview Error</title></head><body>' + errorHtml + '</body></html>');
+            // Try to show a static preview instead of just an error
+            this.showStaticPreview(message);
+        },
+        
+        /**
+         * Show static preview when AJAX fails
+         */
+        showStaticPreview: function(errorMessage) {
+            var scheme = this.getColorSchemeColors(this.currentColorScheme);
+            
+            var staticHtml = '<!DOCTYPE html><html><head><title>Static Preview</title></head><body style="margin:0;padding:20px;font-family:Arial,sans-serif;background:#f5f5f5;">';
+            staticHtml += '<div style="max-width:600px;margin:0 auto;background:white;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);">';
+            staticHtml += '<div style="background:' + scheme.primary + ';color:white;padding:30px 20px;text-align:center;">';
+            staticHtml += '<h1 style="margin:0 0 10px 0;font-size:28px;">Sample Business</h1>';
+            staticHtml += '<p style="margin:0;opacity:0.9;">Your business tagline here</p>';
+            staticHtml += '</div>';
+            staticHtml += '<div style="padding:30px 20px;">';
+            staticHtml += '<div style="background:' + scheme.accent + ';padding:20px;border-radius:6px;border-left:4px solid ' + scheme.primary + ';">';
+            staticHtml += '<h3 style="margin:0 0 15px 0;color:' + scheme.primary + ';">Contact Information</h3>';
+            staticHtml += '<p style="margin:8px 0;"><strong>Email:</strong> <a href="#" style="color:' + scheme.primary + ';">contact@business.com</a></p>';
+            staticHtml += '<p style="margin:8px 0;"><strong>Phone:</strong> <a href="#" style="color:' + scheme.primary + ';">(555) 123-4567</a></p>';
+            staticHtml += '<p style="margin:8px 0;"><strong>Website:</strong> <a href="#" style="color:' + scheme.primary + ';">www.business.com</a></p>';
+            staticHtml += '</div>';
+            if (errorMessage) {
+                staticHtml += '<div style="margin-top:20px;padding:15px;background:#fff3cd;border:1px solid #ffeaa7;border-radius:4px;color:#856404;">';
+                staticHtml += '<strong>Preview Note:</strong> ' + errorMessage + '<br><small>Showing static preview instead.</small>';
+                staticHtml += '</div>';
+            }
+            staticHtml += '</div>';
+            staticHtml += '<div style="background:' + scheme.secondary + ';color:white;padding:15px 20px;text-align:center;font-size:12px;">';
+            staticHtml += 'Template: ' + this.currentTemplate + ' | Color: ' + this.currentColorScheme;
+            staticHtml += '</div>';
+            staticHtml += '</div></body></html>';
+            
+            this.renderPreview(staticHtml);
+        },
+        
+        /**
+         * Get color scheme colors with fallbacks
+         */
+        getColorSchemeColors: function(schemeKey) {
+            // Default colors as fallback
+            var defaultColors = {
+                primary: '#2271b1',
+                secondary: '#646970',
+                accent: '#f6f7f7',
+                text: '#1d2327'
+            };
+            
+            // Try to get colors from vcardCustomizer if available
+            if (typeof vcardCustomizer !== 'undefined' && vcardCustomizer.industryPalettes) {
+                for (var industry in vcardCustomizer.industryPalettes) {
+                    var schemes = vcardCustomizer.industryPalettes[industry].schemes;
+                    if (schemes && schemes[schemeKey]) {
+                        return schemes[schemeKey];
+                    }
+                }
+            }
+            
+            return defaultColors;
         },
         
         /**
@@ -324,11 +422,40 @@ jQuery(document).ready(function($) {
             $('.device-toggle[data-device="' + device + '"]').addClass('active');
             
             this.$previewFrame.removeClass('desktop tablet mobile').addClass(device);
+        },
+        
+        /**
+         * Test AJAX connection
+         */
+        testAjax: function() {
+            console.log('Testing AJAX connection...');
+            
+            $.ajax({
+                url: vcardCustomizer.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'vcard_test_preview',
+                    nonce: vcardCustomizer.nonce,
+                    post_id: vcardCustomizer.postId
+                },
+                success: function(response) {
+                    console.log('Test AJAX success:', response);
+                    alert('AJAX Test Result: ' + JSON.stringify(response, null, 2));
+                },
+                error: function(xhr, status, error) {
+                    console.error('Test AJAX error:', {xhr: xhr, status: status, error: error});
+                    alert('AJAX Test Failed: ' + status + ' - ' + error);
+                }
+            });
         }
     };
     
-    // Initialize customizer
-    customizer.init();
+    // Initialize customizer only if we're on the right page
+    if ($('#vcard-template-customizer').length > 0) {
+        customizer.init();
+    } else {
+        console.log('Template customizer not found on this page');
+    }
     
     // Make customizer available globally for debugging
     window.vcardCustomizer = customizer;

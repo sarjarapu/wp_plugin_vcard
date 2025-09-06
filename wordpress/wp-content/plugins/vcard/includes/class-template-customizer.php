@@ -46,6 +46,9 @@ class VCard_Template_Customizer {
         add_action('wp_ajax_vcard_get_color_schemes', array($this, 'handle_get_color_schemes'));
         add_action('wp_ajax_vcard_get_template_recommendations', array($this, 'handle_get_template_recommendations'));
         
+        // Debug endpoint
+        add_action('wp_ajax_vcard_test_preview', array($this, 'handle_test_preview'));
+        
         // Hook into existing template settings with streamlined approach
         add_filter('vcard_template_settings_fields', array($this, 'add_enhanced_template_fields'));
         add_action('vcard_template_settings_streamlined', array($this, 'render_streamlined_template_options'));
@@ -540,6 +543,9 @@ class VCard_Template_Customizer {
                         <button type="button" id="refresh-preview" class="button button-secondary">
                             <?php _e('Refresh Preview', 'vcard'); ?>
                         </button>
+                        <button type="button" id="test-ajax" class="button button-secondary" style="margin-left: 10px;">
+                            <?php _e('Test AJAX', 'vcard'); ?>
+                        </button>
                         <div class="preview-device-toggle-streamlined">
                             <button type="button" class="device-toggle active" data-device="desktop" title="Desktop">
                                 <span class="dashicons dashicons-desktop"></span>
@@ -598,7 +604,7 @@ class VCard_Template_Customizer {
             wp_localize_script('vcard-template-customizer', 'vcardCustomizer', array(
                 'ajaxUrl' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('vcard_customizer_nonce'),
-                'postId' => get_the_ID(),
+                'postId' => isset($_GET['post']) ? intval($_GET['post']) : (get_the_ID() ?: 0),
                 'assetsUrl' => VCARD_ASSETS_URL,
                 'strings' => array(
                     'loadingPreview' => __('Loading preview...', 'vcard'),
@@ -617,39 +623,198 @@ class VCard_Template_Customizer {
      * Handle AJAX template preview request
      */
     public function handle_template_preview() {
-        check_ajax_referer('vcard_customizer_nonce', 'nonce');
+        // Debug logging
+        error_log('VCard Preview: Starting preview request');
+        error_log('VCard Preview: POST data: ' . print_r($_POST, true));
         
-        $post_id = intval($_POST['post_id']);
-        $template_key = sanitize_text_field($_POST['template']);
-        $color_scheme_key = sanitize_text_field($_POST['color_scheme']);
+        // Check nonce
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'vcard_customizer_nonce')) {
+            error_log('VCard Preview: Nonce verification failed');
+            wp_send_json_error('Nonce verification failed');
+        }
+        
+        $post_id = intval($_POST['post_id'] ?? 0);
+        $template_key = sanitize_text_field($_POST['template'] ?? 'ceo');
+        $color_scheme_key = sanitize_text_field($_POST['color_scheme'] ?? 'corporate_blue');
+        
+        error_log("VCard Preview: post_id=$post_id, template=$template_key, color_scheme=$color_scheme_key");
         
         if (!$post_id || !current_user_can('edit_post', $post_id)) {
-            wp_die(__('Insufficient permissions.', 'vcard'));
+            error_log('VCard Preview: Permission check failed');
+            wp_send_json_error('Insufficient permissions');
         }
         
         // Get post data
         $post = get_post($post_id);
         if (!$post) {
-            wp_die(__('Post not found.', 'vcard'));
+            error_log('VCard Preview: Post not found');
+            wp_send_json_error('Post not found');
         }
         
-        // Create business profile instance
-        $profile = new VCard_Business_Profile();
-        $profile->load_from_post($post_id);
+        try {
+            // Collect profile data from post meta
+            $profile_data = $this->get_profile_data_from_post($post_id);
+            error_log('VCard Preview: Profile data collected: ' . print_r(array_keys($profile_data), true));
+            
+            // Always use fallback preview for now to test
+            $preview_html = $this->generate_fallback_preview($profile_data, $template_key, $color_scheme_key);
+            error_log('VCard Preview: Fallback preview generated, length: ' . strlen($preview_html));
+            
+            // Wrap in preview container
+            $preview_html = $this->wrap_preview_html($preview_html, $template_key, $color_scheme_key);
+            
+            wp_send_json_success(array(
+                'html' => $preview_html,
+                'template' => $template_key,
+                'color_scheme' => $color_scheme_key,
+                'debug' => 'Preview generated successfully'
+            ));
+            
+        } catch (Exception $e) {
+            error_log('VCard Preview: Exception: ' . $e->getMessage());
+            wp_send_json_error('Preview generation failed: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Get profile data from post meta for preview
+     */
+    private function get_profile_data_from_post($post_id) {
+        $data = array();
         
-        // Get template engine
-        $template_engine = new VCard_Template_Engine();
+        // Personal fields
+        $personal_fields = array('first_name', 'last_name', 'company', 'job_title');
+        foreach ($personal_fields as $field) {
+            $data[$field] = get_post_meta($post_id, '_vcard_' . $field, true);
+        }
         
-        // Generate preview HTML
-        $preview_html = $template_engine->render_template($template_key, $profile->get_all_data(), $color_scheme_key);
+        // Business fields
+        $business_fields = array('business_name', 'business_tagline', 'business_description', 'business_logo', 'cover_image');
+        foreach ($business_fields as $field) {
+            $data[$field] = get_post_meta($post_id, '_vcard_' . $field, true);
+        }
         
-        // Wrap in preview container
-        $preview_html = $this->wrap_preview_html($preview_html, $template_key, $color_scheme_key);
+        // Contact fields
+        $contact_fields = array('phone', 'secondary_phone', 'whatsapp', 'email', 'website', 'address', 'city', 'state', 'zip_code', 'country');
+        foreach ($contact_fields as $field) {
+            $data[$field] = get_post_meta($post_id, '_vcard_' . $field, true);
+        }
         
+        // Social media fields
+        $social_fields = array('facebook', 'instagram', 'linkedin', 'twitter', 'youtube', 'tiktok');
+        foreach ($social_fields as $field) {
+            $data['social_' . $field] = get_post_meta($post_id, '_vcard_social_' . $field, true);
+        }
+        
+        // Complex fields (JSON)
+        $data['business_hours'] = get_post_meta($post_id, '_vcard_business_hours', true);
+        $data['services'] = get_post_meta($post_id, '_vcard_services', true);
+        $data['products'] = get_post_meta($post_id, '_vcard_products', true);
+        $data['gallery'] = get_post_meta($post_id, '_vcard_gallery', true);
+        
+        // Add some sample data if fields are empty for better preview
+        if (empty($data['business_name']) && empty($data['first_name'])) {
+            $data['business_name'] = 'Sample Business';
+            $data['business_tagline'] = 'Your tagline here';
+            $data['business_description'] = 'This is a sample business description to show how your vCard will look.';
+        }
+        
+        if (empty($data['email'])) {
+            $data['email'] = 'contact@samplebusiness.com';
+        }
+        
+        if (empty($data['phone'])) {
+            $data['phone'] = '(555) 123-4567';
+        }
+        
+        if (empty($data['website'])) {
+            $data['website'] = 'https://www.samplebusiness.com';
+        }
+        
+        if (empty($data['address'])) {
+            $data['address'] = '123 Business St, City, State 12345';
+        }
+        
+        return $data;
+    }
+    
+    /**
+     * Generate fallback preview when template engine fails
+     */
+    private function generate_fallback_preview($data, $template_key, $color_scheme_key) {
+        $scheme = $this->get_color_scheme($color_scheme_key);
+        $colors = $scheme ? $scheme : array(
+            'primary' => '#2271b1',
+            'secondary' => '#646970',
+            'accent' => '#f6f7f7',
+            'text' => '#1d2327'
+        );
+        
+        $business_name = !empty($data['business_name']) ? $data['business_name'] : 
+                        (!empty($data['first_name']) ? $data['first_name'] . ' ' . $data['last_name'] : 'Sample Business');
+        
+        $html = '
+        <div class="vcard-preview-fallback" style="
+            font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            background: ' . $colors['accent'] . ';
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        ">
+            <div class="header" style="
+                background: ' . $colors['primary'] . ';
+                color: white;
+                padding: 30px 20px;
+                text-align: center;
+            ">
+                <h1 style="margin: 0 0 10px 0; font-size: 28px; font-weight: 600;">' . esc_html($business_name) . '</h1>
+                ' . (!empty($data['business_tagline']) ? '<p style="margin: 0; font-size: 16px; opacity: 0.9;">' . esc_html($data['business_tagline']) . '</p>' : '') . '
+                ' . (!empty($data['job_title']) ? '<p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.8;">' . esc_html($data['job_title']) . '</p>' : '') . '
+            </div>
+            
+            <div class="content" style="padding: 30px 20px;">
+                ' . (!empty($data['business_description']) ? '<div style="margin-bottom: 25px;"><p style="color: ' . $colors['text'] . '; line-height: 1.6; margin: 0;">' . esc_html($data['business_description']) . '</p></div>' : '') . '
+                
+                <div class="contact-info" style="
+                    background: white;
+                    padding: 20px;
+                    border-radius: 6px;
+                    border-left: 4px solid ' . $colors['primary'] . ';
+                ">
+                    <h3 style="margin: 0 0 15px 0; color: ' . $colors['primary'] . '; font-size: 18px;">Contact Information</h3>
+                    ' . (!empty($data['email']) ? '<p style="margin: 8px 0; color: ' . $colors['text'] . ';"><strong>Email:</strong> <a href="mailto:' . esc_attr($data['email']) . '" style="color: ' . $colors['primary'] . ';">' . esc_html($data['email']) . '</a></p>' : '') . '
+                    ' . (!empty($data['phone']) ? '<p style="margin: 8px 0; color: ' . $colors['text'] . ';"><strong>Phone:</strong> <a href="tel:' . esc_attr($data['phone']) . '" style="color: ' . $colors['primary'] . ';">' . esc_html($data['phone']) . '</a></p>' : '') . '
+                    ' . (!empty($data['website']) ? '<p style="margin: 8px 0; color: ' . $colors['text'] . ';"><strong>Website:</strong> <a href="' . esc_url($data['website']) . '" style="color: ' . $colors['primary'] . ';" target="_blank">' . esc_html($data['website']) . '</a></p>' : '') . '
+                    ' . (!empty($data['address']) ? '<p style="margin: 8px 0; color: ' . $colors['text'] . ';"><strong>Address:</strong> ' . esc_html($data['address']) . '</p>' : '') . '
+                </div>
+            </div>
+            
+            <div class="footer" style="
+                background: ' . $colors['secondary'] . ';
+                color: white;
+                padding: 15px 20px;
+                text-align: center;
+                font-size: 12px;
+                opacity: 0.9;
+            ">
+                Template: ' . esc_html(ucfirst($template_key)) . ' | Color Scheme: ' . esc_html($scheme ? $scheme['name'] : 'Default') . '
+            </div>
+        </div>';
+        
+        return $html;
+    }
+    
+    /**
+     * Handle test preview request for debugging
+     */
+    public function handle_test_preview() {
         wp_send_json_success(array(
-            'html' => $preview_html,
-            'template' => $template_key,
-            'color_scheme' => $color_scheme_key
+            'message' => 'AJAX is working!',
+            'post_data' => $_POST,
+            'user_can_edit' => current_user_can('edit_posts'),
+            'nonce_valid' => wp_verify_nonce($_POST['nonce'] ?? '', 'vcard_customizer_nonce')
         ));
     }
     
