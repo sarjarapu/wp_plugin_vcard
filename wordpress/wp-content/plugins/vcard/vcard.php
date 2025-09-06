@@ -91,8 +91,61 @@ class VCardPlugin {
         add_action('plugins_loaded', array($this, 'load_textdomain'));
         
         // AJAX hooks for frontend interactions
-        add_action('wp_ajax_vcard_track_download', array($this, 'handle_track_download'));
-        add_action('wp_ajax_nopriv_vcard_track_download', array($this, 'handle_track_download'));
+        add_action('wp_ajax_track_vcard_download', array($this, 'handle_track_vcard_download'));
+        add_action('wp_ajax_nopriv_track_vcard_download', array($this, 'handle_track_vcard_download'));
+        add_action('wp_ajax_track_qr_generation', array($this, 'handle_track_qr_generation'));
+        add_action('wp_ajax_nopriv_track_qr_generation', array($this, 'handle_track_qr_generation'));
+        add_action('wp_ajax_submit_vcard_contact_form', array($this, 'handle_contact_form_submission'));
+        add_action('wp_ajax_nopriv_submit_vcard_contact_form', array($this, 'handle_contact_form_submission'));
+    }
+    
+    /**
+     * Enqueue frontend scripts and styles
+     */
+    public function enqueue_scripts() {
+        // Only enqueue on vCard profile pages
+        if (is_singular('vcard_profile')) {
+            wp_enqueue_style(
+                'vcard-business-profile',
+                VCARD_ASSETS_URL . 'css/business-profile.css',
+                array(),
+                VCARD_VERSION
+            );
+            
+            // Enqueue Font Awesome for icons
+            wp_enqueue_style(
+                'font-awesome',
+                'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+                array(),
+                '6.0.0'
+            );
+        }
+    }
+    
+    /**
+     * Enqueue admin scripts and styles
+     */
+    public function admin_enqueue_scripts($hook) {
+        // Only enqueue on vCard profile edit pages
+        if (in_array($hook, array('post.php', 'post-new.php'))) {
+            global $post_type;
+            if ($post_type === 'vcard_profile') {
+                wp_enqueue_media();
+                wp_enqueue_style(
+                    'vcard-admin',
+                    VCARD_ASSETS_URL . 'css/admin.css',
+                    array(),
+                    VCARD_VERSION
+                );
+                wp_enqueue_script(
+                    'vcard-admin',
+                    VCARD_ASSETS_URL . 'js/admin.js',
+                    array('jquery', 'media-upload'),
+                    VCARD_VERSION,
+                    true
+                );
+            }
+        }
     }
     
     /**
@@ -141,6 +194,8 @@ class VCardPlugin {
         // Initialize profile manager
         new VCard_Profile_Manager();
     }
+    
+
     
     public function register_post_type() {
         $args = array(
@@ -287,6 +342,28 @@ class VCardPlugin {
             'single' => true,
             'type' => 'integer',
             'default' => 0,
+        ));
+        
+        register_post_meta('vcard_profile', '_vcard_contact_inquiries', array(
+            'show_in_rest' => true,
+            'single' => true,
+            'type' => 'integer',
+            'default' => 0,
+        ));
+        
+        register_post_meta('vcard_profile', '_vcard_contact_form_enabled', array(
+            'show_in_rest' => true,
+            'single' => true,
+            'type' => 'string',
+            'default' => '1',
+            'sanitize_callback' => 'sanitize_text_field',
+        ));
+        
+        register_post_meta('vcard_profile', '_vcard_contact_form_title', array(
+            'show_in_rest' => true,
+            'single' => true,
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
         ));
         
         register_post_meta('vcard_profile', '_vcard_subscription_plan', array(
@@ -582,6 +659,27 @@ class VCardPlugin {
             'tour' => __('Tour Template', 'vcard'),
         );
         
+        // Contact Form Settings
+        echo '<tr>';
+        echo '<th><label>' . __('Contact Form Settings', 'vcard') . '</label></th>';
+        echo '<td>';
+        
+        $contact_form_enabled = get_post_meta($post->ID, '_vcard_contact_form_enabled', true);
+        $contact_form_title = get_post_meta($post->ID, '_vcard_contact_form_title', true);
+        
+        echo '<div class="contact-form-settings">';
+        echo '<label>';
+        echo '<input type="checkbox" name="vcard_contact_form_enabled" value="1" ' . checked($contact_form_enabled, '1', false) . '>';
+        echo ' ' . __('Enable contact form on profile', 'vcard');
+        echo '</label><br><br>';
+        
+        echo '<label for="vcard_contact_form_title">' . __('Contact Form Title', 'vcard') . '</label><br>';
+        echo '<input type="text" id="vcard_contact_form_title" name="vcard_contact_form_title" value="' . esc_attr($contact_form_title ?: __('Leave a Message', 'vcard')) . '" class="regular-text">';
+        echo '</div>';
+        
+        echo '</td>';
+        echo '</tr>';
+        
         // Hook for streamlined template customization features
         do_action('vcard_template_settings_streamlined', $post);
         
@@ -653,6 +751,14 @@ class VCardPlugin {
             if (isset($_POST['vcard_social_' . $field])) {
                 update_post_meta($post_id, '_vcard_social_' . $field, esc_url_raw($_POST['vcard_social_' . $field]));
             }
+        }
+        
+        // Contact form settings
+        $contact_form_enabled = isset($_POST['vcard_contact_form_enabled']) ? '1' : '0';
+        update_post_meta($post_id, '_vcard_contact_form_enabled', $contact_form_enabled);
+        
+        if (isset($_POST['vcard_contact_form_title'])) {
+            update_post_meta($post_id, '_vcard_contact_form_title', sanitize_text_field($_POST['vcard_contact_form_title']));
         }
         
         // Streamlined template settings - template_name is now handled by radio buttons
@@ -780,57 +886,7 @@ class VCardPlugin {
         return $template;
     }
     
-    /**
-     * Enqueue public scripts and styles
-     */
-    public function enqueue_scripts() {
-        // Only enqueue on vCard pages
-        if (is_post_type_archive('vcard_profile') || is_singular('vcard_profile')) {
-            // Enqueue CSS with cache busting
-            wp_enqueue_style('vcard-public-style', VCARD_ASSETS_URL . 'css/public.css', array(), VCARD_VERSION . '-' . time());
-            
-            // Fallback: also enqueue the main style.css if public.css fails
-            if (file_exists(VCARD_PLUGIN_PATH . 'assets/style.css')) {
-                wp_enqueue_style('vcard-fallback-style', VCARD_ASSETS_URL . 'style.css', array(), VCARD_VERSION . '-' . time());
-            }
-            
-            wp_enqueue_script('vcard-public-script', VCARD_ASSETS_URL . 'js/public.js', array('jquery'), VCARD_VERSION, true);
-            
-            // Localize script for AJAX
-            wp_localize_script('vcard-public-script', 'vcard_public', array(
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('vcard_public_nonce'),
-                'strings' => array(
-                    'download_vcard' => __('Download vCard', 'vcard'),
-                    'share_profile' => __('Share Profile', 'vcard'),
-                    'save_contact' => __('Save Contact', 'vcard'),
-                )
-            ));
-            
-            // Debug: Log the CSS URL for troubleshooting
-            error_log('vCard CSS URL: ' . VCARD_ASSETS_URL . 'css/public.css');
-            
-            // Add critical inline CSS as fallback
-            $inline_css = "
-                .vcard-single-container { max-width: 800px; margin: 0 auto; padding: 20px; }
-                .vcard-single { background: #fff; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; }
-                .vcard-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px 30px; text-align: center; }
-                .vcard-name { font-size: 2.2em; margin: 0 0 10px 0; font-weight: 300; }
-                .vcard-title { font-size: 1.1em; opacity: 0.9; margin: 0; font-weight: 300; }
-                .vcard-content { padding: 30px; }
-                .vcard-contact-info h3, .vcard-address h3 { color: #333; font-size: 1.3em; margin: 0 0 15px 0; padding-bottom: 8px; border-bottom: 2px solid #667eea; }
-                .vcard-contact-item { margin: 8px 0; display: flex; align-items: center; }
-                .vcard-contact-item strong { min-width: 80px; color: #555; }
-                .vcard-contact-item a { color: #667eea; text-decoration: none; }
-                .vcard-contact-item a:hover { text-decoration: underline; }
-                .vcard-address-details { background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #667eea; }
-                .vcard-actions { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
-                .vcard-download-btn { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1em; cursor: pointer; transition: transform 0.2s ease; }
-                .vcard-download-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-            ";
-            wp_add_inline_style('vcard-public-style', $inline_css);
-        }
-    }
+
     
     /**
      * Plugin activation
@@ -1631,71 +1687,7 @@ class VCardPlugin {
     public function admin_init() {
         // Register settings will be implemented in future tasks
     }
-    
-    /**
-     * Enqueue admin scripts and styles
-     */
-    public function admin_enqueue_scripts($hook) {
-        global $post_type, $post;
-        
-        // Only enqueue on vCard profile edit pages
-        if (($hook === 'post.php' || $hook === 'post-new.php') && $post_type === 'vcard_profile') {
-            // Enqueue enhanced admin styles and scripts
-            wp_enqueue_style('vcard-admin-meta-box', VCARD_ASSETS_URL . 'css/admin-meta-box.css', array(), VCARD_VERSION);
-            wp_enqueue_script('vcard-admin-meta-box', VCARD_ASSETS_URL . 'js/admin-meta-box.js', array('jquery', 'jquery-ui-sortable'), VCARD_VERSION, true);
-            
-            // Enqueue WordPress media library
-            wp_enqueue_media();
-            
-            // Enqueue WordPress color picker
-            wp_enqueue_style('wp-color-picker');
-            wp_enqueue_script('wp-color-picker');
-            
-            // Localize script for AJAX and translations
-            wp_localize_script('vcard-admin-meta-box', 'vcardAdmin', array(
-                'ajax_url' => admin_url('admin-ajax.php'),
-                'nonce' => wp_create_nonce('vcard_admin_nonce'),
-                'strings' => array(
-                    'service' => __('Service', 'vcard'),
-                    'product' => __('Product', 'vcard'),
-                    'remove' => __('Remove', 'vcard'),
-                    'serviceName' => __('Service Name', 'vcard'),
-                    'servicePrice' => __('Price', 'vcard'),
-                    'serviceCategory' => __('Category', 'vcard'),
-                    'serviceDuration' => __('Duration', 'vcard'),
-                    'serviceDescription' => __('Description', 'vcard'),
-                    'productName' => __('Product Name', 'vcard'),
-                    'productPrice' => __('Price', 'vcard'),
-                    'productCategory' => __('Category', 'vcard'),
-                    'productSKU' => __('SKU', 'vcard'),
-                    'productDescription' => __('Description', 'vcard'),
-                    'productImage' => __('Product Image', 'vcard'),
-                    'inStock' => __('In Stock', 'vcard'),
-                    'featured' => __('Featured', 'vcard'),
-                    'selectImage' => __('Select Image', 'vcard'),
-                    'removeImage' => __('Remove Image', 'vcard'),
-                    'selectGalleryImages' => __('Select Gallery Images', 'vcard'),
-                    'addToGallery' => __('Add to Gallery', 'vcard'),
-                    'selectProductImage' => __('Select Product Image', 'vcard'),
-                    'selectBusinessLogo' => __('Select Business Logo', 'vcard'),
-                    'selectCoverImage' => __('Select Cover Image', 'vcard'),
-                    'businessNameRequired' => __('Business name is required for business profiles.', 'vcard'),
-                    'nameRequired' => __('First name and last name are required.', 'vcard'),
-                    'emailRequired' => __('Email address is required.', 'vcard'),
-                    'emailInvalid' => __('Please enter a valid email address.', 'vcard'),
-                    'serviceNameRequired' => __('Service #%d name is required.', 'vcard'),
-                    'productNameRequired' => __('Product #%d name is required.', 'vcard'),
-                    'validationErrors' => __('Please fix the following errors:', 'vcard')
-                )
-            ));
-        }
-        
-        // Enqueue on vCard admin pages
-        if (strpos($hook, 'vcard') !== false) {
-            wp_enqueue_style('vcard-admin-style', VCARD_ASSETS_URL . 'css/admin.css', array(), VCARD_VERSION);
-            wp_enqueue_script('vcard-admin-script', VCARD_ASSETS_URL . 'js/admin.js', array('jquery'), VCARD_VERSION, true);
-        }
-    }
+
     
     // ========================================
     // Custom Table Helper Methods
@@ -1949,6 +1941,237 @@ class VCardPlugin {
             wp_send_json_error(array('message' => 'Invalid profile ID'));
         }
     }
+    
+    /**
+     * Handle vCard download tracking
+     */
+    public function handle_track_vcard_download() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_tracking')) {
+            wp_die('Security check failed');
+        }
+        
+        $post_id = intval($_POST['post_id']);
+        
+        if ($post_id > 0 && get_post_type($post_id) === 'vcard_profile') {
+            // Increment download counter
+            $current_downloads = (int) get_post_meta($post_id, '_vcard_vcard_downloads', true);
+            update_post_meta($post_id, '_vcard_vcard_downloads', $current_downloads + 1);
+            
+            // Log to analytics table if it exists
+            global $wpdb;
+            $analytics_table = VCARD_ANALYTICS_TABLE;
+            
+            // Check if table exists
+            if ($wpdb->get_var("SHOW TABLES LIKE '$analytics_table'") === $analytics_table) {
+                $wpdb->insert(
+                    $analytics_table,
+                    array(
+                        'profile_id' => $post_id,
+                        'event_type' => 'vcard_download',
+                        'event_date' => current_time('mysql'),
+                        'user_ip' => $this->get_client_ip(),
+                        'user_agent' => sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                    ),
+                    array('%d', '%s', '%s', '%s', '%s')
+                );
+            }
+            
+            wp_send_json_success(array('downloads' => $current_downloads + 1));
+        }
+        
+        wp_send_json_error('Invalid post ID');
+    }
+    
+    /**
+     * Handle QR code generation tracking
+     */
+    public function handle_track_qr_generation() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_tracking')) {
+            wp_die('Security check failed');
+        }
+        
+        $post_id = intval($_POST['post_id']);
+        
+        if ($post_id > 0 && get_post_type($post_id) === 'vcard_profile') {
+            // Increment QR scan counter
+            $current_qr_scans = (int) get_post_meta($post_id, '_vcard_qr_scans', true);
+            update_post_meta($post_id, '_vcard_qr_scans', $current_qr_scans + 1);
+            
+            // Log to analytics table if it exists
+            global $wpdb;
+            $analytics_table = VCARD_ANALYTICS_TABLE;
+            
+            // Check if table exists
+            if ($wpdb->get_var("SHOW TABLES LIKE '$analytics_table'") === $analytics_table) {
+                $wpdb->insert(
+                    $analytics_table,
+                    array(
+                        'profile_id' => $post_id,
+                        'event_type' => 'qr_generation',
+                        'event_date' => current_time('mysql'),
+                        'user_ip' => $this->get_client_ip(),
+                        'user_agent' => sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                    ),
+                    array('%d', '%s', '%s', '%s', '%s')
+                );
+            }
+            
+            wp_send_json_success(array('qr_scans' => $current_qr_scans + 1));
+        }
+        
+        wp_send_json_error('Invalid post ID');
+    }
+    
+    /**
+     * Handle contact form submission
+     */
+    public function handle_contact_form_submission() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['vcard_contact_nonce'], 'vcard_contact_form')) {
+            wp_send_json_error(array('message' => __('Security check failed. Please refresh the page and try again.', 'vcard')));
+        }
+        
+        // Honeypot spam protection
+        if (!empty($_POST['website_url'])) {
+            wp_send_json_error(array('message' => __('Spam detected.', 'vcard')));
+        }
+        
+        // Rate limiting - prevent too many submissions from same IP
+        $user_ip = $this->get_client_ip();
+        $rate_limit_key = 'vcard_contact_rate_limit_' . md5($user_ip);
+        $submissions_count = get_transient($rate_limit_key);
+        
+        if ($submissions_count && $submissions_count >= 5) {
+            wp_send_json_error(array('message' => __('Too many submissions. Please wait before sending another message.', 'vcard')));
+        }
+        
+        // Validate required fields
+        $required_fields = array(
+            'contact_name' => __('Name is required.', 'vcard'),
+            'contact_email' => __('Email is required.', 'vcard'),
+            'contact_message' => __('Message is required.', 'vcard'),
+            'profile_id' => __('Invalid profile.', 'vcard')
+        );
+        
+        foreach ($required_fields as $field => $error_message) {
+            if (empty($_POST[$field])) {
+                wp_send_json_error(array('message' => $error_message));
+            }
+        }
+        
+        // Sanitize and validate data
+        $profile_id = intval($_POST['profile_id']);
+        $contact_name = sanitize_text_field($_POST['contact_name']);
+        $contact_email = sanitize_email($_POST['contact_email']);
+        $contact_phone = sanitize_text_field($_POST['contact_phone']);
+        $contact_subject = sanitize_text_field($_POST['contact_subject']);
+        $contact_message = sanitize_textarea_field($_POST['contact_message']);
+        
+        // Validate email
+        if (!is_email($contact_email)) {
+            wp_send_json_error(array('message' => __('Please enter a valid email address.', 'vcard')));
+        }
+        
+        // Validate profile exists and is published
+        $profile_post = get_post($profile_id);
+        if (!$profile_post || $profile_post->post_type !== 'vcard_profile' || $profile_post->post_status !== 'publish') {
+            wp_send_json_error(array('message' => __('Invalid profile.', 'vcard')));
+        }
+        
+        // Get business profile data
+        $business_profile = new VCard_Business_Profile($profile_id);
+        $business_email = $business_profile->get_data('email');
+        $business_name = $business_profile->get_data('business_name') ?: get_the_title($profile_id);
+        
+        if (empty($business_email)) {
+            wp_send_json_error(array('message' => __('Business contact information is not available.', 'vcard')));
+        }
+        
+        // Prepare email content
+        $subject = !empty($contact_subject) ? $contact_subject : sprintf(__('New inquiry from %s', 'vcard'), get_bloginfo('name'));
+        
+        $message = sprintf(
+            __("You have received a new message through your vCard profile.\n\n" .
+               "Profile: %s\n" .
+               "From: %s\n" .
+               "Email: %s\n" .
+               "Phone: %s\n" .
+               "Subject: %s\n\n" .
+               "Message:\n%s\n\n" .
+               "---\n" .
+               "This message was sent through your vCard profile: %s", 'vcard'),
+            $business_name,
+            $contact_name,
+            $contact_email,
+            $contact_phone ?: __('Not provided', 'vcard'),
+            $contact_subject ?: __('No subject', 'vcard'),
+            $contact_message,
+            get_permalink($profile_id)
+        );
+        
+        // Set email headers
+        $headers = array(
+            'Content-Type: text/plain; charset=UTF-8',
+            'From: ' . get_bloginfo('name') . ' <' . get_option('admin_email') . '>',
+            'Reply-To: ' . $contact_name . ' <' . $contact_email . '>'
+        );
+        
+        // Send email
+        $email_sent = wp_mail($business_email, $subject, $message, $headers);
+        
+        if ($email_sent) {
+            // Log the contact form submission
+            $this->log_contact_form_submission($profile_id, $contact_name, $contact_email, $contact_subject, $contact_message);
+            
+            // Update rate limiting
+            $new_count = $submissions_count ? $submissions_count + 1 : 1;
+            set_transient($rate_limit_key, $new_count, HOUR_IN_SECONDS);
+            
+            wp_send_json_success(array(
+                'message' => __('Thank you for your message! We will get back to you soon.', 'vcard')
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => __('Failed to send message. Please try again or contact us directly.', 'vcard')
+            ));
+        }
+    }
+    
+    /**
+     * Log contact form submission for analytics
+     */
+    private function log_contact_form_submission($profile_id, $contact_name, $contact_email, $subject, $message) {
+        global $wpdb;
+        $analytics_table = VCARD_ANALYTICS_TABLE;
+        
+        // Check if table exists
+        if ($wpdb->get_var("SHOW TABLES LIKE '$analytics_table'") === $analytics_table) {
+            $wpdb->insert(
+                $analytics_table,
+                array(
+                    'profile_id' => $profile_id,
+                    'event_type' => 'contact_form_submission',
+                    'event_date' => current_time('mysql'),
+                    'user_ip' => $this->get_client_ip(),
+                    'user_agent' => sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                    'event_data' => wp_json_encode(array(
+                        'contact_name' => $contact_name,
+                        'contact_email' => $contact_email,
+                        'subject' => $subject,
+                        'message_length' => strlen($message)
+                    ))
+                ),
+                array('%d', '%s', '%s', '%s', '%s', '%s')
+            );
+        }
+        
+        // Also increment a simple counter in post meta
+        $current_inquiries = (int) get_post_meta($profile_id, '_vcard_contact_inquiries', true);
+        update_post_meta($profile_id, '_vcard_contact_inquiries', $current_inquiries + 1);
+    }
+    
 }
 
 // Initialize the plugin

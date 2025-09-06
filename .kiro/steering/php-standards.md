@@ -22,3 +22,8 @@ fileMatchPattern: '*.php'
 - Follow WordPress naming conventions
 - Use WordPress hooks and filters appropriately
 - Implement proper error handling
+
+## Execution Specific
+
+- Run the php files using docker exec on `wordpress-wordpress-1`
+- Always use full path. local `./wp-content` maps to `/var/www/html/wp-content` on container
