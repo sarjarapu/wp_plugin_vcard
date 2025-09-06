@@ -117,6 +117,8 @@ class VCardPlugin {
         add_action('wp_ajax_nopriv_get_embed_code', array($this, 'handle_get_embed_code'));
         add_action('wp_ajax_download_qr_code', array($this, 'handle_download_qr_code'));
         add_action('wp_ajax_nopriv_download_qr_code', array($this, 'handle_download_qr_code'));
+        add_action('wp_ajax_track_vcard_event', array($this, 'handle_track_event'));
+        add_action('wp_ajax_nopriv_track_vcard_event', array($this, 'handle_track_event'));
         
         // Short URL redirect handling
         add_action('init', array($this, 'handle_short_url_redirects'));
@@ -911,6 +913,62 @@ class VCardPlugin {
         } catch (Exception $e) {
             error_log('QR code download error: ' . $e->getMessage());
             wp_die('QR code download failed');
+        }
+    }
+    
+    /**
+     * Handle AJAX request for tracking events
+     */
+    public function handle_track_event() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_sharing_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $event_type = sanitize_text_field($_POST['event_type']);
+        $event_data = json_decode(stripslashes($_POST['event_data']), true) ?: array();
+        
+        if (!$event_type) {
+            wp_send_json_error('Invalid event type');
+        }
+        
+        try {
+            // Store detailed analytics if analytics table exists
+            global $wpdb;
+            $analytics_table = $wpdb->prefix . 'vcard_analytics';
+            
+            if ($wpdb->get_var("SHOW TABLES LIKE '$analytics_table'") === $analytics_table) {
+                $wpdb->insert(
+                    $analytics_table,
+                    array(
+                        'profile_id' => isset($event_data['profile_id']) ? intval($event_data['profile_id']) : 0,
+                        'event_type' => $event_type,
+                        'event_data' => wp_json_encode($event_data),
+                        'created_at' => current_time('mysql')
+                    ),
+                    array('%d', '%s', '%s', '%s')
+                );
+            }
+            
+            // Update profile-specific counters for certain events
+            if (isset($event_data['profile_id']) && $event_data['profile_id']) {
+                $profile_id = intval($event_data['profile_id']);
+                
+                switch ($event_type) {
+                    case 'profile_view':
+                        $current_views = (int) get_post_meta($profile_id, '_vcard_profile_views', true);
+                        update_post_meta($profile_id, '_vcard_profile_views', $current_views + 1);
+                        break;
+                }
+            }
+            
+            do_action('vcard_event_tracked', $event_type, $event_data);
+            
+            wp_send_json_success('Event tracked');
+            
+        } catch (Exception $e) {
+            error_log('Event tracking error: ' . $e->getMessage());
+            wp_send_json_error('Event tracking failed');
         }
     }
     

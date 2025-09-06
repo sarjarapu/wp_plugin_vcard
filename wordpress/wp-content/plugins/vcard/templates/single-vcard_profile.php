@@ -13,9 +13,9 @@ $template_name = $business_profile->get_data('template_name') ?: 'default';
 $is_business = $business_profile->is_business_profile();
 ?>
 
-<div class="vcard-single-container vcard-template-<?php echo esc_attr($template_name); ?> <?php echo $is_business ? 'vcard-business-profile' : 'vcard-personal-profile'; ?>">
+<div class="vcard-single-container vcard-template-<?php echo esc_attr($template_name); ?> <?php echo $is_business ? 'vcard-business-profile' : 'vcard-personal-profile'; ?>" data-profile-id="<?php echo get_the_ID(); ?>">
     <?php while (have_posts()) : the_post(); ?>
-        <article class="vcard-single">
+        <article class="vcard-single" data-profile-id="<?php echo get_the_ID(); ?>">
             <!-- Profile Header Section -->
             <div class="vcard-header">
                 <?php if (has_post_thumbnail()) : ?>
@@ -420,6 +420,9 @@ $is_business = $business_profile->is_business_profile();
 <?php endif; ?>
 
 <script>
+// Set profile ID for JavaScript access
+document.body.setAttribute('data-profile-id', '<?php echo get_the_ID(); ?>');
+
 // Legacy function for backward compatibility
 function downloadVCard() {
     // Use the enhanced export system

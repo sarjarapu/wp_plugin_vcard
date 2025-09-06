@@ -16,6 +16,11 @@
          * Initialize sharing functionality
          */
         init: function() {
+            if (typeof vcard_sharing === 'undefined') {
+                console.error('vcard_sharing object not available - sharing functionality will be limited');
+                return;
+            }
+            
             this.bindEvents();
             this.initializeComponents();
         },
@@ -618,14 +623,31 @@
          * Track generic event
          */
         trackEvent: function(eventType, data) {
+            // Check if vcard_sharing object exists
+            if (typeof vcard_sharing === 'undefined') {
+                console.error('vcard_sharing object not found - script may not be properly localized');
+                return;
+            }
+            
+            // Debug logging
+            console.log('Tracking event:', eventType, data);
+            console.log('AJAX URL:', vcard_sharing.ajax_url);
+            console.log('Nonce:', vcard_sharing.nonce);
+            
             $.ajax({
-                url: vcard_sharing.ajax_url,
+                url: vcard_sharing.ajax_url || '/wp-admin/admin-ajax.php',
                 type: 'POST',
                 data: {
                     action: 'track_vcard_event',
                     event_type: eventType,
                     event_data: JSON.stringify(data),
-                    nonce: vcard_sharing.nonce
+                    nonce: vcard_sharing.nonce || ''
+                },
+                success: function(response) {
+                    console.log('Event tracking success:', response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Event tracking error:', xhr.responseText, status, error);
                 }
             });
         },
@@ -647,11 +669,34 @@
          * Get current profile ID
          */
         getCurrentProfileId: function() {
-            return $('body').data('profile-id') || 
-                   $('.vcard-profile').data('profile-id') ||
-                   $('.vcard-single').data('profile-id') ||
-                   $('input[name="profile_id"]').val() ||
-                   VCardSharing.extractProfileIdFromUrl();
+            // Try multiple methods to get profile ID
+            var profileId = $('body').data('profile-id') || 
+                           $('.vcard-profile').data('profile-id') ||
+                           $('.vcard-single').data('profile-id') ||
+                           $('.vcard-download-btn').data('profile-id') ||
+                           $('input[name="profile_id"]').val();
+            
+            // If still not found, try to extract from URL
+            if (!profileId) {
+                profileId = VCardSharing.extractProfileIdFromUrl();
+            }
+            
+            // If still not found and we're on a single vcard page, try to get from WordPress
+            if (!profileId && $('body').hasClass('single-vcard_profile')) {
+                // Try to get from WordPress global if available
+                if (typeof wp !== 'undefined' && wp.data && wp.data.select) {
+                    try {
+                        var post = wp.data.select('core/editor').getCurrentPost();
+                        if (post && post.id) {
+                            profileId = post.id;
+                        }
+                    } catch (e) {
+                        // Ignore error, fallback methods will be used
+                    }
+                }
+            }
+            
+            return profileId;
         },
 
         /**
@@ -717,9 +762,14 @@
          */
         setupSharingAnalytics: function() {
             // Track page views for sharing analytics
-            if (VCardSharing.getCurrentProfileId()) {
+            var profileId = VCardSharing.getCurrentProfileId();
+            console.log('Setup sharing analytics - Profile ID:', profileId);
+            console.log('Is single vcard profile:', $('body').hasClass('single-vcard_profile'));
+            console.log('vcard_sharing object:', typeof vcard_sharing !== 'undefined' ? vcard_sharing : 'undefined');
+            
+            if (profileId && $('body').hasClass('single-vcard_profile')) {
                 VCardSharing.trackEvent('profile_view', {
-                    profile_id: VCardSharing.getCurrentProfileId(),
+                    profile_id: profileId,
                     referrer: document.referrer,
                     user_agent: navigator.userAgent
                 });

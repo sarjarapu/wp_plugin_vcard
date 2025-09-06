@@ -42,6 +42,7 @@ class VCard_Business_Profile {
     public function __construct($post_id = null) {
         if ($post_id) {
             $this->post_id = $post_id;
+            $this->profile_data['post_id'] = $post_id; // Store post_id in profile data
             $this->load_profile_data();
         }
     }

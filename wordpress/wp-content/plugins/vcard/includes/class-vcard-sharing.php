@@ -34,7 +34,15 @@ class VCard_Sharing {
      */
     public function __construct($business_profile) {
         $this->business_profile = $business_profile;
-        $this->profile_url = get_permalink($business_profile->get_data('post_id'));
+        $post_id = $business_profile->get_data('post_id');
+        if (!$post_id) {
+            // Fallback: try to get post_id from the business_profile object directly
+            $reflection = new ReflectionClass($business_profile);
+            $property = $reflection->getProperty('post_id');
+            $property->setAccessible(true);
+            $post_id = $property->getValue($business_profile);
+        }
+        $this->profile_url = get_permalink($post_id);
     }
     
     /**
