@@ -102,10 +102,15 @@ class VCardPlugin {
         // Load BusinessProfile class for enhanced profile management
         require_once VCARD_INCLUDES_PATH . 'class-business-profile.php';
         
+        // Load TemplateEngine class for template rendering
+        require_once VCARD_INCLUDES_PATH . 'class-template-engine.php';
+        
+        // Load TemplateCustomizer class for template customization
+        require_once VCARD_INCLUDES_PATH . 'class-template-customizer.php';
+        
         // Core includes will be loaded in future tasks
         // require_once VCARD_INCLUDES_PATH . 'class-vcard-post-type.php';
         // require_once VCARD_INCLUDES_PATH . 'class-vcard-meta-fields.php';
-        // require_once VCARD_INCLUDES_PATH . 'class-vcard-template-engine.php';
     }
     
     public function init() {
@@ -114,6 +119,9 @@ class VCardPlugin {
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_meta_fields'));
         add_filter('template_include', array($this, 'load_templates'));
+        
+        // Initialize template customizer
+        new VCard_Template_Customizer();
     }
     
     public function register_post_type() {
@@ -920,6 +928,24 @@ class VCardPlugin {
         foreach ($template_fields as $field) {
             if (isset($_POST['vcard_' . $field])) {
                 update_post_meta($post_id, '_vcard_' . $field, sanitize_text_field($_POST['vcard_' . $field]));
+            }
+        }
+        
+        // Template customization fields
+        if (isset($_POST['vcard_template_customization_nonce']) && wp_verify_nonce($_POST['vcard_template_customization_nonce'], 'vcard_template_customization')) {
+            // Industry selection
+            if (isset($_POST['vcard_industry'])) {
+                update_post_meta($post_id, '_vcard_industry', sanitize_text_field($_POST['vcard_industry']));
+            }
+            
+            // Template selection
+            if (isset($_POST['vcard_template'])) {
+                update_post_meta($post_id, '_vcard_template', sanitize_text_field($_POST['vcard_template']));
+            }
+            
+            // Color scheme selection
+            if (isset($_POST['vcard_color_scheme'])) {
+                update_post_meta($post_id, '_vcard_color_scheme', sanitize_text_field($_POST['vcard_color_scheme']));
             }
         }
         
