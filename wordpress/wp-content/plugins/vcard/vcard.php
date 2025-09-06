@@ -394,6 +394,48 @@ class VCardPlugin {
         echo '<td><textarea id="vcard_business_description" name="vcard_business_description" rows="4" class="large-text">' . esc_textarea($business_description) . '</textarea></td>';
         echo '</tr>';
         
+        // Business Logo
+        $business_logo = get_post_meta($post->ID, '_vcard_business_logo', true);
+        echo '<tr>';
+        echo '<th><label>' . __('Business Logo', 'vcard') . '</label></th>';
+        echo '<td>';
+        echo '<div class="image-selection-container">';
+        echo '<input type="hidden" id="vcard_business_logo" name="vcard_business_logo" value="' . esc_attr($business_logo) . '">';
+        echo '<div class="business-logo-preview">';
+        if (!empty($business_logo)) {
+            $logo_url = wp_get_attachment_image_url($business_logo, 'thumbnail');
+            if ($logo_url) {
+                echo '<img src="' . esc_url($logo_url) . '" alt="">';
+            }
+        }
+        echo '</div>';
+        echo '<button type="button" class="button select-business-logo"' . (empty($business_logo) ? '' : ' style="display:none;"') . '>' . __('Select Logo', 'vcard') . '</button>';
+        echo '<button type="button" class="button remove-business-logo"' . (empty($business_logo) ? ' style="display:none;"' : '') . '>' . __('Remove Logo', 'vcard') . '</button>';
+        echo '</div>';
+        echo '</td>';
+        echo '</tr>';
+        
+        // Cover Image
+        $cover_image = get_post_meta($post->ID, '_vcard_cover_image', true);
+        echo '<tr>';
+        echo '<th><label>' . __('Cover Image', 'vcard') . '</label></th>';
+        echo '<td>';
+        echo '<div class="image-selection-container">';
+        echo '<input type="hidden" id="vcard_cover_image" name="vcard_cover_image" value="' . esc_attr($cover_image) . '">';
+        echo '<div class="cover-image-preview">';
+        if (!empty($cover_image)) {
+            $cover_url = wp_get_attachment_image_url($cover_image, 'medium');
+            if ($cover_url) {
+                echo '<img src="' . esc_url($cover_url) . '" alt="">';
+            }
+        }
+        echo '</div>';
+        echo '<button type="button" class="button select-cover-image"' . (empty($cover_image) ? '' : ' style="display:none;"') . '>' . __('Select Cover Image', 'vcard') . '</button>';
+        echo '<button type="button" class="button remove-cover-image"' . (empty($cover_image) ? ' style="display:none;"' : '') . '>' . __('Remove Cover Image', 'vcard') . '</button>';
+        echo '</div>';
+        echo '</td>';
+        echo '</tr>';
+        
         // Business Hours (JSON field with UI)
         $business_hours = get_post_meta($post->ID, '_vcard_business_hours', true);
         $hours_data = !empty($business_hours) ? json_decode($business_hours, true) : array();
@@ -567,6 +609,37 @@ class VCardPlugin {
         echo '<div id="services-products" class="tab-content">';
         echo '<h3>' . __('Services & Products', 'vcard') . '</h3>';
         
+        // Gallery section
+        echo '<h4>' . __('Business Gallery', 'vcard') . '</h4>';
+        $gallery = get_post_meta($post->ID, '_vcard_gallery', true);
+        $gallery_ids = !empty($gallery) ? explode(',', $gallery) : array();
+        
+        echo '<div class="gallery-container">';
+        echo '<div class="gallery-images">';
+        echo '<input type="hidden" name="vcard_gallery" class="gallery-ids" value="' . esc_attr($gallery) . '">';
+        echo '<div class="gallery-grid">';
+        
+        if (!empty($gallery_ids)) {
+            foreach ($gallery_ids as $image_id) {
+                if (!empty($image_id)) {
+                    $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
+                    if ($image_url) {
+                        echo '<div class="gallery-image" data-id="' . esc_attr($image_id) . '">';
+                        echo '<img src="' . esc_url($image_url) . '" alt="">';
+                        echo '<div class="gallery-image-actions">';
+                        echo '<button type="button" class="remove-gallery-image">&times;</button>';
+                        echo '</div>';
+                        echo '</div>';
+                    }
+                }
+            }
+        }
+        
+        echo '</div>';
+        echo '<button type="button" class="button add-gallery-image">' . __('Add Gallery Images', 'vcard') . '</button>';
+        echo '</div>';
+        echo '</div>';
+        
         // Services section
         echo '<h4>' . __('Services', 'vcard') . '</h4>';
         $services = get_post_meta($post->ID, '_vcard_services', true);
@@ -576,7 +649,7 @@ class VCardPlugin {
         echo '<div class="services-list">';
         if (!empty($services_data) && is_array($services_data)) {
             foreach ($services_data as $index => $service) {
-                $this->render_service_item($index, $service);
+                $this->render_enhanced_service_item($index, $service);
             }
         }
         echo '</div>';
@@ -592,7 +665,7 @@ class VCardPlugin {
         echo '<div class="products-list">';
         if (!empty($products_data) && is_array($products_data)) {
             foreach ($products_data as $index => $product) {
-                $this->render_product_item($index, $product);
+                $this->render_enhanced_product_item($index, $product);
             }
         }
         echo '</div>';
@@ -660,9 +733,131 @@ class VCardPlugin {
         echo '</label>';
         echo '</p>';
         echo '</div>';
-    }    
-   
- public function save_meta_fields($post_id) {
+    }
+    
+    /**
+     * Render enhanced service item in meta box
+     */
+    private function render_enhanced_service_item($index, $service) {
+        echo '<div class="service-item">';
+        echo '<div class="service-header">';
+        echo '<h5>' . __('Service', 'vcard') . ' #' . ($index + 1) . '</h5>';
+        echo '<a href="#" class="remove-service remove-item">' . __('Remove', 'vcard') . '</a>';
+        echo '</div>';
+        echo '<div class="service-fields">';
+        
+        echo '<div class="field-row">';
+        echo '<div class="field-col">';
+        echo '<label>' . __('Service Name', 'vcard') . ':</label>';
+        echo '<input type="text" name="vcard_services[' . $index . '][name]" value="' . esc_attr($service['name'] ?? '') . '" class="regular-text" required>';
+        echo '</div>';
+        echo '<div class="field-col">';
+        echo '<label>' . __('Price', 'vcard') . ':</label>';
+        echo '<input type="text" name="vcard_services[' . $index . '][price]" value="' . esc_attr($service['price'] ?? '') . '" class="regular-text" placeholder="$0.00">';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="field-row">';
+        echo '<div class="field-col">';
+        echo '<label>' . __('Category', 'vcard') . ':</label>';
+        echo '<input type="text" name="vcard_services[' . $index . '][category]" value="' . esc_attr($service['category'] ?? '') . '" class="regular-text">';
+        echo '</div>';
+        echo '<div class="field-col">';
+        echo '<label>' . __('Duration', 'vcard') . ':</label>';
+        echo '<input type="text" name="vcard_services[' . $index . '][duration]" value="' . esc_attr($service['duration'] ?? '') . '" class="regular-text" placeholder="60 min">';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="field-row">';
+        echo '<div class="field-col full-width">';
+        echo '<label>' . __('Description', 'vcard') . ':</label>';
+        echo '<textarea name="vcard_services[' . $index . '][description]" rows="3" class="large-text">' . esc_textarea($service['description'] ?? '') . '</textarea>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '</div>';
+        echo '</div>';
+    }
+    
+    /**
+     * Render enhanced product item in meta box
+     */
+    private function render_enhanced_product_item($index, $product) {
+        echo '<div class="product-item">';
+        echo '<div class="product-header">';
+        echo '<h5>' . __('Product', 'vcard') . ' #' . ($index + 1) . '</h5>';
+        echo '<a href="#" class="remove-product remove-item">' . __('Remove', 'vcard') . '</a>';
+        echo '</div>';
+        echo '<div class="product-fields">';
+        
+        echo '<div class="field-row">';
+        echo '<div class="field-col">';
+        echo '<label>' . __('Product Name', 'vcard') . ':</label>';
+        echo '<input type="text" name="vcard_products[' . $index . '][name]" value="' . esc_attr($product['name'] ?? '') . '" class="regular-text" required>';
+        echo '</div>';
+        echo '<div class="field-col">';
+        echo '<label>' . __('Price', 'vcard') . ':</label>';
+        echo '<input type="text" name="vcard_products[' . $index . '][price]" value="' . esc_attr($product['price'] ?? '') . '" class="regular-text" placeholder="$0.00">';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="field-row">';
+        echo '<div class="field-col">';
+        echo '<label>' . __('Category', 'vcard') . ':</label>';
+        echo '<input type="text" name="vcard_products[' . $index . '][category]" value="' . esc_attr($product['category'] ?? '') . '" class="regular-text">';
+        echo '</div>';
+        echo '<div class="field-col">';
+        echo '<label>' . __('SKU', 'vcard') . ':</label>';
+        echo '<input type="text" name="vcard_products[' . $index . '][sku]" value="' . esc_attr($product['sku'] ?? '') . '" class="regular-text">';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="field-row">';
+        echo '<div class="field-col">';
+        echo '<label>';
+        echo '<input type="checkbox" name="vcard_products[' . $index . '][in_stock]" value="1" ' . checked(!empty($product['in_stock']), true, false) . '>';
+        echo ' ' . __('In Stock', 'vcard');
+        echo '</label>';
+        echo '</div>';
+        echo '<div class="field-col">';
+        echo '<label>';
+        echo '<input type="checkbox" name="vcard_products[' . $index . '][featured]" value="1" ' . checked(!empty($product['featured']), true, false) . '>';
+        echo ' ' . __('Featured', 'vcard');
+        echo '</label>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="field-row">';
+        echo '<div class="field-col full-width">';
+        echo '<label>' . __('Description', 'vcard') . ':</label>';
+        echo '<textarea name="vcard_products[' . $index . '][description]" rows="3" class="large-text">' . esc_textarea($product['description'] ?? '') . '</textarea>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '<div class="field-row">';
+        echo '<div class="field-col full-width">';
+        echo '<label>' . __('Product Image', 'vcard') . ':</label>';
+        echo '<div class="product-image-container">';
+        echo '<input type="hidden" name="vcard_products[' . $index . '][image_id]" class="product-image-id" value="' . esc_attr($product['image_id'] ?? '') . '">';
+        echo '<div class="product-image-preview">';
+        if (!empty($product['image_id'])) {
+            $image_url = wp_get_attachment_image_url($product['image_id'], 'thumbnail');
+            if ($image_url) {
+                echo '<img src="' . esc_url($image_url) . '" alt="">';
+            }
+        }
+        echo '</div>';
+        echo '<button type="button" class="button select-product-image"' . (empty($product['image_id']) ? '' : ' style="display:none;"') . '>' . __('Select Image', 'vcard') . '</button>';
+        echo '<button type="button" class="button remove-product-image"' . (empty($product['image_id']) ? ' style="display:none;"' : '') . '>' . __('Remove Image', 'vcard') . '</button>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        
+        echo '</div>';
+        echo '</div>';
+    }
+    
+    public function save_meta_fields($post_id) {
         if (!isset($_POST['vcard_meta_box_nonce']) || !wp_verify_nonce($_POST['vcard_meta_box_nonce'], 'vcard_meta_box')) {
             return;
         }
@@ -701,8 +896,10 @@ class VCardPlugin {
         foreach ($contact_fields as $field) {
             if (isset($_POST['vcard_' . $field])) {
                 $value = $_POST['vcard_' . $field];
-                if (in_array($field, array('email', 'website'))) {
-                    $value = sanitize_email($field === 'email' ? $value : sanitize_url($value));
+                if ($field === 'email') {
+                    $value = sanitize_email($value);
+                } elseif ($field === 'website') {
+                    $value = esc_url_raw($value);
                 } else {
                     $value = sanitize_text_field($value);
                 }
@@ -739,6 +936,25 @@ class VCardPlugin {
             update_post_meta($post_id, '_vcard_business_hours', wp_json_encode($business_hours));
         }
         
+        // Gallery
+        if (isset($_POST['vcard_gallery'])) {
+            $gallery_ids = sanitize_text_field($_POST['vcard_gallery']);
+            // Validate that all IDs are valid attachment IDs
+            if (!empty($gallery_ids)) {
+                $ids = explode(',', $gallery_ids);
+                $valid_ids = array();
+                foreach ($ids as $id) {
+                    $id = intval($id);
+                    if ($id > 0 && wp_attachment_is_image($id)) {
+                        $valid_ids[] = $id;
+                    }
+                }
+                update_post_meta($post_id, '_vcard_gallery', implode(',', $valid_ids));
+            } else {
+                update_post_meta($post_id, '_vcard_gallery', '');
+            }
+        }
+        
         // Services (JSON)
         if (isset($_POST['vcard_services']) && is_array($_POST['vcard_services'])) {
             $services = array();
@@ -750,6 +966,7 @@ class VCardPlugin {
                         'description' => sanitize_textarea_field($service['description'] ?? ''),
                         'price' => sanitize_text_field($service['price'] ?? ''),
                         'category' => sanitize_text_field($service['category'] ?? ''),
+                        'duration' => sanitize_text_field($service['duration'] ?? ''),
                     );
                 }
             }
@@ -761,13 +978,22 @@ class VCardPlugin {
             $products = array();
             foreach ($_POST['vcard_products'] as $product) {
                 if (!empty($product['name'])) {
+                    $image_id = !empty($product['image_id']) ? intval($product['image_id']) : 0;
+                    // Validate image ID
+                    if ($image_id > 0 && !wp_attachment_is_image($image_id)) {
+                        $image_id = 0;
+                    }
+                    
                     $products[] = array(
                         'id' => uniqid(),
                         'name' => sanitize_text_field($product['name']),
                         'description' => sanitize_textarea_field($product['description'] ?? ''),
                         'price' => sanitize_text_field($product['price'] ?? ''),
                         'category' => sanitize_text_field($product['category'] ?? ''),
+                        'sku' => sanitize_text_field($product['sku'] ?? ''),
                         'in_stock' => !empty($product['in_stock']),
+                        'featured' => !empty($product['featured']),
+                        'image_id' => $image_id,
                     );
                 }
             }
@@ -1669,23 +1895,52 @@ class VCardPlugin {
         
         // Only enqueue on vCard profile edit pages
         if (($hook === 'post.php' || $hook === 'post-new.php') && $post_type === 'vcard_profile') {
-            wp_enqueue_style('vcard-admin-style', VCARD_ASSETS_URL . 'css/admin.css', array(), VCARD_VERSION);
-            wp_enqueue_script('vcard-admin-script', VCARD_ASSETS_URL . 'js/admin.js', array('jquery'), VCARD_VERSION, true);
+            // Enqueue enhanced admin styles and scripts
+            wp_enqueue_style('vcard-admin-meta-box', VCARD_ASSETS_URL . 'css/admin-meta-box.css', array(), VCARD_VERSION);
+            wp_enqueue_script('vcard-admin-meta-box', VCARD_ASSETS_URL . 'js/admin-meta-box.js', array('jquery', 'jquery-ui-sortable'), VCARD_VERSION, true);
             
-            // Enqueue WordPress color picker if available
+            // Enqueue WordPress media library
+            wp_enqueue_media();
+            
+            // Enqueue WordPress color picker
             wp_enqueue_style('wp-color-picker');
             wp_enqueue_script('wp-color-picker');
             
             // Localize script for AJAX and translations
-            wp_localize_script('vcard-admin-script', 'vcard_admin', array(
+            wp_localize_script('vcard-admin-meta-box', 'vcardAdmin', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('vcard_admin_nonce'),
                 'strings' => array(
-                    'confirm_remove_service' => __('Are you sure you want to remove this service?', 'vcard'),
-                    'confirm_remove_product' => __('Are you sure you want to remove this product?', 'vcard'),
-                    'validation_business_name' => __('Business name is required.', 'vcard'),
-                    'validation_email' => __('Please enter a valid email address.', 'vcard'),
-                    'validation_url' => __('Please enter a valid URL.', 'vcard'),
+                    'service' => __('Service', 'vcard'),
+                    'product' => __('Product', 'vcard'),
+                    'remove' => __('Remove', 'vcard'),
+                    'serviceName' => __('Service Name', 'vcard'),
+                    'servicePrice' => __('Price', 'vcard'),
+                    'serviceCategory' => __('Category', 'vcard'),
+                    'serviceDuration' => __('Duration', 'vcard'),
+                    'serviceDescription' => __('Description', 'vcard'),
+                    'productName' => __('Product Name', 'vcard'),
+                    'productPrice' => __('Price', 'vcard'),
+                    'productCategory' => __('Category', 'vcard'),
+                    'productSKU' => __('SKU', 'vcard'),
+                    'productDescription' => __('Description', 'vcard'),
+                    'productImage' => __('Product Image', 'vcard'),
+                    'inStock' => __('In Stock', 'vcard'),
+                    'featured' => __('Featured', 'vcard'),
+                    'selectImage' => __('Select Image', 'vcard'),
+                    'removeImage' => __('Remove Image', 'vcard'),
+                    'selectGalleryImages' => __('Select Gallery Images', 'vcard'),
+                    'addToGallery' => __('Add to Gallery', 'vcard'),
+                    'selectProductImage' => __('Select Product Image', 'vcard'),
+                    'selectBusinessLogo' => __('Select Business Logo', 'vcard'),
+                    'selectCoverImage' => __('Select Cover Image', 'vcard'),
+                    'businessNameRequired' => __('Business name is required for business profiles.', 'vcard'),
+                    'nameRequired' => __('First name and last name are required.', 'vcard'),
+                    'emailRequired' => __('Email address is required.', 'vcard'),
+                    'emailInvalid' => __('Please enter a valid email address.', 'vcard'),
+                    'serviceNameRequired' => __('Service #%d name is required.', 'vcard'),
+                    'productNameRequired' => __('Product #%d name is required.', 'vcard'),
+                    'validationErrors' => __('Please fix the following errors:', 'vcard')
                 )
             ));
         }
