@@ -99,7 +99,10 @@ class VCardPlugin {
      * Load plugin dependencies
      */
     private function load_dependencies() {
-        // Core includes will be loaded here in future tasks
+        // Load BusinessProfile class for enhanced profile management
+        require_once VCARD_INCLUDES_PATH . 'class-business-profile.php';
+        
+        // Core includes will be loaded in future tasks
         // require_once VCARD_INCLUDES_PATH . 'class-vcard-post-type.php';
         // require_once VCARD_INCLUDES_PATH . 'class-vcard-meta-fields.php';
         // require_once VCARD_INCLUDES_PATH . 'class-vcard-template-engine.php';
