@@ -625,14 +625,8 @@
         trackEvent: function(eventType, data) {
             // Check if vcard_sharing object exists
             if (typeof vcard_sharing === 'undefined') {
-                console.error('vcard_sharing object not found - script may not be properly localized');
                 return;
             }
-            
-            // Debug logging
-            console.log('Tracking event:', eventType, data);
-            console.log('AJAX URL:', vcard_sharing.ajax_url);
-            console.log('Nonce:', vcard_sharing.nonce);
             
             $.ajax({
                 url: vcard_sharing.ajax_url || '/wp-admin/admin-ajax.php',
@@ -642,12 +636,6 @@
                     event_type: eventType,
                     event_data: JSON.stringify(data),
                     nonce: vcard_sharing.nonce || ''
-                },
-                success: function(response) {
-                    console.log('Event tracking success:', response);
-                },
-                error: function(xhr, status, error) {
-                    console.error('Event tracking error:', xhr.responseText, status, error);
                 }
             });
         },
@@ -763,9 +751,6 @@
         setupSharingAnalytics: function() {
             // Track page views for sharing analytics
             var profileId = VCardSharing.getCurrentProfileId();
-            console.log('Setup sharing analytics - Profile ID:', profileId);
-            console.log('Is single vcard profile:', $('body').hasClass('single-vcard_profile'));
-            console.log('vcard_sharing object:', typeof vcard_sharing !== 'undefined' ? vcard_sharing : 'undefined');
             
             if (profileId && $('body').hasClass('single-vcard_profile')) {
                 VCardSharing.trackEvent('profile_view', {
