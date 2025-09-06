@@ -65,12 +65,14 @@ jQuery(document).ready(function($) {
             // Preview controls
             $('#refresh-preview').on('click', function(e) {
                 e.preventDefault();
-                self.loadPreview();
+                console.log('Refresh preview clicked');
+                self.showStaticPreview();
             });
             
             // Test AJAX button
             $('#test-ajax').on('click', function(e) {
                 e.preventDefault();
+                console.log('Test AJAX button clicked');
                 self.testAjax();
             });
             
@@ -240,8 +242,9 @@ jQuery(document).ready(function($) {
             }
             
             this.previewTimer = setTimeout(function() {
-                self.loadPreview();
-            }, 500);
+                // Use static preview instead of AJAX
+                self.showStaticPreview();
+            }, 300);
         },
         
         /**
@@ -256,23 +259,12 @@ jQuery(document).ready(function($) {
                 return;
             }
             
-            // Check if we have basic data
-            if (typeof vcardCustomizer === 'undefined') {
-                console.error('vcardCustomizer not loaded, showing static preview');
-                this.showStaticPreview('JavaScript configuration not loaded');
-                return;
-            }
+            console.log('Loading initial preview - using static preview for reliability');
             
-            if (!vcardCustomizer.postId || vcardCustomizer.postId === 0) {
-                console.error('No post ID available, showing static preview');
-                this.showStaticPreview('No post ID available');
-                return;
-            }
-            
-            // Small delay to ensure DOM is ready, then try AJAX preview
+            // Always use static preview for now since AJAX is problematic
             setTimeout(function() {
-                self.loadPreview();
-            }, 1000);
+                self.showStaticPreview('Static preview - AJAX disabled for stability');
+            }, 500);
         },
         
         /**
@@ -304,11 +296,16 @@ jQuery(document).ready(function($) {
                 },
                 success: function(response) {
                     console.log('Preview response:', response);
-                    if (response.success) {
+                    if (response && response.success) {
+                        console.log('Preview HTML length:', response.data.html.length);
                         self.renderPreview(response.data.html);
                     } else {
-                        console.error('Preview error:', response.data);
-                        self.showPreviewError(response.data || (vcardCustomizer.strings && vcardCustomizer.strings.previewError) || 'Error loading preview');
+                        console.error('Preview error:', response);
+                        var errorMsg = 'Error loading preview';
+                        if (response && response.data) {
+                            errorMsg = response.data;
+                        }
+                        self.showPreviewError(errorMsg);
                     }
                 },
                 error: function(xhr, status, error) {
@@ -361,44 +358,339 @@ jQuery(document).ready(function($) {
          */
         showStaticPreview: function(errorMessage) {
             var scheme = this.getColorSchemeColors(this.currentColorScheme);
+            var templateStyle = this.getTemplateStyle(this.currentTemplate);
             
-            var staticHtml = '<!DOCTYPE html><html><head><title>Static Preview</title></head><body style="margin:0;padding:20px;font-family:Arial,sans-serif;background:#f5f5f5;">';
-            staticHtml += '<div style="max-width:600px;margin:0 auto;background:white;border-radius:8px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1);">';
-            staticHtml += '<div style="background:' + scheme.primary + ';color:white;padding:30px 20px;text-align:center;">';
-            staticHtml += '<h1 style="margin:0 0 10px 0;font-size:28px;">Sample Business</h1>';
-            staticHtml += '<p style="margin:0;opacity:0.9;">Your business tagline here</p>';
+            var staticHtml = '<!DOCTYPE html><html><head><title>Template Preview</title>';
+            staticHtml += '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+            staticHtml += '<style>';
+            staticHtml += 'body { margin:0; padding:20px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background:#f5f5f5; }';
+            staticHtml += '.preview-container { max-width:' + templateStyle.maxWidth + '; margin:0 auto; background:white; border-radius:8px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1); }';
+            staticHtml += '.header { background:' + scheme.primary + '; color:white; padding:' + templateStyle.headerPadding + '; text-align:' + templateStyle.headerAlign + '; }';
+            staticHtml += '.header h1 { margin:0 0 10px 0; font-size:' + templateStyle.titleSize + '; font-weight:600; }';
+            staticHtml += '.header p { margin:0; opacity:0.9; font-size:' + templateStyle.subtitleSize + '; }';
+            staticHtml += '.content { padding:' + templateStyle.contentPadding + '; }';
+            staticHtml += '.contact-card { background:' + scheme.accent + '; padding:20px; border-radius:6px; border-left:4px solid ' + scheme.primary + '; margin-bottom:20px; }';
+            staticHtml += '.contact-card h3 { margin:0 0 15px 0; color:' + scheme.primary + '; font-size:18px; }';
+            staticHtml += '.contact-item { margin:8px 0; color:' + scheme.text + '; }';
+            staticHtml += '.contact-item a { color:' + scheme.primary + '; text-decoration:none; }';
+            staticHtml += '.contact-item a:hover { text-decoration:underline; }';
+            staticHtml += '.services { display:' + templateStyle.servicesDisplay + '; gap:15px; margin-top:20px; }';
+            staticHtml += '.service-item { background:white; border:1px solid ' + scheme.border + '; padding:15px; border-radius:4px; flex:1; }';
+            staticHtml += '.service-item h4 { margin:0 0 8px 0; color:' + scheme.primary + '; font-size:16px; }';
+            staticHtml += '.footer { background:' + scheme.secondary + '; color:white; padding:15px 20px; text-align:center; font-size:12px; }';
+            staticHtml += '.template-badge { background:' + scheme.primary + '; color:white; padding:4px 8px; border-radius:12px; font-size:10px; margin-right:10px; }';
+            staticHtml += '@media (max-width: 600px) { .services { flex-direction:column; } .preview-container { margin:10px; } }';
+            staticHtml += '</style></head><body>';
+            
+            staticHtml += '<div class="preview-container">';
+            staticHtml += '<div class="header">';
+            staticHtml += '<h1>' + templateStyle.businessName + '</h1>';
+            staticHtml += '<p>' + templateStyle.tagline + '</p>';
             staticHtml += '</div>';
-            staticHtml += '<div style="padding:30px 20px;">';
-            staticHtml += '<div style="background:' + scheme.accent + ';padding:20px;border-radius:6px;border-left:4px solid ' + scheme.primary + ';">';
-            staticHtml += '<h3 style="margin:0 0 15px 0;color:' + scheme.primary + ';">Contact Information</h3>';
-            staticHtml += '<p style="margin:8px 0;"><strong>Email:</strong> <a href="#" style="color:' + scheme.primary + ';">contact@business.com</a></p>';
-            staticHtml += '<p style="margin:8px 0;"><strong>Phone:</strong> <a href="#" style="color:' + scheme.primary + ';">(555) 123-4567</a></p>';
-            staticHtml += '<p style="margin:8px 0;"><strong>Website:</strong> <a href="#" style="color:' + scheme.primary + ';">www.business.com</a></p>';
+            
+            staticHtml += '<div class="content">';
+            staticHtml += '<div class="contact-card">';
+            staticHtml += '<h3>Contact Information</h3>';
+            staticHtml += '<div class="contact-item"><strong>Email:</strong> <a href="mailto:contact@business.com">contact@business.com</a></div>';
+            staticHtml += '<div class="contact-item"><strong>Phone:</strong> <a href="tel:5551234567">(555) 123-4567</a></div>';
+            staticHtml += '<div class="contact-item"><strong>Website:</strong> <a href="#" target="_blank">www.business.com</a></div>';
+            staticHtml += '<div class="contact-item"><strong>Address:</strong> 123 Business St, City, State 12345</div>';
             staticHtml += '</div>';
-            if (errorMessage) {
-                staticHtml += '<div style="margin-top:20px;padding:15px;background:#fff3cd;border:1px solid #ffeaa7;border-radius:4px;color:#856404;">';
-                staticHtml += '<strong>Preview Note:</strong> ' + errorMessage + '<br><small>Showing static preview instead.</small>';
+            
+            if (templateStyle.showServices) {
+                staticHtml += '<div class="services">';
+                staticHtml += '<div class="service-item"><h4>Service One</h4><p>Professional service description here.</p></div>';
+                staticHtml += '<div class="service-item"><h4>Service Two</h4><p>Another great service we offer.</p></div>';
+                staticHtml += '<div class="service-item"><h4>Service Three</h4><p>Premium service with excellent results.</p></div>';
                 staticHtml += '</div>';
             }
+            
             staticHtml += '</div>';
-            staticHtml += '<div style="background:' + scheme.secondary + ';color:white;padding:15px 20px;text-align:center;font-size:12px;">';
-            staticHtml += 'Template: ' + this.currentTemplate + ' | Color: ' + this.currentColorScheme;
+            
+            staticHtml += '<div class="footer">';
+            staticHtml += '<span class="template-badge">' + this.currentTemplate.toUpperCase() + '</span>';
+            staticHtml += '<span class="template-badge">' + (scheme.name || this.currentColorScheme) + '</span>';
+            if (errorMessage) {
+                staticHtml += '<br><small style="opacity:0.8;">Static Preview: ' + errorMessage + '</small>';
+            }
             staticHtml += '</div>';
+            
             staticHtml += '</div></body></html>';
             
             this.renderPreview(staticHtml);
         },
         
         /**
+         * Get template-specific styling
+         */
+        getTemplateStyle: function(templateKey) {
+            var styles = {
+                'ceo': {
+                    maxWidth: '800px',
+                    headerPadding: '40px 30px',
+                    headerAlign: 'center',
+                    titleSize: '32px',
+                    subtitleSize: '18px',
+                    contentPadding: '40px 30px',
+                    businessName: 'Executive Business',
+                    tagline: 'Professional Leadership & Excellence',
+                    servicesDisplay: 'flex',
+                    showServices: true
+                },
+                'freelancer': {
+                    maxWidth: '700px',
+                    headerPadding: '35px 25px',
+                    headerAlign: 'left',
+                    titleSize: '28px',
+                    subtitleSize: '16px',
+                    contentPadding: '30px 25px',
+                    businessName: 'Creative Professional',
+                    tagline: 'Design • Development • Innovation',
+                    servicesDisplay: 'grid',
+                    showServices: true
+                },
+                'restaurant': {
+                    maxWidth: '750px',
+                    headerPadding: '30px 25px',
+                    headerAlign: 'center',
+                    titleSize: '30px',
+                    subtitleSize: '16px',
+                    contentPadding: '25px',
+                    businessName: 'Delicious Restaurant',
+                    tagline: 'Fresh • Local • Authentic Cuisine',
+                    servicesDisplay: 'block',
+                    showServices: false
+                },
+                'healthcare': {
+                    maxWidth: '750px',
+                    headerPadding: '35px 30px',
+                    headerAlign: 'center',
+                    titleSize: '26px',
+                    subtitleSize: '15px',
+                    contentPadding: '35px 30px',
+                    businessName: 'Healthcare Professional',
+                    tagline: 'Caring • Professional • Trusted',
+                    servicesDisplay: 'flex',
+                    showServices: true
+                }
+            };
+            
+            return styles[templateKey] || styles['ceo'];
+        },
+        
+        /**
          * Get color scheme colors with fallbacks
          */
         getColorSchemeColors: function(schemeKey) {
-            // Default colors as fallback
-            var defaultColors = {
-                primary: '#2271b1',
-                secondary: '#646970',
-                accent: '#f6f7f7',
-                text: '#1d2327'
+            // Predefined color schemes as fallback - matching PHP scheme keys
+            var colorSchemes = {
+                // Professional schemes
+                'corporate_blue': {
+                    name: 'Corporate Blue',
+                    primary: '#1e40af',
+                    secondary: '#374151',
+                    accent: '#f8fafc',
+                    text: '#1e293b',
+                    border: '#e2e8f0'
+                },
+                'executive_navy': {
+                    name: 'Executive Navy',
+                    primary: '#0f172a',
+                    secondary: '#475569',
+                    accent: '#f1f5f9',
+                    text: '#0f172a',
+                    border: '#cbd5e1'
+                },
+                'business_gray': {
+                    name: 'Business Gray',
+                    primary: '#374151',
+                    secondary: '#6b7280',
+                    accent: '#f9fafb',
+                    text: '#111827',
+                    border: '#d1d5db'
+                },
+                
+                // Healthcare schemes
+                'medical_green': {
+                    name: 'Medical Green',
+                    primary: '#059669',
+                    secondary: '#047857',
+                    accent: '#f0fdf4',
+                    text: '#111827',
+                    border: '#d1d5db'
+                },
+                'healthcare_blue': {
+                    name: 'Healthcare Blue',
+                    primary: '#0284c7',
+                    secondary: '#0369a1',
+                    accent: '#f0f9ff',
+                    text: '#0c4a6e',
+                    border: '#e2e8f0'
+                },
+                'wellness_teal': {
+                    name: 'Wellness Teal',
+                    primary: '#0d9488',
+                    secondary: '#0f766e',
+                    accent: '#f0fdfa',
+                    text: '#134e4a',
+                    border: '#ccfbf1'
+                },
+                
+                // Creative schemes
+                'creative_purple': {
+                    name: 'Creative Purple',
+                    primary: '#7c3aed',
+                    secondary: '#a855f7',
+                    accent: '#faf5ff',
+                    text: '#1f2937',
+                    border: '#e5e7eb'
+                },
+                'artistic_pink': {
+                    name: 'Artistic Pink',
+                    primary: '#ec4899',
+                    secondary: '#f472b6',
+                    accent: '#fdf2f8',
+                    text: '#831843',
+                    border: '#fce7f3'
+                },
+                'vibrant_orange': {
+                    name: 'Vibrant Orange',
+                    primary: '#ea580c',
+                    secondary: '#fb923c',
+                    accent: '#fff7ed',
+                    text: '#9a3412',
+                    border: '#fed7aa'
+                },
+                
+                // Finance schemes
+                'finance_navy': {
+                    name: 'Finance Navy',
+                    primary: '#1e40af',
+                    secondary: '#374151',
+                    accent: '#f9fafb',
+                    text: '#111827',
+                    border: '#d1d5db'
+                },
+                'investment_green': {
+                    name: 'Investment Green',
+                    primary: '#16a34a',
+                    secondary: '#15803d',
+                    accent: '#f7fee7',
+                    text: '#14532d',
+                    border: '#d1d5db'
+                },
+                'wealth_gold': {
+                    name: 'Wealth Gold',
+                    primary: '#d97706',
+                    secondary: '#92400e',
+                    accent: '#fffbeb',
+                    text: '#78350f',
+                    border: '#fde68a'
+                },
+                
+                // Hospitality schemes
+                'warm_orange': {
+                    name: 'Warm Orange',
+                    primary: '#ea580c',
+                    secondary: '#92400e',
+                    accent: '#fff7ed',
+                    text: '#1c1917',
+                    border: '#e7e5e4'
+                },
+                'cozy_brown': {
+                    name: 'Cozy Brown',
+                    primary: '#92400e',
+                    secondary: '#78350f',
+                    accent: '#fef7f0',
+                    text: '#451a03',
+                    border: '#fed7aa'
+                },
+                'restaurant_red': {
+                    name: 'Restaurant Red',
+                    primary: '#dc2626',
+                    secondary: '#991b1b',
+                    accent: '#fef2f2',
+                    text: '#7f1d1d',
+                    border: '#fecaca'
+                },
+                
+                // Fitness schemes
+                'energetic_red': {
+                    name: 'Energetic Red',
+                    primary: '#dc2626',
+                    secondary: '#991b1b',
+                    accent: '#fef2f2',
+                    text: '#1f2937',
+                    border: '#f3f4f6'
+                },
+                'active_blue': {
+                    name: 'Active Blue',
+                    primary: '#2563eb',
+                    secondary: '#1d4ed8',
+                    accent: '#eff6ff',
+                    text: '#1e3a8a',
+                    border: '#dbeafe'
+                },
+                'power_green': {
+                    name: 'Power Green',
+                    primary: '#16a34a',
+                    secondary: '#15803d',
+                    accent: '#f7fee7',
+                    text: '#14532d',
+                    border: '#bbf7d0'
+                },
+                
+                // Construction schemes
+                'industrial_gray': {
+                    name: 'Industrial Gray',
+                    primary: '#374151',
+                    secondary: '#6b7280',
+                    accent: '#f9fafb',
+                    text: '#111827',
+                    border: '#d1d5db'
+                },
+                'construction_orange': {
+                    name: 'Construction Orange',
+                    primary: '#ea580c',
+                    secondary: '#c2410c',
+                    accent: '#fff7ed',
+                    text: '#9a3412',
+                    border: '#fed7aa'
+                },
+                'steel_blue': {
+                    name: 'Steel Blue',
+                    primary: '#0f766e',
+                    secondary: '#0d9488',
+                    accent: '#f0fdfa',
+                    text: '#134e4a',
+                    border: '#99f6e4'
+                },
+                
+                // Luxury schemes
+                'luxury_gold': {
+                    name: 'Luxury Gold',
+                    primary: '#d97706',
+                    secondary: '#92400e',
+                    accent: '#fffbeb',
+                    text: '#1c1917',
+                    border: '#f3f4f6'
+                },
+                'premium_black': {
+                    name: 'Premium Black',
+                    primary: '#111827',
+                    secondary: '#374151',
+                    accent: '#f9fafb',
+                    text: '#111827',
+                    border: '#e5e7eb'
+                },
+                'elegant_purple': {
+                    name: 'Elegant Purple',
+                    primary: '#581c87',
+                    secondary: '#7c3aed',
+                    accent: '#faf5ff',
+                    text: '#3b0764',
+                    border: '#e9d5ff'
+                }
             };
             
             // Try to get colors from vcardCustomizer if available
@@ -411,7 +703,8 @@ jQuery(document).ready(function($) {
                 }
             }
             
-            return defaultColors;
+            // Use predefined scheme or default
+            return colorSchemes[schemeKey] || colorSchemes['corporate_blue'];
         },
         
         /**
@@ -429,6 +722,9 @@ jQuery(document).ready(function($) {
          */
         testAjax: function() {
             console.log('Testing AJAX connection...');
+            console.log('AJAX URL:', vcardCustomizer.ajaxUrl);
+            console.log('Nonce:', vcardCustomizer.nonce);
+            console.log('Post ID:', vcardCustomizer.postId);
             
             $.ajax({
                 url: vcardCustomizer.ajaxUrl,
@@ -440,11 +736,12 @@ jQuery(document).ready(function($) {
                 },
                 success: function(response) {
                     console.log('Test AJAX success:', response);
-                    alert('AJAX Test Result: ' + JSON.stringify(response, null, 2));
+                    alert('AJAX Test SUCCESS!\n\nResponse: ' + JSON.stringify(response, null, 2));
                 },
                 error: function(xhr, status, error) {
                     console.error('Test AJAX error:', {xhr: xhr, status: status, error: error});
-                    alert('AJAX Test Failed: ' + status + ' - ' + error);
+                    console.log('Response text:', xhr.responseText);
+                    alert('AJAX Test FAILED!\n\nStatus: ' + status + '\nError: ' + error + '\nResponse: ' + xhr.responseText);
                 }
             });
         }

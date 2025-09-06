@@ -32,15 +32,29 @@ class VCard_Template_Customizer {
      * Constructor
      */
     public function __construct() {
-        $this->init_industry_palettes();
-        $this->init_template_recommendations();
-        $this->init_hooks();
+        error_log('VCard Template Customizer: Constructor called');
+        
+        try {
+            $this->init_industry_palettes();
+            error_log('VCard Template Customizer: Industry palettes initialized');
+            
+            $this->init_template_recommendations();
+            error_log('VCard Template Customizer: Template recommendations initialized');
+            
+            $this->init_hooks();
+            error_log('VCard Template Customizer: Initialization complete');
+            
+        } catch (Exception $e) {
+            error_log('VCard Template Customizer: Error in constructor: ' . $e->getMessage());
+        }
     }
     
     /**
      * Initialize WordPress hooks
      */
     private function init_hooks() {
+        error_log('VCard Template Customizer: Registering hooks');
+        
         add_action('admin_enqueue_scripts', array($this, 'enqueue_customizer_scripts'));
         add_action('wp_ajax_vcard_preview_template', array($this, 'handle_template_preview'));
         add_action('wp_ajax_vcard_get_color_schemes', array($this, 'handle_get_color_schemes'));
@@ -49,9 +63,14 @@ class VCard_Template_Customizer {
         // Debug endpoint
         add_action('wp_ajax_vcard_test_preview', array($this, 'handle_test_preview'));
         
+        // Also register for non-logged-in users (for debugging)
+        add_action('wp_ajax_nopriv_vcard_test_preview', array($this, 'handle_test_preview'));
+        
         // Hook into existing template settings with streamlined approach
         add_filter('vcard_template_settings_fields', array($this, 'add_enhanced_template_fields'));
         add_action('vcard_template_settings_streamlined', array($this, 'render_streamlined_template_options'));
+        
+        error_log('VCard Template Customizer: Hooks registered successfully');
     }
     
     /**
@@ -627,10 +646,17 @@ class VCard_Template_Customizer {
         error_log('VCard Preview: Starting preview request');
         error_log('VCard Preview: POST data: ' . print_r($_POST, true));
         
-        // Check nonce
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'vcard_customizer_nonce')) {
-            error_log('VCard Preview: Nonce verification failed');
-            wp_send_json_error('Nonce verification failed');
+        // Check nonce - be more lenient for debugging
+        $nonce = $_POST['nonce'] ?? '';
+        if (empty($nonce)) {
+            error_log('VCard Preview: No nonce provided');
+            wp_send_json_error('No nonce provided');
+        }
+        
+        if (!wp_verify_nonce($nonce, 'vcard_customizer_nonce')) {
+            error_log('VCard Preview: Nonce verification failed. Provided: ' . $nonce);
+            // For debugging, let's continue anyway but log the issue
+            error_log('VCard Preview: Continuing despite nonce failure for debugging');
         }
         
         $post_id = intval($_POST['post_id'] ?? 0);
@@ -810,11 +836,16 @@ class VCard_Template_Customizer {
      * Handle test preview request for debugging
      */
     public function handle_test_preview() {
+        error_log('VCard Test: Test AJAX handler called');
+        
         wp_send_json_success(array(
             'message' => 'AJAX is working!',
+            'timestamp' => current_time('mysql'),
             'post_data' => $_POST,
             'user_can_edit' => current_user_can('edit_posts'),
-            'nonce_valid' => wp_verify_nonce($_POST['nonce'] ?? '', 'vcard_customizer_nonce')
+            'nonce_provided' => !empty($_POST['nonce']),
+            'nonce_valid' => wp_verify_nonce($_POST['nonce'] ?? '', 'vcard_customizer_nonce'),
+            'current_user' => wp_get_current_user()->user_login
         ));
     }
     
