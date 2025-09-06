@@ -589,6 +589,9 @@ class VCardPlugin {
         echo '<td><input type="color" id="vcard_secondary_color" name="vcard_secondary_color" value="' . esc_attr($secondary_color ?: '#666666') . '" /></td>';
         echo '</tr>';
         
+        // Hook for enhanced template customization features
+        do_action('vcard_template_settings_after_basic', $post);
+        
         // Font family
         $font_family = get_post_meta($post->ID, '_vcard_font_family', true);
         echo '<tr>';
@@ -936,11 +939,6 @@ class VCardPlugin {
             // Industry selection
             if (isset($_POST['vcard_industry'])) {
                 update_post_meta($post_id, '_vcard_industry', sanitize_text_field($_POST['vcard_industry']));
-            }
-            
-            // Template selection
-            if (isset($_POST['vcard_template'])) {
-                update_post_meta($post_id, '_vcard_template', sanitize_text_field($_POST['vcard_template']));
             }
             
             // Color scheme selection
