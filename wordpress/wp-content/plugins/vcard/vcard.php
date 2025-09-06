@@ -887,11 +887,6 @@ class VCardPlugin {
         
         // Template customization fields
         if (isset($_POST['vcard_template_customization_nonce']) && wp_verify_nonce($_POST['vcard_template_customization_nonce'], 'vcard_template_customization')) {
-            // Industry selection
-            if (isset($_POST['vcard_industry'])) {
-                update_post_meta($post_id, '_vcard_industry', sanitize_text_field($_POST['vcard_industry']));
-            }
-            
             // Color scheme selection
             if (isset($_POST['vcard_color_scheme'])) {
                 update_post_meta($post_id, '_vcard_color_scheme', sanitize_text_field($_POST['vcard_color_scheme']));

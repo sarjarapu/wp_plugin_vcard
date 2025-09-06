@@ -7,10 +7,9 @@ jQuery(document).ready(function($) {
     
     var customizer = {
         
-        // Current selections - streamlined approach
+        // Current selections - simplified approach
         currentTemplate: $('input[name="vcard_template_name"]:checked').val() || 'ceo',
         currentColorScheme: $('input[name="vcard_color_scheme"]:checked').val() || 'corporate_blue',
-        currentIndustry: $('#vcard_industry').val() || 'business',
         
         // Preview elements - streamlined
         $previewFrame: $('#template-preview-frame'),
@@ -24,8 +23,6 @@ jQuery(document).ready(function($) {
          */
         init: function() {
             this.bindEvents();
-            this.initIndustryTabs();
-            this.loadRecommendations();
             this.loadInitialPreview();
         },
         
@@ -35,20 +32,12 @@ jQuery(document).ready(function($) {
         bindEvents: function() {
             var self = this;
             
-            // Industry selection
-            $('#vcard_industry').on('change', function() {
-                self.currentIndustry = $(this).val();
-                self.switchIndustryTab(self.currentIndustry);
-                self.loadRecommendations();
-                self.updateColorSchemeVisibility();
-                self.schedulePreviewUpdate();
-            });
+
             
             // Template selection - streamlined radio buttons
             $('input[name="vcard_template_name"]').on('change', function() {
                 self.currentTemplate = $(this).val();
                 self.updateTemplateSelection();
-                self.loadRecommendations();
                 self.schedulePreviewUpdate();
             });
             
@@ -95,39 +84,9 @@ jQuery(document).ready(function($) {
             });
         },
         
-        /**
-         * Initialize industry tabs
-         */
-        initIndustryTabs: function() {
-            this.switchIndustryTab(this.currentIndustry);
-            this.updateColorSchemeVisibility();
-        },
+
         
-        /**
-         * Switch industry tab
-         */
-        switchIndustryTab: function(industry) {
-            // Update tab navigation (if exists)
-            $('.scheme-tab').removeClass('active');
-            $('.scheme-tab[data-industry="' + industry + '"]').addClass('active');
-            
-            // Update tab content - streamlined
-            $('.scheme-panel-streamlined').removeClass('active');
-            $('.scheme-panel-streamlined[data-industry="' + industry + '"]').addClass('active');
-            
-            // Auto-select first color scheme if current one is not available
-            var $activePanel = $('.scheme-panel-streamlined[data-industry="' + industry + '"]');
-            var $currentScheme = $activePanel.find('input[value="' + this.currentColorScheme + '"]');
-            
-            if ($currentScheme.length === 0) {
-                var $firstScheme = $activePanel.find('input[name="vcard_color_scheme"]:first');
-                if ($firstScheme.length > 0) {
-                    $firstScheme.prop('checked', true);
-                    this.currentColorScheme = $firstScheme.val();
-                    this.updateColorSchemeSelection();
-                }
-            }
-        },
+
         
 
         
@@ -147,35 +106,7 @@ jQuery(document).ready(function($) {
             $('.color-scheme-option-streamlined[data-scheme="' + this.currentColorScheme + '"]').addClass('selected');
         },
         
-        /**
-         * Update color scheme visibility based on industry
-         */
-        updateColorSchemeVisibility: function() {
-            // This is handled by the tab switching, but we can add additional logic here
-            // For example, highlighting recommended schemes
-            this.highlightRecommendedSchemes();
-        },
-        
-        /**
-         * Highlight recommended color schemes
-         */
-        highlightRecommendedSchemes: function() {
-            var recommendations = vcardCustomizer.templateRecommendations[this.currentIndustry];
-            if (!recommendations) return;
-            
-            // Remove existing recommendations
-            $('.color-scheme-option').removeClass('recommended');
-            
-            // Add recommended class to relevant schemes
-            var $activePanel = $('.scheme-panel.active');
-            recommendations.palettes.forEach(function(paletteKey) {
-                if (vcardCustomizer.industryPalettes[paletteKey]) {
-                    Object.keys(vcardCustomizer.industryPalettes[paletteKey].schemes).forEach(function(schemeKey) {
-                        $activePanel.find('.color-scheme-option[data-scheme="' + schemeKey + '"]').addClass('recommended');
-                    });
-                }
-            });
-        },
+
         
         /**
          * Load template recommendations
