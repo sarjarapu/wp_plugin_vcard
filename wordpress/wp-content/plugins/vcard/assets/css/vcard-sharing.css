@@ -12,7 +12,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 9999;
+    z-index: 999999;
     display: none;
 }
 
@@ -22,7 +22,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(2px);
 }
 
@@ -36,6 +36,7 @@
     overflow-y: auto;
     margin: 5vh auto;
     animation: modalSlideIn 0.3s ease-out;
+    z-index: 1000000;
 }
 
 @keyframes modalSlideIn {
@@ -108,6 +109,19 @@
     border-radius: 8px;
     margin-bottom: 12px;
     transition: opacity 0.3s ease;
+    opacity: 0;
+    background: #f9fafb;
+    display: block;
+    margin: 0 auto 12px auto;
+}
+
+.qr-code-container {
+    text-align: center;
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .qr-code-description {
@@ -515,54 +529,53 @@
     to { transform: rotate(360deg); }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
-    .modal-content {
-        background: #1f2937;
-        color: #f9fafb;
-    }
-    
-    .modal-header {
-        background: #111827;
-        border-bottom-color: #374151;
-    }
-    
-    .modal-header h3 {
-        color: #f9fafb;
-    }
-    
-    .close-modal {
-        color: #9ca3af;
-    }
-    
-    .close-modal:hover {
-        background: #374151;
-        color: #f3f4f6;
-    }
-    
-    .qr-customization,
-    .sharing-analytics {
-        background: #111827;
-    }
-    
-    .stat-item {
-        background: #1f2937;
-        border-color: #374151;
-    }
-    
-    .url-input-group input {
-        background: #111827;
-        border-color: #374151;
-        color: #f9fafb;
-    }
-    
-    .url-input-group .button {
-        background: #1f2937;
-        border-color: #374151;
-        color: #f9fafb;
-    }
-    
-    .url-input-group .button:hover {
-        background: #111827;
-    }
+/* Light mode override for better visibility */
+.vcard-modal .modal-content {
+    background: #fff !important;
+    color: #111827 !important;
+}
+
+.vcard-modal .modal-header {
+    background: #f9fafb !important;
+    border-bottom-color: #e5e7eb !important;
+}
+
+.vcard-modal .modal-header h3 {
+    color: #111827 !important;
+}
+
+.vcard-modal .close-modal {
+    color: #6b7280 !important;
+}
+
+.vcard-modal .close-modal:hover {
+    background: #e5e7eb !important;
+    color: #374151 !important;
+}
+
+.vcard-modal .qr-customization,
+.vcard-modal .sharing-analytics {
+    background: #f9fafb !important;
+}
+
+.vcard-modal .stat-item {
+    background: #fff !important;
+    border-color: #e5e7eb !important;
+    color: #111827 !important;
+}
+
+.vcard-modal .url-input-group input {
+    background: #f9fafb !important;
+    border-color: #d1d5db !important;
+    color: #374151 !important;
+}
+
+.vcard-modal .url-input-group .button {
+    background: #fff !important;
+    border-color: #d1d5db !important;
+    color: #374151 !important;
+}
+
+.vcard-modal .url-input-group .button:hover {
+    background: #f3f4f6 !important;
 }

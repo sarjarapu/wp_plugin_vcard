@@ -74,7 +74,7 @@
             e.preventDefault();
             
             var $button = $(this);
-            var profileId = VCardSharing.getCurrentProfileId();
+            var profileId = $button.data('profile-id') || VCardSharing.getCurrentProfileId();
             
             if (!profileId) {
                 VCardSharing.showError('Profile ID not found');
@@ -114,12 +114,15 @@
                     },
                     success: function(response) {
                         if (response.success && response.data) {
+                            console.log('QR Data received:', response.data);
                             resolve(response.data);
                         } else {
+                            console.error('QR generation failed:', response);
                             reject(response.data || 'QR generation failed');
                         }
                     },
                     error: function(xhr, status, error) {
+                        console.error('QR AJAX error:', xhr.responseText);
                         reject('Network error: ' + error);
                     }
                 });
@@ -140,7 +143,14 @@
                         </div>
                         <div class="modal-body">
                             <div class="qr-code-display">
-                                <img src="${qrData.url}" alt="QR Code" class="qr-code-image">
+                                <div class="qr-code-container">
+                                    <div class="qr-loading" style="padding:20px; text-align:center; color:#666;">
+                                        <i class="fas fa-spinner fa-spin"></i> Loading QR Code...
+                                    </div>
+                                    <img src="${qrData.url}" alt="QR Code" class="qr-code-image" style="display:none;" 
+                                         onload="this.style.display='block'; this.style.opacity=1; this.parentElement.querySelector('.qr-loading').style.display='none';" 
+                                         onerror="this.style.display='none'; this.parentElement.querySelector('.qr-loading').innerHTML='QR Code failed to load. <a href=&quot;${qrData.url}&quot; target=&quot;_blank&quot;>Click here to view</a>';">
+                                </div>
                                 <p class="qr-code-description">${vcard_sharing.strings.qr_code_description}</p>
                             </div>
                             
@@ -204,7 +214,10 @@
             
             // Add new modal
             $('body').append(modalHtml);
-            $('#qr-modal').fadeIn();
+            console.log('QR Modal added to body');
+            $('#qr-modal').fadeIn(function() {
+                console.log('QR Modal fade in complete');
+            });
             
             // Store QR data
             $('#qr-modal').data('qr-data', qrData);

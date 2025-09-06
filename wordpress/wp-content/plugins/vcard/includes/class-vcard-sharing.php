@@ -96,7 +96,7 @@ class VCard_Sharing {
         $params = array(
             'chs' => $options['size'] . 'x' . $options['size'],
             'cht' => 'qr',
-            'chl' => urlencode($this->profile_url),
+            'chl' => $this->profile_url, // Don't double-encode
             'choe' => 'UTF-8',
             'chld' => $options['error_correction'] . '|' . $options['margin']
         );
@@ -104,6 +104,44 @@ class VCard_Sharing {
         // Add colors if not default
         if ($options['foreground_color'] !== '000000' || $options['background_color'] !== 'FFFFFF') {
             $params['chco'] = $options['foreground_color'] . ',' . $options['background_color'];
+        }
+        
+        $qr_url = $base_url . '?' . http_build_query($params);
+        
+        // Test if the URL is accessible
+        $response = wp_remote_get($qr_url, array('timeout' => 10));
+        if (is_wp_error($response) || wp_remote_retrieve_response_code($response) !== 200) {
+            // Fallback to a simpler QR service
+            return $this->generate_qr_fallback($options);
+        }
+        
+        return $qr_url;
+    }
+    
+    /**
+     * Fallback QR code generation
+     * 
+     * @param array $options
+     * @return string
+     */
+    private function generate_qr_fallback($options) {
+        // Use QR Server as fallback
+        $base_url = 'https://api.qrserver.com/v1/create-qr-code/';
+        
+        $params = array(
+            'size' => $options['size'] . 'x' . $options['size'],
+            'data' => $this->profile_url,
+            'format' => 'png',
+            'ecc' => strtoupper($options['error_correction']),
+            'margin' => $options['margin']
+        );
+        
+        // Add colors if not default
+        if ($options['foreground_color'] !== '000000') {
+            $params['color'] = $options['foreground_color'];
+        }
+        if ($options['background_color'] !== 'FFFFFF') {
+            $params['bgcolor'] = $options['background_color'];
         }
         
         return $base_url . '?' . http_build_query($params);

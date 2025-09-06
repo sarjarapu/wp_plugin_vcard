@@ -396,7 +396,7 @@ $is_business = $business_profile->is_business_profile();
                         <?php _e('Share Profile', 'vcard'); ?>
                     </button>
                     <?php if ($is_business) : ?>
-                        <button class="vcard-qr-btn" onclick="generateQR()">
+                        <button class="vcard-qr-btn" data-profile-id="<?php echo get_the_ID(); ?>">
                             <i class="fas fa-qrcode"></i>
                             <?php _e('QR Code', 'vcard'); ?>
                         </button>
@@ -407,17 +407,7 @@ $is_business = $business_profile->is_business_profile();
     <?php endwhile; ?>
 </div>
 
-<!-- QR Code Modal (for business profiles) -->
-<?php if ($is_business) : ?>
-<div id="qr-modal" class="vcard-modal" style="display: none;">
-    <div class="modal-content">
-        <span class="close-modal" onclick="closeQRModal()">&times;</span>
-        <h3><?php _e('QR Code for Profile', 'vcard'); ?></h3>
-        <div id="qr-code-container"></div>
-        <p><?php _e('Scan this QR code to quickly access this business profile', 'vcard'); ?></p>
-    </div>
-</div>
-<?php endif; ?>
+
 
 <script>
 // Set profile ID for JavaScript access
@@ -525,23 +515,7 @@ function shareProfile() {
     }
 }
 
-<?php if ($is_business) : ?>
-function generateQR() {
-    // Show QR modal
-    document.getElementById('qr-modal').style.display = 'block';
-    
-    // Generate QR code (you would integrate with a QR code library here)
-    var qrContainer = document.getElementById('qr-code-container');
-    qrContainer.innerHTML = '<div class="qr-placeholder">QR Code would be generated here<br><small>URL: ' + window.location.href + '</small></div>';
-    
-    // Track QR generation
-    trackQRGeneration();
-}
 
-function closeQRModal() {
-    document.getElementById('qr-modal').style.display = 'none';
-}
-<?php endif; ?>
 
 function trackVCardDownload() {
     // AJAX call to track download
