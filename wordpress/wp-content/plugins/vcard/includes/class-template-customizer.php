@@ -46,9 +46,9 @@ class VCard_Template_Customizer {
         add_action('wp_ajax_vcard_get_color_schemes', array($this, 'handle_get_color_schemes'));
         add_action('wp_ajax_vcard_get_template_recommendations', array($this, 'handle_get_template_recommendations'));
         
-        // Hook into existing template settings
+        // Hook into existing template settings with streamlined approach
         add_filter('vcard_template_settings_fields', array($this, 'add_enhanced_template_fields'));
-        add_action('vcard_template_settings_after_basic', array($this, 'render_enhanced_template_options'));
+        add_action('vcard_template_settings_streamlined', array($this, 'render_streamlined_template_options'));
     }
     
     /**
@@ -437,9 +437,9 @@ class VCard_Template_Customizer {
     }
     
     /**
-     * Render enhanced template options in existing template settings section
+     * Render streamlined template options that replace overlapping elements
      */
-    public function render_enhanced_template_options($post) {
+    public function render_streamlined_template_options($post) {
         // Get current values - use existing field names for compatibility
         $current_template = get_post_meta($post->ID, '_vcard_template_name', true) ?: 'ceo';
         $current_color_scheme = get_post_meta($post->ID, '_vcard_color_scheme', true) ?: 'corporate_blue';
@@ -452,9 +452,9 @@ class VCard_Template_Customizer {
         wp_nonce_field('vcard_template_customization', 'vcard_template_customization_nonce');
         ?>
         
-        <!-- Industry Selection Row -->
+        <!-- Step 1: Business Industry -->
         <tr>
-            <th><label for="vcard_industry"><?php _e('Business Industry', 'vcard'); ?></label></th>
+            <th><label for="vcard_industry"><?php _e('1. Business Industry', 'vcard'); ?></label></th>
             <td>
                 <select id="vcard_industry" name="vcard_industry" class="regular-text">
                     <?php foreach ($this->industry_palettes as $industry_key => $industry_data): ?>
@@ -463,24 +463,59 @@ class VCard_Template_Customizer {
                         </option>
                     <?php endforeach; ?>
                 </select>
-                <p class="description"><?php _e('Select your industry to get personalized template and color recommendations.', 'vcard'); ?></p>
+                <p class="description"><?php _e('Choose your business industry to see recommended templates and colors.', 'vcard'); ?></p>
+            </td>
+        </tr>
+        
+        <!-- Step 2: Template Selection -->
+        <tr>
+            <th><label for="vcard_template_name"><?php _e('2. Template Style', 'vcard'); ?></label></th>
+            <td>
+                <div id="vcard-template-customizer" class="vcard-customizer-streamlined">
+                    <div class="template-grid-streamlined">
+                        <?php foreach ($available_templates as $template_key => $template_data): ?>
+                            <div class="template-option-streamlined <?php echo $current_template === $template_key ? 'selected' : ''; ?>" 
+                                 data-template="<?php echo esc_attr($template_key); ?>">
+                                <input type="radio" 
+                                       id="template_<?php echo esc_attr($template_key); ?>" 
+                                       name="vcard_template_name" 
+                                       value="<?php echo esc_attr($template_key); ?>" 
+                                       <?php checked($current_template, $template_key); ?>>
+                                <label for="template_<?php echo esc_attr($template_key); ?>">
+                                    <div class="template-preview-streamlined">
+                                        <div class="template-thumbnail-streamlined">
+                                            <img src="<?php echo VCARD_ASSETS_URL; ?>images/templates/<?php echo esc_attr($template_key); ?>-thumb.svg" 
+                                                 alt="<?php echo esc_attr($template_data['name']); ?>" 
+                                                 onerror="this.src='<?php echo VCARD_ASSETS_URL; ?>images/templates/default-thumb.svg'">
+                                        </div>
+                                        <div class="template-info-streamlined">
+                                            <h6><?php echo esc_html($template_data['name']); ?></h6>
+                                            <p><?php echo esc_html($template_data['description']); ?></p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <p class="description"><?php _e('Select a template that matches your business style.', 'vcard'); ?></p>
             </td>
         </tr>
         
 
         
-        <!-- Color Scheme Selection Row -->
+        <!-- Step 3: Color Scheme -->
         <tr>
-            <th><label for="vcard_color_scheme"><?php _e('Color Scheme', 'vcard'); ?></label></th>
+            <th><label for="vcard_color_scheme"><?php _e('3. Color Scheme', 'vcard'); ?></label></th>
             <td>
-                <div class="color-scheme-selection">
-                    <div class="scheme-tab-content-inline">
+                <div class="color-scheme-selection-streamlined">
+                    <div class="scheme-content-streamlined">
                         <?php foreach ($this->industry_palettes as $industry_key => $industry_data): ?>
-                            <div class="scheme-panel-inline <?php echo $current_industry === $industry_key ? 'active' : ''; ?>" 
+                            <div class="scheme-panel-streamlined <?php echo $current_industry === $industry_key ? 'active' : ''; ?>" 
                                  data-industry="<?php echo esc_attr($industry_key); ?>">
-                                <div class="color-scheme-grid-compact">
+                                <div class="color-scheme-grid-streamlined">
                                     <?php foreach ($industry_data['schemes'] as $scheme_key => $scheme_data): ?>
-                                        <div class="color-scheme-option-compact <?php echo $current_color_scheme === $scheme_key ? 'selected' : ''; ?>" 
+                                        <div class="color-scheme-option-streamlined <?php echo $current_color_scheme === $scheme_key ? 'selected' : ''; ?>" 
                                              data-scheme="<?php echo esc_attr($scheme_key); ?>">
                                             <input type="radio" 
                                                    id="scheme_<?php echo esc_attr($scheme_key); ?>" 
@@ -488,13 +523,13 @@ class VCard_Template_Customizer {
                                                    value="<?php echo esc_attr($scheme_key); ?>" 
                                                    <?php checked($current_color_scheme, $scheme_key); ?>>
                                             <label for="scheme_<?php echo esc_attr($scheme_key); ?>">
-                                                <div class="color-palette-compact">
-                                                    <div class="color-swatch-small primary" style="background-color: <?php echo esc_attr($scheme_data['primary']); ?>"></div>
-                                                    <div class="color-swatch-small secondary" style="background-color: <?php echo esc_attr($scheme_data['secondary']); ?>"></div>
-                                                    <div class="color-swatch-small accent" style="background-color: <?php echo esc_attr($scheme_data['accent']); ?>"></div>
-                                                    <div class="color-swatch-small text" style="background-color: <?php echo esc_attr($scheme_data['text']); ?>"></div>
+                                                <div class="color-palette-streamlined">
+                                                    <div class="color-swatch-streamlined primary" style="background-color: <?php echo esc_attr($scheme_data['primary']); ?>"></div>
+                                                    <div class="color-swatch-streamlined secondary" style="background-color: <?php echo esc_attr($scheme_data['secondary']); ?>"></div>
+                                                    <div class="color-swatch-streamlined accent" style="background-color: <?php echo esc_attr($scheme_data['accent']); ?>"></div>
+                                                    <div class="color-swatch-streamlined text" style="background-color: <?php echo esc_attr($scheme_data['text']); ?>"></div>
                                                 </div>
-                                                <div class="scheme-info-compact">
+                                                <div class="scheme-info-streamlined">
                                                     <span><?php echo esc_html($scheme_data['name']); ?></span>
                                                 </div>
                                             </label>
@@ -505,20 +540,20 @@ class VCard_Template_Customizer {
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <p class="description"><?php _e('Select colors that match your brand and industry.', 'vcard'); ?></p>
+                <p class="description"><?php _e('Choose from curated color palettes designed for your industry.', 'vcard'); ?></p>
             </td>
         </tr>
         
-        <!-- Live Preview Row -->
+        <!-- Step 4: Live Preview -->
         <tr>
-            <th><label><?php _e('Live Preview', 'vcard'); ?></label></th>
+            <th><label><?php _e('4. Preview', 'vcard'); ?></label></th>
             <td>
-                <div class="preview-container-compact">
-                    <div class="preview-controls-inline">
+                <div class="preview-container-streamlined">
+                    <div class="preview-controls-streamlined">
                         <button type="button" id="refresh-preview" class="button button-secondary">
                             <?php _e('Refresh Preview', 'vcard'); ?>
                         </button>
-                        <div class="preview-device-toggle-inline">
+                        <div class="preview-device-toggle-streamlined">
                             <button type="button" class="device-toggle active" data-device="desktop" title="Desktop">
                                 <span class="dashicons dashicons-desktop"></span>
                             </button>
@@ -531,30 +566,19 @@ class VCard_Template_Customizer {
                         </div>
                     </div>
                     
-                    <div class="preview-frame-container-compact">
+                    <div class="preview-frame-container-streamlined">
                         <iframe id="template-preview-frame" 
-                                class="preview-frame-compact desktop" 
+                                class="preview-frame-streamlined desktop" 
                                 src="about:blank" 
                                 frameborder="0">
                         </iframe>
-                        <div class="preview-loading-compact">
+                        <div class="preview-loading-streamlined">
                             <span class="spinner is-active"></span>
                             <p><?php _e('Loading preview...', 'vcard'); ?></p>
                         </div>
                     </div>
                 </div>
-                <p class="description"><?php _e('See how your template and colors will look together.', 'vcard'); ?></p>
-            </td>
-        </tr>
-        
-        <!-- Recommendations Row -->
-        <tr class="recommendations-row" style="display: none;">
-            <th><label><?php _e('Recommendations', 'vcard'); ?></label></th>
-            <td>
-                <div id="template-recommendations-inline"></div>
-            </td>
-        </tr>
-                </div>
+                <p class="description"><?php _e('Preview your vCard with the selected template and colors.', 'vcard'); ?></p>
             </td>
         </tr>
         

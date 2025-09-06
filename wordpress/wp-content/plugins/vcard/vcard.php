@@ -564,54 +564,8 @@ class VCardPlugin {
             'tour' => __('Tour Template', 'vcard'),
         );
         
-        echo '<tr>';
-        echo '<th><label for="vcard_template_name">' . __('Template', 'vcard') . '</label></th>';
-        echo '<td>';
-        echo '<select id="vcard_template_name" name="vcard_template_name" class="regular-text">';
-        foreach ($available_templates as $value => $label) {
-            echo '<option value="' . esc_attr($value) . '" ' . selected($template_name, $value, false) . '>' . esc_html($label) . '</option>';
-        }
-        echo '</select>';
-        echo '</td>';
-        echo '</tr>';
-        
-        // Color customization
-        $primary_color = get_post_meta($post->ID, '_vcard_primary_color', true);
-        $secondary_color = get_post_meta($post->ID, '_vcard_secondary_color', true);
-        
-        echo '<tr>';
-        echo '<th><label for="vcard_primary_color">' . __('Primary Color', 'vcard') . '</label></th>';
-        echo '<td><input type="color" id="vcard_primary_color" name="vcard_primary_color" value="' . esc_attr($primary_color ?: '#007cba') . '" /></td>';
-        echo '</tr>';
-        
-        echo '<tr>';
-        echo '<th><label for="vcard_secondary_color">' . __('Secondary Color', 'vcard') . '</label></th>';
-        echo '<td><input type="color" id="vcard_secondary_color" name="vcard_secondary_color" value="' . esc_attr($secondary_color ?: '#666666') . '" /></td>';
-        echo '</tr>';
-        
-        // Hook for enhanced template customization features
-        do_action('vcard_template_settings_after_basic', $post);
-        
-        // Font family
-        $font_family = get_post_meta($post->ID, '_vcard_font_family', true);
-        echo '<tr>';
-        echo '<th><label for="vcard_font_family">' . __('Font Family', 'vcard') . '</label></th>';
-        echo '<td>';
-        echo '<select id="vcard_font_family" name="vcard_font_family" class="regular-text">';
-        $fonts = array(
-            'Arial, sans-serif' => 'Arial',
-            'Helvetica, sans-serif' => 'Helvetica',
-            'Georgia, serif' => 'Georgia',
-            'Times New Roman, serif' => 'Times New Roman',
-            'Roboto, sans-serif' => 'Roboto',
-            'Open Sans, sans-serif' => 'Open Sans',
-        );
-        foreach ($fonts as $value => $label) {
-            echo '<option value="' . esc_attr($value) . '" ' . selected($font_family, $value, false) . '>' . esc_html($label) . '</option>';
-        }
-        echo '</select>';
-        echo '</td>';
-        echo '</tr>';
+        // Hook for streamlined template customization features
+        do_action('vcard_template_settings_streamlined', $post);
         
         echo '</table>';
         echo '</div>';
@@ -926,12 +880,9 @@ class VCardPlugin {
             }
         }
         
-        // Template settings
-        $template_fields = array('template_name', 'primary_color', 'secondary_color', 'font_family');
-        foreach ($template_fields as $field) {
-            if (isset($_POST['vcard_' . $field])) {
-                update_post_meta($post_id, '_vcard_' . $field, sanitize_text_field($_POST['vcard_' . $field]));
-            }
+        // Streamlined template settings - template_name is now handled by radio buttons
+        if (isset($_POST['vcard_template_name'])) {
+            update_post_meta($post_id, '_vcard_template_name', sanitize_text_field($_POST['vcard_template_name']));
         }
         
         // Template customization fields

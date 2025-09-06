@@ -7,14 +7,14 @@ jQuery(document).ready(function($) {
     
     var customizer = {
         
-        // Current selections - use existing template dropdown
-        currentTemplate: $('#vcard_template_name').val() || 'ceo',
+        // Current selections - streamlined approach
+        currentTemplate: $('input[name="vcard_template_name"]:checked').val() || 'ceo',
         currentColorScheme: $('input[name="vcard_color_scheme"]:checked').val() || 'corporate_blue',
         currentIndustry: $('#vcard_industry').val() || 'business',
         
-        // Preview elements (support both full and compact)
+        // Preview elements - streamlined
         $previewFrame: $('#template-preview-frame'),
-        $previewLoading: $('.preview-loading, .preview-loading-compact'),
+        $previewLoading: $('.preview-loading-streamlined'),
         
         // Debounce timer
         previewTimer: null,
@@ -44,9 +44,10 @@ jQuery(document).ready(function($) {
                 self.schedulePreviewUpdate();
             });
             
-            // Template selection - use existing dropdown
-            $('#vcard_template_name').on('change', function() {
+            // Template selection - streamlined radio buttons
+            $('input[name="vcard_template_name"]').on('change', function() {
                 self.currentTemplate = $(this).val();
+                self.updateTemplateSelection();
                 self.loadRecommendations();
                 self.schedulePreviewUpdate();
             });
@@ -81,8 +82,14 @@ jQuery(document).ready(function($) {
             
 
             
-            // Color scheme option clicks (both full and compact)
-            $(document).on('click', '.color-scheme-option, .color-scheme-option-compact', function() {
+            // Template option clicks - streamlined
+            $('.template-option-streamlined').on('click', function() {
+                var templateKey = $(this).data('template');
+                $(this).find('input[type="radio"]').prop('checked', true).trigger('change');
+            });
+            
+            // Color scheme option clicks - streamlined
+            $(document).on('click', '.color-scheme-option-streamlined', function() {
                 var schemeKey = $(this).data('scheme');
                 $(this).find('input[type="radio"]').prop('checked', true).trigger('change');
             });
@@ -104,12 +111,12 @@ jQuery(document).ready(function($) {
             $('.scheme-tab').removeClass('active');
             $('.scheme-tab[data-industry="' + industry + '"]').addClass('active');
             
-            // Update tab content (both full and compact)
-            $('.scheme-panel, .scheme-panel-inline').removeClass('active');
-            $('.scheme-panel[data-industry="' + industry + '"], .scheme-panel-inline[data-industry="' + industry + '"]').addClass('active');
+            // Update tab content - streamlined
+            $('.scheme-panel-streamlined').removeClass('active');
+            $('.scheme-panel-streamlined[data-industry="' + industry + '"]').addClass('active');
             
             // Auto-select first color scheme if current one is not available
-            var $activePanel = $('.scheme-panel[data-industry="' + industry + '"], .scheme-panel-inline[data-industry="' + industry + '"]');
+            var $activePanel = $('.scheme-panel-streamlined[data-industry="' + industry + '"]');
             var $currentScheme = $activePanel.find('input[value="' + this.currentColorScheme + '"]');
             
             if ($currentScheme.length === 0) {
@@ -125,11 +132,19 @@ jQuery(document).ready(function($) {
 
         
         /**
+         * Update template selection UI
+         */
+        updateTemplateSelection: function() {
+            $('.template-option-streamlined').removeClass('selected');
+            $('.template-option-streamlined[data-template="' + this.currentTemplate + '"]').addClass('selected');
+        },
+        
+        /**
          * Update color scheme selection UI
          */
         updateColorSchemeSelection: function() {
-            $('.color-scheme-option, .color-scheme-option-compact').removeClass('selected');
-            $('.color-scheme-option[data-scheme="' + this.currentColorScheme + '"], .color-scheme-option-compact[data-scheme="' + this.currentColorScheme + '"]').addClass('selected');
+            $('.color-scheme-option-streamlined').removeClass('selected');
+            $('.color-scheme-option-streamlined[data-scheme="' + this.currentColorScheme + '"]').addClass('selected');
         },
         
         /**
@@ -261,8 +276,8 @@ jQuery(document).ready(function($) {
                 var templateKey = $(this).data('template');
                 var schemeKey = $(this).data('scheme');
                 
-                // Set template in existing dropdown
-                $('#vcard_template_name').val(templateKey).trigger('change');
+                // Set template in streamlined radio buttons
+                $('input[name="vcard_template_name"][value="' + templateKey + '"]').prop('checked', true).trigger('change');
                 
                 // Set color scheme (need to switch to correct industry tab first)
                 setTimeout(function() {
