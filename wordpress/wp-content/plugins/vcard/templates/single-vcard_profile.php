@@ -375,10 +375,22 @@ $is_business = $business_profile->is_business_profile();
                 
                 <!-- Action Buttons -->
                 <div class="vcard-actions">
-                    <button class="vcard-download-btn" onclick="downloadVCard()">
-                        <i class="fas fa-download"></i>
-                        <?php _e('Download vCard', 'vcard'); ?>
-                    </button>
+                    <div class="vcard-download-group">
+                        <button class="vcard-download-btn" data-profile-id="<?php echo get_the_ID(); ?>" data-format="vcf">
+                            <i class="fas fa-download"></i>
+                            <?php _e('Download vCard', 'vcard'); ?>
+                        </button>
+                        <div class="vcard-download-options">
+                            <button class="vcard-export-vcf" data-profile-id="<?php echo get_the_ID(); ?>">
+                                <i class="fas fa-file-alt"></i>
+                                <?php _e('VCF Format', 'vcard'); ?>
+                            </button>
+                            <button class="vcard-export-csv" data-profile-id="<?php echo get_the_ID(); ?>">
+                                <i class="fas fa-table"></i>
+                                <?php _e('CSV Format', 'vcard'); ?>
+                            </button>
+                        </div>
+                    </div>
                     <button class="vcard-share-btn" onclick="shareProfile()">
                         <i class="fas fa-share-alt"></i>
                         <?php _e('Share Profile', 'vcard'); ?>
@@ -408,8 +420,19 @@ $is_business = $business_profile->is_business_profile();
 <?php endif; ?>
 
 <script>
+// Legacy function for backward compatibility
 function downloadVCard() {
-    // Get vCard export data from business profile
+    // Use the enhanced export system
+    if (typeof VCardExport !== 'undefined') {
+        VCardExport.exportFormat('vcf');
+    } else {
+        // Fallback to basic vCard generation
+        generateBasicVCard();
+    }
+}
+
+// Basic vCard generation fallback
+function generateBasicVCard() {
     <?php 
     $vcard_data = $business_profile->get_vcard_export_data();
     ?>
@@ -459,6 +482,9 @@ function downloadVCard() {
     vcard += "X-SOCIALPROFILE;TYPE=<?php echo esc_js($platform); ?>:<?php echo esc_js($url); ?>\n";
         <?php endforeach; 
     endif; ?>
+    
+    // Add revision timestamp
+    vcard += "REV:" + new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + "Z\n";
     
     vcard += "END:VCARD";
     

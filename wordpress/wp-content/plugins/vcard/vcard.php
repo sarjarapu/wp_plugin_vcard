@@ -97,6 +97,29 @@ class VCardPlugin {
         add_action('wp_ajax_nopriv_track_qr_generation', array($this, 'handle_track_qr_generation'));
         add_action('wp_ajax_submit_vcard_contact_form', array($this, 'handle_contact_form_submission'));
         add_action('wp_ajax_nopriv_submit_vcard_contact_form', array($this, 'handle_contact_form_submission'));
+        
+        // Enhanced vCard export AJAX hooks
+        add_action('wp_ajax_get_vcard_export_data', array($this, 'handle_get_vcard_export_data'));
+        add_action('wp_ajax_nopriv_get_vcard_export_data', array($this, 'handle_get_vcard_export_data'));
+        add_action('wp_ajax_bulk_vcard_export', array($this, 'handle_bulk_vcard_export'));
+        add_action('wp_ajax_nopriv_bulk_vcard_export', array($this, 'handle_bulk_vcard_export'));
+        
+        // vCard sharing and QR code AJAX hooks
+        add_action('wp_ajax_generate_vcard_qr', array($this, 'handle_generate_qr_code'));
+        add_action('wp_ajax_nopriv_generate_vcard_qr', array($this, 'handle_generate_qr_code'));
+        add_action('wp_ajax_get_vcard_sharing_links', array($this, 'handle_get_sharing_links'));
+        add_action('wp_ajax_nopriv_get_vcard_sharing_links', array($this, 'handle_get_sharing_links'));
+        add_action('wp_ajax_generate_short_url', array($this, 'handle_generate_short_url'));
+        add_action('wp_ajax_nopriv_generate_short_url', array($this, 'handle_generate_short_url'));
+        add_action('wp_ajax_track_vcard_share', array($this, 'handle_track_share'));
+        add_action('wp_ajax_nopriv_track_vcard_share', array($this, 'handle_track_share'));
+        add_action('wp_ajax_get_embed_code', array($this, 'handle_get_embed_code'));
+        add_action('wp_ajax_nopriv_get_embed_code', array($this, 'handle_get_embed_code'));
+        add_action('wp_ajax_download_qr_code', array($this, 'handle_download_qr_code'));
+        add_action('wp_ajax_nopriv_download_qr_code', array($this, 'handle_download_qr_code'));
+        
+        // Short URL redirect handling
+        add_action('init', array($this, 'handle_short_url_redirects'));
     }
     
     /**
@@ -119,6 +142,74 @@ class VCardPlugin {
                 array(),
                 '6.0.0'
             );
+            
+            // Enqueue vCard sharing styles
+            wp_enqueue_style(
+                'vcard-sharing',
+                VCARD_ASSETS_URL . 'css/vcard-sharing.css',
+                array(),
+                VCARD_VERSION
+            );
+            
+            // Enqueue enhanced vCard export script
+            wp_enqueue_script(
+                'vcard-export',
+                VCARD_ASSETS_URL . 'js/vcard-export.js',
+                array('jquery'),
+                VCARD_VERSION,
+                true
+            );
+            
+            // Enqueue vCard sharing script
+            wp_enqueue_script(
+                'vcard-sharing',
+                VCARD_ASSETS_URL . 'js/vcard-sharing.js',
+                array('jquery'),
+                VCARD_VERSION,
+                true
+            );
+            
+            // Localize scripts for AJAX
+            wp_localize_script('vcard-export', 'vcard_export', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('vcard_export_nonce'),
+                'strings' => array(
+                    'downloading' => __('Downloading...', 'vcard'),
+                    'export_failed' => __('Export failed', 'vcard'),
+                    'network_error' => __('Network error', 'vcard'),
+                    'no_profiles_selected' => __('No profiles selected', 'vcard'),
+                )
+            ));
+            
+            wp_localize_script('vcard-sharing', 'vcard_sharing', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('vcard_sharing_nonce'),
+                'strings' => array(
+                    'qr_code_title' => __('QR Code for Profile', 'vcard'),
+                    'qr_code_description' => __('Scan this QR code to quickly access this profile', 'vcard'),
+                    'customize_qr' => __('Customize QR Code', 'vcard'),
+                    'size' => __('Size', 'vcard'),
+                    'foreground_color' => __('Foreground Color', 'vcard'),
+                    'background_color' => __('Background Color', 'vcard'),
+                    'error_correction' => __('Error Correction', 'vcard'),
+                    'regenerate_qr' => __('Regenerate QR Code', 'vcard'),
+                    'download_qr' => __('Download QR Code', 'vcard'),
+                    'share_qr' => __('Share QR Code', 'vcard'),
+                    'share_profile' => __('Share Profile', 'vcard'),
+                    'profile_url' => __('Profile URL', 'vcard'),
+                    'short_url' => __('Short URL', 'vcard'),
+                    'copy' => __('Copy', 'vcard'),
+                    'generate_short_url' => __('Generate Short URL', 'vcard'),
+                    'sharing_stats' => __('Sharing Statistics', 'vcard'),
+                    'total_shares' => __('Total Shares', 'vcard'),
+                    'qr_scans' => __('QR Scans', 'vcard'),
+                    'link_clicks' => __('Link Clicks', 'vcard'),
+                    'copied_to_clipboard' => __('Copied to clipboard!', 'vcard'),
+                    'copy_failed' => __('Failed to copy to clipboard', 'vcard'),
+                    'short_url_generated' => __('Short URL generated successfully', 'vcard'),
+                    'loading' => __('Loading...', 'vcard'),
+                )
+            ));
         }
     }
     
@@ -154,6 +245,12 @@ class VCardPlugin {
     private function load_dependencies() {
         // Load BusinessProfile class for enhanced profile management
         require_once VCARD_INCLUDES_PATH . 'class-business-profile.php';
+        
+        // Load vCard Export class for enhanced export functionality
+        require_once VCARD_INCLUDES_PATH . 'class-vcard-export.php';
+        
+        // Load vCard Sharing class for QR codes and social sharing
+        require_once VCARD_INCLUDES_PATH . 'class-vcard-sharing.php';
         
         // Load TemplateEngine class for template rendering
         require_once VCARD_INCLUDES_PATH . 'class-template-engine.php';
@@ -423,6 +520,433 @@ class VCardPlugin {
         }
         
         return '';
+    }
+    
+    /**
+     * Handle AJAX request for vCard export data
+     */
+    public function handle_get_vcard_export_data() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_export_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_id = intval($_POST['profile_id']);
+        $format = sanitize_text_field($_POST['format']) ?: 'vcf';
+        
+        if (!$profile_id) {
+            wp_send_json_error('Invalid profile ID');
+        }
+        
+        // Check if post exists and is vcard_profile type
+        $post = get_post($profile_id);
+        if (!$post || $post->post_type !== 'vcard_profile') {
+            wp_send_json_error('Profile not found');
+        }
+        
+        try {
+            // Create business profile instance
+            $business_profile = new VCard_Business_Profile($profile_id);
+            
+            // Create export instance
+            $exporter = new VCard_Export($business_profile);
+            $exporter->set_format($format);
+            
+            // Generate export data
+            $export_data = $exporter->generate();
+            
+            // Prepare response
+            $response = array(
+                'content' => $export_data,
+                'filename' => $exporter->get_filename(),
+                'mime_type' => $exporter->get_mime_type(),
+                'format' => $format
+            );
+            
+            // Validate vCard if VCF format
+            if ($format === 'vcf') {
+                $validation = $exporter->validate_vcard($export_data);
+                $response['validation'] = $validation;
+                
+                if (!$validation['valid']) {
+                    error_log('vCard validation failed for profile ' . $profile_id . ': ' . implode(', ', $validation['errors']));
+                }
+            }
+            
+            wp_send_json_success($response);
+            
+        } catch (Exception $e) {
+            error_log('vCard export error: ' . $e->getMessage());
+            wp_send_json_error('Export generation failed: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Handle AJAX request for bulk vCard export
+     */
+    public function handle_bulk_vcard_export() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_export_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_ids = array_map('intval', $_POST['profile_ids']);
+        $format = sanitize_text_field($_POST['format']) ?: 'vcf';
+        
+        if (empty($profile_ids)) {
+            wp_send_json_error('No profile IDs provided');
+        }
+        
+        // Limit bulk export to prevent server overload
+        if (count($profile_ids) > 50) {
+            wp_send_json_error('Too many profiles selected. Maximum 50 profiles allowed.');
+        }
+        
+        try {
+            $export_files = array();
+            
+            foreach ($profile_ids as $profile_id) {
+                // Check if post exists and is vcard_profile type
+                $post = get_post($profile_id);
+                if (!$post || $post->post_type !== 'vcard_profile') {
+                    continue;
+                }
+                
+                // Create business profile instance
+                $business_profile = new VCard_Business_Profile($profile_id);
+                
+                // Create export instance
+                $exporter = new VCard_Export($business_profile);
+                $exporter->set_format($format);
+                
+                // Generate export data
+                $export_data = $exporter->generate();
+                
+                $export_files[] = array(
+                    'filename' => $exporter->get_filename(),
+                    'content' => $export_data
+                );
+            }
+            
+            if (empty($export_files)) {
+                wp_send_json_error('No valid profiles found');
+            }
+            
+            // Create ZIP file for bulk export
+            $zip_content = $this->create_zip_from_files($export_files);
+            
+            $response = array(
+                'content' => base64_encode($zip_content),
+                'filename' => 'vcard_bulk_export_' . date('Y-m-d_H-i-s') . '.zip',
+                'mime_type' => 'application/zip',
+                'count' => count($export_files)
+            );
+            
+            wp_send_json_success($response);
+            
+        } catch (Exception $e) {
+            error_log('Bulk vCard export error: ' . $e->getMessage());
+            wp_send_json_error('Bulk export failed: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Create ZIP file from array of files
+     */
+    private function create_zip_from_files($files) {
+        if (!class_exists('ZipArchive')) {
+            throw new Exception('ZipArchive class not available');
+        }
+        
+        $zip = new ZipArchive();
+        $temp_file = tempnam(sys_get_temp_dir(), 'vcard_bulk_');
+        
+        if ($zip->open($temp_file, ZipArchive::CREATE) !== TRUE) {
+            throw new Exception('Cannot create ZIP file');
+        }
+        
+        foreach ($files as $file) {
+            $zip->addFromString($file['filename'], $file['content']);
+        }
+        
+        $zip->close();
+        
+        $zip_content = file_get_contents($temp_file);
+        unlink($temp_file);
+        
+        return $zip_content;
+    }
+    
+    /**
+     * Handle AJAX request for QR code generation
+     */
+    public function handle_generate_qr_code() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_sharing_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_id = intval($_POST['profile_id']);
+        $options = json_decode(stripslashes($_POST['options']), true) ?: array();
+        
+        if (!$profile_id) {
+            wp_send_json_error('Invalid profile ID');
+        }
+        
+        // Check if post exists and is vcard_profile type
+        $post = get_post($profile_id);
+        if (!$post || $post->post_type !== 'vcard_profile') {
+            wp_send_json_error('Profile not found');
+        }
+        
+        try {
+            // Create business profile and sharing instances
+            $business_profile = new VCard_Business_Profile($profile_id);
+            $sharing = new VCard_Sharing($business_profile);
+            
+            // Generate QR code
+            $qr_data = $sharing->generate_qr_code($options);
+            
+            wp_send_json_success($qr_data);
+            
+        } catch (Exception $e) {
+            error_log('QR code generation error: ' . $e->getMessage());
+            wp_send_json_error('QR code generation failed: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Handle AJAX request for sharing links
+     */
+    public function handle_get_sharing_links() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_sharing_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_id = intval($_POST['profile_id']);
+        
+        if (!$profile_id) {
+            wp_send_json_error('Invalid profile ID');
+        }
+        
+        // Check if post exists and is vcard_profile type
+        $post = get_post($profile_id);
+        if (!$post || $post->post_type !== 'vcard_profile') {
+            wp_send_json_error('Profile not found');
+        }
+        
+        try {
+            // Create business profile and sharing instances
+            $business_profile = new VCard_Business_Profile($profile_id);
+            $sharing = new VCard_Sharing($business_profile);
+            
+            // Get sharing data
+            $sharing_data = array(
+                'links' => $sharing->get_social_sharing_links(),
+                'profile_url' => get_permalink($profile_id),
+                'short_url' => get_post_meta($profile_id, '_vcard_short_url', true),
+                'analytics' => $sharing->get_sharing_analytics()
+            );
+            
+            wp_send_json_success($sharing_data);
+            
+        } catch (Exception $e) {
+            error_log('Sharing links error: ' . $e->getMessage());
+            wp_send_json_error('Failed to get sharing links: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Handle AJAX request for short URL generation
+     */
+    public function handle_generate_short_url() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_sharing_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_id = intval($_POST['profile_id']);
+        
+        if (!$profile_id) {
+            wp_send_json_error('Invalid profile ID');
+        }
+        
+        // Check if post exists and is vcard_profile type
+        $post = get_post($profile_id);
+        if (!$post || $post->post_type !== 'vcard_profile') {
+            wp_send_json_error('Profile not found');
+        }
+        
+        try {
+            // Create business profile and sharing instances
+            $business_profile = new VCard_Business_Profile($profile_id);
+            $sharing = new VCard_Sharing($business_profile);
+            
+            // Generate short URL
+            $short_url = $sharing->generate_short_url();
+            
+            wp_send_json_success(array(
+                'short_url' => $short_url,
+                'profile_id' => $profile_id
+            ));
+            
+        } catch (Exception $e) {
+            error_log('Short URL generation error: ' . $e->getMessage());
+            wp_send_json_error('Short URL generation failed: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Handle AJAX request for tracking shares
+     */
+    public function handle_track_share() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_sharing_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_id = intval($_POST['profile_id']);
+        $platform = sanitize_text_field($_POST['platform']);
+        
+        if (!$profile_id || !$platform) {
+            wp_send_json_error('Invalid parameters');
+        }
+        
+        try {
+            // Create business profile and sharing instances
+            $business_profile = new VCard_Business_Profile($profile_id);
+            $sharing = new VCard_Sharing($business_profile);
+            
+            // Track share
+            $sharing->track_share($platform);
+            
+            wp_send_json_success('Share tracked');
+            
+        } catch (Exception $e) {
+            error_log('Share tracking error: ' . $e->getMessage());
+            wp_send_json_error('Share tracking failed');
+        }
+    }
+    
+    /**
+     * Handle AJAX request for embed code generation
+     */
+    public function handle_get_embed_code() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_sharing_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_id = intval($_POST['profile_id']);
+        $options = json_decode(stripslashes($_POST['options']), true) ?: array();
+        
+        if (!$profile_id) {
+            wp_send_json_error('Invalid profile ID');
+        }
+        
+        try {
+            // Create business profile and sharing instances
+            $business_profile = new VCard_Business_Profile($profile_id);
+            $sharing = new VCard_Sharing($business_profile);
+            
+            // Generate embed code
+            $embed_code = $sharing->get_embed_code($options);
+            
+            wp_send_json_success(array(
+                'embed_code' => $embed_code,
+                'options' => $options
+            ));
+            
+        } catch (Exception $e) {
+            error_log('Embed code generation error: ' . $e->getMessage());
+            wp_send_json_error('Embed code generation failed: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Handle AJAX request for QR code download
+     */
+    public function handle_download_qr_code() {
+        // Verify nonce
+        if (!wp_verify_nonce($_GET['nonce'], 'vcard_qr_download')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_id = intval($_GET['profile_id']);
+        $size = intval($_GET['size']) ?: 300;
+        $format = sanitize_text_field($_GET['format']) ?: 'png';
+        
+        if (!$profile_id) {
+            wp_die('Invalid profile ID');
+        }
+        
+        try {
+            // Create business profile and sharing instances
+            $business_profile = new VCard_Business_Profile($profile_id);
+            $sharing = new VCard_Sharing($business_profile);
+            
+            // Generate QR code
+            $qr_data = $sharing->generate_qr_code(array(
+                'size' => $size,
+                'format' => $format
+            ));
+            
+            // Get QR code image data
+            $image_data = file_get_contents($qr_data['url']);
+            
+            if ($image_data === false) {
+                wp_die('Failed to generate QR code image');
+            }
+            
+            // Set headers for download
+            $filename = 'qr-code-' . $profile_id . '.' . $format;
+            header('Content-Type: image/' . $format);
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Content-Length: ' . strlen($image_data));
+            
+            echo $image_data;
+            exit;
+            
+        } catch (Exception $e) {
+            error_log('QR code download error: ' . $e->getMessage());
+            wp_die('QR code download failed');
+        }
+    }
+    
+    /**
+     * Handle short URL redirects
+     */
+    public function handle_short_url_redirects() {
+        // Check if this is a short URL request
+        $request_uri = $_SERVER['REQUEST_URI'];
+        
+        if (preg_match('/^\/vc\/([a-zA-Z0-9\-_]+)\/?$/', $request_uri, $matches)) {
+            $short_code = $matches[1];
+            
+            // Get mapping
+            $mappings = get_option('vcard_short_url_mappings', array());
+            
+            if (isset($mappings[$short_code])) {
+                $post_id = $mappings[$short_code];
+                
+                // Verify post still exists
+                $post = get_post($post_id);
+                if ($post && $post->post_type === 'vcard_profile' && $post->post_status === 'publish') {
+                    // Track click
+                    VCard_Sharing::track_short_url_click($short_code);
+                    
+                    // Redirect to full URL
+                    wp_redirect(get_permalink($post_id), 301);
+                    exit;
+                }
+            }
+            
+            // Short URL not found, redirect to 404
+            global $wp_query;
+            $wp_query->set_404();
+            status_header(404);
+        }
     }
     
     public function add_meta_boxes() {
