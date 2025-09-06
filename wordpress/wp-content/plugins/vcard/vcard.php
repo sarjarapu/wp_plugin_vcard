@@ -316,6 +316,24 @@ class VCardPlugin {
             'supports' => array('title', 'editor', 'thumbnail'),
             'menu_icon' => 'dashicons-id-alt',
             'show_in_rest' => true,
+            'capability_type' => 'vcard_profile',
+            'map_meta_cap' => true,
+            'capabilities' => array(
+                'edit_post' => 'edit_vcard_profile',
+                'read_post' => 'read_vcard_profile',
+                'delete_post' => 'delete_vcard_profile',
+                'edit_posts' => 'edit_vcard_profiles',
+                'edit_others_posts' => 'edit_others_vcard_profiles',
+                'publish_posts' => 'publish_vcard_profiles',
+                'read_private_posts' => 'read_private_vcard_profiles',
+                'delete_posts' => 'delete_vcard_profiles',
+                'delete_private_posts' => 'delete_private_vcard_profiles',
+                'delete_published_posts' => 'delete_published_vcard_profiles',
+                'delete_others_posts' => 'delete_others_vcard_profiles',
+                'edit_private_posts' => 'edit_private_vcard_profiles',
+                'edit_published_posts' => 'edit_published_vcard_profiles',
+                'create_posts' => 'create_vcard_profiles',
+            ),
         );
         
         register_post_type('vcard_profile', $args);
