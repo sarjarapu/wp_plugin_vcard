@@ -25,5 +25,6 @@ fileMatchPattern: '*.php'
 
 ## Execution Specific
 
-- Run the php files using docker exec on `wordpress-wordpress-1`
+- Execute the php files on docker container using 
+`docker exec wordpress-wordpress-1 php -l /var/www/html/wp-content/...`
 - Always use full path. local `./wp-content` maps to `/var/www/html/wp-content` on container
