@@ -108,6 +108,15 @@ class VCardPlugin {
         // Load TemplateCustomizer class for template customization
         require_once VCARD_INCLUDES_PATH . 'class-template-customizer.php';
         
+        // Load Dashboard Authentication class
+        require_once VCARD_INCLUDES_PATH . 'class-dashboard-auth.php';
+        
+        // Load User Roles Management class
+        require_once VCARD_INCLUDES_PATH . 'class-user-roles.php';
+        
+        // Load Profile Manager class
+        require_once VCARD_INCLUDES_PATH . 'class-profile-manager.php';
+        
         // Core includes will be loaded in future tasks
         // require_once VCARD_INCLUDES_PATH . 'class-vcard-post-type.php';
         // require_once VCARD_INCLUDES_PATH . 'class-vcard-meta-fields.php';
@@ -122,6 +131,15 @@ class VCardPlugin {
         
         // Initialize template customizer
         new VCard_Template_Customizer();
+        
+        // Initialize dashboard authentication
+        new VCard_Dashboard_Auth();
+        
+        // Initialize user roles management
+        new VCard_User_Roles();
+        
+        // Initialize profile manager
+        new VCard_Profile_Manager();
     }
     
     public function register_post_type() {
@@ -352,7 +370,7 @@ class VCardPlugin {
         echo '<a href="#contact-info" class="nav-tab">' . __('Contact Info', 'vcard') . '</a>';
         echo '<a href="#social-media" class="nav-tab">' . __('Social Media', 'vcard') . '</a>';
         echo '<a href="#template-settings" class="nav-tab">' . __('Template Settings', 'vcard') . '</a>';
-        echo '<a href="#services-products" class="nav-tab">' . __('Services & Products', 'vcard') . '</a>';
+
         echo '</nav>';
         
         // Basic Info Tab
@@ -570,257 +588,14 @@ class VCardPlugin {
         echo '</table>';
         echo '</div>';
         
-        // Services & Products Tab
-        echo '<div id="services-products" class="tab-content">';
-        echo '<h3>' . __('Services & Products', 'vcard') . '</h3>';
-        
-        // Gallery section
-        echo '<h4>' . __('Business Gallery', 'vcard') . '</h4>';
-        $gallery = get_post_meta($post->ID, '_vcard_gallery', true);
-        $gallery_ids = !empty($gallery) ? explode(',', $gallery) : array();
-        
-        echo '<div class="gallery-container">';
-        echo '<div class="gallery-images">';
-        echo '<input type="hidden" name="vcard_gallery" class="gallery-ids" value="' . esc_attr($gallery) . '">';
-        echo '<div class="gallery-grid">';
-        
-        if (!empty($gallery_ids)) {
-            foreach ($gallery_ids as $image_id) {
-                if (!empty($image_id)) {
-                    $image_url = wp_get_attachment_image_url($image_id, 'thumbnail');
-                    if ($image_url) {
-                        echo '<div class="gallery-image" data-id="' . esc_attr($image_id) . '">';
-                        echo '<img src="' . esc_url($image_url) . '" alt="">';
-                        echo '<div class="gallery-image-actions">';
-                        echo '<button type="button" class="remove-gallery-image">&times;</button>';
-                        echo '</div>';
-                        echo '</div>';
-                    }
-                }
-            }
-        }
-        
-        echo '</div>';
-        echo '<button type="button" class="button add-gallery-image">' . __('Add Gallery Images', 'vcard') . '</button>';
-        echo '</div>';
-        echo '</div>';
-        
-        // Services section
-        echo '<h4>' . __('Services', 'vcard') . '</h4>';
-        $services = get_post_meta($post->ID, '_vcard_services', true);
-        $services_data = !empty($services) ? json_decode($services, true) : array();
-        
-        echo '<div id="services-container">';
-        echo '<div class="services-list">';
-        if (!empty($services_data) && is_array($services_data)) {
-            foreach ($services_data as $index => $service) {
-                $this->render_enhanced_service_item($index, $service);
-            }
-        }
-        echo '</div>';
-        echo '<button type="button" class="button add-service">' . __('Add Service', 'vcard') . '</button>';
-        echo '</div>';
-        
-        // Products section
-        echo '<h4>' . __('Products', 'vcard') . '</h4>';
-        $products = get_post_meta($post->ID, '_vcard_products', true);
-        $products_data = !empty($products) ? json_decode($products, true) : array();
-        
-        echo '<div id="products-container">';
-        echo '<div class="products-list">';
-        if (!empty($products_data) && is_array($products_data)) {
-            foreach ($products_data as $index => $product) {
-                $this->render_enhanced_product_item($index, $product);
-            }
-        }
-        echo '</div>';
-        echo '<button type="button" class="button add-product">' . __('Add Product', 'vcard') . '</button>';
-        echo '</div>';
-        
-        echo '</div>';
+
         
         echo '</div>'; // Close tabs container
     }
     
-    /**
-     * Render service item in meta box
-     */
-    private function render_service_item($index, $service) {
-        echo '<div class="service-item">';
-        echo '<a href="#" class="remove-service remove-item">' . __('Remove', 'vcard') . '</a>';
-        echo '<h5>' . __('Service', 'vcard') . ' #' . ($index + 1) . '</h5>';
-        echo '<p>';
-        echo '<label>' . __('Name:', 'vcard') . '</label><br>';
-        echo '<input type="text" name="vcard_services[' . $index . '][name]" value="' . esc_attr($service['name'] ?? '') . '" class="regular-text">';
-        echo '</p>';
-        echo '<p>';
-        echo '<label>' . __('Description:', 'vcard') . '</label><br>';
-        echo '<textarea name="vcard_services[' . $index . '][description]" rows="3" class="large-text">' . esc_textarea($service['description'] ?? '') . '</textarea>';
-        echo '</p>';
-        echo '<p>';
-        echo '<label>' . __('Price:', 'vcard') . '</label><br>';
-        echo '<input type="text" name="vcard_services[' . $index . '][price]" value="' . esc_attr($service['price'] ?? '') . '" class="regular-text">';
-        echo '</p>';
-        echo '<p>';
-        echo '<label>' . __('Category:', 'vcard') . '</label><br>';
-        echo '<input type="text" name="vcard_services[' . $index . '][category]" value="' . esc_attr($service['category'] ?? '') . '" class="regular-text">';
-        echo '</p>';
-        echo '</div>';
-    }
+
     
-    /**
-     * Render product item in meta box
-     */
-    private function render_product_item($index, $product) {
-        echo '<div class="product-item">';
-        echo '<a href="#" class="remove-product remove-item">' . __('Remove', 'vcard') . '</a>';
-        echo '<h5>' . __('Product', 'vcard') . ' #' . ($index + 1) . '</h5>';
-        echo '<p>';
-        echo '<label>' . __('Name:', 'vcard') . '</label><br>';
-        echo '<input type="text" name="vcard_products[' . $index . '][name]" value="' . esc_attr($product['name'] ?? '') . '" class="regular-text">';
-        echo '</p>';
-        echo '<p>';
-        echo '<label>' . __('Description:', 'vcard') . '</label><br>';
-        echo '<textarea name="vcard_products[' . $index . '][description]" rows="3" class="large-text">' . esc_textarea($product['description'] ?? '') . '</textarea>';
-        echo '</p>';
-        echo '<p>';
-        echo '<label>' . __('Price:', 'vcard') . '</label><br>';
-        echo '<input type="text" name="vcard_products[' . $index . '][price]" value="' . esc_attr($product['price'] ?? '') . '" class="regular-text">';
-        echo '</p>';
-        echo '<p>';
-        echo '<label>' . __('Category:', 'vcard') . '</label><br>';
-        echo '<input type="text" name="vcard_products[' . $index . '][category]" value="' . esc_attr($product['category'] ?? '') . '" class="regular-text">';
-        echo '</p>';
-        echo '<p>';
-        echo '<label>';
-        echo '<input type="checkbox" name="vcard_products[' . $index . '][in_stock]" value="1" ' . checked(!empty($product['in_stock']), true, false) . '>';
-        echo ' ' . __('In Stock', 'vcard');
-        echo '</label>';
-        echo '</p>';
-        echo '</div>';
-    }
-    
-    /**
-     * Render enhanced service item in meta box
-     */
-    private function render_enhanced_service_item($index, $service) {
-        echo '<div class="service-item">';
-        echo '<div class="service-header">';
-        echo '<h5>' . __('Service', 'vcard') . ' #' . ($index + 1) . '</h5>';
-        echo '<a href="#" class="remove-service remove-item">' . __('Remove', 'vcard') . '</a>';
-        echo '</div>';
-        echo '<div class="service-fields">';
-        
-        echo '<div class="field-row">';
-        echo '<div class="field-col">';
-        echo '<label>' . __('Service Name', 'vcard') . ':</label>';
-        echo '<input type="text" name="vcard_services[' . $index . '][name]" value="' . esc_attr($service['name'] ?? '') . '" class="regular-text" required>';
-        echo '</div>';
-        echo '<div class="field-col">';
-        echo '<label>' . __('Price', 'vcard') . ':</label>';
-        echo '<input type="text" name="vcard_services[' . $index . '][price]" value="' . esc_attr($service['price'] ?? '') . '" class="regular-text" placeholder="$0.00">';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '<div class="field-row">';
-        echo '<div class="field-col">';
-        echo '<label>' . __('Category', 'vcard') . ':</label>';
-        echo '<input type="text" name="vcard_services[' . $index . '][category]" value="' . esc_attr($service['category'] ?? '') . '" class="regular-text">';
-        echo '</div>';
-        echo '<div class="field-col">';
-        echo '<label>' . __('Duration', 'vcard') . ':</label>';
-        echo '<input type="text" name="vcard_services[' . $index . '][duration]" value="' . esc_attr($service['duration'] ?? '') . '" class="regular-text" placeholder="60 min">';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '<div class="field-row">';
-        echo '<div class="field-col full-width">';
-        echo '<label>' . __('Description', 'vcard') . ':</label>';
-        echo '<textarea name="vcard_services[' . $index . '][description]" rows="3" class="large-text">' . esc_textarea($service['description'] ?? '') . '</textarea>';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '</div>';
-        echo '</div>';
-    }
-    
-    /**
-     * Render enhanced product item in meta box
-     */
-    private function render_enhanced_product_item($index, $product) {
-        echo '<div class="product-item">';
-        echo '<div class="product-header">';
-        echo '<h5>' . __('Product', 'vcard') . ' #' . ($index + 1) . '</h5>';
-        echo '<a href="#" class="remove-product remove-item">' . __('Remove', 'vcard') . '</a>';
-        echo '</div>';
-        echo '<div class="product-fields">';
-        
-        echo '<div class="field-row">';
-        echo '<div class="field-col">';
-        echo '<label>' . __('Product Name', 'vcard') . ':</label>';
-        echo '<input type="text" name="vcard_products[' . $index . '][name]" value="' . esc_attr($product['name'] ?? '') . '" class="regular-text" required>';
-        echo '</div>';
-        echo '<div class="field-col">';
-        echo '<label>' . __('Price', 'vcard') . ':</label>';
-        echo '<input type="text" name="vcard_products[' . $index . '][price]" value="' . esc_attr($product['price'] ?? '') . '" class="regular-text" placeholder="$0.00">';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '<div class="field-row">';
-        echo '<div class="field-col">';
-        echo '<label>' . __('Category', 'vcard') . ':</label>';
-        echo '<input type="text" name="vcard_products[' . $index . '][category]" value="' . esc_attr($product['category'] ?? '') . '" class="regular-text">';
-        echo '</div>';
-        echo '<div class="field-col">';
-        echo '<label>' . __('SKU', 'vcard') . ':</label>';
-        echo '<input type="text" name="vcard_products[' . $index . '][sku]" value="' . esc_attr($product['sku'] ?? '') . '" class="regular-text">';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '<div class="field-row">';
-        echo '<div class="field-col">';
-        echo '<label>';
-        echo '<input type="checkbox" name="vcard_products[' . $index . '][in_stock]" value="1" ' . checked(!empty($product['in_stock']), true, false) . '>';
-        echo ' ' . __('In Stock', 'vcard');
-        echo '</label>';
-        echo '</div>';
-        echo '<div class="field-col">';
-        echo '<label>';
-        echo '<input type="checkbox" name="vcard_products[' . $index . '][featured]" value="1" ' . checked(!empty($product['featured']), true, false) . '>';
-        echo ' ' . __('Featured', 'vcard');
-        echo '</label>';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '<div class="field-row">';
-        echo '<div class="field-col full-width">';
-        echo '<label>' . __('Description', 'vcard') . ':</label>';
-        echo '<textarea name="vcard_products[' . $index . '][description]" rows="3" class="large-text">' . esc_textarea($product['description'] ?? '') . '</textarea>';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '<div class="field-row">';
-        echo '<div class="field-col full-width">';
-        echo '<label>' . __('Product Image', 'vcard') . ':</label>';
-        echo '<div class="product-image-container">';
-        echo '<input type="hidden" name="vcard_products[' . $index . '][image_id]" class="product-image-id" value="' . esc_attr($product['image_id'] ?? '') . '">';
-        echo '<div class="product-image-preview">';
-        if (!empty($product['image_id'])) {
-            $image_url = wp_get_attachment_image_url($product['image_id'], 'thumbnail');
-            if ($image_url) {
-                echo '<img src="' . esc_url($image_url) . '" alt="">';
-            }
-        }
-        echo '</div>';
-        echo '<button type="button" class="button select-product-image"' . (empty($product['image_id']) ? '' : ' style="display:none;"') . '>' . __('Select Image', 'vcard') . '</button>';
-        echo '<button type="button" class="button remove-product-image"' . (empty($product['image_id']) ? ' style="display:none;"' : '') . '>' . __('Remove Image', 'vcard') . '</button>';
-        echo '</div>';
-        echo '</div>';
-        echo '</div>';
-        
-        echo '</div>';
-        echo '</div>';
-    }
+
     
     public function save_meta_fields($post_id) {
         if (!isset($_POST['vcard_meta_box_nonce']) || !wp_verify_nonce($_POST['vcard_meta_box_nonce'], 'vcard_meta_box')) {
