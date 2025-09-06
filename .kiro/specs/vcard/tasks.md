@@ -73,8 +73,8 @@
     - Add gallery management with drag-and-drop image upload
     - _Requirements: 2.1, 2.2, 2.3_
 
-- [ ] 6. Enhance existing template system with business profile display
-  - [ ] 6.1 Extend existing single-vcard_profile.php template with business sections
+- [-] 6. Enhance existing template system with business profile display
+  - [-] 6.1 Extend existing single-vcard_profile.php template with business sections
     - Enhance current template to display business information, services, products, and gallery
     - Implement template selection system that renders different layouts based on business type
     - Add profile view counter and analytics tracking to existing template
