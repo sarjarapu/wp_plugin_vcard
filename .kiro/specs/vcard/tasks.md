@@ -163,7 +163,7 @@
     - Add comparative analytics and benchmarking features
     - _Requirements: 2.5, 5.5_
 
-- [ ] 12. Implement modern UX enhancements and interface redesign
+- [ ] 12. Implement modern UX enhancements and component-by-component Tailwind migration
   - [ ] 12.1 Phase 1: UX Flow Optimization (Bootstrap Foundation)
     - Add sticky action bar with save status indicator and quick action buttons to existing templates
     - Implement section navigation with anchor links for smooth scrolling between profile sections
@@ -172,20 +172,28 @@
     - Create contact save status management system with visual feedback
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-  - [ ] 12.2 Phase 2: Visual Refinement (Hybrid Bootstrap + Tailwind)
-    - Introduce Tailwind CSS alongside existing Bootstrap framework for enhanced styling
-    - Replace bulky Bootstrap components with sleeker Tailwind-enhanced alternatives
-    - Implement modern spacing and typography systems using Tailwind utilities
-    - Add micro-interactions and hover states for better user engagement
-    - Optimize interface elements for mobile touch interactions
+  - [ ] 12.2 Phase 2: Component-by-Component Tailwind Migration - Action Bar Components
+    - Set up Tailwind CSS build process and configuration
+    - Migrate sticky action bar from Bootstrap to Tailwind CSS (buttons, layout, positioning)
+    - Replace Bootstrap button classes with Tailwind equivalents for save status and quick actions
+    - Implement Tailwind-based responsive design for action bar components
+    - Remove Bootstrap dependencies for migrated action bar components only
     - _Requirements: 8.1, 8.2, 8.3_
 
-  - [ ] 12.3 Phase 3: Complete Tailwind Migration
-    - Remove Bootstrap dependency and migrate entirely to Tailwind CSS
-    - Implement custom design system with Tailwind component classes
+  - [ ] 12.3 Phase 3: Component-by-Component Migration - Navigation and Forms
+    - Migrate section navigation anchor links from Bootstrap to Tailwind CSS
+    - Replace Bootstrap form components with Tailwind-styled alternatives
+    - Convert Bootstrap cards and containers to Tailwind equivalents
+    - Implement Tailwind typography system for improved text hierarchy
+    - Remove Bootstrap dependencies for migrated navigation and form components
+    - _Requirements: 8.1, 8.2, 8.3_
+
+  - [ ] 12.4 Phase 4: Complete Template Migration and Optimization
+    - Migrate remaining Bootstrap grid system to Tailwind CSS Grid/Flexbox
+    - Replace all remaining Bootstrap utility classes with Tailwind equivalents
+    - Implement custom Tailwind component classes for reusable design patterns
     - Optimize CSS bundle size using Tailwind's purging capabilities
-    - Create reusable component library for consistent design patterns
-    - Implement advanced responsive design patterns with CSS Grid and Flexbox
+    - Remove Bootstrap dependency entirely and validate all functionality
     - _Requirements: 8.4, 8.5_
 
 - [ ] 13. Implement mobile optimization and PWA features
