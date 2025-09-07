@@ -41,6 +41,52 @@
                 </div>
             </div>
             
+            {# Section Navigation #}
+            <nav class="vcard-section-nav">
+                <div class="section-nav-container">
+                    {% set sections = [] %}
+                    
+                    {# Build available sections list #}
+                    {% set description = is_business ? basic_info.business_description : profile.raw_data.content %}
+                    {% if description %}
+                        {% set sections = sections|merge([{id: 'about', label: is_business ? __('About', 'vcard') : __('About', 'vcard')}]) %}
+                    {% endif %}
+                    
+                    {% if is_business and has_services %}
+                        {% set sections = sections|merge([{id: 'services', label: __('Services', 'vcard')}]) %}
+                    {% endif %}
+                    
+                    {% if is_business and has_products %}
+                        {% set sections = sections|merge([{id: 'products', label: __('Products', 'vcard')}]) %}
+                    {% endif %}
+                    
+                    {% if business_data.gallery and business_data.gallery is iterable and business_data.gallery|length > 0 %}
+                        {% set sections = sections|merge([{id: 'gallery', label: __('Gallery', 'vcard')}]) %}
+                    {% endif %}
+                    
+                    {% if basic_info.phone or basic_info.email or basic_info.website or basic_info.address %}
+                        {% set sections = sections|merge([{id: 'contact', label: __('Contact', 'vcard')}]) %}
+                    {% endif %}
+                    
+                    {% if social_media and social_media is iterable and social_media|length > 0 %}
+                        {% set sections = sections|merge([{id: 'social', label: __('Social', 'vcard')}]) %}
+                    {% endif %}
+                    
+                    {# Render navigation if we have multiple sections #}
+                    {% if sections|length > 1 %}
+                        <ul class="section-nav-list">
+                            {% for section in sections %}
+                                <li class="section-nav-item">
+                                    <a href="#{{ section.id }}" class="section-nav-link" data-section="{{ section.id }}">
+                                        {{ section.label }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </nav>
+            
             <div class="vcard-content">
                 
                 {# Business Description or Personal Bio #}
@@ -198,6 +244,26 @@
                         </div>
                     {% endif %}
                 </div>
+                
+                {# Social Media Section #}
+                {% if has_social_media %}
+                    <div id="social" class="vcard-social-section vcard-section">
+                        <h3>{{ __('Connect With Us', 'vcard') }}</h3>
+                        <div class="social-links-grid">
+                            {% for platform, data in social_media %}
+                                <a href="{{ data.url|esc_url }}" target="_blank" rel="noopener" class="social-link-card social-{{ platform }}">
+                                    <div class="social-icon">
+                                        <i class="{{ data.icon_class }}"></i>
+                                    </div>
+                                    <div class="social-info">
+                                        <span class="social-platform">{{ data.platform }}</span>
+                                        <span class="social-handle">{{ data.handle|default('@' ~ data.platform)|esc_html }}</span>
+                                    </div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
                 
                 {# Address Section #}
                 {% if has_address %}

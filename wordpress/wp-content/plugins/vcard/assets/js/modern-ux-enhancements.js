@@ -528,6 +528,98 @@
                 });
             }
         }
+
+        setupSectionNavigation() {
+            // Handle section navigation clicks
+            $(document).on('click', '.section-nav-link', (e) => {
+                e.preventDefault();
+                const targetSection = $(e.currentTarget).data('section');
+                this.scrollToSection(targetSection);
+            });
+
+            // Update active section on scroll
+            $(window).on('scroll', () => {
+                this.updateActiveSection();
+            });
+        }
+
+        scrollToSection(sectionId) {
+            const target = $(`#${sectionId}`);
+            if (target.length) {
+                const offset = 120; // Account for sticky headers
+                const targetPosition = target.offset().top - offset;
+                
+                $('html, body').animate({
+                    scrollTop: targetPosition
+                }, 600, 'easeInOutCubic');
+                
+                // Update active state immediately
+                this.setActiveSection(sectionId);
+            }
+        }
+
+        updateActiveSection() {
+            const sections = $('.vcard-section');
+            const scrollTop = $(window).scrollTop();
+            
+            let activeSection = '';
+            
+            sections.each((index, element) => {
+                const $section = $(element);
+                const sectionTop = $section.offset().top - 150;
+                const sectionBottom = sectionTop + $section.outerHeight();
+                
+                if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
+                    activeSection = $section.attr('id');
+                }
+            });
+            
+            if (activeSection && activeSection !== this.currentSection) {
+                this.setActiveSection(activeSection);
+            }
+        }
+
+        setActiveSection(sectionId) {
+            this.currentSection = sectionId;
+            
+            // Update navigation active state
+            $('.section-nav-link').removeClass('active');
+            $(`.section-nav-link[data-section="${sectionId}"]`).addClass('active');
+            
+            // Track section view for analytics
+            this.trackSectionView(sectionId);
+        }
+
+        trackSectionView(sectionId) {
+            // Track section views for analytics
+            if (this.profileId && sectionId) {
+                $.post(vcard_ajax.ajax_url, {
+                    action: 'vcard_track_section_view',
+                    profile_id: this.profileId,
+                    section: sectionId,
+                    nonce: vcard_ajax.nonce
+                });
+            }
+        }
+
+        // Enhanced smooth scrolling with easing
+        setupSmoothScrolling() {
+            // Add custom easing function
+            $.easing.easeInOutCubic = function (x, t, b, c, d) {
+                if ((t/=d/2) < 1) return c/2*t*t*t + b;
+                return c/2*((t-=2)*t*t + 2) + b;
+            };
+            
+            // Handle all anchor links
+            $(document).on('click', 'a[href^="#"]', (e) => {
+                const href = $(e.currentTarget).attr('href');
+                if (href !== '#' && $(href).length) {
+                    e.preventDefault();
+                    const sectionId = href.substring(1);
+                    this.scrollToSection(sectionId);
+                }
+            });
+        }
     }
 
     // Initialize when DOM is ready
