@@ -30,6 +30,7 @@ class VCard_User_Registration {
         add_action('wp_ajax_nopriv_vcard_verify_sms', array($this, 'handle_sms_verification'));
         add_action('wp_ajax_nopriv_vcard_social_login', array($this, 'handle_social_login'));
         add_action('wp_ajax_nopriv_vcard_resend_verification', array($this, 'handle_resend_verification'));
+        add_action('wp_ajax_nopriv_vcard_user_login', array($this, 'handle_user_login_ajax'));
         
         // Login/logout hooks
         add_action('wp_login', array($this, 'handle_user_login'), 10, 2);
@@ -55,7 +56,7 @@ class VCard_User_Registration {
         if (is_singular('vcard_profile') || is_page()) {
             wp_enqueue_script(
                 'vcard-user-registration',
-                VCARD_ASSETS_URL . 'js/user-registration.js',
+                VCARD_ASSETS_URL . 'js/user-registration-simple.js',
                 array('jquery'),
                 VCARD_VERSION,
                 true
@@ -633,6 +634,45 @@ class VCard_User_Registration {
         
         // Default to current page or home
         return wp_get_referer() ?: home_url();
+    }
+    
+    /**
+     * Handle AJAX user login
+     */
+    public function handle_user_login_ajax() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_registration_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $username = sanitize_text_field($_POST['username']);
+        $password = $_POST['password'];
+        $remember = !empty($_POST['remember']);
+        
+        // Validate input
+        if (empty($username) || empty($password)) {
+            wp_send_json_error('Please enter both username and password');
+        }
+        
+        // Attempt login
+        $credentials = array(
+            'user_login'    => $username,
+            'user_password' => $password,
+            'remember'      => $remember
+        );
+        
+        $user = wp_signon($credentials, false);
+        
+        if (is_wp_error($user)) {
+            wp_send_json_error($user->get_error_message());
+        }
+        
+        // Login successful
+        wp_send_json_success(array(
+            'message' => 'Login successful!',
+            'user_id' => $user->ID,
+            'redirect_url' => $this->get_redirect_url()
+        ));
     }
 }
 

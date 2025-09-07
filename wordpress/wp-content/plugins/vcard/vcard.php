@@ -3,7 +3,7 @@
  * Plugin Name: vCard Business Directory
  * Plugin URI: https://example.com/vcard-plugin
  * Description: A comprehensive multi-tenant business directory platform that enables virtual business card exchange with template customization, contact management, and subscription billing.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: vCard Team
  * Author URI: https://example.com
  * License: GPL v2 or later
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('VCARD_VERSION', '1.0.0');
+define('VCARD_VERSION', '1.0.1');
 define('VCARD_PLUGIN_FILE', __FILE__);
 define('VCARD_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('VCARD_PLUGIN_PATH', plugin_dir_path(__FILE__));
@@ -1577,6 +1577,9 @@ class VCardPlugin {
         // Create custom database tables
         $this->create_custom_tables();
         
+        // Run database upgrades if needed
+        $this->upgrade_database();
+        
         // Create custom user roles
         $this->create_user_roles();
         
@@ -1887,6 +1890,53 @@ class VCardPlugin {
         // Additional indexes for saved contacts table
         $wpdb->query("CREATE INDEX IF NOT EXISTS idx_saved_contacts_user_created ON " . VCARD_SAVED_CONTACTS_TABLE . " (user_id, created_at)");
         $wpdb->query("CREATE INDEX IF NOT EXISTS idx_saved_contacts_profile_created ON " . VCARD_SAVED_CONTACTS_TABLE . " (profile_id, created_at)");
+    }
+    
+    /**
+     * Upgrade database schema when plugin is updated
+     */
+    private function upgrade_database() {
+        $current_db_version = get_option('vcard_db_version', '1.0.0');
+        
+        // Only run upgrades if needed
+        if (version_compare($current_db_version, VCARD_VERSION, '<')) {
+            global $wpdb;
+            
+            // Upgrade to version 1.0.1 - Add missing columns to saved contacts table
+            if (version_compare($current_db_version, '1.0.1', '<')) {
+                $table_name = VCARD_SAVED_CONTACTS_TABLE;
+                
+                // Check if contact_data column exists
+                $columns = $wpdb->get_results("DESCRIBE $table_name");
+                $has_contact_data = false;
+                $has_updated_at = false;
+                
+                foreach ($columns as $column) {
+                    if ($column->Field === 'contact_data') {
+                        $has_contact_data = true;
+                    }
+                    if ($column->Field === 'updated_at') {
+                        $has_updated_at = true;
+                    }
+                }
+                
+                // Add missing contact_data column
+                if (!$has_contact_data) {
+                    $wpdb->query("ALTER TABLE $table_name ADD COLUMN contact_data longtext NOT NULL COMMENT 'JSON data containing contact information' AFTER profile_id");
+                    error_log('vCard Plugin: Added contact_data column to saved contacts table');
+                }
+                
+                // Add missing updated_at column
+                if (!$has_updated_at) {
+                    $wpdb->query("ALTER TABLE $table_name ADD COLUMN updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Last update timestamp'");
+                    error_log('vCard Plugin: Added updated_at column to saved contacts table');
+                }
+            }
+            
+            // Update database version
+            update_option('vcard_db_version', VCARD_VERSION);
+            error_log('vCard Plugin: Database upgraded to version ' . VCARD_VERSION);
+        }
     }
     
     /**
@@ -3019,12 +3069,13 @@ class VCardPlugin {
                 array(
                     'profile_id' => $profile_id,
                     'event_type' => $event_type,
-                    'event_date' => current_time('mysql'),
-                    'user_ip' => $this->get_client_ip(),
+                    'event_data' => wp_json_encode($event_data),
+                    'ip_address' => $this->get_client_ip(),
                     'user_agent' => sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? ''),
-                    'event_data' => wp_json_encode($event_data)
+                    'referrer' => sanitize_text_field($_SERVER['HTTP_REFERER'] ?? ''),
+                    'session_id' => session_id() ?: md5($this->get_client_ip() . $_SERVER['HTTP_USER_AGENT'])
                 ),
-                array('%d', '%s', '%s', '%s', '%s', '%s')
+                array('%d', '%s', '%s', '%s', '%s', '%s', '%s')
             );
             
             // Update post meta counters for quick access

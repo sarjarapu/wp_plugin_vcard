@@ -67,6 +67,9 @@
             // Cloud sync
             $(document).on('click', '.vcard-sync-cloud-btn', this.handleSyncCloud.bind(this));
             
+            // Pull from cloud
+            $(document).on('click', '.vcard-pull-cloud-btn', this.handlePullFromCloud.bind(this));
+            
             // Register for sync
             $(document).on('click', '.vcard-register-for-sync-btn', this.handleRegisterForSync.bind(this));
             
@@ -335,10 +338,8 @@
             // Update contact count
             this.updateContactCount();
             
-            // Load cloud contacts for logged-in users
-            if (vcard_contact_manager && vcard_contact_manager.is_logged_in) {
-                this.loadFromCloud();
-            }
+            // Note: We don't automatically load cloud contacts on page load
+            // to avoid conflicts with local changes. Users must manually sync.
         },
 
         /**
@@ -397,7 +398,9 @@
          * Hide contact list modal
          */
         hideContactList: function(e) {
-            if (e && $(e.target).closest('.vcard-modal-content').length) {
+            // Allow closing if clicking the close button or overlay
+            if (e && $(e.target).closest('.vcard-modal-content').length && 
+                !$(e.target).closest('.vcard-modal-close').length) {
                 return;
             }
             
@@ -429,7 +432,8 @@
                                 <div class="vcard-contact-actions">
                                     <button class="vcard-export-contacts-btn"><i class="fas fa-download"></i> Export All</button>
                                     ${vcard_contact_manager && vcard_contact_manager.is_logged_in ? 
-                                        '<button class="vcard-sync-cloud-btn"><i class="fas fa-sync-alt"></i> Sync Cloud</button>' : 
+                                        '<button class="vcard-sync-cloud-btn"><i class="fas fa-cloud-upload-alt"></i> Push to Cloud</button>' +
+                                        '<button class="vcard-pull-cloud-btn"><i class="fas fa-cloud-download-alt"></i> Pull from Cloud</button>' : 
                                         '<button class="vcard-register-for-sync-btn"><i class="fas fa-user-plus"></i> Register to Sync</button>'
                                     }
                                     <button class="vcard-clear-contacts-btn"><i class="fas fa-trash"></i> Clear All</button>
@@ -865,6 +869,28 @@
         },
 
         /**
+         * Handle pull from cloud button
+         */
+        handlePullFromCloud: function(e) {
+            e.preventDefault();
+            
+            var confirmMessage = 'This will replace your local contacts with your cloud contacts. Continue?';
+            
+            if (!confirm(confirmMessage)) {
+                return;
+            }
+            
+            var $button = $(e.currentTarget);
+            $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Pulling...');
+            
+            this.loadFromCloud();
+            
+            setTimeout(() => {
+                $button.prop('disabled', false).html('<i class="fas fa-cloud-download-alt"></i> Pull from Cloud');
+            }, 2000);
+        },
+
+        /**
          * Handle register for sync button
          */
         handleRegisterForSync: function(e) {
@@ -939,7 +965,7 @@
         },
 
         /**
-         * Sync local contacts with cloud
+         * Sync local contacts with cloud (local is authoritative)
          */
         syncWithCloud: function() {
             if (!vcard_contact_manager || !vcard_contact_manager.is_logged_in) {
@@ -948,23 +974,33 @@
             }
 
             var localContacts = this.getContactData();
+            var localContactIds = this.getSavedContacts();
             
-            if (Object.keys(localContacts).length === 0) {
-                this.showMessage('No local contacts to sync', 'info');
+            // Show confirmation for sync direction
+            var confirmMessage = 'This will make your cloud contacts match your local contacts. ' +
+                                'Local: ' + localContactIds.length + ' contacts. Continue?';
+            
+            if (!confirm(confirmMessage)) {
                 return;
             }
-
+            
             $.ajax({
                 url: vcard_contact_manager.ajax_url,
                 type: 'POST',
                 data: {
-                    action: 'vcard_sync_contacts',
+                    action: 'vcard_push_to_cloud',
                     local_contacts: JSON.stringify(localContacts),
+                    local_contact_ids: JSON.stringify(localContactIds),
                     nonce: vcard_contact_manager.nonce
                 },
                 success: (response) => {
                     if (response.success) {
                         this.showMessage(response.data.message, 'success');
+                        
+                        // Refresh contact list if open
+                        if ($('.vcard-contact-list-modal').is(':visible')) {
+                            this.renderContactList();
+                        }
                     } else {
                         this.showMessage(response.data || vcard_contact_manager.strings.cloud_sync_failed, 'error');
                     }

@@ -637,7 +637,110 @@
             // Show loading state
             $submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Signing In...');
             
-            // Submit login
+            // Submit login via AJAX
+            $.ajax({
+                url: vcard_registration.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'vcard_user_login',
+                    username: formData.log,
+                    password: formData.pwd,
+                    remember: formData.rememberme,
+                    nonce: vcard_registration.nonce
+                },
+                success: (response) => {
+                    if (response.success) {
+                        this.showMessage(response.data.message || 'Login successful!', 'success');
+                        this.handleRegistrationSuccess(response.data);
+                    } else {
+                        this.showMessage(response.data || 'Login failed', 'error');
+                        $submitBtn.prop('disabled', false).html('<i class="fas fa-sign-in-alt"></i> Sign In');
+                    }
+                },
+                error: () => {
+                    this.showMessage('Network error occurred', 'error');
+                    $submitBtn.prop('disabled', false).html('<i class="fas fa-sign-in-alt"></i> Sign In');
+                }
+            });
+        },
+
+        /**
+         * Get login content
+         */
+        getLoginContent: function() {
+            return `
+                <div class="vcard-registration-step vcard-step-login" style="display: none;">
+                    <form class="vcard-login-form">
+                        <div class="vcard-form-field">
+                            <label for="login_username">Email or Username *</label>
+                            <input type="text" id="login_username" name="username" required>
+                        </div>
+                        
+                        <div class="vcard-form-field">
+                            <label for="login_password">Password *</label>
+                            <input type="password" id="login_password" name="password" required>
+                        </div>
+                        
+                        <div class="vcard-form-field">
+                            <label class="vcard-checkbox-label">
+                                <input type="checkbox" name="remember_me">
+                                <span class="vcard-checkbox-custom"></span>
+                                Remember me
+                            </label>
+                        </div>
+                        
+                        <div class="vcard-form-actions">
+                            <button type="submit" class="vcard-btn-primary vcard-btn-full">
+                                <i class="fas fa-sign-in-alt"></i> Sign In
+                            </button>
+                        </div>
+                        
+                        <div class="vcard-login-help">
+                            <p><a href="#" class="vcard-forgot-password">Forgot your password?</a></p>
+                        </div>
+                    </form>
+                    
+                    <div class="vcard-social-divider">
+                        <span>or login with</span>
+                    </div>
+                    
+                    <div class="vcard-social-login-buttons">
+                        <button class="vcard-social-login-btn" data-provider="google">
+                            <i class="fab fa-google"></i>
+                            <span>Google</span>
+                        </button>
+                        
+                        <button class="vcard-social-login-btn" data-provider="facebook">
+                            <i class="fab fa-facebook-f"></i>
+                            <span>Facebook</span>
+                        </button>
+                        
+                        <button class="vcard-social-login-btn" data-provider="linkedin">
+                            <i class="fab fa-linkedin-in"></i>
+                            <span>LinkedIn</span>
+                        </button>
+                    </div>
+                    
+                    <div class="vcard-modal-footer">
+                        <p>Don't have an account? <a href="#" class="vcard-switch-to-register">Register here</a></p>
+                    </div>
+                </div>
+            `;
+        },
+
+        /**
+         * Show message to user
+         */
+        showMessage: function(message, type) {
+            type = type || 'info';
+            
+            var $message = $('<div class="vcard-message vcard-message-' + type + '">' + message + '</div>');
+            $('body').append($message);
+            
+            $message.fadeIn().delay(4000).fadeOut(function() {
+                $(this).remove();
+            });
+        }
             $.ajax({
                 url: wp.ajax.settings.url,
                 type: 'POST',

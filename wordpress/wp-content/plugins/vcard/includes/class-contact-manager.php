@@ -30,6 +30,8 @@ class VCard_Contact_Manager {
         add_action('wp_ajax_vcard_get_saved_contacts', array($this, 'handle_get_saved_contacts'));
         add_action('wp_ajax_vcard_remove_saved_contact', array($this, 'handle_remove_saved_contact'));
         add_action('wp_ajax_vcard_sync_contacts', array($this, 'handle_sync_contacts'));
+        add_action('wp_ajax_vcard_full_sync_contacts', array($this, 'handle_full_sync_contacts'));
+        add_action('wp_ajax_vcard_push_to_cloud', array($this, 'handle_push_to_cloud'));
         
         // Add contact management meta to profile pages
         add_action('wp_head', array($this, 'add_profile_meta_tags'));
@@ -244,6 +246,8 @@ class VCard_Contact_Manager {
         
         $user_id = get_current_user_id();
         $synced_count = 0;
+        $already_synced_count = 0;
+        $total_local_contacts = count($local_contacts);
         
         foreach ($local_contacts as $profile_id => $contact_data) {
             $profile_id = intval($profile_id);
@@ -253,12 +257,171 @@ class VCard_Contact_Manager {
                 if ($this->save_contact_to_database($user_id, $profile_id, $contact_data)) {
                     $synced_count++;
                 }
+            } else {
+                $already_synced_count++;
             }
+        }
+        
+        // Create a clear message based on the results
+        if ($total_local_contacts === 0) {
+            $message = __('No local contacts found to sync', 'vcard');
+        } elseif ($synced_count === 0 && $already_synced_count > 0) {
+            $message = sprintf(__('All %d contacts are already synced to your account', 'vcard'), $already_synced_count);
+        } elseif ($synced_count > 0 && $already_synced_count === 0) {
+            $message = sprintf(__('%d new contacts synced to your account', 'vcard'), $synced_count);
+        } elseif ($synced_count > 0 && $already_synced_count > 0) {
+            $message = sprintf(__('%d new contacts synced, %d were already in your account', 'vcard'), $synced_count, $already_synced_count);
+        } else {
+            $message = __('Sync completed successfully', 'vcard');
         }
         
         wp_send_json_success(array(
             'synced_count' => $synced_count,
-            'message' => sprintf(__('%d contacts synced to your account', 'vcard'), $synced_count)
+            'already_synced_count' => $already_synced_count,
+            'total_contacts' => $total_local_contacts,
+            'message' => $message
+        ));
+    }
+    
+    /**
+     * Handle full bidirectional sync between local and cloud
+     */
+    public function handle_full_sync_contacts() {
+        // Check if user is logged in
+        if (!is_user_logged_in()) {
+            wp_send_json_error('User not logged in');
+        }
+        
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_public_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $local_contacts = json_decode(stripslashes($_POST['local_contacts']), true);
+        $local_contact_ids = json_decode(stripslashes($_POST['local_contact_ids']), true);
+        
+        if (!is_array($local_contacts)) {
+            $local_contacts = array();
+        }
+        
+        if (!is_array($local_contact_ids)) {
+            $local_contact_ids = array();
+        }
+        
+        $user_id = get_current_user_id();
+        
+        // Get current cloud contacts
+        $cloud_contacts = $this->get_user_saved_contacts($user_id);
+        $cloud_contact_ids = array_keys($cloud_contacts);
+        
+        // Find contacts to add to cloud (in local but not in cloud)
+        $contacts_to_add = array();
+        foreach ($local_contact_ids as $profile_id) {
+            if (!in_array($profile_id, $cloud_contact_ids) && isset($local_contacts[$profile_id])) {
+                $contacts_to_add[$profile_id] = $local_contacts[$profile_id];
+            }
+        }
+        
+        // Find contacts to remove from cloud (in cloud but not in local)
+        $contacts_to_remove = array();
+        foreach ($cloud_contact_ids as $profile_id) {
+            if (!in_array($profile_id, $local_contact_ids)) {
+                $contacts_to_remove[] = $profile_id;
+            }
+        }
+        
+        $added_count = 0;
+        $removed_count = 0;
+        
+        // Add new contacts to cloud
+        foreach ($contacts_to_add as $profile_id => $contact_data) {
+            if ($this->save_contact_to_database($user_id, intval($profile_id), $contact_data)) {
+                $added_count++;
+            }
+        }
+        
+        // Remove contacts from cloud
+        foreach ($contacts_to_remove as $profile_id) {
+            if ($this->remove_contact_from_database($user_id, intval($profile_id))) {
+                $removed_count++;
+            }
+        }
+        
+        // Get final cloud state
+        $final_cloud_contacts = $this->get_user_saved_contacts($user_id);
+        
+        // Create sync message
+        $message_parts = array();
+        if ($added_count > 0) {
+            $message_parts[] = sprintf(__('%d contacts added to cloud', 'vcard'), $added_count);
+        }
+        if ($removed_count > 0) {
+            $message_parts[] = sprintf(__('%d contacts removed from cloud', 'vcard'), $removed_count);
+        }
+        
+        if (empty($message_parts)) {
+            $message = __('Contacts are already in sync', 'vcard');
+        } else {
+            $message = implode(', ', $message_parts);
+        }
+        
+        wp_send_json_success(array(
+            'added_count' => $added_count,
+            'removed_count' => $removed_count,
+            'total_contacts' => count($final_cloud_contacts),
+            'cloud_contacts' => $final_cloud_contacts,
+            'message' => $message
+        ));
+    }
+    
+    /**
+     * Push local contacts to cloud (local is authoritative)
+     */
+    public function handle_push_to_cloud() {
+        // Check if user is logged in
+        if (!is_user_logged_in()) {
+            wp_send_json_error('User not logged in');
+        }
+        
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_public_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $local_contacts = json_decode(stripslashes($_POST['local_contacts']), true);
+        $local_contact_ids = json_decode(stripslashes($_POST['local_contact_ids']), true);
+        
+        if (!is_array($local_contacts)) {
+            $local_contacts = array();
+        }
+        
+        if (!is_array($local_contact_ids)) {
+            $local_contact_ids = array();
+        }
+        
+        $user_id = get_current_user_id();
+        
+        // Clear all existing cloud contacts for this user
+        global $wpdb;
+        $table_name = VCARD_SAVED_CONTACTS_TABLE;
+        $wpdb->delete($table_name, array('user_id' => $user_id), array('%d'));
+        
+        // Add all local contacts to cloud
+        $added_count = 0;
+        foreach ($local_contact_ids as $profile_id) {
+            if (isset($local_contacts[$profile_id])) {
+                if ($this->save_contact_to_database($user_id, intval($profile_id), $local_contacts[$profile_id])) {
+                    $added_count++;
+                }
+            }
+        }
+        
+        $message = sprintf(__('Cloud updated: %d contacts synced', 'vcard'), $added_count);
+        
+        wp_send_json_success(array(
+            'synced_count' => $added_count,
+            'total_contacts' => count($local_contact_ids),
+            'message' => $message
         ));
     }
     
