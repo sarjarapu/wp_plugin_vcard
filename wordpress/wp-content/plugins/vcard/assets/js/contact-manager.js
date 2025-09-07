@@ -104,12 +104,12 @@
             var contactData = this.extractContactData(profileId);
             
             if (contactData) {
-                // Save to local storage first
-                this.saveContact(profileId, contactData);
-                
-                // If user is logged in, also save to cloud
                 if (vcard_contact_manager && vcard_contact_manager.is_logged_in) {
+                    // For logged-in users, save directly to cloud only
                     this.saveToCloud(profileId, contactData);
+                } else {
+                    // For anonymous users, save to local storage
+                    this.saveContact(profileId, contactData);
                 }
                 
                 // Update button state
@@ -264,24 +264,32 @@
         },
 
         /**
-         * Remove contact from local storage
+         * Remove contact from local storage (or mark for deletion if logged in)
          */
         removeContact: function(profileId) {
             try {
-                // Remove from saved contacts list
-                var savedContacts = this.getSavedContacts();
-                var index = savedContacts.indexOf(profileId);
-                if (index > -1) {
-                    savedContacts.splice(index, 1);
-                    localStorage.setItem(this.storageKey, JSON.stringify(savedContacts));
+                if (vcard_contact_manager && vcard_contact_manager.is_logged_in) {
+                    // For logged-in users, remove directly from cloud
+                    this.removeFromCloud(profileId);
+                    return true;
+                } else {
+                    // For anonymous users, mark for deletion (soft delete)
+                    var deletedContacts = this.getDeletedContacts();
+                    if (deletedContacts.indexOf(profileId) === -1) {
+                        deletedContacts.push(profileId);
+                        localStorage.setItem('vcard_deleted_contacts', JSON.stringify(deletedContacts));
+                    }
+                    
+                    // Remove from visible list but keep data for sync
+                    var savedContacts = this.getSavedContacts();
+                    var index = savedContacts.indexOf(profileId);
+                    if (index > -1) {
+                        savedContacts.splice(index, 1);
+                        localStorage.setItem(this.storageKey, JSON.stringify(savedContacts));
+                    }
+                    
+                    return true;
                 }
-                
-                // Remove contact data
-                var contactDataStorage = this.getContactData();
-                delete contactDataStorage[profileId];
-                localStorage.setItem(this.contactDataKey, JSON.stringify(contactDataStorage));
-                
-                return true;
             } catch (e) {
                 console.error('Error removing contact:', e);
                 return false;
@@ -329,6 +337,43 @@
         },
 
         /**
+         * Get deleted contacts list (for sync purposes)
+         */
+        getDeletedContacts: function() {
+            try {
+                return JSON.parse(localStorage.getItem('vcard_deleted_contacts') || '[]');
+            } catch (e) {
+                console.error('Error getting deleted contacts:', e);
+                return [];
+            }
+        },
+
+        /**
+         * Remove contact directly from cloud
+         */
+        removeFromCloud: function(profileId) {
+            $.ajax({
+                url: vcard_contact_manager.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'vcard_remove_saved_contact',
+                    profile_id: profileId,
+                    nonce: vcard_contact_manager.nonce
+                },
+                success: (response) => {
+                    if (response.success) {
+                        console.log('Contact removed from cloud');
+                    } else {
+                        console.warn('Failed to remove contact from cloud:', response.data);
+                    }
+                },
+                error: () => {
+                    console.warn('Network error removing contact from cloud');
+                }
+            });
+        },
+
+        /**
          * Initialize contact list functionality
          */
         initContactList: function() {
@@ -338,8 +383,10 @@
             // Update contact count
             this.updateContactCount();
             
-            // Note: We don't automatically load cloud contacts on page load
-            // to avoid conflicts with local changes. Users must manually sync.
+            // For logged-in users, migrate local contacts to cloud and switch to cloud-only mode
+            if (vcard_contact_manager && vcard_contact_manager.is_logged_in) {
+                this.migrateToCloudMode();
+            }
         },
 
         /**
@@ -432,8 +479,7 @@
                                 <div class="vcard-contact-actions">
                                     <button class="vcard-export-contacts-btn"><i class="fas fa-download"></i> Export All</button>
                                     ${vcard_contact_manager && vcard_contact_manager.is_logged_in ? 
-                                        '<button class="vcard-sync-cloud-btn"><i class="fas fa-cloud-upload-alt"></i> Push to Cloud</button>' +
-                                        '<button class="vcard-pull-cloud-btn"><i class="fas fa-cloud-download-alt"></i> Pull from Cloud</button>' : 
+                                        '' : 
                                         '<button class="vcard-register-for-sync-btn"><i class="fas fa-user-plus"></i> Register to Sync</button>'
                                     }
                                     <button class="vcard-clear-contacts-btn"><i class="fas fa-trash"></i> Clear All</button>
@@ -1088,6 +1134,53 @@
                     });
                 }, 2000);
             }
+        },
+
+        /**
+         * Migrate to cloud-only mode for logged-in users
+         */
+        migrateToCloudMode: function() {
+            var localContacts = this.getContactData();
+            var localContactIds = this.getSavedContacts();
+            var deletedContacts = this.getDeletedContacts();
+            
+            // Check if there's anything to migrate
+            if (localContactIds.length === 0 && deletedContacts.length === 0) {
+                // No local data, just load from cloud
+                this.loadFromCloud();
+                return;
+            }
+            
+            // Perform one-time migration
+            $.ajax({
+                url: vcard_contact_manager.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'vcard_migrate_to_cloud',
+                    local_contacts: JSON.stringify(localContacts),
+                    local_contact_ids: JSON.stringify(localContactIds),
+                    deleted_contacts: JSON.stringify(deletedContacts),
+                    nonce: vcard_contact_manager.nonce
+                },
+                success: (response) => {
+                    if (response.success) {
+                        // Clear all local storage
+                        localStorage.removeItem(this.storageKey);
+                        localStorage.removeItem(this.contactDataKey);
+                        localStorage.removeItem('vcard_deleted_contacts');
+                        
+                        // Load cloud contacts
+                        this.loadFromCloud();
+                        
+                        if (response.data.migrated_count > 0 || response.data.deleted_count > 0) {
+                            this.showMessage(response.data.message, 'success');
+                        }
+                    }
+                },
+                error: () => {
+                    console.warn('Migration failed, keeping local storage');
+                }
+            });
         },
 
         /**

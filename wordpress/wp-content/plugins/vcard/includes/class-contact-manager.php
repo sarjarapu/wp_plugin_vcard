@@ -32,6 +32,7 @@ class VCard_Contact_Manager {
         add_action('wp_ajax_vcard_sync_contacts', array($this, 'handle_sync_contacts'));
         add_action('wp_ajax_vcard_full_sync_contacts', array($this, 'handle_full_sync_contacts'));
         add_action('wp_ajax_vcard_push_to_cloud', array($this, 'handle_push_to_cloud'));
+        add_action('wp_ajax_vcard_migrate_to_cloud', array($this, 'handle_migrate_to_cloud'));
         
         // Add contact management meta to profile pages
         add_action('wp_head', array($this, 'add_profile_meta_tags'));
@@ -421,6 +422,77 @@ class VCard_Contact_Manager {
         wp_send_json_success(array(
             'synced_count' => $added_count,
             'total_contacts' => count($local_contact_ids),
+            'message' => $message
+        ));
+    }
+    
+    /**
+     * One-time migration from local storage to cloud
+     */
+    public function handle_migrate_to_cloud() {
+        // Check if user is logged in
+        if (!is_user_logged_in()) {
+            wp_send_json_error('User not logged in');
+        }
+        
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_public_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $local_contacts = json_decode(stripslashes($_POST['local_contacts']), true);
+        $local_contact_ids = json_decode(stripslashes($_POST['local_contact_ids']), true);
+        $deleted_contacts = json_decode(stripslashes($_POST['deleted_contacts']), true);
+        
+        if (!is_array($local_contacts)) {
+            $local_contacts = array();
+        }
+        
+        if (!is_array($local_contact_ids)) {
+            $local_contact_ids = array();
+        }
+        
+        if (!is_array($deleted_contacts)) {
+            $deleted_contacts = array();
+        }
+        
+        $user_id = get_current_user_id();
+        
+        $migrated_count = 0;
+        $deleted_count = 0;
+        
+        // Add local contacts to cloud (only if they don't exist)
+        foreach ($local_contact_ids as $profile_id) {
+            if (isset($local_contacts[$profile_id]) && !$this->contact_exists_in_database($user_id, intval($profile_id))) {
+                if ($this->save_contact_to_database($user_id, intval($profile_id), $local_contacts[$profile_id])) {
+                    $migrated_count++;
+                }
+            }
+        }
+        
+        // Remove deleted contacts from cloud
+        foreach ($deleted_contacts as $profile_id) {
+            if ($this->remove_contact_from_database($user_id, intval($profile_id))) {
+                $deleted_count++;
+            }
+        }
+        
+        // Create migration message
+        $message_parts = array();
+        if ($migrated_count > 0) {
+            $message_parts[] = sprintf(__('%d contacts migrated to your account', 'vcard'), $migrated_count);
+        }
+        if ($deleted_count > 0) {
+            $message_parts[] = sprintf(__('%d deleted contacts removed', 'vcard'), $deleted_count);
+        }
+        
+        $message = empty($message_parts) ? 
+            __('Migration completed', 'vcard') : 
+            implode(', ', $message_parts);
+        
+        wp_send_json_success(array(
+            'migrated_count' => $migrated_count,
+            'deleted_count' => $deleted_count,
             'message' => $message
         ));
     }
