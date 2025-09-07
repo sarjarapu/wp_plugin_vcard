@@ -128,6 +128,10 @@ class VCardPlugin {
         add_action('wp_ajax_vcard_contact_form', array($this, 'handle_contact_form_submission'));
         add_action('wp_ajax_nopriv_vcard_contact_form', array($this, 'handle_contact_form_submission'));
         
+        // Modern UX enhancements AJAX hooks
+        add_action('wp_ajax_vcard_modern_ux_track_event', array($this, 'handle_modern_ux_track_event'));
+        add_action('wp_ajax_nopriv_vcard_modern_ux_track_event', array($this, 'handle_modern_ux_track_event'));
+        
         // Short URL redirect handling
         add_action('init', array($this, 'handle_short_url_redirects'));
     }
@@ -138,6 +142,7 @@ class VCardPlugin {
     public function enqueue_scripts() {
         // Only enqueue on vCard profile pages
         if (is_singular('vcard_profile')) {
+            // Always load the base business profile CSS for compatibility
             wp_enqueue_style(
                 'vcard-business-profile',
                 VCARD_ASSETS_URL . 'css/business-profile.css',
@@ -145,7 +150,69 @@ class VCardPlugin {
                 VCARD_VERSION
             );
             
-            // Enqueue Font Awesome for icons
+            // Load compatibility bridge CSS for better styling
+            wp_enqueue_style(
+                'vcard-compatibility-bridge',
+                VCARD_ASSETS_URL . 'css/compatibility-bridge.css',
+                array('vcard-business-profile'),
+                VCARD_VERSION
+            );
+            
+            // Check if user wants optimized version (can be controlled via option)
+            $use_optimized_css = get_option('vcard_use_optimized_css', true); // Default to true now
+            
+            if ($use_optimized_css) {
+                // Load Tailwind utilities and components
+                wp_enqueue_style(
+                    'vcard-tailwind-utilities',
+                    VCARD_ASSETS_URL . 'css/tailwind-utilities.css',
+                    array(),
+                    VCARD_VERSION
+                );
+                
+                wp_enqueue_style(
+                    'vcard-complete-migration',
+                    VCARD_ASSETS_URL . 'css/complete-migration-optimized.css',
+                    array('vcard-tailwind-utilities'),
+                    VCARD_VERSION
+                );
+            } else {
+                // Component-based loading for development/debugging
+                
+                // Enqueue Tailwind utilities (base utilities)
+                wp_enqueue_style(
+                    'vcard-tailwind-utilities',
+                    VCARD_ASSETS_URL . 'css/tailwind-utilities.css',
+                    array(),
+                    VCARD_VERSION
+                );
+                
+                // Enqueue action bar Tailwind components
+                wp_enqueue_style(
+                    'vcard-action-bar-tailwind',
+                    VCARD_ASSETS_URL . 'css/action-bar-tailwind.css',
+                    array('vcard-tailwind-utilities'),
+                    VCARD_VERSION
+                );
+                
+                // Enqueue navigation and forms Tailwind components
+                wp_enqueue_style(
+                    'vcard-navigation-forms-tailwind',
+                    VCARD_ASSETS_URL . 'css/navigation-forms-tailwind.css',
+                    array('vcard-tailwind-utilities'),
+                    VCARD_VERSION
+                );
+                
+                // Complete migration and optimization
+                wp_enqueue_style(
+                    'vcard-complete-migration',
+                    VCARD_ASSETS_URL . 'css/complete-migration-optimized.css',
+                    array('vcard-tailwind-utilities'),
+                    VCARD_VERSION
+                );
+            }
+            
+            // Essential external dependencies (loaded asynchronously for performance)
             wp_enqueue_style(
                 'font-awesome',
                 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
@@ -153,13 +220,23 @@ class VCardPlugin {
                 '6.0.0'
             );
             
-            // Enqueue vCard sharing styles
-            wp_enqueue_style(
-                'vcard-sharing',
-                VCARD_ASSETS_URL . 'css/vcard-sharing.css',
-                array(),
-                VCARD_VERSION
-            );
+            // Legacy support - only load if Bootstrap components are still needed
+            $legacy_support = get_option('vcard_legacy_bootstrap_support', false);
+            if ($legacy_support) {
+                wp_enqueue_style(
+                    'vcard-business-profile',
+                    VCARD_ASSETS_URL . 'css/business-profile.css',
+                    array(),
+                    VCARD_VERSION
+                );
+                
+                wp_enqueue_style(
+                    'vcard-sharing',
+                    VCARD_ASSETS_URL . 'css/vcard-sharing.css',
+                    array(),
+                    VCARD_VERSION
+                );
+            }
             
             // Enqueue enhanced vCard export script
             wp_enqueue_script(
@@ -271,6 +348,15 @@ class VCardPlugin {
                     'save_failed' => __('Failed to save contact', 'vcard'),
                 )
             ));
+            
+            // Enqueue modern UX enhancements script
+            wp_enqueue_script(
+                'vcard-modern-ux',
+                VCARD_ASSETS_URL . 'js/modern-ux-enhancements.js',
+                array('jquery', 'vcard-public'),
+                VCARD_VERSION,
+                true
+            );
         }
     }
     
@@ -520,6 +606,13 @@ class VCardPlugin {
         ));
         
         register_post_meta('vcard_profile', '_vcard_shares', array(
+            'show_in_rest' => true,
+            'single' => true,
+            'type' => 'integer',
+            'default' => 0,
+        ));
+        
+        register_post_meta('vcard_profile', '_vcard_contact_saves', array(
             'show_in_rest' => true,
             'single' => true,
             'type' => 'integer',
@@ -3103,6 +3196,54 @@ class VCardPlugin {
                 }
             }
         }
+    }
+    
+    /**
+     * Handle AJAX request for event tracking from modern UX enhancements
+     */
+    public function handle_modern_ux_track_event() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_public_nonce')) {
+            wp_send_json_error('Security check failed');
+        }
+        
+        $event_name = sanitize_text_field($_POST['event_name']);
+        $event_data = isset($_POST['event_data']) ? $_POST['event_data'] : array();
+        
+        // Log the event for analytics
+        error_log("vCard Event: {$event_name} - " . json_encode($event_data));
+        
+        // If profile_id is provided, update the relevant meta field
+        if (isset($event_data['profile_id'])) {
+            $profile_id = intval($event_data['profile_id']);
+            
+            // Map modern UX events to existing tracking
+            switch ($event_name) {
+                case 'quick_action_call':
+                case 'quick_action_message':
+                case 'quick_action_whatsapp':
+                case 'quick_action_directions':
+                case 'quick_action_share_native':
+                case 'quick_action_share_clipboard':
+                    // Track as general interaction
+                    $current_views = (int) get_post_meta($profile_id, '_vcard_profile_views', true);
+                    update_post_meta($profile_id, '_vcard_profile_views', $current_views + 1);
+                    break;
+                    
+                case 'contact_save_toggle':
+                    // Track contact saves
+                    if (isset($event_data['saved']) && $event_data['saved']) {
+                        $current_saves = (int) get_post_meta($profile_id, '_vcard_contact_saves', true);
+                        update_post_meta($profile_id, '_vcard_contact_saves', $current_saves + 1);
+                    }
+                    break;
+            }
+        }
+        
+        wp_send_json_success(array(
+            'message' => 'Event tracked successfully',
+            'event' => $event_name
+        ));
     }
     
 }

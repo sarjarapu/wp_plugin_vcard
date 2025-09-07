@@ -13,6 +13,7 @@ $template_name = $business_profile->get_data('template_name') ?: 'default';
 $is_business = $business_profile->is_business_profile();
 ?>
 
+<div class="vcard-modern-wrapper">
 <div class="vcard-single-container vcard-template-<?php echo esc_attr($template_name); ?> <?php echo $is_business ? 'vcard-business-profile' : 'vcard-personal-profile'; ?>" data-profile-id="<?php echo get_the_ID(); ?>">
     <?php while (have_posts()) : the_post(); ?>
         <article class="vcard-single" data-profile-id="<?php echo get_the_ID(); ?>">
@@ -625,5 +626,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+</div> <!-- Close vcard-modern-wrapper -->
 
 <?php get_footer(); ?>

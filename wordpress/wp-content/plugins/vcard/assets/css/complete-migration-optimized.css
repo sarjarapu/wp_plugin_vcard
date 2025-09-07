@@ -1,0 +1,582 @@
+/**
+ * Complete Migration and Optimization - Phase 4
+ * Final migration with Bootstrap removal and CSS optimization
+ */
+
+/* ===== GRID SYSTEM MIGRATION ===== */
+/* Replace Bootstrap grid with Tailwind CSS Grid/Flexbox */
+
+.container-fluid-tailwind {
+    @apply w-full px-4 mx-auto;
+}
+
+.row-tailwind {
+    @apply flex flex-wrap -mx-2;
+}
+
+.col-tailwind {
+    @apply flex-1 px-2;
+}
+
+.col-1-tailwind { @apply w-1/12 px-2; }
+.col-2-tailwind { @apply w-2/12 px-2; }
+.col-3-tailwind { @apply w-3/12 px-2; }
+.col-4-tailwind { @apply w-4/12 px-2; }
+.col-6-tailwind { @apply w-6/12 px-2; }
+.col-8-tailwind { @apply w-8/12 px-2; }
+.col-9-tailwind { @apply w-9/12 px-2; }
+.col-12-tailwind { @apply w-full px-2; }
+
+/* Responsive grid */
+@media (min-width: 768px) {
+    .md\:col-1-tailwind { @apply md:w-1/12; }
+    .md\:col-2-tailwind { @apply md:w-2/12; }
+    .md\:col-3-tailwind { @apply md:w-3/12; }
+    .md\:col-4-tailwind { @apply md:w-4/12; }
+    .md\:col-6-tailwind { @apply md:w-6/12; }
+    .md\:col-8-tailwind { @apply md:w-8/12; }
+    .md\:col-9-tailwind { @apply md:w-9/12; }
+    .md\:col-12-tailwind { @apply md:w-full; }
+}
+
+@media (min-width: 1024px) {
+    .lg\:col-1-tailwind { @apply lg:w-1/12; }
+    .lg\:col-2-tailwind { @apply lg:w-2/12; }
+    .lg\:col-3-tailwind { @apply lg:w-3/12; }
+    .lg\:col-4-tailwind { @apply lg:w-4/12; }
+    .lg\:col-6-tailwind { @apply lg:w-6/12; }
+    .lg\:col-8-tailwind { @apply lg:w-8/12; }
+    .lg\:col-9-tailwind { @apply lg:w-9/12; }
+    .lg\:col-12-tailwind { @apply lg:w-full; }
+}
+
+/* ===== COMPLETE UTILITY REPLACEMENTS ===== */
+
+/* Bootstrap utility replacements */
+.d-none { @apply hidden; }
+.d-block { @apply block; }
+.d-inline { @apply inline; }
+.d-inline-block { @apply inline-block; }
+.d-flex { @apply flex; }
+.d-inline-flex { @apply inline-flex; }
+
+.flex-row { @apply flex-row; }
+.flex-column { @apply flex-col; }
+.flex-wrap { @apply flex-wrap; }
+.flex-nowrap { @apply flex-nowrap; }
+
+.justify-content-start { @apply justify-start; }
+.justify-content-center { @apply justify-center; }
+.justify-content-end { @apply justify-end; }
+.justify-content-between { @apply justify-between; }
+.justify-content-around { @apply justify-around; }
+
+.align-items-start { @apply items-start; }
+.align-items-center { @apply items-center; }
+.align-items-end { @apply items-end; }
+.align-items-stretch { @apply items-stretch; }
+
+/* Text utilities */
+.text-left { @apply text-left; }
+.text-center { @apply text-center; }
+.text-right { @apply text-right; }
+
+.text-primary { @apply text-blue-600; }
+.text-secondary { @apply text-gray-600; }
+.text-success { @apply text-green-600; }
+.text-danger { @apply text-red-600; }
+.text-warning { @apply text-yellow-600; }
+.text-info { @apply text-blue-500; }
+.text-light { @apply text-gray-300; }
+.text-dark { @apply text-gray-900; }
+.text-muted { @apply text-gray-500; }
+
+/* Background utilities */
+.bg-primary { @apply bg-blue-600; }
+.bg-secondary { @apply bg-gray-600; }
+.bg-success { @apply bg-green-600; }
+.bg-danger { @apply bg-red-600; }
+.bg-warning { @apply bg-yellow-500; }
+.bg-info { @apply bg-blue-500; }
+.bg-light { @apply bg-gray-100; }
+.bg-dark { @apply bg-gray-900; }
+
+/* Border utilities */
+.border { @apply border; }
+.border-0 { @apply border-0; }
+.border-top { @apply border-t; }
+.border-right { @apply border-r; }
+.border-bottom { @apply border-b; }
+.border-left { @apply border-l; }
+
+.border-primary { @apply border-blue-600; }
+.border-secondary { @apply border-gray-600; }
+.border-success { @apply border-green-600; }
+.border-danger { @apply border-red-600; }
+
+.rounded { @apply rounded; }
+.rounded-0 { @apply rounded-none; }
+.rounded-sm { @apply rounded-sm; }
+.rounded-lg { @apply rounded-lg; }
+.rounded-pill { @apply rounded-full; }
+.rounded-circle { @apply rounded-full; }
+
+/* Spacing utilities */
+.m-0 { @apply m-0; }
+.m-1 { @apply m-1; }
+.m-2 { @apply m-2; }
+.m-3 { @apply m-3; }
+.m-4 { @apply m-4; }
+.m-5 { @apply m-5; }
+.m-auto { @apply m-auto; }
+
+.mx-0 { @apply mx-0; }
+.mx-1 { @apply mx-1; }
+.mx-2 { @apply mx-2; }
+.mx-3 { @apply mx-3; }
+.mx-4 { @apply mx-4; }
+.mx-5 { @apply mx-5; }
+.mx-auto { @apply mx-auto; }
+
+.my-0 { @apply my-0; }
+.my-1 { @apply my-1; }
+.my-2 { @apply my-2; }
+.my-3 { @apply my-3; }
+.my-4 { @apply my-4; }
+.my-5 { @apply my-5; }
+
+.p-0 { @apply p-0; }
+.p-1 { @apply p-1; }
+.p-2 { @apply p-2; }
+.p-3 { @apply p-3; }
+.p-4 { @apply p-4; }
+.p-5 { @apply p-5; }
+
+.px-0 { @apply px-0; }
+.px-1 { @apply px-1; }
+.px-2 { @apply px-2; }
+.px-3 { @apply px-3; }
+.px-4 { @apply px-4; }
+.px-5 { @apply px-5; }
+
+.py-0 { @apply py-0; }
+.py-1 { @apply py-1; }
+.py-2 { @apply py-2; }
+.py-3 { @apply py-3; }
+.py-4 { @apply py-4; }
+.py-5 { @apply py-5; }
+
+/* ===== OPTIMIZED COMPONENT CLASSES ===== */
+
+/* Reusable design patterns as component classes */
+.vcard-profile-layout {
+    @apply max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8;
+}
+
+.vcard-header-section {
+    @apply bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl p-8 mb-8 shadow-lg;
+}
+
+.vcard-content-grid {
+    @apply grid grid-cols-1 lg:grid-cols-3 gap-8;
+}
+
+.vcard-main-content {
+    @apply lg:col-span-2 space-y-6;
+}
+
+.vcard-sidebar {
+    @apply space-y-6;
+}
+
+.vcard-section-card {
+    @apply bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow duration-200;
+}
+
+.vcard-section-header {
+    @apply px-6 py-4 border-b border-gray-100 bg-gray-50/50;
+}
+
+.vcard-section-title {
+    @apply text-lg font-semibold text-gray-900 flex items-center gap-2;
+}
+
+.vcard-section-body {
+    @apply px-6 py-4;
+}
+
+.vcard-contact-item {
+    @apply flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors duration-200;
+}
+
+.vcard-contact-icon {
+    @apply flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center;
+}
+
+.vcard-contact-icon svg {
+    @apply w-4 h-4 text-blue-600;
+}
+
+.vcard-contact-details {
+    @apply flex-1 min-w-0;
+}
+
+.vcard-contact-label {
+    @apply text-sm font-medium text-gray-900;
+}
+
+.vcard-contact-value {
+    @apply text-sm text-gray-600 truncate;
+}
+
+.vcard-contact-link {
+    @apply hover:text-blue-600 transition-colors duration-200;
+}
+
+/* Service/Product grid patterns */
+.vcard-items-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+}
+
+.vcard-items-grid.three-column {
+    @apply md:grid-cols-2 lg:grid-cols-3;
+}
+
+.vcard-item-card {
+    @apply bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-200;
+}
+
+.vcard-item-image {
+    @apply h-48 overflow-hidden;
+}
+
+.vcard-item-image img {
+    @apply w-full h-full object-cover;
+}
+
+.vcard-item-content {
+    @apply p-4;
+}
+
+.vcard-item-title {
+    @apply font-semibold text-lg text-gray-900 mb-2;
+}
+
+.vcard-item-description {
+    @apply text-gray-600 mb-3 line-clamp-3;
+}
+
+.vcard-item-footer {
+    @apply flex justify-between items-center;
+}
+
+.vcard-item-price {
+    @apply text-lg font-semibold text-green-600;
+}
+
+.vcard-item-category {
+    @apply px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full;
+}
+
+.vcard-item-status {
+    @apply px-2 py-1 text-xs font-medium rounded-full;
+}
+
+.vcard-item-status.in-stock {
+    @apply bg-green-100 text-green-800;
+}
+
+.vcard-item-status.out-of-stock {
+    @apply bg-red-100 text-red-800;
+}
+
+/* Gallery patterns */
+.vcard-gallery-grid {
+    @apply grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+}
+
+.vcard-gallery-item {
+    @apply relative group cursor-pointer overflow-hidden rounded-lg;
+}
+
+.vcard-gallery-image {
+    @apply w-full h-32 object-cover transition-transform duration-200 group-hover:scale-110;
+}
+
+.vcard-gallery-overlay {
+    @apply absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200;
+}
+
+.vcard-gallery-title {
+    @apply absolute bottom-2 left-2 text-white text-sm font-medium;
+}
+
+/* Social media patterns */
+.vcard-social-grid {
+    @apply flex flex-wrap gap-2;
+}
+
+.vcard-social-link {
+    @apply inline-flex items-center justify-center w-10 h-10 text-white rounded-full transition-all duration-200 hover:-translate-y-1 hover:shadow-lg;
+}
+
+.vcard-social-facebook { @apply bg-blue-600 hover:bg-blue-700; }
+.vcard-social-instagram { @apply bg-pink-600 hover:bg-pink-700; }
+.vcard-social-linkedin { @apply bg-blue-700 hover:bg-blue-800; }
+.vcard-social-twitter { @apply bg-blue-400 hover:bg-blue-500; }
+.vcard-social-youtube { @apply bg-red-600 hover:bg-red-700; }
+.vcard-social-tiktok { @apply bg-gray-900 hover:bg-black; }
+
+/* Business hours patterns */
+.vcard-hours-list {
+    @apply space-y-3;
+}
+
+.vcard-hours-item {
+    @apply flex justify-between items-center py-2 border-b border-gray-100 last:border-b-0;
+}
+
+.vcard-hours-day {
+    @apply font-medium text-gray-900;
+}
+
+.vcard-hours-time {
+    @apply font-medium;
+}
+
+.vcard-hours-time.open {
+    @apply text-green-600;
+}
+
+.vcard-hours-time.closed {
+    @apply text-red-600;
+}
+
+/* Action button patterns */
+.vcard-actions-grid {
+    @apply space-y-3;
+}
+
+.vcard-action-primary {
+    @apply btn-tailwind-primary w-full;
+}
+
+.vcard-action-secondary {
+    @apply btn-tailwind-outline w-full;
+}
+
+.vcard-actions-row {
+    @apply grid grid-cols-2 gap-3;
+}
+
+/* ===== CSS PURGING OPTIMIZATION ===== */
+
+/* Only include utilities that are actually used */
+/* This section would be automatically generated by a purging tool */
+
+/* Critical path CSS - inline these for performance */
+.critical-above-fold {
+    @apply block;
+}
+
+/* Non-critical CSS - can be loaded asynchronously */
+.non-critical-below-fold {
+    @apply block;
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+
+/* Reduce paint and layout thrashing */
+.vcard-optimized-animations {
+    will-change: transform, opacity;
+}
+
+.vcard-optimized-animations:hover {
+    transform: translateY(-2px);
+}
+
+/* GPU acceleration for smooth animations */
+.vcard-gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Optimize font loading */
+.vcard-font-display {
+    font-display: swap;
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+
+/* Enhanced focus states */
+.vcard-focus-enhanced:focus {
+    @apply outline-2 outline-blue-500 outline-offset-2;
+}
+
+/* Screen reader improvements */
+.vcard-sr-only {
+    @apply sr-only;
+}
+
+/* High contrast mode improvements */
+@media (prefers-contrast: high) {
+    .vcard-high-contrast {
+        @apply border-2 border-black;
+    }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .vcard-respect-motion-preference {
+        @apply transition-none;
+    }
+    
+    .vcard-respect-motion-preference * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ===== DARK MODE SUPPORT (FUTURE-PROOFING) ===== */
+
+@media (prefers-color-scheme: dark) {
+    .vcard-dark-mode-ready {
+        @apply bg-gray-900 text-white;
+    }
+    
+    .vcard-dark-mode-ready .vcard-section-card {
+        @apply bg-gray-800 border-gray-700;
+    }
+    
+    .vcard-dark-mode-ready .vcard-section-header {
+        @apply bg-gray-700/50 border-gray-600;
+    }
+    
+    .vcard-dark-mode-ready .vcard-contact-item {
+        @apply bg-gray-700 hover:bg-gray-600;
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+
+@media print {
+    .vcard-print-hidden {
+        @apply hidden;
+    }
+    
+    .vcard-print-optimized {
+        @apply text-black bg-white shadow-none;
+    }
+    
+    .vcard-print-optimized * {
+        @apply shadow-none;
+    }
+}
+
+/* ===== RESPONSIVE BREAKPOINT OPTIMIZATIONS ===== */
+
+/* Mobile-first optimizations */
+@media (max-width: 640px) {
+    .vcard-mobile-optimized {
+        @apply px-4 py-2;
+    }
+    
+    .vcard-mobile-stack {
+        @apply flex-col space-y-2;
+    }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+    .vcard-tablet-optimized {
+        @apply px-6 py-3;
+    }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+    .vcard-desktop-optimized {
+        @apply px-8 py-4;
+    }
+}
+
+/* ===== LEGACY BROWSER FALLBACKS ===== */
+
+/* Fallbacks for older browsers that don't support CSS Grid */
+@supports not (display: grid) {
+    .vcard-items-grid {
+        @apply flex flex-wrap;
+    }
+    
+    .vcard-items-grid > * {
+        @apply w-full md:w-1/2 lg:w-1/3;
+    }
+}
+
+/* Fallbacks for browsers without backdrop-filter support */
+@supports not (backdrop-filter: blur(10px)) {
+    .vcard-action-bar {
+        @apply bg-white;
+    }
+}
+
+/* ===== COMPONENT COMPOSITION PATTERNS ===== */
+
+/* Compose complex components from utilities */
+.vcard-hero-section {
+    @apply vcard-header-section text-center;
+}
+
+.vcard-feature-card {
+    @apply vcard-section-card vcard-item-card;
+}
+
+.vcard-contact-card {
+    @apply vcard-section-card p-0;
+}
+
+.vcard-stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+}
+
+.vcard-stat-item {
+    @apply text-center p-4 bg-white rounded-lg border border-gray-200;
+}
+
+.vcard-stat-number {
+    @apply text-2xl font-bold text-blue-600;
+}
+
+.vcard-stat-label {
+    @apply text-sm text-gray-600 mt-1;
+}
+
+/* ===== UTILITY EXTENSIONS ===== */
+
+/* Custom spacing scale */
+.space-y-7 > * + * { margin-top: 1.75rem; }
+.space-y-9 > * + * { margin-top: 2.25rem; }
+
+/* Custom width utilities */
+.w-18 { width: 4.5rem; }
+.w-88 { width: 22rem; }
+
+/* Custom height utilities */
+.h-18 { height: 4.5rem; }
+.h-88 { height: 22rem; }
+
+/* Line clamp utilities */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

@@ -1,0 +1,472 @@
+/**
+ * Navigation and Forms - Tailwind Migration
+ * Phase 3: Migrating navigation components and form elements
+ */
+
+/* ===== ENHANCED SECTION NAVIGATION ===== */
+.section-navigation-enhanced {
+    @apply bg-gradient-to-r from-gray-50 to-gray-100 border-b border-gray-200 overflow-x-auto scrollbar-hide relative;
+}
+
+.section-navigation-enhanced::before {
+    content: '';
+    @apply absolute top-0 left-0 w-full h-full bg-gradient-to-r from-blue-500/5 to-purple-500/5 pointer-events-none;
+}
+
+.section-nav-list-enhanced {
+    @apply flex list-none m-0 px-5 gap-0 min-w-max relative z-10;
+}
+
+.section-nav-item-enhanced {
+    @apply flex-shrink-0 relative;
+}
+
+.section-nav-link-enhanced {
+    @apply block py-4 px-6 text-gray-600 no-underline text-sm font-medium whitespace-nowrap border-b-3 border-transparent transition-all duration-300 relative overflow-hidden;
+}
+
+.section-nav-link-enhanced::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 transform scale-x-0 transition-transform duration-300 origin-left;
+}
+
+.section-nav-link-enhanced:hover {
+    @apply text-blue-700 transform -translate-y-0.5;
+}
+
+.section-nav-link-enhanced:hover::before {
+    @apply scale-x-100;
+}
+
+.section-nav-link-enhanced.active {
+    @apply text-blue-700 border-b-blue-500 bg-white shadow-sm;
+}
+
+.section-nav-link-enhanced.active::before {
+    @apply scale-x-100;
+}
+
+/* Navigation indicators */
+.section-nav-indicator {
+    @apply absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-300 transform scale-x-0;
+}
+
+.section-nav-link-enhanced.active + .section-nav-indicator {
+    @apply scale-x-100;
+}
+
+/* ===== FORM COMPONENTS ===== */
+
+/* Form Container */
+.form-container-tailwind {
+    @apply bg-white border border-gray-200 rounded-xl shadow-sm p-6 max-w-2xl mx-auto;
+}
+
+.form-container-tailwind.elevated {
+    @apply shadow-lg border-gray-300;
+}
+
+/* Form Header */
+.form-header {
+    @apply text-center mb-6 pb-4 border-b border-gray-100;
+}
+
+.form-title {
+    @apply text-xl font-semibold text-gray-800 mb-2;
+}
+
+.form-subtitle {
+    @apply text-sm text-gray-600;
+}
+
+/* Form Grid Layout */
+.form-grid {
+    @apply grid grid-cols-1 gap-4;
+}
+
+.form-grid.two-column {
+    @apply md:grid-cols-2;
+}
+
+.form-grid.three-column {
+    @apply md:grid-cols-3;
+}
+
+/* Form Groups */
+.form-group-tailwind {
+    @apply flex flex-col space-y-2;
+}
+
+.form-group-tailwind.full-width {
+    @apply md:col-span-2;
+}
+
+.form-group-tailwind.span-all {
+    @apply md:col-span-full;
+}
+
+/* Form Labels */
+.form-label-tailwind {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.form-label-tailwind.required::after {
+    content: ' *';
+    @apply text-red-500;
+}
+
+/* Form Inputs */
+.form-input-tailwind {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg text-sm transition-all duration-200 bg-white;
+}
+
+.form-input-tailwind:focus {
+    @apply outline-none ring-2 ring-blue-500/20 border-blue-500;
+}
+
+.form-input-tailwind:hover {
+    @apply border-gray-400;
+}
+
+.form-input-tailwind.error {
+    @apply border-red-500 ring-2 ring-red-500/20;
+}
+
+.form-input-tailwind.success {
+    @apply border-green-500 ring-2 ring-green-500/20;
+}
+
+/* Textarea */
+.form-textarea-tailwind {
+    @apply form-input-tailwind resize-y min-h-24;
+}
+
+/* Select Dropdown */
+.form-select-tailwind {
+    @apply form-input-tailwind appearance-none bg-no-repeat bg-right bg-center pr-10;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-size: 16px 16px;
+}
+
+/* Checkbox and Radio */
+.form-checkbox-tailwind,
+.form-radio-tailwind {
+    @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2;
+}
+
+.form-radio-tailwind {
+    @apply rounded-full;
+}
+
+.form-check-group {
+    @apply flex items-center space-x-3;
+}
+
+.form-check-label {
+    @apply text-sm text-gray-700 cursor-pointer;
+}
+
+/* Input Groups */
+.input-group {
+    @apply relative;
+}
+
+.input-group-prepend,
+.input-group-append {
+    @apply absolute top-0 bottom-0 flex items-center px-3 text-gray-500 bg-gray-50 border border-gray-300;
+}
+
+.input-group-prepend {
+    @apply left-0 rounded-l-lg border-r-0;
+}
+
+.input-group-append {
+    @apply right-0 rounded-r-lg border-l-0;
+}
+
+.input-group .form-input-tailwind {
+    @apply pl-12;
+}
+
+.input-group.append .form-input-tailwind {
+    @apply pr-12 pl-4;
+}
+
+/* Form Validation */
+.form-error-message {
+    @apply text-xs text-red-600 mt-1 flex items-center space-x-1;
+}
+
+.form-success-message {
+    @apply text-xs text-green-600 mt-1 flex items-center space-x-1;
+}
+
+.form-help-text {
+    @apply text-xs text-gray-500 mt-1;
+}
+
+/* Form Actions */
+.form-actions {
+    @apply flex flex-col sm:flex-row gap-3 pt-6 mt-6 border-t border-gray-100;
+}
+
+.form-actions.center {
+    @apply justify-center;
+}
+
+.form-actions.end {
+    @apply justify-end;
+}
+
+.form-actions.between {
+    @apply justify-between;
+}
+
+/* Enhanced Buttons */
+.btn-tailwind {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium rounded-lg border transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2;
+}
+
+.btn-tailwind:disabled {
+    @apply opacity-50 cursor-not-allowed;
+}
+
+.btn-tailwind-primary {
+    @apply btn-tailwind bg-blue-600 text-white border-blue-600 hover:bg-blue-700 hover:border-blue-700 focus:ring-blue-500 hover:-translate-y-0.5 hover:shadow-lg;
+}
+
+.btn-tailwind-secondary {
+    @apply btn-tailwind bg-gray-600 text-white border-gray-600 hover:bg-gray-700 hover:border-gray-700 focus:ring-gray-500 hover:-translate-y-0.5 hover:shadow-lg;
+}
+
+.btn-tailwind-success {
+    @apply btn-tailwind bg-green-600 text-white border-green-600 hover:bg-green-700 hover:border-green-700 focus:ring-green-500 hover:-translate-y-0.5 hover:shadow-lg;
+}
+
+.btn-tailwind-outline {
+    @apply btn-tailwind bg-transparent text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white focus:ring-blue-500 hover:-translate-y-0.5 hover:shadow-lg;
+}
+
+.btn-tailwind-ghost {
+    @apply btn-tailwind bg-transparent text-gray-600 border-transparent hover:bg-gray-100 hover:text-gray-800 focus:ring-gray-500;
+}
+
+/* Button Sizes */
+.btn-tailwind-sm {
+    @apply px-4 py-2 text-xs;
+}
+
+.btn-tailwind-lg {
+    @apply px-8 py-4 text-base;
+}
+
+.btn-tailwind-xl {
+    @apply px-10 py-5 text-lg;
+}
+
+/* Button Loading State */
+.btn-tailwind.loading {
+    @apply opacity-75 cursor-wait;
+}
+
+.btn-tailwind.loading .btn-text {
+    @apply opacity-0;
+}
+
+.btn-loading-spinner {
+    @apply absolute inset-0 flex items-center justify-center;
+}
+
+/* ===== CARD COMPONENTS ===== */
+.card-tailwind {
+    @apply bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden;
+}
+
+.card-tailwind.elevated {
+    @apply shadow-lg border-gray-300;
+}
+
+.card-tailwind.interactive {
+    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-1 cursor-pointer;
+}
+
+.card-header {
+    @apply px-6 py-4 border-b border-gray-100 bg-gray-50/50;
+}
+
+.card-title {
+    @apply text-lg font-semibold text-gray-800 mb-1;
+}
+
+.card-subtitle {
+    @apply text-sm text-gray-600;
+}
+
+.card-body {
+    @apply px-6 py-4;
+}
+
+.card-footer {
+    @apply px-6 py-4 border-t border-gray-100 bg-gray-50/50;
+}
+
+/* ===== CONTAINER COMPONENTS ===== */
+.container-tailwind {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+}
+
+.container-tailwind-sm {
+    @apply max-w-3xl mx-auto px-4 sm:px-6;
+}
+
+.container-tailwind-xs {
+    @apply max-w-xl mx-auto px-4;
+}
+
+/* Section Containers */
+.section-container {
+    @apply py-8 sm:py-12 lg:py-16;
+}
+
+.section-container.compact {
+    @apply py-4 sm:py-6 lg:py-8;
+}
+
+.section-container.spacious {
+    @apply py-12 sm:py-16 lg:py-24;
+}
+
+/* ===== ENHANCED TYPOGRAPHY ===== */
+.typography-tailwind {
+    @apply text-gray-800 leading-relaxed;
+}
+
+.typography-tailwind h1 {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight;
+}
+
+.typography-tailwind h2 {
+    @apply text-2xl sm:text-3xl lg:text-4xl font-semibold text-gray-900 mb-3 leading-tight;
+}
+
+.typography-tailwind h3 {
+    @apply text-xl sm:text-2xl lg:text-3xl font-semibold text-gray-900 mb-3 leading-tight;
+}
+
+.typography-tailwind h4 {
+    @apply text-lg sm:text-xl font-semibold text-gray-900 mb-2 leading-tight;
+}
+
+.typography-tailwind p {
+    @apply text-base text-gray-700 mb-4 leading-relaxed;
+}
+
+.typography-tailwind a {
+    @apply text-blue-600 hover:text-blue-800 transition-colors duration-200;
+}
+
+.typography-tailwind ul,
+.typography-tailwind ol {
+    @apply mb-4 pl-6;
+}
+
+.typography-tailwind li {
+    @apply mb-2 text-gray-700;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .section-navigation-enhanced {
+        @apply px-4;
+    }
+    
+    .section-nav-list-enhanced {
+        @apply px-0;
+    }
+    
+    .section-nav-link-enhanced {
+        @apply py-3 px-4 text-xs;
+    }
+    
+    .form-container-tailwind {
+        @apply p-4 mx-4;
+    }
+    
+    .form-grid.two-column,
+    .form-grid.three-column {
+        @apply grid-cols-1;
+    }
+    
+    .form-actions {
+        @apply flex-col;
+    }
+    
+    .btn-tailwind {
+        @apply w-full justify-center;
+    }
+    
+    .card-tailwind {
+        @apply mx-4;
+    }
+}
+
+@media (max-width: 480px) {
+    .section-nav-link-enhanced {
+        @apply py-2 px-3 text-xs;
+    }
+    
+    .form-container-tailwind {
+        @apply p-3 mx-2 rounded-lg;
+    }
+    
+    .form-input-tailwind,
+    .form-textarea-tailwind,
+    .form-select-tailwind {
+        @apply px-3 py-2 text-sm;
+    }
+    
+    .btn-tailwind {
+        @apply px-4 py-2 text-sm;
+    }
+    
+    .card-header,
+    .card-body,
+    .card-footer {
+        @apply px-4 py-3;
+    }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+.form-input-tailwind:focus-visible,
+.form-textarea-tailwind:focus-visible,
+.form-select-tailwind:focus-visible,
+.btn-tailwind:focus-visible {
+    @apply outline-2 outline-blue-500 outline-offset-2;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .form-input-tailwind,
+    .form-textarea-tailwind,
+    .form-select-tailwind {
+        @apply border-2;
+    }
+    
+    .btn-tailwind {
+        @apply border-2;
+    }
+    
+    .card-tailwind {
+        @apply border-2;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .section-nav-link-enhanced,
+    .form-input-tailwind,
+    .btn-tailwind,
+    .card-tailwind {
+        @apply transition-none;
+    }
+}

@@ -1,0 +1,568 @@
+/**
+ * Modern UX Enhancements - Phase 1: Bootstrap Foundation
+ * Enhanced user experience components while maintaining Bootstrap compatibility
+ */
+
+/* ===== STICKY ACTION BAR ===== */
+.vcard-modern-action-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid #e9ecef;
+    padding: 12px 0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.vcard-modern-action-bar.scrolled {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.15);
+}
+
+.action-bar-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Contact Save Status Indicator */
+.contact-save-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.save-contact-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 2px solid #dee2e6;
+    border-radius: 25px;
+    background: #f8f9fa;
+    color: #495057;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.save-contact-btn:hover {
+    border-color: #007bff;
+    background: #e3f2fd;
+    color: #0056b3;
+    transform: translateY(-1px);
+}
+
+.save-contact-btn.saved {
+    border-color: #28a745;
+    background: #d4edda;
+    color: #155724;
+}
+
+.save-contact-btn.saved:hover {
+    background: #c3e6cb;
+}
+
+.save-contact-btn .save-icon {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.2s ease;
+}
+
+.save-contact-btn.saved .save-icon {
+    transform: scale(1.1);
+}
+
+/* Quick Action Buttons */
+.quick-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.quick-action-btn.call {
+    background: #28a745;
+}
+
+.quick-action-btn.call:hover {
+    background: #218838;
+}
+
+.quick-action-btn.message {
+    background: #007bff;
+}
+
+.quick-action-btn.message:hover {
+    background: #0056b3;
+}
+
+.quick-action-btn.whatsapp {
+    background: #25d366;
+}
+
+.quick-action-btn.whatsapp:hover {
+    background: #1ebe57;
+}
+
+.quick-action-btn.share {
+    background: #6c757d;
+}
+
+.quick-action-btn.share:hover {
+    background: #545b62;
+}
+
+.quick-action-btn.directions {
+    background: #dc3545;
+}
+
+.quick-action-btn.directions:hover {
+    background: #c82333;
+}
+
+/* ===== SECTION NAVIGATION ===== */
+.section-navigation {
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    padding: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.section-navigation::-webkit-scrollbar {
+    display: none;
+}
+
+.section-nav-list {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0 20px;
+    gap: 0;
+    min-width: max-content;
+}
+
+.section-nav-item {
+    flex-shrink: 0;
+}
+
+.section-nav-link {
+    display: block;
+    padding: 12px 20px;
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 500;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.section-nav-link:hover {
+    color: #007bff;
+    background: rgba(0, 123, 255, 0.05);
+    text-decoration: none;
+}
+
+.section-nav-link.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    background: rgba(0, 123, 255, 0.1);
+}
+
+/* ===== SCROLL TO TOP BUTTON ===== */
+.scroll-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 20px rgba(0, 123, 255, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.scroll-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.scroll-to-top:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(0, 123, 255, 0.4);
+}
+
+/* ===== ENHANCED TYPOGRAPHY AND SPACING ===== */
+.vcard-modern-wrapper {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    line-height: 1.6;
+}
+
+.vcard-modern-wrapper h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+}
+
+.vcard-modern-wrapper h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+}
+
+.vcard-modern-wrapper h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+}
+
+.vcard-modern-wrapper h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+
+.vcard-modern-wrapper p {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+/* Enhanced Button Styles */
+.btn-modern {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn-modern:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+}
+
+.btn-modern-primary {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.btn-modern-primary:hover {
+    background: #0056b3;
+    border-color: #0056b3;
+    color: white;
+}
+
+.btn-modern-success {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.btn-modern-success:hover {
+    background: #218838;
+    border-color: #218838;
+    color: white;
+}
+
+.btn-modern-outline {
+    background: transparent;
+    color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-modern-outline:hover {
+    background: #007bff;
+    color: white;
+}
+
+/* ===== SMOOTH SCROLLING ENHANCEMENTS ===== */
+html {
+    scroll-behavior: smooth;
+}
+
+.vcard-section {
+    scroll-margin-top: 120px; /* Account for sticky header */
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* ===== LOADING STATES ===== */
+.loading-spinner {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===== VISUAL FEEDBACK ANIMATIONS ===== */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.pulse {
+    animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .action-bar-container {
+        padding: 0 15px;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .contact-save-status {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .quick-actions {
+        order: 1;
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .save-contact-btn {
+        flex: 1;
+        justify-content: center;
+        max-width: 300px;
+    }
+    
+    .section-nav-list {
+        padding: 0 15px;
+    }
+    
+    .section-nav-link {
+        padding: 10px 15px;
+        font-size: 0.85rem;
+    }
+    
+    .scroll-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .vcard-modern-action-bar {
+        padding: 8px 0;
+    }
+    
+    .action-bar-container {
+        padding: 0 10px;
+    }
+    
+    .quick-action-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+    
+    .save-contact-btn {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .section-nav-link {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus states for better accessibility */
+.save-contact-btn:focus,
+.quick-action-btn:focus,
+.section-nav-link:focus,
+.scroll-to-top:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .vcard-modern-action-bar {
+        border-bottom: 2px solid #000;
+    }
+    
+    .save-contact-btn {
+        border-width: 2px;
+    }
+    
+    .section-nav-link.active {
+        border-bottom-width: 4px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+/* ===== CONTACT SAVE STATUS MANAGEMENT ===== */
+.contact-save-feedback {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    z-index: 1060;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+.contact-save-feedback.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.contact-save-feedback.error {
+    background: #dc3545;
+}
+
+.contact-save-feedback .feedback-icon {
+    margin-right: 8px;
+}
+
+/* ===== ENHANCED VISUAL HIERARCHY ===== */
+.vcard-modern-wrapper .vcard-content > * + * {
+    margin-top: 2rem;
+}
+
+.vcard-modern-wrapper .vcard-section + .vcard-section {
+    margin-top: 3rem;
+}
+
+/* Better spacing for content sections */
+.vcard-modern-wrapper .vcard-services,
+.vcard-modern-wrapper .vcard-products,
+.vcard-modern-wrapper .vcard-gallery,
+.vcard-modern-wrapper .vcard-business-hours,
+.vcard-modern-wrapper .vcard-contact-info,
+.vcard-modern-wrapper .vcard-address,
+.vcard-modern-wrapper .vcard-contact-form {
+    padding: 1.5rem 0;
+}
+
+/* Enhanced section headers */
+.vcard-modern-wrapper .vcard-content h3 {
+    position: relative;
+    padding-left: 1rem;
+}
+
+.vcard-modern-wrapper .vcard-content h3::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #007bff;
+    border-radius: 2px;
+}
