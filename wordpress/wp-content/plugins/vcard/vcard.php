@@ -119,6 +119,8 @@ class VCardPlugin {
         add_action('wp_ajax_nopriv_download_qr_code', array($this, 'handle_download_qr_code'));
         add_action('wp_ajax_track_vcard_event', array($this, 'handle_track_event'));
         add_action('wp_ajax_nopriv_track_vcard_event', array($this, 'handle_track_event'));
+        add_action('wp_ajax_save_vcard_contact', array($this, 'handle_save_vcard_contact'));
+        add_action('wp_ajax_nopriv_save_vcard_contact', array($this, 'handle_save_vcard_contact'));
         
         // Short URL redirect handling
         add_action('init', array($this, 'handle_short_url_redirects'));
@@ -210,6 +212,25 @@ class VCardPlugin {
                     'copy_failed' => __('Failed to copy to clipboard', 'vcard'),
                     'short_url_generated' => __('Short URL generated successfully', 'vcard'),
                     'loading' => __('Loading...', 'vcard'),
+                )
+            ));
+            
+            // Enqueue public script for contact saving functionality
+            wp_enqueue_script(
+                'vcard-public',
+                VCARD_ASSETS_URL . 'js/public.js',
+                array('jquery'),
+                VCARD_VERSION,
+                true
+            );
+            
+            wp_localize_script('vcard-public', 'vcard_public', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('vcard_public_nonce'),
+                'strings' => array(
+                    'save_contact' => __('Save Contact', 'vcard'),
+                    'contact_saved' => __('Contact saved successfully!', 'vcard'),
+                    'save_failed' => __('Failed to save contact', 'vcard'),
                 )
             ));
         }
@@ -987,6 +1008,72 @@ class VCardPlugin {
         } catch (Exception $e) {
             error_log('Event tracking error: ' . $e->getMessage());
             wp_send_json_error('Event tracking failed');
+        }
+    }
+    
+    /**
+     * Handle AJAX request for saving vCard contact
+     */
+    public function handle_save_vcard_contact() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_public_nonce')) {
+            wp_die('Security check failed');
+        }
+        
+        $profile_id = intval($_POST['profile_id']);
+        $user_id = get_current_user_id();
+        
+        if (!$profile_id || !$user_id) {
+            wp_send_json_error('Invalid profile ID or user not logged in');
+        }
+        
+        // Check if user has permission to save contacts
+        if (!current_user_can('save_vcard_contacts')) {
+            wp_send_json_error('You do not have permission to save contacts');
+        }
+        
+        // Check if post exists and is vcard_profile type
+        $post = get_post($profile_id);
+        if (!$post || $post->post_type !== 'vcard_profile') {
+            wp_send_json_error('Profile not found');
+        }
+        
+        try {
+            global $wpdb;
+            $saved_contacts_table = $wpdb->prefix . 'vcard_saved_contacts';
+            
+            // Check if already saved
+            $existing = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM $saved_contacts_table WHERE user_id = %d AND profile_id = %d",
+                $user_id,
+                $profile_id
+            ));
+            
+            if ($existing) {
+                wp_send_json_error('Contact already saved');
+            }
+            
+            // Save the contact
+            $result = $wpdb->insert(
+                $saved_contacts_table,
+                array(
+                    'user_id' => $user_id,
+                    'profile_id' => $profile_id,
+                    'saved_at' => current_time('mysql'),
+                    'notes' => ''
+                ),
+                array('%d', '%d', '%s', '%s')
+            );
+            
+            if ($result === false) {
+                wp_send_json_error('Failed to save contact');
+            }
+            
+            wp_send_json_success('Contact saved successfully');
+            
+        } catch (Exception $e) {
+            error_log('Save contact error: ' . $e->getMessage());
+            wp_send_json_error('Failed to save contact');
         }
     }
     
@@ -2275,10 +2362,137 @@ class VCardPlugin {
      * User dashboard page callback
      */
     public function user_dashboard_page() {
+        $current_user_id = get_current_user_id();
+        
+        // Handle contact removal
+        if (isset($_POST['remove_contact']) && wp_verify_nonce($_POST['_wpnonce'], 'remove_contact')) {
+            $profile_id = intval($_POST['profile_id']);
+            $this->remove_saved_contact($current_user_id, $profile_id);
+            echo '<div class="notice notice-success"><p>' . __('Contact removed successfully.', 'vcard') . '</p></div>';
+        }
+        
+        // Get saved contacts
+        $saved_contacts = $this->get_user_saved_contacts($current_user_id);
+        
         echo '<div class="wrap">';
         echo '<h1>' . __('My Saved Contacts', 'vcard') . '</h1>';
-        echo '<p>' . __('Saved contacts management will be implemented in future tasks.', 'vcard') . '</p>';
-        echo '</div>';
+        
+        if (empty($saved_contacts)) {
+            echo '<div class="notice notice-info">';
+            echo '<p>' . __('You haven\'t saved any contacts yet. Visit business profiles and click "Save Contact" to add them here.', 'vcard') . '</p>';
+            echo '</div>';
+        } else {
+            echo '<div class="saved-contacts-grid">';
+            
+            foreach ($saved_contacts as $contact) {
+                $profile_url = get_permalink($contact->profile_id);
+                $business_profile = new VCard_Business_Profile($contact->profile_id);
+                
+                // Get contact info
+                $business_name = $business_profile->get_data('business_name') ?: $contact->business_name;
+                $tagline = $business_profile->get_data('business_tagline');
+                $phone = $business_profile->get_data('phone');
+                $email = $business_profile->get_data('email');
+                $website = $business_profile->get_data('website');
+                
+                echo '<div class="contact-card">';
+                echo '<div class="contact-header">';
+                echo '<h3><a href="' . esc_url($profile_url) . '">' . esc_html($business_name) . '</a></h3>';
+                if ($tagline) {
+                    echo '<p class="contact-tagline">' . esc_html($tagline) . '</p>';
+                }
+                echo '</div>';
+                
+                echo '<div class="contact-details">';
+                if ($phone) {
+                    echo '<div class="contact-item"><i class="fas fa-phone"></i> <a href="tel:' . esc_attr($phone) . '">' . esc_html($phone) . '</a></div>';
+                }
+                if ($email) {
+                    echo '<div class="contact-item"><i class="fas fa-envelope"></i> <a href="mailto:' . esc_attr($email) . '">' . esc_html($email) . '</a></div>';
+                }
+                if ($website) {
+                    echo '<div class="contact-item"><i class="fas fa-globe"></i> <a href="' . esc_url($website) . '" target="_blank">' . esc_html($website) . '</a></div>';
+                }
+                echo '<div class="contact-item"><i class="fas fa-calendar"></i> Saved: ' . date('M j, Y', strtotime($contact->saved_at)) . '</div>';
+                echo '</div>';
+                
+                echo '<div class="contact-actions">';
+                echo '<a href="' . esc_url($profile_url) . '" class="button button-primary">View Profile</a>';
+                
+                // Remove contact form
+                echo '<form method="post" style="display: inline-block; margin-left: 10px;">';
+                wp_nonce_field('remove_contact');
+                echo '<input type="hidden" name="profile_id" value="' . esc_attr($contact->profile_id) . '">';
+                echo '<button type="submit" name="remove_contact" class="button button-secondary" onclick="return confirm(\'Are you sure you want to remove this contact?\')">Remove</button>';
+                echo '</form>';
+                echo '</div>';
+                
+                echo '</div>'; // contact-card
+            }
+            
+            echo '</div>'; // saved-contacts-grid
+        }
+        
+        echo '</div>'; // wrap
+        
+        // Add CSS for the contact cards
+        echo '<style>
+        .saved-contacts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .contact-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .contact-header h3 {
+            margin: 0 0 5px 0;
+        }
+        
+        .contact-header h3 a {
+            text-decoration: none;
+            color: #0073aa;
+        }
+        
+        .contact-tagline {
+            color: #666;
+            font-style: italic;
+            margin: 0 0 15px 0;
+        }
+        
+        .contact-details {
+            margin-bottom: 15px;
+        }
+        
+        .contact-item {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .contact-item i {
+            width: 16px;
+            color: #666;
+        }
+        
+        .contact-item a {
+            text-decoration: none;
+        }
+        
+        .contact-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        </style>';
     }
     
     /**
@@ -2455,8 +2669,8 @@ class VCardPlugin {
             "SELECT sc.*, p.post_title as business_name, p.post_status
              FROM " . VCARD_SAVED_CONTACTS_TABLE . " sc
              LEFT JOIN {$wpdb->posts} p ON sc.profile_id = p.ID
-             WHERE sc.user_id = %d AND p.post_type = 'vcard_profile'
-             ORDER BY sc.updated_at DESC
+             WHERE sc.user_id = %d AND p.post_type = 'vcard_profile' AND p.post_status = 'publish'
+             ORDER BY sc.saved_at DESC
              LIMIT %d OFFSET %d",
             $user_id,
             $limit,

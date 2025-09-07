@@ -30,7 +30,7 @@
             $('.vcard-download-btn').on('click', this.handleVCardDownload);
             
             // Contact save
-            $('.vcard-save-contact').on('click', this.handleSaveContact);
+            $('.vcard-save-contact-btn').on('click', this.handleSaveContact);
             
             // Share buttons
             $('.vcard-share-btn').on('click', this.handleShare);
@@ -82,15 +82,41 @@
             var $button = $(this);
             var profileId = $button.data('profile-id');
             
-            // Save to local storage for now
-            VCardPublic.saveToLocalStorage(profileId);
+            if (!profileId) {
+                VCardPublic.showMessage('Profile ID not found', 'error');
+                return;
+            }
             
-            // Update button state
-            $button.text('Saved!').addClass('saved');
+            // Show loading state
+            $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
             
-            setTimeout(function() {
-                $button.text(vcard_public.strings.save_contact).removeClass('saved');
-            }, 2000);
+            // Save contact via AJAX
+            $.ajax({
+                url: vcard_public.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'save_vcard_contact',
+                    profile_id: profileId,
+                    nonce: vcard_public.nonce
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $button.html('<i class="fas fa-check"></i> Saved!').addClass('saved');
+                        VCardPublic.showMessage('Contact saved successfully!', 'success');
+                        
+                        setTimeout(function() {
+                            $button.html('<i class="fas fa-bookmark"></i> Save Contact').removeClass('saved').prop('disabled', false);
+                        }, 2000);
+                    } else {
+                        VCardPublic.showMessage(response.data || 'Failed to save contact', 'error');
+                        $button.html('<i class="fas fa-bookmark"></i> Save Contact').prop('disabled', false);
+                    }
+                },
+                error: function() {
+                    VCardPublic.showMessage('Network error occurred', 'error');
+                    $button.html('<i class="fas fa-bookmark"></i> Save Contact').prop('disabled', false);
+                }
+            });
         },
 
         /**
