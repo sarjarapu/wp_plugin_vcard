@@ -29,9 +29,9 @@ class VCardTemplateRenderer {
     private function initializeTwig() {
         $loader = new \Twig\Loader\FilesystemLoader($this->template_path);
         $this->twig = new \Twig\Environment($loader, [
-            'cache' => VCARD_PLUGIN_PATH . 'cache/twig',
-            'debug' => WP_DEBUG,
-            'auto_reload' => WP_DEBUG
+            'cache' => false, // Disabled for development
+            'debug' => true,
+            'auto_reload' => true
         ]);
         
         // Add WordPress-specific filters

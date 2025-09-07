@@ -41,51 +41,94 @@
                 </div>
             </div>
             
-            {# Section Navigation #}
-            <nav class="vcard-section-nav">
-                <div class="section-nav-container">
-                    {% set sections = [] %}
+            {# Modern Action Bar Container - JavaScript will populate this #}
+            <div class="vcard-modern-action-bar">
+                {# Section Navigation - First in action bar #}
+                <nav class="section-navigation">
+                    <div class="section-nav-container">
+                        {% set sections = [] %}
+                        
+                        {# Build available sections list #}
+                        {% set description = is_business ? basic_info.business_description : profile.raw_data.content %}
+                        {% if description %}
+                            {% set sections = sections|merge([{id: 'about', label: is_business ? __('About', 'vcard') : __('About', 'vcard')}]) %}
+                        {% endif %}
+                        
+                        {% if is_business and has_services %}
+                            {% set sections = sections|merge([{id: 'services', label: __('Services', 'vcard')}]) %}
+                        {% endif %}
+                        
+                        {% if is_business and has_products %}
+                            {% set sections = sections|merge([{id: 'products', label: __('Products', 'vcard')}]) %}
+                        {% endif %}
+                        
+                        {% if business_data.gallery and business_data.gallery is iterable and business_data.gallery|length > 0 %}
+                            {% set sections = sections|merge([{id: 'gallery', label: __('Gallery', 'vcard')}]) %}
+                        {% endif %}
+                        
+                        {% if basic_info.phone or basic_info.email or basic_info.website or basic_info.address %}
+                            {% set sections = sections|merge([{id: 'contact', label: __('Contact', 'vcard')}]) %}
+                        {% endif %}
+                        
+                        {% if social_media and social_media is iterable and social_media|length > 0 %}
+                            {% set sections = sections|merge([{id: 'social', label: __('Social', 'vcard')}]) %}
+                        {% endif %}
+                        
+                        {# Render navigation if we have multiple sections #}
+                        {% if sections|length > 1 %}
+                            <ul class="section-nav-list">
+                                {% for section in sections %}
+                                    <li class="section-nav-item">
+                                        <a href="#{{ section.id }}" class="section-nav-link" data-section="{{ section.id }}">
+                                            {{ section.label }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                </nav>
+                
+                {# Action Bar Container - JavaScript will populate this #}
+                <div class="action-bar-container">
+                    <div class="action-bar-container-placeholder">
+                        <!-- JavaScript will inject quick actions here -->
+                    </div>
                     
-                    {# Build available sections list #}
-                    {% set description = is_business ? basic_info.business_description : profile.raw_data.content %}
-                    {% if description %}
-                        {% set sections = sections|merge([{id: 'about', label: is_business ? __('About', 'vcard') : __('About', 'vcard')}]) %}
-                    {% endif %}
-                    
-                    {% if is_business and has_services %}
-                        {% set sections = sections|merge([{id: 'services', label: __('Services', 'vcard')}]) %}
-                    {% endif %}
-                    
-                    {% if is_business and has_products %}
-                        {% set sections = sections|merge([{id: 'products', label: __('Products', 'vcard')}]) %}
-                    {% endif %}
-                    
-                    {% if business_data.gallery and business_data.gallery is iterable and business_data.gallery|length > 0 %}
-                        {% set sections = sections|merge([{id: 'gallery', label: __('Gallery', 'vcard')}]) %}
-                    {% endif %}
-                    
-                    {% if basic_info.phone or basic_info.email or basic_info.website or basic_info.address %}
-                        {% set sections = sections|merge([{id: 'contact', label: __('Contact', 'vcard')}]) %}
-                    {% endif %}
-                    
-                    {% if social_media and social_media is iterable and social_media|length > 0 %}
-                        {% set sections = sections|merge([{id: 'social', label: __('Social', 'vcard')}]) %}
-                    {% endif %}
-                    
-                    {# Render navigation if we have multiple sections #}
-                    {% if sections|length > 1 %}
-                        <ul class="section-nav-list">
-                            {% for section in sections %}
-                                <li class="section-nav-item">
-                                    <a href="#{{ section.id }}" class="section-nav-link" data-section="{{ section.id }}">
-                                        {{ section.label }}
-                                    </a>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
+                    {# Additional vCard Actions #}
+                    <div class="vcard-actions-extended">
+                        <button class="vcard-view-contacts-btn">
+                            <i class="fas fa-address-book"></i>
+                            {{ __('My Contacts', 'vcard') }}
+                            <span class="vcard-contact-count" style="display: none;">0</span>
+                        </button>
+                        
+                        <div class="vcard-download-group">
+                            <button class="vcard-download-btn" data-profile-id="{{ profile_id }}" data-format="vcf">
+                                <i class="fas fa-download"></i>
+                                {{ __('Download', 'vcard') }}
+                            </button>
+                            <div class="vcard-download-options">
+                                <button class="vcard-export-vcf" data-profile-id="{{ profile_id }}">
+                                    <i class="fas fa-file-alt"></i>
+                                    {{ __('VCF', 'vcard') }}
+                                </button>
+                                <button class="vcard-export-csv" data-profile-id="{{ profile_id }}">
+                                    <i class="fas fa-table"></i>
+                                    {{ __('CSV', 'vcard') }}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        {% if is_business %}
+                            <button class="vcard-qr-btn" data-profile-id="{{ profile_id }}">
+                                <i class="fas fa-qrcode"></i>
+                                {{ __('QR Code', 'vcard') }}
+                            </button>
+                        {% endif %}
+                    </div>
                 </div>
-            </nav>
+            </div>
             
             <div class="vcard-content">
                 
@@ -354,49 +397,7 @@
                     </div>
                 {% endif %}
                 
-                {# Action Buttons #}
-                <div class="vcard-actions">
-                    {# Contact Management Buttons #}
-                    <div class="vcard-contact-management">
-                        <button class="vcard-save-contact-btn" data-profile-id="{{ profile_id }}">
-                            <i class="fas fa-bookmark"></i>
-                            {{ __('Save Contact', 'vcard') }}
-                        </button>
-                        
-                        <button class="vcard-view-contacts-btn">
-                            <i class="fas fa-address-book"></i>
-                            {{ __('My Contacts', 'vcard') }}
-                            <span class="vcard-contact-count" style="display: none;">0</span>
-                        </button>
-                    </div>
-                    
-                    <div class="vcard-download-group">
-                        <button class="vcard-download-btn" data-profile-id="{{ profile_id }}" data-format="vcf">
-                            <i class="fas fa-download"></i>
-                            {{ __('Download vCard', 'vcard') }}
-                        </button>
-                        <div class="vcard-download-options">
-                            <button class="vcard-export-vcf" data-profile-id="{{ profile_id }}">
-                                <i class="fas fa-file-alt"></i>
-                                {{ __('VCF Format', 'vcard') }}
-                            </button>
-                            <button class="vcard-export-csv" data-profile-id="{{ profile_id }}">
-                                <i class="fas fa-table"></i>
-                                {{ __('CSV Format', 'vcard') }}
-                            </button>
-                        </div>
-                    </div>
-                    <button class="vcard-share-btn" onclick="shareProfile()">
-                        <i class="fas fa-share-alt"></i>
-                        {{ __('Share Profile', 'vcard') }}
-                    </button>
-                    {% if is_business %}
-                        <button class="vcard-qr-btn" data-profile-id="{{ profile_id }}">
-                            <i class="fas fa-qrcode"></i>
-                            {{ __('QR Code', 'vcard') }}
-                        </button>
-                    {% endif %}
-                </div>
+
             </div>
         </article>
     </div>
