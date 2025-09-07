@@ -1,0 +1,337 @@
+{# Default vCard Profile Template #}
+<div class="vcard-modern-wrapper">
+    <div class="vcard-single-container vcard-template-{{ template_settings.template_name }} {{ is_business ? 'vcard-business-profile' : 'vcard-personal-profile' }}" data-profile-id="{{ profile_id }}">
+        
+        <article class="vcard-single" data-profile-id="{{ profile_id }}">
+            
+            {# Profile Header Section #}
+            <div class="vcard-header">
+                {% if thumbnail_url %}
+                    <div class="vcard-photo">
+                        <img src="{{ thumbnail_url }}" alt="{{ is_business ? basic_info.business_name : (basic_info.first_name ~ ' ' ~ basic_info.last_name) }}" />
+                    </div>
+                {% endif %}
+                
+                <div class="vcard-basic-info">
+                    <h1 class="vcard-name">
+                        {% if is_business %}
+                            {{ basic_info.business_name|esc_html }}
+                        {% else %}
+                            {{ (basic_info.first_name ~ ' ' ~ basic_info.last_name)|trim|esc_html }}
+                        {% endif %}
+                    </h1>
+                    
+                    {% if is_business and basic_info.business_tagline %}
+                        <p class="vcard-tagline">{{ basic_info.business_tagline|esc_html }}</p>
+                    {% elseif basic_info.job_title or basic_info.company %}
+                        <p class="vcard-title">
+                            {{ basic_info.job_title|esc_html }}
+                            {% if basic_info.job_title and basic_info.company %} at {% endif %}
+                            {{ basic_info.company|esc_html }}
+                        </p>
+                    {% endif %}
+                    
+                    {# Profile View Counter #}
+                    <div class="vcard-stats">
+                        <span class="profile-views">
+                            <i class="fas fa-eye"></i>
+                            {{ __('%d views', 'vcard')|format(analytics.profile_views + 1) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vcard-content">
+                
+                {# Business Description or Personal Bio #}
+                {% set description = is_business ? basic_info.business_description : profile.raw_data.content %}
+                {% if description %}
+                    <div id="about" class="vcard-description vcard-section">
+                        <h3>{{ is_business ? __('About Our Business', 'vcard') : __('About', 'vcard') }}</h3>
+                        {% if is_business %}
+                            {{ description|wpautop|wp_kses_post|raw }}
+                        {% else %}
+                            {{ description|raw }}
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                {# Business Services Section #}
+                {% if is_business and has_services %}
+                    <div id="services" class="vcard-services vcard-section">
+                        <h3>{{ __('Our Services', 'vcard') }}</h3>
+                        <div class="services-grid">
+                            {% for service in business_data.services %}
+                                <div class="service-item">
+                                    {% if service.image %}
+                                        <div class="service-image">
+                                            <img src="{{ service.image|esc_url }}" alt="{{ service.name|esc_attr }}">
+                                        </div>
+                                    {% endif %}
+                                    <div class="service-content">
+                                        <h4 class="service-name">{{ service.name|esc_html }}</h4>
+                                        {% if service.description %}
+                                            <p class="service-description">{{ service.description|esc_html }}</p>
+                                        {% endif %}
+                                        {% if service.price %}
+                                            <div class="service-price">{{ service.price|esc_html }}</div>
+                                        {% endif %}
+                                        {% if service.category %}
+                                            <div class="service-category">{{ service.category|esc_html }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {# Business Products Section #}
+                {% if is_business and has_products %}
+                    <div id="products" class="vcard-products vcard-section">
+                        <h3>{{ __('Our Products', 'vcard') }}</h3>
+                        <div class="products-grid">
+                            {% for product in business_data.products %}
+                                <div class="product-item">
+                                    {% if product.images and product.images is iterable %}
+                                        <div class="product-images">
+                                            <img src="{{ product.images[0]|esc_url }}" alt="{{ product.name|esc_attr }}">
+                                            {% if product.images|length > 1 %}
+                                                <div class="product-gallery-indicator">
+                                                    <i class="fas fa-images"></i>
+                                                    {{ __('%d photos', 'vcard')|format(product.images|length) }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="product-content">
+                                        <h4 class="product-name">{{ product.name|esc_html }}</h4>
+                                        {% if product.description %}
+                                            <p class="product-description">{{ product.description|esc_html }}</p>
+                                        {% endif %}
+                                        <div class="product-details">
+                                            {% if product.price %}
+                                                <div class="product-price">{{ product.price|esc_html }}</div>
+                                            {% endif %}
+                                            {% if product.category %}
+                                                <div class="product-category">{{ product.category|esc_html }}</div>
+                                            {% endif %}
+                                            {% if product.in_stock is defined %}
+                                                <div class="product-stock {{ product.in_stock ? 'in-stock' : 'out-of-stock' }}">
+                                                    {{ product.in_stock ? __('In Stock', 'vcard') : __('Out of Stock', 'vcard') }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {# Business Gallery Section #}
+                {% if is_business and has_gallery %}
+                    <div id="gallery" class="vcard-gallery vcard-section">
+                        <h3>{{ __('Gallery', 'vcard') }}</h3>
+                        <div class="gallery-grid">
+                            {% for item in business_data.gallery %}
+                                <div class="gallery-item">
+                                    <img src="{{ (item.thumbnail_url ?? item.image_url)|esc_url }}" 
+                                         alt="{{ item.title|default('')|esc_attr }}"
+                                         data-full="{{ item.image_url|esc_url }}">
+                                    {% if item.title %}
+                                        <div class="gallery-item-title">{{ item.title|esc_html }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {# Business Hours Section #}
+                {% if is_business and has_business_hours %}
+                    <div id="hours" class="vcard-business-hours vcard-section">
+                        <h3>{{ __('Business Hours', 'vcard') }}</h3>
+                        <div class="business-hours-list">
+                            {% for day, schedule in business_hours %}
+                                <div class="business-hours-item">
+                                    <span class="day-label">{{ schedule.label|esc_html }}</span>
+                                    <span class="hours-status {{ schedule.closed ? 'closed' : 'open' }}">
+                                        {{ schedule.status|esc_html }}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {# Contact Information Section #}
+                <div id="contact" class="vcard-contact-info vcard-section">
+                    <h3>{{ __('Contact Information', 'vcard') }}</h3>
+                    
+                    {% for contact in contact_info %}
+                        <div class="vcard-contact-item">
+                            <i class="{{ contact.icon }}"></i>
+                            <div class="contact-details">
+                                <strong>{{ contact.label|esc_html }}:</strong>
+                                {% if contact.type in ['tel', 'email', 'whatsapp', 'url'] %}
+                                    <a href="{{ contact.link|esc_url }}">{{ contact.value|esc_html }}</a>
+                                {% else %}
+                                    {{ contact.value|esc_html }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    {# Social Media Links #}
+                    {% if has_social_media %}
+                        <div class="vcard-social-media">
+                            <h4>{{ __('Follow Us', 'vcard') }}</h4>
+                            <div class="social-links">
+                                {% for platform, data in social_media %}
+                                    <a href="{{ data.url|esc_url }}" target="_blank" rel="noopener" class="social-link social-{{ platform }}">
+                                        <i class="{{ data.icon_class }}"></i>
+                                        <span class="sr-only">{{ data.platform }}</span>
+                                    </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {# Address Section #}
+                {% if has_address %}
+                    <div class="vcard-address">
+                        <h3><i class="fas fa-map-marker-alt"></i> {{ __('Address', 'vcard') }}</h3>
+                        <div class="vcard-address-details">
+                            {% if address.address %}
+                                <div class="address-line">{{ address.address|esc_html }}</div>
+                            {% endif %}
+                            <div class="address-line">
+                                {{ address.city|esc_html }}
+                                {% if address.city and address.state %}, {% endif %}
+                                {{ address.state|esc_html }}
+                                {% if address.zip_code %} {{ address.zip_code|esc_html }}{% endif %}
+                            </div>
+                            {% if address.country %}
+                                <div class="address-line">{{ address.country|esc_html }}</div>
+                            {% endif %}
+                            
+                            {# Map Integration #}
+                            {% if address.latitude and address.longitude %}
+                                <div class="address-map">
+                                    <a href="https://maps.google.com/?q={{ address.latitude|esc_attr }},{{ address.longitude|esc_attr }}" 
+                                       target="_blank" rel="noopener" class="map-link">
+                                        <i class="fas fa-external-link-alt"></i>
+                                        {{ __('View on Map', 'vcard') }}
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {# Contact Form Section #}
+                {% if is_business and settings.contact_form_enabled != '0' %}
+                    <div class="vcard-contact-form">
+                        <h3>{{ settings.contact_form_title|default(__('Leave a Message', 'vcard'))|esc_html }}</h3>
+                        <form id="vcard-contact-form" class="contact-form" method="post" action="">
+                            <input type="hidden" name="vcard_contact_nonce" value="{{ contact_form_nonce }}">
+                            <input type="hidden" name="profile_id" value="{{ profile_id }}">
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="contact_name">{{ __('Your Name', 'vcard') }} <span class="required">*</span></label>
+                                    <input type="text" id="contact_name" name="contact_name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contact_email">{{ __('Your Email', 'vcard') }} <span class="required">*</span></label>
+                                    <input type="email" id="contact_email" name="contact_email" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="contact_phone">{{ __('Your Phone', 'vcard') }}</label>
+                                    <input type="tel" id="contact_phone" name="contact_phone">
+                                </div>
+                                <div class="form-group">
+                                    <label for="contact_subject">{{ __('Subject', 'vcard') }}</label>
+                                    <input type="text" id="contact_subject" name="contact_subject">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="contact_message">{{ __('Message', 'vcard') }} <span class="required">*</span></label>
+                                <textarea id="contact_message" name="contact_message" rows="5" required placeholder="{{ __('Tell us about your inquiry...', 'vcard')|esc_attr }}"></textarea>
+                            </div>
+                            
+                            {# Honeypot field for spam protection #}
+                            <div class="honeypot-field" style="display: none;">
+                                <label for="website_url">{{ __('Website', 'vcard') }}</label>
+                                <input type="text" id="website_url" name="website_url" tabindex="-1" autocomplete="off">
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="submit" class="contact-submit-btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                    {{ __('Send Message', 'vcard') }}
+                                </button>
+                                <div class="form-loading" style="display: none;">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    {{ __('Sending...', 'vcard') }}
+                                </div>
+                            </div>
+                            
+                            <div class="form-messages"></div>
+                        </form>
+                    </div>
+                {% endif %}
+                
+                {# Action Buttons #}
+                <div class="vcard-actions">
+                    {# Contact Management Buttons #}
+                    <div class="vcard-contact-management">
+                        <button class="vcard-save-contact-btn" data-profile-id="{{ profile_id }}">
+                            <i class="fas fa-bookmark"></i>
+                            {{ __('Save Contact', 'vcard') }}
+                        </button>
+                        
+                        <button class="vcard-view-contacts-btn">
+                            <i class="fas fa-address-book"></i>
+                            {{ __('My Contacts', 'vcard') }}
+                            <span class="vcard-contact-count" style="display: none;">0</span>
+                        </button>
+                    </div>
+                    
+                    <div class="vcard-download-group">
+                        <button class="vcard-download-btn" data-profile-id="{{ profile_id }}" data-format="vcf">
+                            <i class="fas fa-download"></i>
+                            {{ __('Download vCard', 'vcard') }}
+                        </button>
+                        <div class="vcard-download-options">
+                            <button class="vcard-export-vcf" data-profile-id="{{ profile_id }}">
+                                <i class="fas fa-file-alt"></i>
+                                {{ __('VCF Format', 'vcard') }}
+                            </button>
+                            <button class="vcard-export-csv" data-profile-id="{{ profile_id }}">
+                                <i class="fas fa-table"></i>
+                                {{ __('CSV Format', 'vcard') }}
+                            </button>
+                        </div>
+                    </div>
+                    <button class="vcard-share-btn" onclick="shareProfile()">
+                        <i class="fas fa-share-alt"></i>
+                        {{ __('Share Profile', 'vcard') }}
+                    </button>
+                    {% if is_business %}
+                        <button class="vcard-qr-btn" data-profile-id="{{ profile_id }}">
+                            <i class="fas fa-qrcode"></i>
+                            {{ __('QR Code', 'vcard') }}
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+    </div>
+</div>

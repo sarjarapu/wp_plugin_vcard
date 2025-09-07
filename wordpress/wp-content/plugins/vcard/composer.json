@@ -1,0 +1,17 @@
+{
+    "name": "vcard/business-directory",
+    "description": "vCard Business Directory Plugin with Twig Templating",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=7.4",
+        "twig/twig": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "VCard\\": "includes/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

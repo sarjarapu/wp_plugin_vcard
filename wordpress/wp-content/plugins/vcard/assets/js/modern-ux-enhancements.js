@@ -47,12 +47,13 @@
             $(window).on('scroll', () => {
                 const scrolled = $(window).scrollTop() > 50;
                 $('.vcard-modern-action-bar').toggleClass('scrolled', scrolled);
+                this.updateActiveSection();
             });
         }
 
         createActionBarHTML() {
             return `
-                <div class="vcard-action-bar">
+                <div class="vcard-modern-action-bar">
                     <div class="action-bar-container">
                         <!-- Contact Save Status -->
                         <div class="contact-save-status">
@@ -151,8 +152,12 @@
 
             Object.entries(sectionMappings).forEach(([sectionId, selector]) => {
                 const $element = $(selector).first();
-                if ($element.length && !$element.attr('id')) {
-                    $element.attr('id', sectionId).addClass('vcard-section');
+                if ($element.length) {
+                    // Add ID if it doesn't exist, or ensure it has the right class
+                    if (!$element.attr('id')) {
+                        $element.attr('id', sectionId);
+                    }
+                    $element.addClass('vcard-section');
                 }
             });
         }
@@ -199,8 +204,11 @@
                 const sectionId = $link.data('section');
                 const $section = $(`#${sectionId}`);
                 
-                if (!$section.length || $section.is(':empty')) {
+                // Only hide if section doesn't exist at all
+                if (!$section.length) {
                     $link.parent().hide();
+                } else {
+                    $link.parent().show();
                 }
             });
         }

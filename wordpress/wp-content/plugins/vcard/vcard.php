@@ -158,6 +158,14 @@ class VCardPlugin {
                 VCARD_VERSION
             );
             
+            // Load modern UX enhancements CSS
+            wp_enqueue_style(
+                'vcard-modern-ux',
+                VCARD_ASSETS_URL . 'css/modern-ux-enhancements.css',
+                array('vcard-compatibility-bridge'),
+                VCARD_VERSION
+            );
+            
             // Check if user wants optimized version (can be controlled via option)
             $use_optimized_css = get_option('vcard_use_optimized_css', true); // Default to true now
             
@@ -187,10 +195,10 @@ class VCardPlugin {
                     VCARD_VERSION
                 );
                 
-                // Enqueue action bar Tailwind components
+                // Enqueue action bar Tailwind components (Phase 2)
                 wp_enqueue_style(
                     'vcard-action-bar-tailwind',
-                    VCARD_ASSETS_URL . 'css/action-bar-tailwind.css',
+                    VCARD_ASSETS_URL . 'css/tailwind-action-bar.css',
                     array('vcard-tailwind-utilities'),
                     VCARD_VERSION
                 );
@@ -349,10 +357,19 @@ class VCardPlugin {
                 )
             ));
             
-            // Enqueue modern UX enhancements script
+            // Enqueue modern UX enhancements script (Phase 1 - Bootstrap)
             wp_enqueue_script(
                 'vcard-modern-ux',
                 VCARD_ASSETS_URL . 'js/modern-ux-enhancements.js',
+                array('jquery', 'vcard-public'),
+                VCARD_VERSION,
+                true
+            );
+            
+            // Enqueue Tailwind modern UX script (Phase 2 - Tailwind Migration)
+            wp_enqueue_script(
+                'vcard-modern-ux-tailwind',
+                VCARD_ASSETS_URL . 'js/modern-ux-tailwind.js',
                 array('jquery', 'vcard-public'),
                 VCARD_VERSION,
                 true
@@ -390,6 +407,16 @@ class VCardPlugin {
      * Load plugin dependencies
      */
     private function load_dependencies() {
+        // Load Composer autoloader for Twig
+        if (file_exists(VCARD_PLUGIN_PATH . 'vendor/autoload.php')) {
+            require_once VCARD_PLUGIN_PATH . 'vendor/autoload.php';
+        }
+        
+        // Load new architecture classes
+        require_once VCARD_INCLUDES_PATH . 'VCardDatabaseHelper.php';
+        require_once VCARD_INCLUDES_PATH . 'VCardTemplateRenderer.php';
+        require_once VCARD_INCLUDES_PATH . 'VCardProfileController.php';
+        
         // Load BusinessProfile class for enhanced profile management
         require_once VCARD_INCLUDES_PATH . 'class-business-profile.php';
         
@@ -398,9 +425,6 @@ class VCardPlugin {
         
         // Load vCard Sharing class for QR codes and social sharing
         require_once VCARD_INCLUDES_PATH . 'class-vcard-sharing.php';
-        
-        // Load TemplateEngine class for template rendering
-        require_once VCARD_INCLUDES_PATH . 'class-template-engine.php';
         
         // Load TemplateCustomizer class for template customization
         require_once VCARD_INCLUDES_PATH . 'class-template-customizer.php';
@@ -419,10 +443,6 @@ class VCardPlugin {
         
         // Load User Registration class
         require_once VCARD_INCLUDES_PATH . 'class-user-registration.php';
-        
-        // Core includes will be loaded in future tasks
-        // require_once VCARD_INCLUDES_PATH . 'class-vcard-post-type.php';
-        // require_once VCARD_INCLUDES_PATH . 'class-vcard-meta-fields.php';
     }
     
     public function init() {
@@ -723,10 +743,16 @@ class VCardPlugin {
         }
         
         try {
-            // Create business profile instance
-            $business_profile = new VCard_Business_Profile($profile_id);
+            // Use new architecture
+            $controller = new VCard\VCardProfileController();
+            $vcard_data = $controller->generateVCardExportData($profile_id);
             
-            // Create export instance
+            if (!$vcard_data) {
+                wp_send_json_error('Failed to generate vCard data');
+            }
+            
+            // Create export instance with new data
+            $business_profile = new VCard_Business_Profile($profile_id);
             $exporter = new VCard_Export($business_profile);
             $exporter->set_format($format);
             
@@ -1647,7 +1673,8 @@ class VCardPlugin {
         }
         
         if (is_singular('vcard_profile')) {
-            $plugin_template = VCARD_PLUGIN_PATH . 'templates/single-vcard_profile.php';
+            // Use new Twig-based template
+            $plugin_template = VCARD_PLUGIN_PATH . 'templates/single-vcard_profile-twig.php';
             if (file_exists($plugin_template)) {
                 return $plugin_template;
             }

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind Action Bar Migration Test</title>
+    <link rel="stylesheet" href="assets/css/tailwind-action-bar.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        .test-content {
+            height: 200vh;
+            padding: 20px;
+        }
+        .test-section {
+            height: 300px;
+            margin: 40px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body data-profile-id="123">
+    <div class="vcard-modern-wrapper">
+        <div class="vcard-single-container" data-profile-id="123">
+            
+            <!-- Test Content -->
+            <div class="test-content">
+                <h1>Tailwind Action Bar Migration Test</h1>
+                <p>This page tests the Tailwind-based action bar components (Phase 2).</p>
+                
+                <div id="about" class="test-section vcard-section">
+                    <h2>About Section</h2>
+                    <p>This is the about section content.</p>
+                </div>
+                
+                <div id="services" class="test-section vcard-section">
+                    <h2>Services Section</h2>
+                    <p>This is the services section content.</p>
+                </div>
+                
+                <div id="products" class="test-section vcard-section">
+                    <h2>Products Section</h2>
+                    <p>This is the products section content.</p>
+                </div>
+                
+                <div id="gallery" class="test-section vcard-section">
+                    <h2>Gallery Section</h2>
+                    <p>This is the gallery section content.</p>
+                </div>
+                
+                <div id="contact" class="test-section vcard-section">
+                    <h2>Contact Section</h2>
+                    <p>This is the contact section content.</p>
+                    
+                    <!-- Test contact info for quick actions -->
+                    <div class="vcard-contact-item">
+                        <strong>Phone:</strong> <a href="tel:+1234567890">+1 (234) 567-890</a>
+                    </div>
+                    <div class="vcard-contact-item">
+                        <strong>WhatsApp:</strong> <a href="https://wa.me/1234567890">+1 (234) 567-890</a>
+                    </div>
+                    <div class="vcard-address-details">
+                        123 Main Street, City, State 12345
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Mock WordPress AJAX object for testing
+        window.vcard_public = {
+            ajax_url: '/wp-admin/admin-ajax.php',
+            nonce: 'test-nonce'
+        };
+    </script>
+    <script src="assets/js/modern-ux-tailwind.js"></script>
+    
+    <script>
+        // Add some test styling to show the difference
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add a banner to show this is the Tailwind version
+            const banner = document.createElement('div');
+            banner.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; right: 0; background: #10b981; color: white; text-align: center; padding: 5px; z-index: 1000; font-size: 12px;">
+                    🎨 Tailwind Migration Test - Phase 2: Action Bar Components
+                </div>
+            `;
+            document.body.insertBefore(banner, document.body.firstChild);
+            
+            // Adjust body padding to account for banner
+            document.body.style.paddingTop = '30px';
+        });
+    </script>
+</body>
+</html>
