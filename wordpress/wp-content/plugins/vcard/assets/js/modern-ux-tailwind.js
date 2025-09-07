@@ -93,30 +93,6 @@
                             </a>
                         </div>
                     </div>
-                    
-                    <!-- Section Navigation -->
-                    <div class="section-navigation-tw">
-                        <ul class="section-nav-list-tw tw-list-none tw-m-0">
-                            <li class="section-nav-item-tw">
-                                <a href="#about" class="section-nav-link-tw" data-section="about">About</a>
-                            </li>
-                            <li class="section-nav-item-tw">
-                                <a href="#services" class="section-nav-link-tw" data-section="services">Services</a>
-                            </li>
-                            <li class="section-nav-item-tw">
-                                <a href="#products" class="section-nav-link-tw" data-section="products">Products</a>
-                            </li>
-                            <li class="section-nav-item-tw">
-                                <a href="#gallery" class="section-nav-link-tw" data-section="gallery">Gallery</a>
-                            </li>
-                            <li class="section-nav-item-tw">
-                                <a href="#hours" class="section-nav-link-tw" data-section="hours">Hours</a>
-                            </li>
-                            <li class="section-nav-item-tw">
-                                <a href="#contact" class="section-nav-link-tw" data-section="contact">Contact</a>
-                            </li>
-                        </ul>
-                    </div>
                 </div>
             `;
         }

@@ -367,13 +367,14 @@ class VCardPlugin {
             );
             
             // Enqueue Tailwind modern UX script (Phase 2 - Tailwind Migration)
-            wp_enqueue_script(
-                'vcard-modern-ux-tailwind',
-                VCARD_ASSETS_URL . 'js/modern-ux-tailwind.js',
-                array('jquery', 'vcard-public'),
-                VCARD_VERSION,
-                true
-            );
+            // Disabled: Tailwind version causes duplicate action bars
+            // wp_enqueue_script(
+            //     'vcard-modern-ux-tailwind',
+            //     VCARD_ASSETS_URL . 'js/modern-ux-tailwind.js',
+            //     array('jquery', 'vcard-public'),
+            //     VCARD_VERSION,
+            //     true
+            // );
         }
     }
     
