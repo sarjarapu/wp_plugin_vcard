@@ -74,9 +74,16 @@
         },
 
         /**
-         * Handle save contact
+         * Handle save contact (deprecated - handled by VCardContactManager)
          */
         handleSaveContact: function(e) {
+            // This is now handled by VCardContactManager
+            // Keep for backward compatibility but delegate to contact manager
+            if (window.VCardContactManager) {
+                return VCardContactManager.handleSaveContact(e);
+            }
+            
+            // Fallback for when contact manager is not loaded
             e.preventDefault();
             
             var $button = $(this);
@@ -90,7 +97,7 @@
             // Show loading state
             $button.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Saving...');
             
-            // Save contact via AJAX
+            // Save contact via AJAX (basic fallback)
             $.ajax({
                 url: vcard_public.ajax_url,
                 type: 'POST',
@@ -192,9 +199,15 @@
         },
 
         /**
-         * Save contact to local storage
+         * Save contact to local storage (deprecated - use VCardContactManager instead)
          */
         saveToLocalStorage: function(profileId) {
+            // This method is deprecated in favor of VCardContactManager
+            if (window.VCardContactManager) {
+                console.warn('VCardPublic.saveToLocalStorage is deprecated. Use VCardContactManager instead.');
+                return;
+            }
+            
             var savedContacts = JSON.parse(localStorage.getItem('vcard_saved_contacts') || '[]');
             
             if (savedContacts.indexOf(profileId) === -1) {

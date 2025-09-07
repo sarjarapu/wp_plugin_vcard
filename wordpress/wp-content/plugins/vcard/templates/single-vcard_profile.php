@@ -375,12 +375,19 @@ $is_business = $business_profile->is_business_profile();
                 
                 <!-- Action Buttons -->
                 <div class="vcard-actions">
-                    <?php if (is_user_logged_in() && current_user_can('save_vcard_contacts')) : ?>
+                    <!-- Contact Management Buttons (for all users) -->
+                    <div class="vcard-contact-management">
                         <button class="vcard-save-contact-btn" data-profile-id="<?php echo get_the_ID(); ?>">
                             <i class="fas fa-bookmark"></i>
                             <?php _e('Save Contact', 'vcard'); ?>
                         </button>
-                    <?php endif; ?>
+                        
+                        <button class="vcard-view-contacts-btn">
+                            <i class="fas fa-address-book"></i>
+                            <?php _e('My Contacts', 'vcard'); ?>
+                            <span class="vcard-contact-count" style="display: none;">0</span>
+                        </button>
+                    </div>
                     
                     <div class="vcard-download-group">
                         <button class="vcard-download-btn" data-profile-id="<?php echo get_the_ID(); ?>" data-format="vcf">

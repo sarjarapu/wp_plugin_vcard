@@ -122,6 +122,12 @@ class VCardPlugin {
         add_action('wp_ajax_save_vcard_contact', array($this, 'handle_save_vcard_contact'));
         add_action('wp_ajax_nopriv_save_vcard_contact', array($this, 'handle_save_vcard_contact'));
         
+        // Contact management AJAX hooks
+        add_action('wp_ajax_vcard_track_event', array($this, 'handle_track_event'));
+        add_action('wp_ajax_nopriv_vcard_track_event', array($this, 'handle_track_event'));
+        add_action('wp_ajax_vcard_contact_form', array($this, 'handle_contact_form_submission'));
+        add_action('wp_ajax_nopriv_vcard_contact_form', array($this, 'handle_contact_form_submission'));
+        
         // Short URL redirect handling
         add_action('init', array($this, 'handle_short_url_redirects'));
     }
@@ -224,6 +230,38 @@ class VCardPlugin {
                 true
             );
             
+            // Enqueue contact manager script and styles
+            wp_enqueue_script(
+                'vcard-contact-manager',
+                VCARD_ASSETS_URL . 'js/contact-manager.js',
+                array('jquery'),
+                VCARD_VERSION,
+                true
+            );
+            
+            wp_enqueue_style(
+                'vcard-contact-manager',
+                VCARD_ASSETS_URL . 'css/contact-manager.css',
+                array(),
+                VCARD_VERSION
+            );
+            
+            // Localize contact manager script
+            wp_localize_script('vcard-contact-manager', 'vcard_contact_manager', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('vcard_public_nonce'),
+                'is_logged_in' => is_user_logged_in(),
+                'user_id' => get_current_user_id(),
+                'strings' => array(
+                    'save_to_cloud' => __('Save to Account', 'vcard'),
+                    'sync_with_cloud' => __('Sync with Account', 'vcard'),
+                    'cloud_sync_success' => __('Synced with your account!', 'vcard'),
+                    'cloud_sync_failed' => __('Failed to sync with account', 'vcard'),
+                    'login_required' => __('Please login to sync contacts', 'vcard'),
+                    'register_prompt' => __('Create an account to save contacts across devices', 'vcard'),
+                )
+            ));
+            
             wp_localize_script('vcard-public', 'vcard_public', array(
                 'ajax_url' => admin_url('admin-ajax.php'),
                 'nonce' => wp_create_nonce('vcard_public_nonce'),
@@ -289,6 +327,12 @@ class VCardPlugin {
         
         // Load Profile Manager class
         require_once VCARD_INCLUDES_PATH . 'class-profile-manager.php';
+        
+        // Load Contact Manager class
+        require_once VCARD_INCLUDES_PATH . 'class-contact-manager.php';
+        
+        // Load User Registration class
+        require_once VCARD_INCLUDES_PATH . 'class-user-registration.php';
         
         // Core includes will be loaded in future tasks
         // require_once VCARD_INCLUDES_PATH . 'class-vcard-post-type.php';
@@ -955,61 +999,7 @@ class VCardPlugin {
         }
     }
     
-    /**
-     * Handle AJAX request for tracking events
-     */
-    public function handle_track_event() {
-        // Verify nonce
-        if (!wp_verify_nonce($_POST['nonce'], 'vcard_sharing_nonce')) {
-            wp_die('Security check failed');
-        }
-        
-        $event_type = sanitize_text_field($_POST['event_type']);
-        $event_data = json_decode(stripslashes($_POST['event_data']), true) ?: array();
-        
-        if (!$event_type) {
-            wp_send_json_error('Invalid event type');
-        }
-        
-        try {
-            // Store detailed analytics if analytics table exists
-            global $wpdb;
-            $analytics_table = $wpdb->prefix . 'vcard_analytics';
-            
-            if ($wpdb->get_var("SHOW TABLES LIKE '$analytics_table'") === $analytics_table) {
-                $wpdb->insert(
-                    $analytics_table,
-                    array(
-                        'profile_id' => isset($event_data['profile_id']) ? intval($event_data['profile_id']) : 0,
-                        'event_type' => $event_type,
-                        'event_data' => wp_json_encode($event_data),
-                        'created_at' => current_time('mysql')
-                    ),
-                    array('%d', '%s', '%s', '%s')
-                );
-            }
-            
-            // Update profile-specific counters for certain events
-            if (isset($event_data['profile_id']) && $event_data['profile_id']) {
-                $profile_id = intval($event_data['profile_id']);
-                
-                switch ($event_type) {
-                    case 'profile_view':
-                        $current_views = (int) get_post_meta($profile_id, '_vcard_profile_views', true);
-                        update_post_meta($profile_id, '_vcard_profile_views', $current_views + 1);
-                        break;
-                }
-            }
-            
-            do_action('vcard_event_tracked', $event_type, $event_data);
-            
-            wp_send_json_success('Event tracked');
-            
-        } catch (Exception $e) {
-            error_log('Event tracking error: ' . $e->getMessage());
-            wp_send_json_error('Event tracking failed');
-        }
-    }
+
     
     /**
      * Handle AJAX request for saving vCard contact
@@ -1841,24 +1831,26 @@ class VCardPlugin {
         ) $charset_collate COMMENT='Subscription and billing management';";
         
         // Saved contacts table - for end user contact management
-        // Allows registered users to save business contacts with personal notes
+        // Allows registered users to save business contacts with contact data
         $saved_contacts_table = "CREATE TABLE " . VCARD_SAVED_CONTACTS_TABLE . " (
             id bigint(20) NOT NULL AUTO_INCREMENT,
             user_id bigint(20) NOT NULL COMMENT 'WordPress user ID (end user)',
             profile_id bigint(20) NOT NULL COMMENT 'vCard profile ID being saved',
+            contact_data longtext NOT NULL COMMENT 'JSON data containing contact information',
             notes text COMMENT 'Personal notes about this business contact',
             tags varchar(255) COMMENT 'Comma-separated tags for organization',
             is_favorite tinyint(1) DEFAULT 0 COMMENT 'Favorite contact flag',
             contact_frequency varchar(20) COMMENT 'never, rarely, sometimes, often',
             last_contacted datetime COMMENT 'Last contact date',
             reminder_date datetime COMMENT 'Follow-up reminder date',
-            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            saved_at datetime DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY user_id (user_id),
             KEY profile_id (profile_id),
             KEY is_favorite (is_favorite),
             KEY reminder_date (reminder_date),
+            KEY saved_at (saved_at),
             UNIQUE KEY user_profile (user_id, profile_id)
         ) $charset_collate COMMENT='End user saved business contacts';";
         
@@ -2984,6 +2976,82 @@ class VCardPlugin {
         // Also increment a simple counter in post meta
         $current_inquiries = (int) get_post_meta($profile_id, '_vcard_contact_inquiries', true);
         update_post_meta($profile_id, '_vcard_contact_inquiries', $current_inquiries + 1);
+    }
+    
+    /**
+     * Handle AJAX request for tracking events
+     */
+    public function handle_track_event() {
+        // Verify nonce - accept both sharing and public nonces
+        $nonce_valid = wp_verify_nonce($_POST['nonce'], 'vcard_public_nonce') || 
+                      wp_verify_nonce($_POST['nonce'], 'vcard_sharing_nonce');
+        
+        if (!$nonce_valid) {
+            wp_die('Security check failed');
+        }
+        
+        $event_type = sanitize_text_field($_POST['event_type']);
+        $event_data = json_decode(stripslashes($_POST['event_data']), true);
+        
+        if (empty($event_type)) {
+            wp_send_json_error('Invalid event type');
+        }
+        
+        // Log the event
+        $this->log_analytics_event($event_type, $event_data);
+        
+        wp_send_json_success();
+    }
+    
+    /**
+     * Log analytics event
+     */
+    private function log_analytics_event($event_type, $event_data = array()) {
+        global $wpdb;
+        $analytics_table = VCARD_ANALYTICS_TABLE;
+        
+        // Check if table exists
+        if ($wpdb->get_var("SHOW TABLES LIKE '$analytics_table'") === $analytics_table) {
+            $profile_id = isset($event_data['profile_id']) ? intval($event_data['profile_id']) : 0;
+            
+            $wpdb->insert(
+                $analytics_table,
+                array(
+                    'profile_id' => $profile_id,
+                    'event_type' => $event_type,
+                    'event_date' => current_time('mysql'),
+                    'user_ip' => $this->get_client_ip(),
+                    'user_agent' => sanitize_text_field($_SERVER['HTTP_USER_AGENT'] ?? ''),
+                    'event_data' => wp_json_encode($event_data)
+                ),
+                array('%d', '%s', '%s', '%s', '%s', '%s')
+            );
+            
+            // Update post meta counters for quick access
+            if ($profile_id > 0) {
+                switch ($event_type) {
+                    case 'profile_view':
+                        $current_views = (int) get_post_meta($profile_id, '_vcard_profile_views', true);
+                        update_post_meta($profile_id, '_vcard_profile_views', $current_views + 1);
+                        break;
+                        
+                    case 'vcard_download':
+                        $current_downloads = (int) get_post_meta($profile_id, '_vcard_vcard_downloads', true);
+                        update_post_meta($profile_id, '_vcard_vcard_downloads', $current_downloads + 1);
+                        break;
+                        
+                    case 'qr_scan':
+                        $current_scans = (int) get_post_meta($profile_id, '_vcard_qr_scans', true);
+                        update_post_meta($profile_id, '_vcard_qr_scans', $current_scans + 1);
+                        break;
+                        
+                    case 'profile_share':
+                        $current_shares = (int) get_post_meta($profile_id, '_vcard_shares', true);
+                        update_post_meta($profile_id, '_vcard_shares', $current_shares + 1);
+                        break;
+                }
+            }
+        }
     }
     
 }

@@ -1,0 +1,647 @@
+/**
+ * vCard User Registration Styles
+ * Version: 1.0.0
+ */
+
+/* Registration Modal */
+.vcard-registration-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: none;
+}
+
+.vcard-registration-modal .vcard-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+}
+
+.vcard-registration-modal .vcard-modal-content {
+    position: relative;
+    max-width: 500px;
+    width: 90%;
+    max-height: 90vh;
+    margin: 5vh auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.vcard-registration-modal .vcard-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    background: linear-gradient(135deg, #007cba 0%, #005a87 100%);
+    color: white;
+}
+
+.vcard-registration-modal .vcard-modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.vcard-registration-modal.vcard-login-mode .vcard-register-title,
+.vcard-registration-modal.vcard-register-mode .vcard-login-title {
+    display: none;
+}
+
+.vcard-registration-modal .vcard-modal-close {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.vcard-registration-modal .vcard-modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.vcard-registration-modal .vcard-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+/* Registration Methods */
+.vcard-registration-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.vcard-registration-method {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.vcard-registration-method:hover {
+    border-color: #007cba;
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 124, 186, 0.15);
+}
+
+.vcard-registration-method i {
+    font-size: 24px;
+    color: #007cba;
+    width: 32px;
+    text-align: center;
+}
+
+.vcard-registration-method span {
+    font-weight: 600;
+    color: #333;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.vcard-registration-method small {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+/* Social Login */
+.vcard-social-divider {
+    text-align: center;
+    margin: 24px 0;
+    position: relative;
+}
+
+.vcard-social-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: #e1e5e9;
+}
+
+.vcard-social-divider span {
+    background: white;
+    padding: 0 16px;
+    color: #6c757d;
+    font-size: 14px;
+    position: relative;
+}
+
+.vcard-social-login-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.vcard-social-login-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: #333;
+}
+
+.vcard-social-login-btn:hover {
+    border-color: #007cba;
+    background: #f8f9fa;
+    transform: translateY(-2px);
+}
+
+.vcard-social-login-btn i {
+    font-size: 20px;
+}
+
+.vcard-social-login-btn[data-provider="google"] i {
+    color: #db4437;
+}
+
+.vcard-social-login-btn[data-provider="facebook"] i {
+    color: #4267b2;
+}
+
+.vcard-social-login-btn[data-provider="linkedin"] i {
+    color: #0077b5;
+}
+
+.vcard-social-login-btn span {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+/* Forms */
+.vcard-registration-modal form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.vcard-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.vcard-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.vcard-form-field label {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+}
+
+.vcard-form-field input {
+    padding: 12px 16px;
+    border: 2px solid #e1e5e9;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.vcard-form-field input:focus {
+    outline: none;
+    border-color: #007cba;
+    box-shadow: 0 0 0 3px rgba(0, 124, 186, 0.1);
+}
+
+.vcard-form-field input:invalid {
+    border-color: #dc3545;
+}
+
+.vcard-form-field small {
+    color: #6c757d;
+    font-size: 12px;
+}
+
+/* Password Strength */
+.vcard-password-strength {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.vcard-password-strength .strength-bar {
+    flex: 1;
+    height: 4px;
+    background: #e1e5e9;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+}
+
+.vcard-password-strength .strength-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.vcard-password-strength.weak .strength-bar::after {
+    width: 33%;
+    background: #dc3545;
+}
+
+.vcard-password-strength.medium .strength-bar::after {
+    width: 66%;
+    background: #ffc107;
+}
+
+.vcard-password-strength.strong .strength-bar::after {
+    width: 100%;
+    background: #28a745;
+}
+
+.vcard-password-strength .strength-text {
+    font-size: 12px;
+    font-weight: 500;
+    min-width: 60px;
+}
+
+.vcard-password-strength.weak .strength-text {
+    color: #dc3545;
+}
+
+.vcard-password-strength.medium .strength-text {
+    color: #ffc107;
+}
+
+.vcard-password-strength.strong .strength-text {
+    color: #28a745;
+}
+
+/* Checkbox */
+.vcard-checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.vcard-checkbox-label input[type="checkbox"] {
+    display: none;
+}
+
+.vcard-checkbox-custom {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #e1e5e9;
+    border-radius: 3px;
+    background: white;
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.2s ease;
+}
+
+.vcard-checkbox-label input[type="checkbox"]:checked + .vcard-checkbox-custom {
+    background: #007cba;
+    border-color: #007cba;
+}
+
+.vcard-checkbox-label input[type="checkbox"]:checked + .vcard-checkbox-custom::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.vcard-checkbox-label a {
+    color: #007cba;
+    text-decoration: none;
+}
+
+.vcard-checkbox-label a:hover {
+    text-decoration: underline;
+}
+
+/* Buttons */
+.vcard-form-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.vcard-btn-primary,
+.vcard-btn-secondary {
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.vcard-btn-primary {
+    background: #007cba;
+    color: white;
+    flex: 1;
+}
+
+.vcard-btn-primary:hover:not(:disabled) {
+    background: #005a87;
+    transform: translateY(-1px);
+}
+
+.vcard-btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.vcard-btn-secondary {
+    background: white;
+    color: #6c757d;
+    border-color: #e1e5e9;
+}
+
+.vcard-btn-secondary:hover {
+    background: #f8f9fa;
+    border-color: #ced4da;
+}
+
+.vcard-btn-full {
+    width: 100%;
+}
+
+/* Verification Step */
+.vcard-verification-info {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.vcard-verification-info i {
+    font-size: 48px;
+    color: #007cba;
+    margin-bottom: 16px;
+}
+
+.vcard-verification-info h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.vcard-verification-info p {
+    color: #6c757d;
+    margin: 0;
+}
+
+.vcard-verification-help {
+    text-align: center;
+    margin-top: 16px;
+}
+
+.vcard-verification-help a {
+    color: #007cba;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.vcard-verification-help a:hover {
+    text-decoration: underline;
+}
+
+/* Sync Contacts Step */
+.vcard-sync-info {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.vcard-sync-info i {
+    font-size: 48px;
+    color: #007cba;
+    margin-bottom: 16px;
+}
+
+.vcard-sync-info h4 {
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.vcard-sync-info p {
+    color: #6c757d;
+    margin: 0;
+}
+
+/* Modal Footer */
+.vcard-modal-footer {
+    text-align: center;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e5e9;
+}
+
+.vcard-modal-footer p {
+    margin: 0;
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.vcard-modal-footer a {
+    color: #007cba;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.vcard-modal-footer a:hover {
+    text-decoration: underline;
+}
+
+/* Registration Buttons */
+.vcard-register-btn,
+.vcard-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #007cba;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.vcard-register-btn:hover,
+.vcard-login-btn:hover {
+    background: #005a87;
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.vcard-login-btn {
+    background: #28a745;
+}
+
+.vcard-login-btn:hover {
+    background: #1e7e34;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vcard-registration-modal .vcard-modal-content {
+        width: 95%;
+        margin: 2.5vh auto;
+        max-height: 95vh;
+        border-radius: 8px;
+    }
+    
+    .vcard-registration-modal .vcard-modal-header,
+    .vcard-registration-modal .vcard-modal-body {
+        padding: 20px;
+    }
+    
+    .vcard-form-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .vcard-social-login-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .vcard-form-actions {
+        flex-direction: column;
+    }
+    
+    .vcard-btn-secondary {
+        order: 2;
+    }
+}
+
+@media (max-width: 480px) {
+    .vcard-registration-modal .vcard-modal-content {
+        width: 100%;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+    }
+    
+    .vcard-registration-modal .vcard-modal-body {
+        padding: 16px;
+    }
+    
+    .vcard-registration-method {
+        padding: 16px;
+    }
+    
+    .vcard-social-login-btn {
+        padding: 12px;
+    }
+}
+
+/* Loading States */
+.vcard-registration-modal .vcard-loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.vcard-registration-modal .vcard-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007cba;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Accessibility */
+.vcard-registration-modal *:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+    .vcard-registration-modal .vcard-modal-content {
+        border: 2px solid #000;
+    }
+    
+    .vcard-registration-method,
+    .vcard-social-login-btn {
+        border-width: 3px;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .vcard-registration-modal *,
+    .vcard-registration-modal *::before,
+    .vcard-registration-modal *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
