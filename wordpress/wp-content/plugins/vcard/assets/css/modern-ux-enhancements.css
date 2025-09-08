@@ -130,7 +130,7 @@
 .quick-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px; /* Increased from 8px to 12px for more spacing */
     flex-wrap: wrap;
 }
 
@@ -138,8 +138,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 48px !important; /* Override Tailwind w-10 class */
+    height: 48px !important; /* Override Tailwind h-10 class */
     border: none;
     border-radius: 50%;
     color: white;
@@ -147,6 +147,21 @@
     transition: all 0.2s ease;
     text-decoration: none;
     font-size: 16px;
+}
+
+/* Increase SVG icon size to 32px for better visibility */
+.quick-action-btn svg {
+    width: 32px !important; /* Increased from 16px to 32px (100% larger) */
+    height: 32px !important; /* Increased from 16px to 32px (100% larger) */
+}
+
+/* Also add email button styling */
+.quick-action-btn.email {
+    background: #007cba;
+}
+
+.quick-action-btn.email:hover {
+    background: #005a87;
 }
 
 .quick-action-btn:hover {

@@ -55,13 +55,8 @@
                 directions: !!contactData.address && contactData.address !== ', ,  '
             });
             
-            // Debug: Email specific
-            console.log('Email debug:', {
-                emailValue: contactData.email,
-                emailLength: contactData.email ? contactData.email.length : 0,
-                emailTrimmed: contactData.email ? contactData.email.trim() : 'NO EMAIL',
-                willShowEmailButton: !!contactData.email
-            });
+            // Debug: Email specific (can be removed in production)
+            // console.log('Email debug:', contactData.email);
             
             return contactData;
         }
@@ -151,12 +146,6 @@
                     </a>` : ''}
                     <!-- DEBUG: Force show email button -->
                     <a href="mailto:${this.contactData.email || 'no-email@example.com'}?subject=${encodeURIComponent('Inquiry about ' + this.contactData.businessName)}" class="quick-action-btn email" title="Email: '${this.contactData.email}' (${typeof this.contactData.email})" style="background: blue;">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-                        </svg>
-                    </a>
-                    <!-- DEBUG: Test email button (always shows) -->
-                    <a href="mailto:test@example.com?subject=Test" class="quick-action-btn email-test" title="Test Email" style="background: red;">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
                         </svg>
