@@ -163,6 +163,11 @@
                             </a>
                         {% endif %}
                         
+                        {# Save Contact Button #}
+                        <button class="contact-action-btn save-contact" data-profile-id="{{ profile_id }}" title="{{ __('Save Contact', 'vcard') }}">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                        
                         <button class="contact-action-btn contacts" title="{{ __('My Contacts', 'vcard') }}">
                             <i class="fas fa-address-book"></i>
                             <span class="contact-count-badge" style="display: none;">0</span>

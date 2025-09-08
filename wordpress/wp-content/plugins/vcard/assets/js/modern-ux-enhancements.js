@@ -114,28 +114,12 @@
 
         createActionBarHTML() {
             return `
-                <!-- Contact Save Status -->
-                <div class="contact-save-status">
-                    <button class="save-contact-btn" data-profile-id="${this.profileId}">
-                        <svg class="save-icon w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
-                        </svg>
-                        <span class="save-text">Save Contact</span>
-                    </button>
-                </div>
-                
                 <!-- Quick Actions -->
                 <div class="quick-actions">
                     ${this.contactData.phone ? `
                     <a href="tel:${this.contactData.phone}" class="quick-action-btn call" title="Call ${this.contactData.phone}">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                        </svg>
-                    </a>` : ''}
-                    ${this.contactData.phone ? `
-                    <a href="sms:${this.contactData.phone}?body=${encodeURIComponent('Hi, I would like to know more about ' + this.contactData.businessName)}" class="quick-action-btn message" title="Send SMS">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
-                            <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
                         </svg>
                     </a>` : ''}
                     ${this.contactData.whatsapp ? `
@@ -160,6 +144,12 @@
                     <a href="${this.getDirectionsUrl()}" class="quick-action-btn directions" title="Get Directions" target="_blank">
                         <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
                             <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                    </a>` : ''}
+                    ${this.contactData.phone ? `
+                    <a href="sms:${this.contactData.phone}?body=${encodeURIComponent('Hi, I would like to know more about ' + this.contactData.businessName)}" class="quick-action-btn message" title="Send SMS">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                            <path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
                         </svg>
                     </a>` : ''}
                 </div>
@@ -289,7 +279,7 @@
 
         setupContactSaveStatus() {
             // Handle save contact button click
-            $(document).on('click', '.save-contact-btn', (e) => {
+            $(document).on('click', '.contact-action-btn.save-contact', (e) => {
                 e.preventDefault();
                 this.toggleContactSave();
             });
@@ -323,8 +313,8 @@
                 this.showFeedback('Contact saved successfully!', 'success');
                 
                 // Trigger pulse animation
-                $('.save-contact-btn').addClass('pulse');
-                setTimeout(() => $('.save-contact-btn').removeClass('pulse'), 500);
+                $('.contact-action-btn.save-contact').addClass('pulse');
+                setTimeout(() => $('.contact-action-btn.save-contact').removeClass('pulse'), 500);
             }
             
             localStorage.setItem('vcard_saved_contacts', JSON.stringify(savedContacts));
@@ -338,26 +328,17 @@
         }
 
         updateSaveButton() {
-            const $btn = $('.save-contact-btn');
-            const $icon = $btn.find('.save-icon');
-            const $text = $btn.find('.save-text');
+            const $btn = $('.contact-action-btn.save-contact');
+            const $icon = $btn.find('i');
             
             if (this.isContactSaved) {
                 $btn.addClass('saved');
-                $text.text('Saved');
-                $icon.html(`
-                    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                    </svg>
-                `);
+                $btn.attr('title', 'Contact Saved ❤️');
+                $icon.removeClass('far').addClass('fas'); // Solid heart when saved
             } else {
                 $btn.removeClass('saved');
-                $text.text('Save Contact');
-                $icon.html(`
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                    </svg>
-                `);
+                $btn.attr('title', 'Save Contact');
+                $icon.removeClass('fas').addClass('far'); // Outline heart when not saved
             }
         }
 
@@ -525,7 +506,7 @@
 
         setupVisualFeedback() {
             // Add visual feedback for interactions
-            $(document).on('click', '.btn-modern, .quick-action-btn, .save-contact-btn', function() {
+            $(document).on('click', '.btn-modern, .quick-action-btn, .contact-action-btn', function() {
                 $(this).addClass('pulse');
                 setTimeout(() => $(this).removeClass('pulse'), 300);
             });

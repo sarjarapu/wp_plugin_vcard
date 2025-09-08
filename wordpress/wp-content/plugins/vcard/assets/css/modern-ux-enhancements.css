@@ -232,6 +232,22 @@
     background: #d97706;
 }
 
+.contact-action-btn.save-contact {
+    background: #ef4444; /* Red for heart/save */
+}
+
+.contact-action-btn.save-contact:hover {
+    background: #dc2626;
+}
+
+.contact-action-btn.save-contact.saved {
+    background: #ef4444; /* Keep red when saved */
+}
+
+.contact-action-btn.save-contact.saved:hover {
+    background: #dc2626; /* Same red hover when saved */
+}
+
 /* Contact count badge */
 .contact-count-badge {
     position: absolute;
