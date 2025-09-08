@@ -10,6 +10,10 @@
                     <div class="vcard-photo">
                         <img src="{{ thumbnail_url }}" alt="{{ is_business ? basic_info.business_name : (basic_info.first_name ~ ' ' ~ basic_info.last_name) }}" />
                     </div>
+                {% elseif is_business and basic_info.business_logo %}
+                    <div class="vcard-photo">
+                        <img src="{{ basic_info.business_logo }}" alt="{{ basic_info.business_name }}" />
+                    </div>
                 {% elseif is_business and basic_info.company_logo %}
                     <div class="vcard-photo">
                         <img src="{{ basic_info.company_logo }}" alt="{{ basic_info.business_name }}" />
@@ -58,6 +62,9 @@
             
             === COMPANY LOGO / THUMBNAIL ===
             thumbnail_url: {{ thumbnail_url ?? 'NOT SET' }}
+            basic_info.company_logo: {{ basic_info.company_logo ?? 'NOT SET' }}
+            basic_info.business_logo: {{ basic_info.business_logo ?? 'NOT SET' }}
+            business_data.logo: {{ business_data.logo ?? 'NOT SET' }}
             
             === BASIC INFO ===
             {% for key, value in basic_info %}
@@ -338,46 +345,12 @@
                             </div>
                         </div>
                     {% endfor %}
-                    
-                    {# Social Media Links #}
-                    {% if has_social_media %}
-                        <div class="vcard-social-media">
-                            <h4>{{ __('Follow Us', 'vcard') }}</h4>
-                            <div class="social-links">
-                                {% for platform, data in social_media %}
-                                    <a href="{{ data.url|esc_url }}" target="_blank" rel="noopener" class="social-link social-{{ platform }}">
-                                        <i class="{{ data.icon_class }}"></i>
-                                        <span class="sr-only">{{ data.platform }}</span>
-                                    </a>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
                 </div>
-                
-                {# Social Media Section #}
-                {% if has_social_media %}
-                    <div id="social" class="vcard-social-section vcard-section">
-                        <h3>{{ __('Connect With Us', 'vcard') }}</h3>
-                        <div class="social-links-grid">
-                            {% for platform, data in social_media %}
-                                <a href="{{ data.url|esc_url }}" target="_blank" rel="noopener" class="social-link-card social-{{ platform }}">
-                                    <div class="social-icon">
-                                        <i class="{{ data.icon_class }}"></i>
-                                    </div>
-                                    <div class="social-info">
-                                        <span class="social-platform">{{ data.platform }}</span>
-                                        <span class="social-handle">{{ data.handle|default('@' ~ data.platform)|esc_html }}</span>
-                                    </div>
-                                </a>
-                            {% endfor %}
-                        </div>
-                    </div>
-                {% endif %}
                 
                 {# Address Section #}
                 {% if has_address %}
                     <div class="vcard-address">
+                        <h1>Testing Address</h1>
                         <h3><i class="fas fa-map-marker-alt"></i> {{ __('Address', 'vcard') }}</h3>
                         <div class="vcard-address-details">
                             {% if address.address %}
@@ -403,6 +376,22 @@
                                     </a>
                                 </div>
                             {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+                
+                
+                {# Social Media Section #}
+                {% if has_social_media %}
+                    <div id="social" class="vcard-social-section vcard-section">
+                        <h3>{{ __('Connect With Us', 'vcard') }}</h3>
+                        <div class="social-links">
+                            {% for platform, data in social_media %}
+                                <a href="{{ data.url|esc_url }}" target="_blank" rel="noopener" class="social-link social-{{ platform }}">
+                                    <i class="{{ data.icon_class }}"></i>
+                                    <span class="sr-only">{{ data.platform }}</span>
+                                </a>
+                            {% endfor %}
                         </div>
                     </div>
                 {% endif %}
