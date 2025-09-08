@@ -42,7 +42,66 @@
             </div>
             
             {# Modern Action Bar Container - JavaScript will populate this #}
-            <div class="vcard-modern-action-bar">
+            {# Debug: Full data structure - remove in production #}
+            <!-- 
+            === FULL DEBUG DATA DUMP ===
+            Profile ID: {{ profile_id ?? 'NOT SET' }}
+            Is Business: {{ is_business ? 'YES' : 'NO' }}
+            
+            === BASIC INFO ===
+            {% for key, value in basic_info %}
+                {{ key }}: {{ value ?? 'EMPTY' }}
+            {% endfor %}
+            
+            === RAW CONTACT INFO ===
+            {% if raw_contact_info is defined %}
+                {% for key, value in raw_contact_info %}
+                    raw_contact_info.{{ key }}: {{ value ?? 'EMPTY' }}
+                {% endfor %}
+            {% else %}
+                raw_contact_info: NOT DEFINED
+            {% endif %}
+            
+            === PROFILE.CONTACT_INFO (FORMATTED) ===
+            {% if profile.contact_info is defined %}
+                profile.contact_info type: {{ profile.contact_info is iterable ? 'ARRAY' : 'OTHER' }}
+                profile.contact_info length: {{ profile.contact_info|length }}
+            {% else %}
+                profile.contact_info: NOT DEFINED
+            {% endif %}
+            
+            === CONTACT_INFO (FORMATTED) ===
+            {% if contact_info is defined %}
+                contact_info type: {{ contact_info is iterable ? 'ARRAY' : 'OTHER' }}
+                {% if contact_info is iterable %}
+                    {% for item in contact_info %}
+                        Contact Item: {{ item.label ?? 'NO LABEL' }} = {{ item.value ?? 'NO VALUE' }}
+                    {% endfor %}
+                {% endif %}
+            {% else %}
+                contact_info: NOT DEFINED
+            {% endif %}
+            
+            === ADDRESS ===
+            {% for key, value in address %}
+                address.{{ key }}: {{ value ?? 'EMPTY' }}
+            {% endfor %}
+            
+            === RAW PROFILE DATA ===
+            {% if profile.raw_data is defined %}
+                profile.raw_data.id: {{ profile.raw_data.id ?? 'NOT SET' }}
+                profile.raw_data.title: {{ profile.raw_data.title ?? 'NOT SET' }}
+            {% else %}
+                profile.raw_data: NOT DEFINED
+            {% endif %}
+            -->
+            
+            <div class="vcard-modern-action-bar" 
+                 data-phone="{{ raw_contact_info.phone|default('')|esc_attr }}" 
+                 data-email="{{ raw_contact_info.email|default('')|esc_attr }}" 
+                 data-whatsapp="{{ raw_contact_info.whatsapp|default('')|esc_attr }}" 
+                 data-business-name="{{ is_business ? basic_info.business_name : (basic_info.first_name ~ ' ' ~ basic_info.last_name)|trim|esc_attr }}"
+                 data-address="{{ (address.address ~ ', ' ~ address.city ~ ', ' ~ address.state ~ ' ' ~ address.zip_code)|trim|esc_attr }}">
                 {# Section Navigation - First in action bar #}
                 <nav class="section-navigation">
                     <div class="section-nav-container">
@@ -97,6 +156,14 @@
                     
                     {# Additional vCard Actions #}
                     <div class="vcard-actions-extended">
+                        {# Edit Button - Show for admins and profile owners #}
+                        {% if can_edit_profile %}
+                            <a href="{{ edit_profile_url }}" class="vcard-edit-btn">
+                                <i class="fas fa-edit"></i>
+                                {{ __('Edit Profile', 'vcard') }}
+                            </a>
+                        {% endif %}
+                        
                         <button class="vcard-view-contacts-btn">
                             <i class="fas fa-address-book"></i>
                             {{ __('My Contacts', 'vcard') }}

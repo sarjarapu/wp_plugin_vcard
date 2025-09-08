@@ -41,6 +41,9 @@ class VCardDatabaseHelper {
             }
         }
         
+        // Debug: Log processed meta data
+        error_log('VCardDatabaseHelper - Processed Meta: ' . print_r($processed_meta, true));
+        
         return [
             'id' => $profile_id,
             'title' => $post->post_title,
@@ -68,6 +71,10 @@ class VCardDatabaseHelper {
         }
         
         $meta = $data['meta'];
+        
+        // Debug: Check what's in meta array
+        error_log('VCardDatabaseHelper - Meta keys available: ' . print_r(array_keys($meta), true));
+        error_log('VCardDatabaseHelper - Contact fields: phone=' . ($meta['phone'] ?? 'NOT FOUND') . ', email=' . ($meta['email'] ?? 'NOT FOUND'));
         
         $result = [
             'basic_info' => [
@@ -141,8 +148,9 @@ class VCardDatabaseHelper {
         $result['thumbnail_url'] = get_the_post_thumbnail_url($profile_id, 'medium');
         $result['contact_form_nonce'] = wp_create_nonce('vcard_contact_form_' . $profile_id);
         
-        // Add formatted contact info for template
-        $result['contact_info'] = self::formatContactInfo($result['contact_info']);
+        // Preserve raw contact info and add formatted version
+        $result['raw_contact_info'] = $result['contact_info']; // Keep raw data
+        $result['contact_info'] = self::formatContactInfo($result['contact_info']); // Format for display
         
         return $result;
     }

@@ -81,7 +81,13 @@ class VCardProfileController {
      * @return array|null
      */
     public function get_profile_data($profile_id) {
-        return VCardDatabaseHelper::getBusinessProfileData($profile_id);
+        $data = VCardDatabaseHelper::getBusinessProfileData($profile_id);
+        
+        // Debug: Log what we get from database
+        error_log('VCardProfileController - Profile ID: ' . $profile_id);
+        error_log('VCardProfileController - Database Data: ' . print_r($data, true));
+        
+        return $data;
     }
     
     /**
