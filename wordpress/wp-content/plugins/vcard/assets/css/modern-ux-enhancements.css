@@ -164,6 +164,91 @@
     background: #005a87;
 }
 
+/* ===== CONTACT MANAGEMENT ACTIONS ===== */
+.contact-management-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.contact-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px !important;
+    height: 48px !important;
+    border: none;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    font-size: 16px;
+    position: relative;
+}
+
+.contact-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    text-decoration: none;
+    color: white;
+}
+
+.contact-action-btn i {
+    font-size: 20px; /* Slightly smaller than quick actions for distinction */
+}
+
+/* Contact Management Button Colors */
+.contact-action-btn.edit {
+    background: #007cba; /* WordPress blue */
+}
+
+.contact-action-btn.edit:hover {
+    background: #005a87;
+}
+
+.contact-action-btn.contacts {
+    background: #8b5cf6; /* Purple */
+}
+
+.contact-action-btn.contacts:hover {
+    background: #7c3aed;
+}
+
+.contact-action-btn.download {
+    background: #22c55e; /* Green */
+}
+
+.contact-action-btn.download:hover {
+    background: #16a34a;
+}
+
+.contact-action-btn.qr {
+    background: #f59e0b; /* Orange */
+}
+
+.contact-action-btn.qr:hover {
+    background: #d97706;
+}
+
+/* Contact count badge */
+.contact-count-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
 .quick-action-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);

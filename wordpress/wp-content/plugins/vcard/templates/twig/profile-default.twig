@@ -154,43 +154,27 @@
                         <!-- JavaScript will inject quick actions here -->
                     </div>
                     
-                    {# Additional vCard Actions #}
-                    <div class="vcard-actions-extended">
+                    {# Contact Management Actions - Consistent Icon Buttons #}
+                    <div class="contact-management-actions">
                         {# Edit Button - Show for admins and profile owners #}
                         {% if can_edit_profile %}
-                            <a href="{{ edit_profile_url }}" class="vcard-edit-btn">
+                            <a href="{{ edit_profile_url }}" class="contact-action-btn edit" title="{{ __('Edit Profile', 'vcard') }}">
                                 <i class="fas fa-edit"></i>
-                                {{ __('Edit Profile', 'vcard') }}
                             </a>
                         {% endif %}
                         
-                        <button class="vcard-view-contacts-btn">
+                        <button class="contact-action-btn contacts" title="{{ __('My Contacts', 'vcard') }}">
                             <i class="fas fa-address-book"></i>
-                            {{ __('My Contacts', 'vcard') }}
-                            <span class="vcard-contact-count" style="display: none;">0</span>
+                            <span class="contact-count-badge" style="display: none;">0</span>
                         </button>
                         
-                        <div class="vcard-download-group">
-                            <button class="vcard-download-btn" data-profile-id="{{ profile_id }}" data-format="vcf">
-                                <i class="fas fa-download"></i>
-                                {{ __('Download', 'vcard') }}
-                            </button>
-                            <div class="vcard-download-options">
-                                <button class="vcard-export-vcf" data-profile-id="{{ profile_id }}">
-                                    <i class="fas fa-file-alt"></i>
-                                    {{ __('VCF', 'vcard') }}
-                                </button>
-                                <button class="vcard-export-csv" data-profile-id="{{ profile_id }}">
-                                    <i class="fas fa-table"></i>
-                                    {{ __('CSV', 'vcard') }}
-                                </button>
-                            </div>
-                        </div>
+                        <button class="contact-action-btn download" data-profile-id="{{ profile_id }}" data-format="vcf" title="{{ __('Download vCard', 'vcard') }}">
+                            <i class="fas fa-download"></i>
+                        </button>
                         
                         {% if is_business %}
-                            <button class="vcard-qr-btn" data-profile-id="{{ profile_id }}">
+                            <button class="contact-action-btn qr" data-profile-id="{{ profile_id }}" title="{{ __('QR Code', 'vcard') }}">
                                 <i class="fas fa-qrcode"></i>
-                                {{ __('QR Code', 'vcard') }}
                             </button>
                         {% endif %}
                     </div>
