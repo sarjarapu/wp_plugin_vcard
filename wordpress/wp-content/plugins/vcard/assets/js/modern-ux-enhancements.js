@@ -3,7 +3,7 @@
  * Enhanced user experience JavaScript functionality
  */
 
-(function($) {
+(function ($) {
     'use strict';
 
     // Main UX Enhancement Class
@@ -13,20 +13,20 @@
             this.isContactSaved = false;
             this.currentSection = '';
             this.contactData = this.getContactData();
-            
+
             this.init();
         }
 
         getContactData() {
             // Get contact data directly from data attributes set by Twig template
             const $actionBar = $('.vcard-modern-action-bar');
-            
+
             const phone = $actionBar.data('phone') || '';
             const email = $actionBar.data('email') || '';
             const whatsapp = $actionBar.data('whatsapp') || phone; // Use phone as WhatsApp fallback
             const businessName = $actionBar.data('business-name') || 'this business';
             const address = $actionBar.data('address') || '';
-            
+
             // Clean and format the data
             const contactData = {
                 phone: phone.toString().replace(/[^\d+]/g, ''), // Clean phone number
@@ -35,7 +35,7 @@
                 businessName: businessName.toString().trim(),
                 address: address.toString().trim()
             };
-            
+
             // Debug: log contact data (remove in production)
             console.log('Raw Data Attributes:', {
                 phone: $actionBar.data('phone'),
@@ -45,7 +45,7 @@
                 address: $actionBar.data('address')
             });
             console.log('Processed Contact Data:', contactData);
-            
+
             // Debug: Check which buttons will show
             console.log('Buttons that will show:', {
                 phone: !!contactData.phone,
@@ -54,17 +54,17 @@
                 email: !!contactData.email,
                 directions: !!contactData.address && contactData.address !== ', ,  '
             });
-            
+
             // Debug: Email specific (can be removed in production)
             // console.log('Email debug:', contactData.email);
-            
+
             return contactData;
         }
 
         getDirectionsUrl() {
             // Get address from contact data
             const address = this.contactData.address;
-            
+
             if (address && address !== ', ,  ') { // Check if address has actual content
                 return `https://maps.google.com/maps?q=${encodeURIComponent(address)}`;
             }
@@ -79,7 +79,7 @@
             this.setupQuickActions();
             this.setupSmoothScrolling();
             this.setupVisualFeedback();
-            
+
             // Initialize on DOM ready
             $(document).ready(() => {
                 this.checkContactSaveStatus();
@@ -88,9 +88,9 @@
         }
 
         getProfileId() {
-            return document.body.getAttribute('data-profile-id') || 
-                   $('.vcard-single').data('profile-id') || 
-                   $('[data-profile-id]').first().data('profile-id');
+            return document.body.getAttribute('data-profile-id') ||
+                $('.vcard-single').data('profile-id') ||
+                $('[data-profile-id]').first().data('profile-id');
         }
 
         setupActionBar() {
@@ -103,11 +103,11 @@
                 const $actionBar = $('.vcard-modern-action-bar');
                 const actionBarBottom = $actionBar.offset().top + $actionBar.outerHeight();
                 const scrollTop = $(window).scrollTop();
-                
+
                 // Only float navigation when scrolled past the action bar
                 const shouldFloat = scrollTop > actionBarBottom;
                 $actionBar.toggleClass('scrolled', shouldFloat);
-                
+
                 this.updateActiveSection();
             });
         }
@@ -147,7 +147,7 @@
         setupSectionNavigation() {
             // Add section IDs to existing content
             this.addSectionIds();
-            
+
             // Handle section navigation clicks
             $(document).on('click', '.section-nav-link', (e) => {
                 e.preventDefault();
@@ -191,7 +191,7 @@
                 const $actionBar = $('.vcard-modern-action-bar');
                 const isFloating = $actionBar.hasClass('scrolled');
                 const offset = isFloating ? $('.section-navigation').outerHeight() + 20 : 20;
-                
+
                 $('html, body').animate({
                     scrollTop: $target.offset().top - offset
                 }, 500);
@@ -204,12 +204,12 @@
             const $actionBar = $('.vcard-modern-action-bar');
             const isFloating = $actionBar.hasClass('scrolled');
             const offset = isFloating ? $('.section-navigation').outerHeight() + 50 : 50;
-            
+
             $('.vcard-section').each((index, element) => {
                 const $section = $(element);
                 const sectionTop = $section.offset().top - offset;
                 const sectionBottom = sectionTop + $section.outerHeight();
-                
+
                 if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
                     const sectionId = $section.attr('id');
                     this.setActiveNavItem(sectionId);
@@ -232,7 +232,7 @@
                 const $link = $(element);
                 const sectionId = $link.data('section');
                 const $section = $(`#${sectionId}`);
-                
+
                 // Only hide if section doesn't exist at all
                 if (!$section.length) {
                     $link.parent().hide();
@@ -283,7 +283,7 @@
         toggleContactSave() {
             const savedContacts = JSON.parse(localStorage.getItem('vcard_saved_contacts') || '[]');
             const profileIdStr = this.profileId.toString();
-            
+
             if (this.isContactSaved) {
                 // Remove from saved contacts
                 const index = savedContacts.indexOf(profileIdStr);
@@ -299,15 +299,15 @@
                 }
                 this.isContactSaved = true;
                 this.showFeedback('Contact saved successfully!', 'success');
-                
+
                 // Trigger pulse animation
                 $('.contact-action-btn.save-contact').addClass('pulse');
                 setTimeout(() => $('.contact-action-btn.save-contact').removeClass('pulse'), 500);
             }
-            
+
             localStorage.setItem('vcard_saved_contacts', JSON.stringify(savedContacts));
             this.updateSaveButton();
-            
+
             // Track the save action
             this.trackEvent('contact_save_toggle', {
                 profile_id: this.profileId,
@@ -318,7 +318,7 @@
         updateSaveButton() {
             const $btn = $('.contact-action-btn.save-contact');
             const $icon = $btn.find('i');
-            
+
             if (this.isContactSaved) {
                 $btn.addClass('saved');
                 $btn.attr('title', 'Contact Saved ❤️');
@@ -333,7 +333,7 @@
         setupQuickActions() {
             // Get contact information from the page
             const contactInfo = this.extractContactInfo();
-            
+
             // Handle quick action clicks
             $(document).on('click', '.quick-action-btn', (e) => {
                 e.preventDefault();
@@ -360,7 +360,7 @@
                 `[href^="mailto:"]`,
                 `[href*="wa.me"]`
             ];
-            
+
             let value = '';
             selectors.forEach(selector => {
                 if (!value) {
@@ -370,7 +370,7 @@
                     }
                 }
             });
-            
+
             return value;
         }
 
@@ -383,7 +383,7 @@
             switch (action) {
                 case 'call':
                     if (contactInfo.phone) {
-                        const phoneUrl = contactInfo.phone.startsWith('tel:') ? 
+                        const phoneUrl = contactInfo.phone.startsWith('tel:') ?
                             contactInfo.phone : `tel:${contactInfo.phone}`;
                         window.location.href = phoneUrl;
                         this.trackEvent('quick_action_call', { profile_id: this.profileId });
@@ -391,7 +391,7 @@
                         this.showFeedback('Phone number not available', 'error');
                     }
                     break;
-                    
+
                 case 'message':
                     if (contactInfo.phone) {
                         const smsUrl = `sms:${contactInfo.phone.replace('tel:', '')}`;
@@ -401,7 +401,7 @@
                         this.showFeedback('Phone number not available', 'error');
                     }
                     break;
-                    
+
                 case 'whatsapp':
                     if (contactInfo.whatsapp || contactInfo.phone) {
                         const whatsappNumber = (contactInfo.whatsapp || contactInfo.phone)
@@ -414,11 +414,11 @@
                         this.showFeedback('WhatsApp number not available', 'error');
                     }
                     break;
-                    
+
                 case 'share':
                     this.handleShare();
                     break;
-                    
+
                 case 'directions':
                     if (contactInfo.address) {
                         const mapsUrl = `https://maps.google.com/?q=${encodeURIComponent(contactInfo.address)}`;
@@ -437,7 +437,7 @@
                 text: `Check out this business profile`,
                 url: window.location.href
             };
-            
+
             if (navigator.share) {
                 navigator.share(shareData).then(() => {
                     this.trackEvent('quick_action_share_native', { profile_id: this.profileId });
@@ -480,7 +480,7 @@
             $(document).on('click', 'a[href^="#"]', (e) => {
                 const href = $(e.currentTarget).attr('href');
                 if (href === '#') return;
-                
+
                 const $target = $(href);
                 if ($target.length) {
                     e.preventDefault();
@@ -494,7 +494,7 @@
 
         setupVisualFeedback() {
             // Add visual feedback for interactions
-            $(document).on('click', '.btn-modern, .quick-action-btn, .contact-action-btn', function() {
+            $(document).on('click', '.btn-modern, .quick-action-btn, .contact-action-btn', function () {
                 $(this).addClass('pulse');
                 setTimeout(() => $(this).removeClass('pulse'), 300);
             });
@@ -503,24 +503,24 @@
         showFeedback(message, type = 'success') {
             // Remove existing feedback
             $('.contact-save-feedback').remove();
-            
+
             // Create feedback element
-            const icon = type === 'success' ? 
+            const icon = type === 'success' ?
                 '<svg class="feedback-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>' :
                 '<svg class="feedback-icon" viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
-            
+
             const $feedback = $(`
                 <div class="contact-save-feedback ${type}">
                     ${icon}
                     ${message}
                 </div>
             `);
-            
+
             $('body').append($feedback);
-            
+
             // Show feedback
             setTimeout(() => $feedback.addClass('show'), 100);
-            
+
             // Hide feedback after 3 seconds
             setTimeout(() => {
                 $feedback.removeClass('show');
@@ -533,7 +533,7 @@
             if (typeof gtag !== 'undefined') {
                 gtag('event', eventName, data);
             }
-            
+
             // Also send to WordPress if AJAX is available
             if (typeof vcard_public !== 'undefined') {
                 $.ajax({
@@ -568,11 +568,11 @@
             if (target.length) {
                 const offset = 120; // Account for sticky headers
                 const targetPosition = target.offset().top - offset;
-                
+
                 $('html, body').animate({
                     scrollTop: targetPosition
                 }, 600, 'easeInOutCubic');
-                
+
                 // Update active state immediately
                 this.setActiveSection(sectionId);
             }
@@ -581,19 +581,19 @@
         updateActiveSection() {
             const sections = $('.vcard-section');
             const scrollTop = $(window).scrollTop();
-            
+
             let activeSection = '';
-            
+
             sections.each((index, element) => {
                 const $section = $(element);
                 const sectionTop = $section.offset().top - 150;
                 const sectionBottom = sectionTop + $section.outerHeight();
-                
+
                 if (scrollTop >= sectionTop && scrollTop < sectionBottom) {
                     activeSection = $section.attr('id');
                 }
             });
-            
+
             if (activeSection && activeSection !== this.currentSection) {
                 this.setActiveSection(activeSection);
             }
@@ -601,18 +601,18 @@
 
         setActiveSection(sectionId) {
             this.currentSection = sectionId;
-            
+
             // Update navigation active state
             $('.section-nav-link').removeClass('active');
             $(`.section-nav-link[data-section="${sectionId}"]`).addClass('active');
-            
+
             // Track section view for analytics
             this.trackSectionView(sectionId);
         }
 
         trackSectionView(sectionId) {
             // Track section views for analytics
-            if (this.profileId && sectionId) {
+            if (this.profileId && sectionId && typeof vcard_ajax !== 'undefined') {
                 $.post(vcard_ajax.ajax_url, {
                     action: 'vcard_track_section_view',
                     profile_id: this.profileId,
@@ -626,10 +626,10 @@
         setupSmoothScrolling() {
             // Add custom easing function
             $.easing.easeInOutCubic = function (x, t, b, c, d) {
-                if ((t/=d/2) < 1) return c/2*t*t*t + b;
-                return c/2*((t-=2)*t*t + 2) + b;
+                if ((t /= d / 2) < 1) return c / 2 * t * t * t + b;
+                return c / 2 * ((t -= 2) * t * t + 2) + b;
             };
-            
+
             // Handle all anchor links
             $(document).on('click', 'a[href^="#"]', (e) => {
                 const href = $(e.currentTarget).attr('href');
@@ -643,7 +643,7 @@
     }
 
     // Initialize when DOM is ready
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Only initialize on vCard profile pages
         if ($('.vcard-single-container').length) {
             new VCardModernUX();

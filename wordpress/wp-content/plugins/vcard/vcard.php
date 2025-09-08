@@ -131,6 +131,8 @@ class VCardPlugin {
         // Modern UX enhancements AJAX hooks
         add_action('wp_ajax_vcard_modern_ux_track_event', array($this, 'handle_modern_ux_track_event'));
         add_action('wp_ajax_nopriv_vcard_modern_ux_track_event', array($this, 'handle_modern_ux_track_event'));
+        add_action('wp_ajax_vcard_track_section_view', array($this, 'handle_track_section_view'));
+        add_action('wp_ajax_nopriv_vcard_track_section_view', array($this, 'handle_track_section_view'));
         
         // Short URL redirect handling
         add_action('init', array($this, 'handle_short_url_redirects'));
@@ -365,6 +367,12 @@ class VCardPlugin {
                 VCARD_VERSION,
                 true
             );
+            
+            // Localize modern UX script
+            wp_localize_script('vcard-modern-ux', 'vcard_ajax', array(
+                'ajax_url' => admin_url('admin-ajax.php'),
+                'nonce' => wp_create_nonce('vcard_public_nonce'),
+            ));
             
             // Enqueue Tailwind modern UX script (Phase 2 - Tailwind Migration)
             // Disabled: Tailwind version causes duplicate action bars
@@ -3311,6 +3319,35 @@ class VCardPlugin {
         wp_send_json_success(array(
             'message' => 'Event tracked successfully',
             'event' => $event_name
+        ));
+    }
+    
+    /**
+     * Handle AJAX request for section view tracking
+     */
+    public function handle_track_section_view() {
+        // Verify nonce
+        if (!wp_verify_nonce($_POST['nonce'], 'vcard_public_nonce')) {
+            wp_send_json_error('Security check failed');
+        }
+        
+        $profile_id = intval($_POST['profile_id']);
+        $section = sanitize_text_field($_POST['section']);
+        
+        if (!$profile_id || !$section) {
+            wp_send_json_error('Invalid parameters');
+        }
+        
+        // Track the section view
+        $this->track_analytics_event('section_view', array(
+            'profile_id' => $profile_id,
+            'section' => $section
+        ));
+        
+        wp_send_json_success(array(
+            'message' => 'Section view tracked',
+            'profile_id' => $profile_id,
+            'section' => $section
         ));
     }
     
