@@ -957,4 +957,17 @@ SECTION NAVIGATION ===== */
     .social-link-card {
         padding: 15px;
     }
+}/* 
+Fix tagline color */
+.vcard-tagline {
+    color: white !important; /* Keep tagline white for visibility on dark backgrounds */
+}
+
+/* Company logo styling in banner */
+.vcard-photo img {
+    width: 120px !important;
+    height: 120px !important;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.2);
 }

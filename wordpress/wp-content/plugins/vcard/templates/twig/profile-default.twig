@@ -10,6 +10,14 @@
                     <div class="vcard-photo">
                         <img src="{{ thumbnail_url }}" alt="{{ is_business ? basic_info.business_name : (basic_info.first_name ~ ' ' ~ basic_info.last_name) }}" />
                     </div>
+                {% elseif is_business and basic_info.company_logo %}
+                    <div class="vcard-photo">
+                        <img src="{{ basic_info.company_logo }}" alt="{{ basic_info.business_name }}" />
+                    </div>
+                {% elseif is_business and business_data.logo %}
+                    <div class="vcard-photo">
+                        <img src="{{ business_data.logo }}" alt="{{ basic_info.business_name }}" />
+                    </div>
                 {% endif %}
                 
                 <div class="vcard-basic-info">
@@ -47,6 +55,9 @@
             === FULL DEBUG DATA DUMP ===
             Profile ID: {{ profile_id ?? 'NOT SET' }}
             Is Business: {{ is_business ? 'YES' : 'NO' }}
+            
+            === COMPANY LOGO / THUMBNAIL ===
+            thumbnail_url: {{ thumbnail_url ?? 'NOT SET' }}
             
             === BASIC INFO ===
             {% for key, value in basic_info %}
