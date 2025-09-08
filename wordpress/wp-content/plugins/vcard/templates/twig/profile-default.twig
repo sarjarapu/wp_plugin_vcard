@@ -169,7 +169,7 @@
                     <div class="contact-management-actions">
                         {# Edit Button - Show for admins and profile owners #}
                         {% if can_edit_profile %}
-                            <a href="{{ edit_profile_url }}" class="contact-action-btn edit" title="{{ __('Edit Profile', 'vcard') }}">
+                            <a href="{{ edit_profile_url|raw }}" class="contact-action-btn edit" title="{{ __('Edit Profile', 'vcard') }}">
                                 <i class="fas fa-edit"></i>
                             </a>
                         {% endif %}

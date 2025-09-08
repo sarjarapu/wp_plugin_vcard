@@ -449,6 +449,7 @@ class VCardPlugin {
     public function init() {
         $this->register_post_type();
         $this->register_meta_fields();
+        $this->assign_vcard_capabilities();
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_meta_fields'));
         add_filter('template_include', array($this, 'load_templates'));
@@ -464,6 +465,45 @@ class VCardPlugin {
         
         // Initialize profile manager
         new VCard_Profile_Manager();
+    }
+    
+    /**
+     * Assign vCard capabilities to administrator and editor roles
+     */
+    private function assign_vcard_capabilities() {
+        $admin_role = get_role('administrator');
+        $editor_role = get_role('editor');
+        
+        $vcard_capabilities = array(
+            'edit_vcard_profile',
+            'read_vcard_profile', 
+            'delete_vcard_profile',
+            'edit_vcard_profiles',
+            'edit_others_vcard_profiles',
+            'publish_vcard_profiles',
+            'read_private_vcard_profiles',
+            'delete_vcard_profiles',
+            'delete_private_vcard_profiles',
+            'delete_published_vcard_profiles',
+            'delete_others_vcard_profiles',
+            'edit_private_vcard_profiles',
+            'edit_published_vcard_profiles',
+            'create_vcard_profiles'
+        );
+        
+        // Add capabilities to administrator
+        if ($admin_role) {
+            foreach ($vcard_capabilities as $cap) {
+                $admin_role->add_cap($cap);
+            }
+        }
+        
+        // Add capabilities to editor
+        if ($editor_role) {
+            foreach ($vcard_capabilities as $cap) {
+                $editor_role->add_cap($cap);
+            }
+        }
     }
     
 

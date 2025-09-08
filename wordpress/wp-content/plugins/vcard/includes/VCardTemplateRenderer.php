@@ -148,6 +148,10 @@ class VCardTemplateRenderer {
             // Current page context
             'profile_id' => $profile_data['raw_data']['id'],
             'profile_url' => get_permalink($profile_data['raw_data']['id']),
+            
+            // Edit functionality
+            'can_edit_profile' => current_user_can('edit_post', $profile_data['raw_data']['id']),
+            'edit_profile_url' => admin_url('edit.php?post_type=vcard_profile'),
             'thumbnail_url' => $profile_data['raw_data']['thumbnail_url'] ?? '',
             
             // Edit permissions and URL

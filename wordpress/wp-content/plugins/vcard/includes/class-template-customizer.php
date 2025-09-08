@@ -467,8 +467,29 @@ class VCard_Template_Customizer {
         $current_color_scheme = get_post_meta($post->ID, '_vcard_color_scheme', true) ?: 'corporate_blue';
         
         // Get template engine for available templates
-        $template_engine = new VCard_Template_Engine();
-        $available_templates = $template_engine->get_available_templates();
+        if (class_exists('VCard_Template_Engine')) {
+            $template_engine = new VCard_Template_Engine();
+            $available_templates = $template_engine->get_available_templates();
+        } else {
+            // Fallback to basic template list if class doesn't exist
+            $available_templates = array(
+                'ceo' => __('CEO Template', 'vcard'),
+                'freelancer' => __('Freelancer Template', 'vcard'),
+                'restaurant' => __('Restaurant Template', 'vcard'),
+                'construction' => __('Construction Template', 'vcard'),
+                'education' => __('Education Template', 'vcard'),
+                'fitness' => __('Fitness Template', 'vcard'),
+                'coffeebar' => __('Coffee Bar Template', 'vcard'),
+                'handyman' => __('Handyman Template', 'vcard'),
+                'healthcare' => __('Healthcare Template', 'vcard'),
+                'immigration' => __('Immigration Template', 'vcard'),
+                'lawyer' => __('Lawyer Template', 'vcard'),
+                'makeup-artist' => __('Makeup Artist Template', 'vcard'),
+                'ngo' => __('NGO Template', 'vcard'),
+                'saloon' => __('Saloon Template', 'vcard'),
+                'tour' => __('Tour Template', 'vcard'),
+            );
+        }
         
         wp_nonce_field('vcard_template_customization', 'vcard_template_customization_nonce');
         ?>
@@ -491,12 +512,12 @@ class VCard_Template_Customizer {
                                     <div class="template-preview-streamlined">
                                         <div class="template-thumbnail-streamlined">
                                             <img src="<?php echo VCARD_ASSETS_URL; ?>images/templates/<?php echo esc_attr($template_key); ?>-thumb.svg" 
-                                                 alt="<?php echo esc_attr($template_data['name']); ?>" 
+                                                 alt="<?php echo esc_attr(is_array($template_data) ? $template_data['name'] : $template_data); ?>" 
                                                  onerror="this.src='<?php echo VCARD_ASSETS_URL; ?>images/templates/default-thumb.svg'">
                                         </div>
                                         <div class="template-info-streamlined">
-                                            <h6><?php echo esc_html($template_data['name']); ?></h6>
-                                            <p><?php echo esc_html($template_data['description']); ?></p>
+                                            <h6><?php echo esc_html(is_array($template_data) ? $template_data['name'] : $template_data); ?></h6>
+                                            <p><?php echo esc_html(is_array($template_data) && isset($template_data['description']) ? $template_data['description'] : ''); ?></p>
                                         </div>
                                     </div>
                                 </label>
