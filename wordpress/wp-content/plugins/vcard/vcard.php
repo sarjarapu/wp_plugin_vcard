@@ -3338,11 +3338,8 @@ class VCardPlugin {
             wp_send_json_error('Invalid parameters');
         }
         
-        // Track the section view
-        $this->track_analytics_event('section_view', array(
-            'profile_id' => $profile_id,
-            'section' => $section
-        ));
+        // Simple logging for now - can be enhanced later
+        error_log("vCard Section View: Profile {$profile_id}, Section {$section}");
         
         wp_send_json_success(array(
             'message' => 'Section view tracked',
