@@ -6,10 +6,10 @@
 /* ===== ACTION BAR - NORMAL FLOW ===== */
 .vcard-modern-action-bar {
     position: relative;
-    background: rgba(248, 249, 250, 0.95);
+    background: #f8f9fa !important;
     border-bottom: 1px solid #e9ecef;
     margin-bottom: 20px;
-    padding: 15px 0;
+    padding: 0 0 15px 0 !important;
     transition: all 0.3s ease;
 }
 
@@ -24,7 +24,8 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 999; /* Lower z-index to not interfere with popups */
+    z-index: 999;
+    /* Lower z-index to not interfere with popups */
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(12px);
     padding: 10px 0;
@@ -67,7 +68,10 @@
 .action-bar-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 30px 20px 0 20px; /* Increased top padding for more vertical room */
+    padding: 20px 20px 0 20px !important;
+    /* Force top padding to override other rules */
+    background: #f8f9fa;
+    /* Match section-navigation background */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -129,7 +133,8 @@
 .quick-actions {
     display: flex;
     align-items: center;
-    gap: 12px !important; /* Force 12px gap to match contact-management-actions */
+    gap: 12px !important;
+    /* Force 12px gap to match contact-management-actions */
     flex-wrap: wrap;
 }
 
@@ -137,8 +142,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 48px !important; /* Override Tailwind w-10 class */
-    height: 48px !important; /* Override Tailwind h-10 class */
+    width: 48px !important;
+    /* Override Tailwind w-10 class */
+    height: 48px !important;
+    /* Override Tailwind h-10 class */
     border: none;
     border-radius: 50%;
     color: white;
@@ -150,7 +157,8 @@
 
 /* Set FontAwesome icon size to match contact-action-btn */
 .quick-action-btn i {
-    font-size: 24px; /* Match contact-action-btn icon size */
+    font-size: 24px;
+    /* Match contact-action-btn icon size */
 }
 
 /* Also add email button styling */
@@ -194,12 +202,14 @@
 }
 
 .contact-action-btn i {
-    font-size: 24px; /* Increased to 24px to match quick-action SVG icons */
+    font-size: 24px;
+    /* Increased to 24px to match quick-action SVG icons */
 }
 
 /* Contact Management Button Colors */
 .contact-action-btn.edit {
-    background: #007cba; /* WordPress blue */
+    background: #007cba;
+    /* WordPress blue */
 }
 
 .contact-action-btn.edit:hover {
@@ -207,7 +217,8 @@
 }
 
 .contact-action-btn.contacts {
-    background: #8b5cf6; /* Purple */
+    background: #8b5cf6;
+    /* Purple */
 }
 
 .contact-action-btn.contacts:hover {
@@ -215,7 +226,8 @@
 }
 
 .contact-action-btn.download {
-    background: #22c55e; /* Green */
+    background: #22c55e;
+    /* Green */
 }
 
 .contact-action-btn.download:hover {
@@ -223,7 +235,8 @@
 }
 
 .contact-action-btn.qr {
-    background: #f59e0b; /* Orange */
+    background: #f59e0b;
+    /* Orange */
 }
 
 .contact-action-btn.qr:hover {
@@ -231,7 +244,8 @@
 }
 
 .contact-action-btn.save-contact {
-    background: #ef4444; /* Red for heart/save */
+    background: #ef4444;
+    /* Red for heart/save */
 }
 
 .contact-action-btn.save-contact:hover {
@@ -239,11 +253,13 @@
 }
 
 .contact-action-btn.save-contact.saved {
-    background: #ef4444; /* Keep red when saved */
+    background: #ef4444;
+    /* Keep red when saved */
 }
 
 .contact-action-btn.save-contact.saved:hover {
-    background: #dc2626; /* Same red hover when saved */
+    background: #dc2626;
+    /* Same red hover when saved */
 }
 
 /* Contact count badge */
@@ -433,7 +449,7 @@
     font-size: 1rem;
     line-height: 1.6;
     margin-bottom: 1rem;
-    color: white; /* Match vcard-name color for consistency */
+    /* Dark gray for good readability on light backgrounds */
 }
 
 /* Enhanced Button Styles */
@@ -498,7 +514,8 @@ html {
 }
 
 .vcard-section {
-    scroll-margin-top: 120px; /* Account for sticky header */
+    scroll-margin-top: 120px;
+    /* Account for sticky header */
     padding-top: 20px;
     padding-bottom: 20px;
 }
@@ -515,8 +532,13 @@ html {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 /* ===== VISUAL FEEDBACK ANIMATIONS ===== */
@@ -525,8 +547,15 @@ html {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .pulse {
@@ -534,9 +563,17 @@ html {
 }
 
 @keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -546,34 +583,34 @@ html {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .contact-save-status {
         order: 2;
         width: 100%;
         justify-content: center;
     }
-    
+
     .quick-actions {
         order: 1;
         justify-content: center;
         width: 100%;
     }
-    
+
     .save-contact-btn {
         flex: 1;
         justify-content: center;
         max-width: 300px;
     }
-    
+
     .section-nav-list {
         padding: 0 15px;
     }
-    
+
     .section-nav-link {
         padding: 10px 15px;
         font-size: 0.85rem;
     }
-    
+
     .scroll-to-top {
         bottom: 20px;
         right: 20px;
@@ -587,22 +624,22 @@ html {
     .vcard-modern-action-bar {
         padding: 8px 0;
     }
-    
+
     .action-bar-container {
         padding: 0 10px;
     }
-    
+
     .quick-action-btn {
         width: 36px;
         height: 36px;
         font-size: 14px;
     }
-    
+
     .save-contact-btn {
         padding: 6px 12px;
         font-size: 0.85rem;
     }
-    
+
     .section-nav-link {
         padding: 8px 12px;
         font-size: 0.8rem;
@@ -636,11 +673,11 @@ html {
     .vcard-modern-action-bar {
         border-bottom: 2px solid #000;
     }
-    
+
     .save-contact-btn {
         border-width: 2px;
     }
-    
+
     .section-nav-link.active {
         border-bottom-width: 4px;
     }
@@ -653,7 +690,7 @@ html {
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
     }
-    
+
     html {
         scroll-behavior: auto;
     }
@@ -689,11 +726,11 @@ html {
 }
 
 /* ===== ENHANCED VISUAL HIERARCHY ===== */
-.vcard-modern-wrapper .vcard-content > * + * {
+.vcard-modern-wrapper .vcard-content>*+* {
     margin-top: 2rem;
 }
 
-.vcard-modern-wrapper .vcard-section + .vcard-section {
+.vcard-modern-wrapper .vcard-section+.vcard-section {
     margin-top: 3rem;
 }
 
@@ -724,11 +761,13 @@ html {
     background: #007bff;
     border-radius: 2px;
 }
+
 /* ===== 
 SECTION NAVIGATION ===== */
 .vcard-section-nav {
     position: sticky;
-    top: 80px; /* Below action bar */
+    top: 80px;
+    /* Below action bar */
     z-index: 1040;
     background: rgba(248, 249, 250, 0.95);
     backdrop-filter: blur(8px);
@@ -740,7 +779,8 @@ SECTION NAVIGATION ===== */
 .section-nav-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 15px 20px; /* Added vertical padding for better spacing */
+    padding: 15px 20px;
+    /* Added vertical padding for better spacing */
 }
 
 .section-nav-list {
@@ -760,13 +800,16 @@ SECTION NAVIGATION ===== */
 .section-nav-link {
     display: inline-flex;
     align-items: center;
-    padding: 12px 20px; /* Increased from 8px 16px */
+    padding: 12px 20px;
+    /* Increased from 8px 16px */
     background: #ffffff;
     color: #495057;
     text-decoration: none;
-    border-radius: 25px; /* Increased from 20px */
+    border-radius: 25px;
+    /* Increased from 20px */
     border: 1px solid #dee2e6;
-    font-size: 16px; /* Increased from 14px */
+    font-size: 16px;
+    /* Increased from 14px */
     font-weight: 500;
     transition: all 0.3s ease;
     white-space: nowrap;
@@ -793,14 +836,14 @@ SECTION NAVIGATION ===== */
         top: 70px;
         padding: 10px 0;
     }
-    
+
     .section-nav-list {
         gap: 8px;
         justify-content: flex-start;
         overflow-x: auto;
         padding-bottom: 5px;
     }
-    
+
     .section-nav-link {
         padding: 6px 12px;
         font-size: 13px;
@@ -870,20 +913,47 @@ SECTION NAVIGATION ===== */
 }
 
 /* Platform-specific colors */
-.social-facebook .social-icon { background: #1877f2; color: white; }
-.social-twitter .social-icon { background: #1da1f2; color: white; }
-.social-linkedin .social-icon { background: #0077b5; color: white; }
-.social-instagram .social-icon { background: #e4405f; color: white; }
-.social-youtube .social-icon { background: #ff0000; color: white; }
-.social-tiktok .social-icon { background: #000000; color: white; }
-.social-whatsapp .social-icon { background: #25d366; color: white; }
+.social-facebook .social-icon {
+    background: #1877f2;
+    color: white;
+}
+
+.social-twitter .social-icon {
+    background: #1da1f2;
+    color: white;
+}
+
+.social-linkedin .social-icon {
+    background: #0077b5;
+    color: white;
+}
+
+.social-instagram .social-icon {
+    background: #e4405f;
+    color: white;
+}
+
+.social-youtube .social-icon {
+    background: #ff0000;
+    color: white;
+}
+
+.social-tiktok .social-icon {
+    background: #000000;
+    color: white;
+}
+
+.social-whatsapp .social-icon {
+    background: #25d366;
+    color: white;
+}
 
 @media (max-width: 768px) {
     .social-links-grid {
         grid-template-columns: 1fr;
         gap: 15px;
     }
-    
+
     .social-link-card {
         padding: 15px;
     }
