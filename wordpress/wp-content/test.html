@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full antialiased [--ring:theme(colors.blue.500)]">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tailwind Calendar UI</title>
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind config: enable dark mode via class
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          boxShadow: {
+            focus: '0 0 0 2px var(--tw-shadow-color), 0 0 0 4px var(--ring)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- App styles (optional polish) -->
+  <style>
+    /* Smooth focus outline for keyboard users */
+    .kbd-focus:focus-visible { outline: none; box-shadow: 0 0 0 2px rgb(255 255 255), 0 0 0 4px var(--ring); }
+    /* Hide scrollbars in chips row */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="h-full bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+  <div class="min-h-full">
+    <!-- App Shell -->
+    <header class="sticky top-0 z-30 backdrop-blur bg-white/70 dark:bg-gray-900/60 border-b border-gray-200/80 dark:border-white/10">
+      <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+        <div class="flex items-center gap-3">
+          <div class="size-9 grid place-items-center rounded-lg bg-blue-600 text-white font-bold">Cal</div>
+          <div>
+            <h1 class="text-lg font-semibold leading-tight">Team Calendar</h1>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Built with Tailwind CSS ✔️</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="btn-today" type="button" class="kbd-focus inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/80">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Today
+          </button>
+
+          <div class="hidden sm:flex items-center rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800">
+            <button id="btn-prev" class="kbd-focus p-2 hover:bg-gray-50 dark:hover:bg-gray-800/80" aria-label="Previous month">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="h-6 w-px bg-gray-200 dark:bg-white/10" aria-hidden="true"></div>
+            <button id="btn-next" class="kbd-focus p-2 hover:bg-gray-50 dark:hover:bg-gray-800/80" aria-label="Next month">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+
+          <button id="btn-dark" type="button" class="kbd-focus inline-flex items-center gap-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-800/80" aria-pressed="false">
+            <svg id="icon-sun" class="size-4 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2m-2.95-7.05 1.41 1.41M4.54 18.36l1.41 1.41m0-12.73L4.54 5.64m14.83 12.72-1.41-1.41"/></svg>
+            <svg id="icon-moon" class="size-4 dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <span class="hidden sm:inline">Dark</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 grid lg:grid-cols-12 gap-6">
+      <!-- Sidebar (Mini month + filters) -->
+      <aside class="lg:col-span-4 xl:col-span-3 space-y-6">
+        <section class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 p-4">
+          <div class="flex items-center justify-between">
+            <h2 id="mini-title" class="text-sm font-semibold"></h2>
+            <div class="flex items-center rounded-md border border-gray-200 dark:border-white/10">
+              <button id="mini-prev" class="kbd-focus p-1.5 hover:bg-gray-50 dark:hover:bg-gray-800/80" aria-label="Previous month">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+              </button>
+              <div class="h-5 w-px bg-gray-200 dark:bg-white/10"></div>
+              <button id="mini-next" class="kbd-focus p-1.5 hover:bg-gray-50 dark:hover:bg-gray-800/80" aria-label="Next month">
+                <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
+          </div>
+          <div id="mini-grid" class="mt-3 grid grid-cols-7 gap-1 text-xs"></div>
+        </section>
+
+        <section class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 p-4">
+          <h3 class="text-sm font-semibold">Filters</h3>
+          <div class="mt-3 flex gap-2 overflow-x-auto no-scrollbar">
+            <button data-tag="meeting" class="tag-btn kbd-focus rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700/70">Meeting</button>
+            <button data-tag="deadline" class="tag-btn kbd-focus rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700/70">Deadline</button>
+            <button data-tag="outofoffice" class="tag-btn kbd-focus rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700/70">OOO</button>
+            <button data-tag="release" class="tag-btn kbd-focus rounded-full border border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-gray-700 px-3 py-1.5 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700/70">Release</button>
+          </div>
+        </section>
+
+        <section class="rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 p-4">
+          <h3 class="text-sm font-semibold mb-2">Upcoming</h3>
+          <ul id="upcoming" class="space-y-2 text-sm"></ul>
+        </section>
+      </aside>
+
+      <!-- Main Calendar -->
+      <section class="lg:col-span-8 xl:col-span-9 rounded-2xl border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800">
+        <div class="p-4 border-b border-gray-200 dark:border-white/10 flex items-center justify-between">
+          <div>
+            <h2 id="title" class="text-lg font-semibold leading-tight"></h2>
+            <p id="subtitle" class="text-xs text-gray-500 dark:text-gray-400"></p>
+          </div>
+          <div class="sm:hidden flex items-center rounded-lg border border-gray-200 dark:border-white/10">
+            <button id="btn-prev-sm" class="kbd-focus p-2 hover:bg-gray-50 dark:hover:bg-gray-800/80" aria-label="Previous month">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <div class="h-6 w-px bg-gray-200 dark:bg-white/10"></div>
+            <button id="btn-next-sm" class="kbd-focus p-2 hover:bg-gray-50 dark:hover:bg-gray-800/80" aria-label="Next month">
+              <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Weekday header -->
+        <div class="grid grid-cols-7 text-xs font-medium text-gray-500 dark:text-gray-400 px-2 sm:px-4 pt-3">
+          <div class="px-2 text-center">Sun</div>
+          <div class="px-2 text-center">Mon</div>
+          <div class="px-2 text-center">Tue</div>
+          <div class="px-2 text-center">Wed</div>
+          <div class="px-2 text-center">Thu</div>
+          <div class="px-2 text-center">Fri</div>
+          <div class="px-2 text-center">Sat</div>
+        </div>
+
+        <!-- Month grid -->
+        <div id="grid"
+             class="grid grid-cols-7 gap-2 p-2 sm:p-4"
+             role="grid"
+             aria-labelledby="title">
+          <!-- JS will populate day cells -->
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Event Drawer -->
+  <div id="drawer" class="fixed inset-x-0 bottom-0 z-40 translate-y-full transition-transform duration-300">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6">
+      <div class="rounded-t-2xl border border-b-0 border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 shadow-lg">
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-white/10">
+          <h3 id="drawer-title" class="text-sm font-semibold">Events</h3>
+          <button id="drawer-close" class="kbd-focus p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/80" aria-label="Close">
+            <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 18 18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div id="drawer-content" class="p-4 space-y-3 text-sm"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Templates (for cloning) -->
+  <template id="tpl-event-pill">
+    <span class="inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium border">
+      <span class="inline-block size-1.5 rounded-full"></span>
+      <span class="truncate max-w-[10ch] sm:max-w-[20ch]"></span>
+    </span>
+  </template>
+
+  <template id="tpl-upcoming-item">
+    <li class="flex items-center justify-between rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-gray-800 px-3 py-2">
+      <div class="min-w-0">
+        <p class="truncate font-medium"></p>
+        <p class="truncate text-xs text-gray-500 dark:text-gray-400"></p>
+      </div>
+      <span class="ml-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border">
+        <span class="inline-block size-1.5 rounded-full"></span>
+        <span class="capitalize"></span>
+      </span>
+    </li>
+  </template>
+
+  <!-- App Script -->
+  <script>
+    // ---------- Utilities ----------
+    const fmt = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' });
+    const fmtLong = new Intl.DateTimeFormat(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    const fmtMonth = new Intl.DateTimeFormat(undefined, { month: 'long' });
+    const fmtNum = new Intl.NumberFormat(undefined);
+
+    const COLORS = {
+      meeting: {border:'border-blue-200 dark:border-blue-600/50', bg:'bg-blue-50 dark:bg-blue-500/15', dot:'bg-blue-500', text:'text-blue-700 dark:text-blue-300'},
+      deadline:{border:'border-rose-200 dark:border-rose-600/50', bg:'bg-rose-50 dark:bg-rose-500/15', dot:'bg-rose-500', text:'text-rose-700 dark:text-rose-300'},
+      outofoffice:{border:'border-amber-200 dark:border-amber-600/50', bg:'bg-amber-50 dark:bg-amber-500/15', dot:'bg-amber-500', text:'text-amber-700 dark:text-amber-300'},
+      release:{border:'border-emerald-200 dark:border-emerald-600/50', bg:'bg-emerald-50 dark:bg-emerald-500/15', dot:'bg-emerald-500', text:'text-emerald-700 dark:text-emerald-300'},
+      default:{border:'border-gray-200 dark:border-white/10', bg:'bg-gray-50 dark:bg-gray-700', dot:'bg-gray-400', text:'text-gray-700 dark:text-gray-300'},
+    };
+
+    function startOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+    function endOfMonth(d){ return new Date(d.getFullYear(), d.getMonth()+1, 0); }
+    function addMonths(d,n){ return new Date(d.getFullYear(), d.getMonth()+n, 1); }
+    function sameDate(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
+    function isBetween(d, a, b){ const x=d.setHours(0,0,0,0), y=a.setHours(0,0,0,0), z=b.setHours(0,0,0,0); return (x>=Math.min(y,z) && x<=Math.max(y,z)); }
+
+    // ---------- Fake Data (replace with your own API) ----------
+    const sampleEvents = [
+      { id: 1, title: 'Sprint Planning', date: '2025-09-02T10:00:00', duration: 60, tag: 'meeting' },
+      { id: 2, title: 'Release v2.8', date: '2025-09-04T09:00:00', duration: 30, tag: 'release' },
+      { id: 3, title: 'Design Review', date: '2025-09-11T14:00:00', duration: 60, tag: 'meeting' },
+      { id: 4, title: 'Quarterly Deadline', date: '2025-09-30T17:00:00', duration: 0, tag: 'deadline' },
+      { id: 5, title: 'Saida PTO', date: '2025-09-16T00:00:00', duration: 24*60*3, tag: 'outofoffice' },
+      { id: 6, title: 'All-Hands', date: '2025-10-01T11:30:00', duration: 60, tag: 'meeting' },
+      { id: 7, title: 'Beta Cutoff', date: '2025-10-15T18:00:00', duration: 0, tag: 'deadline' },
+      { id: 8, title: 'Retrospective', date: '2025-09-26T16:00:00', duration: 60, tag: 'meeting' },
+    ];
+
+    // ---------- App State ----------
+    const state = {
+      viewDate: startOfMonth(new Date()),
+      miniDate: startOfMonth(new Date()),
+      focused: new Date(),
+      selection: { start: null, end: null },
+      filters: new Set(), // tags
+      events: sampleEvents,
+    };
+
+    // ---------- DOM ----------
+    const grid = document.getElementById('grid');
+    const title = document.getElementById('title');
+    const subtitle = document.getElementById('subtitle');
+
+    const miniTitle = document.getElementById('mini-title');
+    const miniGrid = document.getElementById('mini-grid');
+
+    const upcoming = document.getElementById('upcoming');
+
+    const btnPrev = document.getElementById('btn-prev');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrevSm = document.getElementById('btn-prev-sm');
+    const btnNextSm = document.getElementById('btn-next-sm');
+    const btnToday = document.getElementById('btn-today');
+
+    const miniPrev = document.getElementById('mini-prev');
+    const miniNext = document.getElementById('mini-next');
+
+    const btnDark = document.getElementById('btn-dark');
+
+    const drawer = document.getElementById('drawer');
+    const drawerContent = document.getElementById('drawer-content');
+    const drawerTitle = document.getElementById('drawer-title');
+    const drawerClose = document.getElementById('drawer-close');
+
+    const tplPill = document.getElementById('tpl-event-pill');
+    const tplUpcoming = document.getElementById('tpl-upcoming-item');
+
+    // ---------- Rendering ----------
+    function daysForMonth(monthDate){
+      const start = startOfMonth(monthDate);
+      const end = endOfMonth(monthDate);
+      const startWeekday = start.getDay(); // 0..6
+      const days = [];
+
+      // prev month spill
+      for(let i=0;i<startWeekday;i++){
+        const d = new Date(start); d.setDate(d.getDate() - (startWeekday - i));
+        days.push({ date: d, outside: true });
+      }
+      // current month
+      for(let i=1;i<=end.getDate();i++){
+        const d = new Date(start); d.setDate(i);
+        days.push({ date: d, outside: false });
+      }
+      // next month spill to fill 42 cells (6 rows)
+      while(days.length % 7 !== 0) {
+        const d = new Date(end); d.setDate(d.getDate() + (days.length % 7 === 0 ? 0 : (days.length >= 35 ? (42 - days.length) : (35 - days.length))));
+        // ensure pushing sequentially
+        const last = days[days.length-1].date;
+        const next = new Date(last); next.setDate(last.getDate()+1);
+        days.push({ date: next, outside: true });
+      }
+      // Guarantee 6 rows (42 cells)
+      while(days.length < 42) {
+        const last = days[days.length-1].date;
+        const next = new Date(last); next.setDate(last.getDate()+1);
+        days.push({ date: next, outside: true });
+      }
+      return days;
+    }
+
+    function filteredEventsForDate(d){
+      const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+      const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999);
+      const tagFilter = state.filters.size ? (e)=>state.filters.has(e.tag) : ()=>true;
+
+      return state.events.filter(e=>{
+        const start = new Date(e.date);
+        const end = new Date(start.getTime() + e.duration*60*1000);
+        const overlaps = start <= dayEnd && end >= dayStart;
+        return overlaps && tagFilter(e);
+      }).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    }
+
+    function renderMonth(){
+      // Header
+      title.textContent = fmt.format(state.viewDate);
+      const count = state.events.filter(e => {
+        const d = new Date(e.date);
+        return d.getFullYear()===state.viewDate.getFullYear() && d.getMonth()===state.viewDate.getMonth();
+      }).length;
+      subtitle.textContent = `${fmtNum.format(count)} event${count===1?'':'s'} in ${fmtMonth.format(state.viewDate)}`;
+
+      grid.innerHTML = '';
+      const days = daysForMonth(state.viewDate);
+      const today = new Date();
+
+      days.forEach(({date, outside}, idx)=>{
+        const cell = document.createElement('button');
+        cell.type = 'button';
+        cell.className = [
+          'group kbd-focus relative h-28 sm:h-32 md:h-36 w-full rounded-xl border text-left p-2 flex flex-col',
+          outside ? 'bg-gray-50/60 dark:bg-gray-900/40 text-gray-400 border-dashed border-gray-200 dark:border-white/10' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-white/10',
+          sameDate(date, today) ? 'ring-1 ring-inset ring-blue-500/40' : '',
+        ].join(' ');
+        cell.setAttribute('role','gridcell');
+        cell.setAttribute('tabindex','0');
+        cell.dataset.date = date.toISOString();
+
+        // Day number
+        const num = document.createElement('div');
+        num.className = [
+          'ml-auto size-7 grid place-items-center rounded-full text-xs font-medium',
+          sameDate(date,today) ? 'bg-blue-600 text-white' : 'text-gray-600 dark:text-gray-300 group-hover:bg-gray-100/80 dark:group-hover:bg-gray-700/60'
+        ].join(' ');
+        num.textContent = date.getDate();
+        cell.appendChild(num);
+
+        // Event chips row
+        const row = document.createElement('div');
+        row.className = 'mt-auto flex flex-wrap items-center gap-1.5';
+        const events = filteredEventsForDate(date);
+        events.slice(0,3).forEach(e=>{
+          const pill = tplPill.content.firstElementChild.cloneNode(true);
+          const c = COLORS[e.tag] || COLORS.default;
+          pill.className = `inline-flex items-center gap-1 rounded px-2 py-0.5 text-[11px] font-medium border ${c.border} ${c.bg} ${c.text}`;
+          pill.querySelector('span').classList.add(c.dot);
+          pill.querySelectorAll('span')[1].textContent = e.title;
+          row.appendChild(pill);
+        });
+        if (events.length > 3){
+          const more = document.createElement('span');
+          more.className = 'text-[11px] text-gray-500 dark:text-gray-400';
+          more.textContent = `+${events.length-3} more`;
+          row.appendChild(more);
+        }
+        cell.appendChild(row);
+
+        // Range highlight
+        const {start, end} = state.selection;
+        if (start && end && isBetween(new Date(date), new Date(start), new Date(end))){
+          cell.classList.add('bg-blue-50/70','dark:bg-blue-500/10');
+        } else if (start && sameDate(date, new Date(start))){
+          cell.classList.add('bg-blue-100/80','dark:bg-blue-500/20');
+        } else if (end && sameDate(date, new Date(end))){
+          cell.classList.add('bg-blue-100/80','dark:bg-blue-500/20');
+        }
+
+        // Click handler -> open drawer
+        cell.addEventListener('click', (ev)=>{
+          const day = new Date(cell.dataset.date);
+          if (ev.shiftKey && state.selection.start){
+            state.selection.end = day;
+            renderMonth();
+            openDrawer(day);
+          } else if (ev.metaKey || ev.ctrlKey){
+            state.selection.start = day;
+            state.selection.end = day;
+            renderMonth();
+            openDrawer(day);
+          } else {
+            state.selection.start = day;
+            state.selection.end = null;
+            renderMonth();
+            openDrawer(day);
+          }
+        });
+
+        // Keyboard arrows
+        cell.addEventListener('keydown', (ev)=>{
+          const i = idx;
+          if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(ev.key)){
+            ev.preventDefault();
+          }
+          let targetIndex = null;
+          if (ev.key==='ArrowLeft') targetIndex = i-1;
+          if (ev.key==='ArrowRight') targetIndex = i+1;
+          if (ev.key==='ArrowUp') targetIndex = i-7;
+          if (ev.key==='ArrowDown') targetIndex = i+7;
+          if (targetIndex!=null){
+            const cells = [...grid.querySelectorAll('[role="gridcell"]')];
+            const t = cells[targetIndex];
+            if (t){ t.focus(); }
+          }
+          if (ev.key==='Enter' || ev.key===' '){
+            ev.preventDefault();
+            cell.click();
+          }
+        });
+
+        grid.appendChild(cell);
+      });
+    }
+
+    function renderMini(){
+      miniTitle.textContent = fmt.format(state.miniDate);
+      miniGrid.innerHTML = '';
+      const days = daysForMonth(state.miniDate);
+      const curMonth = state.miniDate.getMonth();
+      const today = new Date();
+      days.forEach(({date, outside})=>{
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = [
+          'kbd-focus aspect-square w-full rounded-md text-xs',
+          outside ? 'text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/80' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/80',
+        ].join(' ');
+        if (sameDate(date,today)){
+          b.classList.add('ring-1','ring-inset','ring-blue-500/40');
+        }
+        b.textContent = date.getDate();
+        b.addEventListener('click', ()=>{
+          state.viewDate = new Date(date.getFullYear(), date.getMonth(), 1);
+          renderMonth();
+        });
+        miniGrid.appendChild(b);
+      });
+    }
+
+    function renderUpcoming(){
+      upcoming.innerHTML = '';
+      const now = new Date();
+      const nextItems = state.events
+        .filter(e => new Date(e.date) >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
+        .sort((a,b)=>new Date(a.date)-new Date(b.date))
+        .slice(0, 6);
+
+      nextItems.forEach(e=>{
+        const li = tplUpcoming.content.firstElementChild.cloneNode(true);
+        const c = COLORS[e.tag] || COLORS.default;
+        const [titleEl, subEl] = li.querySelectorAll('p');
+        titleEl.textContent = e.title;
+        subEl.textContent = fmtLong.format(new Date(e.date));
+        const badge = li.querySelector('span');
+        badge.className = `ml-3 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium border ${c.border} ${c.bg} ${(c.text||'')}`;
+        badge.querySelector('span').classList.add(c.dot);
+        badge.querySelectorAll('span')[1].textContent = e.tag;
+        upcoming.appendChild(li);
+      });
+      if (nextItems.length===0){
+        const empty = document.createElement('p');
+        empty.className = 'text-sm text-gray-500 dark:text-gray-400';
+        empty.textContent = 'No upcoming events.';
+        upcoming.appendChild(empty);
+      }
+    }
+
+    function openDrawer(day){
+      const list = filteredEventsForDate(day);
+      drawerTitle.textContent = `Events — ${fmtLong.format(day)}`;
+      drawerContent.innerHTML = '';
+      if (!list.length){
+        const p = document.createElement('p');
+        p.className = 'text-sm text-gray-500 dark:text-gray-400';
+        p.textContent = 'No events for this date.';
+        drawerContent.appendChild(p);
+      } else {
+        list.forEach(e=>{
+          const c = COLORS[e.tag] || COLORS.default;
+          const item = document.createElement('div');
+          item.className = `rounded-lg border ${c.border} ${c.bg} p-3`;
+          const time = new Date(e.date);
+          const end = new Date(time.getTime() + e.duration*60*1000);
+          const timeLabel = e.duration===0 ? 'All day' : `${time.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}–${end.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`;
+          item.innerHTML = `
+            <div class="flex items-center justify-between">
+              <p class="font-medium ${c.text||''}">${e.title}</p>
+              <span class="inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${c.border} ${c.bg} ${c.text||''}">
+                <span class="inline-block size-1.5 rounded-full ${c.dot}"></span>
+                <span class="capitalize">${e.tag}</span>
+              </span>
+            </div>
+            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">${timeLabel}</p>
+          `;
+          drawerContent.appendChild(item);
+        });
+      }
+      drawer.classList.remove('translate-y-full');
+    }
+    function closeDrawer(){ drawer.classList.add('translate-y-full'); }
+
+    // ---------- Interactions ----------
+    function gotoMonth(n){ state.viewDate = addMonths(state.viewDate, n); renderMonth(); }
+    btnPrev.addEventListener('click', ()=>gotoMonth(-1));
+    btnNext.addEventListener('click', ()=>gotoMonth(1));
+    btnPrevSm.addEventListener('click', ()=>gotoMonth(-1));
+    btnNextSm.addEventListener('click', ()=>gotoMonth(1));
+    btnToday.addEventListener('click', ()=>{
+      state.viewDate = startOfMonth(new Date());
+      renderMonth(); renderMini();
+    });
+    miniPrev.addEventListener('click', ()=>{ state.miniDate = addMonths(state.miniDate,-1); renderMini(); });
+    miniNext.addEventListener('click', ()=>{ state.miniDate = addMonths(state.miniDate,1); renderMini(); });
+
+    drawerClose.addEventListener('click', closeDrawer);
+    drawer.addEventListener('click', (e)=>{ if (e.target===drawer) closeDrawer(); });
+
+    // Tag filters
+    document.querySelectorAll('.tag-btn').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const tag = b.dataset.tag;
+        if (state.filters.has(tag)){ state.filters.delete(tag); b.classList.remove('ring-2','ring-offset-1','ring-blue-500'); }
+        else { state.filters.add(tag); b.classList.add('ring-2','ring-offset-1','ring-blue-500'); }
+        renderMonth(); renderUpcoming();
+      });
+    });
+
+    // Dark mode
+    function setDark(on){
+      const root = document.documentElement;
+      root.classList.toggle('dark', on);
+      btnDark.setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    btnDark.addEventListener('click', ()=> setDark(!document.documentElement.classList.contains('dark')));
+
+    // ---------- Boot ----------
+    (function init(){
+      // Respect OS preference on first load
+      const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      setDark(prefersDark);
+      renderMonth();
+      renderMini();
+      renderUpcoming();
+    })();
+  </script>
+</body>
+</html>

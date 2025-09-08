@@ -221,4 +221,112 @@
         min-width: auto;
         margin-bottom: 3px;
     }
+}/*
+ Contact Section Two-Column Layout */
+.contact-two-column-layout {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.contact-info-left,
+.address-info-right {
+    flex: 1;
+}
+
+/* Contact Items - Horizontal Layout */
+.contact-item-horizontal {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 0.95em;
+    line-height: 1.6;
+}
+
+.contact-item-horizontal i {
+    width: 20px;
+    margin-right: 10px;
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.contact-label {
+    font-weight: 600;
+    color: #333;
+    margin-right: 8px;
+    white-space: nowrap;
+}
+
+.contact-value {
+    color: #555;
+}
+
+.contact-value a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.contact-value a:hover {
+    text-decoration: underline;
+}
+
+/* Address Section */
+.address-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95em;
+}
+
+.address-header i {
+    width: 20px;
+    margin-right: 10px;
+    color: #667eea;
+}
+
+.address-content {
+    font-size: 0.95em;
+    line-height: 1.6;
+    color: #555;
+}
+
+.address-line {
+    margin-bottom: 5px;
+}
+
+.address-map {
+    margin-top: 15px;
+}
+
+.map-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.9em;
+}
+
+.map-link:hover {
+    text-decoration: underline;
+}
+
+.map-link i {
+    margin-right: 5px;
+}
+
+/* Mobile Responsive - Stack vertically */
+@media (max-width: 768px) {
+    .contact-two-column-layout {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .contact-item-horizontal {
+        font-size: 0.9em;
+    }
+    
+    .address-header,
+    .address-content {
+        font-size: 0.9em;
+    }
 }

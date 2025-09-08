@@ -328,57 +328,64 @@
                     </div>
                 {% endif %}
                 
-                {# Contact Information Section #}
-                <div id="contact" class="vcard-contact-info vcard-section">
+                {# Contact Information & Address Section - Two Column Layout #}
+                <div id="contact" class="vcard-contact-section vcard-section">
                     <h3>{{ __('Contact Information', 'vcard') }}</h3>
                     
-                    {% for contact in contact_info %}
-                        <div class="vcard-contact-item">
-                            <i class="{{ contact.icon }}"></i>
-                            <div class="contact-details">
-                                <strong>{{ contact.label|esc_html }}:</strong>
-                                {% if contact.type in ['tel', 'email', 'whatsapp', 'url'] %}
-                                    <a href="{{ contact.link|esc_url }}">{{ contact.value|esc_html }}</a>
-                                {% else %}
-                                    {{ contact.value|esc_html }}
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-                
-                {# Address Section #}
-                {% if has_address %}
-                    <div class="vcard-address">
-                        <h1>Testing Address</h1>
-                        <h3><i class="fas fa-map-marker-alt"></i> {{ __('Address', 'vcard') }}</h3>
-                        <div class="vcard-address-details">
-                            {% if address.address %}
-                                <div class="address-line">{{ address.address|esc_html }}</div>
-                            {% endif %}
-                            <div class="address-line">
-                                {{ address.city|esc_html }}
-                                {% if address.city and address.state %}, {% endif %}
-                                {{ address.state|esc_html }}
-                                {% if address.zip_code %} {{ address.zip_code|esc_html }}{% endif %}
-                            </div>
-                            {% if address.country %}
-                                <div class="address-line">{{ address.country|esc_html }}</div>
-                            {% endif %}
-                            
-                            {# Map Integration #}
-                            {% if address.latitude and address.longitude %}
-                                <div class="address-map">
-                                    <a href="https://maps.google.com/?q={{ address.latitude|esc_attr }},{{ address.longitude|esc_attr }}" 
-                                       target="_blank" rel="noopener" class="map-link">
-                                        <i class="fas fa-external-link-alt"></i>
-                                        {{ __('View on Map', 'vcard') }}
-                                    </a>
+                    <div class="contact-two-column-layout">
+                        {# Left Column - Contact Information #}
+                        <div class="contact-info-left">
+                            {% for contact in contact_info %}
+                                <div class="contact-item-horizontal">
+                                    <i class="{{ contact.icon }}"></i>
+                                    <span class="contact-label">{{ contact.label|esc_html }}:</span>
+                                    <span class="contact-value">
+                                        {% if contact.type in ['tel', 'email', 'whatsapp', 'url'] %}
+                                            <a href="{{ contact.link|esc_url }}">{{ contact.value|esc_html }}</a>
+                                        {% else %}
+                                            {{ contact.value|esc_html }}
+                                        {% endif %}
+                                    </span>
                                 </div>
-                            {% endif %}
+                            {% endfor %}
                         </div>
+                        
+                        {# Right Column - Address Information #}
+                        {% if has_address %}
+                            <div class="address-info-right">
+                                <div class="address-header">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ __('Address', 'vcard') }}</span>
+                                </div>
+                                <div class="address-content">
+                                    {% if address.address %}
+                                        <div class="address-line">{{ address.address|esc_html }}</div>
+                                    {% endif %}
+                                    <div class="address-line">
+                                        {{ address.city|esc_html }}
+                                        {% if address.city and address.state %}, {% endif %}
+                                        {{ address.state|esc_html }}
+                                        {% if address.zip_code %} {{ address.zip_code|esc_html }}{% endif %}
+                                    </div>
+                                    {% if address.country %}
+                                        <div class="address-line">{{ address.country|esc_html }}</div>
+                                    {% endif %}
+                                    
+                                    {# Map Integration #}
+                                    {% if address.latitude and address.longitude %}
+                                        <div class="address-map">
+                                            <a href="https://maps.google.com/?q={{ address.latitude|esc_attr }},{{ address.longitude|esc_attr }}" 
+                                               target="_blank" rel="noopener" class="map-link">
+                                                <i class="fas fa-external-link-alt"></i>
+                                                {{ __('View on Map', 'vcard') }}
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
                 
                 
                 {# Social Media Section #}
