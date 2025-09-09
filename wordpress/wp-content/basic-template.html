@@ -419,7 +419,7 @@
               <div>1234 Congress Ave, Suite 200</div>
               <div>Medical Plaza Building</div>
               <div>Austin, Texas, USA 78701</div>
-              <div class="mt-1 text-slate-600 dark:text-slate-300">Google Plus Code: <span class="font-medium">77CM+4R Austin</span></div>
+              <div>Google Plus Code: <a href="https://www.google.com/maps/place/F5CX%2B3J" target="_blank">77CM+4R Austin</a></div>
             </address>
           </div>
 
@@ -427,36 +427,97 @@
           <!-- Socials -->
           <div class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 p-6">
             <h3 class="font-semibold text-lg mb-4">Follow us</h3>
-            <div class="flex flex-wrap gap-3">
-              <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" href="#" aria-label="Facebook">
-                <i class="fa-brands fa-facebook text-blue-600"></i> Facebook
+                        <div class="flex flex-wrap justify-center md:justify-start gap-4">
+              <!-- Facebook -->
+              <a href="https://facebook.com/yourpage" target="_blank" rel="noopener"
+                aria-label="Facebook"
+                class="inline-flex items-center justify-center h-12 w-12 rounded-full 
+                      ring-1 ring-slate-200 dark:ring-slate-800 
+                      bg-white dark:bg-slate-950 
+                      hover:ring-primary/40 hover:shadow transition">
+                <i class="fa-brands fa-facebook-f text-blue-600 text-2xl"></i>
               </a>
-              <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" href="#" aria-label="Instagram">
-                <i class="fa-brands fa-instagram text-pink-500"></i> Instagram
+              <!-- Twitter / X -->
+              <a href="https://twitter.com/yourhandle" target="_blank" rel="noopener"
+                aria-label="Twitter"
+                class="inline-flex items-center justify-center h-12 w-12 rounded-full 
+                      ring-1 ring-slate-200 dark:ring-slate-800 
+                      bg-white dark:bg-slate-950 
+                      hover:ring-primary/40 hover:shadow transition">
+                <i class="fa-brands fa-x-twitter text-black dark:text-white text-2xl"></i>
               </a>
-              <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" href="#" aria-label="LinkedIn">
-                <i class="fa-brands fa-linkedin text-sky-600"></i> LinkedIn
+              <!-- Instagram -->
+              <a href="https://instagram.com/yourhandle" target="_blank" rel="noopener"
+                aria-label="Instagram"
+                class="inline-flex items-center justify-center h-12 w-12 rounded-full 
+                      ring-1 ring-slate-200 dark:ring-slate-800 
+                      bg-white dark:bg-slate-950 
+                      hover:ring-primary/40 hover:shadow transition">
+                <i class="fa-brands fa-instagram text-pink-500 text-2xl"></i>
               </a>
-              <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" href="#" aria-label="X">
-                <i class="fa-brands fa-x-twitter"></i> X
+              <!-- LinkedIn -->
+              <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener"
+                aria-label="LinkedIn"
+                class="inline-flex items-center justify-center h-12 w-12 rounded-full 
+                      ring-1 ring-slate-200 dark:ring-slate-800 
+                      bg-white dark:bg-slate-950 
+                      hover:ring-primary/40 hover:shadow transition">
+                <i class="fa-brands fa-linkedin-in text-sky-700 text-2xl"></i>
+              </a>
+              <!-- YouTube -->
+              <a href="https://youtube.com/yourchannel" target="_blank" rel="noopener"
+                aria-label="YouTube"
+                class="inline-flex items-center justify-center h-12 w-12 rounded-full 
+                      ring-1 ring-slate-200 dark:ring-slate-800 
+                      bg-white dark:bg-slate-950 
+                      hover:ring-primary/40 hover:shadow transition">
+                <i class="fa-brands fa-youtube text-red-600 text-2xl"></i>
+              </a>
+              <!-- TikTok -->
+              <a href="https://tiktok.com/@yourhandle" target="_blank" rel="noopener"
+                aria-label="TikTok"
+                class="inline-flex items-center justify-center h-12 w-12 rounded-full 
+                      ring-1 ring-slate-200 dark:ring-slate-800 
+                      bg-white dark:bg-slate-950 
+                      hover:ring-primary/40 hover:shadow transition">
+                <i class="fa-brands fa-tiktok text-black dark:text-white text-2xl"></i>
               </a>
             </div>
           </div>
         </div>
+
 
         <!-- Column B -->
         <div class="space-y-6">
           <!-- Hours -->
           <div class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 p-6">
             <h3 class="font-semibold text-lg mb-4">Hours of Operation</h3>
-            <ul class="divide-y divide-slate-200 dark:divide-slate-800">
-              <li class="flex justify-between py-2"><span>Monday</span><span>8:00 AM – 6:00 PM</span></li>
-              <li class="flex justify-between py-2"><span>Tuesday</span><span>8:00 AM – 6:00 PM</span></li>
-              <li class="flex justify-between py-2"><span>Wednesday</span><span>8:00 AM – 6:00 PM</span></li>
-              <li class="flex justify-between py-2"><span>Thursday</span><span>8:00 AM – 6:00 PM</span></li>
-              <li class="flex justify-between py-2"><span>Friday</span><span>8:00 AM – 4:00 PM</span></li>
-              <li class="flex justify-between py-2"><span>Saturday</span><span>Closed</span></li>
-              <li class="flex justify-between py-2"><span>Sunday</span><span>Closed</span></li>
+            <!-- Alternating rows: even rows get palette-tinted bg -->
+            <ul
+              class="grid gap-1
+                    [&>li]:flex [&>li]:justify-between [&>li]:items-center
+                    [&>li]:py-2 [&>li]:px-3 [&>li]:rounded-lg
+                    [&>li:nth-child(even)]:bg-[var(--primary-50)]
+                    dark:[&>li:nth-child(even)]:bg-slate-800/60">
+              <li data-dow="1"><span>Monday</span><span>8:00 AM – 6:00 PM</span></li>
+              <li data-dow="2"><span>Tuesday</span><span>8:00 AM – 6:00 PM</span></li>
+              <li data-dow="3"><span>Wednesday</span><span>8:00 AM – 6:00 PM</span></li>
+              <li data-dow="4"><span>Thursday</span><span>8:00 AM – 6:00 PM</span></li>
+              <li data-dow="5"><span>Friday</span><span>8:00 AM – 4:00 PM</span></li>
+              <li data-dow="6">
+                <span>Saturday</span>
+                <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full
+                            bg-rose-50 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300">
+                  Closed
+                </span>
+              </li>
+              <li data-dow="0">
+                <span>Sunday</span>
+                <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full
+                            bg-rose-50 text-rose-700 dark:bg-rose-400/10 dark:text-rose-300">
+                  Closed
+                </span>
+              </li>
             </ul>
           </div>
 
