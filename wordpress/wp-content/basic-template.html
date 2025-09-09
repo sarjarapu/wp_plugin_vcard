@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" data-theme="blue">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Acme Dental Care — Business Profile</title>
+  <meta name="description" content="Business profile page: About, Products & Services, Contact, Reviews, Hours, Map, Gallery." />
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Inter', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font Awesome (icon CDN) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+  <!-- Base CSS variables + palettes -->
+  <style>
+    :root {
+      --primary: #2563eb; /* default blue */
+      --primary-600: #2563eb;
+      --primary-700: #1d4ed8;
+      --primary-50: #eff6ff;
+    }
+    [data-theme="blue"]  { --primary:#2563eb; --primary-600:#2563eb; --primary-700:#1d4ed8; --primary-50:#eff6ff;}
+    [data-theme="teal"]  { --primary:#0d9488; --primary-600:#0d9488; --primary-700:#0f766e; --primary-50:#ecfeff;}
+    [data-theme="violet"]{ --primary:#7c3aed; --primary-600:#7c3aed; --primary-700:#6d28d9; --primary-50:#f5f3ff;}
+    [data-theme="rose"]  { --primary:#e11d48; --primary-600:#e11d48; --primary-700:#be123c; --primary-50:#fff1f2;}
+    [data-theme="amber"] { --primary:#f59e0b; --primary-600:#f59e0b; --primary-700:#d97706; --primary-50:#fffbeb;}
+
+    /* Utility helpers for CSS variables with Tailwind arbitrary values */
+    .text-primary   { color: var(--primary); }
+    .bg-primary     { background-color: var(--primary); }
+    .bg-primary-50  { background-color: var(--primary-50); }
+    .ring-primary   { --tw-ring-color: var(--primary); }
+    .gradient-primary { background-image: linear-gradient(90deg, var(--primary-700), var(--primary-600)); }
+  </style>
+</head>
+
+<body class="antialiased text-slate-800 dark:text-slate-100 bg-white dark:bg-slate-950">
+  <!-- ======= Top Large Navigation ======= -->
+  <header id="top" class="relative">
+    <div class="w-full border-b border-slate-200/70 dark:border-slate-800/70 bg-white/80 dark:bg-slate-900/70 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex items-center justify-between py-4">
+          <!-- Brand -->
+          <a href="#top" class="flex items-center gap-3 group">
+            <img src="https://via.placeholder.com/48x48.png?text=Logo" alt="Company Logo" class="h-12 w-12 rounded-lg ring-1 ring-slate-200 dark:ring-slate-800 group-hover:scale-105 transition" />
+            <div>
+              <span class="block font-semibold text-lg md:text-2xl">Acme Dental Care</span>
+              <span class="text-sm text-slate-500 dark:text-slate-400">Bright smiles since 1998</span>
+            </div>
+          </a>
+
+          <!-- Primary Menu (Large) -->
+          <div class="hidden lg:flex items-center gap-2">
+            <a href="#about" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">About</a>
+            <a href="#request-info" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Request Info</a>
+            <a href="#products" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Products & Services</a>
+            <a href="#contact" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Contact</a>
+            <a href="#reviews" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Reviews</a>
+            <a href="#gallery" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Gallery</a>
+            <!-- Theme & Palette -->
+            <div class="ml-2 flex items-center gap-2">
+              <button id="themeToggle" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-moon text-primary"></i><span class="hidden xl:inline">Theme</span>
+              </button>
+              <div class="hidden xl:flex items-center gap-1">
+                <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
+                <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="teal"  style="background:#0d9488" title="Teal"></button>
+                <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="violet"style="background:#7c3aed" title="Violet"></button>
+                <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
+                <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mobile Menu Button -->
+          <button id="openMenu" class="lg:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Open menu">
+            <i class="fa-solid fa-bars text-xl"></i>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobileMenu" class="fixed inset-0 z-50 hidden">
+      <div class="absolute inset-0 bg-black/40" id="closeMenu"></div>
+      <div class="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-white dark:bg-slate-900 shadow-xl p-6 flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <div class="font-bold text-lg">Menu</div>
+          <button id="closeMenuBtn" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Close menu">
+            <i class="fa-solid fa-xmark text-xl"></i>
+          </button>
+        </div>
+        <a href="#quick-actions" class="py-2">Quick Actions</a>
+        <a href="#about" class="py-2">About</a>
+        <a href="#request-info" class="py-2">Request Info</a>
+        <a href="#products" class="py-2">Products & Services</a>
+        <a href="#contact" class="py-2">Contact</a>
+        <a href="#reviews" class="py-2">Reviews</a>
+        <a href="#gallery" class="py-2">Gallery</a>
+        <div class="pt-4 border-t border-slate-200 dark:border-slate-800 mt-auto">
+          <button id="themeToggleMobile" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-moon text-primary"></i><span>Toggle Theme</span>
+          </button>
+          <div class="flex items-center gap-2 mt-3">
+            <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
+            <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="teal"  style="background:#0d9488" title="Teal"></button>
+            <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="violet"style="background:#7c3aed" title="Violet"></button>
+            <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
+            <button class="palette h-8 w-8 rounded-full ring-2 ring-white shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Banner / Hero -->
+    <section class="relative overflow-hidden">
+      <div class="absolute inset-0 gradient-primary opacity-10 dark:opacity-20"></div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <div class="grid md:grid-cols-2 gap-10 items-center">
+          <div>
+            <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-primary-50 text-primary ring-1 ring-primary/10">
+              <i class="fa-solid fa-circle-check"></i> Verified Business
+            </span>
+            <h1 class="mt-5 text-3xl md:text-5xl font-extrabold leading-tight">
+              Acme Dental Care
+            </h1>
+            <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
+              Family-friendly dentistry offering preventative care, cosmetic treatments, and emergency services with cutting-edge tech and a gentle touch.
+            </p>
+            <div class="mt-6 flex flex-wrap gap-3">
+              <a href="#request-info" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-primary text-white shadow hover:opacity-95">
+                <i class="fa-solid fa-paper-plane"></i> Request Info
+              </a>
+              <a href="#contact" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-phone"></i> Contact Us
+              </a>
+            </div>
+            <!-- Social proof -->
+            <div class="mt-6 flex items-center gap-6 text-slate-600 dark:text-slate-300">
+              <span class="inline-flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> 4.8/5 (238 reviews)</span>
+              <span class="hidden sm:inline">•</span>
+              <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot text-primary"></i> Austin, TX</span>
+            </div>
+          </div>
+          <div class="relative">
+            <img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1200&auto=format&fit=crop" alt="Clinic" class="w-full h-72 md:h-[22rem] object-cover rounded-2xl shadow-lg ring-1 ring-slate-200 dark:ring-slate-800" />
+            <div class="absolute -bottom-6 -left-6 bg-white dark:bg-slate-900 rounded-xl p-4 shadow ring-1 ring-slate-200 dark:ring-slate-800">
+              <div class="flex items-center gap-3">
+                <img src="https://via.placeholder.com/56x56.png?text=AD" alt="Logo" class="h-14 w-14 rounded-lg ring-1 ring-slate-200 dark:ring-slate-700" />
+                <div>
+                  <div class="font-semibold">Since 1998</div>
+                  <div class="text-sm text-slate-500 dark:text-slate-400">Locally Owned</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </header>
+
+  <!-- ======= Sticky Compact Nav (reveals on scroll) ======= -->
+  <div id="stickyNav" class="hidden fixed top-0 inset-x-0 z-40 bg-white/90 dark:bg-slate-900/85 backdrop-blur border-b border-slate-200/70 dark:border-slate-800/70">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between py-3">
+        <a href="#top" class="flex items-center gap-2">
+          <img src="https://via.placeholder.com/28x28.png?text=AD" class="h-7 w-7 rounded-md ring-1 ring-slate-200 dark:ring-slate-800" alt="">
+          <span class="font-semibold">Acme Dental Care</span>
+        </a>
+        <div class="flex items-center gap-1 text-sm">
+          <a href="#quick-actions" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Actions</a>
+          <a href="#about" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">About</a>
+          <a href="#products" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">P&S</a>
+          <a href="#contact" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Contact</a>
+          <a href="#reviews" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Reviews</a>
+          <a href="#gallery" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Gallery</a>
+          <button id="stickyTheme" class="ml-2 p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle theme">
+            <i class="fa-solid fa-moon text-primary"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= Quick Actions (compact icon-only) ======= -->
+  <section id="quick-actions" class="py-10 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">Quick Actions</h2>
+
+      <!-- Groups stack vertically on small screens, side-by-side on md+ -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Group: Contact Us -->
+        <div role="group" aria-labelledby="qa-contact-label" class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 p-4">
+          <h3 id="qa-contact-label" class="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-3">Contact Us</h3>
+          <!-- Buttons align horizontally and wrap as needed -->
+          <div class="flex flex-wrap items-center gap-3">
+            <a href="tel:+15125551234" aria-label="Call Us" title="Call Us"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-phone-volume text-emerald-600 text-3xl"></i>
+            </a>
+            <a href="https://wa.me/15125551234?text=Hello%20Acme%20Dental%20Care" target="_blank" rel="noopener"
+              aria-label="WhatsApp" title="WhatsApp"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-brands fa-whatsapp text-green-600 text-3xl"></i>
+            </a>
+            <a href="mailto:hello@acmedental.com?subject=Inquiry%20from%20Website" aria-label="Email" title="Email"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-envelope text-rose-500 text-3xl"></i>
+            </a>
+            <button type="button" aria-label="Share" title="Share" id="shareBtn"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-share-nodes text-amber-500 text-3xl"></i>
+            </button>
+            <a href="#map" aria-label="Map" title="Map"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-map-location-dot text-sky-600 text-3xl"></i>
+            </a>
+            <a href="https://acmedental.com" target="_blank" rel="noopener" aria-label="Website URL" title="Website URL"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-globe text-violet-600 text-3xl"></i>
+            </a>
+          </div>
+        </div>
+
+        <!-- Group: Contact Management -->
+        <div role="group" aria-labelledby="qa-manage-label" class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 p-4">
+          <h3 id="qa-manage-label" class="text-sm font-semibold text-slate-600 dark:text-slate-300 mb-3">Contact Management</h3>
+          <div class="flex flex-wrap items-center gap-3">
+            <button type="button" aria-label="Edit" title="Edit"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-pen-to-square text-slate-900 dark:text-slate-100 text-3xl""></i>
+            </button>
+            <button type="button" aria-label="Save to favorites" title="Save to favorites"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-star text-yellow-500 text-3xl""></i>
+            </button>
+            <button type="button" aria-label="Address Book" title="Address Book"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-address-book text-indigo-600 text-3xl""></i>
+            </button>
+            <a download
+              href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0AVERSION%3A3.0%0AN%3AAcme%3B%3B%3B%0ATEL%3BTYPE%3Dwork%2Cvoice%3A%2B15125551234%0AEMAIL%3Ahello%40acmedental.com%0AEND%3AVCARD"
+              aria-label="Download Contact" title="Download Contact"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-download text-emerald-600 text-3xl""></i>
+            </a>
+            <button type="button" aria-label="QR Code" title="QR Code"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-qrcode text-rose-600 text-3xl""></i>
+            </button>
+            <a href="mailto:hello@acmedental.com" aria-label="Share vCard" title="Share vCard"
+              class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950 hover:ring-primary/40 hover:shadow transition">
+              <i class="fa-solid fa-paperclip text-sky-600 text-3xl""></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- ======= About Us (alt bg) ======= -->
+  <section id="about" class="py-16 bg-gray-50 dark:bg-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-4">About Us</h2>
+      <div class="prose dark:prose-invert max-w-none">
+        <p>At <strong>Acme Dental Care</strong>, we believe every smile tells a story. Our team blends compassionate care with the latest clinical technology to deliver preventative, restorative, and cosmetic treatments tailored to each patient.</p>
+        <br/><p>Founded in 1998, our practice has grown through word-of-mouth and results you can see. From routine cleanings and whitening to implants and emergency care, we make dentistry approachable and affordable for families across Austin.</p>
+        <br/><p>Our clinic features same-day crowns, digital X-rays, and sedation options for anxious patients. We also offer flexible scheduling and transparent pricing because healthcare should be simple.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= Request Info (white) ======= -->
+  <section id="request-info" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">Request Information</h2>
+      <form class="grid lg:grid-cols-2 gap-6" onsubmit="event.preventDefault(); alert('Thanks! We will contact you shortly.');">
+        <div>
+          <label class="block text-sm font-medium mb-1" for="name">Your Name</label>
+          <input id="name" type="text" required placeholder="Jane Doe" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" for="email">Email</label>
+          <input id="email" type="email" required placeholder="jane@example.com" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" for="phone">Phone</label>
+          <input id="phone" type="tel" placeholder="+1 512 555 1234" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" for="referred">Referred By</label>
+          <input id="referred" type="text" placeholder="Friend, Ad, Doctor..." class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
+        </div>
+        <div class="lg:col-span-2">
+          <label class="block text-sm font-medium mb-1" for="message">Message</label>
+          <textarea id="message" rows="5" placeholder="How can we help?" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary"></textarea>
+        </div>
+        <div class="lg:col-span-2">
+          <button type="submit" class="w-full sm:w-auto inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white shadow hover:opacity-95">
+            <i class="fa-solid fa-paper-plane"></i> Submit Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ======= Products & Services (alt bg) ======= -->
+  <section id="products" class="py-16 bg-gray-50 dark:bg-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">Products & Services</h2>
+
+      <!-- Service Cards -->
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <!-- Service -->
+        <article class="rounded-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+            <img src="https://images.unsplash.com/photo-1654373535457-383a0a4d00f9?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
+          </div>
+          <div class="p-5">
+            <h3 class="font-semibold text-lg">Teeth Whitening</h3>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">Professional in-office whitening for fast, dramatic results, plus take-home kits for maintenance.</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="font-semibold">$199</span>
+              <a href="#request-info" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-cart-shopping text-emerald-500"></i> Enquire</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+            <img src="https://images.unsplash.com/photo-1593022356769-11f762e25ed9?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
+          </div>
+          <div class="p-5">
+            <h3 class="font-semibold text-lg">Dental Implants</h3>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">Replace missing teeth with durable, natural-looking implants. Includes consultation and 3D imaging.</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="font-semibold">From $1,999</span>
+              <a href="#request-info" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-file-signature text-violet-500"></i> Book</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+            <img src="https://images.unsplash.com/photo-1602932213623-cc17e9541bb4?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
+          </div>
+          <div class="p-5">
+            <h3 class="font-semibold text-lg">Emergency Dentistry</h3>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">Same-day appointments for pain, broken teeth, or infections. Call us for immediate assistance.</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="font-semibold">Call for pricing</span>
+              <a href="tel:+15125551234" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white hover:opacity-95"><i class="fa-solid fa-phone"></i> Call Now</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+            <img src="https://images.unsplash.com/photo-1654373535457-383a0a4d00f9?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
+          </div>
+          <div class="p-5">
+            <h3 class="font-semibold text-lg">Teeth Whitening</h3>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">Professional in-office whitening for fast, dramatic results, plus take-home kits for maintenance.</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="font-semibold">$199</span>
+              <a href="#request-info" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-cart-shopping text-emerald-500"></i> Enquire</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+            <img src="https://images.unsplash.com/photo-1593022356769-11f762e25ed9?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
+          </div>
+          <div class="p-5">
+            <h3 class="font-semibold text-lg">Dental Implants</h3>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">Replace missing teeth with durable, natural-looking implants. Includes consultation and 3D imaging.</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="font-semibold">From $1,999</span>
+              <a href="#request-info" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"><i class="fa-solid fa-file-signature text-violet-500"></i> Book</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="rounded-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+            <img src="https://images.unsplash.com/photo-1602932213623-cc17e9541bb4?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
+          </div>
+          <div class="p-5">
+            <h3 class="font-semibold text-lg">Emergency Dentistry</h3>
+            <p class="mt-2 text-slate-600 dark:text-slate-300">Same-day appointments for pain, broken teeth, or infections. Call us for immediate assistance.</p>
+            <div class="mt-4 flex items-center justify-between">
+              <span class="font-semibold">Call for pricing</span>
+              <a href="tel:+15125551234" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 text-white hover:opacity-95"><i class="fa-solid fa-phone"></i> Call Now</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= Contact Information (white) ======= -->
+  <section id="contact" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">Contact Information</h2>
+
+      <!-- Grid: details / hours / address-map / socials -->
+      <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Column A -->
+        <div class="space-y-6">
+          <!-- Direct contact list -->
+          <div class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+            <h3 class="font-semibold text-lg mb-4">Get in touch</h3>
+            <ul class="space-y-3">
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-phone text-emerald-500 text-xl"></i>
+                <span>Call Us: <a href="tel:+15125551234" class="text-primary font-medium">+1 (512) 555-1234</a></span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-brands fa-whatsapp text-green-500 text-xl"></i>
+                <span>WhatsApp: <a href="https://wa.me/15125551234" class="text-primary font-medium">+1 (512) 555-1234</a></span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-envelope text-rose-500 text-xl"></i>
+                <span>Email: <a href="mailto:hello@acmedental.com" class="text-primary font-medium">hello@acmedental.com</a></span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-share-nodes text-amber-500 text-xl"></i>
+                <span>Share: <button id="shareBtn2" class="text-primary font-medium underline">Share this page</button></span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-location-dot text-sky-500 text-xl"></i>
+                <span>Map: <a href="#map" class="text-primary font-medium">Open Map</a></span>
+              </li>
+              <li class="flex items-center gap-3">
+                <i class="fa-solid fa-globe text-violet-500 text-xl"></i>
+                <span>Website URL: <a href="https://acmedental.com" class="text-primary font-medium" target="_blank" rel="noopener">acmedental.com</a></span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Hours -->
+          <div class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+            <h3 class="font-semibold text-lg mb-4">Hours of Operation</h3>
+            <ul class="divide-y divide-slate-200 dark:divide-slate-800">
+              <li class="flex justify-between py-2"><span>Monday</span><span>8:00 AM – 6:00 PM</span></li>
+              <li class="flex justify-between py-2"><span>Tuesday</span><span>8:00 AM – 6:00 PM</span></li>
+              <li class="flex justify-between py-2"><span>Wednesday</span><span>8:00 AM – 6:00 PM</span></li>
+              <li class="flex justify-between py-2"><span>Thursday</span><span>8:00 AM – 6:00 PM</span></li>
+              <li class="flex justify-between py-2"><span>Friday</span><span>8:00 AM – 4:00 PM</span></li>
+              <li class="flex justify-between py-2"><span>Saturday</span><span>Closed</span></li>
+              <li class="flex justify-between py-2"><span>Sunday</span><span>Closed</span></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Column B -->
+        <div class="space-y-6">
+          <!-- Address + Plus Code -->
+          <div class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+            <h3 class="font-semibold text-lg mb-4">Address</h3>
+            <address class="not-italic">
+              <div>Acme Dental Care</div>
+              <div>1234 Congress Ave, Suite 200</div>
+              <div>Medical Plaza Building</div>
+              <div>Austin, Texas, USA 78701</div>
+              <div class="mt-1 text-slate-600 dark:text-slate-300">Google Plus Code: <span class="font-medium">77CM+4R Austin</span></div>
+            </address>
+          </div>
+
+          <!-- Map & Directions -->
+          <div id="map" class="rounded-2xl overflow-hidden ring-1 ring-slate-200 dark:ring-slate-800">
+            <iframe
+              title="Map to Acme Dental Care"
+              width="100%" height="300" style="border:0;"
+              loading="lazy"
+              allowfullscreen
+              referrerpolicy="no-referrer-when-downgrade"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3448.887!2d-97.743!3d30.267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8644b50b%3A0x0!2sTexas%20State%20Capitol!5e0!3m2!1sen!2sus!4v1682530000000">
+            </iframe>
+            <div class="p-4 bg-white dark:bg-slate-950">
+              <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=Texas+State+Capitol"
+                 class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:opacity-95">
+                <i class="fa-solid fa-turn-up"></i> Get Directions
+              </a>
+            </div>
+          </div>
+
+          <!-- Socials -->
+          <div class="rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 p-6">
+            <h3 class="font-semibold text-lg mb-4">Follow us</h3>
+            <div class="flex flex-wrap gap-3">
+              <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" href="#" aria-label="Facebook">
+                <i class="fa-brands fa-facebook text-blue-600"></i> Facebook
+              </a>
+              <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" href="#" aria-label="Instagram">
+                <i class="fa-brands fa-instagram text-pink-500"></i> Instagram
+              </a>
+              <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" href="#" aria-label="LinkedIn">
+                <i class="fa-brands fa-linkedin text-sky-600"></i> LinkedIn
+              </a>
+              <a class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800" href="#" aria-label="X">
+                <i class="fa-brands fa-x-twitter"></i> X
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======= Reviews (alt bg) ======= -->
+  <section id="reviews" class="py-16 bg-gray-50 dark:bg-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold">Reviews</h2>
+        <a href="#request-info" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white hover:opacity-95">
+          <i class="fa-solid fa-comment-dots"></i> Leave a Review
+        </a>
+      </div>
+
+      <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <article class="p-6 rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold">Alex P.</div>
+            <div class="text-amber-400"><i class="fa-solid fa-star"></i> 5.0</div>
+          </div>
+          <p class="mt-3 text-slate-600 dark:text-slate-300">Best whitening I’ve ever had. Friendly team and no upsell pressure. Highly recommend!</p>
+          <div class="mt-4 text-sm text-slate-500">Visited: May 2025</div>
+        </article>
+
+        <article class="p-6 rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold">Maria G.</div>
+            <div class="text-amber-400"><i class="fa-solid fa-star"></i> 4.7</div>
+          </div>
+          <p class="mt-3 text-slate-600 dark:text-slate-300">Implant process was smooth and clearly explained. Financing options were a lifesaver.</p>
+          <div class="mt-4 text-sm text-slate-500">Visited: Feb 2025</div>
+        </article>
+
+        <article class="p-6 rounded-2xl ring-1 ring-slate-200 dark:ring-slate-800 bg-white dark:bg-slate-950">
+          <div class="flex items-center justify-between">
+            <div class="font-semibold">Sam R.</div>
+            <div class="text-amber-400"><i class="fa-solid fa-star"></i> 4.9</div>
+          </div>
+          <p class="mt-3 text-slate-600 dark:text-slate-300">Emergency visit on a Sunday — they called back fast and took great care of me Monday morning.</p>
+          <div class="mt-4 text-sm text-slate-500">Visited: Aug 2025</div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= Gallery (white) ======= -->
+  <section id="gallery" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl md:text-3xl font-bold">Gallery</h2>
+        <div class="text-sm text-slate-600 dark:text-slate-300">Tap to enlarge</div>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <a href="https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+          <img src="https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+        </a>
+        <a href="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+          <img src="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+        </a>
+        <a href="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+          <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+        </a>
+        <a href="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-slate-200 dark:ring-slate-800">
+          <img src="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= Footer (alt bg) ======= -->
+  <footer class="py-10 bg-gray-50 dark:bg-slate-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <div class="text-sm text-slate-600 dark:text-slate-300">
+        Powered by <strong>Digital Xcutives Pvt Ltd.</strong> (c) 2025
+      </div>
+      <div class="mt-2">
+        <a href="#top" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm">
+          <i class="fa-solid fa-arrow-up"></i> Back to top
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ======= Behavior JS (Theme, Palettes, Sticky Nav, Share) ======= -->
+  <script>
+    // Persisted theme
+    const htmlEl = document.documentElement;
+    const setDark = (on) => {
+      htmlEl.classList.toggle('dark', on);
+      localStorage.setItem('theme', on ? 'dark' : 'light');
+    };
+    // Initial theme: localStorage or OS
+    (() => {
+      const saved = localStorage.getItem('theme');
+      if (saved) setDark(saved === 'dark');
+      else setDark(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      const savedPalette = localStorage.getItem('palette');
+      if (savedPalette) htmlEl.setAttribute('data-theme', savedPalette);
+    })();
+
+    // Theme togglers
+    const toggleTheme = () => setDark(!document.documentElement.classList.contains('dark'));
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    document.getElementById('themeToggleMobile').addEventListener('click', toggleTheme);
+    document.getElementById('stickyTheme').addEventListener('click', toggleTheme);
+
+    // Palette switchers
+    document.querySelectorAll('.palette').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.getAttribute('data-theme');
+        htmlEl.setAttribute('data-theme', t);
+        localStorage.setItem('palette', t);
+      });
+    });
+
+    // Mobile menu open/close
+    const mobileMenu = document.getElementById('mobileMenu');
+    document.getElementById('openMenu').addEventListener('click', ()=> mobileMenu.classList.remove('hidden'));
+    const closeMenu = ()=> mobileMenu.classList.add('hidden');
+    document.getElementById('closeMenu').addEventListener('click', closeMenu);
+    document.getElementById('closeMenuBtn').addEventListener('click', closeMenu);
+    mobileMenu.querySelectorAll('a').forEach(a=> a.addEventListener('click', closeMenu));
+
+    // Sticky nav reveal
+    const sticky = document.getElementById('stickyNav');
+    const heroEnd = 220; // px threshold
+    const onScroll = () => {
+      if (window.scrollY > heroEnd) sticky.classList.remove('hidden');
+      else sticky.classList.add('hidden');
+    };
+    document.addEventListener('scroll', onScroll, {passive:true});
+
+    // Web Share
+    async function sharePage() {
+      const data = {
+        title: document.title,
+        text: 'Check out this business profile!',
+        url: window.location.href
+      };
+      if (navigator.share) {
+        try { await navigator.share(data); } catch(e) {}
+      } else {
+        // Fallback: copy to clipboard
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          alert('Link copied to clipboard!');
+        } catch {
+          prompt('Copy this link:', window.location.href);
+        }
+      }
+    }
+    document.getElementById('shareBtn').addEventListener('click', sharePage);
+    document.getElementById('shareBtn2').addEventListener('click', sharePage);
+  </script>
+</body>
+</html>
