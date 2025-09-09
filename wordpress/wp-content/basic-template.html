@@ -67,7 +67,6 @@
             <a href="#contact" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Contact</a>
             <a href="#reviews" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Reviews</a>
             <a href="#gallery" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Gallery</a>
-            <a href="#request-info" class="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Request Info</a>
             <!-- Theme & Palette -->
             <div class="ml-2 flex items-center gap-2">
               <button id="themeToggle" type="button" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800">
@@ -101,9 +100,8 @@
             <i class="fa-solid fa-xmark text-xl"></i>
           </button>
         </div>
-        <a href="#quick-actions" class="py-2">Quick Actions</a>
+        <a href="#top" class="py-2">Home</a>
         <a href="#about" class="py-2">About</a>
-        <a href="#request-info" class="py-2">Request Info</a>
         <a href="#products" class="py-2">Products</a>
         <a href="#contact" class="py-2">Contact</a>
         <a href="#reviews" class="py-2">Reviews</a>
@@ -166,16 +164,16 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between py-3">
         <a href="#top" class="flex items-center gap-2">
-          <img src="https://via.placeholder.com/28x28.png?text=AD" class="h-7 w-7 rounded-md ring-1 ring-slate-200 dark:ring-slate-800" alt="">
-          <span class="font-semibold">Acme Dental Care</span>
+          <img src="https://www.avivadentalcare.com/favicon.png" class="h-8 w-8 rounded-md ring-1 ring-slate-200 dark:ring-slate-800" alt="">
+          <span class="font-semibold hidden md:inline-flex">Acme Dental Care</span>
         </a>
         <div class="flex items-center gap-1 text-sm">
-          <a href="#quick-actions" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Actions</a>
+          <a href="#top" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Home</a>
           <a href="#about" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">About</a>
-          <a href="#products" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">P&S</a>
+          <a href="#products" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Products</a>
           <a href="#contact" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Contact</a>
-          <a href="#reviews" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Reviews</a>
-          <a href="#gallery" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">Gallery</a>
+          <a href="#reviews" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 hidden md:inline-flex">Reviews</a>
+          <a href="#gallery" class="px-3 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 hidden md:inline-flex">Gallery</a>
           <button id="stickyTheme" class="ml-2 p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Toggle theme">
             <i class="fa-solid fa-moon text-primary"></i>
           </button>
@@ -261,7 +259,7 @@
   </section>
   
   <!-- ======= About Us (alt bg) ======= -->
-  <section id="about" class="py-16 bg-gray-50 dark:bg-slate-900">
+  <section id="about" class="py-16 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-2xl md:text-3xl font-bold mb-4">About Us</h2>
       <div class="prose dark:prose-invert max-w-none">
@@ -272,39 +270,6 @@
     </div>
   </section>
 
-  <!-- ======= Request Info (white) ======= -->
-  <section id="request-info" class="py-16 bg-white">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <h2 class="text-2xl md:text-3xl font-bold mb-6">Request Information</h2>
-      <form class="grid lg:grid-cols-2 gap-6" onsubmit="event.preventDefault(); alert('Thanks! We will contact you shortly.');">
-        <div>
-          <label class="block text-sm font-medium mb-1" for="name">Your Name</label>
-          <input id="name" type="text" required placeholder="Jane Doe" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1" for="email">Email</label>
-          <input id="email" type="email" required placeholder="jane@example.com" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1" for="phone">Phone</label>
-          <input id="phone" type="tel" placeholder="+1 512 555 1234" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-1" for="referred">Referred By</label>
-          <input id="referred" type="text" placeholder="Friend, Ad, Doctor..." class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
-        </div>
-        <div class="lg:col-span-2">
-          <label class="block text-sm font-medium mb-1" for="message">Message</label>
-          <textarea id="message" rows="5" placeholder="How can we help?" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary"></textarea>
-        </div>
-        <div class="lg:col-span-2">
-          <button type="submit" class="w-full sm:w-auto inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white shadow hover:opacity-95">
-            <i class="fa-solid fa-paper-plane"></i> Submit Request
-          </button>
-        </div>
-      </form>
-    </div>
-  </section>
 
   <!-- ======= Products & Services (alt bg) ======= -->
   <section id="products" class="py-16 bg-gray-50 dark:bg-slate-900">
@@ -581,6 +546,40 @@
           <img src="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
         </a>
       </div>
+    </div>
+  </section>
+
+  <!-- ======= Request Info (white) ======= -->
+  <section id="request-info" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <h2 class="text-2xl md:text-3xl font-bold mb-6">Request Information</h2>
+      <form class="grid lg:grid-cols-2 gap-6" onsubmit="event.preventDefault(); alert('Thanks! We will contact you shortly.');">
+        <div>
+          <label class="block text-sm font-medium mb-1" for="name">Your Name</label>
+          <input id="name" type="text" required placeholder="Jane Doe" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" for="email">Email</label>
+          <input id="email" type="email" required placeholder="jane@example.com" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" for="phone">Phone</label>
+          <input id="phone" type="tel" placeholder="+1 512 555 1234" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1" for="referred">Referred By</label>
+          <input id="referred" type="text" placeholder="Friend, Ad, Doctor..." class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary" />
+        </div>
+        <div class="lg:col-span-2">
+          <label class="block text-sm font-medium mb-1" for="message">Message</label>
+          <textarea id="message" rows="5" placeholder="How can we help?" class="w-full rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-4 py-3 focus:outline-none focus:ring ring-primary"></textarea>
+        </div>
+        <div class="lg:col-span-2">
+          <button type="submit" class="w-full sm:w-auto inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white shadow hover:opacity-95">
+            <i class="fa-solid fa-paper-plane"></i> Submit Request
+          </button>
+        </div>
+      </form>
     </div>
   </section>
 
