@@ -782,7 +782,7 @@
     // ===== Sticky nav + Back-to-top (merged scroll handler)
     const sticky = document.getElementById('stickyNav');
     const backToTop = document.getElementById('backToTop');
-    const STICKY_THRESHOLD = 220; // px to show sticky nav
+    const STICKY_THRESHOLD = 100; // px to show sticky nav
     const TOP_THRESHOLD = 300;    // px to show "back to top"
     const onScroll = () => {
       const y = window.scrollY || document.documentElement.scrollTop || 0;
