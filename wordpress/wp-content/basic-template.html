@@ -590,19 +590,34 @@
   <footer class="py-10 bg-gray-50 dark:bg-slate-900">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <div class="border-t border-gray-200 py-8 text-sm text-slate-600 dark:text-slate-300">
-        Copyright &copy; 2025 Digital Xcutives. Powered by 
-        <strong>
-          <a href="https://digitalxcutives.com/" target="_blank">Digital Xcutives Pvt Ltd.</a>
-        </strong> 
-        <span class="block sm:inline">All rights reserved.</span>
-      </div>
-      <div class="mt-2">
-        <a href="#top" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-sm">
-          <i class="fa-solid fa-arrow-up"></i> Back to top
-        </a>
+        <p>Powered by 
+          <strong>
+            <a href="https://digitalxcutives.com/" target="_blank">Digital Xcutives Pvt Ltd.</a>
+          </strong> 
+          <span class="block sm:inline">All rights reserved.</span>
+        </p>
+        <br/>
+        <p>Copyright &copy; 2025 Digital Xcutives. </p>
       </div>
     </div>
   </footer>
+
+  <!-- Floating Back-To-Top -->
+  <button
+    id="backToTop"
+    type="button"
+    aria-label="Back to top"
+    class="fixed bottom-6 right-6 z-50
+          hidden opacity-0 translate-y-2
+          rounded-full h-12 w-12 shadow-lg
+          bg-primary text-white
+          ring-1 ring-black/5
+          hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/70
+          transition duration-200"
+  >
+    <i class="fa-solid fa-arrow-up"></i>
+    <span class="sr-only">Back to top</span>
+  </button>
 
   <!-- ======= Behavior JS (Theme, Palettes, Sticky Nav, Share) ======= -->
   <script>
@@ -644,12 +659,22 @@
     document.getElementById('closeMenuBtn').addEventListener('click', closeMenu);
     mobileMenu.querySelectorAll('a').forEach(a=> a.addEventListener('click', closeMenu));
 
-    // Sticky nav reveal
+    // ===== Sticky nav + Back-to-top (merged scroll handler)
     const sticky = document.getElementById('stickyNav');
-    const heroEnd = 220; // px threshold
+    const backToTop = document.getElementById('backToTop');
+    const STICKY_THRESHOLD = 220; // px to show sticky nav
+    const TOP_THRESHOLD = 300;    // px to show "back to top"
     const onScroll = () => {
-      if (window.scrollY > heroEnd) sticky.classList.remove('hidden');
-      else sticky.classList.add('hidden');
+      const y = window.scrollY || document.documentElement.scrollTop || 0;
+      // Sticky nav reveal
+      if (sticky) {
+        if (y > STICKY_THRESHOLD) sticky.classList.remove('hidden');
+        else sticky.classList.add('hidden');
+      }
+      // Back-to-top reveal
+      if (backToTop) {
+        if (y > TOP_THRESHOLD) show(backToTop); else hide(backToTop);
+      }
     };
     document.addEventListener('scroll', onScroll, {passive:true});
 
@@ -674,6 +699,46 @@
     }
     document.getElementById('shareBtn').addEventListener('click', sharePage);
     document.getElementById('shareBtn2').addEventListener('click', sharePage);
+
+
+
+    function show(el) {
+      if (!el) return;
+      el.classList.remove('hidden');
+      requestAnimationFrame(() => el.classList.remove('opacity-0','translate-y-2'));
+    }
+    function hide(el) {
+      if (!el) return;
+      el.classList.add('opacity-0','translate-y-2');
+      setTimeout(() => { if (el.classList.contains('opacity-0')) el.classList.add('hidden'); }, 200);
+    }
+
+    // function onScroll() {
+    //   const y = window.scrollY || document.documentElement.scrollTop || 0;
+
+    //   // Sticky nav reveal
+    //   if (sticky) {
+    //     if (y > STICKY_THRESHOLD) sticky.classList.remove('hidden');
+    //     else sticky.classList.add('hidden');
+    //   }
+
+    //   // Back-to-top reveal
+    //   if (backToTop) {
+    //     if (y > TOP_THRESHOLD) show(backToTop); else hide(backToTop);
+    //   }
+    // }
+    // document.addEventListener('scroll', onScroll, { passive: true });
+    // // Initialize state in case page loads mid-way
+    // onScroll();
+
+    // Back-to-top click
+    if (backToTop) {
+      backToTop.addEventListener('click', (e) => {
+        e.preventDefault();
+        const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top: 0, behavior: prefersReduced ? 'auto' : 'smooth' });
+      });
+    }
   </script>
 </body>
 </html>
