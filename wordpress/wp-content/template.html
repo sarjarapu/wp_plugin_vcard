@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth" data-theme="blue" data-industry="services">
+<html lang="en" class="scroll-smooth" data-theme="blue" data-industry="transport">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -51,7 +51,7 @@
     .overlay-primary::before {
       content: "";
       position: absolute; inset: 0;
-      background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.35));
+      background: linear-gradient(180deg, var(--primary-50), var(--primary-50));
       mix-blend-mode: multiply;
       pointer-events: none;
     }
@@ -68,8 +68,8 @@
 <body class="antialiased text-slate-800 dark:text-slate-100 bg-slate-100 dark:bg-slate-950 px-0 md:px-6">
   <!-- Page wrapper -->
   <div class="max-w-[1200px] mx-auto 
-              border border-slate-200 dark:border-slate-800 
-              shadow-2xl
+              border border-slate-200 border-t-0 
+              dark:border-slate-800 shadow-2xl
               bg-white dark:bg-slate-900 
               rounded-xl">
 
@@ -135,10 +135,11 @@
       </div>
     </div>
 
+    
     <!-- ===== Hero (palette-tinted image + parallax) ===== -->
-    <section id="hero"
-      class="overlay-primary parallax-md bg-cover bg-center text-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
+    <section id="hero" class="relative overflow-hidden">
+      <div class="absolute inset-0 gradient-primary opacity-10 dark:opacity-20"></div>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div class="grid md:grid-cols-2 gap-10 items-center">
           <div>
             <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-white/15 ring-1 ring-white/30 backdrop-blur">
@@ -147,20 +148,20 @@
             <h1 class="mt-5 text-3xl md:text-5xl font-extrabold leading-tight">
               Acme Dental Care
             </h1>
-            <p class="mt-4 text-lg text-white/90">
+            <p class="mt-4 text-lg text-slate-600 dark:text-slate-300">
               Family-friendly dentistry offering preventative care, cosmetic treatments, and emergency services with cutting-edge tech and a gentle touch.
             </p>
             <div class="mt-6 flex flex-wrap gap-3">
-              <a href="#request-info" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-white text-[var(--primary-700)] hover:bg-white/90">
+              <a href="#request-info" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-primary text-white shadow hover:opacity-95">
                 <i class="fa-solid fa-paper-plane"></i> Request Info
               </a>
-              <a href="#contact" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[var(--primary-700)] text-white shadow-md hover:bg-[var(--primary-600)]/90">
+              <a href="#contact" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-slate-100 text-slate-900 shadow-md hover:bg-gray-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600">
                 <i class="fa-solid fa-phone"></i> Contact Us
               </a>
             </div>
-            <div class="mt-6 flex items-center gap-6 text-white/80">
+            <div class="mt-6 flex items-center gap-6 text-slate-600 dark:text-slate-100 font-semibold">
               <span class="inline-flex items-center gap-2"><i class="fa-solid fa-star text-amber-300"></i> 4.8/5 (238 reviews)</span>
-              <span class="hidden sm:inline">•</span>
+              <span class="hidden sm:inline text-2xl">&#8226;</span>
               <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> Austin, TX</span>
             </div>
           </div>
@@ -195,10 +196,10 @@
     </div>
   </div>
 
-  <!-- ===== Palette/industry parallax band 1 ===== -->
-  <section id="band-1" class="overlay-primary parallax-md bg-cover bg-center" data-bg="" data-palette="false">
+  <!-- ===== Palette/industry parallax band 1 =====  -->
+  <!-- <section id="band-1" class="overlay-primary parallax-md bg-cover bg-center" data-palette="false">
     <div class="px-4 sm:px-6 lg:px-8 py-12 md:py-16"></div>
-  </section>
+  </section> -->
 
   <!-- ======= Quick Actions (compact icon-only) ======= -->
   <section id="quick-actions" class="py-4 bg-gray-50 dark:bg-slate-900">
@@ -299,8 +300,15 @@
   </section>
 
   <!-- ===== Band 2 (palette tint ON) ===== -->
-  <section id="band-2" class="overlay-primary parallax-md bg-cover bg-center" data-bg="" data-palette="true">
-    <div class="px-4 sm:px-6 lg:px-8 py-12 md:py-16"></div>
+  <section id="band-2" class="overlay-primary parallax-md bg-cover bg-center" data-palette="true">
+    <div class="px-4 sm:px-6 lg:px-8 py-24">
+      <div class="text-slate-800 bg-slate-50/95 dark:text-slate-800 dark:bg-slate-100 p-8 max-w-[500px]">
+<p>At <strong>Acme Dental Care</strong>, we believe every smile tells a story. Our team blends compassionate care with the latest clinical technology to deliver preventative, restorative, and cosmetic treatments tailored to each patient.</p>
+        <br/><p>Founded in 1998, our practice has grown through word-of-mouth and results you can see. From routine cleanings and whitening to implants and emergency care, we make dentistry approachable and affordable for families across Austin.</p>
+        <br/><p>Our clinic features same-day crowns, digital X-rays, and sedation options for anxious patients. We also offer flexible scheduling and transparent pricing because healthcare should be simple.</p>
+      </div>
+      
+    </div>
   </section>
 
   <!-- ======= Products & Services (alt bg) ======= -->
@@ -787,24 +795,24 @@
       // Per-industry defaults (replace with CMS fields in production)
       const INDUSTRY_IMAGES = {
         transport: {
-          hero: 'https://images.unsplash.com/photo-1518544801976-3e188ae2c6f0?q=80&w=1600&auto=format&fit=crop',
-          band1: 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?q=80&w=1600&auto=format&fit=crop',
-          band2: 'https://images.unsplash.com/photo-1493236296276-d17357e2882f?q=80&w=1600&auto=format&fit=crop'
+          hero: 'https://images.unsplash.com/photo-1595900604598-4667e6437839?auto=format&fit=crop&w=1600',
+          band1: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1600',
+          band2: 'https://images.unsplash.com/photo-1498084393753-b411b2d26b34?auto=format&fit=crop&w=1600'
         },
         restaurant: {
-          hero: 'https://images.unsplash.com/photo-1541542684-4a1b4a6f44c6?q=80&w=1600&auto=format&fit=crop',
-          band1: 'https://images.unsplash.com/photo-1526318472351-c75fcf070305?q=80&w=1600&auto=format&fit=crop',
-          band2: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?q=80&w=1600&auto=format&fit=crop'
+          hero: 'https://images.unsplash.com/photo-1556910103-1d15a1b516b4?auto=format&fit=crop&w=1600',
+          band1: 'https://images.unsplash.com/photo-1541542684-4a1b4a6f44c6?auto=format&fit=crop&w=1600',
+          band2: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=1600'
         },
         services: {
-          hero: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?q=80&w=1600&auto=format&fit=crop',
-          band1: 'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?q=80&w=1600&auto=format&fit=crop',
-          band2: 'https://images.unsplash.com/photo-1520975922320-8dfc71b2f5aa?q=80&w=1600&auto=format&fit=crop'
+          hero: 'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1600',
+          band1: 'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=1600',
+          band2: 'https://images.unsplash.com/photo-1520975922320-8dfc71b2f5aa?auto=format&fit=crop&w=1600'
         },
         textile: {
-          hero: 'https://images.unsplash.com/photo-1534791547706-5fa6b7d4f37f?q=80&w=1600&auto=format&fit=crop',
-          band1: 'https://images.unsplash.com/photo-1542060748-10c28b62716b?q=80&w=1600&auto=format&fit=crop',
-          band2: 'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?q=80&w=1600&auto=format&fit=crop'
+          hero: 'https://images.unsplash.com/photo-1534791547706-5fa6b7d4f37f?auto=format&fit=crop&w=1600',
+          band1: 'https://images.unsplash.com/photo-1542060748-10c28b62716b?auto=format&fit=crop&w=1600',
+          band2: 'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?auto=format&fit=crop&w=1600'
         }
       };
 
@@ -822,7 +830,7 @@
       }
 
       // Only set defaults if author hasn't provided explicit data-bg in HTML
-      if (!document.getElementById('hero')?.getAttribute('data-bg'))  setBG('hero',  imgs.hero,  true);
+      // if (!document.getElementById('hero')?.getAttribute('data-bg'))  setBG('hero',  imgs.hero,  true);
       if (!document.getElementById('band-1')?.getAttribute('data-bg')) setBG('band-1', imgs.band1, false);
       if (!document.getElementById('band-2')?.getAttribute('data-bg')) setBG('band-2', imgs.band2, true);
 
