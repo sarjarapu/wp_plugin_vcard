@@ -49,8 +49,8 @@
     --on-surface-variant:  #475569;     /* slate-600 */
 
     /* Inverse surfaces */
-    --inverse-surface:     #111827;     /* slate-900 */
-    --inverse-on-surface:  #E5E7EB;     /* slate-200 */
+    --inverse-surface: #2E2E2E;          /* dark bar for footer in light mode */
+    --inverse-on-surface: #FFFFFF;       /* white text/icons */
     --inverse-primary:     #93C5FD;     /* blue-300 for inverse CTA */
 
     /* Outline & dividers */
@@ -103,8 +103,9 @@
     --surface-variant:     #101827;
     --on-surface-variant:  #9CA3AF;
 
-    --inverse-surface:     #E6E1E5;
-    --inverse-on-surface:  #313033;
+    /* Dark mode tokens */
+    --inverse-surface: #121212;          /* deeper, near-black */
+    --inverse-on-surface: #E0E0E0;       /* light gray text/icons */
     --inverse-primary:     #2563EB;
 
     --outline:             #1F2937;
@@ -169,6 +170,12 @@
 
   /* Parallax (safe) */
   @media (min-width: 768px) { .parallax-md { background-attachment: fixed; } }
+  /* Theme buttons use explicit text roles; don't auto-change color on hover */
+  #themeToggle:hover,
+  #themeToggleMobile:hover,
+  #stickyTheme:hover {
+    color: inherit;
+  }
   </style>
 </head>
 
@@ -204,6 +211,77 @@
           </nav>
         </div>
       </div>
+      <!-- Mobile Drawer -->
+      <div id="mobileMenu" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40" id="closeMenu"></div>
+        <div class="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-[var(--surface-0)] shadow-xl p-6 flex flex-col gap-3 text-[var(--on-surface)]">
+          <div class="flex items-center justify-between">
+            <div class="font-bold text-lg">Menu</div>
+            <button id="closeMenuBtn" class="p-2 rounded-lg hover:bg-[var(--surface-1)]" aria-label="Close menu">
+              <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+          </div>
+          <a href="#top" class="py-2">Home</a>
+          <a href="#about" class="py-2">About</a>
+          <a href="#products" class="py-2">Products</a>
+          <a href="#contact" class="py-2">Contact</a>
+          <a href="#reviews" class="py-2">Reviews</a>
+          <a href="#gallery" class="py-2">Gallery</a>
+          <div class="pt-4 border-t border-[var(--outline-variant)] mt-auto">
+            <button id="themeToggleMobile" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-[var(--outline)] hover:bg-[var(--primary-container)]">
+              <i class="fa-solid fa-moon"></i><span>Toggle Theme</span>
+            </button>
+            <div class="flex items-center gap-2 mt-3">
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="teal"  style="background:#0d9488" title="Teal"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="violet"style="background:#7c3aed" title="Violet"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+      <!-- ===== Hero (no background effects) ===== -->
+      <section id="hero" class="relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
+          <div class="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm bg-[var(--inverse-surface)]/15 ring-1 ring-[var(--on-primary)]/20 backdrop-blur text-[var(--on-surface)]">
+                <i class="fa-solid fa-circle-check"></i> Verified Business
+              </span>
+              <h1 class="mt-5 text-3xl md:text-5xl font-extrabold leading-tight text-[var(--on-surface)]">
+                Acme Dental Care
+              </h1>
+              <p class="mt-4 text-lg text-[var(--on-surface-variant)]">
+                Family-friendly dentistry offering preventative care, cosmetic treatments, and emergency services with cutting-edge tech and a gentle touch.
+              </p>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <!-- Primary (Filled) -->
+                <a href="#request-info" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
+                  <i class="fa-solid fa-paper-plane"></i> Request Info
+                </a>
+                <!-- Tonal (Primary Container) -->
+                <a href="#contact"
+                  class="inline-flex items-center gap-2 px-6 py-3 rounded-lg
+                          bg-slate-100 text-slate-900 shadow
+                          hover:bg-slate-200 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600 transition">
+                  <i class="fa-solid fa-phone"></i> Contact Us
+                </a>
+              </div>
+              <div class="mt-6 flex items-center gap-6 text-[var(--on-surface)] font-semibold">
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> 4.8/5 (238 reviews)</span>
+                <span class="hidden sm:inline text-2xl">&#8226;</span>
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> Austin, TX</span>
+              </div>
+            </div>
+            <div class="relative">
+              <img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1200&auto=format&fit=crop" alt="Clinic" class="w-full h-72 md:h-[22rem] object-cover rounded-2xl shadow-lg ring-1 ring-[var(--outline-variant)]" />
+            </div>
+          </div>
+        </div>
+      </section>
     </header>
 
     <!-- ======= Sticky Compact Nav (MATCHES MAIN, fixed width) ======= -->
@@ -228,8 +306,10 @@
             <a href="#gallery"  class="px-3 py-1.5 rounded hover:bg-[var(--primary)]/15 text-[var(--on-primary)] hidden md:inline-flex">Gallery</a>
 
             <button id="stickyTheme"
-                    class="ml-2 p-2 rounded hover:bg-[var(--primary)]/20 text-[var(--on-primary)]"
-                    aria-label="Toggle theme">
+              class="ml-2 p-2 rounded
+                    text-[var(--on-primary)]
+                    hover:bg-[var(--primary)]/20"
+              aria-label="Toggle theme">
               <i class="fa-solid fa-moon"></i>
             </button>
           </div>
@@ -677,6 +757,7 @@
         </div>
       </div>
     </footer>
+    
   </div>
 
   <!-- Floating Back-To-Top -->
