@@ -184,34 +184,6 @@
   #stickyTheme:hover {
     color: inherit;
   }
-  .section-edge {
-    position: relative;       /* enable pseudos */
-    z-index: 10;              /* sit ABOVE the next section so shadow shows */
-  }
-
-  .section-edge::before {     /* CRISP top edge */
-    content: "";
-    position: absolute;
-    inset: 0 auto auto 0;     /* top:0; left:0; right:0 */
-    height: 2px;
-    background-color: color-mix(in srgb, var(--on-surface) 14%, transparent);
-    pointer-events: none;
-  }
-
-  .section-edge::after {      /* SOFT shadow overlapping the next section */
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: -1px;             /* extend past the bottom edge */
-    height: 2px;             /* size of the falloff */
-    pointer-events: none;
-    background: linear-gradient(
-      to bottom,
-      color-mix(in srgb, var(--on-surface) 18%, transparent) 0%,
-      transparent 100%
-    );
-  }
   </style>
 </head>
 
@@ -280,7 +252,7 @@
       
 
       <!-- ===== Hero (no background effects) ===== -->
-      <section id="hero" class="relative overflow-hidden bg-[var(--section-a-bg)] section-edge">
+      <section id="hero" class="relative overflow-hidden bg-[var(--section-a-bg)]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
           <div class="grid md:grid-cols-2 gap-10 items-center">
             <div>
@@ -357,7 +329,7 @@
     </div>
 
     <!-- ======= Quick Actions ======= -->
-    <section id="quick-actions" class="py-4 bg-[var(--section-b-bg)] section-edge">
+    <section id="quick-actions" class="py-4 bg-[var(--section-b-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
           <!-- Group: Contact Us -->
@@ -449,7 +421,7 @@
     </section>
 
     <!-- ======= About Us ======= -->
-    <section id="about" class="py-16 pb-32 bg-[var(--section-a-bg)] section-edge">
+    <section id="about" class="py-16 pb-32 bg-[var(--section-a-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-2xl md:text-3xl font-bold mb-4 text-[var(--on-surface)]">About Us</h2>
         <div class="prose dark:prose-invert max-w-none text-[var(--on-surface)]">
@@ -461,7 +433,7 @@
     </section>
 
     <!-- ===== Parallax band (text card is SOLID) ===== -->
-    <section id="band-2" class="parallax-md bg-cover bg-center section-edge" data-palette="true">
+    <section id="band-2" class="parallax-md bg-cover bg-center" data-palette="true">
       <div class="px-4 sm:px-6 lg:px-8 py-24">
         <div class="max-w-[600px] rounded-2xl shadow-xl
                     bg-[var(--section-a-bg)] ring-1 ring-[var(--outline-variant)]
@@ -473,7 +445,7 @@
     </section>
 
     <!-- ======= Products & Services ======= -->
-    <section id="products" class="py-16 pb-32 bg-[var(--section-a-bg)] section-edge">
+    <section id="products" class="py-16 pb-32 bg-[var(--section-a-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-2xl md:text-3xl font-bold mb-6 text-[var(--on-surface)]">Products & Services</h2>
 
@@ -545,7 +517,7 @@
     </section>
 
     <!-- ======= Contact Information ======= -->
-    <section id="contact" class="py-16 pb-32 bg-[var(--section-b-bg)] section-edge">
+    <section id="contact" class="py-16 pb-32 bg-[var(--section-b-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-2xl md:text-3xl font-bold mb-6 text-[var(--on-surface)]">Contact Information</h2>
 
@@ -664,7 +636,7 @@
     </section>
 
     <!-- ======= Reviews ======= -->
-    <section id="reviews" class="py-16 pb-32 bg-[var(--section-a-bg)] section-edge">
+    <section id="reviews" class="py-16 pb-32 bg-[var(--section-a-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl md:text-3xl font-bold text-[var(--on-surface)]">Reviews</h2>
@@ -705,7 +677,7 @@
     </section>
 
     <!-- ======= Gallery ======= -->
-    <section id="gallery" class="py-16 pb-32 bg-[var(--section-b-bg)] section-edge">
+    <section id="gallery" class="py-16 pb-32 bg-[var(--section-b-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-2xl md:text-3xl font-bold text-[var(--on-surface)]">Gallery</h2>
@@ -736,7 +708,7 @@
     </section>
 
     <!-- ======= Request Info (CARD with contrasting inputs) ======= -->
-    <section id="request-info" class="py-16 pb-32 bg-[var(--section-a-bg)] section-edge">
+    <section id="request-info" class="py-16 pb-32 bg-[var(--section-a-bg)]">
       <div class="mx-auto px-4 max-w-[450px] sm:max-w-[600px] lg:max-w-[800px]">
         <div class="bg-[var(--surface-0)] rounded-2xl shadow-2xl p-8 ring-1 ring-[var(--outline-variant)]">
           <h2 class="text-2xl md:text-3xl font-bold mb-6 text-[var(--on-surface)]">Request Information</h2>
