@@ -3,171 +3,169 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Material-ish Palette Demo</title>
+  <title>M3 Roles + Tailwind Demo</title>
 
-  <!-- Tailwind CDN -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = { darkMode: 'class' }
-  </script>
+  <script> tailwind.config = { darkMode: 'class' } </script>
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
   <style>
-    /* ===== Design Tokens: semantic (Material-ish) ===== */
-    :root {
-      /* on-surface/text + neutrals (light defaults) */
-      --surface: #f8fafc;            /* slate-50 */
-      --surface-variant: #eef2f7;     /* ~ slate-100 */
-      --surface-inverse: #0f172a;     /* slate-900 */
-      --on-surface: #0f172a;          /* slate-900 */
-      --on-surface-2: #334155;        /* slate-700 */
-      --outline: #cbd5e1;             /* slate-300 */
-      --divider: #e5e7eb;             /* slate-200 */
-      --error: #dc2626;
-      --on-error: #ffffff;
+  /* ======================================================
+     MATERIAL 3 ROLE TOKENS (Light defaults)
+     Paste Theme Builder LIGHT tokens here to override.
+     ====================================================== */
+  :root {
+    /* Brand roles */
+    --primary:              #EA580C;
+    --on-primary:           #FFFFFF;
+    --primary-container:    #FFEDD5;
+    --on-primary-container: #7C2D12;
 
-      /* Defaults; actual values come from [data-theme] below */
-      --primary-50:#fff7ed; --primary-100:#ffedd5; --primary-200:#fed7aa; --primary-300:#fdba74; --primary-400:#fb923c; --primary-500:#f97316; --primary-600:#ea580c; --primary-700:#c2410c; --primary-800:#9a3412; --primary-900:#7c2d12;
-      --secondary-50:#eff6ff; --secondary-100:#dbeafe; --secondary-200:#bfdbfe; --secondary-300:#93c5fd; --secondary-400:#60a5fa; --secondary-500:#3b82f6; --secondary-600:#2563eb; --secondary-700:#1d4ed8; --secondary-800:#1e40af; --secondary-900:#1e3a8a;
-      --tertiary-50:#ecfeff; --tertiary-100:#cffafe; --tertiary-200:#a5f3fc; --tertiary-300:#67e8f9; --tertiary-400:#22d3ee; --tertiary-500:#06b6d4; --tertiary-600:#0891b2; --tertiary-700:#0e7490; --tertiary-800:#155e75; --tertiary-900:#164e63;
+    --secondary:              #4F46E5;
+    --on-secondary:           #FFFFFF;
+    --secondary-container:    #E0E7FF;
+    --on-secondary-container: #1E3A8A;
 
-      --primary: var(--primary-600);
-      --primary-contrast: #ffffff;
-      --secondary: var(--secondary-600);
-      --secondary-contrast: #ffffff;
-      --tertiary: var(--tertiary-500);
-      --tertiary-contrast: #ffffff;
-    }
+    --tertiary:              #14B8A6;
+    --on-tertiary:           #FFFFFF;
+    --tertiary-container:    #CCFBF1;
+    --on-tertiary-container: #115E59;
 
-    /* Dark mode neutrals */
-    .dark :root, .dark {
-      --surface: #0b1220;            /* deep slate */
-      --surface-variant: #101827;    /* card bg */
-      --surface-inverse: #ffffff;
-      --on-surface: #e5e7eb;         /* slate-200 */
-      --on-surface-2: #9ca3af;       /* slate-400 */
-      --outline: #1f2937;            /* slate-800 */
-      --divider: #111827;            /* slate-900 */
-    }
+    /* Error roles */
+    --error:               #B3261E;
+    --on-error:            #FFFFFF;
+    --error-container:     #F9DEDC;
+    --on-error-container:  #410E0B;
 
-    /* ===== Palettes (primary/secondary/tertiary full 10-scale) ===== */
-    /* Orange theme (default) */
-    [data-theme="orange"] {
-      --primary-50:#fff7ed; --primary-100:#ffedd5; --primary-200:#fed7aa; --primary-300:#fdba74; --primary-400:#fb923c; --primary-500:#f97316; --primary-600:#ea580c; --primary-700:#c2410c; --primary-800:#9a3412; --primary-900:#7c2d12;
-      /* secondary: Indigo, tertiary: Teal */
-      --secondary-50:#eef2ff; --secondary-100:#e0e7ff; --secondary-200:#c7d2fe; --secondary-300:#a5b4fc; --secondary-400:#818cf8; --secondary-500:#6366f1; --secondary-600:#4f46e5; --secondary-700:#4338ca; --secondary-800:#3730a3; --secondary-900:#312e81;
-      --tertiary-50:#f0fdfa; --tertiary-100:#ccfbf1; --tertiary-200:#99f6e4; --tertiary-300:#5eead4; --tertiary-400:#2dd4bf; --tertiary-500:#14b8a6; --tertiary-600:#0d9488; --tertiary-700:#0f766e; --tertiary-800:#115e59; --tertiary-900:#134e4a;
-    }
+    /* Neutrals & surfaces */
+    --background:          #FFFBFE;
+    --on-background:       #1C1B1F;
 
-    /* Blue */
-    [data-theme="blue"] {
-      --primary-50:#eff6ff; --primary-100:#dbeafe; --primary-200:#bfdbfe; --primary-300:#93c5fd; --primary-400:#60a5fa; --primary-500:#3b82f6; --primary-600:#2563eb; --primary-700:#1d4ed8; --primary-800:#1e40af; --primary-900:#1e3a8a;
-      --secondary-50:#fff7ed; --secondary-100:#ffedd5; --secondary-200:#fed7aa; --secondary-300:#fdba74; --secondary-400:#fb923c; --secondary-500:#f97316; --secondary-600:#ea580c; --secondary-700:#c2410c; --secondary-800:#9a3412; --secondary-900:#7c2d12;
-      --tertiary-50:#f5f3ff; --tertiary-100:#ede9fe; --tertiary-200:#ddd6fe; --tertiary-300:#c4b5fd; --tertiary-400:#a78bfa; --tertiary-500:#8b5cf6; --tertiary-600:#7c3aed; --tertiary-700:#6d28d9; --tertiary-800:#5b21b6; --tertiary-900:#4c1d95;
-    }
+    --surface:             #FFFBFE;
+    --on-surface:          #1C1B1F;
+    --surface-variant:     #E7E0EC;
+    --on-surface-variant:  #49454F;
 
-    /* Indigo */
-    [data-theme="indigo"] {
-      --primary-50:#eef2ff; --primary-100:#e0e7ff; --primary-200:#c7d2fe; --primary-300:#a5b4fc; --primary-400:#818cf8; --primary-500:#6366f1; --primary-600:#4f46e5; --primary-700:#4338ca; --primary-800:#3730a3; --primary-900:#312e81;
-      --secondary-50:#fff7ed; --secondary-100:#ffedd5; --secondary-200:#fed7aa; --secondary-300:#fdba74; --secondary-400:#fb923c; --secondary-500:#f97316; --secondary-600:#ea580c; --secondary-700:#c2410c; --secondary-800:#9a3412; --secondary-900:#7c2d12;
-      --tertiary-50:#f0fdfa; --tertiary-100:#ccfbf1; --tertiary-200:#99f6e4; --tertiary-300:#5eead4; --tertiary-400:#2dd4bf; --tertiary-500:#14b8a6; --tertiary-600:#0d9488; --tertiary-700:#0f766e; --tertiary-800:#115e59; --tertiary-900:#134e4a;
-    }
+    /* Inverse surfaces */
+    --inverse-surface:     #313033;
+    --inverse-on-surface:  #F4EFF4;
+    --inverse-primary:     #D0BCFF;
 
-    /* Violet */
-    [data-theme="violet"] {
-      --primary-50:#f5f3ff; --primary-100:#ede9fe; --primary-200:#ddd6fe; --primary-300:#c4b5fd; --primary-400:#a78bfa; --primary-500:#8b5cf6; --primary-600:#7c3aed; --primary-700:#6d28d9; --primary-800:#5b21b6; --primary-900:#4c1d95;
-      --secondary-50:#fff7ed; --secondary-100:#ffedd5; --secondary-200:#fed7aa; --secondary-300:#fdba74; --secondary-400:#fb923c; --secondary-500:#f97316; --secondary-600:#ea580c; --secondary-700:#c2410c; --secondary-800:#9a3412; --secondary-900:#7c2d12;
-      --tertiary-50:#eff6ff; --tertiary-100:#dbeafe; --tertiary-200:#bfdbfe; --tertiary-300:#93c5fd; --tertiary-400:#60a5fa; --tertiary-500:#3b82f6; --tertiary-600:#2563eb; --tertiary-700:#1d4ed8; --tertiary-800:#1e40af; --tertiary-900:#1e3a8a;
-    }
+    /* Outline & dividers */
+    --outline:             #938F99;
+    --outline-variant:     #CAC4D0;
+    --divider:             #E6E0E9;
 
-    /* Emerald */
-    [data-theme="emerald"] {
-      --primary-50:#ecfdf5; --primary-100:#d1fae5; --primary-200:#a7f3d0; --primary-300:#6ee7b7; --primary-400:#34d399; --primary-500:#10b981; --primary-600:#059669; --primary-700:#047857; --primary-800:#065f46; --primary-900:#064e3b;
-      --secondary-50:#eef2ff; --secondary-100:#e0e7ff; --secondary-200:#c7d2fe; --secondary-300:#a5b4fc; --secondary-400:#818cf8; --secondary-500:#6366f1; --secondary-600:#4f46e5; --secondary-700:#4338ca; --secondary-800:#3730a3; --secondary-900:#312e81;
-      --tertiary-50:#fff7ed; --tertiary-100:#ffedd5; --tertiary-200:#fed7aa; --tertiary-300:#fdba74; --tertiary-400:#fb923c; --tertiary-500:#f97316; --tertiary-600:#ea580c; --tertiary-700:#c2410c; --tertiary-800:#9a3412; --tertiary-900:#7c2d12;
-    }
+    /* Elevation surfaces (0–5) */
+    --surface-0: var(--surface);
+    --surface-1: color-mix(in srgb, var(--surface) 92%, var(--on-surface) 8%);
+    --surface-2: color-mix(in srgb, var(--surface) 88%, var(--on-surface) 12%);
+    --surface-3: color-mix(in srgb, var(--surface) 84%, var(--on-surface) 16%);
+    --surface-4: color-mix(in srgb, var(--surface) 80%, var(--on-surface) 20%);
+    --surface-5: color-mix(in srgb, var(--surface) 76%, var(--on-surface) 24%);
+  }
 
-    /* Teal */
-    [data-theme="teal"] {
-      --primary-50:#f0fdfa; --primary-100:#ccfbf1; --primary-200:#99f6e4; --primary-300:#5eead4; --primary-400:#2dd4bf; --primary-500:#14b8a6; --primary-600:#0d9488; --primary-700:#0f766e; --primary-800:#115e59; --primary-900:#134e4a;
-      --secondary-50:#f5f3ff; --secondary-100:#ede9fe; --secondary-200:#ddd6fe; --secondary-300:#c4b5fd; --secondary-400:#a78bfa; --secondary-500:#8b5cf6; --secondary-600:#7c3aed; --secondary-700:#6d28d9; --secondary-800:#5b21b6; --secondary-900:#4c1d95;
-      --tertiary-50:#fff7ed; --tertiary-100:#ffedd5; --tertiary-200:#fed7aa; --tertiary-300:#fdba74; --tertiary-400:#fb923c; --tertiary-500:#f97316; --tertiary-600:#ea580c; --tertiary-700:#c2410c; --tertiary-800:#9a3412; --tertiary-900:#7c2d12;
-    }
+  /* ======================================================
+     DARK THEME TOKENS
+     Paste Theme Builder DARK tokens here to override.
+     ====================================================== */
+  .dark {
+    --primary:              #D0BCFF;
+    --on-primary:           #381E72;
+    --primary-container:    #4F378B;
+    --on-primary-container: #EADDFF;
 
-    /* Amber */
-    [data-theme="amber"] {
-      --primary-50:#fffbeb; --primary-100:#fef3c7; --primary-200:#fde68a; --primary-300:#fcd34d; --primary-400:#fbbf24; --primary-500:#f59e0b; --primary-600:#d97706; --primary-700:#b45309; --primary-800:#92400e; --primary-900:#78350f;
-      --secondary-50:#eff6ff; --secondary-100:#dbeafe; --secondary-200:#bfdbfe; --secondary-300:#93c5fd; --secondary-400:#60a5fa; --secondary-500:#3b82f6; --secondary-600:#2563eb; --secondary-700:#1d4ed8; --secondary-800:#1e40af; --secondary-900:#1e3a8a;
-      --tertiary-50:#ecfeff; --tertiary-100:#cffafe; --tertiary-200:#a5f3fc; --tertiary-300:#67e8f9; --tertiary-400:#22d3ee; --tertiary-500:#06b6d4; --tertiary-600:#0891b2; --tertiary-700:#0e7490; --tertiary-800:#155e75; --tertiary-900:#164e63;
-    }
+    --secondary:              #CCC2DC;
+    --on-secondary:           #332D41;
+    --secondary-container:    #4A4458;
+    --on-secondary-container: #E8DEF8;
 
-    /* Red */
-    [data-theme="red"] {
-      --primary-50:#fef2f2; --primary-100:#fee2e2; --primary-200:#fecaca; --primary-300:#fca5a5; --primary-400:#f87171; --primary-500:#ef4444; --primary-600:#dc2626; --primary-700:#b91c1c; --primary-800:#991b1b; --primary-900:#7f1d1d;
-      --secondary-50:#eff6ff; --secondary-100:#dbeafe; --secondary-200:#bfdbfe; --secondary-300:#93c5fd; --secondary-400:#60a5fa; --secondary-500:#3b82f6; --secondary-600:#2563eb; --secondary-700:#1d4ed8; --secondary-800:#1e40af; --secondary-900:#1e3a8a;
-      --tertiary-50:#f5f3ff; --tertiary-100:#ede9fe; --tertiary-200:#ddd6fe; --tertiary-300:#c4b5fd; --tertiary-400:#a78bfa; --tertiary-500:#8b5cf6; --tertiary-600:#7c3aed; --tertiary-700:#6d28d9; --tertiary-800:#5b21b6; --tertiary-900:#4c1d95;
-    }
+    --tertiary:              #EFB8C8;
+    --on-tertiary:           #492532;
+    --tertiary-container:    #633B48;
+    --on-tertiary-container: #FFD8E4;
 
-    /* Rose */
-    [data-theme="rose"] {
-      --primary-50:#fff1f2; --primary-100:#ffe4e6; --primary-200:#fecdd3; --primary-300:#fda4af; --primary-400:#fb7185; --primary-500:#f43f5e; --primary-600:#e11d48; --primary-700:#be123c; --primary-800:#9f1239; --primary-900:#881337;
-      --secondary-50:#eff6ff; --secondary-100:#dbeafe; --secondary-200:#bfdbfe; --secondary-300:#93c5fd; --secondary-400:#60a5fa; --secondary-500:#3b82f6; --secondary-600:#2563eb; --secondary-700:#1d4ed8; --secondary-800:#1e40af; --secondary-900:#1e3a8a;
-      --tertiary-50:#ecfeff; --tertiary-100:#cffafe; --tertiary-200:#a5f3fc; --tertiary-300:#67e8f9; --tertiary-400:#22d3ee; --tertiary-500:#06b6d4; --tertiary-600:#0891b2; --tertiary-700:#0e7490; --tertiary-800:#155e75; --tertiary-900:#164e63;
-    }
+    --error:               #F2B8B5;
+    --on-error:            #601410;
+    --error-container:     #8C1D18;
+    --on-error-container:  #F9DEDC;
 
-    /* Slate (neutral brand) */
-    [data-theme="slate"] {
-      --primary-50:#f8fafc; --primary-100:#f1f5f9; --primary-200:#e2e8f0; --primary-300:#cbd5e1; --primary-400:#94a3b8; --primary-500:#64748b; --primary-600:#475569; --primary-700:#334155; --primary-800:#1f2937; --primary-900:#0f172a;
-      --secondary-50:#eff6ff; --secondary-100:#dbeafe; --secondary-200:#bfdbfe; --secondary-300:#93c5fd; --secondary-400:#60a5fa; --secondary-500:#3b82f6; --secondary-600:#2563eb; --secondary-700:#1d4ed8; --secondary-800:#1e40af; --secondary-900:#1e3a8a;
-      --tertiary-50:#ecfeff; --tertiary-100:#cffafe; --tertiary-200:#a5f3fc; --tertiary-300:#67e8f9; --tertiary-400:#22d3ee; --tertiary-500:#06b6d4; --tertiary-600:#0891b2; --tertiary-700:#0e7490; --tertiary-800:#155e75; --tertiary-900:#164e63;
-    }
+    --background:          #1C1B1F;
+    --on-background:       #E6E1E5;
 
-    /* Derived convenience tokens */
-    :root {
-      --primary: var(--primary-600);
-      --primary-hover: var(--primary-700);
-      --secondary: var(--secondary-600);
-      --secondary-hover: var(--secondary-700);
-      --tertiary: var(--tertiary-500);
-      --tertiary-hover: var(--tertiary-600);
-      --on-primary: #ffffff;
-      --on-secondary: #ffffff;
-      --on-tertiary: #ffffff;
-    }
+    --surface:             #1C1B1F;
+    --on-surface:          #E6E1E5;
+    --surface-variant:     #49454F;
+    --on-surface-variant:  #CAC4D0;
+
+    --inverse-surface:     #E6E1E5;
+    --inverse-on-surface:  #313033;
+    --inverse-primary:     #6750A4;
+
+    --outline:             #938F99;
+    --outline-variant:     #49454F;
+    --divider:             #2C2A30;
+
+    --surface-0: var(--surface);
+    --surface-1: color-mix(in srgb, var(--surface) 92%, var(--on-surface) 8%);
+    --surface-2: color-mix(in srgb, var(--surface) 88%, var(--on-surface) 12%);
+    --surface-3: color-mix(in srgb, var(--surface) 84%, var(--on-surface) 16%);
+    --surface-4: color-mix(in srgb, var(--surface) 80%, var(--on-surface) 20%);
+    --surface-5: color-mix(in srgb, var(--surface) 76%, var(--on-surface) 24%);
+  }
+
+  /* ======================================================
+     OPTIONAL: MULTI-PALETTE BRAND SETS (light only here).
+     Toggle by <html data-theme="...">. Dark uses .dark overrides.
+     Replace these with Theme Builder results if desired.
+     ====================================================== */
+  [data-theme="orange"] {
+    --primary:#EA580C; --on-primary:#fff; --primary-container:#FFEDD5; --on-primary-container:#7C2D12;
+    --secondary:#4F46E5; --on-secondary:#fff; --secondary-container:#E0E7FF; --on-secondary-container:#1E3A8A;
+    --tertiary:#14B8A6; --on-tertiary:#fff; --tertiary-container:#CCFBF1; --on-tertiary-container:#115E59;
+  }
+  [data-theme="indigo"] {
+    --primary:#4F46E5; --on-primary:#fff; --primary-container:#E0E7FF; --on-primary-container:#1E3A8A;
+    --secondary:#EA580C; --on-secondary:#fff; --secondary-container:#FFEDD5; --on-secondary-container:#7C2D12;
+    --tertiary:#06B6D4; --on-tertiary:#fff; --tertiary-container:#CFFAFE; --on-tertiary-container:#155E75;
+  }
+  [data-theme="teal"] {
+    --primary:#0D9488; --on-primary:#fff; --primary-container:#CCFBF1; --on-primary-container:#115E59;
+    --secondary:#6366F1; --on-secondary:#fff; --secondary-container:#E0E7FF; --on-secondary-container:#1E3A8A;
+    --tertiary:#F59E0B; --on-tertiary:#1F2937; --tertiary-container:#FEF3C7; --on-tertiary-container:#7C2D12;
+  }
+  [data-theme="rose"] {
+    --primary:#E11D48; --on-primary:#fff; --primary-container:#FFE4E6; --on-primary-container:#881337;
+    --secondary:#2563EB; --on-secondary:#fff; --secondary-container:#DBEAFE; --on-secondary-container:#1E3A8A;
+    --tertiary:#10B981; --on-tertiary:#062e24; --tertiary-container:#D1FAE5; --on-tertiary-container:#064E3B;
+  }
   </style>
 </head>
 
-<body class="bg-[var(--surface)] text-[var(--on-surface)] min-h-screen antialiased">
-  <!-- Page wrapper -->
+<body class="bg-[var(--background)] text-[var(--on-background)] min-h-screen antialiased">
   <div class="max-w-[1200px] mx-auto p-4 md:p-8">
-    <!-- Header / Menu (uses primary) -->
-    <nav class="rounded-xl bg-[var(--primary-700)] text-white px-4 py-3 mb-6">
+
+    <!-- App Bar (Primary) -->
+    <nav class="rounded-xl px-4 py-3 mb-6 bg-[var(--primary)] text-[var(--on-primary)]">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <i class="fa-solid fa-tooth text-white/90"></i>
+          <i class="fa-solid fa-circle-nodes"></i>
           <span class="font-semibold">Brand</span>
-          <span class="mx-3 h-5 w-px bg-white/20"></span>
-          <a class="rounded-md px-3 py-2 bg-[var(--primary-800)]" href="#">Dashboard</a>
-          <a class="rounded-md px-3 py-2 hover:bg-[var(--primary-600)]/80" href="#">Team</a>
-          <a class="rounded-md px-3 py-2 hover:bg-[var(--primary-600)]/80" href="#">Projects</a>
-          <a class="rounded-md px-3 py-2 hover:bg-[var(--primary-600)]/80" href="#">Reports</a>
+          <span class="mx-3 h-5 w-px bg-[var(--on-primary)]/20"></span>
+          <a class="rounded-md px-3 py-2 bg-[var(--inverse-primary)]/25" href="#">Dashboard</a>
+          <a class="rounded-md px-3 py-2 hover:bg-[var(--primary)]/15" href="#">Team</a>
+          <a class="rounded-md px-3 py-2 hover:bg-[var(--primary)]/15" href="#">Projects</a>
+          <a class="rounded-md px-3 py-2 hover:bg-[var(--primary)]/15" href="#">Reports</a>
         </div>
         <div class="flex items-center gap-2">
-          <!-- Palette switcher -->
           <select id="palette" class="rounded-md bg-white/10 text-white px-3 py-2">
             <option value="orange">Orange</option>
-            <option value="amber">Amber</option>
-            <option value="red">Red</option>
-            <option value="rose">Rose</option>
-            <option value="blue">Blue</option>
             <option value="indigo">Indigo</option>
-            <option value="violet">Violet</option>
-            <option value="emerald">Emerald</option>
             <option value="teal">Teal</option>
-            <option value="slate">Slate</option>
+            <option value="rose">Rose</option>
           </select>
-          <!-- Dark/Light -->
           <button id="toggleTheme" class="rounded-md px-3 py-2 bg-white/10 hover:bg-white/15">
             <i class="fa-solid fa-moon"></i>
           </button>
@@ -175,100 +173,136 @@
       </div>
     </nav>
 
-    <!-- Paper (surface) -->
-    <section class="rounded-2xl bg-[var(--surface-variant)] border border-[var(--outline)] p-6 mb-6">
-      <h2 class="text-xl font-bold mb-2">Paper (Surface Variant)</h2>
-      <p class="text-[var(--on-surface-2)]">This area uses surface tokens, so it adapts to both palette and dark mode.</p>
+    <!-- Paper (Surface-1) -->
+    <section class="rounded-2xl bg-[var(--surface-1)] border border-[var(--outline-variant)] p-6 mb-6">
+      <h2 class="text-xl font-bold mb-2 text-[var(--on-surface)]">Paper (Surface-1)</h2>
+      <p class="text-[var(--on-surface-variant)]">
+        Uses role tokens so it adapts per palette and dark mode.
+      </p>
     </section>
 
-    <!-- Card + Buttons -->
+    <!-- Cards + Buttons + Icons + Form -->
     <section class="grid md:grid-cols-2 gap-6">
-      <article class="rounded-2xl bg-white dark:bg-[var(--surface-variant)] border border-[var(--outline)] shadow-xl p-6">
-        <h3 class="text-lg font-semibold mb-2">Card Title</h3>
-        <p class="text-[var(--on-surface-2)] mb-4">Cards are great for grouping related content.</p>
+      <!-- Card A -->
+      <article class="rounded-2xl bg-[var(--surface-2)] border border-[var(--outline-variant)] shadow-xl p-6">
+        <h3 class="text-lg font-semibold text-[var(--on-surface)]">Card Title</h3>
+        <p class="mt-1 text-[var(--on-surface-variant)]">Cards are elevated surfaces.</p>
 
-        <div class="flex flex-wrap gap-3">
-          <!-- Primary button -->
+        <div class="mt-4 flex flex-wrap gap-3">
+          <!-- Filled Primary -->
           <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
                          bg-[var(--primary)] text-[var(--on-primary)] shadow
-                         hover:bg-[var(--primary-hover)] transition">
+                         hover:brightness-95 transition">
             <i class="fa-solid fa-paper-plane"></i> Primary
           </button>
 
-          <!-- Secondary button -->
+          <!-- Tonal (Primary Container) -->
+          <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                         bg-[var(--primary-container)] text-[var(--on-primary-container)]
+                         ring-1 ring-[var(--outline-variant)]
+                         hover:brightness-95 transition">
+            <i class="fa-solid fa-circle-nodes"></i> Tonal
+          </button>
+
+          <!-- Filled Secondary -->
           <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
                          bg-[var(--secondary)] text-[var(--on-secondary)] shadow
-                         hover:bg-[var(--secondary-hover)] transition">
+                         hover:brightness-95 transition">
             <i class="fa-solid fa-phone"></i> Secondary
           </button>
 
-          <!-- Tertiary button (outlined) -->
+          <!-- Secondary Tonal -->
           <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
-                         border-2 border-[var(--tertiary)]
-                         text-[var(--tertiary)] hover:bg-[var(--tertiary-50)]
-                         dark:hover:bg-[var(--tertiary-900)]/30 transition">
-            <i class="fa-solid fa-star"></i> Tertiary
+                         bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
+                         ring-1 ring-[var(--outline-variant)]
+                         hover:brightness-95 transition">
+            <i class="fa-solid fa-circle-notch"></i> Secondary Tonal
+          </button>
+
+          <!-- Outlined -->
+          <button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                         border border-[var(--outline)]
+                         text-[var(--on-surface)]
+                         hover:bg-[var(--surface-variant)]/60 transition">
+            <i class="fa-regular fa-square"></i> Outlined
           </button>
         </div>
 
-        <!-- Icon buttons -->
+        <!-- Icon Buttons -->
         <div class="mt-4 flex flex-wrap items-center gap-3">
+          <!-- Branded soft -->
           <button class="h-10 w-10 inline-flex items-center justify-center rounded-full
-                         bg-[var(--primary-50)] text-[var(--primary)]
-                         ring-1 ring-[var(--outline)]
-                         hover:bg-[var(--primary-100)] transition">
+                         bg-[var(--primary-container)] text-[var(--on-primary-container)]
+                         ring-1 ring-[var(--outline-variant)] hover:brightness-95">
             <i class="fa-solid fa-heart"></i>
           </button>
-
+          <!-- Neutral -->
           <button class="h-10 w-10 inline-flex items-center justify-center rounded-full
-                         bg-[var(--secondary-50)] text-[var(--secondary)]
-                         ring-1 ring-[var(--outline)]
-                         hover:bg-[var(--secondary-100)] transition">
+                         bg-[var(--surface-0)] text-[var(--on-surface)]
+                         ring-1 ring-[var(--outline-variant)]
+                         hover:bg-[var(--surface-1)]">
             <i class="fa-solid fa-bell"></i>
+          </button>
+          <!-- Error demo -->
+          <button class="h-10 w-10 inline-flex items-center justify-center rounded-full
+                         bg-[var(--error-container)] text-[var(--on-error-container)]
+                         ring-1 ring-[var(--outline-variant)]">
+            <i class="fa-solid fa-triangle-exclamation"></i>
           </button>
         </div>
       </article>
 
-      <!-- Form -->
-      <article class="rounded-2xl bg-white dark:bg-[var(--surface-variant)] border border-[var(--outline)] shadow-xl p-6">
-        <h3 class="text-lg font-semibold mb-4">Form</h3>
+      <!-- Card B: Form -->
+      <article class="rounded-2xl bg-[var(--surface-3)] border border-[var(--outline-variant)] shadow-xl p-6">
+        <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-4">Form</h3>
+
         <form class="grid gap-4">
           <div>
-            <label for="name" class="block text-sm font-medium mb-1">Your Name</label>
+            <label for="name" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Your Name</label>
             <input id="name" type="text" placeholder="Jane Doe"
               class="w-full rounded-lg px-4 py-2
-                     bg-[var(--surface)] text-[var(--on-surface)]
-                     border border-[var(--outline)]
-                     focus:outline-none focus:ring-2 focus:ring-[var(--primary-300)]">
+                     bg-[var(--surface-0)] text-[var(--on-surface)]
+                     border border-[var(--outline-variant)]
+                     focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/40">
           </div>
+
           <div>
-            <label for="email" class="block text-sm font-medium mb-1">Email</label>
+            <label for="email" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email</label>
             <input id="email" type="email" placeholder="jane@example.com"
               class="w-full rounded-lg px-4 py-2
-                     bg-[var(--surface)] text-[var(--on-surface)]
-                     border border-[var(--outline)]
-                     focus:outline-none focus:ring-2 focus:ring-[var(--secondary-300)]">
+                     bg-[var(--surface-0)] text-[var(--on-surface)]
+                     border border-[var(--outline-variant)]
+                     focus:outline-none focus:ring-2 focus:ring-[var(--secondary)]/40">
           </div>
+
           <div>
-            <label for="company" class="block text-sm font-medium mb-1">Company</label>
+            <label for="company" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Company</label>
             <input id="company" type="text" placeholder="Acme Inc."
               class="w-full rounded-lg px-4 py-2
-                     bg-[var(--surface)] text-[var(--on-surface)]
-                     border border-[var(--outline)]
-                     focus:outline-none focus:ring-2 focus:ring-[var(--tertiary-300)]">
+                     bg-[var(--surface-0)] text-[var(--on-surface)]
+                     border border-[var(--outline-variant)]
+                     focus:outline-none focus:ring-2 focus:ring-[var(--tertiary)]/40">
+          </div>
+
+          <!-- Error helper example -->
+          <div class="text-sm">
+            <span class="inline-flex items-center px-2 py-1 rounded
+                         bg-[var(--error-container)] text-[var(--on-error-container)]">
+              <i class="fa-solid fa-circle-exclamation mr-1"></i> Email is required
+            </span>
           </div>
 
           <div class="pt-2 flex flex-wrap gap-3">
             <button type="submit"
               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
                      bg-[var(--primary)] text-[var(--on-primary)] shadow
-                     hover:bg-[var(--primary-hover)] transition">
+                     hover:brightness-95 transition">
               <i class="fa-solid fa-paper-plane"></i> Submit
             </button>
             <button type="button"
               class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
-                     bg-[var(--secondary)] text-[var(--on-secondary)] shadow
-                     hover:bg-[var(--secondary-hover)] transition">
+                     bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
+                     ring-1 ring-[var(--outline-variant)]">
               <i class="fa-solid fa-circle-info"></i> More Info
             </button>
           </div>
@@ -276,19 +310,33 @@
       </article>
     </section>
 
-    <!-- Divider sample -->
+    <!-- Divider -->
     <div class="my-8 h-px bg-[var(--divider)]"></div>
 
-    <!-- Background sample row -->
-    <section class="grid md:grid-cols-3 gap-6">
-      <div class="rounded-xl p-6 border border-[var(--outline)] bg-[var(--surface)]">Surface</div>
-      <div class="rounded-xl p-6 border border-[var(--outline)] bg-[var(--surface-variant)]">Surface Variant</div>
-      <div class="rounded-xl p-6 border border-[var(--outline)] bg-[var(--primary-50)] text-[var(--on-surface)]">Primary-50 Sample</div>
+    <!-- Surface levels preview -->
+    <section class="grid md:grid-cols-5 gap-4">
+      <div class="rounded-lg p-4 border border-[var(--outline-variant)] bg-[var(--surface-0)]">Surface-0</div>
+      <div class="rounded-lg p-4 border border-[var(--outline-variant)] bg-[var(--surface-1)]">Surface-1</div>
+      <div class="rounded-lg p-4 border border-[var(--outline-variant)] bg-[var(--surface-2)]">Surface-2</div>
+      <div class="rounded-lg p-4 border border-[var(--outline-variant)] bg-[var(--surface-3)]">Surface-3</div>
+      <div class="rounded-lg p-4 border border-[var(--outline-variant)] bg-[var(--surface-5)]">Surface-5</div>
     </section>
+
+    <!-- Inverse Surface footer -->
+    <footer class="mt-10 px-4 py-6 rounded-xl
+                   bg-[var(--inverse-surface)] text-[var(--inverse-on-surface)]">
+      <div class="flex items-center justify-between">
+        <div>Inverse surface sample</div>
+        <button class="px-4 py-2 rounded-lg
+                       bg-[var(--inverse-primary)] text-[var(--on-primary)]">
+          Inverse CTA
+        </button>
+      </div>
+    </footer>
   </div>
 
   <script>
-    // Theme persistence
+    // Persisted theme + palette
     const root = document.documentElement;
     const paletteSel = document.getElementById('palette');
     const savedTheme = localStorage.getItem('theme');
@@ -297,7 +345,7 @@
     if (savedTheme === 'dark') root.classList.add('dark');
     if (savedPalette) {
       root.setAttribute('data-theme', savedPalette);
-      paletteSel.value = savedPalette;
+      if (paletteSel) paletteSel.value = savedPalette;
     }
 
     document.getElementById('toggleTheme').addEventListener('click', () => {
