@@ -8,6 +8,7 @@
         "timber/timber": "^2.0"
     },
     "require-dev": {
+        "brain/monkey": "^2.0",
         "phpunit/phpunit": "^11"
     },
     "autoload": {
