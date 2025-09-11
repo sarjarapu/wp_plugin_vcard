@@ -99,3 +99,99 @@ For support and documentation, please visit the plugin's official page.
 - Database table creation
 - Admin interface foundation
 - Asset management system
+
+
+## Braindump
+
+### Fields
+
+- PHPUnit
+- platesphp
+
+- Core fields
+    - slug
+    - name
+    - 
+
+
+```json
+{
+  "schemaVersion": 1,
+  "theme": {
+    "palette": "orange",
+    "industry": "dental",
+    "darkModeDefault": false
+  },
+  "brand": {
+    "name": "Acme Dental Care",
+    "tagline": "Gentle care. Bright smiles.",
+    "logoUrl": "https://cdn....logo.png",
+    "heroUrl": "https://cdn....hero.jpg"
+  },
+  "location": {
+    "label": "Dallas Office",
+    "address": {
+      "line1": "123 Main St",
+      "line2": "Suite 200",
+      "city": "Dallas",
+      "state": "TX",
+      "zip": "75201",
+      "country": "USA",
+      "plusCode": "8644VQ57+3Q",
+      "lat": 32.7767,
+      "lng": -96.7970
+    },
+    "contact": {
+      "phone": "+1 512 555 1234",
+      "whatsapp": "+1 512 555 1234",
+      "email": "hello@acmedental.com",
+      "website": "https://acmedental.com"
+    },
+    "hours": [
+      {"dow":1,"open":"08:00","close":"18:00","closed":false},
+      {"dow":2,"open":"08:00","close":"18:00","closed":false},
+      {"dow":3,"open":"08:00","close":"18:00","closed":false},
+      {"dow":4,"open":"08:00","close":"18:00","closed":false},
+      {"dow":5,"open":"08:00","close":"16:00","closed":false},
+      {"dow":6,"closed":true},
+      {"dow":0,"closed":true}
+    ]
+  },
+  "quickActions": [
+    {"icon":"fa-solid fa-phone","label":"Call","url":"tel:+15125551234"},
+    {"icon":"fa-brands fa-whatsapp","label":"WhatsApp","url":"https://wa.me/15125551234"},
+    {"icon":"fa-solid fa-envelope","label":"Email","url":"mailto:hello@..."},
+    {"icon":"fa-solid fa-map-location-dot","label":"Map","url":"#map"},
+    {"icon":"fa-solid fa-globe","label":"Website","url":"https://acme..."}
+  ],
+  "services": [
+    {
+      "title":"Teeth Whitening",
+      "descriptionHtml":"<p>Professional in-office ...</p>",
+      "priceText":"$199",
+      "imageUrl":"https://cdn...jpg",
+      "cta":{"type":"enquire","label":"Enquire","value":"#request-info"}
+    },
+    {
+      "title":"Implants",
+      "descriptionHtml":"<p>Permanent solution ...</p>",
+      "priceText":"From $1,499",
+      "imageUrl":"https://cdn...jpg",
+      "cta":{"type":"call","label":"Call Now","value":"+15125551234"}
+    }
+  ],
+  "socials": [
+    {"platform":"facebook","url":"..."},
+    {"platform":"instagram","url":"..."},
+    {"platform":"tiktok","url":"..."}
+  ],
+  "gallery": [
+    {"url":"https://cdn...1.jpg","alt":"Lobby"},
+    {"url":"https://cdn...2.jpg","alt":"Chair"}
+  ],
+  "content": {
+    "aboutHtml": "<p>We are a full-service dental practice...</p>",
+    "requestInfoIntro": "Tell us how we can help"
+  }
+}
+```
