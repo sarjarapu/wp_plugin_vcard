@@ -131,27 +131,27 @@
   }
 
   /* ===== OPTIONAL multi-brand base (light) toggled by [data-theme] ===== */
-  [data-theme="{{ profile.palette|default('blue') }}"] {
+  [data-theme="blue"] {
     --primary:#2563EB; --on-primary:#fff; --primary-container:#DBEAFE; --on-primary-container:#1E3A8A;
     --secondary:#0EA5E9; --on-secondary:#03283A; --secondary-container:#E0F2FE; --on-secondary-container:#0C4A6E;
     --tertiary:#14B8A6; --on-tertiary:#062E24; --tertiary-container:#CCFBF1; --on-tertiary-container:#115E59;
   }
-  [data-theme="{{ profile.palette|default('blue') }}"] {
+  [data-theme="teal"] {
     --primary:#0D9488; --on-primary:#fff; --primary-container:#CCFBF1; --on-primary-container:#115E59;
     --secondary:#6366F1; --on-secondary:#fff; --secondary-container:#E0E7FF; --on-secondary-container:#1E3A8A;
     --tertiary:#F59E0B; --on-tertiary:#1F2937; --tertiary-container:#FEF3C7; --on-tertiary-container:#7C2D12;
   }
-  [data-theme="{{ profile.palette|default('blue') }}"] {
+  [data-theme="violet"] {
     --primary:#7C3AED; --on-primary:#fff; --primary-container:#EDE9FE; --on-primary-container:#4C1D95;
     --secondary:#06B6D4; --on-secondary:#05212A; --secondary-container:#CFFAFE; --on-secondary-container:#155E75;
     --tertiary:#10B981; --on-tertiary:#062E24; --tertiary-container:#D1FAE5; --on-tertiary-container:#064E3B;
   }
-  [data-theme="{{ profile.palette|default('blue') }}"] { /* rose tertiary kept in rose family */
+  [data-theme="rose"] { /* rose tertiary kept in rose family */
     --primary:#E11D48; --on-primary:#fff; --primary-container:#FFE4E6; --on-primary-container:#881337;
     --secondary:#2563EB; --on-secondary:#fff; --secondary-container:#DBEAFE; --on-secondary-container:#1E3A8A;
     --tertiary:#F43F5E; --on-tertiary:#fff; --tertiary-container:#FFE4E6; --on-tertiary-container:#881337;
   }
-  [data-theme="{{ profile.palette|default('blue') }}"] {
+  [data-theme="amber"] {
     --primary:#F59E0B; --on-primary:#1F2937; --primary-container:#FEF3C7; --on-primary-container:#7C2D12;
     --secondary:#2563EB; --on-secondary:#fff; --secondary-container:#DBEAFE; --on-secondary-container:#1E3A8A;
     --tertiary:#10B981; --on-tertiary:#062E24; --tertiary-container:#D1FAE5; --on-tertiary-container:#064E3B;
@@ -240,11 +240,11 @@
               <i class="fa-solid fa-moon"></i><span>Toggle Theme</span>
             </button>
             <div class="flex items-center gap-2 mt-3">
-              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="{{ profile.palette|default('blue') }}"  style="background:#2563eb" title="Blue"></button>
-              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="{{ profile.palette|default('blue') }}"  style="background:#0d9488" title="Teal"></button>
-              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="{{ profile.palette|default('blue') }}"style="background:#7c3aed" title="Violet"></button>
-              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="{{ profile.palette|default('blue') }}"  style="background:#e11d48" title="Rose"></button>
-              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="{{ profile.palette|default('blue') }}" style="background:#f59e0b" title="Amber"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="teal"  style="background:#0d9488" title="Teal"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="violet"style="background:#7c3aed" title="Violet"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
             </div>
           </div>
         </div>
@@ -409,11 +409,11 @@
               <i class="fa-solid fa-moon"></i><span class="hidden xl:inline">Theme</span>
             </button>
             <div class="hidden xl:flex items-center gap-1">
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="{{ profile.palette|default('blue') }}"  style="background:#2563eb" title="Blue"></button>
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="{{ profile.palette|default('blue') }}"  style="background:#0d9488" title="Teal"></button>
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="{{ profile.palette|default('blue') }}"style="background:#7c3aed" title="Violet"></button>
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="{{ profile.palette|default('blue') }}"  style="background:#e11d48" title="Rose"></button>
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="{{ profile.palette|default('blue') }}" style="background:#f59e0b" title="Amber"></button>
+              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
+              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="teal"  style="background:#0d9488" title="Teal"></button>
+              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="violet"style="background:#7c3aed" title="Violet"></button>
+              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
+              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
             </div>
           </div>
         </div>
