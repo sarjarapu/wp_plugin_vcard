@@ -149,7 +149,7 @@ class _1_0_0_CreateBase implements Migration
             return;
         }
 
-        // Helper to build a minimal site_json blob
+        // Helper to build a richer site_json blob used by front-end templates
         $makeJson = function(string $name, string $city, string $countryCode, string $palette, string $industry): string {
             $data = [
                 'seo' => [
@@ -162,22 +162,60 @@ class _1_0_0_CreateBase implements Migration
                     'palette' => $palette,
                     'industry' => $industry,
                 ],
+                'hero' => [
+                    'heading' => $name,
+                    'subheading' => 'Family-friendly services with a modern touch.',
+                    'badge' => 'Verified Business',
+                    'image' => 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=1600&q=80&auto=format&fit=crop',
+                    'rating' => ['value' => 4.8, 'count' => 238],
+                    'ctas' => [
+                        ['text' => 'Request Info', 'url' => '#request-info', 'style' => 'primary'],
+                        ['text' => 'Contact Us',  'url' => '#contact',       'style' => 'tonal'],
+                    ],
+                ],
+                'about' => [
+                    'html' => "<p>{$name} provides quality services in {$city}. Our team uses modern tools to deliver excellent outcomes.</p>",
+                ],
+                'services' => [
+                    [
+                        'id' => 'svc-1',
+                        'title' => 'Consultation',
+                        'description' => 'Initial consult and recommendations.',
+                        'icon' => 'fa-solid fa-comments',
+                        'features' => ['Assessment', 'Recommendations'],
+                        'price' => 'Call for pricing'
+                    ],
+                    [
+                        'id' => 'svc-2',
+                        'title' => 'Premium Service',
+                        'description' => 'Advanced package for comprehensive needs.',
+                        'icon' => 'fa-solid fa-star',
+                        'features' => ['Priority', 'Comprehensive'],
+                        'price' => '$199'
+                    ],
+                ],
                 'contact' => [
                     'phone' => '+1 512 555 1234',
                     'email' => 'hello@example.com',
                     'website' => 'https://example.com',
-                    'address' => [
-                        'line1' => '123 Main St',
-                        'city' => $city,
-                        'country_code' => $countryCode,
-                        'postal_code' => '00000',
-                    ]
+                    'address' => "123 Main St, {$city}, {$countryCode} 00000",
+                    'hours' => [
+                        ['day' => 'Mon–Fri', 'open' => '08:00', 'close' => '17:00'],
+                        ['day' => 'Sat',     'open' => '09:00', 'close' => '13:00'],
+                    ],
                 ],
-                'services' => [
-                    ['id' => 'svc-1', 'title' => 'Consultation', 'price' => 'Call for pricing'],
-                    ['id' => 'svc-2', 'title' => 'Premium Service', 'price' => '$199'],
+                'reviews' => [
+                    ['author' => 'Jane Doe', 'rating' => 5,   'date' => '2025-04-01', 'text' => 'Fantastic staff and spotless space!'],
+                    ['author' => 'Mark T.',  'rating' => 4.5, 'date' => '2025-03-20', 'text' => 'Quick appointment and great results.'],
                 ],
-                'gallery' => [],
+                'gallery' => [
+                    ['src' => 'https://example.com/images/1.jpg', 'alt' => 'Reception area', 'caption' => 'Welcome desk'],
+                    ['src' => 'https://example.com/images/2.jpg', 'alt' => 'Main room',      'caption' => 'Modern equipment'],
+                ],
+                'social' => [
+                    ['network' => 'facebook',  'url' => 'https://facebook.com/example'],
+                    ['network' => 'instagram', 'url' => 'https://instagram.com/example'],
+                ],
             ];
             return wp_json_encode($data);
         };

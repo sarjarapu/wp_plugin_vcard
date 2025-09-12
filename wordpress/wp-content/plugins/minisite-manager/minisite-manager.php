@@ -24,6 +24,10 @@ define('MINISITE_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('MINISITE_DB_VERSION', '1.0.0');        // target schema version
 define('MINISITE_DB_OPTION',  'minisite_db_version');
 define('MINISITE_DEFAULT_TEMPLATE', 'v2025');
+// Environment: set to true in production to prevent destructive dev resets
+if (!defined('MINISITE_LIVE_PRODUCTION')) {
+  define('MINISITE_LIVE_PRODUCTION', false);
+}
 
 /**
  * Autoload (Composer)
@@ -44,6 +48,17 @@ function minisite_class($class) {
  * Activation / Deactivation
  */
 register_activation_hook(__FILE__, function () {
+  // In non-production, optionally drop and reset before migrating (dev convenience)
+  if (!MINISITE_LIVE_PRODUCTION) {
+    global $wpdb;
+    if (class_exists(\Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase::class)) {
+      $m = new \Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase();
+      $m->down($wpdb);
+    }
+    // Ensure runner applies base migration
+    update_option(MINISITE_DB_OPTION, '0.0.0', false);
+  }
+
   // Apply DB migrations
   if ($vcClass = minisite_class(\Minisite\Infrastructure\Versioning\VersioningController::class)) {
     $vc = new $vcClass(MINISITE_DB_VERSION, MINISITE_DB_OPTION);
@@ -56,7 +71,15 @@ register_activation_hook(__FILE__, function () {
 });
 
 register_deactivation_hook(__FILE__, function () {
-  // Keep data. Only flush rewrites.
+  // In non-production, drop plugin tables and clear version option on deactivation
+  if (!MINISITE_LIVE_PRODUCTION) {
+    global $wpdb;
+    if (class_exists(\Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase::class)) {
+      $m = new \Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase();
+      $m->down($wpdb);
+    }
+    delete_option(MINISITE_DB_OPTION);
+  }
   flush_rewrite_rules();
 });
 

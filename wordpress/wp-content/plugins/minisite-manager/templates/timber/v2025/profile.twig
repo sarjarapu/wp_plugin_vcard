@@ -1,0 +1,26 @@
+{% extends "v2025/base.twig" %}
+
+{% block header %}
+  {% include "v2025/partials/hero.twig" %}
+{% endblock %}
+
+{% block content %}
+  <div class="grid">
+    {% include "v2025/partials/about.twig" %}
+    {% include "v2025/partials/contact.twig" %}
+  </div>
+
+  {# Optional sections; will be populated when template.html is converted #}
+  {% if profile.siteJson.services is defined and profile.siteJson.services %}
+    {% include "v2025/partials/services.twig" %}
+  {% endif %}
+
+  {% if profile.siteJson.reviews is defined and profile.siteJson.reviews %}
+    {% include "v2025/partials/reviews.twig" %}
+  {% endif %}
+
+  {% if profile.siteJson.gallery is defined and profile.siteJson.gallery %}
+    {% include "v2025/partials/gallery.twig" %}
+  {% endif %}
+{% endblock %}
+

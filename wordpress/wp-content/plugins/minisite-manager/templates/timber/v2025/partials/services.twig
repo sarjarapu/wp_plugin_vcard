@@ -1,0 +1,13 @@
+<section>
+  <h2>Services</h2>
+  <ul>
+    {% for svc in profile.siteJson.services|default([]) %}
+      <li>
+        {% if svc.icon %}<span aria-hidden="true">{{ svc.icon }}</span>{% endif %}
+        <strong>{{ svc.title }}</strong>
+        {% if svc.description %}<div class="muted">{{ svc.description }}</div>{% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+

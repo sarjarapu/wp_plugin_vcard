@@ -20,6 +20,12 @@ class VersioningController
     {
         global $wpdb;
 
+        // Safety (dev only): if our tables are missing but option says up-to-date, force a migration run
+        if ((defined('MINISITE_LIVE_PRODUCTION') ? !MINISITE_LIVE_PRODUCTION : true) && $this->tablesMissing($wpdb)) {
+            // Reset stored version so runner applies base migration
+            update_option($this->optionKey, '0.0.0', false);
+        }
+
         $locator = new MigrationLocator(
             // directory where migration classes live
             \trailingslashit(\MINISITE_PLUGIN_DIR) . 'src/Infrastructure/Versioning/Migrations'
@@ -34,5 +40,24 @@ class VersioningController
                 }
             });
         }
+    }
+
+    private function tablesMissing(\wpdb $wpdb): bool
+    {
+        $prefix = $wpdb->prefix;
+        $tables = [
+            $prefix . 'minisite_profiles',
+            $prefix . 'minisite_profile_revisions',
+            $prefix . 'minisite_reviews',
+        ];
+
+        foreach ($tables as $t) {
+            // SHOW TABLES LIKE is portable enough for our case
+            $exists = (string)$wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $t));
+            if ($exists !== $t) {
+                return true; // Missing at least one table
+            }
+        }
+        return false;
     }
 }
