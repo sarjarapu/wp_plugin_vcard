@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ profile.siteJson.seo.title|default(profile.title) }}</title>
-  <meta name="description" content="{{ profile.siteJson.seo.description|default('Business profile: About, Products <meta name="description" content="Business profile: About, Products & Services, Contact, Reviews, Hours, Map, Gallery." Services, Contact, Reviews, Hours, Map, Gallery.') }}" />
+  <meta name="description" content="{{ profile.siteJson.seo.description|default('') }}" />
   <!-- Tailwind CSS (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script> tailwind.config = { darkMode: 'class' } </script>
@@ -197,9 +197,9 @@
           <nav class="flex items-center justify-between py-4">
             <!-- Brand -->
             <a href="#top" class="flex items-center gap-3 group">
-              <img src="https://www.avivadentalcare.com/favicon.png" alt="Company Logo"
+              <img src="{{ profile.siteJson.brand.logo|default('') }}" alt="{{ profile.name }} Logo"
                   class="h-12 w-12 rounded-lg ring-1 ring-white/20 group-hover:scale-105 transition" />
-              <span class="block font-semibold text-lg md:text-2xl">Acme Dental Care</span>
+              <span class="block font-semibold text-lg md:text-2xl">{{ profile.name }}</span>
             </a>
 
             <!-- Primary Menu (Large) -->
@@ -259,36 +259,34 @@
               <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm
                           bg-[var(--tertiary-container)] text-[var(--on-tertiary-container)]
                           ring-1 ring-[var(--outline-variant)] shadow-sm">
-                <i class="fa-solid fa-circle-check"></i> Verified Business
+                <i class="fa-solid fa-circle-check"></i> {{ profile.siteJson.hero.badge|default('Verified Business') }}
               </span>
               <h1 class="mt-5 text-3xl md:text-5xl font-extrabold leading-tight text-[var(--on-surface)]">
-                Acme Dental Care
+                {{ profile.siteJson.hero.heading|default(profile.name) }}
               </h1>
-              <p class="mt-4 text-lg text-[var(--on-surface-variant)]">
-                Family-friendly dentistry offering preventative care, cosmetic treatments, and emergency services with cutting-edge tech and a gentle touch.
-              </p>
+              <p class="mt-4 text-lg text-[var(--on-surface-variant)]">{{ profile.siteJson.hero.subheading|default('') }}</p>
               <div class="mt-6 flex flex-wrap gap-3">
                 <!-- Primary (Filled) -->
                 <a href="#request-info" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
-                  <i class="fa-solid fa-paper-plane"></i> Request Info
+                  <i class="fa-solid fa-paper-plane"></i> {{ profile.siteJson.hero.ctas[0].text|default('Request Info') }}
                 </a>
                 <!-- Tonal (Primary Container) -->
-                <a href="#contact"
+                <a href="#contact' }}"
                   class="inline-flex items-center gap-2 px-6 py-3 rounded-lg
                           bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
                           ring-1 ring-[var(--outline-variant)]
                           hover:brightness-95 transition">
-                  <i class="fa-solid fa-phone"></i> Contact Us
+                  <i class="fa-solid fa-phone"></i> {{ profile.siteJson.hero.ctas[1].text|default('Contact Us') }}
                 </a>
               </div>
               <div class="mt-6 flex items-center gap-6 text-[var(--on-surface)] font-semibold">
-                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> 4.8/5 (238 reviews)</span>
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> {{ profile.siteJson.hero.rating.value|default('') }}/5 ({{ profile.siteJson.hero.rating.count|default('') }} reviews)</span>
                 <span class="hidden sm:inline text-2xl">&#8226;</span>
-                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> Austin, TX</span>
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> {{ profile.city }}{% if profile.region %}, {{ profile.region }}{% endif %}</span>
               </div>
             </div>
             <div class="relative">
-              <img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1200&auto=format&fit=crop" alt="Clinic" class="w-full h-72 md:h-[22rem] object-cover rounded-2xl shadow-lg ring-1 ring-[var(--outline-variant)]" />
+              <img src="{{ profile.siteJson.hero.image|default('') }}" alt="{{ profile.siteJson.hero.imageAlt|default('') }}" class="w-full h-72 md:h-[22rem] object-cover rounded-2xl shadow-lg ring-1 ring-[var(--outline-variant)]" />
             </div>
           </div>
         </div>
@@ -304,9 +302,9 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between py-3">
           <a href="#top" class="flex items-center gap-2">
-            <img src="https://www.avivadentalcare.com/favicon.png"
+            <img src="{{ profile.siteJson.brand.logo|default('favicon.png') }}"
                 class="h-8 w-8 rounded-md ring-1 ring-white/20" alt="">
-            <span class="font-bold hidden md:inline-flex">Acme Dental Care</span>
+            <span class="font-bold hidden md:inline-flex">{{ profile.name }}</span>
           </a>
           <div class="flex items-center gap-1 text-md">
             <a href="#top"      class="px-3 py-1.5 rounded bg-[var(--primary)]/25 text-[var(--on-primary)]">Home</a>
@@ -336,16 +334,16 @@
           <div role="group" aria-labelledby="qa-contact-label" class="rounded-2xl p-4">
             <h3 id="qa-contact-label" class="text-md font-bold text-[var(--on-surface)] mb-3">Contact Information</h3>
             <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-              <a href="tel:+15125551234" aria-label="Call Us" title="Call Us"
+              <a href="tel:{{ profile.siteJson.contact.phone|default('') }}" aria-label="Call Us" title="Call Us"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-phone-volume text-emerald-600 text-2xl"></i>
               </a>
-              <a href="https://wa.me/15125551234?text=Hello%20Acme%20Dental%20Care" target="_blank" rel="noopener"
+              <a href="https://wa.me/{{ profile.siteJson.contact.phone|default('') }}?text=Hello%20{{ profile.name|url_encode }}" target="_blank" rel="noopener"
                 aria-label="WhatsApp" title="WhatsApp"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-brands fa-whatsapp text-green-600 text-2xl"></i>
               </a>
-              <a href="mailto:hello@acmedental.com?subject=Inquiry%20from%20Website" aria-label="Email" title="Email"
+              <a href="mailto:{{ profile.siteJson.contact.email|default('') }}?subject=Inquiry%20from%20Website" aria-label="Email" title="Email"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-envelope text-rose-500 text-2xl"></i>
               </a>
@@ -357,7 +355,7 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-map-location-dot text-sky-600 text-2xl"></i>
               </a>
-              <a href="https://acmedental.com" target="_blank" rel="noopener" aria-label="Website URL" title="Website URL"
+              <a href="{{ profile.siteJson.contact.website|default('') }}" target="_blank" rel="noopener" aria-label="Website URL" title="Website URL"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-globe text-violet-600 text-2xl"></i>
               </a>
@@ -381,7 +379,7 @@
                 <i class="fa-solid fa-address-book text-indigo-600 text-2xl"></i>
               </button>
               <a download
-                href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0AVERSION%3A3.0%0AN%3AAcme%3B%3B%3B%0ATEL%3BTYPE%3Dwork%2Cvoice%3A%2B15125551234%0AEMAIL%3Ahello%40acmedental.com%0AEND%3AVCARD"
+                href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0AVERSION%3A3.0%0AN%3A{{ profile.name|url_encode }}%3B%3B%3B%0ATEL%3BTYPE%3Dwork%2Cvoice%3A{{ profile.siteJson.contact.phone|default('')|url_encode }}%0AEMAIL%3A{{ profile.siteJson.contact.email|default('')|url_encode }}%0AEND%3AVCARD"
                 aria-label="Download Contact" title="Download Contact"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-download text-emerald-600 text-2xl"></i>
@@ -390,7 +388,7 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-qrcode text-rose-600 text-2xl"></i>
               </button>
-              <a href="mailto:hello@acmedental.com" aria-label="Share vCard" title="Share vCard"
+              <a href="mailto:{{ profile.siteJson.contact.email|default('') }}" aria-label="Share vCard" title="Share vCard"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-paperclip text-sky-600 text-2xl"></i>
               </a>
@@ -425,9 +423,7 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-2xl md:text-3xl font-bold mb-4 text-[var(--on-surface)]">About Us</h2>
         <div class="prose dark:prose-invert max-w-none text-[var(--on-surface)]">
-          <p><strong>Acme Dental Care</strong> blends compassionate care with the latest clinical technology to deliver preventative, restorative, and cosmetic treatments tailored to each patient.</p>
-          <br/><p>Founded in 1998, our practice has grown through word-of-mouth and results you can see. From routine cleanings and whitening to implants and emergency care, we make dentistry approachable and affordable for families across Austin.</p>
-          <br/><p>Our clinic features same-day crowns, digital X-rays, and sedation options for anxious patients. Flexible scheduling and transparent pricing included.</p>
+          <p>{{ profile.siteJson.about.html|default('') }}</p>
         </div>
       </div>
     </section>
@@ -438,8 +434,7 @@
         <div class="max-w-[600px] rounded-2xl shadow-xl
                     bg-[var(--section-a-bg)] ring-1 ring-[var(--outline-variant)]
                     text-[var(--on-surface)] p-8 py-16">
-          <p>We believe every smile tells a story. Our team blends compassionate care with clinical precision to deliver treatments tailored to you.</p>
-          <br/><p>Emergency care, cosmetic dentistry, preventative plans—crafted to fit your budget and schedule.</p>
+          <p>{{ profile.siteJson.whyUs.html|default('') }}</p>
         </div>
       </div>
     </section>
@@ -456,16 +451,16 @@
               <img src="https://images.unsplash.com/photo-1654373535457-383a0a4d00f9?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
             </div>
             <div class="p-5">
-              <h3 class="font-semibold text-lg text-[var(--on-surface)]">Teeth Whitening</h3>
-              <p class="mt-2 text-[var(--on-surface-variant)]">Fast, dramatic in-office results with optional take-home kits.</p>
+              <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ profile.siteJson.services[0].title|default('') }}</h3>
+              <p class="mt-2 text-[var(--on-surface-variant)]">{{ profile.siteJson.services[0].description|default('') }}</p>
               <div class="mt-4 flex items-center justify-between">
-                <span class="font-semibold text-[var(--on-surface)]">$199</span>
+                <span class="font-semibold text-[var(--on-surface)]">{{ profile.siteJson.services[0].price|default('') }}</span>
                 <a href="#request-info"
                   class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
                           bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
                           ring-1 ring-[var(--outline-variant)]
                           hover:brightness-95 transition">
-                  <i class="fa-solid fa-cart-shopping"></i> Enquire
+                  <i class="fa-solid fa-cart-shopping"></i> {{ profile.siteJson.services[0].cta|default('Enquire') }}
                 </a>
               </div>
             </div>
@@ -477,16 +472,16 @@
               <img src="https://images.unsplash.com/photo-1593022356769-11f762e25ed9?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
             </div>
             <div class="p-5">
-              <h3 class="font-semibold text-lg text-[var(--on-surface)]">Dental Implants</h3>
-              <p class="mt-2 text-[var(--on-surface-variant)]">Durable, natural-looking implants. Includes consultation + 3D imaging.</p>
+              <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ profile.siteJson.services[1].title|default('') }}</h3>
+              <p class="mt-2 text-[var(--on-surface-variant)]">{{ profile.siteJson.services[1].description|default('') }}</p>
               <div class="mt-4 flex items-center justify-between">
-                <span class="font-semibold text-[var(--on-surface)]">From $1,999</span>
+                <span class="font-semibold text-[var(--on-surface)]">{{ profile.siteJson.services[1].price|default('') }}</span>
                 <a href="#request-info"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
                         bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
                         ring-1 ring-[var(--outline-variant)]
                         hover:brightness-95 transition">
-                <i class="fa-solid fa-calendar-check"></i> Book
+                <i class="fa-solid fa-calendar-check"></i> {{ profile.siteJson.services[1].cta|default('') }}
               </a>
               </div>
             </div>
@@ -498,16 +493,16 @@
               <img src="https://images.unsplash.com/photo-1602932213623-cc17e9541bb4?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
             </div>
             <div class="p-5">
-              <h3 class="font-semibold text-lg text-[var(--on-surface)]">Emergency Dentistry</h3>
-              <p class="mt-2 text-[var(--on-surface-variant)]">Same-day appointments for pain, broken teeth, or infections.</p>
+              <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ profile.siteJson.services[2].title|default('') }}</h3>
+              <p class="mt-2 text-[var(--on-surface-variant)]">{{ profile.siteJson.services[2].description|default('') }}</p>
               <div class="mt-4 flex items-center justify-between">
-                <span class="font-semibold text-[var(--on-surface)]">Call for pricing</span>
-                <a href="tel:+15125551234"
+                <span class="font-semibold text-[var(--on-surface)]">{{ profile.siteJson.services[2].price|default('') }}</span>
+                <a href="{{ profile.siteJson.services[2].url|default('') }}"
                 class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
                         bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
                         ring-1 ring-[var(--outline-variant)]
                         hover:brightness-95 transition">
-                <i class="fa-solid fa-phone"></i> Call Now
+                <i class="fa-solid fa-phone"></i> {{ profile.siteJson.services[2].cta|default('Call Now') }}
               </a>
               </div>
             </div>
@@ -529,15 +524,15 @@
               <ul class="space-y-3 text-[var(--on-surface)]">
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-phone text-emerald-500 text-xl"></i>
-                  <span>Call Us: <a href="tel:+15125551234" class="text-primary font-medium">+1 (512) 555-1234</a></span>
+                  <span>Call Us: <a href="tel:{{ profile.siteJson.contact.phone|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.phone|default('') }}</a></span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="fa-brands fa-whatsapp text-green-500 text-xl"></i>
-                  <span>WhatsApp: <a href="https://wa.me/15125551234" class="text-primary font-medium">+1 (512) 555-1234</a></span>
+                  <span>WhatsApp: <a href="https://wa.me/{{ profile.siteJson.contact.phone|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.phone|default('') }}</a></span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-envelope text-rose-500 text-xl"></i>
-                  <span>Email: <a href="mailto:hello@acmedental.com" class="text-primary font-medium">hello@acmedental.com</a></span>
+                  <span>Email: <a href="mailto:{{ profile.siteJson.contact.email|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.email|default('') }}</a></span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-share-nodes text-amber-500 text-xl"></i>
@@ -549,7 +544,7 @@
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-globe text-violet-500 text-xl"></i>
-                  <span>Website URL: <a href="https://acmedental.com" class="text-primary font-medium" target="_blank" rel="noopener">acmedental.com</a></span>
+                  <span>Website URL: <a href="{{ profile.siteJson.contact.website|default('') }}" class="text-primary font-medium" target="_blank" rel="noopener">{{ profile.siteJson.contact.website|default('') }}</a></span>
                 </li>
                 <li class="flex items-center gap-3 pt-3">
                   <a href="#request-info" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
@@ -575,13 +570,16 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Follow us</h3>
               <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                <a href="https://facebook.com/yourpage" target="_blank" rel="noopener" aria-label="Facebook" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                {% set fb = null %}{% for s in profile.siteJson.social|default([]) %}{% if s.network == 'facebook' %}{% set fb = s.url %}{% endif %}{% endfor %}
+                <a href="{{ fb|default('https://facebook.com/yourpage') }}" target="_blank" rel="noopener" aria-label="Facebook" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                   <i class="fa-brands fa-facebook-f text-blue-600 text-2xl"></i>
                 </a>
-                <a href="https://twitter.com/yourhandle" target="_blank" rel="noopener" aria-label="Twitter" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <a href="{{ tw|default('https://twitter.com/yourhandle') }}" target="_blank" rel="noopener" aria-label="Twitter" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                   <i class="fa-brands fa-x-twitter text-[var(--on-surface)] text-2xl"></i>
                 </a>
-                <a href="https://instagram.com/yourhandle" target="_blank" rel="noopener" aria-label="Instagram" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                {% set tw = null %}{% for s in profile.siteJson.social|default([]) %}{% if s.network in ['x','twitter'] %}{% set tw = s.url %}{% endif %}{% endfor %}
+                {% set ig = null %}{% for s in profile.siteJson.social|default([]) %}{% if s.network == 'instagram' %}{% set ig = s.url %}{% endif %}{% endfor %}
+                <a href="{{ ig|default('https://instagram.com/yourhandle') }}" target="_blank" rel="noopener" aria-label="Instagram" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                   <i class="fa-brands fa-instagram text-pink-500 text-2xl"></i>
                 </a>
                 <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener" aria-label="LinkedIn" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
@@ -648,29 +646,29 @@
         <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] ">
             <div class="flex items-center justify-between text-[var(--on-surface)]">
-              <div class="font-semibold">Alex P.</div>
-              <div class="text-amber-400"><i class="fa-solid fa-star"></i> 5.0</div>
+              <div class="font-semibold">{{ profile.siteJson.reviews[0].author|default('') }}</div>
+              <div class="text-amber-400"><i class="fa-solid fa-star"></i> {{ profile.siteJson.reviews[0].rating|default('') }}</div>
             </div>
-            <p class="mt-3 text-[var(--on-surface-variant)]">Best whitening I’ve ever had. Friendly team and no upsell pressure. Highly recommend!</p>
-            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: May 2025</div>
+            <p class="mt-3 text-[var(--on-surface-variant)]">{{ profile.siteJson.reviews[0].text|default('') }}</p>
+            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: {{ profile.siteJson.reviews[0].date|default('') }}</div>
           </article>
 
           <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] ">
             <div class="flex items-center justify-between text-[var(--on-surface)]">
-              <div class="font-semibold">Maria G.</div>
-              <div class="text-amber-400"><i class="fa-solid fa-star"></i> 4.7</div>
+              <div class="font-semibold">{{ profile.siteJson.reviews[1].author|default('') }}</div>
+              <div class="text-amber-400"><i class="fa-solid fa-star"></i> {{ profile.siteJson.reviews[1].rating|default('') }}</div>
             </div>
-            <p class="mt-3 text-[var(--on-surface-variant)]">Implant process was smooth and clearly explained. Financing options were a lifesaver.</p>
-            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: Feb 2025</div>
+            <p class="mt-3 text-[var(--on-surface-variant)]">{{ profile.siteJson.reviews[1].text|default('') }}</p>
+            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: {{ profile.siteJson.reviews[1].date|default('') }}</div>
           </article>
 
           <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] ">
             <div class="flex items-center justify-between text-[var(--on-surface)]">
-              <div class="font-semibold">Sam R.</div>
-              <div class="text-amber-400"><i class="fa-solid fa-star"></i> 4.9</div>
+              <div class="font-semibold">{{ profile.siteJson.reviews[2].author|default('') }}</div>
+              <div class="text-amber-400"><i class="fa-solid fa-star"></i> {{ profile.siteJson.reviews[2].rating|default('') }}</div>
             </div>
-            <p class="mt-3 text-[var(--on-surface-variant)]">Emergency visit on a Sunday — they called back fast and took great care of me Monday morning.</p>
-            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: Aug 2025</div>
+            <p class="mt-3 text-[var(--on-surface-variant)]">{{ profile.siteJson.reviews[2].text|default('') }}</p>
+            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: {{ profile.siteJson.reviews[2].date|default('') }}</div>
           </article>
         </div>
       </div>
@@ -685,23 +683,23 @@
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <a href="https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+          <a href="{{ (profile.siteJson.gallery[0].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+            <img src="{{ (profile.siteJson.gallery[0].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[0].alt|default('') }}">
           </a>
-          <a href="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+          <a href="{{ (profile.siteJson.gallery[1].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+            <img src="{{ (profile.siteJson.gallery[1].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[1].alt|default('') }}">
           </a>
-          <a href="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+          <a href="{{ (profile.siteJson.gallery[2].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+            <img src="{{ (profile.siteJson.gallery[2].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[2].alt|default('') }}">
           </a>
-          <a href="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+          <a href="{{ (profile.siteJson.gallery[3].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+            <img src="{{ (profile.siteJson.gallery[3].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[3].alt|default('') }}">
           </a>
-          <a href="https://images.unsplash.com/photo-1489278353717-f64c6ee8a4d2?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="https://images.unsplash.com/photo-1489278353717-f64c6ee8a4d2?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+          <a href="{{ (profile.siteJson.gallery[4].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+            <img src="{{ (profile.siteJson.gallery[4].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[4].alt|default('') }}">
           </a>
-          <a href="https://images.unsplash.com/photo-1564420228450-d9a5bc8d6565?q=80&w=1600&auto=format&fit=crop" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="https://images.unsplash.com/photo-1564420228450-d9a5bc8d6565?q=80&w=800&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+          <a href="{{ (profile.siteJson.gallery[5].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+            <img src="{{ (profile.siteJson.gallery[5].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[5].alt|default('') }}">
           </a>
         </div>
       </div>
