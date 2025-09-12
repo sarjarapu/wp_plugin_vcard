@@ -558,11 +558,18 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Address</h3>
               <address class="not-italic text-[var(--on-surface)]">
-                <div>Acme Dental Care</div>
-                <div>1234 Congress Ave, Suite 200</div>
-                <div>Medical Plaza Building</div>
-                <div>Austin, Texas, USA 78701</div>
-                <div>Google Plus Code: <a class="text-primary font-medium" href="https://www.google.com/maps/place/F5CX%2B3J" target="_blank">77CM+4R Austin</a></div>
+                <div>{{ profile.name }}</div>
+                <div>{{ profile.siteJson.contact.address_line1|default(profile.siteJson.contact.address|default('')) }}</div>
+                <div>{{ profile.siteJson.contact.address_line2|default('') }}</div>
+                <div>
+                  {{ profile.city }}{% if profile.region %}, {{ profile.region }}{% endif %}, {{ profile.countryCode }}{% if profile.postalCode %} {{ profile.postalCode }}{% endif %}
+                </div>
+                <div>
+                  Google Plus Code:
+                  <a class="text-primary font-medium" href="{{ profile.siteJson.contact.plusCodeUrl|default('https://www.google.com/maps/place/F5CX%2B3J') }}" target="_blank">
+                    {{ profile.siteJson.contact.plusCode|default('77CM+4R Austin') }}
+                  </a>
+                </div>
               </address>
             </div>
 
