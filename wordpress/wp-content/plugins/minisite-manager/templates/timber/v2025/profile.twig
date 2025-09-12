@@ -608,27 +608,30 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Hours of Operation</h3>
               <ul class="grid gap-1 text-[var(--on-surface)] [&>li]:flex [&>li]:justify-between [&>li]:items-center [&>li]:py-2 [&>li]:px-3 [&>li]:rounded-lg [&>li:nth-child(even)]:bg-[var(--surface-1)]">
-                <li data-dow="1"><span>Monday</span><span>8:00 AM – 6:00 PM</span></li>
-                <li data-dow="2"><span>Tuesday</span><span>8:00 AM – 6:00 PM</span></li>
-                <li data-dow="3"><span>Wednesday</span><span>8:00 AM – 6:00 PM</span></li>
-                <li data-dow="4"><span>Thursday</span><span>8:00 AM – 6:00 PM</span></li>
-                <li data-dow="5"><span>Friday</span><span>8:00 AM – 4:00 PM</span></li>
-                <li data-dow="6" class="opacity-90"><span>Saturday</span><span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--error-container)] text-[var(--on-error-container)]">Closed</span></li>
-                <li data-dow="0" class="opacity-90"><span>Sunday</span><span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--error-container)] text-[var(--on-error-container)]">Closed</span></li>
+                {% for h in profile.siteJson.contact.hours|default([]) %}
+                  <li data-dow="{{ loop.index0 }}">
+                    <span>{{ h.day }}</span>
+                    {% if h.open is defined and h.close is defined and h.open and h.close %}
+                      <span>{{ h.open }} – {{ h.close }}</span>
+                    {% else %}
+                      <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--error-container)] text-[var(--on-error-container)]">Closed</span>
+                    {% endif %}
+                  </li>
+                {% endfor %}
               </ul>
             </div>
 
             <!-- Map & Directions -->
             <div id="map" class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)]">
               <iframe
-                title="Map to Acme Dental Care"
+                title="Map to {{ profile.name }}"
                 width="100%" height="300" style="border:0;"
                 loading="lazy" allowfullscreen
                 referrerpolicy="no-referrer-when-downgrade"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3448.887!2d-97.743!3d30.267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8644b50b%3A0x0!2sTexas%20State%20Capitol!5e0!3m2!1sen!2sus!4v1682530000000">
+                src="{% if profile.siteJson.contact.mapEmbedUrl is defined and profile.siteJson.contact.mapEmbedUrl %}{{ profile.siteJson.contact.mapEmbedUrl }}{% elseif profile.geo.lat and profile.geo.lng %}https://www.google.com/maps?q={{ profile.geo.lat }},{{ profile.geo.lng }}&z=14&output=embed{% else %}https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3448.887!2d-97.743!3d30.267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8644b50b%3A0x0!2sTexas%20State%20Capitol!5e0!3m2!1sen!2sus!4v1682530000000{% endif %}">
               </iframe>
               <div class="p-4 bg-[var(--surface-0)]">
-                <a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=Texas+State+Capitol"
+                <a target="_blank" rel="noopener" href="{% if profile.siteJson.contact.directionsUrl is defined and profile.siteJson.contact.directionsUrl %}{{ profile.siteJson.contact.directionsUrl }}{% elseif profile.geo.lat and profile.geo.lng %}https://www.google.com/maps/dir/?api=1&destination={{ profile.geo.lat }},{{ profile.geo.lng }}{% else %}https://www.google.com/maps/dir/?api=1&destination=Texas+State+Capitol{% endif %}"
                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
                   <i class="fa-solid fa-turn-up"></i> Get Directions
                 </a>
