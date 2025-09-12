@@ -1,26 +1,288 @@
-{% extends "v2025/base.twig" %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" data-theme="{{ profile.palette|default('blue') }}" data-industry="{{ profile.industry|default('services') }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ profile.siteJson.seo.title|default(profile.title) }}</title>
+  <meta name="description" content="{{ profile.siteJson.seo.description|default('Business profile: About, Products & Services, Contact, Reviews, Hours, Map, Gallery.') }}" />
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script> tailwind.config = { darkMode: 'class' } </script>
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
 
-{% block header %}
-  {% include "v2025/partials/hero.twig" %}
-{% endblock %}
+  <style>
+  /* ======================================================
+     MATERIAL 3 ROLE TOKENS (Light defaults)
+     Replace with Material Theme Builder LIGHT tokens if desired.
+     ====================================================== */
+  :root {
+    /* Brand roles */
+    --primary:              #2563EB;   /* blue-600 */
+    --on-primary:           #FFFFFF;
+    --primary-container:    #DBEAFE;   /* blue-100 */
+    --on-primary-container: #1E3A8A;
 
-{% block content %}
-  <div class="grid">
-    {% include "v2025/partials/about.twig" %}
-    {% include "v2025/partials/contact.twig" %}
+    --secondary:              #0EA5E9; /* sky-500 */
+    --on-secondary:           #03283A;
+    --secondary-container:    #E0F2FE; /* sky-100 */
+    --on-secondary-container: #0C4A6E;
+
+    --tertiary:              #14B8A6;  /* teal-500 */
+    --on-tertiary:           #062E24;
+    --tertiary-container:    #CCFBF1;  /* teal-100 */
+    --on-tertiary-container: #115E59;
+
+    /* Error roles */
+    --error:               #B3261E;
+    --on-error:            #FFFFFF;
+    --error-container:     #F9DEDC;
+    --on-error-container:  #410E0B;
+
+    /* Neutrals & surfaces */
+    --background:          #F8FAFC;     /* slate-50 */
+    --on-background:       #0F172A;     /* slate-900 */
+
+    --surface:             #FFFFFF;
+    --on-surface:          #0F172A;
+    --surface-variant:     #E2E8F0;     /* slate-200 */
+    --on-surface-variant:  #475569;     /* slate-600 */
+
+    /* Inverse surfaces */
+    --inverse-surface: #2E2E2E;          /* dark bar for footer in light mode */
+    --inverse-on-surface: #FFFFFF;       /* white text/icons */
+    --inverse-primary:     #93C5FD;     /* blue-300 for inverse CTA */
+
+    /* Outline & dividers */
+    --outline:             #CBD5E1;     /* slate-300 */
+    --outline-variant:     #E2E8F0;     /* slate-200 */
+    --divider:             #E5E7EB;     /* neutral rule */
+
+    /* Elevation surfaces (0–5) */
+    --surface-0: var(--surface);
+    --surface-1: color-mix(in srgb, var(--surface) 92%, var(--on-surface) 8%);
+    --surface-2: color-mix(in srgb, var(--surface) 88%, var(--on-surface) 12%);
+    --surface-3: color-mix(in srgb, var(--surface) 84%, var(--on-surface) 16%);
+    --surface-4: color-mix(in srgb, var(--surface) 80%, var(--on-surface) 20%);
+    --surface-5: color-mix(in srgb, var(--surface) 76%, var(--on-surface) 24%);
+
+    /* Focus ring */
+    --focus-ring: color-mix(in srgb, var(--primary) 40%, transparent);
+
+    --section-a-bg: var(--surface-0);  /* card-white */
+    --section-b-bg: var(--surface-2);  /* soft gray */
+  }
+
+  /* ======================================================
+     DARK THEME TOKENS
+     Replace with Material Theme Builder DARK tokens if desired.
+     ====================================================== */
+  .dark {
+    --primary:              #93C5FD;    /* blue-300 */
+    --on-primary:           #0B2447;
+    --primary-container:    #1E3A8A;    /* blue-800 */
+    --on-primary-container: #E0E7FF;
+
+    --secondary:              #7DD3FC;  /* sky-300 */
+    --on-secondary:           #082F49;
+    --secondary-container:    #0C4A6E;  /* sky-900 */
+    --on-secondary-container: #E0F2FE;
+
+    --tertiary:              #5EEAD4;   /* teal-300 */
+    --on-tertiary:           #05201B;
+    --tertiary-container:    #115E59;   /* teal-800 */
+    --on-tertiary-container: #CCFBF1;
+
+    --error:               #F2B8B5;
+    --on-error:            #601410;
+    --error-container:     #8C1D18;
+    --on-error-container:  #F9DEDC;
+
+    --background:          #0B1220;
+    --on-background:       #E6E1E5;
+
+    --surface:             #0B1220;
+    --on-surface:          #E6E1E5;
+    --surface-variant:     #101827;
+    --on-surface-variant:  #9CA3AF;
+
+    /* Dark mode tokens */
+    --inverse-surface: #121212;          /* deeper, near-black */
+    --inverse-on-surface: #E0E0E0;       /* light gray text/icons */
+    --inverse-primary:     #2563EB;
+
+    --outline:             #1F2937;
+    --outline-variant:     #0F172A;
+    --divider:             #111827;
+
+    /* Dark surfaces: bigger separation so sections don’t blend */
+    --surface-0: var(--surface); /* base page chrome */
+    --surface-1: color-mix(in srgb, var(--surface) 88%, var(--on-surface) 12%);
+    --surface-2: color-mix(in srgb, var(--surface) 78%, var(--on-surface) 22%);
+    --surface-3: color-mix(in srgb, var(--surface) 68%, var(--on-surface) 32%);
+    --surface-4: color-mix(in srgb, var(--surface) 60%, var(--on-surface) 40%);
+    --surface-5: color-mix(in srgb, var(--surface) 50%, var(--on-surface) 50%);
+  }
+  </style>
+</head>
+<body class="min-h-screen bg-[var(--background)] text-[var(--on-background)]">
+  <!-- Outer page wrapper (centered, framed) -->
+  <div class="max-w-[1000px] mx-auto my-0 border-t-0 rounded-none md:rounded-xl shadow-2xl border border-[var(--outline-variant)] bg-[var(--surface-0)]">
+    <!-- ======= Main Top Navigation (role-based) ======= -->
+    <header id="top" class="relative">
+      <div class="w-full border-b border-[var(--outline-variant)] bg-[var(--primary)] text-[var(--on-primary)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav class="flex items-center justify-between py-4">
+            <!-- Brand -->
+            <a href="#top" class="flex items-center gap-3 group">
+              <img src="{{ profile.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}" alt="Company Logo"
+                  class="h-12 w-12 rounded-lg ring-1 ring-white/20 group-hover:scale-105 transition" />
+              <span class="block font-semibold text-lg md:text-2xl">{{ profile.name }}</span>
+            </a>
+
+            <!-- Primary Menu (Large) -->
+            <div class="hidden lg:flex items-center gap-2">
+              <a href="#top"      class="px-4 py-2 rounded-lg bg-[var(--primary)]/25 text-[var(--on-primary)]">Home</a>
+              <a href="#about"    class="px-4 py-2 rounded-lg hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">About</a>
+              <a href="#products" class="px-4 py-2 rounded-lg hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Products</a>
+              <a href="#contact"  class="px-4 py-2 rounded-lg hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Contact</a>
+              <a href="#reviews"  class="px-4 py-2 rounded-lg hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Reviews</a>
+              <a href="#gallery"  class="px-4 py-2 rounded-lg hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Gallery</a>
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button id="openMenu" class="lg:hidden p-2 rounded-lg hover:bg-[var(--primary)]/20 text-[var(--on-primary)]" aria-label="Open menu">
+              <i class="fa-solid fa-bars text-xl"></i>
+            </button>
+          </nav>
+        </div>
+      </div>
+      <!-- Mobile Drawer -->
+      <div id="mobileMenu" class="fixed inset-0 z-50 hidden">
+        <div class="absolute inset-0 bg-black/40" id="closeMenu"></div>
+        <div class="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-[var(--surface-0)] shadow-xl p-6 flex flex-col gap-3 text-[var(--on-surface)]">
+          <div class="flex items-center justify-between">
+            <div class="font-bold text-lg">Menu</div>
+            <button id="closeMenuBtn" class="p-2 rounded-lg hover:bg-[var(--surface-1)]" aria-label="Close menu">
+              <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+          </div>
+          <a href="#top" class="py-2">Home</a>
+          <a href="#about" class="py-2">About</a>
+          <a href="#products" class="py-2">Products</a>
+          <a href="#contact" class="py-2">Contact</a>
+          <a href="#reviews" class="py-2">Reviews</a>
+          <a href="#gallery" class="py-2">Gallery</a>
+          <div class="pt-4 border-t border-[var(--outline-variant)] mt-auto">
+            <button id="themeToggleMobile" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-[var(--outline)] hover:bg-[var(--primary-container)]">
+              <i class="fa-solid fa-moon"></i><span>Toggle Theme</span>
+            </button>
+            <div class="flex items-center gap-2 mt-3">
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="teal"  style="background:#0d9488" title="Teal"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="violet"style="background:#7c3aed" title="Violet"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
+              <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+
+      <!-- ===== Hero (no background effects) ===== -->
+      <section id="hero" class="relative overflow-hidden bg-[var(--section-a-bg)]">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative">
+          <div class="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm
+                          bg-[var(--tertiary-container)] text-[var(--on-tertiary-container)]
+                          ring-1 ring-[var(--outline-variant)] shadow-sm">
+                <i class="fa-solid fa-circle-check"></i> {{ profile.siteJson.hero.badge|default('Verified Business') }}
+              </span>
+              <h1 class="mt-5 text-3xl md:text-5xl font-extrabold leading-tight text-[var(--on-surface)]">
+                {{ profile.siteJson.hero.heading|default(profile.name) }}
+              </h1>
+              <p class="mt-4 text-lg text-[var(--on-surface-variant)]">
+                {{ profile.siteJson.hero.subheading|default('') }}
+              </p>
+              <div class="mt-6 flex flex-wrap gap-3">
+                <!-- Primary (Filled) -->
+                <a href="{{ (profile.siteJson.hero.ctas[0].url|default('#request-info')) }}" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
+                  <i class="fa-solid fa-paper-plane"></i> {{ profile.siteJson.hero.ctas[0].text|default('Request Info') }}
+                </a>
+                <!-- Tonal (Primary Container) -->
+                <a href="{{ (profile.siteJson.hero.ctas[1].url|default('#contact')) }}"
+                  class="inline-flex items-center gap-2 px-6 py-3 rounded-lg
+                          bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
+                          ring-1 ring-[var(--outline-variant)]
+                          hover:brightness-95 transition">
+                  <i class="fa-solid fa-phone"></i> {{ profile.siteJson.hero.ctas[1].text|default('Contact Us') }}
+                </a>
+              </div>
+              <div class="mt-6 flex items-center gap-6 text-[var(--on-surface)] font-semibold">
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> {{ profile.siteJson.hero.rating.value|default('') }}/5 ({{ profile.siteJson.hero.rating.count|default('') }} reviews)</span>
+                <span class="hidden sm:inline text-2xl">&#8226;</span>
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> {{ profile.city }}{% if profile.region %}, {{ profile.region }}{% endif %}</span>
+              </div>
+            </div>
+            <div class="relative">
+              <img src="{{ profile.siteJson.hero.image|default('https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1200&auto=format&fit=crop') }}" alt="Clinic" class="w-full h-72 md:h-[22rem] object-cover rounded-2xl shadow-lg ring-1 ring-[var(--outline-variant)]" />
+            </div>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <!-- ======= Sticky Compact Nav (MATCHES MAIN, fixed width) ======= -->
+    <div id="stickyNav"
+        class="hidden fixed top-0 left-1/2 -translate-x-1/2 z-50
+                w-full max-w-[1000px]
+                border-b border-[var(--outline-variant)]
+                bg-[var(--primary)] text-[var(--on-primary)] backdrop-blur">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between py-3">
+          <a href="#top" class="flex items-center gap-2">
+            <img src="{{ profile.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}"
+                class="h-8 w-8 rounded-md ring-1 ring-white/20" alt="">
+            <span class="font-bold hidden md:inline-flex">{{ profile.name }}</span>
+          </a>
+          <div class="flex items-center gap-1 text-md">
+            <a href="#top"      class="px-3 py-1.5 rounded bg-[var(--primary)]/25 text-[var(--on-primary)]">Home</a>
+            <a href="#about"    class="px-3 py-1.5 rounded hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">About</a>
+            <a href="#products" class="px-3 py-1.5 rounded hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Products</a>
+            <a href="#contact"  class="px-3 py-1.5 rounded hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Contact</a>
+            <a href="#reviews"  class="px-3 py-1.5 rounded hover:bg-[var(--primary)]/15 text-[var(--on-primary)] hidden md:inline-flex">Reviews</a>
+            <a href="#gallery"  class="px-3 py-1.5 rounded hover:bg-[var(--primary)]/15 text-[var(--on-primary)] hidden md:inline-flex">Gallery</a>
+
+            <button id="stickyTheme"
+              class="ml-2 p-2 rounded
+                    text-[var(--on-primary)]
+                    hover:bg-[var(--primary)]/20"
+              aria-label="Toggle theme">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======= Quick Actions ======= -->
+    <section id="quick-actions" class="py-4 bg-[var(--section-b-bg)]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Keep as-is (buttons/links static for now) -->
+      </div>
+    </section>
+
+    <!-- ======= Band with background image based on industry ======= -->
+    <section id="band-2" class="relative h-48 md:h-60 w-full bg-no-repeat bg-center bg-cover"></section>
+
+    <!-- ======= About, Products, Contact, Reviews, Gallery, Request Info, Footer ======= -->
+    {# Keep the rest of template as-is for now; can be progressively parameterized later #}
+    {% include "php/v2025/template.html" ignore missing %}
+
   </div>
 
-  {# Optional sections; will be populated when template.html is converted #}
-  {% if profile.siteJson.services is defined and profile.siteJson.services %}
-    {% include "v2025/partials/services.twig" %}
-  {% endif %}
-
-  {% if profile.siteJson.reviews is defined and profile.siteJson.reviews %}
-    {% include "v2025/partials/reviews.twig" %}
-  {% endif %}
-
-  {% if profile.siteJson.gallery is defined and profile.siteJson.gallery %}
-    {% include "v2025/partials/gallery.twig" %}
-  {% endif %}
-{% endblock %}
+  <!-- Floating Back-To-Top and behavior scripts are embedded in template.html; if not included, copy same JS here. -->
+</body>
+</html>
 
