@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Infrastructure\Persistence\Repositories;
 
 use Minisite\Infrastructure\Persistence\Repositories\ProfileRevisionRepository;
+use Minisite\Domain\Entities\ProfileRevision;
 use PHPUnit\Framework\TestCase;
 
 final class ProfileRevisionRepositoryTest extends TestCase
@@ -26,21 +27,22 @@ final class ProfileRevisionRepositoryTest extends TestCase
             return 1;
         });
     
-        $repo = new ProfileRevisionRepository($wpdb, 'wp_biz_profiles_revisions');
+        $repo = new ProfileRevisionRepository($wpdb);
     
         $rev = new ProfileRevision(
             id: null,
             profileId: 12,
             revisionNumber: 3,
             status: 'draft',
-            jsonData: ['a' => 1],
-            createdAt: new \DateTimeImmutable('now')
+            schemaVersion: 1,
+            siteJson: ['a' => 1],
+            createdAt: new \DateTimeImmutable('now'),
+            createdBy: 9
         );
     
-        $ok = $repo->add($rev);
-    
-        $this->assertTrue($ok);
-        $this->assertSame(77, $wpdb->insert_id);
+        $saved = $repo->add($rev);
+        $this->assertInstanceOf(ProfileRevision::class, $saved);
+        $this->assertSame(77, $saved->id);
     }
 
     public function testListForProfileReturnsOrderedDesc(): void
@@ -52,22 +54,34 @@ final class ProfileRevisionRepositoryTest extends TestCase
         // the repo should construct ProfileRevision objects from them.
         $wpdb->method('get_results')->willReturn([
             [
-                'id' => 22, 'profile_id' => 12, 'revision_number' => 6,
-                'status' => 'draft', 'json_data' => '{"x":2}', 'created_at' => '2025-01-02 00:00:00',
+                'id' => 22,
+                'profile_id' => 12,
+                'revision_number' => 6,
+                'status' => 'draft',
+                'schema_version' => 1,
+                'site_json' => '{"x":2}',
+                'created_at' => '2025-01-02 00:00:00',
+                'created_by' => 9,
             ],
             [
-                'id' => 21, 'profile_id' => 12, 'revision_number' => 5,
-                'status' => 'published', 'json_data' => '{"x":1}', 'created_at' => '2025-01-01 00:00:00',
+                'id' => 21,
+                'profile_id' => 12,
+                'revision_number' => 5,
+                'status' => 'published',
+                'schema_version' => 1,
+                'site_json' => '{"x":1}',
+                'created_at' => '2025-01-01 00:00:00',
+                'created_by' => 8,
             ],
         ]);
     
-        $repo = new ProfileRevisionRepository($wpdb, 'wp_biz_profiles_revisions');
-        $rows = $repo->listForProfile(12, 10, 0);
+        $repo = new ProfileRevisionRepository($wpdb);
+        $rows = $repo->listForProfile(12, 10);
     
         // Assert on entity API, not array access:
         $this->assertCount(2, $rows);
         $this->assertInstanceOf(ProfileRevision::class, $rows[0]);
-        $this->assertSame(6, $rows[0]->revisionNumber());
-        $this->assertSame(5, $rows[1]->revisionNumber());
+        $this->assertSame(6, $rows[0]->revisionNumber);
+        $this->assertSame(5, $rows[1]->revisionNumber);
     }
 }

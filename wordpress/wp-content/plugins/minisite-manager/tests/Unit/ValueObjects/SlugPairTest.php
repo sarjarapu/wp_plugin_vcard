@@ -11,14 +11,14 @@ final class SlugPairTest extends TestCase
     public function testConstructAndAccessors(): void
     {
         $p = new SlugPair('my-biz', 'nyc');
-        $this->assertSame('my-biz', $p->business());
-        $this->assertSame('nyc', $p->location());
+        $this->assertSame('my-biz', $p->business);
+        $this->assertSame('nyc', $p->location);
     }
 
     public function testAsArrayAndFull(): void
     {
         $p = new SlugPair('dallas-dental', 'tx-downtown');
-        $this->assertSame(['business' => 'dallas-dental', 'location' => 'tx-downtown'], $p->asArray());
+        $this->assertSame(['business_slug' => 'dallas-dental', 'location_slug' => 'tx-downtown'], $p->asArray());
         $this->assertSame('dallas-dental/tx-downtown', $p->full());
     }
 

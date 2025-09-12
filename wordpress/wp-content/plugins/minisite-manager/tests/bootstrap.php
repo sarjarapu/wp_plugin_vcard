@@ -42,7 +42,7 @@ if (!function_exists('get_option')) {
     function get_option($key, $default = false) {
         return $GLOBALS['__test_options'][$key] ?? $default;
     }
-    function update_option($key, $value) {
+    function update_option($key, $value, $autoload = null) {
         $GLOBALS['__test_options'][$key] = $value;
         return true;
     }

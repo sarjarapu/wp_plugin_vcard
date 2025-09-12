@@ -136,7 +136,7 @@ final class ProfileRepositoryMoreTest extends TestCase
         );
 
         $saved = $repo->save($profile, 5);
-        $this->assertSame(6, $saved->siteVersion());
+        $this->assertSame(6, $saved->siteVersion);
         $this->assertGreaterThanOrEqual(2, $callCount, 'expects at least the UPDATE and the POINT sync SQL to run');
     }
 }
