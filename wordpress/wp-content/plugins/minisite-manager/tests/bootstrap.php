@@ -1,10 +1,10 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
 
-// WP result-type constants used by $wpdb
-if (!defined('OBJECT'))   define('OBJECT',   'OBJECT');
-if (!defined('ARRAY_A'))  define('ARRAY_A',  'ARRAY_A');
-if (!defined('ARRAY_N'))  define('ARRAY_N',  'ARRAY_N');
+// Ensure WP result-type constants exist when WP isn't loaded.
+if (!defined('OBJECT'))   define('OBJECT', 'OBJECT');
+if (!defined('ARRAY_A'))  define('ARRAY_A', 'ARRAY_A');
+if (!defined('ARRAY_N'))  define('ARRAY_N', 'ARRAY_N');
 if (!defined('OBJECT_K')) define('OBJECT_K', 'OBJECT_K');
 
 // (Optional) Brain Monkey setup if you use it
@@ -15,10 +15,8 @@ if (!function_exists('wp_json_encode')) {
     function wp_json_encode($data) { return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); }
 }
 
-/**
- * Minimal wpdb stub so PHPUnit can reflect/mocking works without WP.
- * Add only what your tests touch.
- */
+
+// Minimal wpdb stub if none exists yet:
 if (!class_exists('wpdb')) {
     class wpdb {
         public string $prefix = 'wp_';
@@ -31,10 +29,21 @@ if (!class_exists('wpdb')) {
             }
             return $query;
         }
-        // Avoid defaulting to ARRAY_A: let tests pass it explicitly
-        public function get_row($query, $output = null)      { return null; }
-        public function get_results($query, $output = null)  { return []; }
-        public function query($query)                        { $this->rows_affected = 0; return 0; }
-        public function insert($table, $data, $format = [])  { $this->insert_id = 1; return 1; }
+        public function get_row($query, $output = null) { return null; }
+        public function get_results($query, $output = null) { return []; }
+        public function query($query) { return 0; }
+        public function insert($table, $data, $format = []) { $this->insert_id = 1; return 1; }
+    }
+}
+
+// Option storage stubs for versioning tests
+if (!function_exists('get_option')) {
+    $GLOBALS['__test_options'] = [];
+    function get_option($key, $default = false) {
+        return $GLOBALS['__test_options'][$key] ?? $default;
+    }
+    function update_option($key, $value) {
+        $GLOBALS['__test_options'][$key] = $value;
+        return true;
     }
 }

@@ -24,7 +24,7 @@ class MigrationRunner
      * Run all migrations whose version is > current and <= targetVersion.
      * Each migration must be idempotent.
      */
-    public function runUpToTarget(\wpdb $wpdb, ?callable $logger = null): void
+    public function upgradeTo(\wpdb $wpdb, ?callable $logger = null): void
     {
         $logger ??= static function ($msg) {};
         $current = $this->current();

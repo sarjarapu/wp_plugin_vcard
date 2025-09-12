@@ -1,5 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit bootstrap="tests/bootstrap.php" colors="true" cacheResult="false">
+<phpunit
+  bootstrap="tests/bootstrap.php"
+  colors="true"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd"
+>
+  <!-- What to measure (the filter) -->
+  <source>
+    <include>
+      <directory suffix=".php">src</directory>
+    </include>
+    <exclude>
+      <directory suffix=".php">vendor</directory>
+      <directory suffix=".php">tests</directory>
+    </exclude>
+  </source>
+
+  <!-- How to report coverage -->
+  <coverage includeUncoveredFiles="true" pathCoverage="false">
+    <report>
+      <html outputDirectory="build/coverage"/>
+      <text outputFile="php://stdout" showUncoveredFiles="false"/>
+    </report>
+  </coverage>
+
   <testsuites>
     <testsuite name="Unit">
       <directory>tests/Unit</directory>
