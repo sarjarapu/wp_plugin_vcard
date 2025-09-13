@@ -453,7 +453,7 @@
           {% set services = profile.siteJson.services.listing|default([]) %}
           {% if services %}
             {% for svc in services %}
-              <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none flex flex-col h-full">
+              <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none flex flex-col h-full shadow-sm hover:shadow-md transition-shadow">
                 <div class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
                   <img src="{{ svc.image|default('https://images.unsplash.com/photo-1654373535457-383a0a4d00f9?q=80&w=1200&auto=format&fit=crop') }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
                 </div>
@@ -677,7 +677,7 @@
 
         <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
           {% for r in profile.siteJson.reviews|default([]) %}
-            <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] ">
+            <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] shadow-sm hover:shadow-md transition-shadow">
               <div class="flex items-center justify-between text-[var(--on-surface)]">
                 <div class="font-semibold">{{ r.author }}</div>
                 <div class="text-amber-400"><i class="fa-solid fa-star"></i> {{ r.rating }}</div>
@@ -913,6 +913,9 @@
         },
         textile: {
           band2: 'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?auto=format&fit=crop&w=1600'
+        },
+        dentist: {
+          band2: 'https://images.unsplash.com/photo-1704455306251-b4634215d98f?auto=format&fit=crop&w=1600'
         }
       };
       const industry = root.getAttribute('data-industry') || 'services';

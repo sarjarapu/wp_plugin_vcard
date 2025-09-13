@@ -65,9 +65,8 @@ register_activation_hook(__FILE__, function () {
     $vc->activate();
   }
 
-  // Ensure rewrites are registered before flush
-  do_action('minisite/register_rewrites');
-  flush_rewrite_rules();
+  // Defer rewrite flush until after init has registered our rules
+  update_option('minisite_flush_rewrites', 1, false);
 });
 
 register_deactivation_hook(__FILE__, function () {
@@ -117,6 +116,11 @@ add_action('init', function () {
     add_rewrite_tag('%minisite_biz%', '([^&]+)');
     add_rewrite_tag('%minisite_loc%', '([^&]+)');
     add_rewrite_rule('^b/([^/]+)/([^/]+)/?$', 'index.php?minisite=1&minisite_biz=$matches[1]&minisite_loc=$matches[2]', 'top');
+  }
+  // One-time flush after activation to avoid manual Permalinks save
+  if (get_option('minisite_flush_rewrites')) {
+    flush_rewrite_rules();
+    delete_option('minisite_flush_rewrites');
   }
 }, 5);
 

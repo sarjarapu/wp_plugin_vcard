@@ -199,7 +199,7 @@ class _1_0_0_CreateBase implements Migration
             'lng'            => -96.7970,
             'site_template'  => 'v2025',
             'palette'        => 'blue',
-            'industry'       => 'services',
+            'industry'       => 'dentist',
             'default_locale' => 'en-US',
             'schema_version' => 1,
             'site_version'   => 1,
