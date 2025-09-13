@@ -698,12 +698,30 @@
           <div class="text-sm text-[var(--on-surface-variant)]">Tap to enlarge</div>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="gallery-grid">
           {% for img in profile.siteJson.gallery|default([]) %}
-            <a href="{{ img.src }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+            <a href="{{ img.src }}" data-gallery-index="{{ loop.index0 }}" data-caption="{{ img.caption|default(img.alt|default('')) }}" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
               <img src="{{ img.src }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ img.alt|default('') }}">
             </a>
           {% endfor %}
+        </div>
+
+        {# Lightbox overlay #}
+        <div id="galleryLightbox" class="fixed inset-0 z-50 hidden">
+          <div class="absolute inset-0 bg-black/70" data-glb-close></div>
+          <div class="relative h-full w-full flex items-center justify-center p-6">
+            <button type="button" class="absolute top-4 right-4 p-3 rounded-full bg-[var(--surface-0)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]" aria-label="Close" data-glb-close>
+              <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+            <button type="button" class="absolute left-4 md:left-6 p-3 rounded-full bg-[var(--surface-0)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]" aria-label="Previous" id="glb-prev">
+              <i class="fa-solid fa-chevron-left text-xl"></i>
+            </button>
+            <img id="glb-image" src="" alt="" class="max-h-[85vh] max-w-[90vw] rounded-xl shadow-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] object-contain" />
+            <button type="button" class="absolute right-4 md:right-6 p-3 rounded-full bg-[var(--surface-0)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]" aria-label="Next" id="glb-next">
+              <i class="fa-solid fa-chevron-right text-xl"></i>
+            </button>
+          </div>
+          <div class="absolute bottom-4 left-1/2 -translate-x-1/2 max-w-[90vw] text-center px-4 py-2 rounded bg-[var(--surface-0)]/90 text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] shadow" id="glb-caption"></div>
         </div>
       </div>
     </section>
@@ -897,6 +915,43 @@
         el.style.backgroundSize = 'cover';
         el.style.backgroundPosition = 'center';
       }
+    })();
+
+    // Gallery lightbox
+    (function () {
+      const lightbox = document.getElementById('galleryLightbox');
+      const imgEl = document.getElementById('glb-image');
+      const capEl = document.getElementById('glb-caption');
+      const prevBtn = document.getElementById('glb-prev');
+      const nextBtn = document.getElementById('glb-next');
+      const items = Array.from(document.querySelectorAll('#gallery-grid [data-gallery-index]'));
+      if (!lightbox || !imgEl || !capEl || items.length === 0) return;
+
+      const closeEls = lightbox.querySelectorAll('[data-glb-close]');
+      const data = items.map(a => ({ src: a.getAttribute('href'), cap: a.getAttribute('data-caption') || '' }));
+      let idx = 0;
+      const open = (i) => {
+        idx = (i + data.length) % data.length;
+        imgEl.src = data[idx].src;
+        imgEl.alt = data[idx].cap;
+        capEl.textContent = data[idx].cap;
+        lightbox.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      };
+      const show = (i) => open(i);
+      const close = () => { lightbox.classList.add('hidden'); document.body.style.overflow = ''; };
+
+      items.forEach((a, i) => a.addEventListener('click', (e) => { e.preventDefault(); open(i); }));
+      if (prevBtn) prevBtn.addEventListener('click', () => show(idx - 1));
+      if (nextBtn) nextBtn.addEventListener('click', () => show(idx + 1));
+      closeEls.forEach(el => el.addEventListener('click', close));
+      lightbox.addEventListener('click', (e) => { if (e.target === lightbox) close(); });
+      document.addEventListener('keydown', (e) => {
+        if (lightbox.classList.contains('hidden')) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowLeft') show(idx - 1);
+        if (e.key === 'ArrowRight') show(idx + 1);
+      });
     })();
 
     // Initialize scroll state on load
