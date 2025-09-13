@@ -493,26 +493,46 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-7 text-[var(--on-surface)]">Get in touch</h3>
               <ul class="space-y-3 text-[var(--on-surface)]">
-                <li class="flex items-center gap-3">
-                  <i class="fa-solid fa-phone text-emerald-500 text-xl"></i>
-                  <span>Call Us: <a href="tel:{{ profile.siteJson.contact.phone.link|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.phone.text|default('') }}</a></span>
-                </li>
-                <li class="flex items-center gap-3">
-                  <i class="fa-brands fa-whatsapp text-green-500 text-xl"></i>
-                  <span>WhatsApp: <a href="https://wa.me/{{ profile.siteJson.contact.whatsapp.link|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.whatsapp.text|default('') }}</a></span>
-                </li>
-                <li class="flex items-center gap-3">
-                  <i class="fa-solid fa-envelope text-rose-500 text-xl"></i>
-                  <span>Email: <a href="mailto:{{ profile.siteJson.contact.email|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.email|default('') }}</a></span>
-                </li>
+                {% set phone_link = profile.siteJson.contact.phone.link|default('')|trim %}
+                {% set phone_text = profile.siteJson.contact.phone.text|default('')|trim %}
+                {% if phone_link or phone_text %}
+                  <li class="flex items-center gap-3">
+                    <i class="fa-solid fa-phone text-emerald-500 text-xl"></i>
+                    <span>Call Us: <a href="tel:{{ phone_link }}" class="text-primary font-medium">{{ phone_text ?: phone_link }}</a></span>
+                  </li>
+                {% endif %}
+
+                {% set wa_link = profile.siteJson.contact.whatsapp.link|default('')|trim %}
+                {% set wa_text = profile.siteJson.contact.whatsapp.text|default('')|trim %}
+                {% if wa_link or wa_text %}
+                  <li class="flex items-center gap-3">
+                    <i class="fa-brands fa-whatsapp text-green-500 text-xl"></i>
+                    <span>WhatsApp: <a href="https://wa.me/{{ wa_link }}" class="text-primary font-medium">{{ wa_text ?: wa_link }}</a></span>
+                  </li>
+                {% endif %}
+
+                {% set email = profile.siteJson.contact.email|default('')|trim %}
+                {% if email %}
+                  <li class="flex items-center gap-3">
+                    <i class="fa-solid fa-envelope text-rose-500 text-xl"></i>
+                    <span>Email: <a href="mailto:{{ email }}" class="text-primary font-medium">{{ email }}</a></span>
+                  </li>
+                {% endif %}
+
+                {% set w_link = profile.siteJson.contact.website.link|default('')|trim %}
+                {% set w_text = profile.siteJson.contact.website.text|default('')|trim %}
+                {% if w_link or w_text %}
+                  <li class="flex items-center gap-3">
+                    <i class="fa-solid fa-globe text-violet-500 text-xl"></i>
+                    <span>Website URL: <a href="{{ w_link }}" class="text-primary font-medium" target="_blank" rel="noopener">{{ w_text ?: w_link }}</a></span>
+                  </li>
+                {% endif %}
+
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-location-dot text-sky-500 text-xl"></i>
                   <span>Map: <a href="#map" class="text-primary font-medium">Open Map</a></span>
                 </li>
-                <li class="flex items-center gap-3">
-                  <i class="fa-solid fa-globe text-violet-500 text-xl"></i>
-                  <span>Website URL: <a href="{{ profile.siteJson.contact.website.link|default('') }}" class="text-primary font-medium" target="_blank" rel="noopener">{{ profile.siteJson.contact.website.text|default('') }}</a></span>
-                </li>
+
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-share-nodes text-amber-500 text-xl"></i>
                   <span>Share: <button id="shareBtn2" class="text-primary font-medium underline">Share this page</button></span>
