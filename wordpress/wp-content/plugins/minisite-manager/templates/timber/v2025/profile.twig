@@ -453,16 +453,16 @@
           {% set services = profile.siteJson.services.listing|default([]) %}
           {% if services %}
             {% for svc in services %}
-              <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none">
+              <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none flex flex-col h-full">
                 <div class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
                   <img src="{{ svc.image|default('https://images.unsplash.com/photo-1654373535457-383a0a4d00f9?q=80&w=1200&auto=format&fit=crop') }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
                 </div>
-                <div class="p-5">
+                <div class="p-5 flex flex-col grow">
                   <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ svc.title }}</h3>
                   {% if svc.description %}
-                    <p class="mt-2 text-[var(--on-surface-variant)]">{{ svc.description }}</p>
+                    <p class="mt-2 text-[var(--on-surface-variant)] max-h-36 overflow-y-auto pr-1 mb-4">{{ svc.description }}</p>
                   {% endif %}
-                  <div class="mt-4 flex items-center justify-between">
+                  <div class="mt-auto flex items-center justify-between">
                     <span class="font-semibold text-[var(--on-surface)]">{{ svc.price }}</span>
                     {% if svc.url or svc.cta %}
                       <a href="{{ svc.url|default('#request-info') }}"
