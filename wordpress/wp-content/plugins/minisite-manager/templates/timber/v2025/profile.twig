@@ -269,7 +269,7 @@
               <p class="mt-4 text-lg text-[var(--on-surface-variant)]">{{ profile.siteJson.hero.subheading|default('') }}</p>
               <div class="mt-6 flex flex-wrap gap-3">
                 <!-- Primary (Filled) -->
-                <a href="#request-info" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
+                <a href="{{ profile.siteJson.hero.ctas[0].url|default('#request-info') }}" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
                   <i class="fa-solid fa-paper-plane"></i> {{ profile.siteJson.hero.ctas[0].text|default('Request Info') }}
                 </a>
                 <!-- Tonal (Primary Container) -->

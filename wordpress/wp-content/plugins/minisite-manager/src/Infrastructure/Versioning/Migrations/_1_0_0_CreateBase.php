@@ -221,7 +221,7 @@ class _1_0_0_CreateBase implements Migration
                     'ctas'   => [ ['text'=>'Request Info','url'=>'#request-info'], ['text'=>'Contact Us','url'=>'#contact'] ],
                 ],
                 'about' => [ 'html' => '<p>Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.</p><p>From routine cleanings to implants and cosmetic treatments, our Dallas team creates a calm experience with lasting results.</p><p>We welcome families and offer flexible scheduling and transparent pricing.</p><br/><p>Understanding the dental insurance plans, the different levels of participation and payout options you chose could be a daunting task for many patients. Ask our expertly trained dental professionals at Cedar Park office how you could utilize the plan benefits to the maximum and avoid paying any unnecessary out of pocket charges.</p>' ],
-                'whyUs' => [ 'title' => 'Why Choose Us?', 'html' => '<p>The patient coordinators at Aviva Dental Care of Cedar Park ensure that you have plenty of time for each appointment. The additional time will allow us to know you and your dental priorities better. You will also have ample time to discuss any of your questions, concerns about oral health. We seldom run behind, so you should not have to wait for us after your scheduled appointment time.</p><br/><p>Whether you need a routine exam or experiencing a dental emergency, we will thoroughly answer all your questions or concerns in a relaxed, pressure-free environment. Finally, you will never feel rushed or forced to take a treatment plan that you don\'t need. So, you won\'t have to worry about surprise costs or how to fit your dental goals into your budget.</p>' ],
+                'whyUs' => [ 'title' => 'Why Choose Us?', 'html' => '<p>The patient coordinators at Aviva Dental Care of Cedar Park ensure that you have plenty of time for each appointment. The additional time will allow us to know you and your dental priorities better. You will also have ample time to discuss any of your questions, concerns about oral health. We seldom run behind, so you should not have to wait for us after your scheduled appointment time.</p><br/><p>Whether you need a routine exam or experiencing a dental emergency, we will thoroughly answer all your questions or concerns in a relaxed, pressure-free environment. Finally, you will never feel rushed or forced to take a treatment plan that you don\'t need. So, you won\'t have to worry about surprise costs or how to fit your dental goals into your budget.</p>','image'=>'https://images.unsplash.com/photo-1704455306251-b4634215d98f?auto=format&fit=crop&w=1600' ],
                 'services' => [
                     'title' => 'Products & Services',
                     'listing' => [
@@ -374,23 +374,24 @@ class _1_0_0_CreateBase implements Migration
                 'name'=>'Lotus Textiles','city'=>'Mumbai',
                 'brand'=>[
                     'palette'=>'rose','industry'=>'textile',
-                    'logo'=>'https://cdn-icons-png.flaticon.com/512/1549/1549464.png'
+                    'logo'=>'https://cdn-icons-png.flaticon.com/512/6010/6010534.png'
                 ],
                 'seo'=>[
                     'title'=>'Lotus Textiles — Mumbai',
                     'description'=>'Fine silks, linens, and custom tailoring in Colaba. Contemporary designs rooted in Indian handloom traditions.',
-                    'keywords'=>'lotus textiles, fabrics, handloom, mumbai, tailoring'
+                    'keywords'=>'lotus textiles, fabrics, handloom, mumbai, tailoring',
+                    'favicon'=>'https://cdn-icons-png.flaticon.com/512/6010/6010534.png'
                 ],
                 'hero'=>[
                     'heading'=>'Lotus Textiles',
                     'subheading'=>'Your Colaba, Mumbai fabric house offering premium silks, breathable linens, and bespoke tailoring with attentive fittings in a relaxed studio at fair, transparent prices.',
                     'badge'=>'Trusted Supplier',
-                    'image'=>'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?w=1600&q=80&auto=format&fit=crop',
+                    'image'=>'https://images.unsplash.com/photo-1542044801-30d3e45ae49a?w=1600&q=80&auto=format&fit=crop',
                     'rating'=>['value'=>4.7,'count'=>412],
                     'ctas'=>[ ['text'=>'Browse Collection','url'=>'#products'], ['text'=>'Contact','url'=>'#contact'] ],
                 ],
-                'about'=>['html'=>'<p>At Lotus Textiles, we curate fine silks, linens, and cottons from across India. Our artisans and suppliers are carefully selected for quality and ethical practices.</p><p>Our in-house designers craft contemporary styles while preserving handloom traditions. Whether you need luxury Banarasi silk or breathable linen, our team will help you match fabric to occasion and fit.</p><p>We supply boutiques and provide made-to-measure services with transparent pricing and turnaround times.</p>'],
-                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>We combine premium materials with tailored service. Our consultants guide you through fabric selection, lining, and care so your garments last for years.</p><p>Alterations and bespoke stitching are done in-house for consistency and speed. Enjoy convenient fittings and delivery across Mumbai.</p>'],
+                'about'=>['html'=>'<p>At Lotus Textiles, we curate fine silks, linens, and cottons from across India. Our artisans and suppliers are carefully selected for quality and ethical practices.</p><br/><p>Our in-house designers craft contemporary styles while preserving handloom traditions. Whether you need luxury Banarasi silk or breathable linen, our team will help you match fabric to occasion and fit.</p><br/><p>We supply boutiques and provide made-to-measure services with transparent pricing and turnaround times.</p>'],
+                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>We combine premium materials with tailored service. Our consultants guide you through fabric selection, lining, and care so your garments last for years.</p><br/><p>Alterations and bespoke stitching are done in-house for consistency and speed. Enjoy convenient fittings and delivery across Mumbai.</p>', 'image'=>'https://images.unsplash.com/photo-1524292332709-b33366a7f165?auto=format&fit=crop&w=1600'],
                 'services'=>[
                     'title'=>'Products & Services',
                     'listing'=>[
@@ -469,12 +470,13 @@ class _1_0_0_CreateBase implements Migration
                 'name'=>'Green Bites','city'=>'London',
                 'brand'=>[
                     'palette'=>'amber','industry'=>'restaurant',
-                    'logo'=>'https://cdn-icons-png.flaticon.com/512/3480/3480514.png'
+                    'logo'=>'https://cdn-icons-png.flaticon.com/512/3170/3170733.png'
                 ],
                 'seo'=>[
                     'title'=>'Green Bites — Plant-forward Kitchen',
                     'description'=>'Seasonal bowls, sourdough, and specialty coffee made with British produce. Walk-ins welcome; bookings recommended for weekends.',
-                    'keywords'=>'green bites, lunch bowls, sourdough, coffee, london'
+                    'keywords'=>'green bites, lunch bowls, sourdough, coffee, london',
+                    'favicon'=>'https://cdn-icons-png.flaticon.com/512/3170/3170733.png'
                 ],
                 'hero'=>[
                     'heading'=>'Green Bites',
@@ -484,8 +486,8 @@ class _1_0_0_CreateBase implements Migration
                     'rating'=>['value'=>4.6,'count'=>320],
                     'ctas'=>[ ['text'=>'View Menu','url'=>'#products'], ['text'=>'Book Table','url'=>'#contact'] ],
                 ],
-                'about'=>['html'=>'<p>We cook with British seasonal produce and whole grains, pairing vibrant vegetables with house ferments and dressings.</p><p>Our menu rotates weekly with vegetarian and vegan options. Sourdough is baked on site each morning and our coffee is sourced from independent UK roasters.</p><p>Walk-ins welcome; bookings recommended for weekends.</p>'],
-                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>We keep ingredients simple and traceable. Our kitchen minimizes waste by pickling and fermenting trimmings, and we donate surplus through local partners.</p><p>Friendly service, fair pricing, and quick counter ordering get you back to your day fast.</p>'],
+                'about'=>['html'=>'<p>We cook with British seasonal produce and whole grains, pairing vibrant vegetables with house ferments and dressings.</p><br/><p>Our menu rotates weekly with vegetarian and vegan options. Sourdough is baked on site each morning and our coffee is sourced from independent UK roasters.</p><br/><p>Walk-ins welcome; bookings recommended for weekends.</p>'],
+                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>We keep ingredients simple and traceable. Our kitchen minimizes waste by pickling and fermenting trimmings, and we donate surplus through local partners.</p><br/><p>Friendly service, fair pricing, and quick counter ordering get you back to your day fast.</p>','image'=>'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=1600'],
                 'services'=>[
                     'title'=>'Menu Highlights',
                     'listing'=>[
@@ -563,23 +565,24 @@ class _1_0_0_CreateBase implements Migration
                 'name'=>'Swift Transit','city'=>'Sydney',
                 'brand'=>[
                     'palette'=>'teal','industry'=>'transport',
-                    'logo'=>'https://cdn-icons-png.flaticon.com/512/5969/5969268.png'
+                    'logo'=>'https://cdn-icons-png.flaticon.com/512/995/995260.png'
                 ],
                 'seo'=>[
                     'title'=>'Swift Transit — Courier & Logistics',
                     'description'=>'Reliable same‑day courier and scheduled logistics across NSW with real-time tracking and friendly support.',
-                    'keywords'=>'swift transit, courier, logistics, sydney, same day delivery'
+                    'keywords'=>'swift transit, courier, logistics, sydney, same day delivery',
+                    'favicon'=>'https://cdn-icons-png.flaticon.com/512/995/995260.png'
                 ],
                 'hero'=>[
                     'heading'=>'Swift Transit',
                     'subheading'=>'Your Sydney, NSW courier partner for same‑day and scheduled deliveries, last‑mile logistics, and careful handling with real‑time tracking, friendly support, and on‑time, transparent pricing.',
                     'badge'=>'On-Time Delivery',
-                    'image'=>'https://images.unsplash.com/photo-1498084393753-b411b2d26b34?w=1600&q=80&auto=format&fit=crop',
+                    'image'=>'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1600&q=80&auto=format&fit=crop',
                     'rating'=>['value'=>4.9,'count'=>189],
                     'ctas'=>[ ['text'=>'Get Quote','url'=>'#request-info'], ['text'=>'Call','url'=>'tel:+61255501234'] ],
                 ],
-                'about'=>['html'=>'<p>Swift Transit provides same‑day courier and scheduled deliveries for businesses across Sydney. Our fleet includes vans, bikes, and EVs to fit every job size.</p><p>We\'re trusted by retailers, clinics, and agencies to handle time-critical consignments with care and visibility.</p><p>Real-time tracking and dedicated support keep your operations moving.</p>'],
-                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>On-time performance, transparent pricing, and proactive communication are at the core of our service. Our drivers are trained to handle fragile and confidential items.</p><p>We integrate with your workflows and provide proof-of-delivery instantly.</p>'],
+                'about'=>['html'=>'<p>Swift Transit provides same‑day courier and scheduled deliveries for businesses across Sydney. Our fleet includes vans, bikes, and EVs to fit every job size.</p><br/><p>We\'re trusted by retailers, clinics, and agencies to handle time-critical consignments with care and visibility.</p><br/><p>Real-time tracking and dedicated support keep your operations moving.</p>'],
+                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>On-time performance, transparent pricing, and proactive communication are at the core of our service. Our drivers are trained to handle fragile and confidential items.</p><br/><p>We integrate with your workflows and provide proof-of-delivery instantly.</p>','image'=>'https://images.unsplash.com/photo-1498084393753-b411b2d26b34?auto=format&fit=crop&w=1600'],
                 'services'=>[
                     'title'=>'Services',
                     'listing'=>[
