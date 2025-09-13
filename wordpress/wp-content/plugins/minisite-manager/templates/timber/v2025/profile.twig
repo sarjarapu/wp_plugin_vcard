@@ -574,27 +574,52 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Follow us</h3>
               <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                {% set fb = null %}{% for s in profile.siteJson.social|default([]) %}{% if s.network == 'facebook' %}{% set fb = s.url %}{% endif %}{% endfor %}
-                <a href="{{ fb|default('https://facebook.com/yourpage') }}" target="_blank" rel="noopener" aria-label="Facebook" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                  <i class="fa-brands fa-facebook-f text-blue-600 text-2xl"></i>
-                </a>
-                <a href="{{ tw|default('https://twitter.com/yourhandle') }}" target="_blank" rel="noopener" aria-label="Twitter" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                  <i class="fa-brands fa-x-twitter text-[var(--on-surface)] text-2xl"></i>
-                </a>
-                {% set tw = null %}{% for s in profile.siteJson.social|default([]) %}{% if s.network in ['x','twitter'] %}{% set tw = s.url %}{% endif %}{% endfor %}
-                {% set ig = null %}{% for s in profile.siteJson.social|default([]) %}{% if s.network == 'instagram' %}{% set ig = s.url %}{% endif %}{% endfor %}
-                <a href="{{ ig|default('https://instagram.com/yourhandle') }}" target="_blank" rel="noopener" aria-label="Instagram" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                  <i class="fa-brands fa-instagram text-pink-500 text-2xl"></i>
-                </a>
-                <a href="https://linkedin.com/in/yourprofile" target="_blank" rel="noopener" aria-label="LinkedIn" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                  <i class="fa-brands fa-linkedin-in text-sky-700 text-2xl"></i>
-                </a>
-                <a href="https://youtube.com/yourchannel" target="_blank" rel="noopener" aria-label="YouTube" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                  <i class="fa-brands fa-youtube text-red-600 text-2xl"></i>
-                </a>
-                <a href="https://tiktok.com/@yourhandle" target="_blank" rel="noopener" aria-label="TikTok" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                  <i class="fa-brands fa-tiktok text-[var(--on-surface)] text-2xl"></i>
-                </a>
+                {# Extract known socials #}
+                {% set fb = null %}
+                {% set tw = null %}
+                {% set ig = null %}
+                {% set li = null %}
+                {% set yt = null %}
+                {% set tt = null %}
+                {% for s in profile.siteJson.social|default([]) %}
+                  {% if s.network == 'facebook' %}{% set fb = s.url %}{% endif %}
+                  {% if s.network in ['x','twitter'] %}{% set tw = s.url %}{% endif %}
+                  {% if s.network == 'instagram' %}{% set ig = s.url %}{% endif %}
+                  {% if s.network == 'linkedin' %}{% set li = s.url %}{% endif %}
+                  {% if s.network == 'youtube' %}{% set yt = s.url %}{% endif %}
+                  {% if s.network == 'tiktok' %}{% set tt = s.url %}{% endif %}
+                {% endfor %}
+
+                {% if fb %}
+                  <a href="{{ fb }}" target="_blank" rel="noopener" aria-label="Facebook" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                    <i class="fa-brands fa-facebook-f text-blue-600 text-2xl"></i>
+                  </a>
+                {% endif %}
+                {% if tw %}
+                  <a href="{{ tw }}" target="_blank" rel="noopener" aria-label="Twitter" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                    <i class="fa-brands fa-x-twitter text-[var(--on-surface)] text-2xl"></i>
+                  </a>
+                {% endif %}
+                {% if ig %}
+                  <a href="{{ ig }}" target="_blank" rel="noopener" aria-label="Instagram" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                    <i class="fa-brands fa-instagram text-pink-500 text-2xl"></i>
+                  </a>
+                {% endif %}
+                {% if li %}
+                  <a href="{{ li }}" target="_blank" rel="noopener" aria-label="LinkedIn" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                    <i class="fa-brands fa-linkedin-in text-sky-700 text-2xl"></i>
+                  </a>
+                {% endif %}
+                {% if yt %}
+                  <a href="{{ yt }}" target="_blank" rel="noopener" aria-label="YouTube" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                    <i class="fa-brands fa-youtube text-red-600 text-2xl"></i>
+                  </a>
+                {% endif %}
+                {% if tt %}
+                  <a href="{{ tt }}" target="_blank" rel="noopener" aria-label="TikTok" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                    <i class="fa-brands fa-tiktok text-[var(--on-surface)] text-2xl"></i>
+                  </a>
+                {% endif %}
               </div>
             </div>
           </div>

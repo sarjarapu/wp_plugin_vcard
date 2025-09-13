@@ -292,16 +292,43 @@ class _1_0_0_CreateBase implements Migration
                     'plusCode'=>'77CM+4R Dallas','plusCodeUrl'=>'https://maps.google.com/?q=77CM+4R+Dallas'
                 ],
                 'reviews'=>[
-                    ['author'=>'Jane Doe','rating'=>5,'date'=>'2025-04-01','text'=>'Fantastic staff and spotless space!'],
-                    ['author'=>'Mark T.','rating'=>4.5,'date'=>'2025-03-20','text'=>'Quick appointment and great results.'],
+                    [
+                        'author'=>'Jane Doe','rating'=>5,'date'=>'2025-04-01',
+                        'text'=>'The hygienist was incredibly gentle and explained every step before she started. The clinic is spotless and the equipment looks brand new. I left feeling well cared for and finally not dreading my next visit.'
+                    ],
+                    [
+                        'author'=>'Mark T.','rating'=>4.5,'date'=>'2025-03-20',
+                        'text'=>'Booked a last‑minute appointment for a chipped tooth and they fit me in the same day. The repair was quick and painless, and the billing was clear. Parking was easy which is a bonus in Dallas.'
+                    ],
+                    [
+                        'author'=>'Priya S.','rating'=>4.8,'date'=>'2025-02-28',
+                        'text'=>'I had whitening done here and the results were immediate. The dentist checked sensitivity throughout and gave me clear aftercare instructions. Front desk followed up the next day to see how I was doing.'
+                    ],
+                    [
+                        'author'=>'Daniel K.','rating'=>4.9,'date'=>'2025-01-15',
+                        'text'=>'Super organized practice with on‑time appointments. They walked me through options for a crown and never pushed extras. Waiting area is calm and the coffee machine is a nice touch.'
+                    ],
+                    [
+                        'author'=>'Alicia M.','rating'=>5,'date'=>'2024-12-05',
+                        'text'=>'Brought my teen for Invisalign and the consultation was thorough without being overwhelming. Clear timeline, fair pricing, and they answered all our questions. We feel confident continuing care here.'
+                    ],
                 ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
-                    ['src'=>'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop','alt'=>'Chair'],
+                    ['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
+                    ['src'=>'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
+                    ['src'=>'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
+                    ['src'=>'https://images.unsplash.com/photo-1489278353717-f64c6ee8a4d2?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
+                    ['src'=>'https://images.unsplash.com/photo-1564420228450-d9a5bc8d6565?q=80&w=800&auto=format&fit=crop','alt'=>'Chair'],['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
+                    
                 ],
                 'social'=>[
                     ['network'=>'facebook','url'=>'https://facebook.com/acmedental.dallas'],
                     ['network'=>'instagram','url'=>'https://instagram.com/acmedental.dallas'],
+                    ['network'=>'x','url'=>'https://x.com/acmedental.dallas'],
+                    ['network'=>'linkedin','url'=>'https://linkedin.com/acmedental.dallas'],
+                    ['network'=>'youtube','url'=>'https://youtube.com/acmedental.dallas'],
+                    ['network'=>'tiktok','url'=>'https://tiktok.com/acmedental.dallas'],
                 ],
             ]),
             'search_terms'   => 'acme dental dentist dallas tx services clinic',
