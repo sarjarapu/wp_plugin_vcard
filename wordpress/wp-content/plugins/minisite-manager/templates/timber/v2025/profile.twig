@@ -370,11 +370,11 @@
           <div role="group" aria-labelledby="qa-contact-label" class="rounded-2xl p-4">
             <h3 id="qa-contact-label" class="text-md font-bold text-[var(--on-surface)] mb-3">Contact Information</h3>
             <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-              <a href="tel:{{ profile.siteJson.contact.phone|default('') }}" aria-label="Call Us" title="Call Us"
+              <a href="tel:{{ profile.siteJson.contact.phone.link|default('') }}" aria-label="Call Us" title="Call Us"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-phone-volume text-emerald-600 text-2xl"></i>
               </a>
-              <a href="https://wa.me/{{ profile.siteJson.contact.phone|default('') }}?text=Hello%20{{ profile.name|url_encode }}" target="_blank" rel="noopener"
+              <a href="https://wa.me/{{ profile.siteJson.contact.phone.link|default('') }}?text=Hello%20{{ profile.name|url_encode }}" target="_blank" rel="noopener"
                 aria-label="WhatsApp" title="WhatsApp"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-brands fa-whatsapp text-green-600 text-2xl"></i>
@@ -391,7 +391,7 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-map-location-dot text-sky-600 text-2xl"></i>
               </a>
-              <a href="{{ profile.siteJson.contact.website|default('') }}" target="_blank" rel="noopener" aria-label="Website URL" title="Website URL"
+              <a href="{{ profile.siteJson.contact.website.link|default('') }}" target="_blank" rel="noopener" aria-label="Website URL" title="Website URL"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-globe text-violet-600 text-2xl"></i>
               </a>
@@ -414,9 +414,23 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-address-book text-indigo-600 text-2xl"></i>
               </button>
-              <a download
-                href="data:text/vcard;charset=utf-8,BEGIN%3AVCARD%0AVERSION%3A3.0%0AN%3A{{ profile.name|url_encode }}%3B%3B%3B%0ATEL%3BTYPE%3Dwork%2Cvoice%3A{{ profile.siteJson.contact.phone|default('')|url_encode }}%0AEMAIL%3A{{ profile.siteJson.contact.email|default('')|url_encode }}%0AEND%3AVCARD"
+              <a id="downloadVcard" download href="#"
                 aria-label="Download Contact" title="Download Contact"
+                data-name="{{ profile.name }}"
+                data-org="{{ profile.name }}"
+                data-title="{{ profile.siteJson.brand.industry|default('') }}"
+                data-phone="{{ profile.siteJson.contact.phone.link|default('') }}"
+                data-email="{{ profile.siteJson.contact.email|default('') }}"
+                data-url="{{ profile.siteJson.contact.website.link|default('') }}"
+                data-addr1="{{ profile.siteJson.contact.address_line1|default('') }}"
+                data-addr2="{{ profile.siteJson.contact.address_line2|default('') }}"
+                data-addr3="{{ profile.siteJson.contact.address_line3|default('') }}"
+                data-addr4="{{ profile.siteJson.contact.address_line4|default('') }}"
+                data-city="{{ profile.city }}"
+                data-region="{{ profile.region|default('') }}"
+                data-postal="{{ profile.postalCode|default('') }}"
+                data-country="{{ profile.countryCode }}"
+                data-logo="{{ profile.siteJson.brand.logo|default('') }}"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-download text-emerald-600 text-2xl"></i>
               </a>
@@ -948,6 +962,93 @@
     safeOn('shareBtn2', 'click', sharePage);
     safeOn('openMenuSticky', 'click', () => mobileMenu && mobileMenu.classList.remove('hidden'));
     safeOn('stickyMobileTheme', 'click', toggleTheme);
+
+    // Build and download vCard on demand (tries to include LOGO as URI; base64 embedding optional)
+    (function () {
+      const a = document.getElementById('downloadVcard');
+      if (!a) return;
+      a.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const d = a.dataset;
+        const name = (d.name || '').trim();
+        const org = (d.org || name).trim();
+        const title = (d.title || '').trim();
+        const phone = (d.phone || '').trim();
+        const email = (d.email || '').trim();
+        const url = (d.url || '').trim();
+        const addr1 = (d.addr1 || '').trim();
+        const addr2 = (d.addr2 || '').trim();
+        const addr3 = (d.addr3 || '').trim();
+        const addr4 = (d.addr4 || '').trim();
+        const city = (d.city || '').trim();
+        const region = (d.region || '').trim();
+        const postal = (d.postal || '').trim();
+        const country = (d.country || '').trim();
+        const logo = (d.logo || '').trim();
+
+        // Helper: fetch image as base64 (best-effort; falls back to URI on failure)
+        async function toBase64(url) {
+          try {
+            const res = await fetch(url, { mode: 'cors' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const ct = res.headers.get('Content-Type') || '';
+            const buf = await res.arrayBuffer();
+            let binary = '';
+            const bytes = new Uint8Array(buf);
+            const len = bytes.byteLength;
+            for (let i = 0; i < len; i++) binary += String.fromCharCode(bytes[i]);
+            return { b64: btoa(binary), media: ct || guessType(url) };
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function guessType(url) {
+          const u = (url || '').toLowerCase();
+          if (u.endsWith('.png')) return 'image/png';
+          if (u.endsWith('.jpg') || u.endsWith('.jpeg')) return 'image/jpeg';
+          if (u.endsWith('.gif')) return 'image/gif';
+          if (u.endsWith('.svg')) return 'image/svg+xml';
+          return 'image/png';
+        }
+
+        let logoLine = '';
+        if (logo) {
+          const enc = await toBase64(logo);
+          if (enc && enc.b64) {
+            logoLine = `PHOTO;MEDIATYPE=${enc.media};ENCODING=b:${enc.b64}\n`;
+          } else {
+            // Fallback to URI if base64 embedding failed
+            logoLine = `PHOTO;VALUE=URI:${logo}\n`;
+          }
+        }
+
+        const vcf = [
+          'BEGIN:VCARD',
+          'VERSION:3.0',
+          `N:${name};;;;`,
+          `FN:${name}`,
+          title ? `TITLE:${title}` : '',
+          `ORG:${org}`,
+          logoLine ? logoLine.trimEnd() : '',
+          phone ? `TEL;TYPE=work,voice:${phone}` : '',
+          email ? `EMAIL:${email}` : '',
+          url ? `URL:${url}` : '',
+          `ADR;TYPE=work:;;${addr1} ${addr2};${city};${region};${postal};${country}`,
+          'END:VCARD'
+        ].filter(Boolean).join('\n');
+
+        const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
+        const objUrl = URL.createObjectURL(blob);
+        const tmp = document.createElement('a');
+        tmp.href = objUrl;
+        tmp.download = (name || 'contact') + '.vcf';
+        document.body.appendChild(tmp);
+        tmp.click();
+        tmp.remove();
+        URL.revokeObjectURL(objUrl);
+      });
+    })();
 
     // Scrollspy: highlight nav links in top, sticky, and mobile menus
     (function () {
