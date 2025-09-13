@@ -223,9 +223,49 @@ class _1_0_0_CreateBase implements Migration
                 'about' => [ 'html' => '<p>Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.</p><p>From routine cleanings to implants and cosmetic treatments, our Dallas team creates a calm experience with lasting results.</p><p>We welcome families and offer flexible scheduling and transparent pricing.</p><br/><p>Understanding the dental insurance plans, the different levels of participation and payout options you chose could be a daunting task for many patients. Ask our expertly trained dental professionals at Cedar Park office how you could utilize the plan benefits to the maximum and avoid paying any unnecessary out of pocket charges.</p>' ],
                 'whyUs' => [ 'title' => 'Why Choose Us?', 'html' => '<p>The patient coordinators at Aviva Dental Care of Cedar Park ensure that you have plenty of time for each appointment. The additional time will allow us to know you and your dental priorities better. You will also have ample time to discuss any of your questions, concerns about oral health. We seldom run behind, so you should not have to wait for us after your scheduled appointment time.</p><br/><p>Whether you need a routine exam or experiencing a dental emergency, we will thoroughly answer all your questions or concerns in a relaxed, pressure-free environment. Finally, you will never feel rushed or forced to take a treatment plan that you don\'t need. So, you won\'t have to worry about surprise costs or how to fit your dental goals into your budget.</p>' ],
                 'services' => [
-                    ['title'=>'Preventative Care','description'=>'Cleanings, x-rays, exams','price'=>'$99','cta'=>'Enquire','url'=>'#request-info'],
-                    ['title'=>'Cosmetic Dentistry','description'=>'Whitening, veneers, bonding','price'=>'From $299','cta'=>'Book','url'=>'#request-info'],
-                    ['title'=>'Emergency Dentistry','description'=>'Same-day pain relief and repairs','price'=>'Call for pricing','cta'=>'Call Now','url'=>'tel:+12145550123'],
+                    'title' => 'Products & Services',
+                    'listing' => [
+                        [
+                            'title'=>'General Dentistry',
+                            'description'=>'A semi-annual visit to our dentist enables early detection of various oral complications and provide treatment early in the disease process.',
+                            'price'=>'$199',
+                            'icon' => 'fa-circle-info',
+                            'cta'=>'More info',
+                            'url'=>'#request-info'
+                        ],
+                        [
+                            'title'=>'Teeth Whitening',
+                            'description'=>'Whitening is a painless procedure brightens your teeth by several within an hour. The teeth whitening is effective on natural tooth enamel but not on restorations.',
+                            'price'=>'$499',
+                            'icon'=>'fa-circle-info',
+                            'cta'=>'Contact Us',
+                            'url'=>'#contact'
+                        ],
+                        [
+                            'title'=>'Dentures & Crowns',
+                            'description'=>'The dental crowns are durable and natural-looking tooth-shaped caps fitted over any remaining healthy tooth structure or a dental implant to restore the tooth\'s health.',
+                            'price'=>'Call for pricing',
+                            'icon'=>'fa-crown',
+                            'cta'=>'Call Us',
+                            'url'=>'#request-info'
+                        ],
+                        [
+                            'title'=>'Invisalign',
+                            'description'=>'Show off your smile as people won\'t even notice you\'re wearing transparent Invisalign aligners when compared to the traditional metal braces options. It\'s easy to remove aligners and eat whatever you like. There are no wires to trap food or get in the way when you floss.',
+                            'price'=>'$3,999',
+                            'icon' => 'fa-bolt',
+                            'cta'=>'Enquire',
+                            'url'=>'#request-info'
+                        ],
+                        [
+                            'title'=>'Dental Implants',
+                            'description'=>'A dental implant is a metal post that functions as a replacement tooth root. Once your dentist places the implant in the bone of the jaw, new bone forms around the implant to firmly hold it in place. Implants can also support dental restorations like crowns and bridges, just like regular teeth. They can even support full or partial dentures and give them more stability in the mouth.',
+                            'price'=>'Call for pricing',
+                            'icon' => 'fa-circle-info',
+                            'cta'=>'Enquire',
+                            'url'=>'#request-info'
+                        ],
+                    ]
                 ],
                 'contact' => [
                     'phone'=>'+1 (214) 555-0123','email'=>'care@acmedental.us','website'=>'https://acmedental.us',
