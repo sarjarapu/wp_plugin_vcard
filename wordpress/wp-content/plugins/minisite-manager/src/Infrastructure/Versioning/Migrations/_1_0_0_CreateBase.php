@@ -164,16 +164,18 @@ class _1_0_0_CreateBase implements Migration
             $brand  = $a['brand']  ?? [];
             $hero   = $a['hero']   ?? [];
             $about  = $a['about']  ?? [];
+            $whyUs  = $a['whyUs']  ?? [];
             $svcs   = $a['services'] ?? [];
             $contact= $a['contact']?? [];
             $reviews= $a['reviews']?? [];
             $gallery= $a['gallery']?? [];
             $social = $a['social'] ?? [];
             $data = [
-                'seo'   => $seo + [ 'title' => "$name — $city", 'description' => "Learn more about $name located in $city." ],
+                'seo'   => $seo, # + [ 'title' => "$name — $city", 'description' => $description, 'keywords' => $keywords ],
                 'brand' => $brand + [ 'name' => $name, 'logo' => null, 'palette' => 'blue', 'industry' => 'services' ],
                 'hero'  => $hero,
                 'about' => $about,
+                'whyUs' => $whyUs,
                 'services' => $svcs,
                 'contact'  => $contact,
                 'reviews'  => $reviews,
@@ -203,16 +205,23 @@ class _1_0_0_CreateBase implements Migration
             'site_version'   => 1,
             'site_json'      => $buildJson([
                 'name' => 'Acme Dental', 'city' => 'Dallas',
-                'brand' => ['palette' => 'blue', 'industry' => 'services'],
+                'brand' => ['palette' => 'blue', 'industry' => 'services', 'logo' => 'https://cdn-icons-png.flaticon.com/512/8718/8718971.png'],
+                'seo'   => [ 
+                    'title' => 'Acme Dental — Dallas', 
+                    'description' => 'Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.',
+                    'keywords' => 'acme dental, dental care, dallas, tx, services, clinic',
+                    'favicon' => 'https://cdn-icons-png.flaticon.com/512/8718/8718971.png',
+                ],
                 'hero' => [
-                    'heading' => 'Acme Dental Care — Dallas',
-                    'subheading' => 'Preventative, cosmetic and emergency dentistry with a gentle touch.',
+                    'heading' => 'Acme Dental Care',
+                    'subheading' => 'Your friendly Dallas,TX neighborhood dental clinic offering Preventative, cosmetic and emergency dentistry exceptional dental care in a very comfortable, relaxing stress-free environment at affordable prices.',
                     'badge' => 'Verified Business',
                     'image' => 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=1600&q=80&auto=format&fit=crop',
                     'rating' => ['value' => 4.8, 'count' => 238],
                     'ctas'   => [ ['text'=>'Request Info','url'=>'#request-info'], ['text'=>'Contact Us','url'=>'#contact'] ],
                 ],
-                'about' => [ 'html' => '<p>Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.</p><p>From routine cleanings to implants and cosmetic treatments, our Dallas team creates a calm experience with lasting results.</p><p>We welcome families and offer flexible scheduling and transparent pricing.</p>' ],
+                'about' => [ 'html' => '<p>Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.</p><p>From routine cleanings to implants and cosmetic treatments, our Dallas team creates a calm experience with lasting results.</p><p>We welcome families and offer flexible scheduling and transparent pricing.</p><br/><p>Understanding the dental insurance plans, the different levels of participation and payout options you chose could be a daunting task for many patients. Ask our expertly trained dental professionals at Cedar Park office how you could utilize the plan benefits to the maximum and avoid paying any unnecessary out of pocket charges.</p>' ],
+                'whyUs' => [ 'title' => 'Why Choose Us?', 'html' => '<p>The patient coordinators at Aviva Dental Care of Cedar Park ensure that you have plenty of time for each appointment. The additional time will allow us to know you and your dental priorities better. You will also have ample time to discuss any of your questions, concerns about oral health. We seldom run behind, so you should not have to wait for us after your scheduled appointment time.</p><br/><p>Whether you need a routine exam or experiencing a dental emergency, we will thoroughly answer all your questions or concerns in a relaxed, pressure-free environment. Finally, you will never feel rushed or forced to take a treatment plan that you don\'t need. So, you won\'t have to worry about surprise costs or how to fit your dental goals into your budget.</p>' ],
                 'services' => [
                     ['title'=>'Preventative Care','description'=>'Cleanings, x-rays, exams','price'=>'$99','cta'=>'Enquire','url'=>'#request-info'],
                     ['title'=>'Cosmetic Dentistry','description'=>'Whitening, veneers, bonding','price'=>'From $299','cta'=>'Book','url'=>'#request-info'],

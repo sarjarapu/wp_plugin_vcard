@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ profile.siteJson.seo.title|default(profile.title) }}</title>
   <meta name="description" content="{{ profile.siteJson.seo.description|default('') }}" />
+  <meta name="keywords" content="{{ profile.siteJson.seo.keywords|default('') }}" />
+  <link rel="icon" type="image/x-icon" href="{{ profile.siteJson.seo.favicon|default('favicon.png') }}">
   <!-- Tailwind CSS (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script> tailwind.config = { darkMode: 'class' } </script>
@@ -271,7 +273,7 @@
                   <i class="fa-solid fa-paper-plane"></i> {{ profile.siteJson.hero.ctas[0].text|default('Request Info') }}
                 </a>
                 <!-- Tonal (Primary Container) -->
-                <a href="#contact' }}"
+                <a href="#contact"
                   class="inline-flex items-center gap-2 px-6 py-3 rounded-lg
                           bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
                           ring-1 ring-[var(--outline-variant)]
@@ -434,6 +436,9 @@
         <div class="max-w-[600px] rounded-2xl shadow-xl
                     bg-[var(--section-a-bg)] ring-1 ring-[var(--outline-variant)]
                     text-[var(--on-surface)] p-8 py-16">
+          <h2 class="text-[var(--on-surface)] text-2xl font-bold mb-4 ">
+            {{ profile.siteJson.whyUs.title|default('Why Choose Us?') }}
+          </h2>
           <p>{{ profile.siteJson.whyUs.html|default('') }}</p>
         </div>
       </div>
