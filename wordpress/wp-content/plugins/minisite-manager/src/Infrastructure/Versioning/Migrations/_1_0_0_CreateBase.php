@@ -314,13 +314,13 @@ class _1_0_0_CreateBase implements Migration
                     ],
                 ],
                 'gallery'=>[
-                    ['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
-                    ['src'=>'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
-                    ['src'=>'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
-                    ['src'=>'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
-                    ['src'=>'https://images.unsplash.com/photo-1489278353717-f64c6ee8a4d2?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
-                    ['src'=>'https://images.unsplash.com/photo-1564420228450-d9a5bc8d6565?q=80&w=800&auto=format&fit=crop','alt'=>'Chair'],
-                    ['src'=>'https://images.unsplash.com/photo-1660737217837-95f00b9eae53?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
+                    ['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Dental checkup visit'],
+                    ['src'=>'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop','alt'=>'Cleaning and tar-tar removal'],
+                    ['src'=>'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=800&auto=format&fit=crop','alt'=>'Clear aligners'],
+                    ['src'=>'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop','alt'=>'Dental hygiene'],
+                    ['src'=>'https://images.unsplash.com/photo-1489278353717-f64c6ee8a4d2?q=80&w=800&auto=format&fit=crop','alt'=>'Teeth whitening'],
+                    ['src'=>'https://images.unsplash.com/photo-1564420228450-d9a5bc8d6565?q=80&w=800&auto=format&fit=crop','alt'=>'Dental products'],
+                    ['src'=>'https://images.unsplash.com/photo-1660737217837-95f00b9eae53?q=80&w=800&auto=format&fit=crop','alt'=>'Porcelain veneers'],
                     
                 ],
                 'social'=>[
@@ -410,7 +410,13 @@ class _1_0_0_CreateBase implements Migration
                     'address'=>'12 Colaba Causeway, Mumbai 400001',
                     'address_line1'=>'12 Colaba Causeway','address_line2'=>'2nd Floor','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
-                        ['day'=>'Mon–Sat','open'=>'10:00','close'=>'19:00'],['day'=>'Sun']
+                        ['day'=>'Mon'],
+                        ['day'=>'Tue','open'=>'11:00','close'=>'19:00'],
+                        ['day'=>'Wed','open'=>'11:00','close'=>'19:00'],
+                        ['day'=>'Thu','open'=>'11:00','close'=>'19:00'],
+                        ['day'=>'Fri','open'=>'11:00','close'=>'19:00'],
+                        ['day'=>'Sat','open'=>'11:00','close'=>'19:00'],
+                        ['day'=>'Sun','open'=>'11:00','close'=>'19:00']
                     ],
                     'plusCode'=>'2RQP+6V Mumbai','plusCodeUrl'=>'https://maps.google.com/?q=2RQP+6V+Mumbai'
                 ],
@@ -423,13 +429,16 @@ class _1_0_0_CreateBase implements Migration
                 ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1534639077088-d702bcf685e7?q=80&w=800&auto=format&fit=crop','alt'=>'Fabric rolls'],
-                    ['src'=>'https://images.unsplash.com/photo-1632421377986-0b1f70773812?q=80&w=800&auto=format&fit=crop','alt'=>'Tailor at work'],
-                    ['src'=>'https://images.unsplash.com/photo-1534126511673-b6899657816a?q=80&w=800&auto=format&fit=crop','alt'=>'Tailor at work'],
-                    ['src'=>'https://images.unsplash.com/photo-1623605004748-3af12342204f?q=80&w=800&auto=format&fit=crop','alt'=>'Tailor at work'],
-                    ['src'=>'https://images.unsplash.com/photo-1506034844286-f98ed954e516?q=80&w=800&auto=format&fit=crop','alt'=>'Tailor at work']
+                    ['src'=>'https://images.unsplash.com/photo-1632421377986-0b1f70773812?q=80&w=800&auto=format&fit=crop','alt'=>'Linen collection'],
+                    ['src'=>'https://images.unsplash.com/photo-1534126511673-b6899657816a?q=80&w=800&auto=format&fit=crop','alt'=>'Tailoring'],
+                    ['src'=>'https://images.unsplash.com/photo-1623605004748-3af12342204f?q=80&w=800&auto=format&fit=crop','alt'=>'Embroidery'],
+                    ['src'=>'https://images.unsplash.com/photo-1506034844286-f98ed954e516?q=80&w=800&auto=format&fit=crop','alt'=>'Dyeing & Finishing']
                 ],
                 'social'=>[
-                    ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles']
+                    ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles'],
+                    ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles'],
+                    ['network'=>'x','url'=>'https://x.com/lotus.textiles'],
+                    ['network'=>'youtube','url'=>'https://youtube.com/lotus.textiles'],
                 ],
             ]),
             'search_terms'   => 'lotus textiles fabric mumbai india showroom boutique',
@@ -496,7 +505,7 @@ class _1_0_0_CreateBase implements Migration
                     'listing'=>[
                         ['title'=>'Lunch Bowls','image'=>'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=800&auto=format&fit=crop','description'=>'Seasonal veg + grains with herb dressings.','price'=>'£9.50','icon'=>'fa-bowl-food','cta'=>'Order','url'=>'#request-info'],
                         ['title'=>'Sourdough Sandwiches','image'=>'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop','description'=>'Slow-risen bread with fresh fillings.','price'=>'£7.80','icon'=>'fa-bread-slice','cta'=>'Order','url'=>'#request-info'],
-                        ['title'=>'Specialty Coffee','image'=>'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=800&auto=format&fit=crop','description'=>'Single-origin roasts with alternative milks.','price'=>'£3.20','icon'=>'fa-mug-hot','cta'=>'Order','url'=>'#request-info'],
+                        ['title'=>'Specialty Coffee','image'=>'https://plus.unsplash.com/premium_photo-1674327105074-46dd8319164b?q=80&w=800&auto=format&fit=crop','description'=>'Single-origin roasts with alternative milks.','price'=>'£3.20','icon'=>'fa-mug-hot','cta'=>'Order','url'=>'#request-info'],
                         ['title'=>'Breakfast Plates','image'=>'https://images.unsplash.com/photo-1498654200943-1088dd4438ae?q=80&w=800&auto=format&fit=crop','description'=>'Eggs, greens, and sourdough toast.','price'=>'£8.90','icon'=>'fa-egg','cta'=>'Order','url'=>'#request-info'],
                         ['title'=>'Bakes & Pastries','image'=>'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=800&auto=format&fit=crop','description'=>'Morning buns, cookies, and seasonal cakes.','price'=>'£2.50+','icon'=>'fa-cookie-bite','cta'=>'Order','url'=>'#request-info']
                     ]
@@ -509,7 +518,13 @@ class _1_0_0_CreateBase implements Migration
                     'address'=>'10 Fleet St, London EC4Y 1AA',
                     'address_line1'=>'10 Fleet Street','address_line2'=>'','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
-                        ['day'=>'Mon–Fri','open'=>'08:00','close'=>'18:00'],['day'=>'Sat','open'=>'09:00','close'=>'16:00'],['day'=>'Sun']
+                        ['day'=>'Mon','open'=>'06:00','close'=>'15:00'],
+                        ['day'=>'Tue','open'=>'06:00','close'=>'15:00'],
+                        ['day'=>'Wed','open'=>'06:00','close'=>'15:00'],
+                        ['day'=>'Thu','open'=>'06:00','close'=>'15:00'],
+                        ['day'=>'Fri','open'=>'06:00','close'=>'15:00'],
+                        ['day'=>'Sat','open'=>'06:00','close'=>'15:00'],
+                        ['day'=>'Sun','open'=>'06:00','close'=>'15:00'],
                     ],
                     'plusCode'=>'GV5C+3W London','plusCodeUrl'=>'https://maps.google.com/?q=GV5C+3W+London'
                 ],
@@ -521,11 +536,18 @@ class _1_0_0_CreateBase implements Migration
                     ['author'=>'Ben S.','rating'=>4.9,'date'=>'2024-11-10','text'=>'Love the seasonal menu changes and the sourdough loaves on Fridays. Consistently great quality.']
                 ],
                 'gallery'=>[
-                    ['src'=>'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&q=80&auto=format&fit=crop','alt'=>'Bowl'],
-                    ['src'=>'https://images.unsplash.com/photo-1498654200943-1088dd4438ae?w=1600&q=80&auto=format&fit=crop','alt'=>'Bread']
+                    ['src'=>'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&q=80&auto=format&fit=crop','alt'=>'Lunch bowl'],
+                    ['src'=>'https://images.unsplash.com/photo-1498654200943-1088dd4438ae?w=1600&q=80&auto=format&fit=crop','alt'=>'Healthy food'],
+                    ['src'=>'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop','alt'=>'Bread'],
+                    ['src'=>'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=800&auto=format&fit=crop','alt'=>'Bakes & Pastries'],
+                    ['src'=>'https://plus.unsplash.com/premium_photo-1674327105074-46dd8319164b?w=1600&q=80&auto=format&fit=crop','alt'=>'Coffee']
                 ],
                 'social'=>[
-                    ['network'=>'instagram','url'=>'https://instagram.com/greenbites.london']
+                    ['network'=>'instagram','url'=>'https://instagram.com/greenbites.london'],
+                    ['network'=>'facebook','url'=>'https://facebook.com/greenbites.london'],
+                    ['network'=>'instagram','url'=>'https://instagram.com/greenbites.london'],
+                    ['network'=>'youtube','url'=>'https://youtube.com/greenbites.london'],
+                    ['network'=>'tiktok','url'=>'https://tiktok.com/greenbites.london'],
                 ],
             ]),
             'search_terms'   => 'green bites lunch bowls london cafe vegan coffee',
@@ -589,11 +611,11 @@ class _1_0_0_CreateBase implements Migration
                 'services'=>[
                     'title'=>'Services',
                     'listing'=>[
-                        ['title'=>'Same‑Day Courier','image'=>'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=800&auto=format&fit=crop','description'=>'Intra-city urgent deliveries with live tracking.','price'=>'From A$29','icon'=>'fa-truck-fast','cta'=>'Get Quote','url'=>'#request-info'],
-                        ['title'=>'Scheduled Routes','image'=>'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?q=80&w=800&auto=format&fit=crop','description'=>'Daily and weekly pickups tailored to your timetable.','price'=>'Custom','icon'=>'fa-route','cta'=>'Contact','url'=>'#contact'],
-                        ['title'=>'Warehouse Transfer','image'=>'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?q=80&w=800&auto=format&fit=crop','description'=>'Pallet & bulk moves with pallet-jack ready vans.','price'=>'Custom','icon'=>'fa-dolly','cta'=>'Call','url'=>'tel:+61255501234'],
-                        ['title'=>'Medical Courier','image'=>'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=800&auto=format&fit=crop','description'=>'Specimens and documents with chain-of-custody.','price'=>'Custom','icon'=>'fa-briefcase-medical','cta'=>'Get Quote','url'=>'#request-info'],
-                        ['title'=>'After-hours Support','image'=>'https://images.unsplash.com/photo-1482192505345-5655af888cc4?q=80&w=800&auto=format&fit=crop','description'=>'Evening and weekend coverage on request.','price'=>'Custom','icon'=>'fa-clock','cta'=>'Contact','url'=>'#contact']
+                        ['title'=>'Same‑Day Courier','image'=>'https://plus.unsplash.com/premium_photo-1757583509874-59d774474cf3?q=80&w=800&auto=format&fit=crop','description'=>'Intra-city urgent deliveries with live tracking.','price'=>'From A$29','icon'=>'fa-truck-fast','cta'=>'Get Quote','url'=>'#request-info'],
+                        ['title'=>'Scheduled Routes','image'=>'https://plus.unsplash.com/premium_photo-1723651354432-7796fb4ecebc?q=80&w=800&auto=format&fit=crop','description'=>'Daily and weekly pickups tailored to your timetable.','price'=>'Custom','icon'=>'fa-route','cta'=>'Contact','url'=>'#contact'],
+                        ['title'=>'Warehouse Transfer','image'=>'https://plus.unsplash.com/premium_photo-1749423089108-9ab9871fb9e2?q=80&w=800&auto=format&fit=crop','description'=>'Pallet & bulk moves with pallet-jack ready vans.','price'=>'Custom','icon'=>'fa-dolly','cta'=>'Call','url'=>'tel:+61255501234'],
+                        ['title'=>'Medical Courier','image'=>'https://images.unsplash.com/photo-1659353888323-1f5c85ea3952?q=80&w=800&auto=format&fit=crop','description'=>'Specimens and documents with chain-of-custody.','price'=>'Custom','icon'=>'fa-briefcase-medical','cta'=>'Get Quote','url'=>'#request-info'],
+                        ['title'=>'After-hours Support','image'=>'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=800&auto=format&fit=crop','description'=>'Evening and weekend coverage on request.','price'=>'Custom','icon'=>'fa-clock','cta'=>'Contact','url'=>'#contact']
                     ]
                 ],
                 'contact'=>[
@@ -604,7 +626,14 @@ class _1_0_0_CreateBase implements Migration
                     'address'=>'200 George St, Sydney NSW 2000',
                     'address_line1'=>'200 George St','address_line2'=>'Level 20','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
-                        ['day'=>'Mon–Fri','open'=>'07:00','close'=>'19:00'],['day'=>'Sat','open'=>'08:00','close'=>'14:00'],['day'=>'Sun']
+                        ['day'=>'Mon','open'=>'07:00','close'=>'16:00'],
+                        ['day'=>'Tue','open'=>'07:00','close'=>'16:00'],
+                        ['day'=>'Wed','open'=>'07:00','close'=>'16:00'],
+                        ['day'=>'Thu','open'=>'07:00','close'=>'16:00'],
+                        ['day'=>'Fri','open'=>'07:00','close'=>'16:00'],
+                        ['day'=>'Sat','open'=>'09:00','close'=>'14:00'],
+                        ['day'=>'Sun'],
+
                     ],
                     'plusCode'=>'46R6+XM Sydney','plusCodeUrl'=>'https://maps.google.com/?q=46R6+XM+Sydney'
                 ],
@@ -616,11 +645,19 @@ class _1_0_0_CreateBase implements Migration
                     ['author'=>'Owen C.','rating'=>4.8,'date'=>'2024-11-03','text'=>'We use their scheduled routes daily. Reliable timings and proactive updates whenever traffic is heavy.']
                 ],
                 'gallery'=>[
-                    ['src'=>'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=1600&q=80&auto=format&fit=crop','alt'=>'Van'],
-                    ['src'=>'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?w=1600&q=80&auto=format&fit=crop','alt'=>'Warehouse']
+                    ['src'=>'https://plus.unsplash.com/premium_photo-1757583509874-59d774474cf3?q=80&w=800&auto=format&fit=crop','alt'=>'Same-day delivery'],
+                    ['src'=>'https://plus.unsplash.com/premium_photo-1723651354432-7796fb4ecebc?q=80&w=800&auto=format&fit=crop','alt'=>'Route '],
+                    ['src'=>'https://plus.unsplash.com/premium_photo-1749423089108-9ab9871fb9e2?q=80&w=800&auto=format&fit=crop','alt'=>'Warehouse pickup'],
+                    ['src'=>'https://images.unsplash.com/photo-1659353888323-1f5c85ea3952?q=80&w=800&auto=format&fit=crop','alt'=>'Medical Courier'],
+                    ['src'=>'https://plus.unsplash.com/premium_photo-1661963219843-f1a50a6cfcd3?q=80&w=800&auto=format&fit=crop','alt'=>'Semi-truck delivering goods'],
+                    ['src'=>'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=800&auto=format&fit=crop','alt'=>'24x7 Support']
                 ],
                 'social'=>[
-                    ['network'=>'facebook','url'=>'https://facebook.com/swifttransit.au']
+                    ['network'=>'facebook','url'=>'https://facebook.com/swifttransit.au'],
+                    ['network'=>'instagram','url'=>'https://instagram.com/swifttransit.au'],
+                    ['network'=>'youtube','url'=>'https://youtube.com/swifttransit.au'],
+                    ['network'=>'x','url'=>'https://x.com/swifttransit.au'],
+                    ['network'=>'linkedin','url'=>'https://linkedin.com/swifttransit.au'],
                 ],
             ]),
             'search_terms'   => 'swift transit courier sydney logistics same day delivery',
