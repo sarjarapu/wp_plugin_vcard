@@ -232,7 +232,7 @@
       <!-- Mobile Drawer -->
       <div id="mobileMenu" class="fixed inset-0 z-50 hidden">
         <div class="absolute inset-0 bg-black/40" id="closeMenu"></div>
-        <div class="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-[var(--surface-0)] shadow-xl p-6 flex flex-col gap-3 text-[var(--on-surface)]">
+        <div class="absolute right-0 top-0 h-full w-60 max-w-[55vw] bg-[var(--surface-0)] shadow-xl p-6 pl-12 flex flex-col gap-3 text-[var(--on-surface)]">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
               <img src="{{ profile.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}" alt="Company Logo" class="h-8 w-8 rounded-md ring-1 ring-[var(--outline-variant)]" />
@@ -248,19 +248,19 @@
           <a href="#contact" class="py-2">Contact</a>
           <a href="#reviews" class="py-2">Reviews</a>
           <a href="#gallery" class="py-2">Gallery</a>
-          <div class="pt-4 border-t border-[var(--outline-variant)] mt-auto">
-            <button id="themeToggleMobile" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-[var(--outline)] hover:bg-[var(--primary-container)]">
+          <div class="pt-4 border-t border-[var(--outline-variant)]">
+            <button id="themeToggleMobile" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] hover:bg-[var(--surface-1)]">
               <i class="fa-solid fa-moon dark:hidden"></i>
               <i class="fa-solid fa-sun hidden dark:inline"></i>
               <span>Toggle Theme</span>
             </button>
-            <div class="flex items-center gap-2 mt-3">
+            <!-- <div class="flex items-center gap-2 mt-3">
               <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
               <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="teal"  style="background:#0d9488" title="Teal"></button>
               <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="violet"style="background:#7c3aed" title="Violet"></button>
               <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
               <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
