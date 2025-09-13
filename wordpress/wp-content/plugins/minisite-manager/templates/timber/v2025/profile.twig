@@ -708,20 +708,26 @@
 
         {# Lightbox overlay #}
         <div id="galleryLightbox" class="fixed inset-0 z-50 hidden">
-          <div class="absolute inset-0 bg-black/70" data-glb-close></div>
+          <div class="absolute inset-0 bg-[var(--on-surface)]/60" data-glb-close></div>
           <div class="relative h-full w-full flex items-center justify-center p-4 md:p-6">
-            <div class="relative max-w-[92vw] md:max-w-[80vw] lg:max-w-[70vw]">
+            <div class="relative max-w-[92vw] md:max-w-[80vw] lg:max-w-[70vw] bg-[var(--surface-0)] rounded-xl ring-1 ring-[var(--outline-variant)] p-3 md:p-4">
               <button type="button" class="absolute -top-4 -right-4 p-2 rounded-full bg-[var(--surface-0)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]" aria-label="Close" data-glb-close>
-                <img alt="Close" class="h-6 w-6" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M6 6l12 12M6 18L18 6'/%3E%3C/svg%3E"/>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+                </svg>
               </button>
               <button type="button" class="absolute left-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[var(--surface-0)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]" aria-label="Previous" id="glb-prev">
-                <img alt="Prev" class="h-6 w-6" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M15 19l-7-7 7-7'/%3E%3C/svg%3E"/>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+                </svg>
               </button>
-              <img id="glb-image" src="" alt="" class="max-h-[75vh] max-w-[92vw] md:max-w-[80vw] lg:max-w-[70vw] rounded-xl shadow-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] object-contain" />
+              <img id="glb-image" src="" alt="" class="max-h-[70vh] max-w-[92vw] md:max-w-[80vw] lg:max-w-[70vw] rounded-lg shadow-2xl object-contain" />
               <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[var(--surface-0)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]" aria-label="Next" id="glb-next">
-                <img alt="Next" class="h-6 w-6" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' fill='none' stroke='currentColor' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M9 5l7 7-7 7'/%3E%3C/svg%3E"/>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
               </button>
-              <div class="mt-3 max-w-[92vw] text-center px-4 py-2 rounded bg-[var(--surface-0)]/90 text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] shadow" id="glb-caption"></div>
+              <div class="mt-3 max-w-[92vw] text-center px-2 md:px-4 py-1 md:py-2 text-[var(--on-surface)]" id="glb-caption"></div>
             </div>
           </div>
         </div>
