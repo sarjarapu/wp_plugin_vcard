@@ -239,7 +239,9 @@
           <a href="#gallery" class="py-2">Gallery</a>
           <div class="pt-4 border-t border-[var(--outline-variant)] mt-auto">
             <button id="themeToggleMobile" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-[var(--outline)] hover:bg-[var(--primary-container)]">
-              <i class="fa-solid fa-moon"></i><span>Toggle Theme</span>
+              <i class="fa-solid fa-moon dark:hidden"></i>
+              <i class="fa-solid fa-sun hidden dark:inline"></i>
+              <span>Toggle Theme</span>
             </button>
             <div class="flex items-center gap-2 mt-3">
               <button class="palette h-8 w-8 rounded-full ring-2 ring-white/50 shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
@@ -321,7 +323,8 @@
                     text-[var(--on-primary)]
                     hover:bg-[var(--primary)]/20"
               aria-label="Toggle theme">
-              <i class="fa-solid fa-moon"></i>
+              <i class="fa-solid fa-moon dark:hidden"></i>
+              <i class="fa-solid fa-sun hidden dark:inline"></i>
             </button>
           </div>
         </div>
