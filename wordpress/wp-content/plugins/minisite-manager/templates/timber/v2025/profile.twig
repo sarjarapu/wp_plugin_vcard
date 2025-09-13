@@ -212,6 +212,14 @@
               <a href="#contact"  class="px-4 py-2 rounded-lg hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Contact</a>
               <a href="#reviews"  class="px-4 py-2 rounded-lg hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Reviews</a>
               <a href="#gallery"  class="px-4 py-2 rounded-lg hover:bg-[var(--primary)]/15 text-[var(--on-primary)]">Gallery</a>
+
+              <!-- Theme toggle (Top menu) -->
+              <button id="topTheme"
+                class="ml-2 p-2 rounded text-[var(--on-primary)] hover:bg-[var(--primary)]/20"
+                aria-label="Toggle theme">
+                <i class="fa-solid fa-moon dark:hidden"></i>
+                <i class="fa-solid fa-sun hidden dark:inline"></i>
+              </button>
             </div>
 
             <!-- Mobile Menu Button -->
@@ -226,7 +234,10 @@
         <div class="absolute inset-0 bg-black/40" id="closeMenu"></div>
         <div class="absolute right-0 top-0 h-full w-80 max-w-[85vw] bg-[var(--surface-0)] shadow-xl p-6 flex flex-col gap-3 text-[var(--on-surface)]">
           <div class="flex items-center justify-between">
-            <div class="font-bold text-lg">Menu</div>
+            <div class="flex items-center gap-2">
+              <img src="{{ profile.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}" alt="Company Logo" class="h-8 w-8 rounded-md ring-1 ring-[var(--outline-variant)]" />
+              <div class="font-bold text-lg">Menu</div>
+            </div>
             <button id="closeMenuBtn" class="p-2 rounded-lg hover:bg-[var(--surface-1)]" aria-label="Close menu">
               <i class="fa-solid fa-xmark text-xl"></i>
             </button>
@@ -838,6 +849,7 @@
     // Theme toggles
     const toggleTheme = () => setDark(!root.classList.contains('dark'));
     safeOn('themeToggle', 'click', toggleTheme);
+    safeOn('topTheme', 'click', toggleTheme);
     safeOn('themeToggleMobile', 'click', toggleTheme);
     safeOn('stickyTheme', 'click', toggleTheme);
 
