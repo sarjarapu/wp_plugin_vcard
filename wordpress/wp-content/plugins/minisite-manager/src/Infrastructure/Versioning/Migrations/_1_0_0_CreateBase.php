@@ -315,11 +315,12 @@ class _1_0_0_CreateBase implements Migration
                 ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
-                    ['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
+                    ['src'=>'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
                     ['src'=>'https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
                     ['src'=>'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
                     ['src'=>'https://images.unsplash.com/photo-1489278353717-f64c6ee8a4d2?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
-                    ['src'=>'https://images.unsplash.com/photo-1564420228450-d9a5bc8d6565?q=80&w=800&auto=format&fit=crop','alt'=>'Chair'],['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
+                    ['src'=>'https://images.unsplash.com/photo-1564420228450-d9a5bc8d6565?q=80&w=800&auto=format&fit=crop','alt'=>'Chair'],
+                    ['src'=>'https://images.unsplash.com/photo-1660737217837-95f00b9eae53?q=80&w=800&auto=format&fit=crop','alt'=>'Reception'],
                     
                 ],
                 'social'=>[
