@@ -273,12 +273,21 @@ class _1_0_0_CreateBase implements Migration
                     ]
                 ],
                 'contact' => [
-                    'phone'=>'+1 (214) 555-0123','email'=>'care@acmedental.us','website'=>'https://acmedental.us',
-                    'address'=>'123 Main St, Dallas, TX 75201','address_line1'=>'123 Main St','address_line2'=>'Suite 200',
+                    'phone'=>['text'=>'+1 (214) 555-0123', 'link'=>'+12145550123'],
+                    'whatsapp'=>['text'=>'+1 (214) 555-0123', 'link'=>'12145550123'],
+                    'email'=>'care@acmedental.us',
+                    'website'=>['text'=>'acmedental.us', 'link'=>'https://acmedental.us'],
+                    'address'=>'123 Main St, Dallas, TX 75201',
+                    'address_line1'=>'123 Main St',
+                    'address_line2'=>'Suite 200',
+                    'address_line3'=>'','address_line4'=>'',
                     'hours'=>[
-                        ['day'=>'Mon','open'=>'08:00','close'=>'17:00'],['day'=>'Tue','open'=>'08:00','close'=>'17:00'],
-                        ['day'=>'Wed','open'=>'08:00','close'=>'17:00'],['day'=>'Thu','open'=>'08:00','close'=>'17:00'],
-                        ['day'=>'Fri','open'=>'08:00','close'=>'15:00'],['day'=>'Sat'],['day'=>'Sun']
+                        ['day'=>'Mon','open'=>'08:00','close'=>'17:00'],
+                        ['day'=>'Tue','open'=>'08:00','close'=>'17:00'],
+                        ['day'=>'Wed','open'=>'08:00','close'=>'17:00'],
+                        ['day'=>'Thu','open'=>'08:00','close'=>'17:00'],
+                        ['day'=>'Fri','open'=>'08:00','close'=>'15:00'],
+                        ['day'=>'Sat'],['day'=>'Sun']
                     ],
                     'plusCode'=>'77CM+4R Dallas','plusCodeUrl'=>'https://maps.google.com/?q=77CM+4R+Dallas'
                 ],

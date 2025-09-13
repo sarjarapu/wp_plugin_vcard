@@ -491,23 +491,19 @@
           <!-- Column A -->
           <div class="space-y-6">
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
-              <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Get in touch</h3>
+              <h3 class="font-semibold text-lg mb-7 text-[var(--on-surface)]">Get in touch</h3>
               <ul class="space-y-3 text-[var(--on-surface)]">
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-phone text-emerald-500 text-xl"></i>
-                  <span>Call Us: <a href="tel:{{ profile.siteJson.contact.phone|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.phone|default('') }}</a></span>
+                  <span>Call Us: <a href="tel:{{ profile.siteJson.contact.phone.link|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.phone.text|default('') }}</a></span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="fa-brands fa-whatsapp text-green-500 text-xl"></i>
-                  <span>WhatsApp: <a href="https://wa.me/{{ profile.siteJson.contact.phone|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.phone|default('') }}</a></span>
+                  <span>WhatsApp: <a href="https://wa.me/{{ profile.siteJson.contact.whatsapp.link|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.whatsapp.text|default('') }}</a></span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-envelope text-rose-500 text-xl"></i>
                   <span>Email: <a href="mailto:{{ profile.siteJson.contact.email|default('') }}" class="text-primary font-medium">{{ profile.siteJson.contact.email|default('') }}</a></span>
-                </li>
-                <li class="flex items-center gap-3">
-                  <i class="fa-solid fa-share-nodes text-amber-500 text-xl"></i>
-                  <span>Share: <button id="shareBtn2" class="text-primary font-medium underline">Share this page</button></span>
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-location-dot text-sky-500 text-xl"></i>
@@ -515,7 +511,11 @@
                 </li>
                 <li class="flex items-center gap-3">
                   <i class="fa-solid fa-globe text-violet-500 text-xl"></i>
-                  <span>Website URL: <a href="{{ profile.siteJson.contact.website|default('') }}" class="text-primary font-medium" target="_blank" rel="noopener">{{ profile.siteJson.contact.website|default('') }}</a></span>
+                  <span>Website URL: <a href="{{ profile.siteJson.contact.website.link|default('') }}" class="text-primary font-medium" target="_blank" rel="noopener">{{ profile.siteJson.contact.website.text|default('') }}</a></span>
+                </li>
+                <li class="flex items-center gap-3">
+                  <i class="fa-solid fa-share-nodes text-amber-500 text-xl"></i>
+                  <span>Share: <button id="shareBtn2" class="text-primary font-medium underline">Share this page</button></span>
                 </li>
                 <li class="flex items-center gap-3 pt-3">
                   <a href="#request-info" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
@@ -532,13 +532,19 @@
                 <div>{{ profile.name }}</div>
                 <div>{{ profile.siteJson.contact.address_line1|default(profile.siteJson.contact.address|default('')) }}</div>
                 <div>{{ profile.siteJson.contact.address_line2|default('') }}</div>
+                {% if profile.siteJson.contact.address_line3|trim is not empty %}
+                <div>{{ profile.siteJson.contact.address_line3|default('') }}</div>
+                {% endif %}
+                {% if profile.siteJson.contact.address_line4|trim is not empty %}
+                <div>{{ profile.siteJson.contact.address_line4|default('') }}</div>
+                {% endif %}
                 <div>
                   {{ profile.city }}{% if profile.region %}, {{ profile.region }}{% endif %}, {{ profile.countryCode }}{% if profile.postalCode %} {{ profile.postalCode }}{% endif %}
                 </div>
                 <div>
                   Google Plus Code:
-                  <a class="text-primary font-medium" href="{{ profile.siteJson.contact.plusCodeUrl|default('https://www.google.com/maps/place/F5CX%2B3J') }}" target="_blank">
-                    {{ profile.siteJson.contact.plusCode|default('77CM+4R Austin') }}
+                  <a class="text-primary font-medium" href="{{ profile.siteJson.contact.plusCodeUrl|default('https://www.google.com/maps/') }}" target="_blank">
+                    {{ profile.siteJson.contact.plusCode|default('') }}
                   </a>
                 </div>
               </address>
