@@ -445,68 +445,34 @@
         <h2 class="text-2xl md:text-3xl font-bold mb-6 text-[var(--on-surface)]">Products & Services</h2>
 
         <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-          <!-- Card 1 -->
-          <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none">
-            <div class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-              <img src="https://images.unsplash.com/photo-1654373535457-383a0a4d00f9?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
-            </div>
-            <div class="p-5">
-              <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ profile.siteJson.services[0].title|default('') }}</h3>
-              <p class="mt-2 text-[var(--on-surface-variant)]">{{ profile.siteJson.services[0].description|default('') }}</p>
-              <div class="mt-4 flex items-center justify-between">
-                <span class="font-semibold text-[var(--on-surface)]">{{ profile.siteJson.services[0].price|default('') }}</span>
-                <a href="#request-info"
-                  class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
-                          bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
-                          ring-1 ring-[var(--outline-variant)]
-                          hover:brightness-95 transition">
-                  <i class="fa-solid fa-cart-shopping"></i> {{ profile.siteJson.services[0].cta|default('Enquire') }}
-                </a>
-              </div>
-            </div>
-          </article>
-
-          <!-- Card 2 -->
-          <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none">
-            <div class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-              <img src="https://images.unsplash.com/photo-1593022356769-11f762e25ed9?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
-            </div>
-            <div class="p-5">
-              <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ profile.siteJson.services[1].title|default('') }}</h3>
-              <p class="mt-2 text-[var(--on-surface-variant)]">{{ profile.siteJson.services[1].description|default('') }}</p>
-              <div class="mt-4 flex items-center justify-between">
-                <span class="font-semibold text-[var(--on-surface)]">{{ profile.siteJson.services[1].price|default('') }}</span>
-                <a href="#request-info"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
-                        bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
-                        ring-1 ring-[var(--outline-variant)]
-                        hover:brightness-95 transition">
-                <i class="fa-solid fa-calendar-check"></i> {{ profile.siteJson.services[1].cta|default('') }}
-              </a>
-              </div>
-            </div>
-          </article>
-
-          <!-- Card 3 -->
-          <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none">
-            <div class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-              <img src="https://images.unsplash.com/photo-1602932213623-cc17e9541bb4?q=80&w=1200&auto=format&fit=crop" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">  
-            </div>
-            <div class="p-5">
-              <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ profile.siteJson.services[2].title|default('') }}</h3>
-              <p class="mt-2 text-[var(--on-surface-variant)]">{{ profile.siteJson.services[2].description|default('') }}</p>
-              <div class="mt-4 flex items-center justify-between">
-                <span class="font-semibold text-[var(--on-surface)]">{{ profile.siteJson.services[2].price|default('') }}</span>
-                <a href="{{ profile.siteJson.services[2].url|default('') }}"
-                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
-                        bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
-                        ring-1 ring-[var(--outline-variant)]
-                        hover:brightness-95 transition">
-                <i class="fa-solid fa-phone"></i> {{ profile.siteJson.services[2].cta|default('Call Now') }}
-              </a>
-              </div>
-            </div>
-          </article>
+          {% set services = profile.siteJson.services|default([]) %}
+          {% if services %}
+            {% for svc in services %}
+              <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none">
+                <div class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+                  <img src="{{ svc.image|default('https://images.unsplash.com/photo-1654373535457-383a0a4d00f9?q=80&w=1200&auto=format&fit=crop') }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="">
+                </div>
+                <div class="p-5">
+                  <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ svc.title }}</h3>
+                  {% if svc.description %}
+                    <p class="mt-2 text-[var(--on-surface-variant)]">{{ svc.description }}</p>
+                  {% endif %}
+                  <div class="mt-4 flex items-center justify-between">
+                    <span class="font-semibold text-[var(--on-surface)]">{{ svc.price }}</span>
+                    {% if svc.url or svc.cta %}
+                      <a href="{{ svc.url|default('#request-info') }}"
+                        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+                                bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
+                                ring-1 ring-[var(--outline-variant)]
+                                hover:brightness-95 transition">
+                        <i class="fa-solid fa-cart-shopping"></i> {{ svc.cta|default('Enquire') }}
+                      </a>
+                    {% endif %}
+                  </div>
+                </div>
+              </article>
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
     </section>
@@ -654,32 +620,16 @@
         </div>
 
         <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-          <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] ">
-            <div class="flex items-center justify-between text-[var(--on-surface)]">
-              <div class="font-semibold">{{ profile.siteJson.reviews[0].author|default('') }}</div>
-              <div class="text-amber-400"><i class="fa-solid fa-star"></i> {{ profile.siteJson.reviews[0].rating|default('') }}</div>
-            </div>
-            <p class="mt-3 text-[var(--on-surface-variant)]">{{ profile.siteJson.reviews[0].text|default('') }}</p>
-            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: {{ profile.siteJson.reviews[0].date|default('') }}</div>
-          </article>
-
-          <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] ">
-            <div class="flex items-center justify-between text-[var(--on-surface)]">
-              <div class="font-semibold">{{ profile.siteJson.reviews[1].author|default('') }}</div>
-              <div class="text-amber-400"><i class="fa-solid fa-star"></i> {{ profile.siteJson.reviews[1].rating|default('') }}</div>
-            </div>
-            <p class="mt-3 text-[var(--on-surface-variant)]">{{ profile.siteJson.reviews[1].text|default('') }}</p>
-            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: {{ profile.siteJson.reviews[1].date|default('') }}</div>
-          </article>
-
-          <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] ">
-            <div class="flex items-center justify-between text-[var(--on-surface)]">
-              <div class="font-semibold">{{ profile.siteJson.reviews[2].author|default('') }}</div>
-              <div class="text-amber-400"><i class="fa-solid fa-star"></i> {{ profile.siteJson.reviews[2].rating|default('') }}</div>
-            </div>
-            <p class="mt-3 text-[var(--on-surface-variant)]">{{ profile.siteJson.reviews[2].text|default('') }}</p>
-            <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: {{ profile.siteJson.reviews[2].date|default('') }}</div>
-          </article>
+          {% for r in profile.siteJson.reviews|default([]) %}
+            <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] ">
+              <div class="flex items-center justify-between text-[var(--on-surface)]">
+                <div class="font-semibold">{{ r.author }}</div>
+                <div class="text-amber-400"><i class="fa-solid fa-star"></i> {{ r.rating }}</div>
+              </div>
+              <p class="mt-3 text-[var(--on-surface-variant)]">{{ r.text }}</p>
+              <div class="mt-4 text-sm text-[var(--on-surface-variant)]/90">Visited: {{ r.date }}</div>
+            </article>
+          {% endfor %}
         </div>
       </div>
     </section>
@@ -693,24 +643,11 @@
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-          <a href="{{ (profile.siteJson.gallery[0].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="{{ (profile.siteJson.gallery[0].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[0].alt|default('') }}">
-          </a>
-          <a href="{{ (profile.siteJson.gallery[1].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="{{ (profile.siteJson.gallery[1].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[1].alt|default('') }}">
-          </a>
-          <a href="{{ (profile.siteJson.gallery[2].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="{{ (profile.siteJson.gallery[2].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[2].alt|default('') }}">
-          </a>
-          <a href="{{ (profile.siteJson.gallery[3].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="{{ (profile.siteJson.gallery[3].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[3].alt|default('') }}">
-          </a>
-          <a href="{{ (profile.siteJson.gallery[4].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="{{ (profile.siteJson.gallery[4].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[4].alt|default('') }}">
-          </a>
-          <a href="{{ (profile.siteJson.gallery[5].src|default('')) }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
-            <img src="{{ (profile.siteJson.gallery[5].src|default('')) }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ profile.siteJson.gallery[5].alt|default('') }}">
-          </a>
+          {% for img in profile.siteJson.gallery|default([]) %}
+            <a href="{{ img.src }}" target="_blank" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
+              <img src="{{ img.src }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ img.alt|default('') }}">
+            </a>
+          {% endfor %}
         </div>
       </div>
     </section>
