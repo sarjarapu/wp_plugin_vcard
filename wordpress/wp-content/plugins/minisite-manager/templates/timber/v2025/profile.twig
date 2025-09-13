@@ -957,7 +957,12 @@
       function linksFor(id) {
         const sel = `a[href="#${id}"]`;
         const acc = [];
-        containers.forEach(c => { if (c) c.querySelectorAll(sel).forEach(el => acc.push(el)); });
+        containers.forEach(c => {
+          if (!c) return;
+          c.querySelectorAll(sel).forEach(el => {
+            if (!el.querySelector('img')) acc.push(el);
+          });
+        });
         return acc;
       }
 
@@ -966,18 +971,15 @@
 
       function clearAll() {
         linkMap.forEach(links => links.forEach(a => {
-          a.classList.remove('bg-[var(--primary)]/25');
-          a.classList.remove('bg-[var(--primary)]/15');
+          // Remove any active styles (use the same classes for all menus for consistency)
           a.classList.remove('bg-[var(--secondary-container)]','text-[var(--on-secondary-container)]','rounded');
         }));
       }
       function activate(id) {
         clearAll();
         const links = linkMap.get(id) || [];
-        links.forEach(a => {
-          if (isMobile(a)) a.classList.add('bg-[var(--secondary-container)]','text-[var(--on-secondary-container)]','rounded');
-          else a.classList.add('bg-[var(--primary)]/25');
-        });
+        // Apply the same highlight style used in the sidebar to all menus
+        links.forEach(a => a.classList.add('bg-[var(--secondary-container)]','text-[var(--on-secondary-container)]','rounded'));
       }
 
       const obsTargets = SECTION_IDS.map(id => document.getElementById(id)).filter(Boolean);
@@ -994,6 +996,9 @@
 
       // Click to activate immediately
       linkMap.forEach((links, id) => links.forEach(a => a.addEventListener('click', () => activate(id))));
+
+      // Initial state on load
+      activate('top');
     })();
 
     // Gallery lightbox
