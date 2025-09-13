@@ -888,7 +888,15 @@
     }
     const onScroll = () => {
       const y = window.scrollY || document.documentElement.scrollTop || 0;
-      if (sticky) y > STICKY_THRESHOLD ? sticky.classList.remove('hidden') : sticky.classList.add('hidden');
+      const isSmall = window.matchMedia('(max-width: 767.98px)').matches;
+      if (sticky) {
+        if (isSmall) {
+          // Never show floating/sticky menu on small screens (where burger is used)
+          sticky.classList.add('hidden');
+        } else {
+          y > STICKY_THRESHOLD ? sticky.classList.remove('hidden') : sticky.classList.add('hidden');
+        }
+      }
       if (backToTop) y > TOP_THRESHOLD ? show(backToTop) : hide(backToTop);
     };
     document.addEventListener('scroll', onScroll, { passive: true });
