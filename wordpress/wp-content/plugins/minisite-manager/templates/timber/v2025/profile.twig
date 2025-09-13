@@ -973,13 +973,23 @@
         linkMap.forEach(links => links.forEach(a => {
           // Remove any active styles (use the same classes for all menus for consistency)
           a.classList.remove('bg-[var(--secondary-container)]','text-[var(--on-secondary-container)]','rounded');
+          // Desktop/sticky active styles
+          a.classList.remove('bg-black/20');
+          a.classList.remove('dark:bg-white/20');
         }));
       }
       function activate(id) {
         clearAll();
         const links = linkMap.get(id) || [];
-        // Apply the same highlight style used in the sidebar to all menus
-        links.forEach(a => a.classList.add('bg-[var(--secondary-container)]','text-[var(--on-secondary-container)]','rounded'));
+        links.forEach(a => {
+          if (isMobile(a)) {
+            // Mobile sidebar style (secondary container)
+            a.classList.add('bg-[var(--secondary-container)]','text-[var(--on-secondary-container)]','rounded');
+          } else {
+            // Desktop/sticky: darker shade overlay on the primary bar
+            a.classList.add('bg-black/20','dark:bg-white/20','rounded');
+          }
+        });
       }
 
       const obsTargets = SECTION_IDS.map(id => document.getElementById(id)).filter(Boolean);
