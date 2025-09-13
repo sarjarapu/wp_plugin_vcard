@@ -140,82 +140,45 @@ class _1_0_0_CreateBase implements Migration
         $revisionsT = $wpdb->prefix . 'minisite_profile_revisions';
         $reviewsT   = $wpdb->prefix . 'minisite_reviews';
 
-        // Avoid duplicate seeding
+        // Avoid duplicate seeding (check any of our seeded slugs)
         $exists = (int) $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$profilesT} WHERE (business_slug=%s AND location_slug=%s) OR (business_slug=%s AND location_slug=%s)",
-            'acme-dental','dallas','lotus-textiles','mumbai'
+            "SELECT COUNT(*) FROM {$profilesT}
+             WHERE (business_slug=%s AND location_slug=%s)
+                OR (business_slug=%s AND location_slug=%s)
+                OR (business_slug=%s AND location_slug=%s)
+                OR (business_slug=%s AND location_slug=%s)",
+            'acme-dental','dallas',
+            'lotus-textiles','mumbai',
+            'green-bites','london',
+            'swift-transit','sydney'
         ));
         if ($exists > 0) {
             return;
         }
 
-        // Helper to build a richer site_json blob used by front-end templates
-        $makeJson = function(string $name, string $city, string $countryCode, string $palette, string $industry): string {
+        // Helper to build site_json with realistic per-business data
+        $buildJson = function(array $a): string {
+            $name   = $a['name'];
+            $city   = $a['city'];
+            $seo    = $a['seo']    ?? [];
+            $brand  = $a['brand']  ?? [];
+            $hero   = $a['hero']   ?? [];
+            $about  = $a['about']  ?? [];
+            $svcs   = $a['services'] ?? [];
+            $contact= $a['contact']?? [];
+            $reviews= $a['reviews']?? [];
+            $gallery= $a['gallery']?? [];
+            $social = $a['social'] ?? [];
             $data = [
-                'seo' => [
-                    'title' => "{$name} — {$city}",
-                    'description' => "Learn more about {$name} located in {$city}.",
-                ],
-                'brand' => [
-                    'name' => $name,
-                    'logo' => null,
-                    'palette' => $palette,
-                    'industry' => $industry,
-                ],
-                'hero' => [
-                    'heading' => $name,
-                    'subheading' => 'Family-friendly services with a modern touch.',
-                    'badge' => 'Verified Business',
-                    'image' => 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=1600&q=80&auto=format&fit=crop',
-                    'rating' => ['value' => 4.8, 'count' => 238],
-                    'ctas' => [
-                        ['text' => 'Request Info', 'url' => '#request-info', 'style' => 'primary'],
-                        ['text' => 'Contact Us',  'url' => '#contact',       'style' => 'tonal'],
-                    ],
-                ],
-                'about' => [
-                    'html' => "<p>{$name} provides quality services in {$city}. Our team uses modern tools to deliver excellent outcomes.</p>",
-                ],
-                'services' => [
-                    [
-                        'id' => 'svc-1',
-                        'title' => 'Consultation',
-                        'description' => 'Initial consult and recommendations.',
-                        'icon' => 'fa-solid fa-comments',
-                        'features' => ['Assessment', 'Recommendations'],
-                        'price' => 'Call for pricing'
-                    ],
-                    [
-                        'id' => 'svc-2',
-                        'title' => 'Premium Service',
-                        'description' => 'Advanced package for comprehensive needs.',
-                        'icon' => 'fa-solid fa-star',
-                        'features' => ['Priority', 'Comprehensive'],
-                        'price' => '$199'
-                    ],
-                ],
-                'contact' => [
-                    'phone' => '+1 512 555 1234',
-                    'email' => 'hello@example.com',
-                    'website' => 'https://example.com',
-                    'address' => "123 Main St, {$city}, {$countryCode} 00000",
-                    'hours' => [
-                        ['day' => 'Mon–Fri', 'open' => '08:00', 'close' => '17:00'],
-                        ['day' => 'Sat',     'open' => '09:00', 'close' => '13:00'],
-                    ],
-                ],
-                'reviews' => [
-                    ['author' => 'Jane Doe', 'rating' => 5,   'date' => '2025-04-01', 'text' => 'Fantastic staff and spotless space!'],
-                    ['author' => 'Mark T.',  'rating' => 4.5, 'date' => '2025-03-20', 'text' => 'Quick appointment and great results.'],
-                ],
-                'gallery' => [
-                    ['src' => 'https://example.com/images/1.jpg', 'alt' => 'Reception area', 'caption' => 'Welcome desk'],
-                    ['src' => 'https://example.com/images/2.jpg', 'alt' => 'Main room',      'caption' => 'Modern equipment'],
-                ],
-                'social' => [
-                    ['network' => 'facebook',  'url' => 'https://facebook.com/example'],
-                    ['network' => 'instagram', 'url' => 'https://instagram.com/example'],
-                ],
+                'seo'   => $seo + [ 'title' => "$name — $city", 'description' => "Learn more about $name located in $city." ],
+                'brand' => $brand + [ 'name' => $name, 'logo' => null, 'palette' => 'blue', 'industry' => 'services' ],
+                'hero'  => $hero,
+                'about' => $about,
+                'services' => $svcs,
+                'contact'  => $contact,
+                'reviews'  => $reviews,
+                'gallery'  => $gallery,
+                'social'   => $social,
             ];
             return wp_json_encode($data);
         };
@@ -238,7 +201,46 @@ class _1_0_0_CreateBase implements Migration
             'default_locale' => 'en-US',
             'schema_version' => 1,
             'site_version'   => 1,
-            'site_json'      => $makeJson('Acme Dental', 'Dallas', 'US', 'blue', 'services'),
+            'site_json'      => $buildJson([
+                'name' => 'Acme Dental', 'city' => 'Dallas',
+                'brand' => ['palette' => 'blue', 'industry' => 'services'],
+                'hero' => [
+                    'heading' => 'Acme Dental Care — Dallas',
+                    'subheading' => 'Preventative, cosmetic and emergency dentistry with a gentle touch.',
+                    'badge' => 'Verified Business',
+                    'image' => 'https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=1600&q=80&auto=format&fit=crop',
+                    'rating' => ['value' => 4.8, 'count' => 238],
+                    'ctas'   => [ ['text'=>'Request Info','url'=>'#request-info'], ['text'=>'Contact Us','url'=>'#contact'] ],
+                ],
+                'about' => [ 'html' => '<p>Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.</p><p>From routine cleanings to implants and cosmetic treatments, our Dallas team creates a calm experience with lasting results.</p><p>We welcome families and offer flexible scheduling and transparent pricing.</p>' ],
+                'services' => [
+                    ['title'=>'Preventative Care','description'=>'Cleanings, x-rays, exams','price'=>'$99','cta'=>'Enquire','url'=>'#request-info'],
+                    ['title'=>'Cosmetic Dentistry','description'=>'Whitening, veneers, bonding','price'=>'From $299','cta'=>'Book','url'=>'#request-info'],
+                    ['title'=>'Emergency Dentistry','description'=>'Same-day pain relief and repairs','price'=>'Call for pricing','cta'=>'Call Now','url'=>'tel:+12145550123'],
+                ],
+                'contact' => [
+                    'phone'=>'+1 (214) 555-0123','email'=>'care@acmedental.us','website'=>'https://acmedental.us',
+                    'address'=>'123 Main St, Dallas, TX 75201','address_line1'=>'123 Main St','address_line2'=>'Suite 200',
+                    'hours'=>[
+                        ['day'=>'Mon','open'=>'08:00','close'=>'17:00'],['day'=>'Tue','open'=>'08:00','close'=>'17:00'],
+                        ['day'=>'Wed','open'=>'08:00','close'=>'17:00'],['day'=>'Thu','open'=>'08:00','close'=>'17:00'],
+                        ['day'=>'Fri','open'=>'08:00','close'=>'15:00'],['day'=>'Sat'],['day'=>'Sun']
+                    ],
+                    'plusCode'=>'77CM+4R Dallas','plusCodeUrl'=>'https://maps.google.com/?q=77CM+4R+Dallas'
+                ],
+                'reviews'=>[
+                    ['author'=>'Jane Doe','rating'=>5,'date'=>'2025-04-01','text'=>'Fantastic staff and spotless space!'],
+                    ['author'=>'Mark T.','rating'=>4.5,'date'=>'2025-03-20','text'=>'Quick appointment and great results.'],
+                ],
+                'gallery'=>[
+                    ['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Reception'],
+                    ['src'=>'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop','alt'=>'Chair'],
+                ],
+                'social'=>[
+                    ['network'=>'facebook','url'=>'https://facebook.com/acmedental.dallas'],
+                    ['network'=>'instagram','url'=>'https://instagram.com/acmedental.dallas'],
+                ],
+            ]),
             'search_terms'   => 'acme dental dentist dallas tx services clinic',
             'status'         => 'published',
             'created_by'     => get_current_user_id() ?: null,
@@ -277,7 +279,40 @@ class _1_0_0_CreateBase implements Migration
             'default_locale' => 'en-IN',
             'schema_version' => 1,
             'site_version'   => 1,
-            'site_json'      => $makeJson('Lotus Textiles', 'Mumbai', 'IN', 'rose', 'textile'),
+            'site_json'      => $buildJson([
+                'name'=>'Lotus Textiles','city'=>'Mumbai',
+                'brand'=>['palette'=>'rose','industry'=>'textile'],
+                'hero'=>[
+                    'heading'=>'Lotus Textiles — Mumbai','subheading'=>'Premium fabrics and bespoke tailoring since 1985.',
+                    'badge'=>'Trusted Supplier','image'=>'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?w=1600&q=80&auto=format&fit=crop',
+                    'rating'=>['value'=>4.7,'count'=>412],
+                    'ctas'=>[ ['text'=>'Browse Collection','url'=>'#products'], ['text'=>'Contact','url'=>'#contact'] ],
+                ],
+                'about'=>['html'=>'<p>At Lotus Textiles, we curate fine silks, linens, and cottons from across India.</p><p>Our in-house designers craft contemporary styles while preserving handloom traditions.</p><p>We supply boutiques and provide made-to-measure services.</p>'],
+                'services'=>[
+                    ['title'=>'Handloom Silks','description'=>'Banarasi, Kanchipuram','price'=>'From ₹3,999','cta'=>'Enquire','url'=>'#request-info'],
+                    ['title'=>'Linen Collections','description'=>'Breathable summer linens','price'=>'From ₹1,999','cta'=>'Enquire','url'=>'#request-info'],
+                    ['title'=>'Tailoring','description'=>'Custom stitching & fittings','price'=>'Quoted','cta'=>'Book','url'=>'tel:+912266601234'],
+                ],
+                'contact'=>[
+                    'phone'=>'+91 22 6660 1234','email'=>'hello@lotustextiles.in','website'=>'https://lotustextiles.in',
+                    'address'=>'12 Colaba Causeway, Mumbai 400001','address_line1'=>'12 Colaba Causeway','address_line2'=>'2nd Floor',
+                    'hours'=>[
+                        ['day'=>'Mon–Sat','open'=>'10:00','close'=>'19:00'],['day'=>'Sun']
+                    ],
+                    'plusCode'=>'2RQP+6V Mumbai','plusCodeUrl'=>'https://maps.google.com/?q=2RQP+6V+Mumbai'
+                ],
+                'reviews'=>[
+                    ['author'=>'Asha P.','rating'=>5,'date'=>'2025-02-10','text'=>'Beautiful fabrics and helpful staff.'],
+                    ['author'=>'Rohit K.','rating'=>4.6,'date'=>'2025-03-01','text'=>'Great pricing and quality.'],
+                ],
+                'gallery'=>[
+                    ['src'=>'https://images.unsplash.com/photo-1520975916090-3105956dac38?w=1600&q=80&auto=format&fit=crop','alt'=>'Fabric rolls'],
+                ],
+                'social'=>[
+                    ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles'],
+                ],
+            ]),
             'search_terms'   => 'lotus textiles fabric mumbai india showroom boutique',
             'status'         => 'published',
             'created_by'     => get_current_user_id() ?: null,
@@ -297,9 +332,149 @@ class _1_0_0_CreateBase implements Migration
             ));
         }
 
+        // Insert third profile: Green Bites (London, GB)
+        $green = [
+            'business_slug'  => 'green-bites',
+            'location_slug'  => 'london',
+            'title'          => 'Green Bites — London',
+            'name'           => 'Green Bites',
+            'city'           => 'London',
+            'region'         => 'London',
+            'country_code'   => 'GB',
+            'postal_code'    => 'EC1A 1AA',
+            'lat'            => 51.509865,
+            'lng'            => -0.118092,
+            'site_template'  => 'v2025',
+            'palette'        => 'amber',
+            'industry'       => 'restaurant',
+            'default_locale' => 'en-GB',
+            'schema_version' => 1,
+            'site_version'   => 1,
+            'site_json'      => $buildJson([
+                'name'=>'Green Bites','city'=>'London',
+                'brand'=>['palette'=>'amber','industry'=>'restaurant'],
+                'hero'=>[
+                    'heading'=>'Green Bites — Plant-forward Kitchen','subheading'=>'Seasonal bowls, sourdough, and specialty coffee.',
+                    'badge'=>'Local Favourite','image'=>'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80&auto=format&fit=crop',
+                    'rating'=>['value'=>4.6,'count'=>320],
+                    'ctas'=>[ ['text'=>'View Menu','url'=>'#products'], ['text'=>'Book Table','url'=>'#contact'] ],
+                ],
+                'about'=>['html'=>'<p>We cook with British seasonal produce and whole grains.</p><p>Our menu rotates weekly with vegetarian and vegan options.</p><p>Walk-ins welcome; bookings recommended for weekends.</p>'],
+                'services'=>[
+                    ['title'=>'Lunch Bowls','description'=>'Seasonal veg + grains','price'=>'£9.50','cta'=>'Order','url'=>'#request-info'],
+                    ['title'=>'Sourdough Sandwiches','description'=>'House-baked bread','price'=>'£7.80','cta'=>'Order','url'=>'#request-info'],
+                    ['title'=>'Specialty Coffee','description'=>'Single-origin roasts','price'=>'£3.20','cta'=>'Order','url'=>'#request-info'],
+                ],
+                'contact'=>[
+                    'phone'=>'+44 20 7946 0958','email'=>'hello@greenbites.co.uk','website'=>'https://greenbites.co.uk',
+                    'address'=>'10 Fleet St, London EC4Y 1AA','address_line1'=>'10 Fleet Street','address_line2'=>'',
+                    'hours'=>[
+                        ['day'=>'Mon–Fri','open'=>'08:00','close'=>'18:00'],['day'=>'Sat','open'=>'09:00','close'=>'16:00'],['day'=>'Sun']
+                    ],
+                    'plusCode'=>'GV5C+3W London','plusCodeUrl'=>'https://maps.google.com/?q=GV5C+3W+London'
+                ],
+                'reviews'=>[
+                    ['author'=>'Alex P.','rating'=>5,'date'=>'2025-02-12','text'=>'Best sourdough in the City!'],
+                    ['author'=>'Maria G.','rating'=>4.7,'date'=>'2025-03-18','text'=>'Delicious bowls and friendly staff.'],
+                ],
+                'gallery'=>[
+                    ['src'=>'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&q=80&auto=format&fit=crop','alt'=>'Bowl'],
+                ],
+                'social'=>[
+                    ['network'=>'instagram','url'=>'https://instagram.com/greenbites.london'],
+                ],
+            ]),
+            'search_terms'   => 'green bites lunch bowls london cafe vegan coffee',
+            'status'         => 'published',
+            'created_by'     => get_current_user_id() ?: null,
+            'updated_by'     => get_current_user_id() ?: null,
+        ];
+        $wpdb->insert($profilesT, $green, [
+            '%s','%s','%s','%s','%s','%s','%s','%s',
+            '%f','%f','%s','%s','%s','%s',
+            '%d','%d','%s','%s','%s','%s','%d','%d'
+        ]);
+        $greenId = (int) $wpdb->insert_id;
+        if ($greenId) {
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                $green['lng'], $green['lat'], $greenId
+            ));
+        }
+
+        // Insert fourth profile: Swift Transit (Sydney, AU)
+        $swift = [
+            'business_slug'  => 'swift-transit',
+            'location_slug'  => 'sydney',
+            'title'          => 'Swift Transit — Sydney',
+            'name'           => 'Swift Transit',
+            'city'           => 'Sydney',
+            'region'         => 'NSW',
+            'country_code'   => 'AU',
+            'postal_code'    => '2000',
+            'lat'            => -33.8688,
+            'lng'            => 151.2093,
+            'site_template'  => 'v2025',
+            'palette'        => 'teal',
+            'industry'       => 'transport',
+            'default_locale' => 'en-AU',
+            'schema_version' => 1,
+            'site_version'   => 1,
+            'site_json'      => $buildJson([
+                'name'=>'Swift Transit','city'=>'Sydney',
+                'brand'=>['palette'=>'teal','industry'=>'transport'],
+                'hero'=>[
+                    'heading'=>'Swift Transit — Australia','subheading'=>'Reliable courier and last‑mile logistics across NSW.',
+                    'badge'=>'On-Time Delivery','image'=>'https://images.unsplash.com/photo-1498084393753-b411b2d26b34?w=1600&q=80&auto=format&fit=crop',
+                    'rating'=>['value'=>4.9,'count'=>189],
+                    'ctas'=>[ ['text'=>'Get Quote','url'=>'#request-info'], ['text'=>'Call','url'=>'tel:+61255501234'] ],
+                ],
+                'about'=>['html'=>'<p>Swift Transit provides same‑day courier and scheduled deliveries for businesses across Sydney.</p><p>Our fleet includes vans, bikes, and EVs to fit every job size.</p><p>Real-time tracking and friendly support keep your operations moving.</p>'],
+                'services'=>[
+                    ['title'=>'Same‑Day Courier','description'=>'Intra-city urgent deliveries','price'=>'From A$29','cta'=>'Get Quote','url'=>'#request-info'],
+                    ['title'=>'Scheduled Routes','description'=>'Daily/weekly pickups','price'=>'Custom','cta'=>'Contact','url'=>'#contact'],
+                    ['title'=>'Warehouse Transfer','description'=>'Pallet & bulk moves','price'=>'Custom','cta'=>'Call','url'=>'tel:+61255501234'],
+                ],
+                'contact'=>[
+                    'phone'=>'+61 2 5550 1234','email'=>'ops@swifttransit.au','website'=>'https://swifttransit.au',
+                    'address'=>'200 George St, Sydney NSW 2000','address_line1'=>'200 George St','address_line2'=>'Level 20',
+                    'hours'=>[
+                        ['day'=>'Mon–Fri','open'=>'07:00','close'=>'19:00'],['day'=>'Sat','open'=>'08:00','close'=>'14:00'],['day'=>'Sun']
+                    ],
+                    'plusCode'=>'46R6+XM Sydney','plusCodeUrl'=>'https://maps.google.com/?q=46R6+XM+Sydney'
+                ],
+                'reviews'=>[
+                    ['author'=>'Zoe L.','rating'=>5,'date'=>'2025-01-22','text'=>'Super fast and careful with fragile items.'],
+                    ['author'=>'Nick R.','rating'=>4.8,'date'=>'2025-03-02','text'=>'Great communication and tracking.'],
+                ],
+                'gallery'=>[
+                    ['src'=>'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=1600&q=80&auto=format&fit=crop','alt'=>'Van'],
+                ],
+                'social'=>[
+                    ['network'=>'facebook','url'=>'https://facebook.com/swifttransit.au'],
+                ],
+            ]),
+            'search_terms'   => 'swift transit courier sydney logistics same day delivery',
+            'status'         => 'published',
+            'created_by'     => get_current_user_id() ?: null,
+            'updated_by'     => get_current_user_id() ?: null,
+        ];
+        $wpdb->insert($profilesT, $swift, [
+            '%s','%s','%s','%s','%s','%s','%s','%s',
+            '%f','%f','%s','%s','%s','%s',
+            '%d','%d','%s','%s','%s','%s','%d','%d'
+        ]);
+        $swiftId = (int) $wpdb->insert_id;
+        if ($swiftId) {
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                $swift['lng'], $swift['lat'], $swiftId
+            ));
+        }
+
         // ——— Revisions for each profile (rev 1 draft, rev 2 published snapshot) ———
         $nowUser = get_current_user_id() ?: null;
-        foreach ([ $acmeId => 'US', $lotusId => 'IN' ] as $pid => $cc) {
+        foreach ([ $acmeId => 'US', $lotusId => 'IN', $greenId => 'GB', $swiftId => 'AU' ] as $pid => $cc) {
             if (!$pid) { continue; }
 
             // rev 1: draft
@@ -347,6 +522,14 @@ class _1_0_0_CreateBase implements Migration
         if ($lotusId) {
             $insertReview($lotusId, 'Asha P.', 5.0, 'Beautiful fabric collection and helpful staff.', 'en-IN');
             $insertReview($lotusId, 'Rohit K.', 4.6, 'Great pricing and quality.', 'en-IN');
+        }
+        if ($greenId) {
+            $insertReview($greenId, 'Clara W.', 4.9, 'Delicious bowls, lovely staff.', 'en-GB');
+            $insertReview($greenId, 'Owen T.', 4.5, 'Great coffee and sourdough.', 'en-GB');
+        }
+        if ($swiftId) {
+            $insertReview($swiftId, 'Zoe L.', 5.0, 'Super fast and careful with fragile items.', 'en-AU');
+            $insertReview($swiftId, 'Nick R.', 4.8, 'Great communication and tracking.', 'en-AU');
         }
     }
 
