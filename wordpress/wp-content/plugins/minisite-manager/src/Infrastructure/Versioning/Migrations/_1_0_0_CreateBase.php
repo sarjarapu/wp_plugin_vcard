@@ -372,36 +372,60 @@ class _1_0_0_CreateBase implements Migration
             'site_version'   => 1,
             'site_json'      => $buildJson([
                 'name'=>'Lotus Textiles','city'=>'Mumbai',
-                'brand'=>['palette'=>'rose','industry'=>'textile'],
+                'brand'=>[
+                    'palette'=>'rose','industry'=>'textile',
+                    'logo'=>'https://cdn-icons-png.flaticon.com/512/1549/1549464.png'
+                ],
+                'seo'=>[
+                    'title'=>'Lotus Textiles — Mumbai',
+                    'description'=>'Fine silks, linens, and custom tailoring in Colaba. Contemporary designs rooted in Indian handloom traditions.',
+                    'keywords'=>'lotus textiles, fabrics, handloom, mumbai, tailoring'
+                ],
                 'hero'=>[
-                    'heading'=>'Lotus Textiles — Mumbai','subheading'=>'Premium fabrics and bespoke tailoring since 1985.',
-                    'badge'=>'Trusted Supplier','image'=>'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?w=1600&q=80&auto=format&fit=crop',
+                    'heading'=>'Lotus Textiles',
+                    'subheading'=>'Your Colaba, Mumbai fabric house offering premium silks, breathable linens, and bespoke tailoring with attentive fittings in a relaxed studio at fair, transparent prices.',
+                    'badge'=>'Trusted Supplier',
+                    'image'=>'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?w=1600&q=80&auto=format&fit=crop',
                     'rating'=>['value'=>4.7,'count'=>412],
                     'ctas'=>[ ['text'=>'Browse Collection','url'=>'#products'], ['text'=>'Contact','url'=>'#contact'] ],
                 ],
-                'about'=>['html'=>'<p>At Lotus Textiles, we curate fine silks, linens, and cottons from across India.</p><p>Our in-house designers craft contemporary styles while preserving handloom traditions.</p><p>We supply boutiques and provide made-to-measure services.</p>'],
+                'about'=>['html'=>'<p>At Lotus Textiles, we curate fine silks, linens, and cottons from across India. Our artisans and suppliers are carefully selected for quality and ethical practices.</p><p>Our in-house designers craft contemporary styles while preserving handloom traditions. Whether you need luxury Banarasi silk or breathable linen, our team will help you match fabric to occasion and fit.</p><p>We supply boutiques and provide made-to-measure services with transparent pricing and turnaround times.</p>'],
+                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>We combine premium materials with tailored service. Our consultants guide you through fabric selection, lining, and care so your garments last for years.</p><p>Alterations and bespoke stitching are done in-house for consistency and speed. Enjoy convenient fittings and delivery across Mumbai.</p>'],
                 'services'=>[
-                    ['title'=>'Handloom Silks','description'=>'Banarasi, Kanchipuram','price'=>'From ₹3,999','cta'=>'Enquire','url'=>'#request-info'],
-                    ['title'=>'Linen Collections','description'=>'Breathable summer linens','price'=>'From ₹1,999','cta'=>'Enquire','url'=>'#request-info'],
-                    ['title'=>'Tailoring','description'=>'Custom stitching & fittings','price'=>'Quoted','cta'=>'Book','url'=>'tel:+912266601234'],
+                    'title'=>'Products & Services',
+                    'listing'=>[
+                        ['title'=>'Handloom Silks','image'=>'https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=800&auto=format&fit=crop','description'=>'Banarasi, Kanchipuram, and more. Rich textures and timeless patterns.','price'=>'From ₹3,999','icon'=>'fa-swatchbook','cta'=>'Enquire','url'=>'#request-info'],
+                        ['title'=>'Linen Collections','image'=>'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop','description'=>'Lightweight linens ideal for Mumbai summers. Multiple shades and weights.','price'=>'From ₹1,999','icon'=>'fa-shirt','cta'=>'Enquire','url'=>'#request-info'],
+                        ['title'=>'Tailoring','image'=>'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop','description'=>'Custom stitching & fittings for suits, blouses, and kurtas.','price'=>'Quoted','icon'=>'fa-scissors','cta'=>'Book','url'=>'tel:+912266601234'],
+                        ['title'=>'Embroidery','image'=>'https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=800&auto=format&fit=crop','description'=>'Hand and machine embroidery with zari and threadwork to match your design.','price'=>'Quoted','icon'=>'fa-needle','cta'=>'Enquire','url'=>'#request-info'],
+                        ['title'=>'Dyeing & Finishing','image'=>'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop','description'=>'Custom dye shades and fabric finishing for drape and handfeel.','price'=>'Quoted','icon'=>'fa-flask','cta'=>'Enquire','url'=>'#request-info']
+                    ]
                 ],
                 'contact'=>[
-                    'phone'=>'+91 22 6660 1234','email'=>'hello@lotustextiles.in','website'=>'https://lotustextiles.in',
-                    'address'=>'12 Colaba Causeway, Mumbai 400001','address_line1'=>'12 Colaba Causeway','address_line2'=>'2nd Floor',
+                    'phone'=>['text'=>'+91 22 6660 1234','link'=>'+912266601234'],
+                    'whatsapp'=>['text'=>'+91 22 6660 1234','link'=>'912266601234'],
+                    'email'=>'hello@lotustextiles.in',
+                    'website'=>['text'=>'lotustextiles.in','link'=>'https://lotustextiles.in'],
+                    'address'=>'12 Colaba Causeway, Mumbai 400001',
+                    'address_line1'=>'12 Colaba Causeway','address_line2'=>'2nd Floor','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
                         ['day'=>'Mon–Sat','open'=>'10:00','close'=>'19:00'],['day'=>'Sun']
                     ],
                     'plusCode'=>'2RQP+6V Mumbai','plusCodeUrl'=>'https://maps.google.com/?q=2RQP+6V+Mumbai'
                 ],
                 'reviews'=>[
-                    ['author'=>'Asha P.','rating'=>5,'date'=>'2025-02-10','text'=>'Beautiful fabrics and helpful staff.'],
-                    ['author'=>'Rohit K.','rating'=>4.6,'date'=>'2025-03-01','text'=>'Great pricing and quality.'],
+                    ['author'=>'Asha P.','rating'=>5,'date'=>'2025-02-10','text'=>'Beautiful fabric selection and honest pricing. The team helped me pick the right silk and arranged quick alterations. I received so many compliments at the event.'],
+                    ['author'=>'Rohit K.','rating'=>4.6,'date'=>'2025-03-01','text'=>'Quality linens and attentive staff. Turnaround for tailoring was faster than expected and the fit was perfect.'],
+                    ['author'=>'Neha S.','rating'=>4.8,'date'=>'2025-01-22','text'=>'They sourced a specific shade of chiffon for me within two days. Great communication throughout and careful packaging.'],
+                    ['author'=>'Imran V.','rating'=>4.7,'date'=>'2024-12-18','text'=>'Got a sherwani tailored here. Professional fittings and precise embroidery work. Delivery was on the promised date.'],
+                    ['author'=>'Kavita D.','rating'=>4.9,'date'=>'2024-11-05','text'=>'Staff were patient while I compared several silks. They suggested blouse lining and care tips that really helped.']
                 ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1520975916090-3105956dac38?w=1600&q=80&auto=format&fit=crop','alt'=>'Fabric rolls'],
+                    ['src'=>'https://images.unsplash.com/photo-1453227588063-bb302b62f50b?w=1600&q=80&auto=format&fit=crop','alt'=>'Tailor at work']
                 ],
                 'social'=>[
-                    ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles'],
+                    ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles']
                 ],
             ]),
             'search_terms'   => 'lotus textiles fabric mumbai india showroom boutique',
@@ -443,36 +467,60 @@ class _1_0_0_CreateBase implements Migration
             'site_version'   => 1,
             'site_json'      => $buildJson([
                 'name'=>'Green Bites','city'=>'London',
-                'brand'=>['palette'=>'amber','industry'=>'restaurant'],
+                'brand'=>[
+                    'palette'=>'amber','industry'=>'restaurant',
+                    'logo'=>'https://cdn-icons-png.flaticon.com/512/3480/3480514.png'
+                ],
+                'seo'=>[
+                    'title'=>'Green Bites — Plant-forward Kitchen',
+                    'description'=>'Seasonal bowls, sourdough, and specialty coffee made with British produce. Walk-ins welcome; bookings recommended for weekends.',
+                    'keywords'=>'green bites, lunch bowls, sourdough, coffee, london'
+                ],
                 'hero'=>[
-                    'heading'=>'Green Bites — Plant-forward Kitchen','subheading'=>'Seasonal bowls, sourdough, and specialty coffee.',
-                    'badge'=>'Local Favourite','image'=>'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80&auto=format&fit=crop',
+                    'heading'=>'Green Bites',
+                    'subheading'=>'Your London café for seasonal bowls, sourdough bakes, and specialty coffee served warm and fast with plenty of vegetarian and vegan options at everyday prices.',
+                    'badge'=>'Local Favourite',
+                    'image'=>'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1600&q=80&auto=format&fit=crop',
                     'rating'=>['value'=>4.6,'count'=>320],
                     'ctas'=>[ ['text'=>'View Menu','url'=>'#products'], ['text'=>'Book Table','url'=>'#contact'] ],
                 ],
-                'about'=>['html'=>'<p>We cook with British seasonal produce and whole grains.</p><p>Our menu rotates weekly with vegetarian and vegan options.</p><p>Walk-ins welcome; bookings recommended for weekends.</p>'],
+                'about'=>['html'=>'<p>We cook with British seasonal produce and whole grains, pairing vibrant vegetables with house ferments and dressings.</p><p>Our menu rotates weekly with vegetarian and vegan options. Sourdough is baked on site each morning and our coffee is sourced from independent UK roasters.</p><p>Walk-ins welcome; bookings recommended for weekends.</p>'],
+                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>We keep ingredients simple and traceable. Our kitchen minimizes waste by pickling and fermenting trimmings, and we donate surplus through local partners.</p><p>Friendly service, fair pricing, and quick counter ordering get you back to your day fast.</p>'],
                 'services'=>[
-                    ['title'=>'Lunch Bowls','description'=>'Seasonal veg + grains','price'=>'£9.50','cta'=>'Order','url'=>'#request-info'],
-                    ['title'=>'Sourdough Sandwiches','description'=>'House-baked bread','price'=>'£7.80','cta'=>'Order','url'=>'#request-info'],
-                    ['title'=>'Specialty Coffee','description'=>'Single-origin roasts','price'=>'£3.20','cta'=>'Order','url'=>'#request-info'],
+                    'title'=>'Menu Highlights',
+                    'listing'=>[
+                        ['title'=>'Lunch Bowls','image'=>'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=800&auto=format&fit=crop','description'=>'Seasonal veg + grains with herb dressings.','price'=>'£9.50','icon'=>'fa-bowl-food','cta'=>'Order','url'=>'#request-info'],
+                        ['title'=>'Sourdough Sandwiches','image'=>'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=800&auto=format&fit=crop','description'=>'Slow-risen bread with fresh fillings.','price'=>'£7.80','icon'=>'fa-bread-slice','cta'=>'Order','url'=>'#request-info'],
+                        ['title'=>'Specialty Coffee','image'=>'https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?q=80&w=800&auto=format&fit=crop','description'=>'Single-origin roasts with alternative milks.','price'=>'£3.20','icon'=>'fa-mug-hot','cta'=>'Order','url'=>'#request-info'],
+                        ['title'=>'Breakfast Plates','image'=>'https://images.unsplash.com/photo-1498654200943-1088dd4438ae?q=80&w=800&auto=format&fit=crop','description'=>'Eggs, greens, and sourdough toast.','price'=>'£8.90','icon'=>'fa-egg','cta'=>'Order','url'=>'#request-info'],
+                        ['title'=>'Bakes & Pastries','image'=>'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=800&auto=format&fit=crop','description'=>'Morning buns, cookies, and seasonal cakes.','price'=>'£2.50+','icon'=>'fa-cookie-bite','cta'=>'Order','url'=>'#request-info']
+                    ]
                 ],
                 'contact'=>[
-                    'phone'=>'+44 20 7946 0958','email'=>'hello@greenbites.co.uk','website'=>'https://greenbites.co.uk',
-                    'address'=>'10 Fleet St, London EC4Y 1AA','address_line1'=>'10 Fleet Street','address_line2'=>'',
+                    'phone'=>['text'=>'+44 20 7946 0958','link'=>'+442079460958'],
+                    'whatsapp'=>['text'=>'+44 20 7946 0958','link'=>'442079460958'],
+                    'email'=>'hello@greenbites.co.uk',
+                    'website'=>['text'=>'greenbites.co.uk','link'=>'https://greenbites.co.uk'],
+                    'address'=>'10 Fleet St, London EC4Y 1AA',
+                    'address_line1'=>'10 Fleet Street','address_line2'=>'','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
                         ['day'=>'Mon–Fri','open'=>'08:00','close'=>'18:00'],['day'=>'Sat','open'=>'09:00','close'=>'16:00'],['day'=>'Sun']
                     ],
                     'plusCode'=>'GV5C+3W London','plusCodeUrl'=>'https://maps.google.com/?q=GV5C+3W+London'
                 ],
                 'reviews'=>[
-                    ['author'=>'Alex P.','rating'=>5,'date'=>'2025-02-12','text'=>'Best sourdough in the City!'],
-                    ['author'=>'Maria G.','rating'=>4.7,'date'=>'2025-03-18','text'=>'Delicious bowls and friendly staff.'],
+                    ['author'=>'Alex P.','rating'=>5,'date'=>'2025-02-12','text'=>'Best sourdough in the City. The crust has real depth of flavor and the bowls are generous. Staff remembered my usual after two visits.'],
+                    ['author'=>'Maria G.','rating'=>4.7,'date'=>'2025-03-18','text'=>'Delicious bowls and quick service at lunch. Great coffee with oat milk, and I love the rotating specials.'],
+                    ['author'=>'Tom H.','rating'=>4.6,'date'=>'2025-01-30','text'=>'Great place for a quick, healthy lunch. Seating fills up at noon but the line moves fast.'],
+                    ['author'=>'Ella R.','rating'=>4.8,'date'=>'2024-12-21','text'=>'Excellent espresso and friendly baristas. The vegan bowl had great textures and bright flavors.'],
+                    ['author'=>'Ben S.','rating'=>4.9,'date'=>'2024-11-10','text'=>'Love the seasonal menu changes and the sourdough loaves on Fridays. Consistently great quality.']
                 ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&q=80&auto=format&fit=crop','alt'=>'Bowl'],
+                    ['src'=>'https://images.unsplash.com/photo-1498654200943-1088dd4438ae?w=1600&q=80&auto=format&fit=crop','alt'=>'Bread']
                 ],
                 'social'=>[
-                    ['network'=>'instagram','url'=>'https://instagram.com/greenbites.london'],
+                    ['network'=>'instagram','url'=>'https://instagram.com/greenbites.london']
                 ],
             ]),
             'search_terms'   => 'green bites lunch bowls london cafe vegan coffee',
@@ -513,36 +561,60 @@ class _1_0_0_CreateBase implements Migration
             'site_version'   => 1,
             'site_json'      => $buildJson([
                 'name'=>'Swift Transit','city'=>'Sydney',
-                'brand'=>['palette'=>'teal','industry'=>'transport'],
+                'brand'=>[
+                    'palette'=>'teal','industry'=>'transport',
+                    'logo'=>'https://cdn-icons-png.flaticon.com/512/5969/5969268.png'
+                ],
+                'seo'=>[
+                    'title'=>'Swift Transit — Courier & Logistics',
+                    'description'=>'Reliable same‑day courier and scheduled logistics across NSW with real-time tracking and friendly support.',
+                    'keywords'=>'swift transit, courier, logistics, sydney, same day delivery'
+                ],
                 'hero'=>[
-                    'heading'=>'Swift Transit — Australia','subheading'=>'Reliable courier and last‑mile logistics across NSW.',
-                    'badge'=>'On-Time Delivery','image'=>'https://images.unsplash.com/photo-1498084393753-b411b2d26b34?w=1600&q=80&auto=format&fit=crop',
+                    'heading'=>'Swift Transit',
+                    'subheading'=>'Your Sydney, NSW courier partner for same‑day and scheduled deliveries, last‑mile logistics, and careful handling with real‑time tracking, friendly support, and on‑time, transparent pricing.',
+                    'badge'=>'On-Time Delivery',
+                    'image'=>'https://images.unsplash.com/photo-1498084393753-b411b2d26b34?w=1600&q=80&auto=format&fit=crop',
                     'rating'=>['value'=>4.9,'count'=>189],
                     'ctas'=>[ ['text'=>'Get Quote','url'=>'#request-info'], ['text'=>'Call','url'=>'tel:+61255501234'] ],
                 ],
-                'about'=>['html'=>'<p>Swift Transit provides same‑day courier and scheduled deliveries for businesses across Sydney.</p><p>Our fleet includes vans, bikes, and EVs to fit every job size.</p><p>Real-time tracking and friendly support keep your operations moving.</p>'],
+                'about'=>['html'=>'<p>Swift Transit provides same‑day courier and scheduled deliveries for businesses across Sydney. Our fleet includes vans, bikes, and EVs to fit every job size.</p><p>We\'re trusted by retailers, clinics, and agencies to handle time-critical consignments with care and visibility.</p><p>Real-time tracking and dedicated support keep your operations moving.</p>'],
+                'whyUs'=>['title'=>'Why Choose Us?','html'=>'<p>On-time performance, transparent pricing, and proactive communication are at the core of our service. Our drivers are trained to handle fragile and confidential items.</p><p>We integrate with your workflows and provide proof-of-delivery instantly.</p>'],
                 'services'=>[
-                    ['title'=>'Same‑Day Courier','description'=>'Intra-city urgent deliveries','price'=>'From A$29','cta'=>'Get Quote','url'=>'#request-info'],
-                    ['title'=>'Scheduled Routes','description'=>'Daily/weekly pickups','price'=>'Custom','cta'=>'Contact','url'=>'#contact'],
-                    ['title'=>'Warehouse Transfer','description'=>'Pallet & bulk moves','price'=>'Custom','cta'=>'Call','url'=>'tel:+61255501234'],
+                    'title'=>'Services',
+                    'listing'=>[
+                        ['title'=>'Same‑Day Courier','image'=>'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?q=80&w=800&auto=format&fit=crop','description'=>'Intra-city urgent deliveries with live tracking.','price'=>'From A$29','icon'=>'fa-truck-fast','cta'=>'Get Quote','url'=>'#request-info'],
+                        ['title'=>'Scheduled Routes','image'=>'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?q=80&w=800&auto=format&fit=crop','description'=>'Daily and weekly pickups tailored to your timetable.','price'=>'Custom','icon'=>'fa-route','cta'=>'Contact','url'=>'#contact'],
+                        ['title'=>'Warehouse Transfer','image'=>'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?q=80&w=800&auto=format&fit=crop','description'=>'Pallet & bulk moves with pallet-jack ready vans.','price'=>'Custom','icon'=>'fa-dolly','cta'=>'Call','url'=>'tel:+61255501234'],
+                        ['title'=>'Medical Courier','image'=>'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=800&auto=format&fit=crop','description'=>'Specimens and documents with chain-of-custody.','price'=>'Custom','icon'=>'fa-briefcase-medical','cta'=>'Get Quote','url'=>'#request-info'],
+                        ['title'=>'After-hours Support','image'=>'https://images.unsplash.com/photo-1482192505345-5655af888cc4?q=80&w=800&auto=format&fit=crop','description'=>'Evening and weekend coverage on request.','price'=>'Custom','icon'=>'fa-clock','cta'=>'Contact','url'=>'#contact']
+                    ]
                 ],
                 'contact'=>[
-                    'phone'=>'+61 2 5550 1234','email'=>'ops@swifttransit.au','website'=>'https://swifttransit.au',
-                    'address'=>'200 George St, Sydney NSW 2000','address_line1'=>'200 George St','address_line2'=>'Level 20',
+                    'phone'=>['text'=>'+61 2 5550 1234','link'=>'+61255501234'],
+                    'whatsapp'=>['text'=>'+61 2 5550 1234','link'=>'61255501234'],
+                    'email'=>'ops@swifttransit.au',
+                    'website'=>['text'=>'swifttransit.au','link'=>'https://swifttransit.au'],
+                    'address'=>'200 George St, Sydney NSW 2000',
+                    'address_line1'=>'200 George St','address_line2'=>'Level 20','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
                         ['day'=>'Mon–Fri','open'=>'07:00','close'=>'19:00'],['day'=>'Sat','open'=>'08:00','close'=>'14:00'],['day'=>'Sun']
                     ],
                     'plusCode'=>'46R6+XM Sydney','plusCodeUrl'=>'https://maps.google.com/?q=46R6+XM+Sydney'
                 ],
                 'reviews'=>[
-                    ['author'=>'Zoe L.','rating'=>5,'date'=>'2025-01-22','text'=>'Super fast and careful with fragile items.'],
-                    ['author'=>'Nick R.','rating'=>4.8,'date'=>'2025-03-02','text'=>'Great communication and tracking.'],
+                    ['author'=>'Zoe L.','rating'=>5,'date'=>'2025-01-22','text'=>'Super fast and careful with fragile items. They handled our clinic samples with documented chain-of-custody and delivered earlier than promised.'],
+                    ['author'=>'Nick R.','rating'=>4.8,'date'=>'2025-03-02','text'=>'Great communication and tracking. Dispatch answered within seconds, and the driver called ahead for loading dock access.'],
+                    ['author'=>'Sam D.','rating'=>4.7,'date'=>'2025-02-11','text'=>'Booked an urgent pickup at 4 pm and it reached the CBD in under an hour. Clear proof‑of‑delivery emailed instantly.'],
+                    ['author'=>'Priya V.','rating'=>4.9,'date'=>'2024-12-19','text'=>'Courteous drivers and clean vehicles. Our bulk transfers were secured properly and arrived without damage.'],
+                    ['author'=>'Owen C.','rating'=>4.8,'date'=>'2024-11-03','text'=>'We use their scheduled routes daily. Reliable timings and proactive updates whenever traffic is heavy.']
                 ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=1600&q=80&auto=format&fit=crop','alt'=>'Van'],
+                    ['src'=>'https://images.unsplash.com/photo-1544928147-79a2dbc1f389?w=1600&q=80&auto=format&fit=crop','alt'=>'Warehouse']
                 ],
                 'social'=>[
-                    ['network'=>'facebook','url'=>'https://facebook.com/swifttransit.au'],
+                    ['network'=>'facebook','url'=>'https://facebook.com/swifttransit.au']
                 ],
             ]),
             'search_terms'   => 'swift transit courier sydney logistics same day delivery',
