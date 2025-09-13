@@ -398,7 +398,7 @@
           </div>
 
           <!-- Theme & Palette quick controls (optional) -->
-          <div class="ml-2 flex items-center gap-2 justify-center md:justify-start">
+          <!-- <div class="ml-2 flex items-center gap-2 justify-center md:justify-start">
             <button id="themeToggle"
               type="button"
               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
@@ -415,7 +415,7 @@
               <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
               <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </section>
@@ -830,8 +830,6 @@
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme) setDark(savedTheme === 'dark');
       else setDark(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-      const savedPalette = localStorage.getItem('palette');
-      if (savedPalette) root.setAttribute('data-theme', savedPalette);
     })();
 
     // Theme toggles
@@ -841,13 +839,13 @@
     safeOn('stickyTheme', 'click', toggleTheme);
 
     // Palette switchers
-    document.querySelectorAll('.palette').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const t = btn.getAttribute('data-theme');
-        root.setAttribute('data-theme', t);
-        localStorage.setItem('palette', t);
-      });
-    });
+    // document.querySelectorAll('.palette').forEach(btn => {
+    //   btn.addEventListener('click', () => {
+    //     const t = btn.getAttribute('data-theme');
+    //     root.setAttribute('data-theme', t);
+    //     localStorage.setItem('palette', t);
+    //   });
+    // });
 
     // Mobile menu
     const mobileMenu = byId('mobileMenu');
@@ -900,8 +898,6 @@
     }
     safeOn('shareBtn', 'click', sharePage);
     safeOn('shareBtn2', 'click', sharePage);
-
-    // Background image now set via Tailwind arbitrary value on #band-2
 
     // Gallery lightbox
     (function () {
