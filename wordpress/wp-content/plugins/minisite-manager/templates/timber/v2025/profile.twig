@@ -342,6 +342,26 @@
       </div>
     </div>
 
+    <!-- ======= Mobile Sticky Bar (small screens only) ======= -->
+    <div id="mobileStickyNav"
+         class="hidden md:hidden fixed top-0 left-0 right-0 z-40 border-b border-[var(--outline-variant)] bg-[var(--primary)] text-[var(--on-primary)]">
+      <div class="px-4 py-2 flex items-center justify-between">
+        
+        <div class="flex items-center gap-2">
+          <img src="{{ profile.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}" alt="{{ profile.name }} Logo"
+               class="h-6 w-6 rounded ring-1 ring-white/20" />
+          <span class="font-semibold text-sm">{{ profile.name }}</span>
+        </div>
+        <button id="openMenuSticky" class="p-2 rounded hover:bg-[var(--primary)]/20" aria-label="Open menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <!-- <button id="stickyMobileTheme" class="p-2 rounded hover:bg-[var(--primary)]/20" aria-label="Toggle theme">
+          <i class="fa-solid fa-moon dark:hidden"></i>
+          <i class="fa-solid fa-sun hidden dark:inline"></i>
+        </button> -->
+      </div>
+    </div>
+
     <!-- ======= Quick Actions ======= -->
     <section id="quick-actions" class="py-4 bg-[var(--section-b-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -889,6 +909,7 @@
     const onScroll = () => {
       const y = window.scrollY || document.documentElement.scrollTop || 0;
       const isSmall = window.matchMedia('(max-width: 767.98px)').matches;
+      const mobileSticky = byId('mobileStickyNav');
       if (sticky) {
         if (isSmall) {
           // Never show floating/sticky menu on small screens (where burger is used)
@@ -896,6 +917,10 @@
         } else {
           y > STICKY_THRESHOLD ? sticky.classList.remove('hidden') : sticky.classList.add('hidden');
         }
+      }
+      if (mobileSticky) {
+        if (isSmall && y > STICKY_THRESHOLD) mobileSticky.classList.remove('hidden');
+        else mobileSticky.classList.add('hidden');
       }
       if (backToTop) y > TOP_THRESHOLD ? show(backToTop) : hide(backToTop);
     };
@@ -921,6 +946,8 @@
     }
     safeOn('shareBtn', 'click', sharePage);
     safeOn('shareBtn2', 'click', sharePage);
+    safeOn('openMenuSticky', 'click', () => mobileMenu && mobileMenu.classList.remove('hidden'));
+    safeOn('stickyMobileTheme', 'click', toggleTheme);
 
     // Scrollspy: highlight nav links in top, sticky, and mobile menus
     (function () {
