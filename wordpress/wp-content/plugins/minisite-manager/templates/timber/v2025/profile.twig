@@ -431,7 +431,9 @@
     </section>
 
     <!-- ===== Parallax band (text card is SOLID) ===== -->
-    <section id="band-2" class="parallax-md bg-cover bg-center" data-palette="true">
+    <section id="band-2"
+      class="parallax-md bg-cover bg-center bg-no-repeat bg-[url('{{ profile.siteJson.whyUs.image|default(profile.siteJson.hero.image|default('')) }}')]"
+      data-palette="true">
       <div class="px-4 sm:px-6 lg:px-8 py-24">
         <div class="max-w-[600px] rounded-2xl shadow-xl
                     bg-[var(--section-a-bg)] ring-1 ring-[var(--outline-variant)]
@@ -899,34 +901,7 @@
     safeOn('shareBtn', 'click', sharePage);
     safeOn('shareBtn2', 'click', sharePage);
 
-    // Background images per industry (band-2 only here)
-    (function () {
-      const INDUSTRY_IMAGES = {
-        transport: {
-          band2: 'https://images.unsplash.com/photo-1498084393753-b411b2d26b34?auto=format&fit=crop&w=1600'
-        },
-        restaurant: {
-          band2: 'https://images.unsplash.com/photo-1551218808-94e220e084d2?auto=format&fit=crop&w=1600'
-        },
-        services: {
-          band2: 'https://images.unsplash.com/photo-1521737852567-6949f3f9f2b5?auto=format&fit=crop&w=1600'
-        },
-        textile: {
-          band2: 'https://images.unsplash.com/photo-1504089879190-820eb03ca34e?auto=format&fit=crop&w=1600'
-        },
-        dentist: {
-          band2: 'https://images.unsplash.com/photo-1704455306251-b4634215d98f?auto=format&fit=crop&w=1600'
-        }
-      };
-      const industry = root.getAttribute('data-industry') || 'services';
-      const url = INDUSTRY_IMAGES[industry]?.band2;
-      const el = document.getElementById('band-2');
-      if (el && url) {
-        el.style.backgroundImage = `url('${url}')`;
-        el.style.backgroundSize = 'cover';
-        el.style.backgroundPosition = 'center';
-      }
-    })();
+    // Background image now set via Tailwind arbitrary value on #band-2
 
     // Gallery lightbox
     (function () {

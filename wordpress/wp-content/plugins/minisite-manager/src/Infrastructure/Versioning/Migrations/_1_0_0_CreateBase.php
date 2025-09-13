@@ -395,11 +395,11 @@ class _1_0_0_CreateBase implements Migration
                 'services'=>[
                     'title'=>'Products & Services',
                     'listing'=>[
-                        ['title'=>'Handloom Silks','image'=>'https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=800&auto=format&fit=crop','description'=>'Banarasi, Kanchipuram, and more. Rich textures and timeless patterns.','price'=>'From ₹3,999','icon'=>'fa-swatchbook','cta'=>'Enquire','url'=>'#request-info'],
-                        ['title'=>'Linen Collections','image'=>'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop','description'=>'Lightweight linens ideal for Mumbai summers. Multiple shades and weights.','price'=>'From ₹1,999','icon'=>'fa-shirt','cta'=>'Enquire','url'=>'#request-info'],
-                        ['title'=>'Tailoring','image'=>'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop','description'=>'Custom stitching & fittings for suits, blouses, and kurtas.','price'=>'Quoted','icon'=>'fa-scissors','cta'=>'Book','url'=>'tel:+912266601234'],
-                        ['title'=>'Embroidery','image'=>'https://images.unsplash.com/photo-1520975916090-3105956dac38?q=80&w=800&auto=format&fit=crop','description'=>'Hand and machine embroidery with zari and threadwork to match your design.','price'=>'Quoted','icon'=>'fa-needle','cta'=>'Enquire','url'=>'#request-info'],
-                        ['title'=>'Dyeing & Finishing','image'=>'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?q=80&w=800&auto=format&fit=crop','description'=>'Custom dye shades and fabric finishing for drape and handfeel.','price'=>'Quoted','icon'=>'fa-flask','cta'=>'Enquire','url'=>'#request-info']
+                        ['title'=>'Handloom Silks','image'=>'https://images.unsplash.com/photo-1534639077088-d702bcf685e7?q=80&w=800&auto=format&fit=crop','description'=>'Banarasi, Kanchipuram, and more. Rich textures and timeless patterns.','price'=>'From ₹3,999','icon'=>'fa-swatchbook','cta'=>'Enquire','url'=>'#request-info'],
+                        ['title'=>'Linen Collections','image'=>'https://images.unsplash.com/photo-1632421377986-0b1f70773812?q=80&w=800&auto=format&fit=crop','description'=>'Lightweight linens ideal for Mumbai summers. Multiple shades and weights.','price'=>'From ₹1,999','icon'=>'fa-shirt','cta'=>'Enquire','url'=>'#request-info'],
+                        ['title'=>'Tailoring','image'=>'https://images.unsplash.com/photo-1534126511673-b6899657816a?q=80&w=800&auto=format&fit=crop','description'=>'Custom stitching & fittings for suits, blouses, and kurtas.','price'=>'Quoted','icon'=>'fa-scissors','cta'=>'Book','url'=>'tel:+912266601234'],
+                        ['title'=>'Embroidery','image'=>'https://images.unsplash.com/photo-1623605004748-3af12342204f?q=80&w=800&auto=format&fit=crop','description'=>'Hand and machine embroidery with zari and threadwork to match your design.','price'=>'Quoted','icon'=>'fa-needle','cta'=>'Enquire','url'=>'#request-info'],
+                        ['title'=>'Dyeing & Finishing','image'=>'https://images.unsplash.com/photo-1506034844286-f98ed954e516?q=80&w=800&auto=format&fit=crop','description'=>'Custom dye shades and fabric finishing for drape and handfeel.','price'=>'Quoted','icon'=>'fa-flask','cta'=>'Enquire','url'=>'#request-info']
                     ]
                 ],
                 'contact'=>[
@@ -422,8 +422,11 @@ class _1_0_0_CreateBase implements Migration
                     ['author'=>'Kavita D.','rating'=>4.9,'date'=>'2024-11-05','text'=>'Staff were patient while I compared several silks. They suggested blouse lining and care tips that really helped.']
                 ],
                 'gallery'=>[
-                    ['src'=>'https://images.unsplash.com/photo-1520975916090-3105956dac38?w=1600&q=80&auto=format&fit=crop','alt'=>'Fabric rolls'],
-                    ['src'=>'https://images.unsplash.com/photo-1453227588063-bb302b62f50b?w=1600&q=80&auto=format&fit=crop','alt'=>'Tailor at work']
+                    ['src'=>'https://images.unsplash.com/photo-1534639077088-d702bcf685e7?q=80&w=800&auto=format&fit=crop','alt'=>'Fabric rolls'],
+                    ['src'=>'https://images.unsplash.com/photo-1632421377986-0b1f70773812?q=80&w=800&auto=format&fit=crop','alt'=>'Tailor at work'],
+                    ['src'=>'https://images.unsplash.com/photo-1534126511673-b6899657816a?q=80&w=800&auto=format&fit=crop','alt'=>'Tailor at work'],
+                    ['src'=>'https://images.unsplash.com/photo-1623605004748-3af12342204f?q=80&w=800&auto=format&fit=crop','alt'=>'Tailor at work'],
+                    ['src'=>'https://images.unsplash.com/photo-1506034844286-f98ed954e516?q=80&w=800&auto=format&fit=crop','alt'=>'Tailor at work']
                 ],
                 'social'=>[
                     ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles']
