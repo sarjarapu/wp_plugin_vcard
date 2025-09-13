@@ -709,8 +709,8 @@
         {# Lightbox overlay #}
         <div id="galleryLightbox" class="fixed inset-0 z-50 hidden">
           <div class="absolute inset-0 bg-[var(--on-surface)]/60" data-glb-close></div>
-          <div class="relative h-full w-full flex items-center justify-center p-4 md:p-6">
-            <div class="relative max-w-[92vw] md:max-w-[80vw] lg:max-w-[70vw] bg-[var(--surface-0)] rounded-xl ring-1 ring-[var(--outline-variant)] p-3 md:p-4">
+          <div id="glb-surface" class="relative h-full w-full flex items-center justify-center p-4 md:p-6">
+            <div id="glb-inner" class="relative w-[min(92vw,800px)] max-w-[800px] bg-[var(--surface-0)] rounded-xl ring-1 ring-[var(--outline-variant)] p-3 md:p-4 flex flex-col items-center">
               <button type="button" class="absolute -top-4 -right-4 p-2 rounded-full bg-[var(--surface-0)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]" aria-label="Close" data-glb-close>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
@@ -721,13 +721,13 @@
                   <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
-              <img id="glb-image" src="" alt="" class="max-h-[70vh] max-w-[92vw] md:max-w-[80vw] lg:max-w-[70vw] rounded-lg shadow-2xl object-contain" />
+              <img id="glb-image" src="" alt="" class="block mx-auto max-h-[70vh] max-w-full rounded-lg object-contain" />
               <button type="button" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-[var(--surface-0)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]" aria-label="Next" id="glb-next">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-              <div class="mt-3 max-w-[92vw] text-center px-2 md:px-4 py-1 md:py-2 text-[var(--on-surface)]" id="glb-caption"></div>
+              <div class="mt-3 max-w-full text-center px-2 md:px-4 py-1 md:py-2 text-[var(--on-surface)]" id="glb-caption"></div>
             </div>
           </div>
         </div>
@@ -932,6 +932,8 @@
       const capEl = document.getElementById('glb-caption');
       const prevBtn = document.getElementById('glb-prev');
       const nextBtn = document.getElementById('glb-next');
+      const surface = document.getElementById('glb-surface');
+      const inner = document.getElementById('glb-inner');
       const items = Array.from(document.querySelectorAll('#gallery-grid [data-gallery-index]'));
       if (!lightbox || !imgEl || !capEl || items.length === 0) return;
 
@@ -953,7 +955,8 @@
       if (prevBtn) prevBtn.addEventListener('click', () => show(idx - 1));
       if (nextBtn) nextBtn.addEventListener('click', () => show(idx + 1));
       closeEls.forEach(el => el.addEventListener('click', close));
-      lightbox.addEventListener('click', (e) => { if (e.target === lightbox) close(); });
+      if (inner) inner.addEventListener('click', (e) => e.stopPropagation());
+      if (surface) surface.addEventListener('click', (e) => { if (e.target === surface) close(); });
       document.addEventListener('keydown', (e) => {
         if (lightbox.classList.contains('hidden')) return;
         if (e.key === 'Escape') close();
