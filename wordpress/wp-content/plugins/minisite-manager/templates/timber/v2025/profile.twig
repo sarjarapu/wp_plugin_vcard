@@ -7,6 +7,35 @@
   <meta name="description" content="{{ profile.siteJson.seo.description|default('') }}" />
   <meta name="keywords" content="{{ profile.siteJson.seo.keywords|default('') }}" />
   <link rel="icon" type="image/x-icon" href="{{ profile.siteJson.seo.favicon|default('favicon.png') }}">
+
+  {# Open Graph + Twitter Cards #}
+  {% set sj = profile.siteJson|default({}) %}
+  {% set ogTitle  = sj.seo.title|default(profile.title) %}
+  {% set ogDesc   = sj.seo.description|default('') %}
+  {% set ogImage  = sj.seo.ogImage|default(sj.hero.image|default(sj.brand.logo|default(''))) %}
+  {% set ogUrl    = sj.seo.canonical|default(sj.contact.website.link|default(function('home_url'))) %}
+  {% set ogSite   = sj.seo.siteName|default(profile.name|default(profile.title)) %}
+  {% set ogLocale = profile.defaultLocale|default('en-US')|replace({'-':'_'}) %}
+  {% set modified = profile.updatedAt is defined and profile.updatedAt ? (profile.updatedAt|date('c')) : '' %}
+
+  <meta property="og:locale" content="{{ ogLocale }}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="{{ ogTitle }}" />
+  <meta property="og:description" content="{{ ogDesc }}" />
+  <meta property="og:url" content="{{ ogUrl }}" />
+  <meta property="og:site_name" content="{{ ogSite }}" />
+  {% if modified %}
+  <meta property="article:modified_time" content="{{ modified }}" />
+  {% endif %}
+  {% if ogImage %}
+  <meta property="og:image" content="{{ ogImage }}" />
+  {% endif %}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{{ ogTitle }}" />
+  <meta name="twitter:description" content="{{ ogDesc }}" />
+  {% if ogImage %}
+  <meta name="twitter:image" content="{{ ogImage }}" />
+  {% endif %}
   <!-- Tailwind CSS (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script> tailwind.config = { darkMode: 'class' } </script>
