@@ -383,9 +383,9 @@
     <!-- ======= Quick Actions ======= -->
     <section id="quick-actions" class="py-4 bg-[var(--section-b-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-center md:text-left">
+        <div class="grid grid-cols-1 md:[grid-template-columns:1fr_auto] gap-8 text-center md:text-left">
           <!-- Group: Contact Us -->
-          <div role="group" aria-labelledby="qa-contact-label" class="rounded-2xl p-4">
+          <div role="group" aria-labelledby="qa-contact-label" class="rounded-2xl p-4 md:col-start-1 md:justify-self-stretch md:min-w-0">
             <h3 id="qa-contact-label" class="text-md font-bold text-[var(--on-surface)] mb-3">Contact Information</h3>
             <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
               <a href="tel:{{ profile.siteJson.contact.phone.link|default('') }}" aria-label="Call Us" title="Call Us"
@@ -413,25 +413,6 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-globe text-violet-600 text-2xl"></i>
               </a>
-            </div>
-          </div>
-
-          <!-- Group: Contact Management -->
-          <div role="group" aria-labelledby="qa-manage-label" class="rounded-2xl p-4">
-            <h3 id="qa-manage-label" class="text-md font-bold text-[var(--on-surface)] mb-3">Manage Contacts</h3>
-            <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-              <button type="button" aria-label="Edit" title="Edit"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-pen-to-square text-[var(--on-surface)] text-2xl"></i>
-              </button>
-              <button type="button" aria-label="Save to favorites" title="Save to favorites"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-star text-yellow-500 text-2xl"></i>
-              </button>
-              <button type="button" aria-label="Address Book" title="Address Book"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-address-book text-indigo-600 text-2xl"></i>
-              </button>
               <a id="downloadVcard" download href="#"
                 aria-label="Download Contact" title="Download Contact"
                 data-name="{{ profile.name }}"
@@ -450,38 +431,32 @@
                 data-country="{{ profile.countryCode }}"
                 data-logo="{{ profile.siteJson.brand.logo|default('') }}"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-download text-emerald-600 text-2xl"></i>
+                <i class="fa-solid fa-address-card text-emerald-600 text-2xl"></i>
               </a>
               <button id="qrBtn" type="button" aria-label="QR Code" title="QR Code"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-qrcode text-rose-600 text-2xl"></i>
               </button>
-              <a href="mailto:{{ profile.siteJson.contact.email|default('') }}" aria-label="Share vCard" title="Share vCard"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-paperclip text-sky-600 text-2xl"></i>
-              </a>
             </div>
           </div>
-
-          <!-- Theme & Palette quick controls (optional) -->
-          <!-- <div class="ml-2 flex items-center gap-2 justify-center md:justify-start">
-            <button id="themeToggle"
-              type="button"
-              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
-                    text-[var(--on-surface)]
-                    border border-[var(--outline)]
-                    bg-[var(--surface-0)]
-                    hover:bg-[var(--surface-1)]">
-              <i class="fa-solid fa-moon"></i><span class="hidden xl:inline">Theme</span>
-            </button>
-            <div class="hidden xl:flex items-center gap-1">
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="blue"  style="background:#2563eb" title="Blue"></button>
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="teal"  style="background:#0d9488" title="Teal"></button>
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="violet"style="background:#7c3aed" title="Violet"></button>
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="rose"  style="background:#e11d48" title="Rose"></button>
-              <button class="palette h-8 w-8 rounded-full ring-1 ring-white shadow" data-theme="amber" style="background:#f59e0b" title="Amber"></button>
+          <!-- Group: Contact Management -->
+          <div role="group" aria-labelledby="qa-manage-label" class="rounded-2xl p-4 md:col-start-2 md:justify-self-end">
+            <h3 id="qa-manage-label" class="text-md font-bold text-[var(--on-surface)] mb-3">Manage Contacts</h3>
+            <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+              <button type="button" aria-label="Edit" title="Edit"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <i class="fa-solid fa-pen-to-square text-[var(--on-surface)] text-2xl"></i>
+              </button>
+              <button type="button" aria-label="Save to favorites" title="Save to favorites"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <i class="fa-solid fa-star text-yellow-500 text-2xl"></i>
+              </button>
+              <button type="button" aria-label="Address Book" title="Address Book"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <i class="fa-solid fa-address-book text-indigo-600 text-2xl"></i>
+              </button>
             </div>
-          </div> -->
+          </div>
         </div>
       </div>
     </section>
