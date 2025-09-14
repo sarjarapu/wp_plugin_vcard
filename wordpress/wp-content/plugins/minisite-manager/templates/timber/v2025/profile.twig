@@ -361,6 +361,24 @@
         </button> -->
       </div>
     </div>
+    
+    <!-- ======= QR Code Overlay ======= -->
+    <div id="qrOverlay" class="fixed inset-0 z-50 hidden">
+      <!-- Dimmed backdrop for better focus; click to close -->
+      <div class="relative h-full w-full flex items-center justify-center p-4">
+        <div class="bg-[var(--background)] text-[var(--on-background)] rounded-xl ring-1 ring-[var(--outline-variant)] p-5 flex flex-col items-center">
+          <!-- Padded QR container for margin around code (theme-aware) -->
+          <div class="p-3 bg-[var(--surface-0)] shadow rounded">
+            <img id="qrImage" alt="QR code" class="block h-64 w-64" />
+          </div>
+          <!-- Centered Close button -->
+          <button type="button" data-qr-close class="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
+            <i class="fa-solid fa-xmark"></i>
+            <span>Close</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- ======= Quick Actions ======= -->
     <section id="quick-actions" class="py-4 bg-[var(--section-b-bg)]">
@@ -434,7 +452,7 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-download text-emerald-600 text-2xl"></i>
               </a>
-              <button type="button" aria-label="QR Code" title="QR Code"
+              <button id="qrBtn" type="button" aria-label="QR Code" title="QR Code"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-qrcode text-rose-600 text-2xl"></i>
               </button>
@@ -962,6 +980,41 @@
     safeOn('shareBtn2', 'click', sharePage);
     safeOn('openMenuSticky', 'click', () => mobileMenu && mobileMenu.classList.remove('hidden'));
     safeOn('stickyMobileTheme', 'click', toggleTheme);
+    
+    // QR overlay (uses Google Chart QR API for simplicity)
+    (function () {
+      const btn = byId('qrBtn');
+      const overlay = byId('qrOverlay');
+      const img = byId('qrImage');
+      if (!btn || !overlay || !img) return;
+      const closeEls = overlay.querySelectorAll('[data-qr-close]');
+      function open() {
+        const target = window.location.href;
+        // Build URL safely to avoid encoding issues
+        const u = new URL('https://chart.googleapis.com/chart');
+        const p = u.searchParams;
+        p.set('cht', 'qr');               // chart type: QR
+        p.set('chs', '300x300');          // size (increase slightly for clarity)
+        p.set('chld', 'M|0');             // error correction | margin
+        p.set('chl', target);             // data
+        img.onerror = () => {
+          // Fallback provider if Google Charts is blocked
+          img.onerror = null;
+          img.src = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(target);
+        };
+        img.src = u.toString();
+        overlay.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+      function close() {
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+      btn.addEventListener('click', open);
+      closeEls.forEach(el => el.addEventListener('click', close));
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.classList.contains('hidden')) close(); });
+    })();
 
     // Build and download vCard on demand (tries to include LOGO as URI; base64 embedding optional)
     (function () {
