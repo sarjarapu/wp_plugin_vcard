@@ -74,3 +74,35 @@ Below is a checklist of all major tasks to take the plugin from current work-in-
 - Maintenance & security checklists (helpful to cross-reference for plugin health).  [oai_citation:1‡Jetpack](https://jetpack.com/resources/wordpress-maintenance/?utm_source=chatgpt.com)  
 
 ---
+
+## Braindump Role features
+
+- From end user experience Both client (paid users) and visiting users (save cards) 
+  - Login page
+  - Registration page
+  - Forgot password page
+- Roles 
+  - Member is a paid business client for minisite, who can create or edit only their minisites
+  - User readonly registered user to save the contacts, view saved contacts, search them
+  - Admin can edit or view any minisite to offfer any assistance. can add remove, modify Members/Users, give credits, discounts codes etc. 
+  - Power Users can edit or view minisites. 
+- Public search by location, distance, profession, specialization, keywords
+- Aggregation of services much like CraigsList
+- Dashboard page to shows Snippes of views from Profile, Minisites listing, Reports and Saved contacts
+- My minisites shows a listing of all the minisites created or editable by them, when they expire, etc. they can do pagination and search etc to filter down the listing
+- Clicking on the minisite takes you to view minisite page. 
+- Edit button on minisite is activated only if you have permission (created by, power user and admin user)
+- Reports for free users, paid and power or admin users can be around the contacts
+- Reports on the owned minisites is only available for paid, power, and admin users
+- Reports on revenue are only available to Power and admin users showing Number of Free Users, Paid Users, Conversions, revenue this month, month over month, year over year growth, discount given etc.
+- Only power users and admin user has capabilities to generate discount codes
+- Any registered user can use the discount code to get credit and extend their membership expiration date
+- Clicking on edit takes you to another page where you can fill form details
+- Permission to add edit are driven by user roles. 
+- Perhaps User can create minisite as well but can preview only and not publish without credits
+- Preview works only for the signed in user and is only viewable by the author or admin
+- My view of power user is additional staff memebrs to build websites on behalf of the paid members
+- So paid members should not be allowed to view certain sentive infromation like credit cards etc of the paid users
+- Refer a friend, get-one-month extra after referred member converts into paid membership. 
+- 
+- Google Sitemap - might need to be broken down in to multiple
