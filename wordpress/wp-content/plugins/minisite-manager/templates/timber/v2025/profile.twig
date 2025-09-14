@@ -187,6 +187,100 @@
     color: inherit;
   }
   </style>
+
+  {# ===== Structured Data (JSON-LD) ===== #}
+  {% set sj = profile.siteJson|default({}) %}
+  {% set orgType = (profile.industry|default('') == 'dentist') ? 'Dentist' : 'LocalBusiness' %}
+
+  {# Build sameAs from social links #}
+  {% set sameAs = [] %}
+  {% for s in sj.social|default([]) %}
+    {% if s.url|default('') %}{% set sameAs = sameAs|merge([s.url]) %}{% endif %}
+  {% endfor %}
+
+  {# Map opening hours to OpeningHoursSpecification #}
+  {% set dayMap = {'Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday','Sun':'Sunday'} %}
+  {% set opening = [] %}
+  {% for h in sj.contact.hours|default([]) %}
+    {% if h.open is defined and h.close is defined %}
+      {% set opening = opening|merge([{
+        '@type':'OpeningHoursSpecification',
+        'dayOfWeek': dayMap[h.day|default('')]|default(h.day|default('')),
+        'opens': h.open,
+        'closes': h.close
+      }]) %}
+    {% endif %}
+  {% endfor %}
+
+  {# Street address lines joined #}
+  {% set streetParts = [] %}
+  {% for k in ['address_line1','address_line2','address_line3','address_line4'] %}
+    {% set part = attribute(sj.contact|default({}), k)|default('') %}
+    {% if part %}
+      {% set streetParts = streetParts|merge([part]) %}
+    {% endif %}
+  {% endfor %}
+  {% set streetAddress = streetParts|join(', ') %}
+
+  {# Aggregate rating (optional) #}
+  {% set aggregate = null %}
+  {% if sj.hero.rating is defined and sj.hero.rating.value is defined and sj.hero.rating.count is defined %}
+    {% set aggregate = {
+      '@type':'AggregateRating',
+      'ratingValue': sj.hero.rating.value,
+      'reviewCount': sj.hero.rating.count
+    } %}
+  {% endif %}
+
+  {# Reviews (optional) #}
+  {% set reviews = [] %}
+  {% for r in sj.reviews|default([]) %}
+    {% set reviews = reviews|merge([{
+      '@type':'Review',
+      'author': {'@type':'Person','name': r.author|default('')},
+      'datePublished': r.date|default(''),
+      'reviewBody': r.text|default(''),
+      'reviewRating': {'@type':'Rating','ratingValue': r.rating|default('')}
+    }]) %}
+  {% endfor %}
+
+  {# Base business schema #}
+  {% set business = {
+    '@context': 'https://schema.org',
+    '@type': orgType,
+    'name': profile.name|default(sj.name|default(profile.title|default(''))),
+    'url': sj.contact.website.link|default(''),
+    'image': sj.hero.image|default(''),
+    'logo': sj.brand.logo|default(''),
+    'telephone': sj.contact.phone.link|default(''),
+    'email': sj.contact.email|default(''),
+    'address': {
+      '@type':'PostalAddress',
+      'streetAddress': streetAddress,
+      'addressLocality': profile.city|default(''),
+      'addressRegion': profile.region|default(''),
+      'postalCode': profile.postalCode|default(''),
+      'addressCountry': profile.countryCode|default('')
+    },
+    'sameAs': sameAs,
+    'openingHoursSpecification': opening
+  } %}
+
+  {% if profile.lat is defined and profile.lat and profile.lng is defined and profile.lng %}
+    {% set business = business|merge({ 'geo': {'@type':'GeoCoordinates','latitude': profile.lat, 'longitude': profile.lng } }) %}
+  {% endif %}
+  {% if aggregate %}
+    {% set business = business|merge({ 'aggregateRating': aggregate }) %}
+  {% endif %}
+  {% if reviews|length %}
+    {% set business = business|merge({ 'review': reviews }) %}
+  {% endif %}
+
+  <script type="application/ld+json">{{ business|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
+
+  {# Optional: embed full site_json for client-side usage #}
+  <script id="profile-site-json" type="application/json">{{ sj|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
+
 </head>
 
 <body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
