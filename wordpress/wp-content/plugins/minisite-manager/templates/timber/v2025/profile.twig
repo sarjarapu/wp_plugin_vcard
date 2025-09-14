@@ -4,16 +4,33 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{{ profile.siteJson.seo.title|default(profile.title) }}</title>
-  <meta name="description" content="{{ profile.siteJson.seo.description|default('') }}" />
+  <meta name="description" content="{{ ogDesc }}" />
   <meta name="keywords" content="{{ profile.siteJson.seo.keywords|default('') }}" />
   <link rel="icon" type="image/x-icon" href="{{ profile.siteJson.seo.favicon|default('favicon.png') }}">
 
   {# Open Graph + Twitter Cards #}
   {% set sj = profile.siteJson|default({}) %}
   {% set ogTitle  = sj.seo.title|default(profile.title) %}
-  {% set ogDesc   = sj.seo.description|default('') %}
+  {# Build a robust description fallback #}
+  {% set ogDesc   = sj.seo.description|default('')|striptags|trim %}
+  {% if ogDesc is empty %}
+    {% set aboutPlain = sj.about.html|default('')|striptags|trim %}
+    {% set ogDesc = sj.hero.subheading|default(aboutPlain)|default(profile.title)|trim %}
+  {% endif %}
+  {% set ogDesc = ogDesc|slice(0, 200) %}
   {% set ogImage  = sj.seo.ogImage|default(sj.hero.image|default(sj.brand.logo|default(''))) %}
-  {% set ogUrl    = sj.seo.canonical|default(sj.contact.website.link|default(function('home_url'))) %}
+  {% set homeBase = function('home_url') %}
+  {# Ensure absolute image URL for scrapers #}
+  {% set ogImageAbs = ogImage %}
+  {% if ogImage and not (ogImage starts with 'http') and not (ogImage starts with '//') %}
+    {% if ogImage starts with '/' %}
+      {% set ogImageAbs = homeBase ~ ogImage %}
+    {% else %}
+      {% set ogImageAbs = homeBase ~ '/' ~ ogImage %}
+    {% endif %}
+  {% endif %}
+  {% set requestUri = function('add_query_arg', null, null) %}
+  {% set ogUrl      = function('home_url', requestUri) %}
   {% set ogSite   = sj.seo.siteName|default(profile.name|default(profile.title)) %}
   {% set ogLocale = profile.defaultLocale|default('en-US')|replace({'-':'_'}) %}
   {% set modified = profile.updatedAt is defined and profile.updatedAt ? (profile.updatedAt|date('c')) : '' %}
@@ -23,18 +40,28 @@
   <meta property="og:title" content="{{ ogTitle }}" />
   <meta property="og:description" content="{{ ogDesc }}" />
   <meta property="og:url" content="{{ ogUrl }}" />
+  <link rel="canonical" href="{{ ogUrl }}" />
   <meta property="og:site_name" content="{{ ogSite }}" />
   {% if modified %}
   <meta property="article:modified_time" content="{{ modified }}" />
   {% endif %}
-  {% if ogImage %}
-  <meta property="og:image" content="{{ ogImage }}" />
+  {% if ogImageAbs %}
+  <meta property="og:image" content="{{ ogImageAbs }}" />
+  <meta property="og:image:secure_url" content="{{ ogImageAbs }}" />
+  {% set imgType = (ogImageAbs ends with '.png') ? 'image/png' : ((ogImageAbs ends with '.jpg' or ogImageAbs ends with '.jpeg') ? 'image/jpeg' : ((ogImageAbs ends with '.gif') ? 'image/gif' : '')) %}
+  {% if imgType %}<meta property="og:image:type" content="{{ imgType }}" />{% endif %}
+  {% if sj.seo.ogImageWidth is defined and sj.seo.ogImageWidth %}<meta property="og:image:width" content="{{ sj.seo.ogImageWidth }}" />{% endif %}
+  {% if sj.seo.ogImageHeight is defined and sj.seo.ogImageHeight %}<meta property="og:image:height" content="{{ sj.seo.ogImageHeight }}" />{% endif %}
+  {% set imgAlt = sj.seo.ogImageAlt|default(sj.hero.imageAlt|default(profile.title)) %}
+  {% if imgAlt %}<meta property="og:image:alt" content="{{ imgAlt }}" />{% endif %}
   {% endif %}
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="{{ ogTitle }}" />
   <meta name="twitter:description" content="{{ ogDesc }}" />
-  {% if ogImage %}
-  <meta name="twitter:image" content="{{ ogImage }}" />
+  <meta name="twitter:url" content="{{ ogUrl }}" />
+  {% if ogImageAbs %}
+  <meta name="twitter:image" content="{{ ogImageAbs }}" />
+  {% if imgAlt %}<meta name="twitter:image:alt" content="{{ imgAlt }}" />{% endif %}
   {% endif %}
   <!-- Tailwind CSS (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -274,13 +301,25 @@
   {% endfor %}
 
   {# Base business schema #}
+  {# Normalize logo to absolute as well #}
+  {% set logo = sj.brand.logo|default('') %}
+  {% set logoAbs = logo %}
+  {% if logo and not (logo starts with 'http') and not (logo starts with '//') %}
+    {% if logo starts with '/' %}
+      {% set logoAbs = homeBase ~ logo %}
+    {% else %}
+      {% set logoAbs = homeBase ~ '/' ~ logo %}
+    {% endif %}
+  {% endif %}
+
   {% set business = {
     '@context': 'https://schema.org',
     '@type': orgType,
+    '@id': ogUrl,
     'name': profile.name|default(sj.name|default(profile.title|default(''))),
-    'url': sj.contact.website.link|default(''),
-    'image': sj.hero.image|default(''),
-    'logo': sj.brand.logo|default(''),
+    'url': ogUrl,
+    'image': ogImageAbs|default(''),
+    'logo': logoAbs|default(''),
     'telephone': sj.contact.phone.link|default(''),
     'email': sj.contact.email|default(''),
     'address': {
