@@ -29,6 +29,37 @@ if (!defined('MINISITE_LIVE_PRODUCTION')) {
   define('MINISITE_LIVE_PRODUCTION', false);
 }
 
+// === Capability strings (use constants for consistency) ===
+define('MINISITE_CAP_READ',                      'minisite_read');
+define('MINISITE_CAP_CREATE',                    'minisite_create');
+define('MINISITE_CAP_PUBLISH',                   'minisite_publish');
+define('MINISITE_CAP_EDIT_OWN',                  'minisite_edit_own');
+define('MINISITE_CAP_DELETE_OWN',                'minisite_delete_own');
+define('MINISITE_CAP_EDIT_ASSIGNED',             'minisite_edit_assigned');
+define('MINISITE_CAP_EDIT_ANY',                  'minisite_edit_any');
+define('MINISITE_CAP_DELETE_ANY',                'minisite_delete_any');
+define('MINISITE_CAP_READ_PRIVATE',              'minisite_read_private');
+
+define('MINISITE_CAP_VIEW_CONTACT_REPORTS_OWN',  'minisite_view_contact_reports_own');
+define('MINISITE_CAP_VIEW_CONTACT_REPORTS_ALL',  'minisite_view_contact_reports_all');
+define('MINISITE_CAP_VIEW_REVENUE_REPORTS',      'minisite_view_revenue_reports');
+
+define('MINISITE_CAP_GENERATE_DISCOUNTS',        'minisite_generate_discounts');
+define('MINISITE_CAP_APPLY_DISCOUNTS',           'minisite_apply_discounts');
+define('MINISITE_CAP_MANAGE_REFERRALS',          'minisite_manage_referrals');
+
+define('MINISITE_CAP_SAVE_CONTACT',              'minisite_save_contact');
+define('MINISITE_CAP_VIEW_SAVED_CONTACTS',       'minisite_view_saved_contacts');
+
+define('MINISITE_CAP_VIEW_BILLING',              'minisite_view_billing');
+define('MINISITE_CAP_MANAGE_PLUGIN',             'minisite_manage_plugin');
+
+// === Role slugs ===
+define('MINISITE_ROLE_USER',   'minisite_user');
+define('MINISITE_ROLE_MEMBER', 'minisite_member');
+define('MINISITE_ROLE_POWER',  'minisite_power');
+define('MINISITE_ROLE_ADMIN',  'minisite_admin');
+
 /**
  * Autoload (Composer)
  */
@@ -65,8 +96,14 @@ register_activation_hook(__FILE__, function () {
     $vc->activate();
   }
 
+  // Ensure roles and capabilities exist and are synced
+  if (function_exists('minisite_sync_roles_and_caps')) {
+    minisite_sync_roles_and_caps();
+  }
+
   // Defer rewrite flush until after init has registered our rules
   update_option('minisite_flush_rewrites', 1, false);
+  
 });
 
 register_deactivation_hook(__FILE__, function () {
@@ -80,6 +117,13 @@ register_deactivation_hook(__FILE__, function () {
     delete_option(MINISITE_DB_OPTION);
   }
   flush_rewrite_rules();
+
+  // Optional cleanup of custom roles in non-production
+  if (!MINISITE_LIVE_PRODUCTION) {
+    foreach ([MINISITE_ROLE_USER, MINISITE_ROLE_MEMBER, MINISITE_ROLE_POWER, MINISITE_ROLE_ADMIN] as $roleSlug) {
+      remove_role($roleSlug);
+    }
+  }
 });
 
 /**
@@ -90,7 +134,184 @@ add_action('admin_init', function () {
     $vc = new $vcClass(MINISITE_DB_VERSION, MINISITE_DB_OPTION);
     $vc->maybeRun();
   }
+
+  // Keep caps synchronized for existing roles (safe, idempotent)
+  if (function_exists('minisite_sync_roles_and_caps')) {
+    minisite_sync_roles_and_caps();
+  }
 });
+
+/**
+ * Roles & Capabilities — registration and meta-cap mapping
+ */
+
+/**
+ * Return the list of all Minisite capability slugs
+ */
+function minisite_all_caps(): array {
+  return [
+    MINISITE_CAP_READ,
+    MINISITE_CAP_CREATE,
+    MINISITE_CAP_PUBLISH,
+    MINISITE_CAP_EDIT_OWN,
+    MINISITE_CAP_DELETE_OWN,
+    MINISITE_CAP_EDIT_ASSIGNED,
+    MINISITE_CAP_EDIT_ANY,
+    MINISITE_CAP_DELETE_ANY,
+    MINISITE_CAP_READ_PRIVATE,
+    MINISITE_CAP_VIEW_CONTACT_REPORTS_OWN,
+    MINISITE_CAP_VIEW_CONTACT_REPORTS_ALL,
+    MINISITE_CAP_VIEW_REVENUE_REPORTS,
+    MINISITE_CAP_GENERATE_DISCOUNTS,
+    MINISITE_CAP_APPLY_DISCOUNTS,
+    MINISITE_CAP_MANAGE_REFERRALS,
+    MINISITE_CAP_SAVE_CONTACT,
+    MINISITE_CAP_VIEW_SAVED_CONTACTS,
+    MINISITE_CAP_VIEW_BILLING,
+    MINISITE_CAP_MANAGE_PLUGIN,
+  ];
+}
+
+/**
+ * Create/update custom roles and assign capabilities. Also grants all minisite caps to WP Administrator.
+ * Idempotent and safe to call more than once.
+ */
+function minisite_sync_roles_and_caps(): void {
+  // Role capability maps
+  $userCaps = [
+    'read' => true,
+    MINISITE_CAP_READ => true,
+    MINISITE_CAP_CREATE => true,
+    MINISITE_CAP_EDIT_OWN => true,
+    MINISITE_CAP_DELETE_OWN => true,
+    MINISITE_CAP_SAVE_CONTACT => true,
+    MINISITE_CAP_VIEW_SAVED_CONTACTS => true,
+    MINISITE_CAP_APPLY_DISCOUNTS => true,
+  ];
+
+  $memberCaps = $userCaps + [
+    MINISITE_CAP_PUBLISH => true,
+    MINISITE_CAP_READ_PRIVATE => true,
+    MINISITE_CAP_VIEW_CONTACT_REPORTS_OWN => true,
+    MINISITE_CAP_MANAGE_REFERRALS => true,
+  ];
+
+  $powerCaps = $memberCaps + [
+    MINISITE_CAP_EDIT_ASSIGNED => true,
+    MINISITE_CAP_EDIT_ANY => true,
+    MINISITE_CAP_DELETE_ANY => true,
+    MINISITE_CAP_VIEW_CONTACT_REPORTS_ALL => true,
+    MINISITE_CAP_VIEW_REVENUE_REPORTS => true,
+    MINISITE_CAP_GENERATE_DISCOUNTS => true,
+    MINISITE_CAP_VIEW_BILLING => true,
+  ];
+
+  $adminCaps = $powerCaps + [
+    MINISITE_CAP_MANAGE_PLUGIN => true,
+  ];
+
+  // Add or update roles
+  minisite_add_or_update_role(MINISITE_ROLE_USER,   'Minisite User',   $userCaps);
+  minisite_add_or_update_role(MINISITE_ROLE_MEMBER, 'Minisite Member', $memberCaps);
+  minisite_add_or_update_role(MINISITE_ROLE_POWER,  'Minisite Power',  $powerCaps);
+  minisite_add_or_update_role(MINISITE_ROLE_ADMIN,  'Minisite Admin',  $adminCaps);
+
+  // Ensure WordPress Administrator always has all minisite caps
+  if ($wpAdmin = get_role('administrator')) {
+    foreach (minisite_all_caps() as $cap) {
+      $wpAdmin->add_cap($cap);
+    }
+  }
+}
+
+/**
+ * Helper to add a role if missing, then ensure capabilities are present.
+ */
+function minisite_add_or_update_role(string $slug, string $name, array $caps): void {
+  $role = get_role($slug);
+  if (!$role) {
+    add_role($slug, $name, $caps);
+    $role = get_role($slug);
+  }
+  if ($role) {
+    foreach ($caps as $cap => $grant) {
+      if ($grant) { $role->add_cap($cap); }
+      // We do not remove caps here to avoid accidental revocation during upgrades
+    }
+  }
+}
+
+/**
+ * Meta-cap mapping for object-specific checks on custom tables.
+ * Enables calls like current_user_can('minisite_edit_profile', $profileId).
+ */
+add_filter('map_meta_cap', function (array $caps, string $cap, int $user_id, array $args) {
+  $objectId = isset($args[0]) ? intval($args[0]) : 0;
+
+  switch ($cap) {
+    case 'minisite_edit_profile':
+      // Full editors
+      if (user_can($user_id, MINISITE_CAP_EDIT_ANY)) { return [MINISITE_CAP_EDIT_ANY]; }
+      // Assigned editors
+      if ($objectId && minisite_user_is_assigned_to_profile($user_id, $objectId) && user_can($user_id, MINISITE_CAP_EDIT_ASSIGNED)) {
+        return [MINISITE_CAP_EDIT_ASSIGNED];
+      }
+      // Owners
+      if ($objectId && minisite_user_owns_profile($user_id, $objectId) && user_can($user_id, MINISITE_CAP_EDIT_OWN)) {
+        return [MINISITE_CAP_EDIT_OWN];
+      }
+      return ['do_not_allow'];
+
+    case 'minisite_delete_profile':
+      if (user_can($user_id, MINISITE_CAP_DELETE_ANY)) { return [MINISITE_CAP_DELETE_ANY]; }
+      if ($objectId && minisite_user_owns_profile($user_id, $objectId) && user_can($user_id, MINISITE_CAP_DELETE_OWN)) {
+        return [MINISITE_CAP_DELETE_OWN];
+      }
+      return ['do_not_allow'];
+
+    case 'minisite_publish_profile':
+      return user_can($user_id, MINISITE_CAP_PUBLISH) ? [MINISITE_CAP_PUBLISH] : ['do_not_allow'];
+
+    case 'minisite_read_profile':
+      // Public read is allowed if profile is published; otherwise require ownership/assignment or read_private
+      if ($objectId && minisite_profile_is_public($objectId)) { return ['exist']; }
+      if (user_can($user_id, MINISITE_CAP_READ_PRIVATE)) { return [MINISITE_CAP_READ_PRIVATE]; }
+      if ($objectId && (minisite_user_owns_profile($user_id, $objectId) || minisite_user_is_assigned_to_profile($user_id, $objectId))) {
+        return ['exist'];
+      }
+      return ['do_not_allow'];
+  }
+
+  return $caps;
+}, 10, 4);
+
+/**
+ * The following helper stubs allow your domain layer to determine ownership/assignment/publication
+ * for profiles stored in custom tables. Hook or implement them using repositories.
+ */
+function minisite_user_owns_profile(int $userId, int $profileId): bool {
+  /**
+   * Implement by querying your profiles table (e.g., owner_user_id column)
+   * or hook via: add_filter('minisite_user_owns_profile', fn($v,$uid,$pid)=>bool, 10, 3)
+   */
+  return (bool) apply_filters('minisite_user_owns_profile', false, $userId, $profileId);
+}
+
+function minisite_user_is_assigned_to_profile(int $userId, int $profileId): bool {
+  /**
+   * Implement by querying an assignment table/profile_editors relation
+   * or hook via: add_filter('minisite_user_is_assigned_to_profile', fn($v,$uid,$pid)=>bool, 10, 3)
+   */
+  return (bool) apply_filters('minisite_user_is_assigned_to_profile', false, $userId, $profileId);
+}
+
+function minisite_profile_is_public(int $profileId): bool {
+  /**
+   * Implement by checking profile status (e.g., published flag) in your custom table
+   * or hook via: add_filter('minisite_profile_is_public', fn($v,$pid)=>bool, 10, 2)
+   */
+  return (bool) apply_filters('minisite_profile_is_public', false, $profileId);
+}
 
 /**
  * Register rewrites for /b/{business}/{location}
