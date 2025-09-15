@@ -397,6 +397,18 @@ add_action('template_redirect', function () {
         case 'dashboard':
           $authCtrl->handleDashboard();
           break;
+        case 'sites':
+          // Delegate to SitesController
+          if ($sitesCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\SitesController::class)) {
+            $sitesCtrl = new $sitesCtrlClass($renderer);
+            $sitesCtrl->handleList();
+            break;
+          }
+          // Fallback if SitesController missing
+          status_header(503);
+          nocache_headers();
+          echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Sites listing unavailable</h1>';
+          exit;
         case 'logout':
           $authCtrl->handleLogout();
           break;

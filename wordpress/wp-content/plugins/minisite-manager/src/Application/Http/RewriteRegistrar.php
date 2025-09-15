@@ -15,8 +15,8 @@ final class RewriteRegistrar
         add_rewrite_tag('%minisite_account%', '([0-1])');
         add_rewrite_tag('%minisite_account_action%', '([^&]+)');
         
-        // Account routes: /account/login, /account/register, /account/dashboard, /account/logout, /account/forgot
-        add_rewrite_rule('^account/(login|register|dashboard|logout|forgot)/?$', 'index.php?minisite_account=1&minisite_account_action=$matches[1]', 'top');
+        // Account routes: /account/login, /account/register, /account/dashboard, /account/logout, /account/forgot, /account/sites
+        add_rewrite_rule('^account/(login|register|dashboard|logout|forgot|sites)/?$', 'index.php?minisite_account=1&minisite_account_action=$matches[1]', 'top');
     }
 }
 

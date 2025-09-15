@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" data-theme="blue">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ page_title }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary:#2563EB; --on-primary:#fff;
+      --secondary:#0EA5E9; --on-secondary:#03283A;
+      --background:#F8FAFC; --on-background:#0F172A;
+      --surface:#FFFFFF; --on-surface:#0F172A;
+      --surface-1:#F1F5F9; --on-surface-variant:#475569;
+      --outline:#CBD5E1; --outline-variant:#E2E8F0;
+      --surface-0:var(--surface);
+    }
+  </style>
+  <script>
+    // TODO: Wire filters and pagination via REST later
+  </script>
+</head>
+<body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
+  <main class="min-h-screen">
+    <div class="max-w-6xl mx-auto p-6">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
+          <p class="mt-2 text-[var(--on-surface-variant)]">View and manage minisites you own.</p>
+        </div>
+        {% if can_create %}
+          <a href="{{ function('home_url','/account/sites/new') }}"
+             class="inline-flex items-center px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+            New Minisite
+          </a>
+        {% endif %}
+      </div>
+
+      <div class="mt-6">
+        <div class="flex items-center gap-3">
+          <div class="flex-1">
+            <input type="search" placeholder="Search by name or slug (TODO)"
+                   class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3" />
+          </div>
+          <!-- TODO: Advanced filters for power/admin -->
+        </div>
+      </div>
+
+      {% if sites is empty %}
+        <div class="mt-10 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-10 text-center">
+          <h3 class="text-xl font-semibold text-[var(--on-surface)]">No minisites yet</h3>
+          <p class="mt-1 text-[var(--on-surface-variant)]">Create your first minisite to get started.</p>
+          {% if can_create %}
+            <a href="{{ function('home_url','/account/sites/new') }}"
+               class="mt-4 inline-flex items-center px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">Create Draft</a>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {% for s in sites %}
+            <div class="rounded-2xl p-6 ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] hover:shadow-lg transition">
+              <div class="flex items-start justify-between gap-3">
+                <div>
+                  <h3 class="font-semibold text-lg text-[var(--on-surface)]">{{ s.title }}</h3>
+                  <p class="mt-1 text-sm text-[var(--on-surface-variant)]">/b/{{ s.slugs.business }}/{{ s.slugs.location }}</p>
+                </div>
+                <span class="inline-flex items-center text-xs font-medium px-2 py-1 rounded-full"
+                      style="background: {{ s.status == 'published' ? '#DCFCE7' : '#E2E8F0' }}; color: {{ s.status == 'published' ? '#166534' : '#334155' }};">
+                  {{ s.status_chip }}
+                </span>
+              </div>
+              <div class="mt-3 text-sm text-[var(--on-surface-variant)]">
+                <div>{{ s.location }}</div>
+                <div class="mt-1">Updated: {{ s.updated_at ?: '—' }}</div>
+                <div>Published: {{ s.published_at ?: '—' }}</div>
+                <div class="mt-1">Subscription: {{ s.subscription }}</div>
+                <div>Online: {{ s.online }}</div>
+              </div>
+              <div class="mt-4 flex items-center gap-2">
+                <a href="{{ function('home_url','/account/sites/' ~ s.id ~ '/edit') }}" class="text-[var(--primary)] hover:underline">Edit</a>
+                <span class="text-[var(--outline)]">•</span>
+                <a href="{{ function('home_url','/account/sites/' ~ s.id ~ '/versions') }}" class="text-[var(--primary)] hover:underline">Versions</a>
+                <span class="text-[var(--outline)]">•</span>
+                <a href="{{ function('home_url','/account/sites/' ~ s.id ~ '/settings') }}" class="text-[var(--primary)] hover:underline">Settings</a>
+                <span class="flex-1"></span>
+                <a href="{{ s.route }}" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">View</a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <!-- TODO: Pagination -->
+      {% endif %}
+    </div>
+  </main>
+</body>
+</html>
+
+

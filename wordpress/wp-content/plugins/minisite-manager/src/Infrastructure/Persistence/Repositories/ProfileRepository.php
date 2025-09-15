@@ -23,6 +23,22 @@ final class ProfileRepository implements ProfileRepositoryInterface
         return $this->mapRow($row);
     }
 
+    /**
+     * List profiles owned by a user (v1 minimal: uses created_by as owner surrogate)
+     * TODO: Switch to explicit owner_user_id column when added.
+     *
+     * @return Profile[]
+     */
+    public function listByOwner(int $userId, int $limit = 50, int $offset = 0): array
+    {
+        $sql = $this->db->prepare(
+            "SELECT * FROM {$this->table()} WHERE created_by=%d ORDER BY updated_at DESC, id DESC LIMIT %d OFFSET %d",
+            $userId, $limit, $offset
+        );
+        $rows = $this->db->get_results($sql, ARRAY_A) ?: [];
+        return array_map(fn($r) => $this->mapRow($r), $rows);
+    }
+
     public function save(Profile $p, int $expectedSiteVersion): Profile
     {
         // Build normalized search_terms (simple example; replace with your builder later)
