@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" data-theme="blue">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ page_title }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary:#2563EB; --on-primary:#fff;
+      --background:#F8FAFC; --on-background:#0F172A;
+      --surface:#FFFFFF; --on-surface:#0F172A;
+      --surface-1:#F1F5F9; --on-surface-variant:#475569;
+      --outline-variant:#E2E8F0;
+      --surface-0:var(--surface);
+    }
+  </style>
+</head>
+<body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
+  <main class="min-h-screen">
+    <div class="max-w-5xl mx-auto p-6">
+      <div class="flex justify-between items-start mb-6">
+        <div>
+          <h1 class="text-3xl md:text-5xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
+          <p class="mt-2 text-[var(--on-surface-variant)]">
+            Welcome back! Manage your minisites and view reports.
+          </p>
+        </div>
+        <a href="{{ function('home_url','/account/logout') }}" 
+           class="inline-flex items-center px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 text-sm font-medium">
+          Sign Out
+        </a>
+      </div>
+
+      <div class="mt-8 grid md:grid-cols-3 gap-6">
+        <a href="{{ function('home_url','/minisites') }}" class="block rounded-2xl p-6 ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] hover:shadow-lg">
+          <h3 class="font-semibold text-lg">My Minisites</h3>
+          <p class="mt-1 text-sm text-[var(--on-surface-variant)]">List, search, and edit your minisites.</p>
+        </a>
+        <a href="{{ function('home_url','/reports') }}" class="block rounded-2xl p-6 ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] hover:shadow-lg">
+          <h3 class="font-semibold text-lg">Reports</h3>
+          <p class="mt-1 text-sm text-[var(--on-surface-variant)]">Contacts and revenue (role-based).</p>
+        </a>
+        <a href="{{ function('home_url','/billing') }}" class="block rounded-2xl p-6 ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] hover:shadow-lg">
+          <h3 class="font-semibold text-lg">Billing</h3>
+          <p class="mt-1 text-sm text-[var(--on-surface-variant)]">Manage plan, credits, discounts.</p>
+        </a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

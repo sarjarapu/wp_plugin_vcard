@@ -1,0 +1,86 @@
+{# Login page (Timber/Twig) #}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" data-theme="blue">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ page_title }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary:#2563EB; --on-primary:#fff;
+      --secondary:#0EA5E9; --on-secondary:#03283A;
+      --background:#F8FAFC; --on-background:#0F172A;
+      --surface:#FFFFFF; --on-surface:#0F172A;
+      --surface-1:#F1F5F9; --on-surface-variant:#475569;
+      --outline:#CBD5E1; --outline-variant:#E2E8F0;
+      --focus-ring: color-mix(in srgb, var(--primary) 40%, transparent);
+      --surface-0:var(--surface);
+    }
+    :is(a,button,input):focus-visible {
+      outline:none; box-shadow:0 0 0 2px var(--focus-ring), 0 0 0 4px white;
+      border-radius:.5rem;
+    }
+  </style>
+</head>
+<body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
+  <main class="min-h-screen flex items-center justify-center p-6">
+    <div class="w-full max-w-[420px] mx-auto">
+      <div class="rounded-2xl shadow-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-8">
+        <div class="text-center mb-6">
+          <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[var(--primary)] text-[var(--on-primary)] shadow-md">
+            <span class="text-xl font-bold">MM</span>
+          </div>
+          <h1 class="mt-4 text-2xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
+          <p class="mt-1 text-sm text-[var(--on-surface-variant)]">Access your dashboard to manage minisites.</p>
+        </div>
+
+        {% if error_msg %}
+          <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm">
+            {{ error_msg | raw }}
+          </div>
+        {% endif %}
+
+        <form method="post" class="grid gap-4">
+          {{ function('wp_nonce_field', 'minisite_login', 'minisite_login_nonce') }}
+          <input type="hidden" name="redirect_to" value="{{ redirect_to }}"/>
+
+          <div>
+            <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email or Username</label>
+            <input name="user_login" type="text" required placeholder="you@example.com"
+              class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)]
+                     border border-[var(--outline-variant)] px-4 py-3
+                     focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/40"/>
+          </div>
+
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-sm font-medium text-[var(--on-surface)]">Password</label>
+              <a href="{{ function('home_url','/account/forgot') }}" class="text-sm text-[var(--primary)] hover:underline">Forgot?</a>
+            </div>
+            <input name="user_pass" type="password" required placeholder="••••••••"
+              class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)]
+                     border border-[var(--outline-variant)] px-4 py-3
+                     focus:outline-none focus:ring-2 focus:ring-[var(--secondary)]/40"/>
+          </div>
+
+          <label class="inline-flex items-center gap-2 text-sm text-[var(--on-surface-variant)]">
+            <input type="checkbox" name="remember" class="rounded border-[var(--outline-variant)]"> Remember me
+          </label>
+
+          <button type="submit"
+            class="mt-2 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-lg
+                   bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+            Sign in
+          </button>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-[var(--on-surface-variant)]">
+          New here?
+          <a class="text-[var(--primary)] hover:underline" href="{{ function('home_url','/account/register') }}">Create an account</a>
+        </p>
+      </div>
+    </div>
+  </main>
+</body>
+</html> 

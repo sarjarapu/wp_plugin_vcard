@@ -11,6 +11,7 @@
  * @package MinisiteManager
  */
 
+
 if (!defined('ABSPATH')) {
   exit;
 }
@@ -346,49 +347,102 @@ add_action('init', function () {
 }, 5);
 
 /**
- * Map our query to a front controller if minisite=1
+ * Map our query to a front controller if minisite=1 or minisite_account=1
  */
 add_action('parse_query', function (\WP_Query $q) {
-  if (!is_admin() && isset($q->query_vars['minisite']) && (int)$q->query_vars['minisite'] === 1) {
-    // Prevent WP from trying to load a post
-    $q->is_home = false;
-    $q->is_page = false;
-    $q->is_singular = false;
-    $q->is_404 = false;
+  if (!is_admin()) {
+    // Handle minisite profile routes
+    if (isset($q->query_vars['minisite']) && (int)$q->query_vars['minisite'] === 1) {
+      $q->is_home = false;
+      $q->is_page = false;
+      $q->is_singular = false;
+      $q->is_404 = false;
+    }
+    
+    // Handle account authentication routes
+    if (isset($q->query_vars['minisite_account']) && (int)$q->query_vars['minisite_account'] === 1) {
+      $q->is_home = false;
+      $q->is_page = false;
+      $q->is_singular = false;
+      $q->is_404 = false;
+    }
   }
 });
 
 /**
- * Template redirect (render the minisite page)
+ * Template redirect (render the minisite page or account pages)
  */
 add_action('template_redirect', function () {
-  if ((int) get_query_var('minisite') !== 1) {
-    return;
-  }
+  // Handle account authentication routes
+  if ((int) get_query_var('minisite_account') === 1) {
+    $action = get_query_var('minisite_account_action');
+    
+    // Resolve renderer: Timber if available
+    $renderer = null;
+    if (class_exists('Timber\Timber') && minisite_class(\Minisite\Application\Rendering\TimberRenderer::class)) {
+      $renderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
+    }
 
-  $biz = get_query_var('minisite_biz');
-  $loc = get_query_var('minisite_loc');
+    // Handle authentication actions
+    if ($authCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\AuthController::class)) {
+      $authCtrl = new $authCtrlClass($renderer);
+      
+      switch ($action) {
+        case 'login':
+          $authCtrl->handleLogin();
+          break;
+        case 'register':
+          $authCtrl->handleRegister();
+          break;
+        case 'dashboard':
+          $authCtrl->handleDashboard();
+          break;
+        case 'logout':
+          $authCtrl->handleLogout();
+          break;
+        case 'forgot':
+          $authCtrl->handleForgotPassword();
+          break;
+        default:
+          wp_redirect(home_url('/account/login'));
+          exit;
+      }
+      exit;
+    }
 
-  // Resolve renderer: Timber if available, else PHP renderer
-  $renderer = null;
-  if (class_exists('Timber\Timber') && minisite_class(\Minisite\Application\Rendering\TimberRenderer::class)) {
-    $renderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
-  } elseif ($phpRenderer = minisite_class(\Minisite\Application\Rendering\PhpRenderer::class)) {
-    $renderer = new $phpRenderer(MINISITE_DEFAULT_TEMPLATE);
-  }
-
-  // Controller to build the view model
-  if ($ctrlClass = minisite_class(\Minisite\Application\Controllers\Front\ProfilePageController::class)) {
-    $ctrl = new $ctrlClass($renderer);
-    $ctrl->handle($biz, $loc);
+    // Fallback if AuthController not available
+    status_header(503);
+    nocache_headers();
+    echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Account system not available</h1><p>AuthController not found.</p>';
     exit;
   }
 
-  // Temporary fallback: simple 503 until controllers are added
-  status_header(503);
-  nocache_headers();
-  echo '<!doctype html><meta charset="utf-8"><title>Minisite</title><h1>Minisite route detected</h1><p>Scaffold the controllers/renderers to complete rendering.</p>';
-  exit;
+  // Handle minisite profile routes
+  if ((int) get_query_var('minisite') === 1) {
+    $biz = get_query_var('minisite_biz');
+    $loc = get_query_var('minisite_loc');
+
+    // Resolve renderer: Timber if available, else PHP renderer
+    $renderer = null;
+    if (class_exists('Timber\Timber') && minisite_class(\Minisite\Application\Rendering\TimberRenderer::class)) {
+      $renderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
+    } elseif ($phpRenderer = minisite_class(\Minisite\Application\Rendering\PhpRenderer::class)) {
+      $renderer = new $phpRenderer(MINISITE_DEFAULT_TEMPLATE);
+    }
+
+    // Controller to build the view model
+    if ($ctrlClass = minisite_class(\Minisite\Application\Controllers\Front\ProfilePageController::class)) {
+      $ctrl = new $ctrlClass($renderer);
+      $ctrl->handle($biz, $loc);
+      exit;
+    }
+
+    // Temporary fallback: simple 503 until controllers are added
+    status_header(503);
+    nocache_headers();
+    echo '<!doctype html><meta charset="utf-8"><title>Minisite</title><h1>Minisite route detected</h1><p>Scaffold the controllers/renderers to complete rendering.</p>';
+    exit;
+  }
 });
 
 /**
@@ -398,7 +452,51 @@ add_filter('query_vars', function (array $vars) {
   $vars[] = 'minisite';
   $vars[] = 'minisite_biz';
   $vars[] = 'minisite_loc';
+  $vars[] = 'minisite_account';
+  $vars[] = 'minisite_account_action';
   return $vars;
+});
+
+/**
+ * Hide wp-admin for non-privileged users (redirect to front-end login)
+ */
+add_action('admin_init', function () {
+  if (is_user_logged_in()) {
+    $user = wp_get_current_user();
+    // Allow access for administrators and minisite_power/minisite_admin roles
+    if (user_can($user, 'manage_options') || 
+        in_array(MINISITE_ROLE_POWER, $user->roles) || 
+        in_array(MINISITE_ROLE_ADMIN, $user->roles)) {
+      return; // Allow access
+    }
+  }
+  
+  // Redirect non-privileged users to front-end login
+  wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+  exit;
+});
+
+/**
+ * Redirect wp-login.php to front-end login
+ */
+add_action('login_init', function () {
+  wp_redirect(home_url('/account/login'));
+  exit;
+});
+
+/**
+ * Hide admin bar for non-privileged users
+ */
+add_action('after_setup_theme', function () {
+  if (is_user_logged_in()) {
+    $user = wp_get_current_user();
+    // Hide admin bar for users who don't have admin privileges
+    if (!user_can($user, 'manage_options') && 
+        !in_array(MINISITE_ROLE_POWER, $user->roles) && 
+        !in_array(MINISITE_ROLE_ADMIN, $user->roles)) {
+      show_admin_bar(false);
+    }
+  }
 });
 
 /**
