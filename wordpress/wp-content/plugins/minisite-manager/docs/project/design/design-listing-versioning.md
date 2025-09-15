@@ -25,14 +25,14 @@ Key caps used (already defined in your plugin):
 ## 2) Data Model
 
 ### 2.1 Custom Post Type
-- **CPT**: `minisite`
+- **Entity**: `Profile` (custom table)
 - **Core fields**: `post_title`, `post_status` (`draft`, `private`, `publish`), `post_author` (last editor)
 - **Meta (single)**:
   - `_minisite_owner_user_id` (int, required)
   - `_minisite_assigned_editors` (array<int>)
   - `_minisite_online` (bool; default `false`)
   - `_minisite_current_version_id` (int; FK → versions table)
-  - `_minisite_slug` (string, unique for public route if you don’t rely on WP permalinks)
+  - `_minisite_business_slug` (string) and `_minisite_location_slug` (string) for public route `/b/{business}/{location}`
 - **Meta (derived/non-authoritative)**:
   - `_minisite_subscription_active` (bool, derived at read time—do not persist)
   - `_minisite_subscription_expires_at` (datetime)
@@ -135,7 +135,7 @@ Use a slim table you control and **sync** with Woo/PMPro events:
 - **Rollback**: same as publish (creates new draft then publish).
 - **Toggle online/offline**: owner OR assigned editor OR admin (does not require active subscription; but without active subscription public view remains blocked regardless).
 
-> Enforce with `map_meta_cap('edit_post', ...)` + explicit checks for owner/assigned/admin and your custom caps (`minisite_publish`, etc.).
+> Enforce with `map_meta_cap('minisite_edit_profile', ...)` + explicit checks for owner/assigned/admin and your custom caps (`minisite_publish`, etc.).
 
 ---
 
@@ -143,11 +143,11 @@ Use a slim table you control and **sync** with Woo/PMPro events:
 
 ### 5.1 Routes (front-end, Timber/Twig)
 - `/account/sites` — “My Sites” listing (role-aware)
-- `/minisite/new` — Create draft (owner becomes current user)
-- `/minisite/{id}/edit` — Editor (draft editing)
-- `/minisite/{id}/versions` — Version history (timeline)
-- `/minisite/{id}/settings` — Ownership, assign editors (power/admin), online/offline toggle
-- `/minisite/{slug}` — Public minisite view (published version only), with draft/offline message fallbacks
+- `/account/sites/new` — Create draft (owner becomes current user)
+- `/account/sites/{id}/edit` — Editor (draft editing)
+- `/account/sites/{id}/versions` — Version history (timeline)
+- `/account/sites/{id}/settings` — Ownership, assign editors (power/admin), online/offline toggle
+- `/b/{business}/{location}` — Public minisite view (published version only), with draft/offline message fallbacks
 
 ### 5.2 “My Sites” Listing — UI Blocks
 - **Header**: “My Minisites” + `New Minisite` (if `current_user_can('minisite_create')`)
@@ -220,9 +220,9 @@ Use a slim table you control and **sync** with Woo/PMPro events:
 
 ## 7) Public Rendering Rules
 
-When resolving `/minisite/{slug}`:
+When resolving `/b/{business}/{location}`:
 
-1) Resolve minisite by slug; compute **effective subscription**.
+1) Resolve minisite by business/location slugs (SlugPair); compute **effective subscription**.
 2) If **no published version**:
    - If drafts exist → render **Draft Message**:
      > “The minisite ‘{name}’ is currently in draft and not available for public view. If you are the owner, please purchase a subscription to publish it.”
@@ -328,7 +328,7 @@ When resolving `/minisite/{slug}`:
 
 ## 15) Minimal Public Route Pseudocode
 
-resolve minisite by slug
+resolve minisite by business/location slugs (SlugPair)
 
 ```
 if not found → 404
