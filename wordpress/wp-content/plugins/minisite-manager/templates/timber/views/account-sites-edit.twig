@@ -67,23 +67,23 @@
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">SEO & Meta</h2>
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Page Title</label>
-                  <input name="seo_title" type="text" value="{{ site_json.seo.title|default('') }}"
+                  <label for="seo_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Page Title</label>
+                  <input id="seo_title" name="seo_title" type="text" value="{{ site_json.seo.title|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Meta Description</label>
-                  <textarea name="seo_description" rows="3"
+                  <label for="seo_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Meta Description</label>
+                  <textarea id="seo_description" name="seo_description" rows="3"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.seo.description|default('') }}</textarea>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Keywords</label>
-                  <input name="seo_keywords" type="text" value="{{ site_json.seo.keywords|default('') }}"
+                  <label for="seo_keywords" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Keywords</label>
+                  <input id="seo_keywords" name="seo_keywords" type="text" value="{{ site_json.seo.keywords|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Favicon URL</label>
-                  <input name="seo_favicon" type="url" value="{{ site_json.seo.favicon|default('') }}"
+                  <label for="seo_favicon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Favicon URL</label>
+                  <input id="seo_favicon" name="seo_favicon" type="url" value="{{ site_json.seo.favicon|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
               </div>
@@ -94,23 +94,23 @@
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Brand & Logo</h2>
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Business Name</label>
-                  <input name="brand_name" type="text" value="{{ site_json.brand.name|default('') }}"
+                  <label for="brand_name" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Business Name</label>
+                  <input id="brand_name" name="brand_name" type="text" value="{{ site_json.brand.name|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Logo URL</label>
-                  <input name="brand_logo" type="url" value="{{ site_json.brand.logo|default('') }}"
+                  <label for="brand_logo" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Logo URL</label>
+                  <input id="brand_logo" name="brand_logo" type="url" value="{{ site_json.brand.logo|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Industry</label>
-                  <input name="brand_industry" type="text" value="{{ site_json.brand.industry|default('') }}"
+                  <label for="brand_industry" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Industry</label>
+                  <input id="brand_industry" name="brand_industry" type="text" value="{{ site_json.brand.industry|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Color Palette</label>
-                  <select name="brand_palette" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
+                  <label for="brand_palette" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Color Palette</label>
+                  <select id="brand_palette" name="brand_palette" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
                     <option value="blue" {{ site_json.brand.palette|default('blue') == 'blue' ? 'selected' : '' }}>Blue</option>
                     <option value="teal" {{ site_json.brand.palette|default('blue') == 'teal' ? 'selected' : '' }}>Teal</option>
                     <option value="green" {{ site_json.brand.palette|default('blue') == 'green' ? 'selected' : '' }}>Green</option>
@@ -127,63 +127,63 @@
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Hero Section</h2>
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Badge Text</label>
-                  <input name="hero_badge" type="text" value="{{ site_json.hero.badge|default('') }}"
+                  <label for="hero_badge" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Badge Text</label>
+                  <input id="hero_badge" name="hero_badge" type="text" value="{{ site_json.hero.badge|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Main Heading</label>
-                  <input name="hero_heading" type="text" value="{{ site_json.hero.heading|default('') }}"
+                  <label for="hero_heading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Main Heading</label>
+                  <input id="hero_heading" name="hero_heading" type="text" value="{{ site_json.hero.heading|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Subheading</label>
-                  <textarea name="hero_subheading" rows="3"
+                  <label for="hero_subheading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Subheading</label>
+                  <textarea id="hero_subheading" name="hero_subheading" rows="3"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.hero.subheading|default('') }}</textarea>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Hero Image URL</label>
-                  <input name="hero_image" type="url" value="{{ site_json.hero.image|default('') }}"
+                  <label for="hero_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Hero Image URL</label>
+                  <input id="hero_image" name="hero_image" type="url" value="{{ site_json.hero.image|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image Alt Text</label>
-                  <input name="hero_image_alt" type="text" value="{{ site_json.hero.imageAlt|default('') }}"
+                  <label for="hero_image_alt" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image Alt Text</label>
+                  <input id="hero_image_alt" name="hero_image_alt" type="text" value="{{ site_json.hero.imageAlt|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 Text</label>
-                    <input name="hero_cta1_text" type="text" value="{{ site_json.hero.ctas[0].text|default('') }}"
+                    <label for="hero_cta1_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 Text</label>
+                    <input id="hero_cta1_text" name="hero_cta1_text" type="text" value="{{ site_json.hero.ctas[0].text|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 URL</label>
-                    <input name="hero_cta1_url" type="url" value="{{ site_json.hero.ctas[0].url|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 Text</label>
-                    <input name="hero_cta2_text" type="text" value="{{ site_json.hero.ctas[1].text|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 URL</label>
-                    <input name="hero_cta2_url" type="url" value="{{ site_json.hero.ctas[1].url|default('') }}"
+                    <label for="hero_cta1_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 URL</label>
+                    <input id="hero_cta1_url" name="hero_cta1_url" type="url" value="{{ site_json.hero.ctas[0].url|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Value</label>
-                    <input name="hero_rating_value" type="text" value="{{ site_json.hero.rating.value|default('') }}"
+                    <label for="hero_cta2_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 Text</label>
+                    <input id="hero_cta2_text" name="hero_cta2_text" type="text" value="{{ site_json.hero.ctas[1].text|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Count</label>
-                    <input name="hero_rating_count" type="text" value="{{ site_json.hero.rating.count|default('') }}"
+                    <label for="hero_cta2_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 URL</label>
+                    <input id="hero_cta2_url" name="hero_cta2_url" type="url" value="{{ site_json.hero.ctas[1].url|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="hero_rating_value" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Value</label>
+                    <input id="hero_rating_value" name="hero_rating_value" type="text" value="{{ site_json.hero.rating.value|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="hero_rating_count" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Count</label>
+                    <input id="hero_rating_count" name="hero_rating_count" type="text" value="{{ site_json.hero.rating.count|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
@@ -195,19 +195,19 @@
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Why Choose Us</h2>
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
-                  <input name="whyus_title" type="text" value="{{ site_json.whyUs.title|default('') }}"
+                  <label for="whyus_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
+                  <input id="whyus_title" name="whyus_title" type="text" value="{{ site_json.whyUs.title|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content HTML</label>
-                  <textarea name="whyus_html" rows="6"
+                  <label for="whyus_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content HTML</label>
+                  <textarea id="whyus_html" name="whyus_html" rows="6"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.whyUs.html|default('') }}</textarea>
                   <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
-                  <input name="whyus_image" type="url" value="{{ site_json.whyUs.image|default('') }}"
+                  <label for="whyus_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
+                  <input id="whyus_image" name="whyus_image" type="url" value="{{ site_json.whyUs.image|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
               </div>
@@ -217,8 +217,8 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">About Content</h2>
               <div>
-                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About HTML</label>
-                <textarea name="about_html" rows="8"
+                <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About HTML</label>
+                <textarea id="about_html" name="about_html" rows="8"
                   class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.about.html|default('') }}</textarea>
                 <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
               </div>
@@ -231,13 +231,13 @@
                 <!-- Phone -->
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Text</label>
-                    <input name="contact_phone_text" type="text" value="{{ site_json.contact.phone.text|default('') }}"
+                    <label for="contact_phone_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Text</label>
+                    <input id="contact_phone_text" name="contact_phone_text" type="text" value="{{ site_json.contact.phone.text|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Link</label>
-                    <input name="contact_phone_link" type="tel" value="{{ site_json.contact.phone.link|default('') }}"
+                    <label for="contact_phone_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Link</label>
+                    <input id="contact_phone_link" name="contact_phone_link" type="tel" value="{{ site_json.contact.phone.link|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
@@ -245,34 +245,34 @@
                 <!-- WhatsApp -->
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Text</label>
-                    <input name="contact_whatsapp_text" type="text" value="{{ site_json.contact.whatsapp.text|default('') }}"
+                    <label for="contact_whatsapp_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Text</label>
+                    <input id="contact_whatsapp_text" name="contact_whatsapp_text" type="text" value="{{ site_json.contact.whatsapp.text|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Link</label>
-                    <input name="contact_whatsapp_link" type="tel" value="{{ site_json.contact.whatsapp.link|default('') }}"
+                    <label for="contact_whatsapp_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Link</label>
+                    <input id="contact_whatsapp_link" name="contact_whatsapp_link" type="tel" value="{{ site_json.contact.whatsapp.link|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
 
                 <!-- Email -->
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email Address</label>
-                  <input name="contact_email" type="email" value="{{ site_json.contact.email|default('') }}"
+                  <label for="contact_email" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email Address</label>
+                  <input id="contact_email" name="contact_email" type="email" value="{{ site_json.contact.email|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
 
                 <!-- Website -->
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website Text</label>
-                    <input name="contact_website_text" type="text" value="{{ site_json.contact.website.text|default('') }}"
+                    <label for="contact_website_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website Text</label>
+                    <input id="contact_website_text" name="contact_website_text" type="text" value="{{ site_json.contact.website.text|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website URL</label>
-                    <input name="contact_website_link" type="url" value="{{ site_json.contact.website.link|default('') }}"
+                    <label for="contact_website_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website URL</label>
+                    <input id="contact_website_link" name="contact_website_link" type="url" value="{{ site_json.contact.website.link|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
@@ -280,25 +280,25 @@
                 <!-- Address -->
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 1</label>
-                    <input name="contact_address1" type="text" value="{{ site_json.contact.address_line1|default('') }}"
+                    <label for="contact_address1" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 1</label>
+                    <input id="contact_address1" name="contact_address1" type="text" value="{{ site_json.contact.address_line1|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 2</label>
-                    <input name="contact_address2" type="text" value="{{ site_json.contact.address_line2|default('') }}"
+                    <label for="contact_address2" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 2</label>
+                    <input id="contact_address2" name="contact_address2" type="text" value="{{ site_json.contact.address_line2|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 3</label>
-                    <input name="contact_address3" type="text" value="{{ site_json.contact.address_line3|default('') }}"
+                    <label for="contact_address3" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 3</label>
+                    <input id="contact_address3" name="contact_address3" type="text" value="{{ site_json.contact.address_line3|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 4</label>
-                    <input name="contact_address4" type="text" value="{{ site_json.contact.address_line4|default('') }}"
+                    <label for="contact_address4" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 4</label>
+                    <input id="contact_address4" name="contact_address4" type="text" value="{{ site_json.contact.address_line4|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
@@ -306,13 +306,13 @@
                 <!-- Plus Code -->
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
-                    <input name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
+                    <label for="contact_pluscode" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
+                    <input id="contact_pluscode" name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code URL</label>
-                    <input name="contact_pluscode_url" type="url" value="{{ site_json.contact.plusCodeUrl|default('') }}"
+                    <label for="contact_pluscode_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code URL</label>
+                    <input id="contact_pluscode_url" name="contact_pluscode_url" type="url" value="{{ site_json.contact.plusCodeUrl|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
@@ -320,13 +320,13 @@
                 <!-- Coordinates -->
                 <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Latitude</label>
-                    <input name="contact_lat" type="number" step="any" value="{{ profile.geo.lat|default('') }}"
+                    <label for="contact_lat" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Latitude</label>
+                    <input id="contact_lat" name="contact_lat" type="number" step="any" value="{{ profile.geo.lat|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Longitude</label>
-                    <input name="contact_lng" type="number" step="any" value="{{ profile.geo.lng|default('') }}"
+                    <label for="contact_lng" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Longitude</label>
+                    <input id="contact_lng" name="contact_lng" type="number" step="any" value="{{ profile.geo.lng|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
@@ -422,8 +422,8 @@
               </div>
               
               <div class="mb-4">
-                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
-                <input name="products_section_title" type="text" value="{{ site_json.services.title|default('Products & Services') }}"
+                <label for="products_section_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
+                <input id="products_section_title" name="products_section_title" type="text" value="{{ site_json.services.title|default('Products & Services') }}"
                   class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
               </div>
 
@@ -438,39 +438,39 @@
                     </div>
                     <div class="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Title</label>
-                        <input name="product_{{ loop.index0 }}_title" type="text" value="{{ item.title|default('') }}"
+                        <label for="product_{{ loop.index0 }}_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Title</label>
+                        <input id="product_{{ loop.index0 }}_title" name="product_{{ loop.index0 }}_title" type="text" value="{{ item.title|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
-                        <input name="product_{{ loop.index0 }}_image" type="url" value="{{ item.image|default('') }}"
+                        <label for="product_{{ loop.index0 }}_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+                        <input id="product_{{ loop.index0 }}_image" name="product_{{ loop.index0 }}_image" type="url" value="{{ item.image|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Price</label>
-                        <input name="product_{{ loop.index0 }}_price" type="text" value="{{ item.price|default('') }}"
+                        <label for="product_{{ loop.index0 }}_price" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Price</label>
+                        <input id="product_{{ loop.index0 }}_price" name="product_{{ loop.index0 }}_price" type="text" value="{{ item.price|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Font Awesome Icon</label>
-                        <input name="product_{{ loop.index0 }}_icon" type="text" value="{{ item.icon|default('') }}" placeholder="fa-solid fa-star"
+                        <label for="product_{{ loop.index0 }}_icon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Font Awesome Icon</label>
+                        <input id="product_{{ loop.index0 }}_icon" name="product_{{ loop.index0 }}_icon" type="text" value="{{ item.icon|default('') }}" placeholder="fa-solid fa-star"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
-                        <input name="product_{{ loop.index0 }}_cta_text" type="text" value="{{ item.cta|default('') }}"
+                        <label for="product_{{ loop.index0 }}_cta_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
+                        <input id="product_{{ loop.index0 }}_cta_text" name="product_{{ loop.index0 }}_cta_text" type="text" value="{{ item.cta|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
-                        <input name="product_{{ loop.index0 }}_cta_url" type="url" value="{{ item.url|default('') }}"
+                        <label for="product_{{ loop.index0 }}_cta_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
+                        <input id="product_{{ loop.index0 }}_cta_url" name="product_{{ loop.index0 }}_cta_url" type="url" value="{{ item.url|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                     </div>
                     <div class="mt-4">
-                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
-                      <textarea name="product_{{ loop.index0 }}_description" rows="3"
+                      <label for="product_{{ loop.index0 }}_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
+                      <textarea id="product_{{ loop.index0 }}_description" name="product_{{ loop.index0 }}_description" rows="3"
                         class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ item.description|default('') }}</textarea>
                     </div>
                   </div>
@@ -485,33 +485,33 @@
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Social Media Links</h2>
               <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
-                  <input name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
+                  <label for="social_facebook" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
+                  <input id="social_facebook" name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
-                  <input name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
+                  <label for="social_instagram" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
+                  <input id="social_instagram" name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">X (Twitter)</label>
-                  <input name="social_x" type="url" value="{{ site_json.social.x|default('') }}"
+                  <label for="social_x" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">X (Twitter)</label>
+                  <input id="social_x" name="social_x" type="url" value="{{ site_json.social.x|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
-                  <input name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
+                  <label for="social_youtube" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
+                  <input id="social_youtube" name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
-                  <input name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
+                  <label for="social_linkedin" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
+                  <input id="social_linkedin" name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">TikTok</label>
-                  <input name="social_tiktok" type="url" value="{{ site_json.social.tiktok|default('') }}"
+                  <label for="social_tiktok" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">TikTok</label>
+                  <input id="social_tiktok" name="social_tiktok" type="url" value="{{ site_json.social.tiktok|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
               </div>
@@ -537,13 +537,13 @@
                     </div>
                     <div class="grid md:grid-cols-2 gap-4">
                       <div>
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
-                        <input name="gallery_{{ loop.index0 }}_image" type="url" value="{{ image.src|default('') }}"
+                        <label for="gallery_{{ loop.index0 }}_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+                        <input id="gallery_{{ loop.index0 }}_image" name="gallery_{{ loop.index0 }}_image" type="url" value="{{ image.src|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                       <div>
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Alt Text</label>
-                        <input name="gallery_{{ loop.index0 }}_alt" type="text" value="{{ image.alt|default('') }}"
+                        <label for="gallery_{{ loop.index0 }}_alt" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Alt Text</label>
+                        <input id="gallery_{{ loop.index0 }}_alt" name="gallery_{{ loop.index0 }}_alt" type="text" value="{{ image.alt|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                     </div>
