@@ -108,8 +108,12 @@ final class SitesController
                     // Build siteJson from form data
                     $siteJson = $this->buildSiteJsonFromForm($_POST);
                     
-                    // Update the profile
-                    $updatedProfile = $repo->updateSiteJson($siteId, $siteJson, (int) $currentUser->ID);
+                    // Handle coordinate fields separately
+                    $lat = !empty($_POST['contact_lat']) ? (float) $_POST['contact_lat'] : null;
+                    $lng = !empty($_POST['contact_lng']) ? (float) $_POST['contact_lng'] : null;
+                    
+                    // Update the profile with coordinates
+                    $updatedProfile = $repo->updateSiteJsonWithCoordinates($siteId, $siteJson, $lat, $lng, (int) $currentUser->ID);
                     $success_msg = 'Changes saved successfully!';
                     
                     // Refresh profile data
@@ -210,6 +214,7 @@ final class SitesController
                 'favicon' => esc_url_raw($postData['seo_favicon'] ?? ''),
             ],
             'brand' => [
+                'name' => sanitize_text_field($postData['brand_name'] ?? ''),
                 'logo' => esc_url_raw($postData['brand_logo'] ?? ''),
                 'industry' => sanitize_text_field($postData['brand_industry'] ?? ''),
                 'palette' => sanitize_text_field($postData['brand_palette'] ?? 'blue'),
@@ -262,6 +267,7 @@ final class SitesController
                 'address_line3' => sanitize_text_field($postData['contact_address3'] ?? ''),
                 'address_line4' => sanitize_text_field($postData['contact_address4'] ?? ''),
                 'plusCode' => sanitize_text_field($postData['contact_pluscode'] ?? ''),
+                'plusCodeUrl' => esc_url_raw($postData['contact_pluscode_url'] ?? ''),
                 'hours' => $this->buildHoursFromForm($postData),
             ],
             'services' => $this->buildServicesFromForm($postData),

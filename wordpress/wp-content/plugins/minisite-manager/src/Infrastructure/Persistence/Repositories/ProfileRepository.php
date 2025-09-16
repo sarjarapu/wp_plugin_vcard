@@ -69,6 +69,33 @@ final class ProfileRepository implements ProfileRepositoryInterface
         return $this->findById($id);
     }
 
+    /**
+     * Update profile's siteJson data and coordinates (for editing)
+     * TODO: Implement proper versioning with versions table
+     */
+    public function updateSiteJsonWithCoordinates(int $id, array $siteJson, ?float $lat, ?float $lng, int $updatedBy): Profile
+    {
+        $sql = $this->db->prepare(
+            "UPDATE {$this->table()} SET site_json=%s, lat=%f, lng=%f, updated_by=%d, updated_at=NOW() WHERE id=%d",
+            wp_json_encode($siteJson), $lat, $lng, $updatedBy, $id
+        );
+        $this->db->query($sql);
+        
+        if ($this->db->rows_affected === 0) {
+            throw new \RuntimeException('Profile not found or update failed.');
+        }
+        
+        // Update POINT column if coordinates are set
+        if ($lat !== null && $lng !== null) {
+            $this->db->query($this->db->prepare(
+                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                $lng, $lat, $id
+            ));
+        }
+        
+        return $this->findById($id);
+    }
+
     public function save(Profile $p, int $expectedSiteVersion): Profile
     {
         // Build normalized search_terms (simple example; replace with your builder later)

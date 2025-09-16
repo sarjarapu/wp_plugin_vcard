@@ -250,20 +250,21 @@
 
   {# Build sameAs from social links #}
   {% set sameAs = [] %}
-  {% for s in sj.social|default([]) %}
-    {% if s.url|default('') %}{% set sameAs = sameAs|merge([s.url]) %}{% endif %}
+  {% set socialData = sj.social|default({}) %}
+  {% for network, url in socialData %}
+    {% if url|default('') %}{% set sameAs = sameAs|merge([url]) %}{% endif %}
   {% endfor %}
 
   {# Map opening hours to OpeningHoursSpecification #}
-  {% set dayMap = {'Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday','Sun':'Sunday'} %}
   {% set opening = [] %}
-  {% for h in sj.contact.hours|default([]) %}
-    {% if h.open is defined and h.close is defined %}
+  {% set hoursData = sj.contact.hours|default({}) %}
+  {% for dayName, dayData in hoursData %}
+    {% if dayData.open is defined and dayData.close is defined and dayData.open and dayData.close and not (dayData.closed is defined and dayData.closed) %}
       {% set opening = opening|merge([{
         '@type':'OpeningHoursSpecification',
-        'dayOfWeek': dayMap[h.day|default('')]|default(h.day|default('')),
-        'opens': h.open,
-        'closes': h.close
+        'dayOfWeek': dayName,
+        'opens': dayData.open,
+        'closes': dayData.close
       }]) %}
     {% endif %}
   {% endfor %}
@@ -334,8 +335,8 @@
     'openingHoursSpecification': opening
   } %}
 
-  {% if profile.lat is defined and profile.lat and profile.lng is defined and profile.lng %}
-    {% set business = business|merge({ 'geo': {'@type':'GeoCoordinates','latitude': profile.lat, 'longitude': profile.lng } }) %}
+  {% if profile.geo.lat is defined and profile.geo.lat and profile.geo.lng is defined and profile.geo.lng %}
+    {% set business = business|merge({ 'geo': {'@type':'GeoCoordinates','latitude': profile.geo.lat, 'longitude': profile.geo.lng } }) %}
   {% endif %}
   {% if aggregate %}
     {% set business = business|merge({ 'aggregateRating': aggregate }) %}
@@ -779,21 +780,14 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Follow us</h3>
               <div class="flex flex-wrap justify-center md:justify-start gap-4">
-                {# Extract known socials #}
-                {% set fb = null %}
-                {% set tw = null %}
-                {% set ig = null %}
-                {% set li = null %}
-                {% set yt = null %}
-                {% set tt = null %}
-                {% for s in profile.siteJson.social|default([]) %}
-                  {% if s.network == 'facebook' %}{% set fb = s.url %}{% endif %}
-                  {% if s.network in ['x','twitter'] %}{% set tw = s.url %}{% endif %}
-                  {% if s.network == 'instagram' %}{% set ig = s.url %}{% endif %}
-                  {% if s.network == 'linkedin' %}{% set li = s.url %}{% endif %}
-                  {% if s.network == 'youtube' %}{% set yt = s.url %}{% endif %}
-                  {% if s.network == 'tiktok' %}{% set tt = s.url %}{% endif %}
-                {% endfor %}
+                {# Extract known socials from new key-value structure #}
+                {% set socialData = profile.siteJson.social|default({}) %}
+                {% set fb = socialData.facebook|default(null) %}
+                {% set tw = socialData.x|default(null) %}
+                {% set ig = socialData.instagram|default(null) %}
+                {% set li = socialData.linkedin|default(null) %}
+                {% set yt = socialData.youtube|default(null) %}
+                {% set tt = socialData.tiktok|default(null) %}
 
                 {% if fb %}
                   <a href="{{ fb }}" target="_blank" rel="noopener" aria-label="Facebook" class="inline-flex items-center justify-center h-12 w-12 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
@@ -835,15 +829,23 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Hours of Operation</h3>
               <ul class="grid gap-1 text-[var(--on-surface)] [&>li]:flex [&>li]:justify-between [&>li]:items-center [&>li]:py-2 [&>li]:px-3 [&>li]:rounded-lg [&>li:nth-child(even)]:bg-[var(--surface-1)]">
-                {% for h in profile.siteJson.contact.hours|default([]) %}
-                  <li data-dow="{{ loop.index0 }}">
-                    <span>{{ h.day }}</span>
-                    {% if h.open is defined and h.close is defined and h.open and h.close %}
-                      <span>{{ h.open }} – {{ h.close }}</span>
-                    {% else %}
-                      <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--error-container)] text-[var(--on-error-container)]">Closed</span>
-                    {% endif %}
-                  </li>
+                {# Define day order for consistent display #}
+                {% set dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                {% set hoursData = profile.siteJson.contact.hours|default({}) %}
+                {% for dayName in dayOrder %}
+                  {% set dayData = hoursData[dayName]|default(null) %}
+                  {% if dayData %}
+                    <li data-dow="{{ loop.index0 }}">
+                      <span>{{ dayName }}</span>
+                      {% if dayData.closed is defined and dayData.closed %}
+                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--error-container)] text-[var(--on-error-container)]">Closed</span>
+                      {% elseif dayData.open is defined and dayData.close is defined and dayData.open and dayData.close %}
+                        <span>{{ dayData.open }} – {{ dayData.close }}</span>
+                      {% else %}
+                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-[var(--error-container)] text-[var(--on-error-container)]">Closed</span>
+                      {% endif %}
+                    </li>
+                  {% endif %}
                 {% endfor %}
               </ul>
             </div>

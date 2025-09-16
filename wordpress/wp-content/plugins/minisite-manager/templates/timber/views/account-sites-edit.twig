@@ -94,6 +94,11 @@
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Brand & Logo</h2>
               <div class="space-y-4">
                 <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Business Name</label>
+                  <input name="brand_name" type="text" value="{{ site_json.brand.name|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Logo URL</label>
                   <input name="brand_logo" type="url" value="{{ site_json.brand.logo|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
@@ -299,10 +304,31 @@
                 </div>
 
                 <!-- Plus Code -->
-                <div>
-                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
-                  <input name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
+                    <input name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code URL</label>
+                    <input name="contact_pluscode_url" type="url" value="{{ site_json.contact.plusCodeUrl|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+
+                <!-- Coordinates -->
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Latitude</label>
+                    <input name="contact_lat" type="number" step="any" value="{{ profile.geo.lat|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Longitude</label>
+                    <input name="contact_lng" type="number" step="any" value="{{ profile.geo.lng|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
                 </div>
 
                 <!-- Business Hours -->
