@@ -435,7 +435,7 @@ class _1_0_0_CreateBase implements Migration
                     ['src'=>'https://images.unsplash.com/photo-1506034844286-f98ed954e516?q=80&w=800&auto=format&fit=crop','alt'=>'Dyeing & Finishing']
                 ],
                 'social'=>[
-                    ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles'],
+                    ['network'=>'facebook','url'=>'https://facebook.com/lotus.textiles'],
                     ['network'=>'instagram','url'=>'https://instagram.com/lotus.textiles'],
                     ['network'=>'x','url'=>'https://x.com/lotus.textiles'],
                     ['network'=>'youtube','url'=>'https://youtube.com/lotus.textiles'],

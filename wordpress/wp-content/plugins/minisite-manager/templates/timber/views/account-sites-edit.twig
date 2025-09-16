@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" data-theme="blue">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ page_title }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --primary:#2563EB; --on-primary:#fff;
+      --secondary:#0EA5E9; --on-secondary:#03283A;
+      --background:#F8FAFC; --on-background:#0F172A;
+      --surface:#FFFFFF; --on-surface:#0F172A;
+      --surface-1:#F1F5F9; --on-surface-variant:#475569;
+      --outline:#CBD5E1; --outline-variant:#E2E8F0;
+      --focus-ring: color-mix(in srgb, var(--primary) 40%, transparent);
+      --surface-0:var(--surface);
+    }
+    :is(a,button,input,textarea,select):focus-visible {
+      outline:none; box-shadow:0 0 0 2px var(--focus-ring), 0 0 0 4px white;
+      border-radius:.5rem;
+    }
+  </style>
+</head>
+<body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
+  <main class="min-h-screen">
+    <div class="max-w-7xl mx-auto p-6">
+      <!-- Header -->
+      <div class="flex items-start justify-between gap-4 mb-6">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
+          <p class="mt-2 text-[var(--on-surface-variant)]">Edit your minisite content and settings.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="{{ preview_url }}" target="_blank" 
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--secondary)] text-[var(--on-secondary)] shadow hover:brightness-95">
+            <i class="fa-solid fa-eye"></i> Preview
+          </a>
+          <a href="{{ function('home_url','/account/sites') }}" 
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">
+            <i class="fa-solid fa-arrow-left"></i> Back to Sites
+          </a>
+        </div>
+      </div>
+
+      {% if error_msg %}
+        <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm">
+          {{ error_msg | raw }}
+        </div>
+      {% endif %}
+
+      {% if success_msg %}
+        <div class="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-green-700 text-sm">
+          {{ success_msg | raw }}
+        </div>
+      {% endif %}
+
+      <!-- Form and Preview Layout -->
+      <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Left: Edit Form -->
+        <div class="space-y-8">
+          <form method="post" class="space-y-8">
+            {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
+
+            <!-- SEO Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">SEO & Meta</h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Page Title</label>
+                  <input name="seo_title" type="text" value="{{ site_json.seo.title|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Meta Description</label>
+                  <textarea name="seo_description" rows="3"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.seo.description|default('') }}</textarea>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Keywords</label>
+                  <input name="seo_keywords" type="text" value="{{ site_json.seo.keywords|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Favicon URL</label>
+                  <input name="seo_favicon" type="url" value="{{ site_json.seo.favicon|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- Brand Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Brand & Logo</h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Logo URL</label>
+                  <input name="brand_logo" type="url" value="{{ site_json.brand.logo|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Industry</label>
+                  <input name="brand_industry" type="text" value="{{ site_json.brand.industry|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Color Palette</label>
+                  <select name="brand_palette" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
+                    <option value="blue" {{ site_json.brand.palette|default('blue') == 'blue' ? 'selected' : '' }}>Blue</option>
+                    <option value="teal" {{ site_json.brand.palette|default('blue') == 'teal' ? 'selected' : '' }}>Teal</option>
+                    <option value="green" {{ site_json.brand.palette|default('blue') == 'green' ? 'selected' : '' }}>Green</option>
+                    <option value="purple" {{ site_json.brand.palette|default('blue') == 'purple' ? 'selected' : '' }}>Purple</option>
+                    <option value="red" {{ site_json.brand.palette|default('blue') == 'red' ? 'selected' : '' }}>Red</option>
+                    <option value="orange" {{ site_json.brand.palette|default('blue') == 'orange' ? 'selected' : '' }}>Orange</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hero Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Hero Section</h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Badge Text</label>
+                  <input name="hero_badge" type="text" value="{{ site_json.hero.badge|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Main Heading</label>
+                  <input name="hero_heading" type="text" value="{{ site_json.hero.heading|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Subheading</label>
+                  <textarea name="hero_subheading" rows="3"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.hero.subheading|default('') }}</textarea>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Hero Image URL</label>
+                  <input name="hero_image" type="url" value="{{ site_json.hero.image|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image Alt Text</label>
+                  <input name="hero_image_alt" type="text" value="{{ site_json.hero.imageAlt|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 Text</label>
+                    <input name="hero_cta1_text" type="text" value="{{ site_json.hero.ctas[0].text|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 URL</label>
+                    <input name="hero_cta1_url" type="url" value="{{ site_json.hero.ctas[0].url|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 Text</label>
+                    <input name="hero_cta2_text" type="text" value="{{ site_json.hero.ctas[1].text|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 URL</label>
+                    <input name="hero_cta2_url" type="url" value="{{ site_json.hero.ctas[1].url|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Value</label>
+                    <input name="hero_rating_value" type="text" value="{{ site_json.hero.rating.value|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Count</label>
+                    <input name="hero_rating_count" type="text" value="{{ site_json.hero.rating.count|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- WhyUs Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Why Choose Us</h2>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
+                  <input name="whyus_title" type="text" value="{{ site_json.whyus.title|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content HTML</label>
+                  <textarea name="whyus_html" rows="6"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.whyus.html|default('') }}</textarea>
+                  <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
+                  <input name="whyus_image" type="url" value="{{ site_json.whyus.image|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">About Content</h2>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About HTML</label>
+                <textarea name="about_html" rows="8"
+                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.about.html|default('') }}</textarea>
+                <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
+              </div>
+            </div>
+
+            <!-- Contact Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Contact Information</h2>
+              <div class="space-y-6">
+                <!-- Phone -->
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Text</label>
+                    <input name="contact_phone_text" type="text" value="{{ site_json.contact.phone.text|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Link</label>
+                    <input name="contact_phone_link" type="tel" value="{{ site_json.contact.phone.link|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+
+                <!-- WhatsApp -->
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Text</label>
+                    <input name="contact_whatsapp_text" type="text" value="{{ site_json.contact.whatsapp.text|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Link</label>
+                    <input name="contact_whatsapp_link" type="tel" value="{{ site_json.contact.whatsapp.link|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+
+                <!-- Email -->
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email Address</label>
+                  <input name="contact_email" type="email" value="{{ site_json.contact.email|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+
+                <!-- Website -->
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website Text</label>
+                    <input name="contact_website_text" type="text" value="{{ site_json.contact.website.text|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website URL</label>
+                    <input name="contact_website_link" type="url" value="{{ site_json.contact.website.link|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+
+                <!-- Address -->
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 1</label>
+                    <input name="contact_address1" type="text" value="{{ site_json.contact.address_line1|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 2</label>
+                    <input name="contact_address2" type="text" value="{{ site_json.contact.address_line2|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 3</label>
+                    <input name="contact_address3" type="text" value="{{ site_json.contact.address_line3|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 4</label>
+                    <input name="contact_address4" type="text" value="{{ site_json.contact.address_line4|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
+
+                <!-- Plus Code -->
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
+                  <input name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+
+                <!-- Business Hours -->
+                <div>
+                  <h3 class="text-lg font-medium text-[var(--on-surface)] mb-3">Business Hours</h3>
+                  <div class="grid md:grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Monday</label>
+                      <input name="hours_monday" type="text" value="{{ site_json.contact.hours.monday|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Tuesday</label>
+                      <input name="hours_tuesday" type="text" value="{{ site_json.contact.hours.tuesday|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Wednesday</label>
+                      <input name="hours_wednesday" type="text" value="{{ site_json.contact.hours.wednesday|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Thursday</label>
+                      <input name="hours_thursday" type="text" value="{{ site_json.contact.hours.thursday|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Friday</label>
+                      <input name="hours_friday" type="text" value="{{ site_json.contact.hours.friday|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Saturday</label>
+                      <input name="hours_saturday" type="text" value="{{ site_json.contact.hours.saturday|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Sunday</label>
+                      <input name="hours_sunday" type="text" value="{{ site_json.contact.hours.sunday|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Products & Services Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Products & Services</h2>
+                <button type="button" id="addProduct" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+                  <i class="fa-solid fa-plus"></i> Add Item
+                </button>
+              </div>
+              
+              <div class="mb-4">
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
+                <input name="products_section_title" type="text" value="{{ site_json.products.section_title|default('Products & Services') }}"
+                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+
+              <div id="productsContainer" class="space-y-4">
+                {% for item in site_json.products.items|default([]) %}
+                  <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+                    <div class="flex items-center justify-between mb-3">
+                      <h3 class="font-medium text-[var(--on-surface)]">Product {{ loop.index }}</h3>
+                      <button type="button" class="removeProduct text-red-600 hover:text-red-800">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Title</label>
+                        <input name="product_{{ loop.index0 }}_title" type="text" value="{{ item.title|default('') }}"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+                        <input name="product_{{ loop.index0 }}_image" type="url" value="{{ item.image|default('') }}"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Price</label>
+                        <input name="product_{{ loop.index0 }}_price" type="text" value="{{ item.price|default('') }}"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Font Awesome Icon</label>
+                        <input name="product_{{ loop.index0 }}_icon" type="text" value="{{ item.icon|default('') }}" placeholder="fa-solid fa-star"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
+                        <input name="product_{{ loop.index0 }}_cta_text" type="text" value="{{ item.cta.text|default('') }}"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
+                        <input name="product_{{ loop.index0 }}_cta_url" type="url" value="{{ item.cta.url|default('') }}"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                      </div>
+                    </div>
+                    <div class="mt-4">
+                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
+                      <textarea name="product_{{ loop.index0 }}_description" rows="3"
+                        class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ item.description|default('') }}</textarea>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+              
+              <input type="hidden" name="product_count" id="productCount" value="{{ site_json.products.items|default([])|length }}"/>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Social Media Links</h2>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
+                  <input name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
+                  <input name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">X (Twitter)</label>
+                  <input name="social_x" type="url" value="{{ site_json.social.x|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
+                  <input name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
+                  <input name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">TikTok</label>
+                  <input name="social_tiktok" type="url" value="{{ site_json.social.tiktok|default('') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gallery Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Image Gallery</h2>
+                <button type="button" id="addGalleryImage" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+                  <i class="fa-solid fa-plus"></i> Add Image
+                </button>
+              </div>
+
+              <div id="galleryContainer" class="space-y-4">
+                {% for image in site_json.gallery|default([]) %}
+                  <div class="gallery-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+                    <div class="flex items-center justify-between mb-3">
+                      <h3 class="font-medium text-[var(--on-surface)]">Image {{ loop.index }}</h3>
+                      <button type="button" class="removeGalleryImage text-red-600 hover:text-red-800">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+                        <input name="gallery_{{ loop.index0 }}_image" type="url" value="{{ image.url|default('') }}"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                      </div>
+                      <div>
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Alt Text</label>
+                        <input name="gallery_{{ loop.index0 }}_alt" type="text" value="{{ image.alt|default('') }}"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                      </div>
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+              
+              <input type="hidden" name="gallery_count" id="galleryCount" value="{{ site_json.gallery|default([])|length }}"/>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="flex items-center gap-4 pt-6">
+              <button type="submit"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+                <i class="fa-solid fa-save"></i> Save Changes
+              </button>
+              <a href="{{ function('home_url','/account/sites') }}"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">
+                Cancel
+              </a>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right: Live Preview -->
+        <div class="lg:sticky lg:top-6">
+          <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)]">Live Preview</h2>
+              <a href="{{ preview_url }}" target="_blank" 
+                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+                <i class="fa-solid fa-external-link-alt"></i> Open
+              </a>
+            </div>
+            <div class="border border-[var(--outline-variant)] rounded-lg overflow-hidden">
+              <iframe src="{{ preview_url }}" 
+                      class="w-full h-[600px] border-0"
+                      title="Preview of {{ profile.title }}">
+                <p>Preview not available. <a href="{{ preview_url }}" target="_blank">Open in new tab</a></p>
+              </iframe>
+            </div>
+            <p class="mt-2 text-xs text-[var(--on-surface-variant)]">Preview updates when you save changes.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Products & Services Management
+    let productCount = parseInt(document.getElementById('productCount').value) || 0;
+    let galleryCount = parseInt(document.getElementById('galleryCount').value) || 0;
+
+    // Add Product
+    document.getElementById('addProduct').addEventListener('click', function() {
+      const container = document.getElementById('productsContainer');
+      const productHtml = `
+        <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-medium text-[var(--on-surface)]">Product ${productCount + 1}</h3>
+            <button type="button" class="removeProduct text-red-600 hover:text-red-800">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Title</label>
+              <input name="product_${productCount}_title" type="text" value=""
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+              <input name="product_${productCount}_image" type="url" value=""
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Price</label>
+              <input name="product_${productCount}_price" type="text" value=""
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Font Awesome Icon</label>
+              <input name="product_${productCount}_icon" type="text" value="" placeholder="fa-solid fa-star"
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
+              <input name="product_${productCount}_cta_text" type="text" value=""
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
+              <input name="product_${productCount}_cta_url" type="url" value=""
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+            </div>
+          </div>
+          <div class="mt-4">
+            <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
+            <textarea name="product_${productCount}_description" rows="3"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"></textarea>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', productHtml);
+      productCount++;
+      document.getElementById('productCount').value = productCount;
+    });
+
+    // Remove Product
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.removeProduct')) {
+        e.target.closest('.product-item').remove();
+        // Renumber remaining products
+        const products = document.querySelectorAll('.product-item');
+        products.forEach((product, index) => {
+          const title = product.querySelector('h3');
+          title.textContent = `Product ${index + 1}`;
+          
+          // Update input names
+          const inputs = product.querySelectorAll('input, textarea');
+          inputs.forEach(input => {
+            const name = input.name;
+            if (name) {
+              const newName = name.replace(/product_\d+_/, `product_${index}_`);
+              input.name = newName;
+            }
+          });
+        });
+        productCount = products.length;
+        document.getElementById('productCount').value = productCount;
+      }
+    });
+
+    // Add Gallery Image
+    document.getElementById('addGalleryImage').addEventListener('click', function() {
+      const container = document.getElementById('galleryContainer');
+      const galleryHtml = `
+        <div class="gallery-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-medium text-[var(--on-surface)]">Image ${galleryCount + 1}</h3>
+            <button type="button" class="removeGalleryImage text-red-600 hover:text-red-800">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+              <input name="gallery_${galleryCount}_image" type="url" value=""
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Alt Text</label>
+              <input name="gallery_${galleryCount}_alt" type="text" value=""
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+            </div>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', galleryHtml);
+      galleryCount++;
+      document.getElementById('galleryCount').value = galleryCount;
+    });
+
+    // Remove Gallery Image
+    document.addEventListener('click', function(e) {
+      if (e.target.closest('.removeGalleryImage')) {
+        e.target.closest('.gallery-item').remove();
+        // Renumber remaining images
+        const images = document.querySelectorAll('.gallery-item');
+        images.forEach((image, index) => {
+          const title = image.querySelector('h3');
+          title.textContent = `Image ${index + 1}`;
+          
+          // Update input names
+          const inputs = image.querySelectorAll('input');
+          inputs.forEach(input => {
+            const name = input.name;
+            if (name) {
+              const newName = name.replace(/gallery_\d+_/, `gallery_${index}_`);
+              input.name = newName;
+            }
+          });
+        });
+        galleryCount = images.length;
+        document.getElementById('galleryCount').value = galleryCount;
+      }
+    });
+  </script>
+</body>
+</html>

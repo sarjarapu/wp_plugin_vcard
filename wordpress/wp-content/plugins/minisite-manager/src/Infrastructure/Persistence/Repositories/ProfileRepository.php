@@ -39,6 +39,36 @@ final class ProfileRepository implements ProfileRepositoryInterface
         return array_map(fn($r) => $this->mapRow($r), $rows);
     }
 
+    /**
+     * Find profile by ID
+     */
+    public function findById(int $id): ?Profile
+    {
+        $sql = $this->db->prepare("SELECT * FROM {$this->table()} WHERE id=%d LIMIT 1", $id);
+        $row = $this->db->get_row($sql, ARRAY_A);
+        if (!$row) return null;
+        return $this->mapRow($row);
+    }
+
+    /**
+     * Update profile's siteJson data (for editing)
+     * TODO: Implement proper versioning with versions table
+     */
+    public function updateSiteJson(int $id, array $siteJson, int $updatedBy): Profile
+    {
+        $sql = $this->db->prepare(
+            "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%d",
+            wp_json_encode($siteJson), $updatedBy, $id
+        );
+        $this->db->query($sql);
+        
+        if ($this->db->rows_affected === 0) {
+            throw new \RuntimeException('Profile not found or update failed.');
+        }
+        
+        return $this->findById($id);
+    }
+
     public function save(Profile $p, int $expectedSiteVersion): Profile
     {
         // Build normalized search_terms (simple example; replace with your builder later)

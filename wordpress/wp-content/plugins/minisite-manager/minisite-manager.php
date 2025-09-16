@@ -409,6 +409,30 @@ add_action('template_redirect', function () {
           nocache_headers();
           echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Sites listing unavailable</h1>';
           exit;
+        case 'edit':
+          // Delegate to SitesController for editing
+          if ($sitesCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\SitesController::class)) {
+            $sitesCtrl = new $sitesCtrlClass($renderer);
+            $sitesCtrl->handleEdit();
+            break;
+          }
+          // Fallback if SitesController missing
+          status_header(503);
+          nocache_headers();
+          echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Edit unavailable</h1>';
+          exit;
+        case 'preview':
+          // Delegate to SitesController for previewing
+          if ($sitesCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\SitesController::class)) {
+            $sitesCtrl = new $sitesCtrlClass($renderer);
+            $sitesCtrl->handlePreview();
+            break;
+          }
+          // Fallback if SitesController missing
+          status_header(503);
+          nocache_headers();
+          echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Preview unavailable</h1>';
+          exit;
         case 'logout':
           $authCtrl->handleLogout();
           break;
@@ -466,6 +490,8 @@ add_filter('query_vars', function (array $vars) {
   $vars[] = 'minisite_loc';
   $vars[] = 'minisite_account';
   $vars[] = 'minisite_account_action';
+  $vars[] = 'minisite_site_id';
+  $vars[] = 'minisite_version_id';
   return $vars;
 });
 
