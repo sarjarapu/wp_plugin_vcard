@@ -235,7 +235,7 @@ final class SitesController
                     'count' => sanitize_text_field($postData['hero_rating_count'] ?? ''),
                 ],
             ],
-            'whyus' => [
+            'whyUs' => [
                 'title' => sanitize_text_field($postData['whyus_title'] ?? ''),
                 'html' => wp_kses_post($postData['whyus_html'] ?? ''),
                 'image' => esc_url_raw($postData['whyus_image'] ?? ''),
@@ -262,44 +262,34 @@ final class SitesController
                 'address_line3' => sanitize_text_field($postData['contact_address3'] ?? ''),
                 'address_line4' => sanitize_text_field($postData['contact_address4'] ?? ''),
                 'plusCode' => sanitize_text_field($postData['contact_pluscode'] ?? ''),
-                'hours' => [
-                    'monday' => sanitize_text_field($postData['hours_monday'] ?? ''),
-                    'tuesday' => sanitize_text_field($postData['hours_tuesday'] ?? ''),
-                    'wednesday' => sanitize_text_field($postData['hours_wednesday'] ?? ''),
-                    'thursday' => sanitize_text_field($postData['hours_thursday'] ?? ''),
-                    'friday' => sanitize_text_field($postData['hours_friday'] ?? ''),
-                    'saturday' => sanitize_text_field($postData['hours_saturday'] ?? ''),
-                    'sunday' => sanitize_text_field($postData['hours_sunday'] ?? ''),
-                ],
+                'hours' => $this->buildHoursFromForm($postData),
             ],
-            'products' => $this->buildProductsFromForm($postData),
+            'services' => $this->buildServicesFromForm($postData),
             'social' => $this->buildSocialFromForm($postData),
             'gallery' => $this->buildGalleryFromForm($postData),
         ];
     }
 
-    private function buildProductsFromForm(array $postData): array
+    private function buildServicesFromForm(array $postData): array
     {
-        $products = [];
-        $productCount = (int) ($postData['product_count'] ?? 0);
+        $services = [];
+        $serviceCount = (int) ($postData['product_count'] ?? 0);
         
-        for ($i = 0; $i < $productCount; $i++) {
-            $products[] = [
+        for ($i = 0; $i < $serviceCount; $i++) {
+            $services[] = [
                 'title' => sanitize_text_field($postData["product_{$i}_title"] ?? ''),
                 'image' => esc_url_raw($postData["product_{$i}_image"] ?? ''),
                 'description' => sanitize_textarea_field($postData["product_{$i}_description"] ?? ''),
                 'price' => sanitize_text_field($postData["product_{$i}_price"] ?? ''),
                 'icon' => sanitize_text_field($postData["product_{$i}_icon"] ?? ''),
-                'cta' => [
-                    'text' => sanitize_text_field($postData["product_{$i}_cta_text"] ?? ''),
-                    'url' => esc_url_raw($postData["product_{$i}_cta_url"] ?? ''),
-                ],
+                'cta' => sanitize_text_field($postData["product_{$i}_cta_text"] ?? ''),
+                'url' => esc_url_raw($postData["product_{$i}_cta_url"] ?? ''),
             ];
         }
         
         return [
-            'section_title' => sanitize_text_field($postData['products_section_title'] ?? 'Products & Services'),
-            'items' => $products,
+            'title' => sanitize_text_field($postData['products_section_title'] ?? 'Products & Services'),
+            'listing' => $services,
         ];
     }
 
@@ -311,11 +301,42 @@ final class SitesController
         foreach ($networks as $network) {
             $url = esc_url_raw($postData["social_{$network}"] ?? '');
             if (!empty($url)) {
-                $social[$network] = $url;
+                $social[] = [
+                    'network' => $network,
+                    'url' => $url,
+                ];
             }
         }
         
         return $social;
+    }
+
+    private function buildHoursFromForm(array $postData): array
+    {
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        $hours = [];
+        
+        foreach ($days as $day) {
+            $hoursText = sanitize_text_field($postData["hours_{$day}"] ?? '');
+            if (!empty($hoursText) && $hoursText !== 'Closed') {
+                // Parse time range like "9:00 AM - 5:00 PM"
+                if (preg_match('/(\d{1,2}:\d{2}\s*[AP]M)\s*-\s*(\d{1,2}:\d{2}\s*[AP]M)/i', $hoursText, $matches)) {
+                    $hours[] = [
+                        'day' => ucfirst($day),
+                        'open' => $matches[1],
+                        'close' => $matches[2],
+                    ];
+                } else {
+                    // Fallback: store as single hours field
+                    $hours[] = [
+                        'day' => ucfirst($day),
+                        'hours' => $hoursText,
+                    ];
+                }
+            }
+        }
+        
+        return $hours;
     }
 
     private function buildGalleryFromForm(array $postData): array
@@ -328,8 +349,9 @@ final class SitesController
             $imageAlt = sanitize_text_field($postData["gallery_{$i}_alt"] ?? '');
             if (!empty($imageUrl)) {
                 $gallery[] = [
-                    'url' => $imageUrl,
+                    'src' => $imageUrl,
                     'alt' => $imageAlt,
+                    'caption' => $imageAlt, // Use alt as caption fallback
                 ];
             }
         }

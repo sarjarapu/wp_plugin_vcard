@@ -191,18 +191,18 @@
               <div class="space-y-4">
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
-                  <input name="whyus_title" type="text" value="{{ site_json.whyus.title|default('') }}"
+                  <input name="whyus_title" type="text" value="{{ site_json.whyUs.title|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content HTML</label>
                   <textarea name="whyus_html" rows="6"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.whyus.html|default('') }}</textarea>
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.whyUs.html|default('') }}</textarea>
                   <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
-                  <input name="whyus_image" type="url" value="{{ site_json.whyus.image|default('') }}"
+                  <input name="whyus_image" type="url" value="{{ site_json.whyUs.image|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
               </div>
@@ -308,42 +308,48 @@
                 <!-- Business Hours -->
                 <div>
                   <h3 class="text-lg font-medium text-[var(--on-surface)] mb-3">Business Hours</h3>
+                  {% set hours_data = {} %}
+                  {% for hour_item in site_json.contact.hours|default([]) %}
+                    {% if hour_item.day is defined %}
+                      {% set day_key = hour_item.day|lower %}
+                      {% if hour_item.open is defined and hour_item.close is defined %}
+                        {% set hours_data = hours_data|merge({(day_key): hour_item.open ~ ' - ' ~ hour_item.close}) %}
+                      {% elseif hour_item.hours is defined %}
+                        {% set hours_data = hours_data|merge({(day_key): hour_item.hours}) %}
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                  
                   <div class="grid md:grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Monday</label>
-                      <input name="hours_monday" type="text" value="{{ site_json.contact.hours.monday|default('') }}"
-                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Tuesday</label>
-                      <input name="hours_tuesday" type="text" value="{{ site_json.contact.hours.tuesday|default('') }}"
-                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Wednesday</label>
-                      <input name="hours_wednesday" type="text" value="{{ site_json.contact.hours.wednesday|default('') }}"
-                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Thursday</label>
-                      <input name="hours_thursday" type="text" value="{{ site_json.contact.hours.thursday|default('') }}"
-                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Friday</label>
-                      <input name="hours_friday" type="text" value="{{ site_json.contact.hours.friday|default('') }}"
-                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Saturday</label>
-                      <input name="hours_saturday" type="text" value="{{ site_json.contact.hours.saturday|default('') }}"
-                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Sunday</label>
-                      <input name="hours_sunday" type="text" value="{{ site_json.contact.hours.sunday|default('') }}"
-                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                    </div>
+                    {% set days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
+                    {% for day in days %}
+                      <div class="hours-day-container">
+                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">{{ day|title }}</label>
+                        <div class="flex items-center gap-2">
+                          <input name="hours_{{ day }}" type="text" value="{{ hours_data[day]|default('') }}" placeholder="9:00 AM - 5:00 PM or Closed"
+                            class="flex-1 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                          <button type="button" class="hours-toggle-btn px-3 py-3 rounded-lg border border-[var(--outline-variant)] bg-[var(--surface-1)] text-[var(--on-surface)] hover:bg-[var(--surface-2)]" data-day="{{ day }}">
+                            <i class="fa-solid fa-clock"></i>
+                          </button>
+                        </div>
+                        <div class="hours-time-picker hidden mt-2 p-3 bg-[var(--surface-2)] rounded-lg border border-[var(--outline-variant)]">
+                          <div class="grid grid-cols-2 gap-2">
+                            <div>
+                              <label class="block text-xs font-medium mb-1 text-[var(--on-surface-variant)]">Open</label>
+                              <input type="time" class="w-full rounded bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                            </div>
+                            <div>
+                              <label class="block text-xs font-medium mb-1 text-[var(--on-surface-variant)]">Close</label>
+                              <input type="time" class="w-full rounded bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                            </div>
+                          </div>
+                          <div class="mt-2 flex gap-2">
+                            <button type="button" class="hours-apply-btn px-3 py-1 rounded bg-[var(--primary)] text-[var(--on-primary)] text-sm">Apply</button>
+                            <button type="button" class="hours-closed-btn px-3 py-1 rounded bg-red-600 text-white text-sm">Mark Closed</button>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
                   </div>
                 </div>
               </div>
@@ -360,12 +366,12 @@
               
               <div class="mb-4">
                 <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
-                <input name="products_section_title" type="text" value="{{ site_json.products.section_title|default('Products & Services') }}"
+                <input name="products_section_title" type="text" value="{{ site_json.services.title|default('Products & Services') }}"
                   class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
               </div>
 
               <div id="productsContainer" class="space-y-4">
-                {% for item in site_json.products.items|default([]) %}
+                {% for item in site_json.services.listing|default([]) %}
                   <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
                     <div class="flex items-center justify-between mb-3">
                       <h3 class="font-medium text-[var(--on-surface)]">Product {{ loop.index }}</h3>
@@ -396,12 +402,12 @@
                       </div>
                       <div>
                         <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
-                        <input name="product_{{ loop.index0 }}_cta_text" type="text" value="{{ item.cta.text|default('') }}"
+                        <input name="product_{{ loop.index0 }}_cta_text" type="text" value="{{ item.cta|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                       <div>
                         <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
-                        <input name="product_{{ loop.index0 }}_cta_url" type="url" value="{{ item.cta.url|default('') }}"
+                        <input name="product_{{ loop.index0 }}_cta_url" type="url" value="{{ item.url|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                     </div>
@@ -414,41 +420,55 @@
                 {% endfor %}
               </div>
               
-              <input type="hidden" name="product_count" id="productCount" value="{{ site_json.products.items|default([])|length }}"/>
+              <input type="hidden" name="product_count" id="productCount" value="{{ site_json.services.listing|default([])|length }}"/>
             </div>
 
             <!-- Social Media Section -->
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Social Media Links</h2>
               <div class="grid md:grid-cols-2 gap-4">
+                {% set social_networks = {
+                  'facebook': '',
+                  'instagram': '',
+                  'x': '',
+                  'youtube': '',
+                  'linkedin': '',
+                  'tiktok': ''
+                } %}
+                {% for social_item in site_json.social|default([]) %}
+                  {% if social_item.network is defined and social_item.url is defined %}
+                    {% set social_networks = social_networks|merge({(social_item.network): social_item.url}) %}
+                  {% endif %}
+                {% endfor %}
+                
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
-                  <input name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
+                  <input name="social_facebook" type="url" value="{{ social_networks.facebook }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
-                  <input name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
+                  <input name="social_instagram" type="url" value="{{ social_networks.instagram }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">X (Twitter)</label>
-                  <input name="social_x" type="url" value="{{ site_json.social.x|default('') }}"
+                  <input name="social_x" type="url" value="{{ social_networks.x }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
-                  <input name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
+                  <input name="social_youtube" type="url" value="{{ social_networks.youtube }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
-                  <input name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
+                  <input name="social_linkedin" type="url" value="{{ social_networks.linkedin }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">TikTok</label>
-                  <input name="social_tiktok" type="url" value="{{ site_json.social.tiktok|default('') }}"
+                  <input name="social_tiktok" type="url" value="{{ social_networks.tiktok }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
               </div>
@@ -475,7 +495,7 @@
                     <div class="grid md:grid-cols-2 gap-4">
                       <div>
                         <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
-                        <input name="gallery_{{ loop.index0 }}_image" type="url" value="{{ image.url|default('') }}"
+                        <input name="gallery_{{ loop.index0 }}_image" type="url" value="{{ image.src|default('') }}"
                           class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                       </div>
                       <div>
@@ -668,6 +688,52 @@
         document.getElementById('galleryCount').value = galleryCount;
       }
     });
+
+    // Business Hours Time Picker
+    document.addEventListener('click', function(e) {
+      // Toggle time picker
+      if (e.target.closest('.hours-toggle-btn')) {
+        const btn = e.target.closest('.hours-toggle-btn');
+        const container = btn.closest('.hours-day-container');
+        const picker = container.querySelector('.hours-time-picker');
+        picker.classList.toggle('hidden');
+      }
+
+      // Apply time
+      if (e.target.closest('.hours-apply-btn')) {
+        const btn = e.target.closest('.hours-apply-btn');
+        const container = btn.closest('.hours-day-container');
+        const picker = container.querySelector('.hours-time-picker');
+        const timeInputs = picker.querySelectorAll('input[type="time"]');
+        const openTime = timeInputs[0].value;
+        const closeTime = timeInputs[1].value;
+        const textInput = container.querySelector('input[name^="hours_"]');
+        
+        if (openTime && closeTime) {
+          const openFormatted = formatTime(openTime);
+          const closeFormatted = formatTime(closeTime);
+          textInput.value = `${openFormatted} - ${closeFormatted}`;
+        }
+        picker.classList.add('hidden');
+      }
+
+      // Mark as closed
+      if (e.target.closest('.hours-closed-btn')) {
+        const btn = e.target.closest('.hours-closed-btn');
+        const container = btn.closest('.hours-day-container');
+        const textInput = container.querySelector('input[name^="hours_"]');
+        textInput.value = 'Closed';
+        container.querySelector('.hours-time-picker').classList.add('hidden');
+      }
+    });
+
+    function formatTime(time24) {
+      const [hours, minutes] = time24.split(':');
+      const hour = parseInt(hours);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 || 12;
+      return `${hour12}:${minutes} ${ampm}`;
+    }
   </script>
 </body>
 </html>
