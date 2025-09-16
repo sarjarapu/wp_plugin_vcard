@@ -96,6 +96,22 @@ final class ProfileRepository implements ProfileRepositoryInterface
         return $this->findById($id);
     }
 
+    /**
+     * Update the current version ID for a profile
+     */
+    public function updateCurrentVersionId(int $id, int $versionId): void
+    {
+        $sql = $this->db->prepare(
+            "UPDATE {$this->table()} SET _minisite_current_version_id = %d WHERE id = %d",
+            $versionId, $id
+        );
+        $this->db->query($sql);
+        
+        if ($this->db->rows_affected === 0) {
+            throw new \RuntimeException('Profile not found or update failed.');
+        }
+    }
+
     public function save(Profile $p, int $expectedSiteVersion): Profile
     {
         // Build normalized search_terms (simple example; replace with your builder later)
@@ -182,7 +198,8 @@ final class ProfileRepository implements ProfileRepositoryInterface
             updatedAt:     $r['updated_at'] ? new \DateTimeImmutable($r['updated_at']) : null,
             publishedAt:   $r['published_at'] ? new \DateTimeImmutable($r['published_at']) : null,
             createdBy:     $r['created_by'] ? (int)$r['created_by'] : null,
-            updatedBy:     $r['updated_by'] ? (int)$r['updated_by'] : null
+            updatedBy:     $r['updated_by'] ? (int)$r['updated_by'] : null,
+            currentVersionId: $r['_minisite_current_version_id'] ? (int)$r['_minisite_current_version_id'] : null
         );
     }
 }

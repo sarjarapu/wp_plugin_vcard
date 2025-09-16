@@ -32,6 +32,15 @@
           <p class="mt-2 text-[var(--on-surface-variant)]">Edit your minisite content and settings.</p>
         </div>
         <div class="flex items-center gap-3">
+          {% if latest_draft %}
+            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 text-sm">
+              <i class="fa-solid fa-edit"></i> Draft v{{ latest_draft.versionNumber }}
+            </span>
+          {% endif %}
+          <a href="{{ versions_url }}" 
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">
+            <i class="fa-solid fa-history"></i> Version History
+          </a>
           <a href="{{ preview_url }}" target="_blank" 
              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--secondary)] text-[var(--on-secondary)] shadow hover:brightness-95">
             <i class="fa-solid fa-eye"></i> Preview
@@ -59,8 +68,29 @@
       <div class="grid lg:grid-cols-2 gap-8">
         <!-- Left: Edit Form -->
         <div class="space-y-8">
-          <form id="minisite-edit-form" method="post" action="{{ function('home_url', '/account/sites/' ~ profile.id ~ '/edit') }}" class="space-y-8">
+          <form id="minisite-edit-form" method="post" class="space-y-8">
             {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
+            
+            <!-- Version Information -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Version Information</h2>
+              <div class="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label for="version_label" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Label</label>
+                  <input id="version_label" name="version_label" type="text" 
+                    value="{{ latest_draft.label|default('') }}"
+                    placeholder="e.g., Updated hero section"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div>
+                  <label for="version_comment" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Comment</label>
+                  <input id="version_comment" name="version_comment" type="text" 
+                    value="{{ latest_draft.comment|default('') }}"
+                    placeholder="e.g., Changed heading and added CTA"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+              </div>
+            </div>
 
             <!-- SEO Section -->
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
@@ -159,8 +189,9 @@
                   </div>
                   <div>
                     <label for="hero_cta1_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 URL</label>
-                    <input id="hero_cta1_url" name="hero_cta1_url" type="url" value="{{ site_json.hero.ctas[0].url|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    <input id="hero_cta1_url" name="hero_cta1_url" type="text" value="{{ site_json.hero.ctas[0].url|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+                      placeholder="https://example.com or #section or /page"/>
                   </div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
@@ -171,8 +202,9 @@
                   </div>
                   <div>
                     <label for="hero_cta2_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 URL</label>
-                    <input id="hero_cta2_url" name="hero_cta2_url" type="url" value="{{ site_json.hero.ctas[1].url|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    <input id="hero_cta2_url" name="hero_cta2_url" type="text" value="{{ site_json.hero.ctas[1].url|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+                      placeholder="https://example.com or #section or /page"/>
                   </div>
                 </div>
                 <div class="grid md:grid-cols-2 gap-4">
@@ -464,8 +496,9 @@
                       </div>
                       <div>
                         <label for="product_{{ loop.index0 }}_cta_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
-                        <input id="product_{{ loop.index0 }}_cta_url" name="product_{{ loop.index0 }}_cta_url" type="url" value="{{ item.url|default('') }}"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                        <input id="product_{{ loop.index0 }}_cta_url" name="product_{{ loop.index0 }}_cta_url" type="text" value="{{ item.url|default('') }}"
+                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+                          placeholder="https://example.com or #section or /page"/>
                       </div>
                     </div>
                     <div class="mt-4">
@@ -556,10 +589,10 @@
 
             <!-- Form Actions -->
             <div class="flex items-center gap-4 pt-6">
-              <button type="submit" id="save-button"
+              <button type="submit" id="save-draft-button" name="action" value="save_draft"
                 class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed">
                 <i class="fa-solid fa-save" id="save-icon"></i> 
-                <span id="save-text">Save Changes</span>
+                <span id="save-text">Save Draft</span>
                 <span id="save-loading" class="hidden">
                   <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -568,6 +601,13 @@
                   Saving...
                 </span>
               </button>
+              {% if latest_draft %}
+                <button type="button" id="publish-button" 
+                  class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                  <i class="fa-solid fa-rocket"></i> 
+                  <span>Publish Draft</span>
+                </button>
+              {% endif %}
               <a href="{{ function('home_url','/account/sites') }}"
                 class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">
                 Cancel
@@ -644,8 +684,9 @@
             </div>
             <div>
               <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
-              <input name="product_${productCount}_cta_url" type="url" value=""
-                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              <input name="product_${productCount}_cta_url" type="text" value=""
+                class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+                placeholder="https://example.com or #section or /page"/>
             </div>
           </div>
           <div class="mt-4">
@@ -958,175 +999,74 @@
     // Initialize paste button states
     updatePasteButtons();
 
-    // Form submission handling
+    // Simple form submission handling - prevent double clicks only
     const form = document.getElementById('minisite-edit-form');
     const saveButton = document.getElementById('save-button');
     const saveIcon = document.getElementById('save-icon');
     const saveText = document.getElementById('save-text');
     const saveLoading = document.getElementById('save-loading');
 
-    // Form validation
-    function validateForm() {
-      let isValid = true;
-      const errors = [];
+    let isSubmitting = false;
 
-      // Clear previous error styling
-      document.querySelectorAll('.error-border').forEach(el => {
-        el.classList.remove('error-border');
-      });
-      document.querySelectorAll('.error-message').forEach(el => {
-        el.remove();
-      });
-
-      // Validate required fields
-      const requiredFields = [
-        { id: 'seo_title', name: 'Page Title' },
-        { id: 'brand_name', name: 'Business Name' },
-        { id: 'hero_heading', name: 'Main Heading' }
-      ];
-
-      requiredFields.forEach(field => {
-        const input = document.getElementById(field.id);
-        if (input && !input.value.trim()) {
-          isValid = false;
-          errors.push(`${field.name} is required`);
-          input.classList.add('error-border');
-          showFieldError(input, `${field.name} is required`);
-        }
-      });
-
-      // Validate URLs
-      const urlFields = [
-        'seo_favicon', 'brand_logo', 'hero_image', 'whyus_image',
-        'hero_cta1_url', 'hero_cta2_url', 'contact_website_link', 'contact_pluscode_url'
-      ];
-
-      urlFields.forEach(fieldId => {
-        const input = document.getElementById(fieldId);
-        if (input && input.value.trim()) {
-          try {
-            new URL(input.value);
-          } catch (e) {
-            isValid = false;
-            errors.push(`Invalid URL in ${input.previousElementSibling?.textContent || fieldId}`);
-            input.classList.add('error-border');
-            showFieldError(input, 'Please enter a valid URL');
-          }
-        }
-      });
-
-      // Validate email
-      const emailField = document.getElementById('contact_email');
-      if (emailField && emailField.value.trim()) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(emailField.value)) {
-          isValid = false;
-          errors.push('Please enter a valid email address');
-          emailField.classList.add('error-border');
-          showFieldError(emailField, 'Please enter a valid email address');
-        }
-      }
-
-      // Show general error message if any
-      if (!isValid) {
-        showGeneralError('Please fix the errors below before saving.');
-      }
-
-      return isValid;
-    }
-
-    function showFieldError(input, message) {
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'error-message text-red-600 text-sm mt-1';
-      errorDiv.textContent = message;
-      input.parentNode.appendChild(errorDiv);
-    }
-
-    function showGeneralError(message) {
-      // Remove existing error message
-      const existingError = document.querySelector('.form-error-message');
-      if (existingError) {
-        existingError.remove();
-      }
-
-      const errorDiv = document.createElement('div');
-      errorDiv.className = 'form-error-message mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm';
-      errorDiv.textContent = message;
-      
-      // Insert after the header
-      const header = document.querySelector('.max-w-7xl .flex.items-start');
-      if (header) {
-        header.parentNode.insertBefore(errorDiv, header.nextSibling);
-      }
-    }
-
-    function setLoadingState(loading) {
-      if (loading) {
-        saveButton.disabled = true;
-        saveIcon.classList.add('hidden');
-        saveText.classList.add('hidden');
-        saveLoading.classList.remove('hidden');
-      } else {
-        saveButton.disabled = false;
-        saveIcon.classList.remove('hidden');
-        saveText.classList.remove('hidden');
-        saveLoading.classList.add('hidden');
-      }
-    }
-
-    // Handle form submission
     form.addEventListener('submit', function(e) {
-      e.preventDefault();
-
-      // Validate form
-      if (!validateForm()) {
-        // Focus on first error field
-        const firstError = document.querySelector('.error-border');
-        if (firstError) {
-          firstError.focus();
-          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return;
+      // Only prevent double submission, let the form submit normally
+      if (isSubmitting) {
+        e.preventDefault();
+        return false;
       }
 
       // Set loading state
-      setLoadingState(true);
+      isSubmitting = true;
+      saveButton.disabled = true;
+      saveIcon.classList.add('hidden');
+      saveText.classList.add('hidden');
+      saveLoading.classList.remove('hidden');
 
-      // Submit form
-      const formData = new FormData(form);
-      
-      fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        credentials: 'same-origin'
-      })
-      .then(response => {
-        if (response.ok) {
-          // Reload page to show success message and updated data
-          window.location.reload();
-        } else {
-          throw new Error('Save failed');
-        }
-      })
-      .catch(error => {
-        console.error('Save error:', error);
-        showGeneralError('Failed to save changes. Please try again.');
-        setLoadingState(false);
-      });
+      // Allow form to submit normally
+      // The page will reload with success/error message
     });
 
-    // Add error styling CSS
-    const style = document.createElement('style');
-    style.textContent = `
-      .error-border {
-        border-color: #ef4444 !important;
-        box-shadow: 0 0 0 1px #ef4444 !important;
-      }
-      .error-border:focus {
-        box-shadow: 0 0 0 2px #ef4444 !important;
-      }
-    `;
-    document.head.appendChild(style);
+    // Handle publish button
+    const publishButton = document.getElementById('publish-button');
+    if (publishButton) {
+      publishButton.addEventListener('click', function() {
+        if (!confirm('Are you sure you want to publish this draft? This will make it live on your website.')) {
+          return;
+        }
+
+        const form = document.getElementById('minisite-edit-form');
+        const formData = new FormData(form);
+        formData.append('action', 'publish_draft');
+        formData.append('nonce', '{{ function("wp_create_nonce", "minisite_version") }}');
+        formData.append('site_id', '{{ profile.id }}');
+        formData.append('version_id', '{{ latest_draft.id }}');
+
+        publishButton.disabled = true;
+        publishButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
+
+        fetch('{{ function("admin_url", "admin-ajax.php") }}', {
+          method: 'POST',
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Draft published successfully!');
+            location.reload();
+          } else {
+            alert('Failed to publish: ' + (data.data || 'Unknown error'));
+            publishButton.disabled = false;
+            publishButton.innerHTML = '<i class="fa-solid fa-rocket"></i> <span>Publish Draft</span>';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Failed to publish: Network error');
+          publishButton.disabled = false;
+          publishButton.innerHTML = '<i class="fa-solid fa-rocket"></i> <span>Publish Draft</span>';
+        });
+      });
+    }
   </script>
 </body>
 </html>

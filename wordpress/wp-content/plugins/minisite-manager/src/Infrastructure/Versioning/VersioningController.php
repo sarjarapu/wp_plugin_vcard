@@ -48,6 +48,7 @@ class VersioningController
         $tables = [
             $prefix . 'minisite_profiles',
             $prefix . 'minisite_profile_revisions',
+            $prefix . 'minisite_versions',
             $prefix . 'minisite_reviews',
         ];
 

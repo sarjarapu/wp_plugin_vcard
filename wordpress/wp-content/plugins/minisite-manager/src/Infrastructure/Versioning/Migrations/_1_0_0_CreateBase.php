@@ -57,6 +57,8 @@ class _1_0_0_CreateBase implements Migration
           created_by        BIGINT UNSIGNED  NULL,
           updated_by        BIGINT UNSIGNED  NULL,
 
+          _minisite_current_version_id BIGINT UNSIGNED NULL,
+
           PRIMARY KEY (id),
           UNIQUE KEY uniq_business_location (business_slug, location_slug)
         ) ENGINE=InnoDB {$charset};
@@ -80,6 +82,30 @@ class _1_0_0_CreateBase implements Migration
           UNIQUE KEY uniq_profile_revision (profile_id, revision_number),
           KEY idx_profile_status (profile_id, status),
           KEY idx_profile_created (profile_id, created_at)
+        ) ENGINE=InnoDB {$charset};
+        ");
+
+        // ——— versions (new versioning system) ———
+        $versions = $wpdb->prefix . 'minisite_versions';
+        DbDelta::run("
+        CREATE TABLE {$versions} (
+          id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          minisite_id      BIGINT UNSIGNED NOT NULL,
+          version_number   INT UNSIGNED    NOT NULL,
+          status           ENUM('draft','published') NOT NULL,
+          label            VARCHAR(120)    NULL,
+          comment          TEXT            NULL,
+          data_json        LONGTEXT        NOT NULL,
+          created_by       BIGINT UNSIGNED NOT NULL,
+          created_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          published_at     DATETIME        NULL,
+          source_version_id BIGINT UNSIGNED NULL,
+
+          PRIMARY KEY (id),
+          UNIQUE KEY uniq_minisite_version (minisite_id, version_number),
+          KEY idx_minisite_status (minisite_id, status),
+          KEY idx_minisite_created (minisite_id, created_at),
+          FOREIGN KEY (minisite_id) REFERENCES {$profiles}(id) ON DELETE CASCADE
         ) ENGINE=InnoDB {$charset};
         ");
 
@@ -122,9 +148,11 @@ class _1_0_0_CreateBase implements Migration
 
         $profiles  = $wpdb->prefix . 'minisite_profiles';
         $revisions = $wpdb->prefix . 'minisite_profile_revisions';
+        $versions  = $wpdb->prefix . 'minisite_versions';
         $reviews   = $wpdb->prefix . 'minisite_reviews';
 
         $wpdb->query("DROP TABLE IF EXISTS {$reviews}");
+        $wpdb->query("DROP TABLE IF EXISTS {$versions}");
         $wpdb->query("DROP TABLE IF EXISTS {$revisions}");
         $wpdb->query("DROP TABLE IF EXISTS {$profiles}");
     }
@@ -677,8 +705,38 @@ class _1_0_0_CreateBase implements Migration
             ));
         }
 
-        // ——— Revisions for each profile (rev 1 draft, rev 2 published snapshot) ———
+        // ——— Versions for each profile (version 1 as published) ———
+        $versionsT = $wpdb->prefix . 'minisite_versions';
         $nowUser = get_current_user_id() ?: null;
+        foreach ([ $acmeId => 'US', $lotusId => 'IN', $greenId => 'GB', $swiftId => 'AU' ] as $pid => $cc) {
+            if (!$pid) { continue; }
+
+            // Get the profile's site_json for the initial version
+            $profile = $wpdb->get_row($wpdb->prepare("SELECT site_json FROM {$profilesT} WHERE id = %d", $pid), ARRAY_A);
+            $siteJson = $profile ? $profile['site_json'] : wp_json_encode(['note'=>'initial version','country'=>$cc]);
+
+            // Create version 1 as published
+            $wpdb->insert($versionsT, [
+                'minisite_id'      => $pid,
+                'version_number'   => 1,
+                'status'           => 'published',
+                'label'            => 'Initial version',
+                'comment'          => 'Migrated from existing data',
+                'data_json'        => $siteJson,
+                'created_by'       => $nowUser,
+                'published_at'     => current_time('mysql'),
+            ], ['%d','%d','%s','%s','%s','%s','%d','%s']);
+
+            $versionId = (int) $wpdb->insert_id;
+
+            // Update profile with current version ID
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$profilesT} SET _minisite_current_version_id = %d WHERE id = %d",
+                $versionId, $pid
+            ));
+        }
+
+        // ——— Revisions for each profile (legacy - keeping for backward compatibility) ———
         foreach ([ $acmeId => 'US', $lotusId => 'IN', $greenId => 'GB', $swiftId => 'AU' ] as $pid => $cc) {
             if (!$pid) { continue; }
 
@@ -745,6 +803,7 @@ class _1_0_0_CreateBase implements Migration
     {
         $profilesT  = $wpdb->prefix . 'minisite_profiles';
         $revisionsT = $wpdb->prefix . 'minisite_profile_revisions';
+        $versionsT  = $wpdb->prefix . 'minisite_versions';
         $reviewsT   = $wpdb->prefix . 'minisite_reviews';
 
         // Get IDs for our seeded slugs
@@ -760,6 +819,7 @@ class _1_0_0_CreateBase implements Migration
 
         // Delete child tables first
         $wpdb->query($wpdb->prepare("DELETE FROM {$reviewsT}   WHERE profile_id IN ($in)", ...$ids));
+        $wpdb->query($wpdb->prepare("DELETE FROM {$versionsT}  WHERE minisite_id IN ($in)", ...$ids));
         $wpdb->query($wpdb->prepare("DELETE FROM {$revisionsT} WHERE profile_id IN ($in)", ...$ids));
         // Delete profiles
         $wpdb->query($wpdb->prepare("DELETE FROM {$profilesT}  WHERE id IN ($in)", ...$ids));

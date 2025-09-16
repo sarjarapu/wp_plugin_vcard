@@ -29,6 +29,7 @@ final class Profile
         public ?\DateTimeImmutable $updatedAt,
         public ?\DateTimeImmutable $publishedAt,
         public ?int $createdBy,
-        public ?int $updatedBy
+        public ?int $updatedBy,
+        public ?int $currentVersionId  // Points to currently published version
     ) {}
 }

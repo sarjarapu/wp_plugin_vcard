@@ -433,6 +433,21 @@ add_action('template_redirect', function () {
           nocache_headers();
           echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Preview unavailable</h1>';
           exit;
+        case 'versions':
+          // Delegate to VersionController for version management
+          if ($versionCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\VersionController::class)) {
+            global $wpdb;
+            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+            $versionCtrl = new $versionCtrlClass($profileRepo, $versionRepo);
+            $versionCtrl->handleListVersions();
+            break;
+          }
+          // Fallback if VersionController missing
+          status_header(503);
+          nocache_headers();
+          echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Version management unavailable</h1>';
+          exit;
         case 'logout':
           $authCtrl->handleLogout();
           break;
@@ -543,4 +558,167 @@ add_action('after_setup_theme', function () {
 add_action('wp_enqueue_scripts', function () {
   // Example: enqueue a tiny base CSS if needed
   // wp_enqueue_style('minisite-base', MINISITE_PLUGIN_URL . 'assets/css/base.css', [], '1.0.0');
+});
+
+/**
+ * AJAX handlers for version management
+ */
+add_action('wp_ajax_publish_version', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
+    wp_send_json_error('Security check failed', 403);
+    return;
+  }
+
+  $siteId = (int) ($_POST['site_id'] ?? 0);
+  $versionId = (int) ($_POST['version_id'] ?? 0);
+  
+  if (!$siteId || !$versionId) {
+    wp_send_json_error('Invalid parameters', 400);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    
+    $profile = $profileRepo->findById($siteId);
+    if (!$profile) {
+      wp_send_json_error('Site not found', 404);
+      return;
+    }
+
+    // Check ownership
+    if ($profile->createdBy !== get_current_user_id()) {
+      wp_send_json_error('Access denied', 403);
+      return;
+    }
+
+    $version = $versionRepo->findById($versionId);
+    if (!$version || $version->minisiteId !== $siteId) {
+      wp_send_json_error('Version not found', 404);
+      return;
+    }
+
+    if ($version->status !== 'draft') {
+      wp_send_json_error('Only draft versions can be published', 400);
+      return;
+    }
+
+    // Publish version (atomic operation)
+    $wpdb->query('START TRANSACTION');
+    
+    try {
+      // Move current published version to draft
+      $wpdb->query($wpdb->prepare(
+        "UPDATE {$wpdb->prefix}minisite_versions 
+         SET status = 'draft' 
+         WHERE minisite_id = %d AND status = 'published'",
+        $siteId
+      ));
+      
+      // Publish new version
+      $wpdb->query($wpdb->prepare(
+        "UPDATE {$wpdb->prefix}minisite_versions 
+         SET status = 'published', published_at = NOW() 
+         WHERE id = %d",
+        $versionId
+      ));
+      
+      // Update profile current version
+      $profileRepo->updateCurrentVersionId($siteId, $versionId);
+      
+      $wpdb->query('COMMIT');
+      
+      wp_send_json_success([
+        'message' => 'Version published successfully',
+        'published_version_id' => $versionId
+      ]);
+      
+    } catch (\Exception $e) {
+      $wpdb->query('ROLLBACK');
+      throw $e;
+    }
+
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to publish version: ' . $e->getMessage(), 500);
+  }
+});
+
+add_action('wp_ajax_rollback_version', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
+    wp_send_json_error('Security check failed', 403);
+    return;
+  }
+
+  $siteId = (int) ($_POST['site_id'] ?? 0);
+  $sourceVersionId = (int) ($_POST['source_version_id'] ?? 0);
+  
+  if (!$siteId || !$sourceVersionId) {
+    wp_send_json_error('Invalid parameters', 400);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    
+    $profile = $profileRepo->findById($siteId);
+    if (!$profile) {
+      wp_send_json_error('Site not found', 404);
+      return;
+    }
+
+    // Check ownership
+    if ($profile->createdBy !== get_current_user_id()) {
+      wp_send_json_error('Access denied', 403);
+      return;
+    }
+
+    $sourceVersion = $versionRepo->findById($sourceVersionId);
+    if (!$sourceVersion || $sourceVersion->minisiteId !== $siteId) {
+      wp_send_json_error('Source version not found', 404);
+      return;
+    }
+
+    // Create rollback version
+    $nextVersion = $versionRepo->getNextVersionNumber($siteId);
+    
+    $rollbackVersion = new \Minisite\Domain\Entities\Version(
+      id: null,
+      minisiteId: $siteId,
+      versionNumber: $nextVersion,
+      status: 'draft',
+      label: "Rollback to v{$sourceVersion->versionNumber}",
+      comment: "Rollback from version {$sourceVersion->versionNumber}",
+      dataJson: $sourceVersion->dataJson,
+      createdBy: get_current_user_id(),
+      createdAt: null,
+      publishedAt: null,
+      sourceVersionId: $sourceVersionId
+    );
+    
+    $savedVersion = $versionRepo->save($rollbackVersion);
+    
+    wp_send_json_success([
+      'id' => $savedVersion->id,
+      'version_number' => $savedVersion->versionNumber,
+      'status' => $savedVersion->status,
+      'message' => 'Rollback draft created'
+    ]);
+
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to create rollback: ' . $e->getMessage(), 500);
+  }
 });
