@@ -458,48 +458,34 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Social Media Links</h2>
               <div class="grid md:grid-cols-2 gap-4">
-                {% set social_networks = {
-                  'facebook': '',
-                  'instagram': '',
-                  'x': '',
-                  'youtube': '',
-                  'linkedin': '',
-                  'tiktok': ''
-                } %}
-                {% for social_item in site_json.social|default([]) %}
-                  {% if social_item.network is defined and social_item.url is defined %}
-                    {% set social_networks = social_networks|merge({(social_item.network): social_item.url}) %}
-                  {% endif %}
-                {% endfor %}
-                
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
-                  <input name="social_facebook" type="url" value="{{ social_networks.facebook }}"
+                  <input name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
-                  <input name="social_instagram" type="url" value="{{ social_networks.instagram }}"
+                  <input name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">X (Twitter)</label>
-                  <input name="social_x" type="url" value="{{ social_networks.x }}"
+                  <input name="social_x" type="url" value="{{ site_json.social.x|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
-                  <input name="social_youtube" type="url" value="{{ social_networks.youtube }}"
+                  <input name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
-                  <input name="social_linkedin" type="url" value="{{ social_networks.linkedin }}"
+                  <input name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">TikTok</label>
-                  <input name="social_tiktok" type="url" value="{{ social_networks.tiktok }}"
+                  <input name="social_tiktok" type="url" value="{{ site_json.social.tiktok|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
               </div>

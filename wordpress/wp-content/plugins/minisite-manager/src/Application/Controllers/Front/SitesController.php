@@ -301,10 +301,7 @@ final class SitesController
         foreach ($networks as $network) {
             $url = esc_url_raw($postData["social_{$network}"] ?? '');
             if (!empty($url)) {
-                $social[] = [
-                    'network' => $network,
-                    'url' => $url,
-                ];
+                $social[$network] = $url;
             }
         }
         
