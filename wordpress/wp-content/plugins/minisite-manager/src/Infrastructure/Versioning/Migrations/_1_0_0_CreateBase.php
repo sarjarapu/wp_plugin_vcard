@@ -282,12 +282,13 @@ class _1_0_0_CreateBase implements Migration
                     'address_line2'=>'Suite 200',
                     'address_line3'=>'','address_line4'=>'',
                     'hours'=>[
-                        ['day'=>'Mon','open'=>'08:00','close'=>'17:00'],
-                        ['day'=>'Tue','open'=>'08:00','close'=>'17:00'],
-                        ['day'=>'Wed','open'=>'08:00','close'=>'17:00'],
-                        ['day'=>'Thu','open'=>'08:00','close'=>'17:00'],
-                        ['day'=>'Fri','open'=>'08:00','close'=>'15:00'],
-                        ['day'=>'Sat'],['day'=>'Sun']
+                        'Monday'=>['open'=>'08:00','close'=>'17:00','closed'=>false],
+                        'Tuesday'=>['open'=>'08:00','close'=>'17:00','closed'=>false],
+                        'Wednesday'=>['open'=>'08:00','close'=>'17:00','closed'=>false],
+                        'Thursday'=>['open'=>'08:00','close'=>'17:00','closed'=>false],
+                        'Friday'=>['open'=>'08:00','close'=>'15:00','closed'=>false],
+                        'Saturday'=>['open'=>'09:00','close'=>'13:00','closed'=>false],
+                        'Sunday'=>['open'=>'','close'=>'','closed'=>true]
                     ],
                     'plusCode'=>'77CM+4R Dallas','plusCodeUrl'=>'https://maps.google.com/?q=77CM+4R+Dallas'
                 ],
@@ -410,13 +411,13 @@ class _1_0_0_CreateBase implements Migration
                     'address'=>'12 Colaba Causeway, Mumbai 400001',
                     'address_line1'=>'12 Colaba Causeway','address_line2'=>'2nd Floor','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
-                        ['day'=>'Mon'],
-                        ['day'=>'Tue','open'=>'11:00','close'=>'19:00'],
-                        ['day'=>'Wed','open'=>'11:00','close'=>'19:00'],
-                        ['day'=>'Thu','open'=>'11:00','close'=>'19:00'],
-                        ['day'=>'Fri','open'=>'11:00','close'=>'19:00'],
-                        ['day'=>'Sat','open'=>'11:00','close'=>'19:00'],
-                        ['day'=>'Sun','open'=>'11:00','close'=>'19:00']
+                        'Monday'=>['open'=>'','close'=>'','closed'=>true],
+                        'Tuesday'=>['open'=>'11:00','close'=>'19:00','closed'=>false],
+                        'Wednesday'=>['open'=>'11:00','close'=>'19:00','closed'=>false],
+                        'Thursday'=>['open'=>'11:00','close'=>'19:00','closed'=>false],
+                        'Friday'=>['open'=>'11:00','close'=>'19:00','closed'=>false],
+                        'Saturday'=>['open'=>'10:00','close'=>'16:00','closed'=>false],
+                        'Sunday'=>['open'=>'11:00','close'=>'19:00','closed'=>false]
                     ],
                     'plusCode'=>'2RQP+6V Mumbai','plusCodeUrl'=>'https://maps.google.com/?q=2RQP+6V+Mumbai'
                 ],
@@ -518,13 +519,13 @@ class _1_0_0_CreateBase implements Migration
                     'address'=>'10 Fleet St, London EC4Y 1AA',
                     'address_line1'=>'10 Fleet Street','address_line2'=>'','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
-                        ['day'=>'Mon','open'=>'06:00','close'=>'15:00'],
-                        ['day'=>'Tue','open'=>'06:00','close'=>'15:00'],
-                        ['day'=>'Wed','open'=>'06:00','close'=>'15:00'],
-                        ['day'=>'Thu','open'=>'06:00','close'=>'15:00'],
-                        ['day'=>'Fri','open'=>'06:00','close'=>'15:00'],
-                        ['day'=>'Sat','open'=>'06:00','close'=>'15:00'],
-                        ['day'=>'Sun','open'=>'06:00','close'=>'15:00'],
+                        'Monday'=>['open'=>'06:00','close'=>'15:00','closed'=>false],
+                        'Tuesday'=>['open'=>'06:00','close'=>'15:00','closed'=>false],
+                        'Wednesday'=>['open'=>'06:00','close'=>'15:00','closed'=>false],
+                        'Thursday'=>['open'=>'06:00','close'=>'15:00','closed'=>false],
+                        'Friday'=>['open'=>'06:00','close'=>'15:00','closed'=>false],
+                        'Saturday'=>['open'=>'06:00','close'=>'15:00','closed'=>false],
+                        'Sunday'=>['open'=>'06:00','close'=>'15:00','closed'=>false]
                     ],
                     'plusCode'=>'GV5C+3W London','plusCodeUrl'=>'https://maps.google.com/?q=GV5C+3W+London'
                 ],
@@ -626,14 +627,13 @@ class _1_0_0_CreateBase implements Migration
                     'address'=>'200 George St, Sydney NSW 2000',
                     'address_line1'=>'200 George St','address_line2'=>'Level 20','address_line3'=>'','address_line4'=>'',
                     'hours'=>[
-                        ['day'=>'Mon','open'=>'07:00','close'=>'16:00'],
-                        ['day'=>'Tue','open'=>'07:00','close'=>'16:00'],
-                        ['day'=>'Wed','open'=>'07:00','close'=>'16:00'],
-                        ['day'=>'Thu','open'=>'07:00','close'=>'16:00'],
-                        ['day'=>'Fri','open'=>'07:00','close'=>'16:00'],
-                        ['day'=>'Sat','open'=>'09:00','close'=>'14:00'],
-                        ['day'=>'Sun'],
-
+                        'Monday'=>['open'=>'07:00','close'=>'16:00','closed'=>false],
+                        'Tuesday'=>['open'=>'07:00','close'=>'16:00','closed'=>false],
+                        'Wednesday'=>['open'=>'07:00','close'=>'16:00','closed'=>false],
+                        'Thursday'=>['open'=>'07:00','close'=>'16:00','closed'=>false],
+                        'Friday'=>['open'=>'07:00','close'=>'16:00','closed'=>false],
+                        'Saturday'=>['open'=>'09:00','close'=>'14:00','closed'=>false],
+                        'Sunday'=>['open'=>'','close'=>'','closed'=>true]
                     ],
                     'plusCode'=>'46R6+XM Sydney','plusCodeUrl'=>'https://maps.google.com/?q=46R6+XM+Sydney'
                 ],
