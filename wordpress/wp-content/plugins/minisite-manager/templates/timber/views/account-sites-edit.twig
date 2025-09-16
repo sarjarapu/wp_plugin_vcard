@@ -59,7 +59,7 @@
       <div class="grid lg:grid-cols-2 gap-8">
         <!-- Left: Edit Form -->
         <div class="space-y-8">
-          <form method="post" class="space-y-8">
+          <form id="minisite-edit-form" method="post" action="{{ function('home_url', '/account/sites/' ~ profile.id ~ '/edit') }}" class="space-y-8">
             {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
 
             <!-- SEO Section -->
@@ -556,9 +556,17 @@
 
             <!-- Form Actions -->
             <div class="flex items-center gap-4 pt-6">
-              <button type="submit"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
-                <i class="fa-solid fa-save"></i> Save Changes
+              <button type="submit" id="save-button"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fa-solid fa-save" id="save-icon"></i> 
+                <span id="save-text">Save Changes</span>
+                <span id="save-loading" class="hidden">
+                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </span>
               </button>
               <a href="{{ function('home_url','/account/sites') }}"
                 class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">
@@ -949,6 +957,176 @@
 
     // Initialize paste button states
     updatePasteButtons();
+
+    // Form submission handling
+    const form = document.getElementById('minisite-edit-form');
+    const saveButton = document.getElementById('save-button');
+    const saveIcon = document.getElementById('save-icon');
+    const saveText = document.getElementById('save-text');
+    const saveLoading = document.getElementById('save-loading');
+
+    // Form validation
+    function validateForm() {
+      let isValid = true;
+      const errors = [];
+
+      // Clear previous error styling
+      document.querySelectorAll('.error-border').forEach(el => {
+        el.classList.remove('error-border');
+      });
+      document.querySelectorAll('.error-message').forEach(el => {
+        el.remove();
+      });
+
+      // Validate required fields
+      const requiredFields = [
+        { id: 'seo_title', name: 'Page Title' },
+        { id: 'brand_name', name: 'Business Name' },
+        { id: 'hero_heading', name: 'Main Heading' }
+      ];
+
+      requiredFields.forEach(field => {
+        const input = document.getElementById(field.id);
+        if (input && !input.value.trim()) {
+          isValid = false;
+          errors.push(`${field.name} is required`);
+          input.classList.add('error-border');
+          showFieldError(input, `${field.name} is required`);
+        }
+      });
+
+      // Validate URLs
+      const urlFields = [
+        'seo_favicon', 'brand_logo', 'hero_image', 'whyus_image',
+        'hero_cta1_url', 'hero_cta2_url', 'contact_website_link', 'contact_pluscode_url'
+      ];
+
+      urlFields.forEach(fieldId => {
+        const input = document.getElementById(fieldId);
+        if (input && input.value.trim()) {
+          try {
+            new URL(input.value);
+          } catch (e) {
+            isValid = false;
+            errors.push(`Invalid URL in ${input.previousElementSibling?.textContent || fieldId}`);
+            input.classList.add('error-border');
+            showFieldError(input, 'Please enter a valid URL');
+          }
+        }
+      });
+
+      // Validate email
+      const emailField = document.getElementById('contact_email');
+      if (emailField && emailField.value.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailField.value)) {
+          isValid = false;
+          errors.push('Please enter a valid email address');
+          emailField.classList.add('error-border');
+          showFieldError(emailField, 'Please enter a valid email address');
+        }
+      }
+
+      // Show general error message if any
+      if (!isValid) {
+        showGeneralError('Please fix the errors below before saving.');
+      }
+
+      return isValid;
+    }
+
+    function showFieldError(input, message) {
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'error-message text-red-600 text-sm mt-1';
+      errorDiv.textContent = message;
+      input.parentNode.appendChild(errorDiv);
+    }
+
+    function showGeneralError(message) {
+      // Remove existing error message
+      const existingError = document.querySelector('.form-error-message');
+      if (existingError) {
+        existingError.remove();
+      }
+
+      const errorDiv = document.createElement('div');
+      errorDiv.className = 'form-error-message mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm';
+      errorDiv.textContent = message;
+      
+      // Insert after the header
+      const header = document.querySelector('.max-w-7xl .flex.items-start');
+      if (header) {
+        header.parentNode.insertBefore(errorDiv, header.nextSibling);
+      }
+    }
+
+    function setLoadingState(loading) {
+      if (loading) {
+        saveButton.disabled = true;
+        saveIcon.classList.add('hidden');
+        saveText.classList.add('hidden');
+        saveLoading.classList.remove('hidden');
+      } else {
+        saveButton.disabled = false;
+        saveIcon.classList.remove('hidden');
+        saveText.classList.remove('hidden');
+        saveLoading.classList.add('hidden');
+      }
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Validate form
+      if (!validateForm()) {
+        // Focus on first error field
+        const firstError = document.querySelector('.error-border');
+        if (firstError) {
+          firstError.focus();
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      // Set loading state
+      setLoadingState(true);
+
+      // Submit form
+      const formData = new FormData(form);
+      
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+      })
+      .then(response => {
+        if (response.ok) {
+          // Reload page to show success message and updated data
+          window.location.reload();
+        } else {
+          throw new Error('Save failed');
+        }
+      })
+      .catch(error => {
+        console.error('Save error:', error);
+        showGeneralError('Failed to save changes. Please try again.');
+        setLoadingState(false);
+      });
+    });
+
+    // Add error styling CSS
+    const style = document.createElement('style');
+    style.textContent = `
+      .error-border {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 1px #ef4444 !important;
+      }
+      .error-border:focus {
+        box-shadow: 0 0 0 2px #ef4444 !important;
+      }
+    `;
+    document.head.appendChild(style);
   </script>
 </body>
 </html>

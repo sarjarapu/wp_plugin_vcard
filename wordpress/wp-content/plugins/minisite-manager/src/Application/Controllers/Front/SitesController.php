@@ -177,8 +177,14 @@ final class SitesController
             exit;
         }
 
-        // TODO: Handle version-specific preview when versions table is implemented
-        // For now, always show current siteJson data
+        // Handle version-specific preview
+        // For "current" version or when versions table is not implemented, show current siteJson data
+        if ($versionId === 'current' || !$versionId) {
+            // Show current version (latest siteJson data)
+        } else {
+            // TODO: Handle specific version ID when versions table is implemented
+            // For now, fall back to current version
+        }
         
         // Use the existing TimberRenderer to render the profile
         if (class_exists('Timber\\Timber') && $this->renderer) {
