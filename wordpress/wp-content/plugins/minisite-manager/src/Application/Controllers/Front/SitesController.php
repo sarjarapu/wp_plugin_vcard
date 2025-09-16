@@ -317,26 +317,44 @@ final class SitesController
         $hours = [];
         
         foreach ($days as $day) {
-            $hoursText = sanitize_text_field($postData["hours_{$day}"] ?? '');
-            if (!empty($hoursText) && $hoursText !== 'Closed') {
-                // Parse time range like "9:00 AM - 5:00 PM"
-                if (preg_match('/(\d{1,2}:\d{2}\s*[AP]M)\s*-\s*(\d{1,2}:\d{2}\s*[AP]M)/i', $hoursText, $matches)) {
-                    $hours[] = [
-                        'day' => ucfirst($day),
-                        'open' => $matches[1],
-                        'close' => $matches[2],
-                    ];
-                } else {
-                    // Fallback: store as single hours field
-                    $hours[] = [
-                        'day' => ucfirst($day),
-                        'hours' => $hoursText,
-                    ];
-                }
+            $isClosed = !empty($postData["hours_{$day}_closed"]);
+            $openTime = sanitize_text_field($postData["hours_{$day}_open"] ?? '');
+            $closeTime = sanitize_text_field($postData["hours_{$day}_close"] ?? '');
+            
+            if ($isClosed) {
+                $hours[] = [
+                    'day' => ucfirst($day),
+                    'closed' => true,
+                ];
+            } elseif (!empty($openTime) && !empty($closeTime)) {
+                // Convert 24-hour format to 12-hour format for display
+                $openFormatted = $this->formatTime24To12($openTime);
+                $closeFormatted = $this->formatTime24To12($closeTime);
+                
+                $hours[] = [
+                    'day' => ucfirst($day),
+                    'open' => $openFormatted,
+                    'close' => $closeFormatted,
+                ];
             }
         }
         
         return $hours;
+    }
+
+    private function formatTime24To12(string $time24): string
+    {
+        if (empty($time24)) return '';
+        
+        $time = explode(':', $time24);
+        $hour = (int) $time[0];
+        $minute = $time[1] ?? '00';
+        
+        $ampm = $hour >= 12 ? 'PM' : 'AM';
+        $hour12 = $hour % 12;
+        if ($hour12 === 0) $hour12 = 12;
+        
+        return sprintf('%d:%s %s', $hour12, $minute, $ampm);
     }
 
     private function buildGalleryFromForm(array $postData): array

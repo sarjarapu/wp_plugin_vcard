@@ -307,50 +307,92 @@
 
                 <!-- Business Hours -->
                 <div>
-                  <h3 class="text-lg font-medium text-[var(--on-surface)] mb-3">Business Hours</h3>
+                  <h3 class="text-lg font-medium text-[var(--on-surface)] mb-4">Business Hours</h3>
                   {% set hours_data = {} %}
                   {% for hour_item in site_json.contact.hours|default([]) %}
                     {% if hour_item.day is defined %}
                       {% set day_key = hour_item.day|lower %}
                       {% if hour_item.open is defined and hour_item.close is defined %}
-                        {% set hours_data = hours_data|merge({(day_key): hour_item.open ~ ' - ' ~ hour_item.close}) %}
+                        {% set hours_data = hours_data|merge({(day_key): {'open': hour_item.open, 'close': hour_item.close, 'closed': false}}) %}
                       {% elseif hour_item.hours is defined %}
-                        {% set hours_data = hours_data|merge({(day_key): hour_item.hours}) %}
+                        {% set hours_data = hours_data|merge({(day_key): {'hours': hour_item.hours, 'closed': false}}) %}
                       {% endif %}
                     {% endif %}
                   {% endfor %}
                   
-                  <div class="grid md:grid-cols-2 gap-3">
-                    {% set days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
-                    {% for day in days %}
-                      <div class="hours-day-container">
-                        <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">{{ day|title }}</label>
-                        <div class="flex items-center gap-2">
-                          <input name="hours_{{ day }}" type="text" value="{{ hours_data[day]|default('') }}" placeholder="9:00 AM - 5:00 PM or Closed"
-                            class="flex-1 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                          <button type="button" class="hours-toggle-btn px-3 py-3 rounded-lg border border-[var(--outline-variant)] bg-[var(--surface-1)] text-[var(--on-surface)] hover:bg-[var(--surface-2)]" data-day="{{ day }}">
-                            <i class="fa-solid fa-clock"></i>
-                          </button>
-                        </div>
-                        <div class="hours-time-picker hidden mt-2 p-3 bg-[var(--surface-2)] rounded-lg border border-[var(--outline-variant)]">
-                          <div class="grid grid-cols-2 gap-2">
-                            <div>
-                              <label class="block text-xs font-medium mb-1 text-[var(--on-surface-variant)]">Open</label>
-                              <input type="time" class="w-full rounded bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
-                            </div>
-                            <div>
-                              <label class="block text-xs font-medium mb-1 text-[var(--on-surface-variant)]">Close</label>
-                              <input type="time" class="w-full rounded bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
-                            </div>
-                          </div>
-                          <div class="mt-2 flex gap-2">
-                            <button type="button" class="hours-apply-btn px-3 py-1 rounded bg-[var(--primary)] text-[var(--on-primary)] text-sm">Apply</button>
-                            <button type="button" class="hours-closed-btn px-3 py-1 rounded bg-red-600 text-white text-sm">Mark Closed</button>
-                          </div>
-                        </div>
-                      </div>
-                    {% endfor %}
+                  <div class="overflow-x-auto">
+                    <table class="w-full border-collapse text-sm">
+                      <thead>
+                        <tr class="border-b border-[var(--outline-variant)]">
+                          <th class="text-left py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Day</th>
+                          <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Closed</th>
+                          <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Open Time</th>
+                          <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Close Time</th>
+                          <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% set days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] %}
+                        {% for day in days %}
+                          <tr class="hours-row border-b border-[var(--outline-variant)] hover:bg-[var(--surface-1)]" data-day="{{ day }}">
+                            <!-- Day Column -->
+                            <td class="py-2 px-2 text-sm font-medium text-[var(--on-surface)]">
+                              {{ day|title }}
+                            </td>
+                            
+                            <!-- Closed Toggle Column -->
+                            <td class="py-2 px-2 text-center">
+                              <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="hours_{{ day }}_closed" id="hours_{{ day }}_closed" 
+                                  class="sr-only peer hours-closed-toggle" {{ hours_data[day].closed|default(false) ? 'checked' : '' }}>
+                                <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+                              </label>
+                            </td>
+                            
+                            <!-- Open Time Column -->
+                            <td class="py-2 px-2 text-center">
+                              <div class="hours-time-controls {{ hours_data[day].closed|default(false) ? 'opacity-50 pointer-events-none' : '' }}">
+                                <input type="time" name="hours_{{ day }}_open" value="{{ hours_data[day].open|default('09:00') }}"
+                                  class="w-32 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                              </div>
+                            </td>
+                            
+                            <!-- Close Time Column -->
+                            <td class="py-2 px-2 text-center">
+                              <div class="hours-time-controls {{ hours_data[day].closed|default(false) ? 'opacity-50 pointer-events-none' : '' }}">
+                                <input type="time" name="hours_{{ day }}_close" value="{{ hours_data[day].close|default('17:00') }}"
+                                  class="w-32 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                              </div>
+                            </td>
+                            
+                            <!-- Actions Column -->
+                            <td class="py-2 px-2 text-center">
+                              <div class="flex items-center justify-center gap-1">
+                                <button type="button" class="hours-copy-btn p-1.5 rounded border border-[var(--outline-variant)] bg-[var(--surface-0)] text-[var(--on-surface)] hover:bg-[var(--surface-2)] transition-colors" 
+                                  title="Copy hours" data-day="{{ day }}">
+                                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z"></path>
+                                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"></path>
+                                  </svg>
+                                </button>
+                                <button type="button" class="hours-paste-btn p-1.5 rounded border border-[var(--outline-variant)] bg-[var(--surface-0)] text-[var(--on-surface)] hover:bg-[var(--surface-2)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                                  title="Paste hours" data-day="{{ day }}" disabled>
+                                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"></path>
+                                  </svg>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
                   </div>
+                  
+                  <!-- Hidden inputs for backward compatibility -->
+                  {% for day in days %}
+                    <input type="hidden" name="hours_{{ day }}" id="hours_{{ day }}_hidden" value="{{ hours_data[day].hours|default('') }}"/>
+                  {% endfor %}
                 </div>
               </div>
             </div>
@@ -689,51 +731,223 @@
       }
     });
 
-    // Business Hours Time Picker
-    document.addEventListener('click', function(e) {
-      // Toggle time picker
-      if (e.target.closest('.hours-toggle-btn')) {
-        const btn = e.target.closest('.hours-toggle-btn');
-        const container = btn.closest('.hours-day-container');
-        const picker = container.querySelector('.hours-time-picker');
-        picker.classList.toggle('hidden');
-      }
+    // Enhanced Business Hours with Copy/Paste
+    let clipboardContent = null;
+    let clipboardValid = false;
 
-      // Apply time
-      if (e.target.closest('.hours-apply-btn')) {
-        const btn = e.target.closest('.hours-apply-btn');
-        const container = btn.closest('.hours-day-container');
-        const picker = container.querySelector('.hours-time-picker');
-        const timeInputs = picker.querySelectorAll('input[type="time"]');
-        const openTime = timeInputs[0].value;
-        const closeTime = timeInputs[1].value;
-        const textInput = container.querySelector('input[name^="hours_"]');
-        
-        if (openTime && closeTime) {
-          const openFormatted = formatTime(openTime);
-          const closeFormatted = formatTime(closeTime);
-          textInput.value = `${openFormatted} - ${closeFormatted}`;
-        }
-        picker.classList.add('hidden');
-      }
-
-      // Mark as closed
-      if (e.target.closest('.hours-closed-btn')) {
-        const btn = e.target.closest('.hours-closed-btn');
-        const container = btn.closest('.hours-day-container');
-        const textInput = container.querySelector('input[name^="hours_"]');
-        textInput.value = 'Closed';
-        container.querySelector('.hours-time-picker').classList.add('hidden');
-      }
-    });
-
+    // Format time from 24-hour to 12-hour format
     function formatTime(time24) {
+      if (!time24) return '';
       const [hours, minutes] = time24.split(':');
       const hour = parseInt(hours);
       const ampm = hour >= 12 ? 'PM' : 'AM';
       const hour12 = hour % 12 || 12;
       return `${hour12}:${minutes} ${ampm}`;
     }
+
+    // Parse time from 12-hour to 24-hour format
+    function parseTime(time12) {
+      if (!time12) return '';
+      const match = time12.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+      if (!match) return '';
+      
+      let hour = parseInt(match[1]);
+      const minute = match[2];
+      const ampm = match[3].toUpperCase();
+      
+      if (ampm === 'PM' && hour !== 12) hour += 12;
+      if (ampm === 'AM' && hour === 12) hour = 0;
+      
+      return `${hour.toString().padStart(2, '0')}:${minute}`;
+    }
+
+    // Validate clipboard content
+    function validateClipboard(content) {
+      if (!content) return false;
+      
+      // Check for "Closed"
+      if (content.toLowerCase().trim() === 'closed') return true;
+      
+      // Check for time range formats
+      const timeRangePatterns = [
+        /(\d{1,2}):(\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i,  // 9:15 AM - 5:45 PM
+        /(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/i,                      // 9:15-17:45
+        /(\d{1,2})\s*-\s*(\d{1,2})/i,                                       // 9-17
+      ];
+      
+      return timeRangePatterns.some(pattern => pattern.test(content));
+    }
+
+    // Parse clipboard content to time values
+    function parseClipboardContent(content) {
+      if (!content) return null;
+      
+      const trimmed = content.trim();
+      
+      // Handle "Closed"
+      if (trimmed.toLowerCase() === 'closed') {
+        return { closed: true };
+      }
+      
+      // Handle time range formats
+      const patterns = [
+        {
+          regex: /(\d{1,2}):(\d{2})\s*(AM|PM)\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)/i,
+          parse: (match) => ({
+            open: parseTime(`${match[1]}:${match[2]} ${match[3]}`),
+            close: parseTime(`${match[4]}:${match[5]} ${match[6]}`)
+          })
+        },
+        {
+          regex: /(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/i,
+          parse: (match) => ({
+            open: `${match[1].padStart(2, '0')}:${match[2]}`,
+            close: `${match[3].padStart(2, '0')}:${match[4]}`
+          })
+        },
+        {
+          regex: /(\d{1,2})\s*-\s*(\d{1,2})/i,
+          parse: (match) => ({
+            open: `${match[1].padStart(2, '0')}:00`,
+            close: `${match[2].padStart(2, '0')}:00`
+          })
+        }
+      ];
+      
+      for (const pattern of patterns) {
+        const match = trimmed.match(pattern.regex);
+        if (match) {
+          return pattern.parse(match);
+        }
+      }
+      
+      return null;
+    }
+
+    // Update paste button states
+    function updatePasteButtons() {
+      const pasteButtons = document.querySelectorAll('.hours-paste-btn');
+      pasteButtons.forEach(btn => {
+        btn.disabled = !clipboardValid;
+      });
+    }
+
+    // Update hidden input for backward compatibility
+    function updateHiddenInput(day) {
+      const row = document.querySelector(`[data-day="${day}"]`);
+      const closedToggle = row.querySelector('.hours-closed-toggle');
+      const openInput = row.querySelector('input[name$="_open"]');
+      const closeInput = row.querySelector('input[name$="_close"]');
+      const hiddenInput = document.getElementById(`hours_${day}_hidden`);
+      
+      if (closedToggle.checked) {
+        hiddenInput.value = 'Closed';
+      } else if (openInput.value && closeInput.value) {
+        const openFormatted = formatTime(openInput.value);
+        const closeFormatted = formatTime(closeInput.value);
+        hiddenInput.value = `${openFormatted} - ${closeFormatted}`;
+      } else {
+        hiddenInput.value = '';
+      }
+    }
+
+    // Event listeners
+    document.addEventListener('click', function(e) {
+      // Copy hours
+      if (e.target.closest('.hours-copy-btn')) {
+        const btn = e.target.closest('.hours-copy-btn');
+        const day = btn.dataset.day;
+        const row = document.querySelector(`[data-day="${day}"]`);
+        const closedToggle = row.querySelector('.hours-closed-toggle');
+        const openInput = row.querySelector('input[name$="_open"]');
+        const closeInput = row.querySelector('input[name$="_close"]');
+        
+        if (closedToggle.checked) {
+          clipboardContent = 'Closed';
+        } else if (openInput.value && closeInput.value) {
+          const openFormatted = formatTime(openInput.value);
+          const closeFormatted = formatTime(closeInput.value);
+          clipboardContent = `${openFormatted} - ${closeFormatted}`;
+        } else {
+          clipboardContent = '';
+        }
+        
+        clipboardValid = validateClipboard(clipboardContent);
+        updatePasteButtons();
+        
+        // Visual feedback
+        btn.style.backgroundColor = 'var(--primary)';
+        btn.style.color = 'var(--on-primary)';
+        setTimeout(() => {
+          btn.style.backgroundColor = '';
+          btn.style.color = '';
+        }, 200);
+      }
+
+      // Paste hours
+      if (e.target.closest('.hours-paste-btn') && clipboardValid) {
+        const btn = e.target.closest('.hours-paste-btn');
+        const day = btn.dataset.day;
+        const row = document.querySelector(`[data-day="${day}"]`);
+        const closedToggle = row.querySelector('.hours-closed-toggle');
+        const openInput = row.querySelector('input[name$="_open"]');
+        const closeInput = row.querySelector('input[name$="_close"]');
+        const timeControls = row.querySelector('.hours-time-controls');
+        
+        const parsed = parseClipboardContent(clipboardContent);
+        
+        if (parsed.closed) {
+          closedToggle.checked = true;
+          timeControls.style.opacity = '0.5';
+          timeControls.style.pointerEvents = 'none';
+        } else if (parsed.open && parsed.close) {
+          closedToggle.checked = false;
+          openInput.value = parsed.open;
+          closeInput.value = parsed.close;
+          timeControls.style.opacity = '1';
+          timeControls.style.pointerEvents = 'auto';
+        }
+        
+        updateHiddenInput(day);
+        
+        // Visual feedback
+        btn.style.backgroundColor = 'var(--primary)';
+        btn.style.color = 'var(--on-primary)';
+        setTimeout(() => {
+          btn.style.backgroundColor = '';
+          btn.style.color = '';
+        }, 200);
+      }
+    });
+
+    // Handle closed toggle changes
+    document.addEventListener('change', function(e) {
+      if (e.target.classList.contains('hours-closed-toggle')) {
+        const day = e.target.closest('[data-day]').dataset.day;
+        const timeControls = e.target.closest('[data-day]').querySelector('.hours-time-controls');
+        
+        if (e.target.checked) {
+          timeControls.style.opacity = '0.5';
+          timeControls.style.pointerEvents = 'none';
+        } else {
+          timeControls.style.opacity = '1';
+          timeControls.style.pointerEvents = 'auto';
+        }
+        
+        updateHiddenInput(day);
+      }
+    });
+
+    // Handle time input changes
+    document.addEventListener('change', function(e) {
+      if (e.target.matches('input[name$="_open"], input[name$="_close"]')) {
+        const day = e.target.closest('[data-day]').dataset.day;
+        updateHiddenInput(day);
+      }
+    });
+
+    // Initialize paste button states
+    updatePasteButtons();
   </script>
 </body>
 </html>
