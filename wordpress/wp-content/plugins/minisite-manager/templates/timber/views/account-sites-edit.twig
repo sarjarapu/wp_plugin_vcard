@@ -90,14 +90,14 @@
                 <div>
                   <label for="version_label" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Label</label>
                   <input id="version_label" name="version_label" type="text" 
-                    value="{{ latest_draft.label|default('') }}"
+                    value="{{ editing_version.label|default('') }}"
                     placeholder="e.g., Updated hero section"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
                   <label for="version_comment" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Comment</label>
                   <input id="version_comment" name="version_comment" type="text" 
-                    value="{{ latest_draft.comment|default('') }}"
+                    value="{{ editing_version.comment|default('') }}"
                     placeholder="e.g., Changed heading and added CTA"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
@@ -613,7 +613,7 @@
                   Saving...
                 </span>
               </button>
-              {% if latest_draft and latest_draft.status == 'draft' %}
+              {% if editing_version and editing_version.status == 'draft' %}
                 <button type="button" id="publish-button" 
                   class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
                   <i class="fa-solid fa-rocket"></i> 
@@ -1051,10 +1051,10 @@
         formData.append('action', 'publish_version');
         formData.append('nonce', '{{ function("wp_create_nonce", "minisite_version") }}');
         formData.append('site_id', '{{ profile.id }}');
-        formData.append('version_id', '{{ latest_draft.id|default("") }}');
+        formData.append('version_id', '{{ editing_version.id|default("") }}');
         
         // Debug logging
-        console.log('Publishing version:', '{{ latest_draft.id|default("") }}');
+        console.log('Publishing version:', '{{ editing_version.id|default("") }}');
         console.log('Site ID:', '{{ profile.id }}');
 
         publishButton.disabled = true;
