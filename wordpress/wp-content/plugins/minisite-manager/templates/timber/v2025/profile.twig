@@ -290,9 +290,9 @@
   {% endif %}
 
   {# Reviews (optional) #}
-  {% set reviews = [] %}
-  {% for r in sj.reviews|default([]) %}
-    {% set reviews = reviews|merge([{
+  {% set reviewsJsonLd = [] %}
+  {% for r in reviews|default([]) %}
+    {% set reviewsJsonLd = reviewsJsonLd|merge([{
       '@type':'Review',
       'author': {'@type':'Person','name': r.author|default('')},
       'datePublished': r.date|default(''),
@@ -341,8 +341,8 @@
   {% if aggregate %}
     {% set business = business|merge({ 'aggregateRating': aggregate }) %}
   {% endif %}
-  {% if reviews|length %}
-    {% set business = business|merge({ 'review': reviews }) %}
+  {% if reviewsJsonLd|length %}
+    {% set business = business|merge({ 'review': reviewsJsonLd }) %}
   {% endif %}
 
   <script type="application/ld+json">{{ business|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
@@ -883,7 +883,7 @@
         </div>
 
         <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {% for r in profile.siteJson.reviews|default([]) %}
+          {% for r in reviews|default([]) %}
             <article class="p-6 rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[450px] shadow-sm hover:shadow-md transition-shadow drop-shadow-[0_8px_18px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_8px_18px_rgba(255,255,255,0.12)] dark:hover:drop-shadow-[0_10px_28px_rgba(255,255,255,0.18)] flex flex-col h-full">
               <div class="flex items-center justify-between text-[var(--on-surface)]">
                 <div class="font-semibold">{{ r.author }}</div>

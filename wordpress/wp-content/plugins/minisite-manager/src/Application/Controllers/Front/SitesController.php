@@ -412,9 +412,10 @@ final class SitesController
             $openTime = sanitize_text_field($postData["hours_{$day}_open"] ?? '');
             $closeTime = sanitize_text_field($postData["hours_{$day}_close"] ?? '');
             
+            $dayName = ucfirst($day);
+            
             if ($isClosed) {
-                $hours[] = [
-                    'day' => ucfirst($day),
+                $hours[$dayName] = [
                     'closed' => true,
                 ];
             } elseif (!empty($openTime) && !empty($closeTime)) {
@@ -422,8 +423,7 @@ final class SitesController
                 $openFormatted = $this->formatTime24To12($openTime);
                 $closeFormatted = $this->formatTime24To12($closeTime);
                 
-                $hours[] = [
-                    'day' => ucfirst($day),
+                $hours[$dayName] = [
                     'open' => $openFormatted,
                     'close' => $closeFormatted,
                 ];

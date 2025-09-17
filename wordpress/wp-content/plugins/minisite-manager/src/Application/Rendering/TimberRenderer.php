@@ -22,9 +22,15 @@ final class TimberRenderer
         $base = trailingslashit(\MINISITE_PLUGIN_DIR) . 'templates/timber';
         \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$base])));
 
+        // Fetch reviews for the profile
+        global $wpdb;
+        $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository($wpdb);
+        $reviews = $reviewRepo->listApprovedForProfile($profile->id);
+
         // Pass the entity directly; use properties in Twig (no additional mapping)
         $context = [
             'profile' => $profile,
+            'reviews' => $reviews,
         ];
 
         \Timber\Timber::render([
