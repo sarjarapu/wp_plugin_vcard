@@ -113,9 +113,10 @@ final class SitesController
         $editingVersion = null;
         
         if ($requestedVersionId === 'latest' || !$requestedVersionId) {
-            // Edit latest draft if exists, otherwise show published version
+            // Edit latest version (draft or published)
+            $latestVersion = $versionRepo->findLatestVersion($siteId);
             $latestDraft = $versionRepo->findLatestDraft($siteId);
-            $editingVersion = $latestDraft;
+            $editingVersion = $latestVersion;
         } else {
             // Edit specific version
             $editingVersion = $versionRepo->findById((int) $requestedVersionId);
@@ -190,7 +191,7 @@ final class SitesController
             $base = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
             \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$base])));
 
-            // Use editing version data if available, otherwise use published version
+            // Use editing version data (should always be available now)
             $siteJson = $editingVersion ? $editingVersion->dataJson : $profile->siteJson;
             
             \Timber\Timber::render('account-sites-edit.twig', [

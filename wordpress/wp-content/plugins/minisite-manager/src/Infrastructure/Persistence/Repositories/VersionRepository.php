@@ -72,6 +72,20 @@ final class VersionRepository implements VersionRepositoryInterface
         return array_map(fn($row) => $this->mapRow($row), $rows);
     }
 
+    public function findLatestVersion(int $minisiteId): ?Version
+    {
+        $sql = $this->db->prepare(
+            "SELECT * FROM {$this->table()} 
+             WHERE minisite_id = %d 
+             ORDER BY version_number DESC 
+             LIMIT 1",
+            $minisiteId
+        );
+        
+        $row = $this->db->get_row($sql, ARRAY_A);
+        return $row ? $this->mapRow($row) : null;
+    }
+
     public function findLatestDraft(int $minisiteId): ?Version
     {
         $sql = $this->db->prepare(
