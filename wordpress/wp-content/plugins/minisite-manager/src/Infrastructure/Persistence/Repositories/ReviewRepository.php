@@ -31,7 +31,8 @@ final class ReviewRepository implements ReviewRepositoryInterface
     public function listApprovedForProfile(int $profileId, int $limit = 20): array
     {
         $sql = $this->db->prepare(
-            "SELECT * FROM {$this->table()} WHERE profile_id=%d AND status='approved' ORDER BY created_at DESC LIMIT %d",
+            // AND status='approved' 
+            "SELECT * FROM {$this->table()} WHERE profile_id=%d ORDER BY created_at DESC LIMIT %d",
             $profileId, $limit
         );
         $rows = $this->db->get_results($sql, ARRAY_A) ?: [];
