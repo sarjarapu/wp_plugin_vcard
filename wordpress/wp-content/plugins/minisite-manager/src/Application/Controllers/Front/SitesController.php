@@ -201,7 +201,9 @@ final class SitesController
                 'editing_version' => $editingVersion,
                 'error_msg' => $error_msg,
                 'success_msg' => $success_msg,
-                'preview_url' => home_url('/account/sites/' . $siteId . '/preview/current'),
+                'preview_url' => $editingVersion ? 
+                    home_url('/account/sites/' . $siteId . '/preview/' . $editingVersion->id) : 
+                    home_url('/account/sites/' . $siteId . '/preview/current'),
                 'versions_url' => home_url('/account/sites/' . $siteId . '/versions'),
                 'edit_latest_url' => home_url('/account/sites/' . $siteId . '/edit/latest'),
             ]);
@@ -246,13 +248,24 @@ final class SitesController
         }
 
         // Handle version-specific preview
-        // For "current" version or when versions table is not implemented, show current siteJson data
+        $versionRepo = new VersionRepository($wpdb);
+        $siteJson = null;
+        
         if ($versionId === 'current' || !$versionId) {
-            // Show current version (latest siteJson data)
+            // Show current published version (from profile.siteJson)
+            $siteJson = $profile->siteJson;
         } else {
-            // TODO: Handle specific version ID when versions table is implemented
-            // For now, fall back to current version
+            // Show specific version
+            $version = $versionRepo->findById((int) $versionId);
+            if (!$version || $version->minisiteId !== $siteId) {
+                wp_redirect(home_url('/account/sites/' . $siteId . '/preview/current'));
+                exit;
+            }
+            $siteJson = $version->dataJson;
         }
+        
+        // Update profile with version-specific data for rendering
+        $profile->siteJson = $siteJson;
         
         // Use the existing TimberRenderer to render the profile
         if (class_exists('Timber\\Timber') && $this->renderer) {
