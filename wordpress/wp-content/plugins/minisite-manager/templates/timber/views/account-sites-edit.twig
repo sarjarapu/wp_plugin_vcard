@@ -613,11 +613,11 @@
                   Saving...
                 </span>
               </button>
-              {% if latest_draft %}
+              {% if latest_draft and latest_draft.status == 'draft' %}
                 <button type="button" id="publish-button" 
                   class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
                   <i class="fa-solid fa-rocket"></i> 
-                  <span>Publish Draft</span>
+                  <span>Publish</span>
                 </button>
               {% endif %}
               <a href="{{ function('home_url','/account/sites') }}"
@@ -1048,10 +1048,14 @@
 
         const form = document.getElementById('minisite-edit-form');
         const formData = new FormData(form);
-        formData.append('action', 'publish_draft');
+        formData.append('action', 'publish_version');
         formData.append('nonce', '{{ function("wp_create_nonce", "minisite_version") }}');
         formData.append('site_id', '{{ profile.id }}');
-        formData.append('version_id', '{{ latest_draft.id }}');
+        formData.append('version_id', '{{ latest_draft.id|default("") }}');
+        
+        // Debug logging
+        console.log('Publishing version:', '{{ latest_draft.id|default("") }}');
+        console.log('Site ID:', '{{ profile.id }}');
 
         publishButton.disabled = true;
         publishButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
@@ -1068,14 +1072,14 @@
           } else {
             alert('Failed to publish: ' + (data.data || 'Unknown error'));
             publishButton.disabled = false;
-            publishButton.innerHTML = '<i class="fa-solid fa-rocket"></i> <span>Publish Draft</span>';
+            publishButton.innerHTML = '<i class="fa-solid fa-rocket"></i> <span>Publish</span>';
           }
         })
         .catch(error => {
           console.error('Error:', error);
           alert('Failed to publish: Network error');
           publishButton.disabled = false;
-          publishButton.innerHTML = '<i class="fa-solid fa-rocket"></i> <span>Publish Draft</span>';
+          publishButton.innerHTML = '<i class="fa-solid fa-rocket"></i> <span>Publish</span>';
         });
       });
     }
