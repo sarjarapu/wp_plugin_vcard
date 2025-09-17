@@ -112,6 +112,30 @@ final class ProfileRepository implements ProfileRepositoryInterface
         }
     }
 
+    /**
+     * Update only coordinates for a profile (used when saving drafts)
+     */
+    public function updateCoordinates(int $id, ?float $lat, ?float $lng, int $updatedBy): void
+    {
+        $sql = $this->db->prepare(
+            "UPDATE {$this->table()} SET lat = %f, lng = %f, updated_by = %d, updated_at = NOW() WHERE id = %d",
+            $lat, $lng, $updatedBy, $id
+        );
+        $this->db->query($sql);
+        
+        if ($this->db->rows_affected === 0) {
+            throw new \RuntimeException('Profile not found or update failed.');
+        }
+        
+        // Update POINT column if coordinates are set
+        if ($lat !== null && $lng !== null) {
+            $this->db->query($this->db->prepare(
+                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                $lng, $lat, $id
+            ));
+        }
+    }
+
     public function save(Profile $p, int $expectedSiteVersion): Profile
     {
         // Build normalized search_terms (simple example; replace with your builder later)

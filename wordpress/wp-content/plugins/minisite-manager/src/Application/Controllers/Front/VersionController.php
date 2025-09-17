@@ -288,8 +288,13 @@ class VersionController
                 $versionId
             ));
             
-            // Update profile current version
-            $this->profileRepository->updateCurrentVersionId($minisiteId, $versionId);
+            // Update profile with published version data and current version ID
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$wpdb->prefix}minisite_profiles 
+                 SET site_json = %s, _minisite_current_version_id = %d, updated_at = NOW() 
+                 WHERE id = %d",
+                wp_json_encode($version->dataJson), $versionId, $minisiteId
+            ));
             
             $wpdb->query('COMMIT');
         } catch (\Exception $e) {

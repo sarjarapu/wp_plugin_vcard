@@ -101,9 +101,29 @@ final class SitesController
         $error_msg = '';
         $success_msg = '';
         $latestDraft = null;
+        
+        // Check for success message from redirect
+        if (isset($_GET['draft_saved']) && $_GET['draft_saved'] === '1') {
+            $success_msg = 'Draft saved successfully!';
+        }
 
-        // Get latest draft version for editing
-        $latestDraft = $versionRepo->findLatestDraft($siteId);
+        // Get version to edit (from URL parameter or latest draft)
+        $requestedVersionId = get_query_var('minisite_version_id');
+        $latestDraft = null;
+        $editingVersion = null;
+        
+        if ($requestedVersionId === 'latest' || !$requestedVersionId) {
+            // Edit latest draft if exists, otherwise show published version
+            $latestDraft = $versionRepo->findLatestDraft($siteId);
+            $editingVersion = $latestDraft;
+        } else {
+            // Edit specific version
+            $editingVersion = $versionRepo->findById((int) $requestedVersionId);
+            if (!$editingVersion || $editingVersion->minisiteId !== $siteId) {
+                wp_redirect(home_url('/account/sites/' . $siteId . '/edit'));
+                exit;
+            }
+        }
 
         // Handle form submission
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_edit_nonce'])) {
@@ -118,32 +138,46 @@ final class SitesController
                     $lat = !empty($_POST['contact_lat']) ? (float) $_POST['contact_lat'] : null;
                     $lng = !empty($_POST['contact_lng']) ? (float) $_POST['contact_lng'] : null;
                     
-                    // Create new draft version
-                    $nextVersion = $versionRepo->getNextVersionNumber($siteId);
+                    // Start transaction for atomic draft save
+                    $wpdb->query('START TRANSACTION');
                     
-                    $version = new \Minisite\Domain\Entities\Version(
-                        id: null,
-                        minisiteId: $siteId,
-                        versionNumber: $nextVersion,
-                        status: 'draft',
-                        label: sanitize_text_field($_POST['version_label'] ?? "Version {$nextVersion}"),
-                        comment: sanitize_textarea_field($_POST['version_comment'] ?? ''),
-                        dataJson: $siteJson,
-                        createdBy: (int) $currentUser->ID,
-                        createdAt: null,
-                        publishedAt: null,
-                        sourceVersionId: null
-                    );
+                    try {
+                        // Create new draft version
+                        $nextVersion = $versionRepo->getNextVersionNumber($siteId);
+                        
+                        $version = new \Minisite\Domain\Entities\Version(
+                            id: null,
+                            minisiteId: $siteId,
+                            versionNumber: $nextVersion,
+                            status: 'draft',
+                            label: sanitize_text_field($_POST['version_label'] ?? "Version {$nextVersion}"),
+                            comment: sanitize_textarea_field($_POST['version_comment'] ?? ''),
+                            dataJson: $siteJson,
+                            createdBy: (int) $currentUser->ID,
+                            createdAt: null,
+                            publishedAt: null,
+                            sourceVersionId: null
+                        );
 
-                    $savedVersion = $versionRepo->save($version);
-                    $latestDraft = $savedVersion;
-                    
-                    // Update profile coordinates if provided
-                    if ($lat !== null && $lng !== null) {
-                        $profileRepo->updateSiteJsonWithCoordinates($siteId, $siteJson, $lat, $lng, (int) $currentUser->ID);
+                        $savedVersion = $versionRepo->save($version);
+                        $latestDraft = $savedVersion;
+                        
+                        // Update profile coordinates if provided (coordinates are stored on profile, not in versions)
+                        if ($lat !== null && $lng !== null) {
+                            // Only update coordinates, not site_json
+                            $profileRepo->updateCoordinates($siteId, $lat, $lng, (int) $currentUser->ID);
+                        }
+                        
+                        $wpdb->query('COMMIT');
+                        
+                        // Redirect to show the latest version after save
+                        wp_redirect(home_url('/account/sites/' . $siteId . '/edit?draft_saved=1'));
+                        exit;
+                        
+                    } catch (\Exception $e) {
+                        $wpdb->query('ROLLBACK');
+                        throw $e;
                     }
-                    
-                    $success_msg = 'Draft saved successfully!';
                     
                 } catch (\Exception $e) {
                     $error_msg = 'Failed to save draft: ' . $e->getMessage();
@@ -156,18 +190,20 @@ final class SitesController
             $base = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
             \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$base])));
 
-            // Use latest draft data if available, otherwise use published version
-            $siteJson = $latestDraft ? $latestDraft->dataJson : $profile->siteJson;
+            // Use editing version data if available, otherwise use published version
+            $siteJson = $editingVersion ? $editingVersion->dataJson : $profile->siteJson;
             
             \Timber\Timber::render('account-sites-edit.twig', [
                 'page_title' => 'Edit: ' . $profile->title,
                 'profile' => $profile,
                 'site_json' => $siteJson,
                 'latest_draft' => $latestDraft,
+                'editing_version' => $editingVersion,
                 'error_msg' => $error_msg,
                 'success_msg' => $success_msg,
                 'preview_url' => home_url('/account/sites/' . $siteId . '/preview/current'),
                 'versions_url' => home_url('/account/sites/' . $siteId . '/versions'),
+                'edit_latest_url' => home_url('/account/sites/' . $siteId . '/edit/latest'),
             ]);
             return;
         }

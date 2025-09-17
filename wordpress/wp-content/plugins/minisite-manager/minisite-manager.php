@@ -630,8 +630,13 @@ add_action('wp_ajax_publish_version', function () {
         $versionId
       ));
       
-      // Update profile current version
-      $profileRepo->updateCurrentVersionId($siteId, $versionId);
+      // Update profile with published version data and current version ID
+      $wpdb->query($wpdb->prepare(
+        "UPDATE {$wpdb->prefix}minisite_profiles 
+         SET site_json = %s, _minisite_current_version_id = %d, updated_at = NOW() 
+         WHERE id = %d",
+        wp_json_encode($version->dataJson), $versionId, $siteId
+      ));
       
       $wpdb->query('COMMIT');
       
