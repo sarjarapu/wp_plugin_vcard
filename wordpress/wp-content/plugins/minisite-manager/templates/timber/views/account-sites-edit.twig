@@ -76,6 +76,40 @@
         </a>
       </div>
 
+      <!-- Quick Navigation -->
+      <div class="mb-6 p-4 rounded-xl bg-[var(--surface-0)] ring-1 ring-[var(--outline-variant)]">
+        <h3 class="text-sm font-medium text-[var(--on-surface)] mb-3">Quick Navigation</h3>
+        <div class="flex flex-wrap items-center gap-2">
+          <a href="#seo-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-search"></i> SEO
+          </a>
+          <a href="#brand-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-palette"></i> Brand
+          </a>
+          <a href="#hero-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-star"></i> Hero
+          </a>
+          <a href="#about-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-info-circle"></i> About
+          </a>
+          <a href="#whyus-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-thumbs-up"></i> Why Us
+          </a>
+          <a href="#contact-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-phone"></i> Contact
+          </a>
+          <a href="#products-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-box"></i> Products
+          </a>
+          <a href="#social-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-share-nodes"></i> Social
+          </a>
+          <a href="#gallery-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+            <i class="fa-solid fa-images"></i> Gallery
+          </a>
+        </div>
+      </div>
+
       <!-- Form and Preview Layout -->
       <div class="grid lg:grid-cols-2 gap-8">
         <!-- Left: Edit Form -->
@@ -85,8 +119,13 @@
             
 
             <!-- SEO Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">SEO & Meta</h2>
+            <div id="seo-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">SEO & Meta</h2>
+                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                  <i class="fa-solid fa-arrow-up text-sm"></i>
+                </a>
+              </div>
               <div class="space-y-4">
                 <div>
                   <label for="seo_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Page Title</label>
@@ -112,8 +151,13 @@
             </div>
 
             <!-- Brand Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Brand & Logo</h2>
+            <div id="brand-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Brand & Logo</h2>
+                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                  <i class="fa-solid fa-arrow-up text-sm"></i>
+                </a>
+              </div>
               <div class="space-y-4">
                 <div>
                   <label for="brand_name" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Business Name</label>
@@ -145,8 +189,13 @@
             </div>
 
             <!-- Hero Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Hero Section</h2>
+            <div id="hero-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Hero Section</h2>
+                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                  <i class="fa-solid fa-arrow-up text-sm"></i>
+                </a>
+              </div>
               <div class="space-y-4">
                 <div>
                   <label for="hero_badge" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Badge Text</label>
@@ -214,9 +263,14 @@
               </div>
             </div>
 
-            <!-- About Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">About Content</h2>
+             <!-- About Section -->
+             <div id="about-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+               <div class="flex items-center justify-between mb-4">
+                 <h2 class="text-xl font-semibold text-[var(--on-surface)]">About Content</h2>
+                 <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                   <i class="fa-solid fa-arrow-up text-sm"></i>
+                 </a>
+               </div>
               <div>
                 <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About HTML</label>
                 <textarea id="about_html" name="about_html" rows="8"
@@ -226,8 +280,13 @@
             </div>
 
             <!-- WhyUs Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Why Choose Us</h2>
+            <div id="whyus-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Why Choose Us</h2>
+                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                  <i class="fa-solid fa-arrow-up text-sm"></i>
+                </a>
+              </div>
               <div class="space-y-4">
                 <div>
                   <label for="whyus_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
@@ -249,8 +308,13 @@
             </div>
 
             <!-- Contact Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Contact Information</h2>
+            <div id="contact-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Contact Information</h2>
+                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                  <i class="fa-solid fa-arrow-up text-sm"></i>
+                </a>
+              </div>
               <div class="space-y-6">
                 <!-- Phone -->
                 <div class="grid md:grid-cols-2 gap-4">
@@ -437,9 +501,14 @@
             </div>
 
             <!-- Products & Services Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="products-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
               <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Products & Services</h2>
+                <div class="flex items-center gap-3">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Products & Services</h2>
+                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </a>
+                </div>
                 <button type="button" id="addProduct" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
                   <i class="fa-solid fa-plus"></i> Add Item
                 </button>
@@ -506,8 +575,13 @@
             </div>
 
             <!-- Social Media Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Social Media Links</h2>
+            <div id="social-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Social Media Links</h2>
+                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                  <i class="fa-solid fa-arrow-up text-sm"></i>
+                </a>
+              </div>
               <div class="grid md:grid-cols-2 gap-4">
                 <div>
                   <label for="social_facebook" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
@@ -543,9 +617,14 @@
             </div>
 
             <!-- Gallery Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="gallery-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
               <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Image Gallery</h2>
+                <div class="flex items-center gap-3">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Image Gallery</h2>
+                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </a>
+                </div>
                 <button type="button" id="addGalleryImage" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
                   <i class="fa-solid fa-plus"></i> Add Image
                 </button>
