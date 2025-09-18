@@ -80,29 +80,9 @@
       <div class="grid lg:grid-cols-2 gap-8">
         <!-- Left: Edit Form -->
         <div class="space-y-8">
-          <form id="minisite-edit-form" method="post" class="space-y-8">
+          <form id="minisite-edit-form" method="post">
             {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
             
-            <!-- Version Information -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Version Information</h2>
-              <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label for="version_label" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Label</label>
-                  <input id="version_label" name="version_label" type="text" 
-                    value="{{ editing_version.label|default('') }}"
-                    placeholder="e.g., Updated hero section"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="version_comment" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Comment</label>
-                  <input id="version_comment" name="version_comment" type="text" 
-                    value="{{ editing_version.comment|default('') }}"
-                    placeholder="e.g., Changed heading and added CTA"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-              </div>
-            </div>
 
             <!-- SEO Section -->
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
@@ -599,37 +579,62 @@
               <input type="hidden" name="gallery_count" id="galleryCount" value="{{ site_json.gallery|default([])|length }}"/>
             </div>
 
-            <!-- Form Actions -->
-            <div class="flex items-center gap-4 pt-6">
-              <button type="submit" id="save-draft-button" name="action" value="save_draft"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                <i class="fa-solid fa-save" id="save-icon"></i> 
-                <span id="save-text">Save Draft</span>
-                <span id="save-loading" class="hidden">
-                  <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Saving...
-                </span>
-              </button>
-              {% if editing_version and editing_version.status == 'draft' %}
-                <button type="button" id="publish-button" 
-                  class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                  <i class="fa-solid fa-rocket"></i> 
-                  <span>Publish</span>
-                </button>
-              {% endif %}
-              <a href="{{ function('home_url','/account/sites') }}"
-                class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">
-                Cancel
-              </a>
-            </div>
           </form>
         </div>
 
-        <!-- Right: Live Preview -->
-        <div class="lg:sticky lg:top-6">
+        <!-- Right: Version Info & Actions + Live Preview -->
+        <div class="lg:sticky lg:top-6 space-y-6">
+          <!-- Version Information & Actions -->
+          <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Version Information</h2>
+            <div class="space-y-4">
+              <div>
+                <label for="version_label" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Label</label>
+                <input id="version_label" name="version_label" type="text" 
+                  value="{{ editing_version.label|default('') }}"
+                  placeholder="e.g., Updated hero section"
+                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+              <div>
+                <label for="version_comment" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Comment</label>
+                <input id="version_comment" name="version_comment" type="text" 
+                  value="{{ editing_version.comment|default('') }}"
+                  placeholder="e.g., Changed heading and added CTA"
+                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+            </div>
+            
+            <!-- Form Actions -->
+            <div class="mt-6 pt-4 border-t border-[var(--outline-variant)]">
+              <div class="space-y-3">
+                <button type="submit" id="save-draft-button" name="action" value="save_draft"
+                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
+                  <i class="fa-solid fa-save" id="save-icon"></i> 
+                  <span id="save-text">Save Draft</span>
+                  <span id="save-loading" class="hidden">
+                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Saving...
+                  </span>
+                </button>
+                {% if editing_version and editing_version.status == 'draft' %}
+                  <button type="button" id="publish-button" 
+                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
+                    <i class="fa-solid fa-rocket"></i> 
+                    <span>Publish</span>
+                  </button>
+                {% endif %}
+                <a href="{{ function('home_url','/account/sites') }}"
+                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm font-medium">
+                  Cancel
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Preview -->
           <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
             <div class="flex items-center justify-between mb-4">
               <h2 class="text-xl font-semibold text-[var(--on-surface)]">Live Preview</h2>
