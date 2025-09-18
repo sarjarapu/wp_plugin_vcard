@@ -1220,14 +1220,30 @@
 
     // Simple form submission handling - prevent double clicks only
     const form = document.getElementById('minisite-edit-form');
-    const saveButton = document.getElementById('save-button');
+    const saveButton = document.getElementById('save-draft-button');
     const saveIcon = document.getElementById('save-icon');
     const saveText = document.getElementById('save-text');
     const saveLoading = document.getElementById('save-loading');
+    
+    console.log('Form elements found:', {
+      form: !!form,
+      saveButton: !!saveButton,
+      saveIcon: !!saveIcon,
+      saveText: !!saveText,
+      saveLoading: !!saveLoading
+    });
+    
+    // Test if button click works at all
+    if (saveButton) {
+      console.log('Save button element:', saveButton);
+      console.log('Save button type:', saveButton.type);
+      console.log('Save button form:', saveButton.form);
+    }
 
     let isSubmitting = false;
 
-    form.addEventListener('submit', function(e) {
+    if (form) {
+      form.addEventListener('submit', function(e) {
       console.log('Form submission triggered');
       
       // Only prevent double submission, let the form submit normally
@@ -1264,7 +1280,39 @@
 
       // Allow form to submit normally
       // The page will reload with success/error message
-    });
+      });
+    } else {
+      console.error('Form element not found!');
+    }
+
+    // Add direct click handler to Save Draft button as backup
+    if (saveButton) {
+      saveButton.addEventListener('click', function(e) {
+        console.log('Save Draft button clicked directly');
+        
+        // Sync all Quill editors before submission
+        if (window.editors) {
+          console.log('Syncing editors on button click:', Object.keys(window.editors));
+          Object.keys(window.editors).forEach(function(key) {
+            const editor = window.editors[key];
+            if (editor && editor.root) {
+              const textareaId = key.replace('_editor', '');
+              const textarea = document.getElementById(textareaId);
+              if (textarea) {
+                textarea.value = editor.root.innerHTML;
+                console.log('Synced editor', key, 'to textarea', textareaId, 'with content:', textarea.value);
+              }
+            }
+          });
+        }
+        
+        // Submit the form programmatically
+        if (form) {
+          console.log('Submitting form programmatically');
+          form.submit();
+        }
+      });
+    }
 
     // Handle publish button
     const publishButton = document.getElementById('publish-button');
