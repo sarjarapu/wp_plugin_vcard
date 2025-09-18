@@ -738,8 +738,8 @@ add_action('wp_ajax_rollback_version', function () {
       minisiteId: $siteId,
       versionNumber: $nextVersion,
       status: 'draft',
-      label: "Rollback to v{$sourceVersion->versionNumber}",
-      comment: "Rollback from version {$sourceVersion->versionNumber}",
+      label: "Copy to v{$sourceVersion->versionNumber}",
+      comment: "Copy of version {$sourceVersion->versionNumber}",
       dataJson: $sourceVersion->dataJson,
       createdBy: get_current_user_id(),
       createdAt: null,
@@ -753,11 +753,11 @@ add_action('wp_ajax_rollback_version', function () {
       'id' => $savedVersion->id,
       'version_number' => $savedVersion->versionNumber,
       'status' => $savedVersion->status,
-      'message' => 'Rollback draft created'
+      'message' => 'Copy of version created'
     ]);
 
   } catch (\Exception $e) {
-    wp_send_json_error('Failed to create rollback: ' . $e->getMessage(), 500);
+    wp_send_json_error('Failed to create copy: ' . $e->getMessage(), 500);
   }
 });
 
