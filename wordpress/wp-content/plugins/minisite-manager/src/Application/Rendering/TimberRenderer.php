@@ -27,6 +27,21 @@ final class TimberRenderer
         $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository($wpdb);
         $reviews = $reviewRepo->listApprovedForProfile($profile->id);
 
+        // Check if current user has bookmarked this profile
+        $isBookmarked = false;
+        if (is_user_logged_in()) {
+            $userId = get_current_user_id();
+            $bookmarkExists = $wpdb->get_var($wpdb->prepare(
+                "SELECT id FROM {$wpdb->prefix}minisite_bookmarks 
+                 WHERE user_id = %d AND profile_id = %d",
+                $userId, $profile->id
+            ));
+            $isBookmarked = (bool) $bookmarkExists;
+        }
+
+        // Add bookmark status to profile object for template access
+        $profile->isBookmarked = $isBookmarked;
+
         // Pass the entity directly; use properties in Twig (no additional mapping)
         $context = [
             'profile' => $profile,

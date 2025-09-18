@@ -590,9 +590,13 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-pen-to-square text-[var(--on-surface)] text-2xl"></i>
               </button>
-              <button type="button" aria-label="Save to favorites" title="Save to favorites"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-star text-yellow-500 text-2xl"></i>
+              <button type="button" id="bookmarkBtn" 
+                aria-label="{% if profile.isBookmarked %}Remove from favorites{% else %}Save to favorites{% endif %}" 
+                title="{% if profile.isBookmarked %}Remove from favorites{% else %}Save to favorites{% endif %}"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition"
+                data-profile-id="{{ profile.id }}"
+                data-is-bookmarked="{{ profile.isBookmarked|default(false) ? 'true' : 'false' }}">
+                <i class="fa-{% if profile.isBookmarked %}solid{% else %}regular{% endif %} fa-star text-yellow-500 text-2xl"></i>
               </button>
               <button type="button" aria-label="Address Book" title="Address Book"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
@@ -1346,6 +1350,66 @@
 
     // Initialize scroll state on load
     onScroll();
+
+    // Bookmark functionality
+    safeOn('bookmarkBtn', 'click', function() {
+      const btn = this;
+      const profileId = btn.dataset.profileId;
+      const isBookmarked = btn.dataset.isBookmarked === 'true';
+      const icon = btn.querySelector('i');
+      
+      // Disable button during request
+      btn.disabled = true;
+      
+      // Show loading state
+      const originalIcon = icon.className;
+      icon.className = 'fa-solid fa-spinner fa-spin text-yellow-500 text-2xl';
+      
+      // Prepare form data
+      const formData = new FormData();
+      formData.append('action', isBookmarked ? 'remove_bookmark' : 'add_bookmark');
+      formData.append('nonce', '{{ function("wp_create_nonce", "minisite_bookmark") }}');
+      formData.append('profile_id', profileId);
+      
+      // Make AJAX request
+      fetch('{{ function("admin_url", "admin-ajax.php") }}', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Toggle bookmark state
+          const newIsBookmarked = !isBookmarked;
+          btn.dataset.isBookmarked = newIsBookmarked.toString();
+          
+          // Update icon
+          icon.className = `fa-${newIsBookmarked ? 'solid' : 'regular'} fa-star text-yellow-500 text-2xl`;
+          
+          // Update aria-label and title
+          const newLabel = newIsBookmarked ? 'Remove from favorites' : 'Save to favorites';
+          btn.setAttribute('aria-label', newLabel);
+          btn.setAttribute('title', newLabel);
+          
+          // Optional: Show success message
+          // You could add a toast notification here
+        } else {
+          // Restore original state on error
+          icon.className = originalIcon;
+          alert('Failed to update bookmark: ' + (data.data || 'Unknown error'));
+        }
+      })
+      .catch(error => {
+        console.error('Bookmark error:', error);
+        // Restore original state on error
+        icon.className = originalIcon;
+        alert('Failed to update bookmark: Network error');
+      })
+      .finally(() => {
+        // Re-enable button
+        btn.disabled = false;
+      });
+    });
   </script>
 </body>
 </html>

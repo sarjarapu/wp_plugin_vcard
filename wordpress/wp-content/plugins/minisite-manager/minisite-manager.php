@@ -727,3 +727,125 @@ add_action('wp_ajax_rollback_version', function () {
     wp_send_json_error('Failed to create rollback: ' . $e->getMessage(), 500);
   }
 });
+
+/**
+ * AJAX handlers for bookmark management
+ */
+add_action('wp_ajax_add_bookmark', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_bookmark')) {
+    wp_send_json_error('Security check failed', 403);
+    return;
+  }
+
+  $profileId = (int) ($_POST['profile_id'] ?? 0);
+  $userId = get_current_user_id();
+  
+  if (!$profileId) {
+    wp_send_json_error('Invalid profile ID', 400);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    
+    // Check if profile exists
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+    $profile = $profileRepo->findById($profileId);
+    if (!$profile) {
+      wp_send_json_error('Profile not found', 404);
+      return;
+    }
+
+    // Check if already bookmarked
+    $existing = $wpdb->get_var($wpdb->prepare(
+      "SELECT id FROM {$wpdb->prefix}minisite_bookmarks 
+       WHERE user_id = %d AND profile_id = %d",
+      $userId, $profileId
+    ));
+
+    if ($existing) {
+      wp_send_json_error('Already bookmarked', 400);
+      return;
+    }
+
+    // Add bookmark
+    $result = $wpdb->insert(
+      $wpdb->prefix . 'minisite_bookmarks',
+      [
+        'user_id' => $userId,
+        'profile_id' => $profileId,
+        'created_at' => current_time('mysql')
+      ],
+      ['%d', '%d', '%s']
+    );
+
+    if ($result === false) {
+      wp_send_json_error('Failed to add bookmark', 500);
+      return;
+    }
+
+    wp_send_json_success([
+      'message' => 'Bookmark added successfully',
+      'bookmark_id' => $wpdb->insert_id
+    ]);
+
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to add bookmark: ' . $e->getMessage(), 500);
+  }
+});
+
+add_action('wp_ajax_remove_bookmark', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_bookmark')) {
+    wp_send_json_error('Security check failed', 403);
+    return;
+  }
+
+  $profileId = (int) ($_POST['profile_id'] ?? 0);
+  $userId = get_current_user_id();
+  
+  if (!$profileId) {
+    wp_send_json_error('Invalid profile ID', 400);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    
+    // Remove bookmark
+    $result = $wpdb->delete(
+      $wpdb->prefix . 'minisite_bookmarks',
+      [
+        'user_id' => $userId,
+        'profile_id' => $profileId
+      ],
+      ['%d', '%d']
+    );
+
+    if ($result === false) {
+      wp_send_json_error('Failed to remove bookmark', 500);
+      return;
+    }
+
+    if ($result === 0) {
+      wp_send_json_error('Bookmark not found', 404);
+      return;
+    }
+
+    wp_send_json_success([
+      'message' => 'Bookmark removed successfully'
+    ]);
+
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to remove bookmark: ' . $e->getMessage(), 500);
+  }
+});

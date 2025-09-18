@@ -137,6 +137,23 @@ class _1_0_0_CreateBase implements Migration
         ) ENGINE=InnoDB {$charset};
         ");
 
+        // ——— bookmarks ———
+        $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
+        DbDelta::run("
+        CREATE TABLE {$bookmarks} (
+          id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          user_id          BIGINT UNSIGNED NOT NULL,
+          profile_id       BIGINT UNSIGNED NOT NULL,
+          created_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+          PRIMARY KEY (id),
+          UNIQUE KEY uniq_user_profile (user_id, profile_id),
+          KEY idx_user (user_id),
+          KEY idx_profile (profile_id),
+          FOREIGN KEY (profile_id) REFERENCES {$profiles}(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB {$charset};
+        ");
+
         // —— dev seed: insert two test minisites + revisions + reviews ——
         $this->seedTestData($wpdb);
     }
@@ -150,7 +167,9 @@ class _1_0_0_CreateBase implements Migration
         $revisions = $wpdb->prefix . 'minisite_profile_revisions';
         $versions  = $wpdb->prefix . 'minisite_versions';
         $reviews   = $wpdb->prefix . 'minisite_reviews';
+        $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
 
+        $wpdb->query("DROP TABLE IF EXISTS {$bookmarks}");
         $wpdb->query("DROP TABLE IF EXISTS {$reviews}");
         $wpdb->query("DROP TABLE IF EXISTS {$versions}");
         $wpdb->query("DROP TABLE IF EXISTS {$revisions}");
