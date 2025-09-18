@@ -63,7 +63,7 @@
                   <span class="text-lg font-semibold text-[var(--on-surface)]">Version {{ version.versionNumber }}</span>
                   {% if version.sourceVersionId %}
                     <span class="inline-flex items-center gap-1 px-2 py-1 rounded text-xs bg-blue-100 text-blue-800">
-                      <i class="fa-solid fa-undo"></i> Rollback
+                      <i class="fa-solid fa-copy"></i> Restored
                     </span>
                   {% endif %}
                 </div>
@@ -98,7 +98,7 @@
                 {% if version.status == 'draft' %}
                   <button type="button" class="publish-version-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50"
                     data-version-id="{{ version.id }}" data-site-id="{{ profile.id }}">
-                    <i class="fa-solid fa-rocket"></i> Publish
+                    <i class="fa-solid fa-rocket"></i> Deploy
                   </button>
                 {% endif %}
                 
@@ -108,9 +108,9 @@
                   </span>
                 {% endif %}
                 
-                <button type="button" class="rollback-version-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]"
+                <button type="button" class="restore-version-btn inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]"
                   data-version-id="{{ version.id }}" data-site-id="{{ profile.id }}" data-version-number="{{ version.versionNumber }}">
-                  <i class="fa-solid fa-undo"></i> Rollback
+                  <i class="fa-solid fa-copy"></i> Create Copy
                 </button>
                 
                 <a href="{{ function('home_url','/account/sites/' ~ profile.id ~ '/preview/' ~ version.id) }}" target="_blank"
@@ -179,11 +179,11 @@
       });
     });
 
-    // Handle rollback version
-    document.querySelectorAll('.rollback-version-btn').forEach(btn => {
+    // Handle restore version
+    document.querySelectorAll('.restore-version-btn').forEach(btn => {
       btn.addEventListener('click', function() {
         const versionNumber = this.dataset.versionNumber;
-        if (!confirm(`Are you sure you want to create a rollback draft from version ${versionNumber}?`)) {
+        if (!confirm(`Are you sure you want to create a new draft from version ${versionNumber}?`)) {
           return;
         }
 
@@ -206,19 +206,19 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            alert('Rollback draft created successfully! You can now edit and publish it.');
+            alert('New draft created successfully! You can now edit and publish it.');
             location.reload();
           } else {
-            alert('Failed to create rollback: ' + (data.data || 'Unknown error'));
+            alert('Failed to create draft: ' + (data.data || 'Unknown error'));
             this.disabled = false;
-            this.innerHTML = '<i class="fa-solid fa-undo"></i> Rollback';
+            this.innerHTML = '<i class="fa-solid fa-copy"></i> Create Draft from This';
           }
         })
         .catch(error => {
           console.error('Error:', error);
-          alert('Failed to create rollback: Network error');
+          alert('Failed to create draft: Network error');
           this.disabled = false;
-          this.innerHTML = '<i class="fa-solid fa-undo"></i> Rollback';
+          this.innerHTML = '<i class="fa-solid fa-copy"></i> Create Draft from This';
         });
       });
     });
