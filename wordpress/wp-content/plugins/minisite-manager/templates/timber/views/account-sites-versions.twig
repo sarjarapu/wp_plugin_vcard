@@ -27,25 +27,21 @@
   <main class="min-h-screen">
     <div class="max-w-7xl mx-auto p-6">
       <!-- Header -->
-      <div class="flex items-start justify-between gap-4 mb-6">
-        <div>
-          <h1 class="text-3xl md:text-4xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
-          <p class="mt-2 text-[var(--on-surface-variant)]">Manage versions and publish changes to your minisite.</p>
-        </div>
-        <div class="flex items-center gap-3">
-          <a href="{{ function('home_url','/account/sites/' ~ profile.id ~ '/edit') }}" 
-             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
-            <i class="fa-solid fa-edit"></i> Edit Site
-          </a>
-          <a href="{{ function('home_url','/account/sites/' ~ profile.id ~ '/preview/current') }}" target="_blank" 
-             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--secondary)] text-[var(--on-secondary)] shadow hover:brightness-95">
-            <i class="fa-solid fa-eye"></i> Preview
-          </a>
-          <a href="{{ function('home_url','/account/sites') }}" 
-             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">
-            <i class="fa-solid fa-arrow-left"></i> Back to Sites
-          </a>
-        </div>
+      <div class="mb-6">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
+        <p class="mt-2 text-[var(--on-surface-variant)]">Manage versions and publish changes to your minisite.</p>
+      </div>
+
+      <!-- Control Buttons -->
+      <div class="flex items-center gap-3 mb-6 p-4 rounded-xl bg-[var(--surface-1)] ring-1 ring-[var(--outline-variant)]">
+        <a href="{{ function('home_url','/account/sites') }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]">
+          <i class="fa-solid fa-arrow-left"></i> Back to Sites
+        </a>
+        <a href="{{ function('home_url','/account/sites/' ~ profile.id ~ '/edit') }}" 
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+          <i class="fa-solid fa-edit"></i> Edit Site
+        </a>
       </div>
 
       <!-- Version List -->
