@@ -186,6 +186,7 @@ final class SitesController
             }
         }
 
+
         // Render edit form
         if (class_exists('Timber\\Timber')) {
             $base = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';

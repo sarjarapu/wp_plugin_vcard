@@ -20,8 +20,110 @@
       outline:none; box-shadow:0 0 0 2px var(--focus-ring), 0 0 0 4px white;
       border-radius:.5rem;
     }
+    
+    /* Quill.js Rich Text Editor Styles */
+    .ql-editor-container {
+      border: 1px solid var(--outline-variant);
+      border-radius: 0.5rem;
+      background: var(--surface-1);
+      overflow: hidden;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      position: relative;
+      resize: vertical;
+      min-height: 120px;
+      max-height: 500px;
+    }
+    
+    .ql-editor-container:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+    
+    /* Resize handle styling */
+    .ql-editor-container::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(-45deg, transparent 30%, var(--outline-variant) 30%, var(--outline-variant) 40%, transparent 40%, transparent 60%, var(--outline-variant) 60%, var(--outline-variant) 70%, transparent 70%);
+      cursor: nw-resize;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+    }
+    
+    .ql-editor-container:hover::after {
+      opacity: 1;
+    }
+    
+    .ql-toolbar {
+      background: var(--surface) !important;
+      border-bottom: 1px solid var(--outline-variant) !important;
+      border-radius: 0.5rem 0.5rem 0 0 !important;
+    }
+    
+    .ql-container {
+      background: var(--surface) !important;
+      border-radius: 0 0 0.5rem 0.5rem !important;
+      border: none !important;
+    }
+    
+    .ql-editor {
+      color: var(--on-surface) !important;
+      font-family: inherit !important;
+      font-size: 1rem !important;
+      line-height: 1.5 !important;
+      min-height: 200px !important;
+      padding: 0.75rem 1rem !important;
+    }
+    
+    .ql-toolbar .ql-stroke {
+      stroke: var(--on-surface) !important;
+    }
+    
+    .ql-toolbar .ql-fill {
+      fill: var(--on-surface) !important;
+    }
+    
+    .ql-toolbar button:hover {
+      background: var(--surface-1) !important;
+    }
+    
+    .ql-toolbar button.ql-active {
+      background: var(--primary) !important;
+      color: var(--on-primary) !important;
+    }
+    
+    .ql-toolbar button.ql-active .ql-stroke {
+      stroke: var(--on-primary) !important;
+    }
+    
+    .ql-toolbar button.ql-active .ql-fill {
+      fill: var(--on-primary) !important;
+    }
+    
+    /* Toolbar button sizing */
+    .ql-toolbar button {
+      width: 28px !important;
+      height: 28px !important;
+      margin: 2px !important;
+    }
+    
+    .ql-toolbar .ql-picker {
+      height: 28px !important;
+    }
+    
+    .ql-toolbar .ql-picker-label {
+      height: 28px !important;
+      line-height: 28px !important;
+    }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  
+  <!-- Quill.js Rich Text Editor -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 </head>
 <body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
   <main class="min-h-screen">
@@ -114,13 +216,13 @@
       <!-- Form and Preview Layout -->
       <div class="grid lg:grid-cols-2 gap-8">
         <!-- Left: Edit Form -->
-        <div class="space-y-8">
+        <div class="space-y-10">
           <form id="minisite-edit-form" method="post">
             {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
             
 
             <!-- SEO Section -->
-            <div id="seo-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="seo-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-[var(--on-surface)]">SEO & Meta</h2>
                 <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
@@ -152,7 +254,7 @@
             </div>
 
             <!-- Brand Section -->
-            <div id="brand-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="brand-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-[var(--on-surface)]">Brand & Logo</h2>
                 <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
@@ -190,7 +292,7 @@
             </div>
 
             <!-- Hero Section -->
-            <div id="hero-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="hero-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-[var(--on-surface)]">Hero Section</h2>
                 <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
@@ -210,8 +312,11 @@
                 </div>
                 <div>
                   <label for="hero_subheading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Subheading</label>
-                  <textarea id="hero_subheading" name="hero_subheading" rows="3"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.hero.subheading|default('') }}</textarea>
+                  <div class="ql-editor-container" style="height: 120px;">
+                    <div id="hero_subheading_editor">{{ site_json.hero.subheading|default('') }}</div>
+                    <textarea id="hero_subheading" name="hero_subheading" style="display: none;">{{ site_json.hero.subheading|default('') }}</textarea>
+                  </div>
+                  <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your subheading. HTML tags are automatically handled.</p>
                 </div>
                 <div>
                   <label for="hero_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Hero Image URL</label>
@@ -265,7 +370,7 @@
             </div>
 
              <!-- About Section -->
-             <div id="about-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+             <div id="about-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
                <div class="flex items-center justify-between mb-4">
                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">About Content</h2>
                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
@@ -273,15 +378,17 @@
                  </a>
                </div>
               <div>
-                <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About HTML</label>
-                <textarea id="about_html" name="about_html" rows="8"
-                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.about.html|default('') }}</textarea>
-                <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
+                <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About Content</label>
+                <div class="ql-editor-container" style="height: 200px;">
+                  <div id="about_html_editor">{{ site_json.about.html|default('') }}</div>
+                  <textarea id="about_html" name="about_html" style="display: none;">{{ site_json.about.html|default('') }}</textarea>
+                </div>
+                <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your content. HTML tags are automatically handled.</p>
               </div>
             </div>
 
             <!-- WhyUs Section -->
-            <div id="whyus-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="whyus-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-[var(--on-surface)]">Why Choose Us</h2>
                 <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
@@ -295,10 +402,12 @@
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
                 <div>
-                  <label for="whyus_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content HTML</label>
-                  <textarea id="whyus_html" name="whyus_html" rows="6"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.whyUs.html|default('') }}</textarea>
-                  <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
+                  <label for="whyus_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content</label>
+                  <div class="ql-editor-container" style="height: 200px;">
+                    <div id="whyus_html_editor">{{ site_json.whyUs.html|default('') }}</div>
+                    <textarea id="whyus_html" name="whyus_html" style="display: none;">{{ site_json.whyUs.html|default('') }}</textarea>
+                  </div>
+                  <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your content. HTML tags are automatically handled.</p>
                 </div>
                 <div>
                   <label for="whyus_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
@@ -309,7 +418,7 @@
             </div>
 
             <!-- Contact Section -->
-            <div id="contact-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="contact-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-[var(--on-surface)]">Contact Information</h2>
                 <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
@@ -502,7 +611,7 @@
             </div>
 
             <!-- Products & Services Section -->
-            <div id="products-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="products-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                   <h2 class="text-xl font-semibold text-[var(--on-surface)]">Products & Services</h2>
@@ -526,7 +635,7 @@
                   <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
                     <div class="flex items-center justify-between mb-3">
                       <h3 class="font-medium text-[var(--on-surface)]">Product {{ loop.index }}</h3>
-                      <button type="button" class="removeProduct text-red-600 hover:text-red-800">
+                      <button type="button" class="removeProduct text-[var(--primary)] hover:text-[var(--primary)]/80">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     </div>
@@ -565,8 +674,11 @@
                     </div>
                     <div class="mt-4">
                       <label for="product_{{ loop.index0 }}_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
-                      <textarea id="product_{{ loop.index0 }}_description" name="product_{{ loop.index0 }}_description" rows="3"
-                        class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ item.description|default('') }}</textarea>
+                      <div class="ql-editor-container" style="height: 120px;">
+                        <div id="product_{{ loop.index0 }}_description_editor">{{ item.description|default('') }}</div>
+                        <textarea id="product_{{ loop.index0 }}_description" name="product_{{ loop.index0 }}_description" style="display: none;">{{ item.description|default('') }}</textarea>
+                      </div>
+                      <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your description. HTML tags are automatically handled.</p>
                     </div>
                   </div>
                 {% endfor %}
@@ -576,7 +688,7 @@
             </div>
 
             <!-- Social Media Section -->
-            <div id="social-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="social-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-semibold text-[var(--on-surface)]">Social Media Links</h2>
                 <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
@@ -618,7 +730,7 @@
             </div>
 
             <!-- Gallery Section -->
-            <div id="gallery-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+            <div id="gallery-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8">
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                   <h2 class="text-xl font-semibold text-[var(--on-surface)]">Image Gallery</h2>
@@ -636,7 +748,7 @@
                   <div class="gallery-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
                     <div class="flex items-center justify-between mb-3">
                       <h3 class="font-medium text-[var(--on-surface)]">Image {{ loop.index }}</h3>
-                      <button type="button" class="removeGalleryImage text-red-600 hover:text-red-800">
+                      <button type="button" class="removeGalleryImage text-[var(--primary)] hover:text-[var(--primary)]/80">
                         <i class="fa-solid fa-trash"></i>
                       </button>
                     </div>
@@ -749,7 +861,7 @@
         <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-medium text-[var(--on-surface)]">Product ${productCount + 1}</h3>
-            <button type="button" class="removeProduct text-red-600 hover:text-red-800">
+            <button type="button" class="removeProduct text-[var(--primary)] hover:text-[var(--primary)]/80">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
@@ -788,14 +900,24 @@
           </div>
           <div class="mt-4">
             <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
-            <textarea name="product_${productCount}_description" rows="3"
-              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"></textarea>
+            <div class="ql-editor-container" style="height: 120px;">
+              <div id="product_${productCount}_description_editor"></div>
+              <textarea name="product_${productCount}_description" style="display: none;"></textarea>
+            </div>
+            <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your description. HTML tags are automatically handled.</p>
           </div>
         </div>
       `;
       container.insertAdjacentHTML('beforeend', productHtml);
       productCount++;
       document.getElementById('productCount').value = productCount;
+      
+      // Initialize Quill editor for the new product description
+      const newEditorId = `product_${productCount - 1}_description_editor`;
+      const newTextareaId = `product_${productCount - 1}_description`;
+      if (window.initProductEditor) {
+        window.initProductEditor(newEditorId, newTextareaId);
+      }
     });
 
     // Remove Product
@@ -830,7 +952,7 @@
         <div class="gallery-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
           <div class="flex items-center justify-between mb-3">
             <h3 class="font-medium text-[var(--on-surface)]">Image ${galleryCount + 1}</h3>
-            <button type="button" class="removeGalleryImage text-red-600 hover:text-red-800">
+            <button type="button" class="removeGalleryImage text-[var(--primary)] hover:text-[var(--primary)]/80">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
@@ -1168,6 +1290,114 @@
         });
       });
     }
+  </script>
+  
+  <!-- Quill.js Rich Text Editor Initialization -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Store all editors for form submission
+      const editors = {};
+      
+      // Function to initialize a Quill editor
+      function initQuillEditor(editorId, textareaId, placeholder = '') {
+        const editor = new Quill(editorId, {
+          theme: 'snow',
+          modules: {
+            toolbar: [
+              /* [{ 'header': [1, 2, 3, false] }], 'code-block'  */
+              ['bold', 'italic', 'underline'],
+              [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+              ['blockquote'],
+              ['link']
+            ]
+          },
+          placeholder: placeholder
+        });
+        
+        // Auto-save content to textarea on change
+        editor.on('text-change', function() {
+          const textarea = document.getElementById(textareaId);
+          if (textarea) {
+            textarea.value = editor.root.innerHTML;
+          }
+        });
+        
+        // Make editor responsive to container resize
+        const container = document.querySelector(editorId).closest('.ql-editor-container');
+        if (container) {
+          // Set initial height
+          const editorElement = document.querySelector(editorId);
+          if (editorElement) {
+            editorElement.style.height = 'auto';
+            editorElement.style.minHeight = '100px';
+          }
+          
+          // Handle container resize
+          const resizeObserver = new ResizeObserver(function(entries) {
+            for (let entry of entries) {
+              const containerHeight = entry.contentRect.height;
+              const toolbarHeight = container.querySelector('.ql-toolbar')?.offsetHeight || 0;
+              const editorHeight = Math.max(100, containerHeight - toolbarHeight - 2); // 2px for borders
+              
+              if (editorElement) {
+                editorElement.style.height = editorHeight + 'px';
+              }
+            }
+          });
+          
+          resizeObserver.observe(container);
+          
+          // Store resize observer for cleanup if needed
+          editor.resizeObserver = resizeObserver;
+        }
+        
+        return editor;
+      }
+      
+      // Initialize About HTML editor
+      editors.about = initQuillEditor('#about_html_editor', 'about_html', 'Write your about content here...');
+      
+      // Initialize WhyUs HTML editor
+      editors.whyus = initQuillEditor('#whyus_html_editor', 'whyus_html', 'Write your why choose us content here...');
+      
+      // Initialize Hero Subheading editor
+      editors.heroSubheading = initQuillEditor('#hero_subheading_editor', 'hero_subheading', 'Write your subheading here...');
+      
+      // Initialize existing product description editors
+      const existingProductEditors = document.querySelectorAll('[id*="_description_editor"]');
+      existingProductEditors.forEach(function(editorElement) {
+        const editorId = editorElement.id;
+        const textareaId = editorId.replace('_editor', '');
+        const placeholder = 'Write your product description here...';
+        
+        editors[editorId] = initQuillEditor('#' + editorId, textareaId, placeholder);
+      });
+      
+      // Sync all editor content with hidden textareas on form submission
+      const form = document.getElementById('minisite-edit-form');
+      if (form) {
+        form.addEventListener('submit', function() {
+          // Sync all editors
+          Object.keys(editors).forEach(function(key) {
+            const editor = editors[key];
+            if (editor && editor.root) {
+              const textareaId = key.replace('_editor', '');
+              const textarea = document.getElementById(textareaId);
+              if (textarea) {
+                textarea.value = editor.root.innerHTML;
+              }
+            }
+          });
+        });
+      }
+      
+      // Function to initialize editor for new product items
+      window.initProductEditor = function(editorId, textareaId) {
+        const editor = initQuillEditor('#' + editorId, textareaId, 'Write your product description here...');
+        editors[editorId] = editor;
+        return editor;
+      };
+    });
   </script>
 </body>
 </html>
