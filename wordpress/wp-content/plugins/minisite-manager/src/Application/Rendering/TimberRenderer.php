@@ -42,6 +42,13 @@ final class TimberRenderer
         // Add bookmark status to profile object for template access
         $profile->isBookmarked = $isBookmarked;
 
+        // Check if current user can edit this profile
+        $canEdit = false;
+        if (is_user_logged_in()) {
+            $canEdit = current_user_can('minisite_edit_profile', $profile->id);
+        }
+        $profile->canEdit = $canEdit;
+
         // Pass the entity directly; use properties in Twig (no additional mapping)
         $context = [
             'profile' => $profile,

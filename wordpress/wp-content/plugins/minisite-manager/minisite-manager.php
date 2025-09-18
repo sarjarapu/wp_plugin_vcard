@@ -315,6 +315,39 @@ function minisite_profile_is_public(int $profileId): bool {
 }
 
 /**
+ * Implement the permission helper functions using database queries
+ */
+add_filter('minisite_user_owns_profile', function (bool $default, int $userId, int $profileId): bool {
+  global $wpdb;
+  
+  // Check if user owns the profile (using created_by as owner surrogate for now)
+  $ownerId = $wpdb->get_var($wpdb->prepare(
+    "SELECT created_by FROM {$wpdb->prefix}minisite_profiles WHERE id = %d",
+    $profileId
+  ));
+  
+  return $ownerId && (int) $ownerId === $userId;
+}, 10, 3);
+
+add_filter('minisite_user_is_assigned_to_profile', function (bool $default, int $userId, int $profileId): bool {
+  // For now, no assignment system is implemented
+  // This would check an assignment table or profile_editors relation
+  return false;
+}, 10, 3);
+
+add_filter('minisite_profile_is_public', function (bool $default, int $profileId): bool {
+  global $wpdb;
+  
+  // Check if profile is published
+  $status = $wpdb->get_var($wpdb->prepare(
+    "SELECT status FROM {$wpdb->prefix}minisite_profiles WHERE id = %d",
+    $profileId
+  ));
+  
+  return $status === 'published';
+}, 10, 2);
+
+/**
  * Register rewrites for /b/{business}/{location}
  */
 add_action('init', function () {

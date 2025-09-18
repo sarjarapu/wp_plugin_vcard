@@ -586,10 +586,13 @@
           <div role="group" aria-labelledby="qa-manage-label" class="rounded-2xl p-4 md:col-start-2 md:justify-self-end">
             <h3 id="qa-manage-label" class="text-md text-right font-bold text-[var(--on-surface)] mb-3">My Bookmarks</h3>
             <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-              <button type="button" aria-label="Edit" title="Edit"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-pen-to-square text-[var(--on-surface)] text-2xl"></i>
-              </button>
+              {% if profile.canEdit %}
+                <a href="{{ function('home_url','/account/sites/' ~ profile.id ~ '/edit') }}" 
+                   aria-label="Edit" title="Edit"
+                   class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                  <i class="fa-solid fa-pen-to-square text-[var(--on-surface)] text-2xl"></i>
+                </a>
+              {% endif %}
               <button type="button" id="bookmarkBtn" 
                 aria-label="{% if profile.isBookmarked %}Remove from favorites{% else %}Save to favorites{% endif %}" 
                 title="{% if profile.isBookmarked %}Remove from favorites{% else %}Save to favorites{% endif %}"
