@@ -195,7 +195,6 @@ class _1_0_0_CreateBase implements Migration
             $whyUs  = $a['whyUs']  ?? [];
             $svcs   = $a['services'] ?? [];
             $contact= $a['contact']?? [];
-            $reviews= $a['reviews']?? [];
             $gallery= $a['gallery']?? [];
             $social = $a['social'] ?? [];
             $data = [
@@ -206,7 +205,6 @@ class _1_0_0_CreateBase implements Migration
                 'whyUs' => $whyUs,
                 'services' => $svcs,
                 'contact'  => $contact,
-                'reviews'  => $reviews,
                 'gallery'  => $gallery,
                 'social'   => $social,
             ];
@@ -320,28 +318,6 @@ class _1_0_0_CreateBase implements Migration
                     ],
                     'plusCode'=>'77CM+4R Dallas','plusCodeUrl'=>'https://maps.google.com/?q=77CM+4R+Dallas'
                 ],
-                'reviews'=>[
-                    [
-                        'author'=>'Jane Doe','rating'=>5,'date'=>'2025-04-01',
-                        'text'=>'The hygienist was incredibly gentle and explained every step before she started. The clinic is spotless and the equipment looks brand new. I left feeling well cared for and finally not dreading my next visit.'
-                    ],
-                    [
-                        'author'=>'Mark T.','rating'=>4.5,'date'=>'2025-03-20',
-                        'text'=>'Booked a last‑minute appointment for a chipped tooth and they fit me in the same day. The repair was quick and painless, and the billing was clear. Parking was easy which is a bonus in Dallas.'
-                    ],
-                    [
-                        'author'=>'Priya S.','rating'=>4.8,'date'=>'2025-02-28',
-                        'text'=>'I had whitening done here and the results were immediate. The dentist checked sensitivity throughout and gave me clear aftercare instructions. Front desk followed up the next day to see how I was doing.'
-                    ],
-                    [
-                        'author'=>'Daniel K.','rating'=>4.9,'date'=>'2025-01-15',
-                        'text'=>'Super organized practice with on‑time appointments. They walked me through options for a crown and never pushed extras. Waiting area is calm and the coffee machine is a nice touch.'
-                    ],
-                    [
-                        'author'=>'Alicia M.','rating'=>5,'date'=>'2024-12-05',
-                        'text'=>'Brought my teen for Invisalign and the consultation was thorough without being overwhelming. Clear timeline, fair pricing, and they answered all our questions. We feel confident continuing care here.'
-                    ],
-                ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop','alt'=>'Dental checkup visit'],
                     ['src'=>'https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop','alt'=>'Cleaning and tar-tar removal'],
@@ -449,13 +425,6 @@ class _1_0_0_CreateBase implements Migration
                     ],
                     'plusCode'=>'2RQP+6V Mumbai','plusCodeUrl'=>'https://maps.google.com/?q=2RQP+6V+Mumbai'
                 ],
-                'reviews'=>[
-                    ['author'=>'Asha P.','rating'=>5,'date'=>'2025-02-10','text'=>'Beautiful fabric selection and honest pricing. The team helped me pick the right silk and arranged quick alterations. I received so many compliments at the event.'],
-                    ['author'=>'Rohit K.','rating'=>4.6,'date'=>'2025-03-01','text'=>'Quality linens and attentive staff. Turnaround for tailoring was faster than expected and the fit was perfect.'],
-                    ['author'=>'Neha S.','rating'=>4.8,'date'=>'2025-01-22','text'=>'They sourced a specific shade of chiffon for me within two days. Great communication throughout and careful packaging.'],
-                    ['author'=>'Imran V.','rating'=>4.7,'date'=>'2024-12-18','text'=>'Got a sherwani tailored here. Professional fittings and precise embroidery work. Delivery was on the promised date.'],
-                    ['author'=>'Kavita D.','rating'=>4.9,'date'=>'2024-11-05','text'=>'Staff were patient while I compared several silks. They suggested blouse lining and care tips that really helped.']
-                ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1534639077088-d702bcf685e7?q=80&w=800&auto=format&fit=crop','alt'=>'Fabric rolls'],
                     ['src'=>'https://images.unsplash.com/photo-1632421377986-0b1f70773812?q=80&w=800&auto=format&fit=crop','alt'=>'Linen collection'],
@@ -557,13 +526,6 @@ class _1_0_0_CreateBase implements Migration
                     ],
                     'plusCode'=>'GV5C+3W London','plusCodeUrl'=>'https://maps.google.com/?q=GV5C+3W+London'
                 ],
-                'reviews'=>[
-                    ['author'=>'Alex P.','rating'=>5,'date'=>'2025-02-12','text'=>'Best sourdough in the City. The crust has real depth of flavor and the bowls are generous. Staff remembered my usual after two visits.'],
-                    ['author'=>'Maria G.','rating'=>4.7,'date'=>'2025-03-18','text'=>'Delicious bowls and quick service at lunch. Great coffee with oat milk, and I love the rotating specials.'],
-                    ['author'=>'Tom H.','rating'=>4.6,'date'=>'2025-01-30','text'=>'Great place for a quick, healthy lunch. Seating fills up at noon but the line moves fast.'],
-                    ['author'=>'Ella R.','rating'=>4.8,'date'=>'2024-12-21','text'=>'Excellent espresso and friendly baristas. The vegan bowl had great textures and bright flavors.'],
-                    ['author'=>'Ben S.','rating'=>4.9,'date'=>'2024-11-10','text'=>'Love the seasonal menu changes and the sourdough loaves on Fridays. Consistently great quality.']
-                ],
                 'gallery'=>[
                     ['src'=>'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=1600&q=80&auto=format&fit=crop','alt'=>'Lunch bowl'],
                     ['src'=>'https://images.unsplash.com/photo-1498654200943-1088dd4438ae?w=1600&q=80&auto=format&fit=crop','alt'=>'Healthy food'],
@@ -663,13 +625,6 @@ class _1_0_0_CreateBase implements Migration
                         'Sunday'=>['open'=>'','close'=>'','closed'=>true]
                     ],
                     'plusCode'=>'46R6+XM Sydney','plusCodeUrl'=>'https://maps.google.com/?q=46R6+XM+Sydney'
-                ],
-                'reviews'=>[
-                    ['author'=>'Zoe L.','rating'=>5,'date'=>'2025-01-22','text'=>'Super fast and careful with fragile items. They handled our clinic samples with documented chain-of-custody and delivered earlier than promised.'],
-                    ['author'=>'Nick R.','rating'=>4.8,'date'=>'2025-03-02','text'=>'Great communication and tracking. Dispatch answered within seconds, and the driver called ahead for loading dock access.'],
-                    ['author'=>'Sam D.','rating'=>4.7,'date'=>'2025-02-11','text'=>'Booked an urgent pickup at 4 pm and it reached the CBD in under an hour. Clear proof‑of‑delivery emailed instantly.'],
-                    ['author'=>'Priya V.','rating'=>4.9,'date'=>'2024-12-19','text'=>'Courteous drivers and clean vehicles. Our bulk transfers were secured properly and arrived without damage.'],
-                    ['author'=>'Owen C.','rating'=>4.8,'date'=>'2024-11-03','text'=>'We use their scheduled routes daily. Reliable timings and proactive updates whenever traffic is heavy.']
                 ],
                 'gallery'=>[
                     ['src'=>'https://plus.unsplash.com/premium_photo-1757583509874-59d774474cf3?q=80&w=800&auto=format&fit=crop','alt'=>'Same-day delivery'],
