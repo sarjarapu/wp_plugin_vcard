@@ -420,13 +420,10 @@ final class SitesController
                     'closed' => true,
                 ];
             } elseif (!empty($openTime) && !empty($closeTime)) {
-                // Convert 24-hour format to 12-hour format for display
-                $openFormatted = $this->formatTime24To12($openTime);
-                $closeFormatted = $this->formatTime24To12($closeTime);
-                
+                // Store times in 24-hour format for HTML time inputs
                 $hours[$dayName] = [
-                    'open' => $openFormatted,
-                    'close' => $closeFormatted,
+                    'open' => $openTime,
+                    'close' => $closeTime,
                 ];
             }
         }
@@ -447,6 +444,33 @@ final class SitesController
         if ($hour12 === 0) $hour12 = 12;
         
         return sprintf('%d:%s %s', $hour12, $minute, $ampm);
+    }
+
+    private function formatTime12To24(string $time12): string
+    {
+        if (empty($time12)) return '';
+        
+        // Check if it's already in 24-hour format (contains no AM/PM)
+        if (!preg_match('/\b(AM|PM)\b/i', $time12)) {
+            return $time12;
+        }
+        
+        // Parse 12-hour format
+        $time = trim($time12);
+        $ampm = strtoupper(substr($time, -2));
+        $timeWithoutAmPm = trim(substr($time, 0, -2));
+        
+        $parts = explode(':', $timeWithoutAmPm);
+        $hour = (int) $parts[0];
+        $minute = $parts[1] ?? '00';
+        
+        if ($ampm === 'PM' && $hour !== 12) {
+            $hour += 12;
+        } elseif ($ampm === 'AM' && $hour === 12) {
+            $hour = 0;
+        }
+        
+        return sprintf('%02d:%s', $hour, $minute);
     }
 
     private function buildGalleryFromForm(array $postData): array
