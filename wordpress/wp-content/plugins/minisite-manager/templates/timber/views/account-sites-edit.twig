@@ -214,6 +214,17 @@
               </div>
             </div>
 
+            <!-- About Section -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">About Content</h2>
+              <div>
+                <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About HTML</label>
+                <textarea id="about_html" name="about_html" rows="8"
+                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.about.html|default('') }}</textarea>
+                <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
+              </div>
+            </div>
+
             <!-- WhyUs Section -->
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
               <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Why Choose Us</h2>
@@ -234,17 +245,6 @@
                   <input id="whyus_image" name="whyus_image" type="url" value="{{ site_json.whyUs.image|default('') }}"
                     class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                 </div>
-              </div>
-            </div>
-
-            <!-- About Section -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">About Content</h2>
-              <div>
-                <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About HTML</label>
-                <textarea id="about_html" name="about_html" rows="8"
-                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.about.html|default('') }}</textarea>
-                <p class="mt-1 text-xs text-[var(--on-surface-variant)]">HTML allowed. Use &lt;p&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;br&gt;, &lt;ul&gt;, &lt;li&gt; tags.</p>
               </div>
             </div>
 
