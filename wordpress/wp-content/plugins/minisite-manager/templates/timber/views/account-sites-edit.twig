@@ -21,6 +21,7 @@
       border-radius:.5rem;
     }
   </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
   <main class="min-h-screen">
@@ -55,11 +56,11 @@
         </a>
         {% if editing_version %}
           {% if editing_version.status == 'draft' %}
-            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 text-sm">
+            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100 text-amber-800">
               <i class="fa-solid fa-edit"></i> Editing Draft v{{ editing_version.versionNumber }}
             </span>
           {% else %}
-            <span class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-100 text-blue-800 text-sm">
+            <span class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-100 text-blue-800">
               <i class="fa-solid fa-eye"></i> Viewing Published v{{ editing_version.versionNumber }}
             </span>
           {% endif %}
