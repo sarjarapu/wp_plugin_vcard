@@ -79,8 +79,9 @@ Below is a checklist of all major tasks to take the plugin from current work-in-
 
 - Edit bugs
   - Brand > Industry and Color Palette are on parent row. But you are saving only site_json
+  - Contact Information > phone/whatsapp autoconvert display to number
+  - Contact Information > Business hours UI is not loading properly
   - 
-
 ## Braindump Role features
 
 - From end user experience Both client (paid users) and visiting users (save cards) 
