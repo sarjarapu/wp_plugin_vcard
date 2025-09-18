@@ -312,7 +312,7 @@
                 </div>
                 <div>
                   <label for="hero_subheading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Subheading</label>
-                  <div class="ql-editor-container" style="height: 120px;">
+                  <div class="ql-editor-container" style="height: 160px;">
                     <div id="hero_subheading_editor">{{ site_json.hero.subheading|default('') }}</div>
                     <textarea id="hero_subheading" name="hero_subheading" style="display: none;">{{ site_json.hero.subheading|default('') }}</textarea>
                   </div>
@@ -379,7 +379,7 @@
                </div>
               <div>
                 <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About Content</label>
-                <div class="ql-editor-container" style="height: 200px;">
+                <div class="ql-editor-container" style="height: 240px;">
                   <div id="about_html_editor">{{ site_json.about.html|default('') }}</div>
                   <textarea id="about_html" name="about_html" style="display: none;">{{ site_json.about.html|default('') }}</textarea>
                 </div>
@@ -403,7 +403,7 @@
                 </div>
                 <div>
                   <label for="whyus_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content</label>
-                  <div class="ql-editor-container" style="height: 200px;">
+                  <div class="ql-editor-container" style="height: 240px;">
                     <div id="whyus_html_editor">{{ site_json.whyUs.html|default('') }}</div>
                     <textarea id="whyus_html" name="whyus_html" style="display: none;">{{ site_json.whyUs.html|default('') }}</textarea>
                   </div>
@@ -674,7 +674,7 @@
                     </div>
                     <div class="mt-4">
                       <label for="product_{{ loop.index0 }}_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
-                      <div class="ql-editor-container" style="height: 120px;">
+                      <div class="ql-editor-container" style="height: 200px;">
                         <div id="product_{{ loop.index0 }}_description_editor">{{ item.description|default('') }}</div>
                         <textarea id="product_{{ loop.index0 }}_description" name="product_{{ loop.index0 }}_description" style="display: none;">{{ item.description|default('') }}</textarea>
                       </div>
@@ -1228,14 +1228,18 @@
     let isSubmitting = false;
 
     form.addEventListener('submit', function(e) {
+      console.log('Form submission triggered');
+      
       // Only prevent double submission, let the form submit normally
       if (isSubmitting) {
+        console.log('Already submitting, preventing double submission');
         e.preventDefault();
         return false;
       }
 
       // Sync all Quill editors before submission
       if (window.editors) {
+        console.log('Syncing editors:', Object.keys(window.editors));
         Object.keys(window.editors).forEach(function(key) {
           const editor = window.editors[key];
           if (editor && editor.root) {
@@ -1243,9 +1247,12 @@
             const textarea = document.getElementById(textareaId);
             if (textarea) {
               textarea.value = editor.root.innerHTML;
+              console.log('Synced editor', key, 'to textarea', textareaId, 'with content:', textarea.value);
             }
           }
         });
+      } else {
+        console.log('No editors found');
       }
 
       // Set loading state

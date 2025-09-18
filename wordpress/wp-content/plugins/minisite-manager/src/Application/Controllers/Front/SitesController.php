@@ -311,7 +311,7 @@ final class SitesController
             'hero' => [
                 'badge' => sanitize_text_field($postData['hero_badge'] ?? ''),
                 'heading' => sanitize_text_field($postData['hero_heading'] ?? ''),
-                'subheading' => sanitize_textarea_field($postData['hero_subheading'] ?? ''),
+                'subheading' => wp_kses_post($postData['hero_subheading'] ?? ''),
                 'image' => esc_url_raw($postData['hero_image'] ?? ''),
                 'imageAlt' => sanitize_text_field($postData['hero_image_alt'] ?? ''),
                 'ctas' => [
@@ -374,7 +374,7 @@ final class SitesController
             $services[] = [
                 'title' => sanitize_text_field($postData["product_{$i}_title"] ?? ''),
                 'image' => esc_url_raw($postData["product_{$i}_image"] ?? ''),
-                'description' => sanitize_textarea_field($postData["product_{$i}_description"] ?? ''),
+                'description' => wp_kses_post($postData["product_{$i}_description"] ?? ''),
                 'price' => sanitize_text_field($postData["product_{$i}_price"] ?? ''),
                 'icon' => sanitize_text_field($postData["product_{$i}_icon"] ?? ''),
                 'cta' => sanitize_text_field($postData["product_{$i}_cta_text"] ?? ''),
