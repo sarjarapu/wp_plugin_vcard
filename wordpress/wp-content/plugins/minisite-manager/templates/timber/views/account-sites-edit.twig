@@ -1201,14 +1201,28 @@
     document.addEventListener('change', function(e) {
       if (e.target.classList.contains('hours-closed-toggle')) {
         const day = e.target.closest('[data-day]').dataset.day;
-        const timeControls = e.target.closest('[data-day]').querySelector('.hours-time-controls');
+        const timeControls = e.target.closest('[data-day]').querySelectorAll('.hours-time-controls');
         
         if (e.target.checked) {
-          timeControls.style.opacity = '0.5';
-          timeControls.style.pointerEvents = 'none';
+          timeControls.forEach(function(control) {
+            const timeInput = control.querySelector('input[type="time"]');
+            if (timeInput) {
+              timeInput.disabled = true;
+              timeInput.setAttribute('tabindex', '-1');
+            }
+            control.style.opacity = '0.5';
+            control.style.pointerEvents = 'none';
+          });
         } else {
-          timeControls.style.opacity = '1';
-          timeControls.style.pointerEvents = 'auto';
+          timeControls.forEach(function(control) {
+            const timeInput = control.querySelector('input[type="time"]');
+            if (timeInput) {
+              timeInput.disabled = false;
+              timeInput.removeAttribute('tabindex');
+            }
+            control.style.opacity = '1';
+            control.style.pointerEvents = 'auto';
+          });
         }
         
         updateHiddenInput(day);
@@ -1220,6 +1234,21 @@
       if (e.target.matches('input[name$="_open"], input[name$="_close"]')) {
         const day = e.target.closest('[data-day]').dataset.day;
         updateHiddenInput(day);
+      }
+    });
+
+    // Prevent keyboard input on disabled time inputs
+    document.addEventListener('keydown', function(e) {
+      if (e.target.matches('input[name$="_open"], input[name$="_close"]') && e.target.disabled) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    });
+
+    // Prevent focus on disabled time inputs
+    document.addEventListener('focusin', function(e) {
+      if (e.target.matches('input[name$="_open"], input[name$="_close"]') && e.target.disabled) {
+        e.target.blur();
       }
     });
 
