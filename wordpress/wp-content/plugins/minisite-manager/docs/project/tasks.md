@@ -75,6 +75,12 @@ Below is a checklist of all major tasks to take the plugin from current work-in-
 
 ---
 
+## Manual Testing
+
+- Edit bugs
+  - Brand > Industry and Color Palette are on parent row. But you are saving only site_json
+  - 
+
 ## Braindump Role features
 
 - From end user experience Both client (paid users) and visiting users (save cards) 

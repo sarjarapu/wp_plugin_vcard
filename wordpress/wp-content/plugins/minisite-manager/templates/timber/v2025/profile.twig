@@ -449,7 +449,7 @@
                   <i class="fa-solid fa-paper-plane"></i> {{ profile.siteJson.hero.ctas[0].text|default('Request Info') }}
                 </a>
                 <!-- Tonal (Primary Container) -->
-                <a href="#contact"
+                <a href="{{ profile.siteJson.hero.ctas[1].url|default('#contact') }}"
                   class="inline-flex items-center gap-2 px-6 py-3 rounded-lg
                           bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
                           ring-1 ring-[var(--outline-variant)]
