@@ -588,27 +588,31 @@
           <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
             <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Version Information</h2>
             <div class="space-y-4">
-              <div>
-                <label for="version_label" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Label</label>
+              <div class="flex items-center gap-3">
+                <label for="version_label" class="text-sm font-medium text-[var(--on-surface)] whitespace-nowrap w-[140px]">Version Label:</label>
                 <input id="version_label" name="version_label" type="text" 
                   value="{{ editing_version.label|default('') }}"
                   placeholder="e.g., Updated hero section"
-                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  class="max-w-[300px] rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
               </div>
-              <div>
-                <label for="version_comment" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Version Comment</label>
+              <div class="flex items-center gap-3">
+                <label for="version_comment" class="text-sm font-medium text-[var(--on-surface)] whitespace-nowrap w-[140px]">Version Comment:</label>
                 <input id="version_comment" name="version_comment" type="text" 
                   value="{{ editing_version.comment|default('') }}"
                   placeholder="e.g., Changed heading and added CTA"
-                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  class="max-w-[300px] rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
               </div>
             </div>
             
             <!-- Form Actions -->
             <div class="mt-6 pt-4 border-t border-[var(--outline-variant)]">
-              <div class="space-y-3">
+              <div class="flex items-center gap-3">
+                <a href="{{ function('home_url','/account/sites') }}"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm font-medium">
+                  Cancel
+                </a>
                 <button type="submit" id="save-draft-button" name="action" value="save_draft"
-                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
                   <i class="fa-solid fa-save" id="save-icon"></i> 
                   <span id="save-text">Save Draft</span>
                   <span id="save-loading" class="hidden">
@@ -621,15 +625,11 @@
                 </button>
                 {% if editing_version and editing_version.status == 'draft' %}
                   <button type="button" id="publish-button" 
-                    class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
                     <i class="fa-solid fa-rocket"></i> 
                     <span>Publish</span>
                   </button>
                 {% endif %}
-                <a href="{{ function('home_url','/account/sites') }}"
-                  class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm font-medium">
-                  Cancel
-                </a>
               </div>
             </div>
           </div>
