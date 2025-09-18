@@ -564,10 +564,6 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-envelope text-rose-500 text-2xl"></i>
               </a>
-              <button type="button" aria-label="Share" title="Share" id="shareBtn"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-share-nodes text-amber-500 text-2xl"></i>
-              </button>
               <a href="#map" aria-label="Map" title="Map"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-map-location-dot text-sky-600 text-2xl"></i>
@@ -576,6 +572,32 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-globe text-violet-600 text-2xl"></i>
               </a>
+              <button id="qrBtn" type="button" aria-label="QR Code" title="QR Code"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <i class="fa-solid fa-qrcode text-rose-600 text-2xl"></i>
+              </button>
+              <button type="button" aria-label="Share" title="Share" id="shareBtn"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <i class="fa-solid fa-share-nodes text-amber-500 text-2xl"></i>
+              </button>
+            </div>
+          </div>
+          <!-- Group: Contact Management -->
+          <div role="group" aria-labelledby="qa-manage-label" class="rounded-2xl p-4 md:col-start-2 md:justify-self-end">
+            <h3 id="qa-manage-label" class="text-md text-right font-bold text-[var(--on-surface)] mb-3">My Bookmarks</h3>
+            <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+              <button type="button" aria-label="Edit" title="Edit"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <i class="fa-solid fa-pen-to-square text-[var(--on-surface)] text-2xl"></i>
+              </button>
+              <button type="button" aria-label="Save to favorites" title="Save to favorites"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <i class="fa-solid fa-star text-yellow-500 text-2xl"></i>
+              </button>
+              <button type="button" aria-label="Address Book" title="Address Book"
+                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
+                <i class="fa-solid fa-address-book text-indigo-600 text-2xl"></i>
+              </button>
               <a id="downloadVcard" download href="#"
                 aria-label="Download Contact" title="Download Contact"
                 data-name="{{ profile.name }}"
@@ -596,28 +618,6 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-address-card text-emerald-600 text-2xl"></i>
               </a>
-              <button id="qrBtn" type="button" aria-label="QR Code" title="QR Code"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-qrcode text-rose-600 text-2xl"></i>
-              </button>
-            </div>
-          </div>
-          <!-- Group: Contact Management -->
-          <div role="group" aria-labelledby="qa-manage-label" class="rounded-2xl p-4 md:col-start-2 md:justify-self-end">
-            <h3 id="qa-manage-label" class="text-md font-bold text-[var(--on-surface)] mb-3">Manage Contacts</h3>
-            <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-              <button type="button" aria-label="Edit" title="Edit"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-pen-to-square text-[var(--on-surface)] text-2xl"></i>
-              </button>
-              <button type="button" aria-label="Save to favorites" title="Save to favorites"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-star text-yellow-500 text-2xl"></i>
-              </button>
-              <button type="button" aria-label="Address Book" title="Address Book"
-                class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
-                <i class="fa-solid fa-address-book text-indigo-600 text-2xl"></i>
-              </button>
             </div>
           </div>
         </div>
