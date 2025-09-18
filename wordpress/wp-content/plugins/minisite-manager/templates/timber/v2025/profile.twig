@@ -3,11 +3,6 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{{ profile.siteJson.seo.title|default(profile.title) }}</title>
-  <meta name="description" content="{{ ogDesc }}" />
-  <meta name="keywords" content="{{ profile.siteJson.seo.keywords|default('') }}" />
-  <link rel="icon" type="image/x-icon" href="{{ profile.siteJson.seo.favicon|default('favicon.png') }}">
-
   {# Open Graph + Twitter Cards #}
   {% set sj = profile.siteJson|default({}) %}
   {% set ogTitle  = sj.seo.title|default(profile.title) %}
@@ -34,6 +29,11 @@
   {% set ogSite   = sj.seo.siteName|default(profile.name|default(profile.title)) %}
   {% set ogLocale = profile.defaultLocale|default('en-US')|replace({'-':'_'}) %}
   {% set modified = profile.updatedAt is defined and profile.updatedAt ? (profile.updatedAt|date('c')) : '' %}
+
+  <title>{{ profile.siteJson.seo.title|default(profile.title) }}</title>
+  <meta name="description" content="{{ ogDesc }}" />
+  <meta name="keywords" content="{{ profile.siteJson.seo.keywords|default('') }}" />
+  <link rel="icon" type="image/x-icon" href="{{ profile.siteJson.seo.favicon|default('favicon.png') }}">
 
   <meta property="og:locale" content="{{ ogLocale }}" />
   <meta property="og:type" content="website" />
