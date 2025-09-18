@@ -779,20 +779,36 @@ class _1_0_0_CreateBase implements Migration
         };
 
         if ($acmeId) {
-            $insertReview($acmeId, 'Jane Doe', 4.8, 'Fantastic service and friendly staff. Clean clinic!');
-            $insertReview($acmeId, 'Mark T.', 4.5, 'Quick appointment and great results.');
+            // ACME Dental reviews (5 total)
+            $insertReview($acmeId, 'Jane Doe', 5.0, 'The hygienist was incredibly gentle and explained every step before she started. The clinic is spotless and the equipment looks brand new. I left feeling well cared for and finally not dreading my next visit.');
+            $insertReview($acmeId, 'Mark T.', 4.5, 'Booked a last‑minute appointment for a chipped tooth and they fit me in the same day. The repair was quick and painless, and the billing was clear. Parking was easy which is a bonus in Dallas.');
+            $insertReview($acmeId, 'Priya S.', 4.8, 'I had whitening done here and the results were immediate. The dentist checked sensitivity throughout and gave me clear aftercare instructions. Front desk followed up the next day to see how I was doing.');
+            $insertReview($acmeId, 'Daniel K.', 4.9, 'Super organized practice with on‑time appointments. They walked me through options for a crown and never pushed extras. Waiting area is calm and the coffee machine is a nice touch.');
+            $insertReview($acmeId, 'Alicia M.', 5.0, 'Brought my teen for Invisalign and the consultation was thorough without being overwhelming. Clear timeline, fair pricing, and they answered all our questions. We feel confident continuing care here.');
         }
         if ($lotusId) {
-            $insertReview($lotusId, 'Asha P.', 5.0, 'Beautiful fabric collection and helpful staff.', 'en-IN');
-            $insertReview($lotusId, 'Rohit K.', 4.6, 'Great pricing and quality.', 'en-IN');
+            // Lotus Textiles reviews (5 total)
+            $insertReview($lotusId, 'Asha P.', 5.0, 'Beautiful fabric selection and honest pricing. The team helped me pick the right silk and arranged quick alterations. I received so many compliments at the event.', 'en-IN');
+            $insertReview($lotusId, 'Rohit K.', 4.6, 'Quality linens and attentive staff. Turnaround for tailoring was faster than expected and the fit was perfect.', 'en-IN');
+            $insertReview($lotusId, 'Neha S.', 4.8, 'They sourced a specific shade of chiffon for me within two days. Great communication throughout and careful packaging.', 'en-IN');
+            $insertReview($lotusId, 'Imran V.', 4.7, 'Got a sherwani tailored here. Professional fittings and precise embroidery work. Delivery was on the promised date.', 'en-IN');
+            $insertReview($lotusId, 'Kavita D.', 4.9, 'Staff were patient while I compared several silks. They suggested blouse lining and care tips that really helped.', 'en-IN');
         }
         if ($greenId) {
-            $insertReview($greenId, 'Clara W.', 4.9, 'Delicious bowls, lovely staff.', 'en-GB');
-            $insertReview($greenId, 'Owen T.', 4.5, 'Great coffee and sourdough.', 'en-GB');
+            // Green Bites reviews (5 total)
+            $insertReview($greenId, 'Alex P.', 5.0, 'Best sourdough in the City. The crust has real depth of flavor and the bowls are generous. Staff remembered my usual after two visits.', 'en-GB');
+            $insertReview($greenId, 'Maria G.', 4.7, 'Delicious bowls and quick service at lunch. Great coffee with oat milk, and I love the rotating specials.', 'en-GB');
+            $insertReview($greenId, 'Tom H.', 4.6, 'Great place for a quick, healthy lunch. Seating fills up at noon but the line moves fast.', 'en-GB');
+            $insertReview($greenId, 'Ella R.', 4.8, 'Excellent espresso and friendly baristas. The vegan bowl had great textures and bright flavors.', 'en-GB');
+            $insertReview($greenId, 'Ben S.', 4.9, 'Love the seasonal menu changes and the sourdough loaves on Fridays. Consistently great quality.', 'en-GB');
         }
         if ($swiftId) {
-            $insertReview($swiftId, 'Zoe L.', 5.0, 'Super fast and careful with fragile items.', 'en-AU');
-            $insertReview($swiftId, 'Nick R.', 4.8, 'Great communication and tracking.', 'en-AU');
+            // Swift Transit reviews (5 total)
+            $insertReview($swiftId, 'Zoe L.', 5.0, 'Super fast and careful with fragile items. They handled our clinic samples with documented chain-of-custody and delivered earlier than promised.', 'en-AU');
+            $insertReview($swiftId, 'Nick R.', 4.8, 'Great communication and tracking. Dispatch answered within seconds, and the driver called ahead for loading dock access.', 'en-AU');
+            $insertReview($swiftId, 'Sam D.', 4.7, 'Booked an urgent pickup at 4 pm and it reached the CBD in under an hour. Clear proof‑of‑delivery emailed instantly.', 'en-AU');
+            $insertReview($swiftId, 'Priya V.', 4.9, 'Courteous drivers and clean vehicles. Our bulk transfers were secured properly and arrived without damage.', 'en-AU');
+            $insertReview($swiftId, 'Owen C.', 4.8, 'We use their scheduled routes daily. Reliable timings and proactive updates whenever traffic is heavy.', 'en-AU');
         }
     }
 
