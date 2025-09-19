@@ -104,6 +104,8 @@ class VersionController
 
         try {
             $nextVersion = $this->versionRepository->getNextVersionNumber($siteId);
+
+            error_log('Form data: ' . print_r($_POST, true));
             
             $version = new \Minisite\Domain\Entities\Version(
                 id: null,
@@ -111,7 +113,8 @@ class VersionController
                 versionNumber: $nextVersion,
                 status: 'draft',
                 label: sanitize_text_field($_POST['label'] ?? "Version {$nextVersion}"),
-                comment: sanitize_textarea_field($_POST['comment'] ?? ''),
+                // comment: sanitize_textarea_field($_POST['comment'] ?? ''),
+                comment: sanitize_textarea_field($_POST['version_comment'] ?? ''),
                 siteJson: $this->buildSiteJsonFromForm($_POST),
                 createdBy: (int) $currentUser->ID,
                 createdAt: null,

@@ -45,6 +45,7 @@ final class VersionRepository implements VersionRepositoryInterface
         ];
         
         // Temporary debug: Log what we're saving
+        error_log('Save($version): ' . print_r($version, true));
         error_log('Saving version data - label: ' . $data['label'] . ', comment: ' . $data['comment'] . ', title: ' . $data['title']);
         error_log('Full data array: ' . print_r($data, true));
         error_log('Formats array: ' . print_r($formats, true));

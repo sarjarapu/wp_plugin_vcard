@@ -130,6 +130,9 @@ final class SitesController
 
         // Handle form submission
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_edit_nonce'])) {
+
+            error_log('==> Form data POST: ' . print_r($_POST, true));
+
             if (!wp_verify_nonce($_POST['minisite_edit_nonce'], 'minisite_edit')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {

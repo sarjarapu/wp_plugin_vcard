@@ -126,6 +126,8 @@
   <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 </head>
 <body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
+<textarea rows="10" cols="100">
+</textarea>
   <main class="min-h-screen">
     <div class="max-w-7xl mx-auto p-6">
       <!-- Header -->
@@ -214,646 +216,646 @@
       </div>
 
       <!-- Form and Preview Layout -->
-      <div class="grid lg:grid-cols-2 gap-8">
-        <!-- Left: Edit Form -->
-        <div class="space-y-10">
-          <form id="minisite-edit-form" method="post">
-            {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
-            
+      <form id="minisite-edit-form" method="post">
+        <div class="grid lg:grid-cols-2 gap-8">
+          <!-- Left: Edit Form -->
+          <div class="space-y-10">
+              {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
+              
 
-            <!-- SEO Section -->
-            <div id="seo-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">SEO & Meta</h2>
-                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
-                  <i class="fa-solid fa-arrow-up text-sm"></i>
-                </a>
-              </div>
-              <div class="space-y-4">
-                <div>
-                  <label for="seo_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Page Title</label>
-                  <input id="seo_title" name="seo_title" type="text" value="{{ site_json.seo.title|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              <!-- SEO Section -->
+              <div id="seo-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">SEO & Meta</h2>
+                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </a>
                 </div>
-                <div>
-                  <label for="seo_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Meta Description</label>
-                  <textarea id="seo_description" name="seo_description" rows="3"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.seo.description|default('') }}</textarea>
-                </div>
-                <div>
-                  <label for="seo_keywords" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Keywords</label>
-                  <input id="seo_keywords" name="seo_keywords" type="text" value="{{ site_json.seo.keywords|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="seo_favicon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Favicon URL</label>
-                  <input id="seo_favicon" name="seo_favicon" type="url" value="{{ site_json.seo.favicon|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-              </div>
-            </div>
-
-            <!-- Brand Section -->
-            <div id="brand-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Brand & Logo</h2>
-                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
-                  <i class="fa-solid fa-arrow-up text-sm"></i>
-                </a>
-              </div>
-              <div class="space-y-4">
-                <div>
-                  <label for="brand_name" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Business Name</label>
-                  <input id="brand_name" name="brand_name" type="text" value="{{ site_json.brand.name|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="brand_logo" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Logo URL</label>
-                  <input id="brand_logo" name="brand_logo" type="url" value="{{ site_json.brand.logo|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="brand_industry" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Industry</label>
-                  <input id="brand_industry" name="brand_industry" type="text" value="{{ site_json.brand.industry|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="brand_palette" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Color Palette</label>
-                  <select id="brand_palette" name="brand_palette" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
-                    <option value="blue" {{ site_json.brand.palette|default('blue') == 'blue' ? 'selected' : '' }}>Blue</option>
-                    <option value="teal" {{ site_json.brand.palette|default('blue') == 'teal' ? 'selected' : '' }}>Teal</option>
-                    <option value="green" {{ site_json.brand.palette|default('blue') == 'green' ? 'selected' : '' }}>Green</option>
-                    <option value="purple" {{ site_json.brand.palette|default('blue') == 'purple' ? 'selected' : '' }}>Purple</option>
-                    <option value="red" {{ site_json.brand.palette|default('blue') == 'red' ? 'selected' : '' }}>Red</option>
-                    <option value="orange" {{ site_json.brand.palette|default('blue') == 'orange' ? 'selected' : '' }}>Orange</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <!-- Hero Section -->
-            <div id="hero-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Hero Section</h2>
-                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
-                  <i class="fa-solid fa-arrow-up text-sm"></i>
-                </a>
-              </div>
-              <div class="space-y-4">
-                <div>
-                  <label for="hero_badge" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Badge Text</label>
-                  <input id="hero_badge" name="hero_badge" type="text" value="{{ site_json.hero.badge|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="hero_heading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Main Heading</label>
-                  <input id="hero_heading" name="hero_heading" type="text" value="{{ site_json.hero.heading|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="hero_subheading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Subheading</label>
-                  <div class="ql-editor-container" style="height: 160px;">
-                    <div id="hero_subheading_editor">{{ site_json.hero.subheading|default('') }}</div>
-                    <textarea id="hero_subheading" name="hero_subheading" style="display: none;">{{ site_json.hero.subheading|default('') }}</textarea>
-                  </div>
-                  <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your subheading. HTML tags are automatically handled.</p>
-                </div>
-                <div>
-                  <label for="hero_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Hero Image URL</label>
-                  <input id="hero_image" name="hero_image" type="url" value="{{ site_json.hero.image|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="hero_image_alt" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image Alt Text</label>
-                  <input id="hero_image_alt" name="hero_image_alt" type="text" value="{{ site_json.hero.imageAlt|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
+                <div class="space-y-4">
                   <div>
-                    <label for="hero_cta1_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 Text</label>
-                    <input id="hero_cta1_text" name="hero_cta1_text" type="text" value="{{ site_json.hero.ctas[0].text|default('') }}"
+                    <label for="seo_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Page Title</label>
+                    <input id="seo_title" name="seo_title" type="text" value="{{ site_json.seo.title|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label for="hero_cta1_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 URL</label>
-                    <input id="hero_cta1_url" name="hero_cta1_url" type="text" value="{{ site_json.hero.ctas[0].url|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
-                      placeholder="https://example.com or #section or /page"/>
+                    <label for="seo_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Meta Description</label>
+                    <textarea id="seo_description" name="seo_description" rows="3"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.seo.description|default('') }}</textarea>
                   </div>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
                   <div>
-                    <label for="hero_cta2_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 Text</label>
-                    <input id="hero_cta2_text" name="hero_cta2_text" type="text" value="{{ site_json.hero.ctas[1].text|default('') }}"
+                    <label for="seo_keywords" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Keywords</label>
+                    <input id="seo_keywords" name="seo_keywords" type="text" value="{{ site_json.seo.keywords|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                   <div>
-                    <label for="hero_cta2_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 URL</label>
-                    <input id="hero_cta2_url" name="hero_cta2_url" type="text" value="{{ site_json.hero.ctas[1].url|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
-                      placeholder="https://example.com or #section or /page"/>
-                  </div>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="hero_rating_value" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Value</label>
-                    <input id="hero_rating_value" name="hero_rating_value" type="text" value="{{ site_json.hero.rating.value|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                  <div>
-                    <label for="hero_rating_count" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Count</label>
-                    <input id="hero_rating_count" name="hero_rating_count" type="text" value="{{ site_json.hero.rating.count|default('') }}"
+                    <label for="seo_favicon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Favicon URL</label>
+                    <input id="seo_favicon" name="seo_favicon" type="url" value="{{ site_json.seo.favicon|default('') }}"
                       class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
                 </div>
               </div>
-            </div>
 
-             <!-- About Section -->
-             <div id="about-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-               <div class="flex items-center justify-between mb-4">
-                 <h2 class="text-xl font-semibold text-[var(--on-surface)]">About Content</h2>
-                 <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
-                   <i class="fa-solid fa-arrow-up text-sm"></i>
-                 </a>
-               </div>
-              <div>
-                <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About Content</label>
-                <div class="ql-editor-container" style="height: 240px;">
-                  <div id="about_html_editor">{{ site_json.about.html|default('') }}</div>
-                  <textarea id="about_html" name="about_html" style="display: none;">{{ site_json.about.html|default('') }}</textarea>
+              <!-- Brand Section -->
+              <div id="brand-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Brand & Logo</h2>
+                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </a>
                 </div>
-                <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your content. HTML tags are automatically handled.</p>
+                <div class="space-y-4">
+                  <div>
+                    <label for="brand_name" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Business Name</label>
+                    <input id="brand_name" name="brand_name" type="text" value="{{ site_json.brand.name|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="brand_logo" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Logo URL</label>
+                    <input id="brand_logo" name="brand_logo" type="url" value="{{ site_json.brand.logo|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="brand_industry" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Industry</label>
+                    <input id="brand_industry" name="brand_industry" type="text" value="{{ site_json.brand.industry|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="brand_palette" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Color Palette</label>
+                    <select id="brand_palette" name="brand_palette" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
+                      <option value="blue" {{ site_json.brand.palette|default('blue') == 'blue' ? 'selected' : '' }}>Blue</option>
+                      <option value="teal" {{ site_json.brand.palette|default('blue') == 'teal' ? 'selected' : '' }}>Teal</option>
+                      <option value="green" {{ site_json.brand.palette|default('blue') == 'green' ? 'selected' : '' }}>Green</option>
+                      <option value="purple" {{ site_json.brand.palette|default('blue') == 'purple' ? 'selected' : '' }}>Purple</option>
+                      <option value="red" {{ site_json.brand.palette|default('blue') == 'red' ? 'selected' : '' }}>Red</option>
+                      <option value="orange" {{ site_json.brand.palette|default('blue') == 'orange' ? 'selected' : '' }}>Orange</option>
+                    </select>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <!-- WhyUs Section -->
-            <div id="whyus-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Why Choose Us</h2>
-                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
-                  <i class="fa-solid fa-arrow-up text-sm"></i>
-                </a>
+              <!-- Hero Section -->
+              <div id="hero-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Hero Section</h2>
+                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </a>
+                </div>
+                <div class="space-y-4">
+                  <div>
+                    <label for="hero_badge" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Badge Text</label>
+                    <input id="hero_badge" name="hero_badge" type="text" value="{{ site_json.hero.badge|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="hero_heading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Main Heading</label>
+                    <input id="hero_heading" name="hero_heading" type="text" value="{{ site_json.hero.heading|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="hero_subheading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Subheading</label>
+                    <div class="ql-editor-container" style="height: 160px;">
+                      <div id="hero_subheading_editor">{{ site_json.hero.subheading|default('') }}</div>
+                      <textarea id="hero_subheading" name="hero_subheading" style="display: none;">{{ site_json.hero.subheading|default('') }}</textarea>
+                    </div>
+                    <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your subheading. HTML tags are automatically handled.</p>
+                  </div>
+                  <div>
+                    <label for="hero_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Hero Image URL</label>
+                    <input id="hero_image" name="hero_image" type="url" value="{{ site_json.hero.image|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="hero_image_alt" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image Alt Text</label>
+                    <input id="hero_image_alt" name="hero_image_alt" type="text" value="{{ site_json.hero.imageAlt|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="hero_cta1_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 Text</label>
+                      <input id="hero_cta1_text" name="hero_cta1_text" type="text" value="{{ site_json.hero.ctas[0].text|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="hero_cta1_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 URL</label>
+                      <input id="hero_cta1_url" name="hero_cta1_url" type="text" value="{{ site_json.hero.ctas[0].url|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+                        placeholder="https://example.com or #section or /page"/>
+                    </div>
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="hero_cta2_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 Text</label>
+                      <input id="hero_cta2_text" name="hero_cta2_text" type="text" value="{{ site_json.hero.ctas[1].text|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="hero_cta2_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 URL</label>
+                      <input id="hero_cta2_url" name="hero_cta2_url" type="text" value="{{ site_json.hero.ctas[1].url|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+                        placeholder="https://example.com or #section or /page"/>
+                    </div>
+                  </div>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="hero_rating_value" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Value</label>
+                      <input id="hero_rating_value" name="hero_rating_value" type="text" value="{{ site_json.hero.rating.value|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="hero_rating_count" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Count</label>
+                      <input id="hero_rating_count" name="hero_rating_count" type="text" value="{{ site_json.hero.rating.count|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div class="space-y-4">
-                <div>
-                  <label for="whyus_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
-                  <input id="whyus_title" name="whyus_title" type="text" value="{{ site_json.whyUs.title|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+
+              <!-- About Section -->
+              <div id="about-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">About Content</h2>
+                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </a>
                 </div>
                 <div>
-                  <label for="whyus_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content</label>
+                  <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About Content</label>
                   <div class="ql-editor-container" style="height: 240px;">
-                    <div id="whyus_html_editor">{{ site_json.whyUs.html|default('') }}</div>
-                    <textarea id="whyus_html" name="whyus_html" style="display: none;">{{ site_json.whyUs.html|default('') }}</textarea>
+                    <div id="about_html_editor">{{ site_json.about.html|default('') }}</div>
+                    <textarea id="about_html" name="about_html" style="display: none;">{{ site_json.about.html|default('') }}</textarea>
                   </div>
                   <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your content. HTML tags are automatically handled.</p>
                 </div>
-                <div>
-                  <label for="whyus_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
-                  <input id="whyus_image" name="whyus_image" type="url" value="{{ site_json.whyUs.image|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+
+              <!-- WhyUs Section -->
+              <div id="whyus-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Why Choose Us</h2>
+                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </a>
+                </div>
+                <div class="space-y-4">
+                  <div>
+                    <label for="whyus_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
+                    <input id="whyus_title" name="whyus_title" type="text" value="{{ site_json.whyUs.title|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="whyus_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content</label>
+                    <div class="ql-editor-container" style="height: 240px;">
+                      <div id="whyus_html_editor">{{ site_json.whyUs.html|default('') }}</div>
+                      <textarea id="whyus_html" name="whyus_html" style="display: none;">{{ site_json.whyUs.html|default('') }}</textarea>
+                    </div>
+                    <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your content. HTML tags are automatically handled.</p>
+                  </div>
+                  <div>
+                    <label for="whyus_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
+                    <input id="whyus_image" name="whyus_image" type="url" value="{{ site_json.whyUs.image|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Contact Section -->
-            <div id="contact-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Contact Information</h2>
-                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
-                  <i class="fa-solid fa-arrow-up text-sm"></i>
-                </a>
-              </div>
-              <div class="space-y-6">
-                <!-- Phone -->
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="contact_phone_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Text</label>
-                    <input id="contact_phone_text" name="contact_phone_text" type="text" value="{{ site_json.contact.phone.text|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                  <div>
-                    <label for="contact_phone_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Link</label>
-                    <input id="contact_phone_link" name="contact_phone_link" type="tel" value="{{ site_json.contact.phone.link|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
+              <!-- Contact Section -->
+              <div id="contact-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Contact Information</h2>
+                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                    <i class="fa-solid fa-arrow-up text-sm"></i>
+                  </a>
                 </div>
+                <div class="space-y-6">
+                  <!-- Phone -->
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="contact_phone_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Text</label>
+                      <input id="contact_phone_text" name="contact_phone_text" type="text" value="{{ site_json.contact.phone.text|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="contact_phone_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Link</label>
+                      <input id="contact_phone_link" name="contact_phone_link" type="tel" value="{{ site_json.contact.phone.link|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                  </div>
 
-                <!-- WhatsApp -->
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="contact_whatsapp_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Text</label>
-                    <input id="contact_whatsapp_text" name="contact_whatsapp_text" type="text" value="{{ site_json.contact.whatsapp.text|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  <!-- WhatsApp -->
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="contact_whatsapp_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Text</label>
+                      <input id="contact_whatsapp_text" name="contact_whatsapp_text" type="text" value="{{ site_json.contact.whatsapp.text|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="contact_whatsapp_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Link</label>
+                      <input id="contact_whatsapp_link" name="contact_whatsapp_link" type="tel" value="{{ site_json.contact.whatsapp.link|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
                   </div>
-                  <div>
-                    <label for="contact_whatsapp_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Link</label>
-                    <input id="contact_whatsapp_link" name="contact_whatsapp_link" type="tel" value="{{ site_json.contact.whatsapp.link|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                </div>
 
-                <!-- Email -->
-                <div>
-                  <label for="contact_email" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email Address</label>
-                  <input id="contact_email" name="contact_email" type="email" value="{{ site_json.contact.email|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
+                  <!-- Email -->
+                  <div>
+                    <label for="contact_email" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email Address</label>
+                    <input id="contact_email" name="contact_email" type="email" value="{{ site_json.contact.email|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
 
-                <!-- Website -->
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="contact_website_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website Text</label>
-                    <input id="contact_website_text" name="contact_website_text" type="text" value="{{ site_json.contact.website.text|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  <!-- Website -->
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="contact_website_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website Text</label>
+                      <input id="contact_website_text" name="contact_website_text" type="text" value="{{ site_json.contact.website.text|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="contact_website_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website URL</label>
+                      <input id="contact_website_link" name="contact_website_link" type="url" value="{{ site_json.contact.website.link|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
                   </div>
-                  <div>
-                    <label for="contact_website_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website URL</label>
-                    <input id="contact_website_link" name="contact_website_link" type="url" value="{{ site_json.contact.website.link|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                </div>
 
-                <!-- Address -->
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="contact_address1" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 1</label>
-                    <input id="contact_address1" name="contact_address1" type="text" value="{{ site_json.contact.address_line1|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  <!-- Address -->
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="contact_address1" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 1</label>
+                      <input id="contact_address1" name="contact_address1" type="text" value="{{ site_json.contact.address_line1|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="contact_address2" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 2</label>
+                      <input id="contact_address2" name="contact_address2" type="text" value="{{ site_json.contact.address_line2|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
                   </div>
-                  <div>
-                    <label for="contact_address2" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 2</label>
-                    <input id="contact_address2" name="contact_address2" type="text" value="{{ site_json.contact.address_line2|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="contact_address3" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 3</label>
+                      <input id="contact_address3" name="contact_address3" type="text" value="{{ site_json.contact.address_line3|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="contact_address4" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 4</label>
+                      <input id="contact_address4" name="contact_address4" type="text" value="{{ site_json.contact.address_line4|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
                   </div>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="contact_address3" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 3</label>
-                    <input id="contact_address3" name="contact_address3" type="text" value="{{ site_json.contact.address_line3|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                  <div>
-                    <label for="contact_address4" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 4</label>
-                    <input id="contact_address4" name="contact_address4" type="text" value="{{ site_json.contact.address_line4|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                </div>
 
-                <!-- Plus Code -->
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="contact_pluscode" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
-                    <input id="contact_pluscode" name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  <!-- Plus Code -->
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="contact_pluscode" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
+                      <input id="contact_pluscode" name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="contact_pluscode_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code URL</label>
+                      <input id="contact_pluscode_url" name="contact_pluscode_url" type="url" value="{{ site_json.contact.plusCodeUrl|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
                   </div>
-                  <div>
-                    <label for="contact_pluscode_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code URL</label>
-                    <input id="contact_pluscode_url" name="contact_pluscode_url" type="url" value="{{ site_json.contact.plusCodeUrl|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                </div>
 
-                <!-- Coordinates -->
-                <div class="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label for="contact_lat" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Latitude</label>
-                    <input id="contact_lat" name="contact_lat" type="number" step="any" value="{{ profile.geo.lat|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  <!-- Coordinates -->
+                  <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                      <label for="contact_lat" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Latitude</label>
+                      <input id="contact_lat" name="contact_lat" type="number" step="any" value="{{ profile.geo.lat|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
+                    <div>
+                      <label for="contact_lng" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Longitude</label>
+                      <input id="contact_lng" name="contact_lng" type="number" step="any" value="{{ profile.geo.lng|default('') }}"
+                        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                    </div>
                   </div>
-                  <div>
-                    <label for="contact_lng" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Longitude</label>
-                    <input id="contact_lng" name="contact_lng" type="number" step="any" value="{{ profile.geo.lng|default('') }}"
-                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                  </div>
-                </div>
 
-                <!-- Business Hours -->
-                <div>
-                  <h3 class="text-lg font-medium text-[var(--on-surface)] mb-4">Business Hours</h3>
-                  {% set hours_data = site_json.contact.hours|default({}) %}
-                  
-                  <div class="overflow-x-auto">
-                    <table class="w-full border-collapse text-sm">
-                      <thead>
-                        <tr class="border-b border-[var(--outline-variant)]">
-                          <th class="text-left py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Day</th>
-                          <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Closed</th>
-                          <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Open Time</th>
-                          <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Close Time</th>
-                          <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-                        {% for day in days %}
-                          <tr class="hours-row border-b border-[var(--outline-variant)] hover:bg-[var(--surface-1)]" data-day="{{ day|lower }}">
-                            <!-- Day Column -->
-                            <td class="py-2 px-2 text-sm font-medium text-[var(--on-surface)]">
-                              {{ day|slice(0, 3) }}
-                            </td>
-                            
-                            <!-- Closed Toggle Column -->
-                            <td class="py-2 px-2 text-center">
-                              <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" name="hours_{{ day|lower }}_closed" id="hours_{{ day|lower }}_closed" 
-                                  class="sr-only peer hours-closed-toggle" {{ hours_data[day].closed|default(false) ? 'checked' : '' }}>
-                                <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
-                              </label>
-                            </td>
-                            
-                            <!-- Open Time Column -->
-                            <td class="py-2 px-2 text-center">
-                              <div class="hours-time-controls {{ hours_data[day].closed|default(false) ? 'opacity-50 pointer-events-none' : '' }}">
-                                {% set open_time = hours_data[day].open|default('09:00') %}
-                                {% if open_time matches '/\\b(AM|PM)\\b/i' %}
-                                  {% set open_time = function('date', 'H:i', function('strtotime', open_time)) %}
-                                {% endif %}
-                                <input type="time" name="hours_{{ day|lower }}_open" value="{{ open_time }}"
-                                  class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
-                              </div>
-                            </td>
-                            
-                            <!-- Close Time Column -->
-                            <td class="py-2 px-2 text-center">
-                              <div class="hours-time-controls {{ hours_data[day].closed|default(false) ? 'opacity-50 pointer-events-none' : '' }}">
-                                {% set close_time = hours_data[day].close|default('17:00') %}
-                                {% if close_time matches '/\\b(AM|PM)\\b/i' %}
-                                  {% set close_time = function('date', 'H:i', function('strtotime', close_time)) %}
-                                {% endif %}
-                                <input type="time" name="hours_{{ day|lower }}_close" value="{{ close_time }}"
-                                  class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
-                              </div>
-                            </td>
-                            
-                            <!-- Actions Column -->
-                            <td class="py-2 px-2 text-center">
-                              <div class="flex items-center justify-center gap-1">
-                                <button type="button" class="hours-copy-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
-                                  title="Copy hours" data-day="{{ day|lower }}">
-                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
-                                  </svg>
-                                </button>
-                                <button type="button" class="hours-paste-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
-                                  title="Paste hours" data-day="{{ day|lower }}" disabled>
-                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                  </svg>
-                                </button>
-                              </div>
-                            </td>
+                  <!-- Business Hours -->
+                  <div>
+                    <h3 class="text-lg font-medium text-[var(--on-surface)] mb-4">Business Hours</h3>
+                    {% set hours_data = site_json.contact.hours|default({}) %}
+                    
+                    <div class="overflow-x-auto">
+                      <table class="w-full border-collapse text-sm">
+                        <thead>
+                          <tr class="border-b border-[var(--outline-variant)]">
+                            <th class="text-left py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Day</th>
+                            <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Closed</th>
+                            <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Open Time</th>
+                            <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Close Time</th>
+                            <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Actions</th>
                           </tr>
-                        {% endfor %}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                          {% for day in days %}
+                            <tr class="hours-row border-b border-[var(--outline-variant)] hover:bg-[var(--surface-1)]" data-day="{{ day|lower }}">
+                              <!-- Day Column -->
+                              <td class="py-2 px-2 text-sm font-medium text-[var(--on-surface)]">
+                                {{ day|slice(0, 3) }}
+                              </td>
+                              
+                              <!-- Closed Toggle Column -->
+                              <td class="py-2 px-2 text-center">
+                                <label class="inline-flex items-center cursor-pointer">
+                                  <input type="checkbox" name="hours_{{ day|lower }}_closed" id="hours_{{ day|lower }}_closed" 
+                                    class="sr-only peer hours-closed-toggle" {{ hours_data[day].closed|default(false) ? 'checked' : '' }}>
+                                  <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+                                </label>
+                              </td>
+                              
+                              <!-- Open Time Column -->
+                              <td class="py-2 px-2 text-center">
+                                <div class="hours-time-controls {{ hours_data[day].closed|default(false) ? 'opacity-50 pointer-events-none' : '' }}">
+                                  {% set open_time = hours_data[day].open|default('09:00') %}
+                                  {% if open_time matches '/\\b(AM|PM)\\b/i' %}
+                                    {% set open_time = function('date', 'H:i', function('strtotime', open_time)) %}
+                                  {% endif %}
+                                  <input type="time" name="hours_{{ day|lower }}_open" value="{{ open_time }}"
+                                    class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                                </div>
+                              </td>
+                              
+                              <!-- Close Time Column -->
+                              <td class="py-2 px-2 text-center">
+                                <div class="hours-time-controls {{ hours_data[day].closed|default(false) ? 'opacity-50 pointer-events-none' : '' }}">
+                                  {% set close_time = hours_data[day].close|default('17:00') %}
+                                  {% if close_time matches '/\\b(AM|PM)\\b/i' %}
+                                    {% set close_time = function('date', 'H:i', function('strtotime', close_time)) %}
+                                  {% endif %}
+                                  <input type="time" name="hours_{{ day|lower }}_close" value="{{ close_time }}"
+                                    class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                                </div>
+                              </td>
+                              
+                              <!-- Actions Column -->
+                              <td class="py-2 px-2 text-center">
+                                <div class="flex items-center justify-center gap-1">
+                                  <button type="button" class="hours-copy-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                                    title="Copy hours" data-day="{{ day|lower }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                  </button>
+                                  <button type="button" class="hours-paste-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                                    title="Paste hours" data-day="{{ day|lower }}" disabled>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    <!-- Hidden inputs for backward compatibility -->
+                    {% for day in days %}
+                      <input type="hidden" name="hours_{{ day }}" id="hours_{{ day }}_hidden" value="{{ hours_data[day].hours|default('') }}"/>
+                    {% endfor %}
                   </div>
-                  
-                  <!-- Hidden inputs for backward compatibility -->
-                  {% for day in days %}
-                    <input type="hidden" name="hours_{{ day }}" id="hours_{{ day }}_hidden" value="{{ hours_data[day].hours|default('') }}"/>
+                </div>
+              </div>
+
+              <!-- Products & Services Section -->
+              <div id="products-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-3">
+                    <h2 class="text-xl font-semibold text-[var(--on-surface)]">Products & Services</h2>
+                    <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                      <i class="fa-solid fa-arrow-up text-sm"></i>
+                    </a>
+                  </div>
+                  <button type="button" id="addProduct" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+                    <i class="fa-solid fa-plus"></i> Add Item
+                  </button>
+                </div>
+                
+                <div class="mb-4">
+                  <label for="products_section_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
+                  <input id="products_section_title" name="products_section_title" type="text" value="{{ site_json.services.title|default('Products & Services') }}"
+                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+
+                <div id="productsContainer" class="space-y-4">
+                  {% for item in site_json.services.listing|default([]) %}
+                    <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+                      <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-medium text-[var(--on-surface)]">Product {{ loop.index }}</h3>
+                        <button type="button" class="removeProduct bg-[var(--surface-1)] hover:bg-[var(--surface)] text-[var(--on-surface)] ">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
+                      <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label for="product_{{ loop.index0 }}_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Title</label>
+                          <input id="product_{{ loop.index0 }}_title" name="product_{{ loop.index0 }}_title" type="text" value="{{ item.title|default('') }}"
+                            class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                        </div>
+                        <div>
+                          <label for="product_{{ loop.index0 }}_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+                          <input id="product_{{ loop.index0 }}_image" name="product_{{ loop.index0 }}_image" type="url" value="{{ item.image|default('') }}"
+                            class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                        </div>
+                        <div>
+                          <label for="product_{{ loop.index0 }}_price" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Price</label>
+                          <input id="product_{{ loop.index0 }}_price" name="product_{{ loop.index0 }}_price" type="text" value="{{ item.price|default('') }}"
+                            class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                        </div>
+                        <div>
+                          <label for="product_{{ loop.index0 }}_icon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Font Awesome Icon</label>
+                          <input id="product_{{ loop.index0 }}_icon" name="product_{{ loop.index0 }}_icon" type="text" value="{{ item.icon|default('') }}" placeholder="fa-solid fa-star"
+                            class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                        </div>
+                        <div>
+                          <label for="product_{{ loop.index0 }}_cta_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
+                          <input id="product_{{ loop.index0 }}_cta_text" name="product_{{ loop.index0 }}_cta_text" type="text" value="{{ item.cta|default('') }}"
+                            class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                        </div>
+                        <div>
+                          <label for="product_{{ loop.index0 }}_cta_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
+                          <input id="product_{{ loop.index0 }}_cta_url" name="product_{{ loop.index0 }}_cta_url" type="text" value="{{ item.url|default('') }}"
+                            class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+                            placeholder="https://example.com or #section or /page"/>
+                        </div>
+                      </div>
+                      <div class="mt-4">
+                        <label for="product_{{ loop.index0 }}_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
+                        <div class="ql-editor-container" style="height: 200px;">
+                          <div id="product_{{ loop.index0 }}_description_editor">{{ item.description|default('') }}</div>
+                          <textarea id="product_{{ loop.index0 }}_description" name="product_{{ loop.index0 }}_description" style="display: none;">{{ item.description|default('') }}</textarea>
+                        </div>
+                        <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your description. HTML tags are automatically handled.</p>
+                      </div>
+                    </div>
                   {% endfor %}
                 </div>
+                
+                <input type="hidden" name="product_count" id="productCount" value="{{ site_json.services.listing|default([])|length }}"/>
               </div>
-            </div>
 
-            <!-- Products & Services Section -->
-            <div id="products-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-              <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Products & Services</h2>
+              <!-- Social Media Section -->
+              <div id="social-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Social Media Links</h2>
                   <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
                     <i class="fa-solid fa-arrow-up text-sm"></i>
                   </a>
                 </div>
-                <button type="button" id="addProduct" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
-                  <i class="fa-solid fa-plus"></i> Add Item
-                </button>
-              </div>
-              
-              <div class="mb-4">
-                <label for="products_section_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
-                <input id="products_section_title" name="products_section_title" type="text" value="{{ site_json.services.title|default('Products & Services') }}"
-                  class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-              </div>
-
-              <div id="productsContainer" class="space-y-4">
-                {% for item in site_json.services.listing|default([]) %}
-                  <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
-                    <div class="flex items-center justify-between mb-3">
-                      <h3 class="font-medium text-[var(--on-surface)]">Product {{ loop.index }}</h3>
-                      <button type="button" class="removeProduct bg-[var(--surface-1)] hover:bg-[var(--surface)] text-[var(--on-surface)] ">
-                        <i class="fa-solid fa-trash"></i>
-                      </button>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label for="product_{{ loop.index0 }}_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Title</label>
-                        <input id="product_{{ loop.index0 }}_title" name="product_{{ loop.index0 }}_title" type="text" value="{{ item.title|default('') }}"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                      </div>
-                      <div>
-                        <label for="product_{{ loop.index0 }}_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
-                        <input id="product_{{ loop.index0 }}_image" name="product_{{ loop.index0 }}_image" type="url" value="{{ item.image|default('') }}"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                      </div>
-                      <div>
-                        <label for="product_{{ loop.index0 }}_price" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Price</label>
-                        <input id="product_{{ loop.index0 }}_price" name="product_{{ loop.index0 }}_price" type="text" value="{{ item.price|default('') }}"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                      </div>
-                      <div>
-                        <label for="product_{{ loop.index0 }}_icon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Font Awesome Icon</label>
-                        <input id="product_{{ loop.index0 }}_icon" name="product_{{ loop.index0 }}_icon" type="text" value="{{ item.icon|default('') }}" placeholder="fa-solid fa-star"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                      </div>
-                      <div>
-                        <label for="product_{{ loop.index0 }}_cta_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
-                        <input id="product_{{ loop.index0 }}_cta_text" name="product_{{ loop.index0 }}_cta_text" type="text" value="{{ item.cta|default('') }}"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                      </div>
-                      <div>
-                        <label for="product_{{ loop.index0 }}_cta_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
-                        <input id="product_{{ loop.index0 }}_cta_url" name="product_{{ loop.index0 }}_cta_url" type="text" value="{{ item.url|default('') }}"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
-                          placeholder="https://example.com or #section or /page"/>
-                      </div>
-                    </div>
-                    <div class="mt-4">
-                      <label for="product_{{ loop.index0 }}_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
-                      <div class="ql-editor-container" style="height: 200px;">
-                        <div id="product_{{ loop.index0 }}_description_editor">{{ item.description|default('') }}</div>
-                        <textarea id="product_{{ loop.index0 }}_description" name="product_{{ loop.index0 }}_description" style="display: none;">{{ item.description|default('') }}</textarea>
-                      </div>
-                      <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your description. HTML tags are automatically handled.</p>
-                    </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label for="social_facebook" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
+                    <input id="social_facebook" name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
-                {% endfor %}
-              </div>
-              
-              <input type="hidden" name="product_count" id="productCount" value="{{ site_json.services.listing|default([])|length }}"/>
-            </div>
-
-            <!-- Social Media Section -->
-            <div id="social-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Social Media Links</h2>
-                <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
-                  <i class="fa-solid fa-arrow-up text-sm"></i>
-                </a>
-              </div>
-              <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label for="social_facebook" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
-                  <input id="social_facebook" name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="social_instagram" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
-                  <input id="social_instagram" name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="social_x" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">X (Twitter)</label>
-                  <input id="social_x" name="social_x" type="url" value="{{ site_json.social.x|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="social_youtube" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
-                  <input id="social_youtube" name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="social_linkedin" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
-                  <input id="social_linkedin" name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-                <div>
-                  <label for="social_tiktok" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">TikTok</label>
-                  <input id="social_tiktok" name="social_tiktok" type="url" value="{{ site_json.social.tiktok|default('') }}"
-                    class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
-              </div>
-            </div>
-
-            <!-- Gallery Section -->
-            <div id="gallery-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
-              <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                  <h2 class="text-xl font-semibold text-[var(--on-surface)]">Image Gallery</h2>
-                  <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
-                    <i class="fa-solid fa-arrow-up text-sm"></i>
-                  </a>
-                </div>
-                <button type="button" id="addGalleryImage" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
-                  <i class="fa-solid fa-plus"></i> Add Image
-                </button>
-              </div>
-
-              <div id="galleryContainer" class="space-y-4">
-                {% for image in site_json.gallery|default([]) %}
-                  <div class="gallery-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
-                    <div class="flex items-center justify-between mb-3">
-                      <h3 class="font-medium text-[var(--on-surface)]">Image {{ loop.index }}</h3>
-                      <button type="button" class="removeGalleryImage bg-[var(--surface-1)] hover:bg-[var(--surface)] text-[var(--on-surface)] ">
-                        <i class="fa-solid fa-trash"></i>
-                      </button>
-                    </div>
-                    <div class="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label for="gallery_{{ loop.index0 }}_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
-                        <input id="gallery_{{ loop.index0 }}_image" name="gallery_{{ loop.index0 }}_image" type="url" value="{{ image.src|default('') }}"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                      </div>
-                      <div>
-                        <label for="gallery_{{ loop.index0 }}_alt" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Alt Text</label>
-                        <input id="gallery_{{ loop.index0 }}_alt" name="gallery_{{ loop.index0 }}_alt" type="text" value="{{ image.alt|default('') }}"
-                          class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                      </div>
-                    </div>
+                  <div>
+                    <label for="social_instagram" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
+                    <input id="social_instagram" name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
                   </div>
-                {% endfor %}
+                  <div>
+                    <label for="social_x" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">X (Twitter)</label>
+                    <input id="social_x" name="social_x" type="url" value="{{ site_json.social.x|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="social_youtube" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
+                    <input id="social_youtube" name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="social_linkedin" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
+                    <input id="social_linkedin" name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                  <div>
+                    <label for="social_tiktok" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">TikTok</label>
+                    <input id="social_tiktok" name="social_tiktok" type="url" value="{{ site_json.social.tiktok|default('') }}"
+                      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                  </div>
+                </div>
               </div>
-              
-              <input type="hidden" name="gallery_count" id="galleryCount" value="{{ site_json.gallery|default([])|length }}"/>
-            </div>
 
-          </form>
-        </div>
-
-        <!-- Right: Version Info & Actions + Live Preview -->
-        <div class="lg:sticky lg:top-6 space-y-6">
-          <!-- Version Information & Actions -->
-          <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-            <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Version Information</h2>
-            <div class="space-y-4">
-              <div class="flex items-center gap-3">
-                <label for="version_label" class="text-sm font-medium text-[var(--on-surface)] whitespace-nowrap w-[140px]">Version Label:</label>
-                <input id="version_label" name="version_label" type="text" 
-                  value="{{ editing_version.label|default('') }}"
-                  placeholder="e.g., Updated hero section"
-                  class="max-w-[300px] rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-              </div>
-              <div class="flex items-center gap-3">
-                <label for="version_comment" class="text-sm font-medium text-[var(--on-surface)] whitespace-nowrap w-[140px]">Version Comment:</label>
-                <input id="version_comment" name="version_comment" type="text" 
-                  value="{{ editing_version.comment|default('') }}"
-                  placeholder="e.g., Changed heading and added CTA"
-                  class="max-w-[300px] rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-              </div>
-            </div>
-            
-            <!-- Form Actions -->
-            <div class="mt-6 pt-4 border-t border-[var(--outline-variant)]">
-              <div class="flex items-center gap-3">
-                <a href="{{ function('home_url','/account/sites') }}"
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm font-medium">
-                  Cancel
-                </a>
-                <button type="submit" id="save-draft-button" name="action" value="save_draft"
-                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
-                  <i class="fa-solid fa-save" id="save-icon"></i> 
-                  <span id="save-text">Save Draft</span>
-                  <span id="save-loading" class="hidden">
-                    <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Saving...
-                  </span>
-                </button>
-                {% if editing_version and editing_version.status == 'draft' %}
-                  <button type="button" id="publish-button" 
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
-                    <i class="fa-solid fa-rocket"></i> 
-                    <span>Publish</span>
+              <!-- Gallery Section -->
+              <div id="gallery-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+                <div class="flex items-center justify-between mb-4">
+                  <div class="flex items-center gap-3">
+                    <h2 class="text-xl font-semibold text-[var(--on-surface)]">Image Gallery</h2>
+                    <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+                      <i class="fa-solid fa-arrow-up text-sm"></i>
+                    </a>
+                  </div>
+                  <button type="button" id="addGalleryImage" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+                    <i class="fa-solid fa-plus"></i> Add Image
                   </button>
-                {% endif %}
+                </div>
+
+                <div id="galleryContainer" class="space-y-4">
+                  {% for image in site_json.gallery|default([]) %}
+                    <div class="gallery-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+                      <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-medium text-[var(--on-surface)]">Image {{ loop.index }}</h3>
+                        <button type="button" class="removeGalleryImage bg-[var(--surface-1)] hover:bg-[var(--surface)] text-[var(--on-surface)] ">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </div>
+                      <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <label for="gallery_{{ loop.index0 }}_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+                          <input id="gallery_{{ loop.index0 }}_image" name="gallery_{{ loop.index0 }}_image" type="url" value="{{ image.src|default('') }}"
+                            class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                        </div>
+                        <div>
+                          <label for="gallery_{{ loop.index0 }}_alt" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Alt Text</label>
+                          <input id="gallery_{{ loop.index0 }}_alt" name="gallery_{{ loop.index0 }}_alt" type="text" value="{{ image.alt|default('') }}"
+                            class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+                
+                <input type="hidden" name="gallery_count" id="galleryCount" value="{{ site_json.gallery|default([])|length }}"/>
               </div>
-            </div>
+
           </div>
 
-          <!-- Live Preview -->
-          <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-semibold text-[var(--on-surface)]">Live Preview</h2>
-              <a href="{{ preview_url }}" target="_blank" 
-                 class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-                <i class="fa-solid fa-external-link-alt"></i> Open
-              </a>
+          <!-- Right: Version Info & Actions + Live Preview -->
+          <div class="lg:sticky lg:top-6 space-y-6">
+            <!-- Version Information & Actions -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-4">Version Information</h2>
+              <div class="space-y-4">
+                <div class="flex items-center gap-3">
+                  <label for="version_label" class="text-sm font-medium text-[var(--on-surface)] whitespace-nowrap w-[140px]">Version Label:</label>
+                  <input id="version_label" name="version_label" type="text" 
+                    value="{{ editing_version.label|default('') }}"
+                    placeholder="e.g., Updated hero section"
+                    class="max-w-[300px] rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+                <div class="flex items-center gap-3">
+                  <label for="version_comment" class="text-sm font-medium text-[var(--on-surface)] whitespace-nowrap w-[140px]">Version Comment:</label>
+                  <input id="version_comment" name="version_comment" type="text" 
+                    value="{{ editing_version.comment|default('') }}"
+                    placeholder="e.g., Changed heading and added CTA"
+                    class="max-w-[300px] rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+                </div>
+              </div>
+              
+              <!-- Form Actions -->
+              <div class="mt-6 pt-4 border-t border-[var(--outline-variant)]">
+                <div class="flex items-center gap-3">
+                  <a href="{{ function('home_url','/account/sites') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm font-medium">
+                    Cancel
+                  </a>
+                  <button type="submit" id="save-draft-button" name="action" value="save_draft"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
+                    <i class="fa-solid fa-save" id="save-icon"></i> 
+                    <span id="save-text">Save Draft</span>
+                    <span id="save-loading" class="hidden">
+                      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Saving...
+                    </span>
+                  </button>
+                  {% if editing_version and editing_version.status == 'draft' %}
+                    <button type="button" id="publish-button" 
+                      class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
+                      <i class="fa-solid fa-rocket"></i> 
+                      <span>Publish</span>
+                    </button>
+                  {% endif %}
+                </div>
+              </div>
             </div>
-            <div class="border border-[var(--outline-variant)] rounded-lg overflow-hidden">
-              <iframe src="{{ preview_url }}" 
-                      class="w-full h-[600px] border-0"
-                      title="Preview of {{ profile.title }}">
-                <p>Preview not available. <a href="{{ preview_url }}" target="_blank">Open in new tab</a></p>
-              </iframe>
+
+            <!-- Live Preview -->
+            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Live Preview</h2>
+                <a href="{{ preview_url }}" target="_blank" 
+                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+                  <i class="fa-solid fa-external-link-alt"></i> Open
+                </a>
+              </div>
+              <div class="border border-[var(--outline-variant)] rounded-lg overflow-hidden">
+                <iframe src="{{ preview_url }}" 
+                        class="w-full h-[600px] border-0"
+                        title="Preview of {{ profile.title }}">
+                  <p>Preview not available. <a href="{{ preview_url }}" target="_blank">Open in new tab</a></p>
+                </iframe>
+              </div>
+              <p class="mt-2 text-xs text-[var(--on-surface-variant)]">Preview updates when you save changes.</p>
             </div>
-            <p class="mt-2 text-xs text-[var(--on-surface-variant)]">Preview updates when you save changes.</p>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   </main>
 
