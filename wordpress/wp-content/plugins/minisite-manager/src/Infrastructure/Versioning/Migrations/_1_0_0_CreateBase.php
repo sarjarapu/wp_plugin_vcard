@@ -847,6 +847,18 @@ class _1_0_0_CreateBase implements Migration
         $versionsT  = $wpdb->prefix . 'minisite_versions';
         $reviewsT   = $wpdb->prefix . 'minisite_reviews';
 
+        // Check if the main profiles table exists before trying to query it
+        $tableExists = $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
+            $wpdb->dbname,
+            $profilesT
+        ));
+
+        if (!$tableExists) {
+            // Tables don't exist yet, nothing to clear
+            return;
+        }
+
         // Get IDs for our seeded slugs
         $rows = $wpdb->get_results("
             SELECT id FROM {$profilesT}
@@ -858,7 +870,7 @@ class _1_0_0_CreateBase implements Migration
         $ids = array_map(fn($r) => (int)$r->id, $rows);
         $in  = implode(',', array_fill(0, count($ids), '%d'));
 
-        // Delete child tables first
+        // Delete child tables first (only if they exist)
         $wpdb->query($wpdb->prepare("DELETE FROM {$reviewsT}   WHERE profile_id IN ($in)", ...$ids));
         $wpdb->query($wpdb->prepare("DELETE FROM {$versionsT}  WHERE minisite_id IN ($in)", ...$ids));
         $wpdb->query($wpdb->prepare("DELETE FROM {$revisionsT} WHERE profile_id IN ($in)", ...$ids));
