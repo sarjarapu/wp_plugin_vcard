@@ -39,15 +39,41 @@ final class TimberRenderer
             $isBookmarked = (bool) $bookmarkExists;
         }
 
-        // Add bookmark status to profile object for template access
-        $profile->isBookmarked = $isBookmarked;
-
         // Check if current user can edit this profile
         $canEdit = false;
         if (is_user_logged_in()) {
             $canEdit = current_user_can('minisite_edit_profile', $profile->id);
         }
-        $profile->canEdit = $canEdit;
+
+        // Create a new Profile object with the updated properties
+        $profile = new \Minisite\Domain\Entities\Profile(
+            id: $profile->id,
+            slugs: $profile->slugs,
+            title: $profile->title,
+            name: $profile->name,
+            city: $profile->city,
+            region: $profile->region,
+            countryCode: $profile->countryCode,
+            postalCode: $profile->postalCode,
+            geo: $profile->geo,
+            siteTemplate: $profile->siteTemplate,
+            palette: $profile->palette,
+            industry: $profile->industry,
+            defaultLocale: $profile->defaultLocale,
+            schemaVersion: $profile->schemaVersion,
+            siteVersion: $profile->siteVersion,
+            siteJson: $profile->siteJson,
+            searchTerms: $profile->searchTerms,
+            status: $profile->status,
+            createdAt: $profile->createdAt,
+            updatedAt: $profile->updatedAt,
+            publishedAt: $profile->publishedAt,
+            createdBy: $profile->createdBy,
+            updatedBy: $profile->updatedBy,
+            currentVersionId: $profile->currentVersionId,
+            isBookmarked: $isBookmarked,
+            canEdit: $canEdit
+        );
 
         // Pass the entity directly; use properties in Twig (no additional mapping)
         $context = [

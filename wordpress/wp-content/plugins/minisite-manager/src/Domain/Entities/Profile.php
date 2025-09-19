@@ -30,6 +30,8 @@ final class Profile
         public ?\DateTimeImmutable $publishedAt,
         public ?int $createdBy,
         public ?int $updatedBy,
-        public ?int $currentVersionId  // Points to currently published version
+        public ?int $currentVersionId,  // Points to currently published version
+        public bool $isBookmarked = false,  // Whether current user has bookmarked this profile
+        public bool $canEdit = false        // Whether current user can edit this profile
     ) {}
 }

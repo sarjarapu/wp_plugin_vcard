@@ -250,7 +250,9 @@ final class ProfileRepository implements ProfileRepositoryInterface
             publishedAt:   $r['published_at'] ? new \DateTimeImmutable($r['published_at']) : null,
             createdBy:     $r['created_by'] ? (int)$r['created_by'] : null,
             updatedBy:     $r['updated_by'] ? (int)$r['updated_by'] : null,
-            currentVersionId: $r['_minisite_current_version_id'] ? (int)$r['_minisite_current_version_id'] : null
+            currentVersionId: $r['_minisite_current_version_id'] ? (int)$r['_minisite_current_version_id'] : null,
+            isBookmarked:  false,  // Will be set by TimberRenderer
+            canEdit:       false   // Will be set by TimberRenderer
         );
     }
 }
