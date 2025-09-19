@@ -43,10 +43,11 @@ final class VersionRepository implements VersionRepositoryInterface
             'site_json' => wp_json_encode($version->siteJson),
             'search_terms' => $version->searchTerms,
         ];
+        
 
         $formats = [
             '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
-            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
         ];
 
         if ($version->id === null) {
@@ -201,6 +202,8 @@ final class VersionRepository implements VersionRepositoryInterface
             }
         }
 
+        $decodedSiteJson = json_decode($row['site_json'], true) ?: [];
+
         return new Version(
             id: (int) $row['id'],
             minisiteId: (int) $row['minisite_id'],
@@ -228,7 +231,7 @@ final class VersionRepository implements VersionRepositoryInterface
             defaultLocale: $row['default_locale'] ?? null,
             schemaVersion: $row['schema_version'] ? (int) $row['schema_version'] : null,
             siteVersion: $row['site_version'] ? (int) $row['site_version'] : null,
-            siteJson: json_decode($row['site_json'], true) ?: [],
+            siteJson: $decodedSiteJson,
             searchTerms: $row['search_terms'] ?? null
         );
     }
