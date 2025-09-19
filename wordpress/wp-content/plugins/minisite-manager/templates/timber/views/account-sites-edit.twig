@@ -1283,12 +1283,16 @@
       form.addEventListener('submit', function(e) {
       console.log('Form submission triggered');
       
-      // Only prevent double submission, let the form submit normally
-      if (isSubmitting) {
-        console.log('Already submitting, preventing double submission');
-        e.preventDefault();
-        return false;
-      }
+      // Debug: Check if version_comment field exists and has value
+      const versionCommentField = document.getElementById('version_comment');
+      const versionLabelField = document.getElementById('version_label');
+      console.log('version_comment field:', versionCommentField);
+      console.log('version_comment value:', versionCommentField ? versionCommentField.value : 'FIELD NOT FOUND');
+      console.log('version_label field:', versionLabelField);
+      console.log('version_label value:', versionLabelField ? versionLabelField.value : 'FIELD NOT FOUND');
+      
+      // Allow form to submit normally
+      console.log('Form submission allowed');
 
       // Sync all Quill editors before submission
       if (window.editors) {
@@ -1327,6 +1331,14 @@
       saveButton.addEventListener('click', function(e) {
         console.log('Save Draft button clicked directly');
         
+        // Debug: Check if version_comment field exists and has value
+        const versionCommentField = document.getElementById('version_comment');
+        const versionLabelField = document.getElementById('version_label');
+        console.log('version_comment field:', versionCommentField);
+        console.log('version_comment value:', versionCommentField ? versionCommentField.value : 'FIELD NOT FOUND');
+        console.log('version_label field:', versionLabelField);
+        console.log('version_label value:', versionLabelField ? versionLabelField.value : 'FIELD NOT FOUND');
+        
         // Sync all Quill editors before submission
         if (window.editors) {
           console.log('Syncing editors on button click:', Object.keys(window.editors));
@@ -1342,6 +1354,9 @@
             }
           });
         }
+        
+        // Allow form to submit normally
+        console.log('Save Draft button clicked - allowing form submission');
         
         // Submit the form programmatically
         if (form) {

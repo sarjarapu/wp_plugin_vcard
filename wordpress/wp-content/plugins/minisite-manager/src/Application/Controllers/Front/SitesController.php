@@ -116,7 +116,9 @@ final class SitesController
             // Edit latest version (draft or published)
             $latestVersion = $versionRepo->findLatestVersion($siteId);
             $latestDraft = $versionRepo->findLatestDraft($siteId);
-            $editingVersion = $latestVersion;
+            // If there's a draft, edit the draft; otherwise edit the latest version
+            $editingVersion = $latestDraft ?: $latestVersion;
+            
         } else {
             // Edit specific version
             $editingVersion = $versionRepo->findById((int) $requestedVersionId);
@@ -132,12 +134,17 @@ final class SitesController
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 try {
+                    // Temporary debug: Log key fields
+                    error_log('Version comment value: ' . ($_POST['version_comment'] ?? 'NOT FOUND'));
+                    error_log('Version label value: ' . ($_POST['version_label'] ?? 'NOT FOUND'));
+                    
                     // Build siteJson from form data
                     $siteJson = $this->buildSiteJsonFromForm($_POST);
                     
                     // Handle coordinate fields separately
                     $lat = !empty($_POST['contact_lat']) ? (float) $_POST['contact_lat'] : null;
                     $lng = !empty($_POST['contact_lng']) ? (float) $_POST['contact_lng'] : null;
+                    
                     
                     // Start transaction for atomic draft save
                     $wpdb->query('START TRANSACTION');
@@ -146,11 +153,8 @@ final class SitesController
                         // Create new draft version
                         $nextVersion = $versionRepo->getNextVersionNumber($siteId);
                         
-                        // Create SlugPair from form data
-                        $slugs = new \Minisite\Domain\ValueObjects\SlugPair(
-                            business: sanitize_text_field($_POST['brand_name'] ?? $profile->slugs->business),
-                            location: sanitize_text_field($_POST['contact_city'] ?? $profile->slugs->location)
-                        );
+                        // Use existing profile slugs (slugs should not change during editing)
+                        $slugs = $profile->slugs;
 
                         // Create GeoPoint from form data
                         $geo = null;
@@ -172,7 +176,7 @@ final class SitesController
                             
                             // Profile fields from form data
                             slugs: $slugs,
-                            title: sanitize_text_field($_POST['seo_title'] ?? $profile->title),
+                            title: $profile->title, // Keep original profile title
                             name: sanitize_text_field($_POST['brand_name'] ?? $profile->name),
                             city: sanitize_text_field($_POST['contact_city'] ?? $profile->city),
                             region: sanitize_text_field($_POST['contact_region'] ?? $profile->region),
@@ -188,6 +192,7 @@ final class SitesController
                             siteJson: $siteJson,
                             searchTerms: $profile->searchTerms
                         );
+                        
 
                         $savedVersion = $versionRepo->save($version);
                         $latestDraft = $savedVersion;

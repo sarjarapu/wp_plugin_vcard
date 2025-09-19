@@ -44,6 +44,12 @@ final class VersionRepository implements VersionRepositoryInterface
             'search_terms' => $version->searchTerms,
         ];
         
+        // Temporary debug: Log what we're saving
+        error_log('Saving version data - label: ' . $data['label'] . ', comment: ' . $data['comment'] . ', title: ' . $data['title']);
+        error_log('Full data array: ' . print_r($data, true));
+        error_log('Formats array: ' . print_r($formats, true));
+        
+        
 
         $formats = [
             '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
@@ -203,6 +209,7 @@ final class VersionRepository implements VersionRepositoryInterface
         }
 
         $decodedSiteJson = json_decode($row['site_json'], true) ?: [];
+        
 
         return new Version(
             id: (int) $row['id'],
