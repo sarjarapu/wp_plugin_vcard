@@ -10,7 +10,7 @@ class _1_0_0_CreateBase implements Migration
 
     public function description(): string
     {
-        return 'Create base tables: minisite_profiles, minisite_profile_revisions, minisite_reviews + seed dev data';
+        return 'Create base tables: minisite_profiles, minisite_profile_revisions, minisite_versions (with complete profile field versioning), minisite_reviews + seed dev data';
     }
 
     public function up(\wpdb $wpdb): void
@@ -100,6 +100,26 @@ class _1_0_0_CreateBase implements Migration
           created_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
           published_at     DATETIME        NULL,
           source_version_id BIGINT UNSIGNED NULL,
+
+          -- Profile fields for complete versioning
+          business_slug     VARCHAR(120)    NULL,
+          location_slug     VARCHAR(120)    NULL,
+          title             VARCHAR(200)    NULL,
+          name              VARCHAR(200)    NULL,
+          city              VARCHAR(120)    NULL,
+          region            VARCHAR(120)    NULL,
+          country_code      CHAR(2)         NULL,
+          postal_code       VARCHAR(20)     NULL,
+          lat               DECIMAL(9,6)    NULL,
+          lng               DECIMAL(9,6)    NULL,
+          location_point    POINT           NULL,
+          site_template     VARCHAR(32)     NULL,
+          palette           VARCHAR(24)     NULL,
+          industry          VARCHAR(40)     NULL,
+          default_locale    VARCHAR(10)     NULL,
+          schema_version    SMALLINT UNSIGNED NULL,
+          site_version      INT UNSIGNED    NULL,
+          search_terms      TEXT            NULL,
 
           PRIMARY KEY (id),
           UNIQUE KEY uniq_minisite_version (minisite_id, version_number),
@@ -685,12 +705,12 @@ class _1_0_0_CreateBase implements Migration
         foreach ([ $acmeId => 'US', $lotusId => 'IN', $greenId => 'GB', $swiftId => 'AU' ] as $pid => $cc) {
             if (!$pid) { continue; }
 
-            // Get the profile's site_json for the initial version
-            $profile = $wpdb->get_row($wpdb->prepare("SELECT site_json FROM {$profilesT} WHERE id = %d", $pid), ARRAY_A);
+            // Get the profile data for the initial version
+            $profile = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$profilesT} WHERE id = %d", $pid), ARRAY_A);
             $siteJson = $profile ? $profile['site_json'] : wp_json_encode(['note'=>'initial version','country'=>$cc]);
-
-            // Create version 1 as published
-            $wpdb->insert($versionsT, [
+            
+            // Create version 1 as published with all profile fields
+            $versionData = [
                 'minisite_id'      => $pid,
                 'version_number'   => 1,
                 'status'           => 'published',
@@ -699,9 +719,42 @@ class _1_0_0_CreateBase implements Migration
                 'data_json'        => $siteJson,
                 'created_by'       => $nowUser,
                 'published_at'     => current_time('mysql'),
-            ], ['%d','%d','%s','%s','%s','%s','%d','%s']);
+                
+                // Profile fields
+                'business_slug'    => $profile['business_slug'] ?? null,
+                'location_slug'    => $profile['location_slug'] ?? null,
+                'title'            => $profile['title'] ?? null,
+                'name'             => $profile['name'] ?? null,
+                'city'             => $profile['city'] ?? null,
+                'region'           => $profile['region'] ?? null,
+                'country_code'     => $profile['country_code'] ?? null,
+                'postal_code'      => $profile['postal_code'] ?? null,
+                'lat'              => $profile['lat'] ?? null,
+                'lng'              => $profile['lng'] ?? null,
+                'location_point'   => null, // Will be set separately if needed
+                'site_template'    => $profile['site_template'] ?? null,
+                'palette'          => $profile['palette'] ?? null,
+                'industry'         => $profile['industry'] ?? null,
+                'default_locale'   => $profile['default_locale'] ?? null,
+                'schema_version'   => $profile['schema_version'] ?? null,
+                'site_version'     => $profile['site_version'] ?? null,
+                'search_terms'     => $profile['search_terms'] ?? null,
+            ];
+
+            $wpdb->insert($versionsT, $versionData, [
+                '%d','%d','%s','%s','%s','%s','%d','%s',
+                '%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%d','%d','%s'
+            ]);
 
             $versionId = (int) $wpdb->insert_id;
+
+            // Set location_point if lat/lng exist
+            if (!empty($profile['lat']) && !empty($profile['lng'])) {
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$versionsT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                    $profile['lng'], $profile['lat'], $versionId
+                ));
+            }
 
             // Update profile with current version ID
             $wpdb->query($wpdb->prepare(

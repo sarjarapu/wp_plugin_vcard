@@ -78,10 +78,10 @@ Below is a checklist of all major tasks to take the plugin from current work-in-
 ## Manual Testing
 
 - Edit bugs
-  - Brand > Industry and Color Palette are on parent row. But you are saving only site_json
+  - ✅ Brand > Industry and Color Palette are on parent row. But you are saving only site_json (FIXED: Complete versioning system now tracks all profile fields)
   - Contact Information > phone/whatsapp autoconvert display to number
-  - Contact Information > Business hours UI is not loading properly
-  - Toggle holiday on/off is not working on closing control
+  - ✅ Contact Information > Business hours UI is not loading properly (FIXED: Time format conversion and data loading)
+  - ✅ Toggle holiday on/off is not working on closing control (FIXED: Both open and close time controls now properly disabled)
 
 ## Braindump Role features
 

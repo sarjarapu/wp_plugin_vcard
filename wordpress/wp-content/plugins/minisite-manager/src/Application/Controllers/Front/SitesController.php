@@ -146,6 +146,18 @@ final class SitesController
                         // Create new draft version
                         $nextVersion = $versionRepo->getNextVersionNumber($siteId);
                         
+                        // Create SlugPair from form data
+                        $slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+                            business: sanitize_text_field($_POST['brand_name'] ?? $profile->slugs->business),
+                            location: sanitize_text_field($_POST['contact_city'] ?? $profile->slugs->location)
+                        );
+
+                        // Create GeoPoint from form data
+                        $geo = null;
+                        if ($lat !== null && $lng !== null) {
+                            $geo = new \Minisite\Domain\ValueObjects\GeoPoint(lat: $lat, lng: $lng);
+                        }
+
                         $version = new \Minisite\Domain\Entities\Version(
                             id: null,
                             minisiteId: $siteId,
@@ -157,7 +169,24 @@ final class SitesController
                             createdBy: (int) $currentUser->ID,
                             createdAt: null,
                             publishedAt: null,
-                            sourceVersionId: null
+                            sourceVersionId: null,
+                            
+                            // Profile fields from form data
+                            slugs: $slugs,
+                            title: sanitize_text_field($_POST['seo_title'] ?? $profile->title),
+                            name: sanitize_text_field($_POST['brand_name'] ?? $profile->name),
+                            city: sanitize_text_field($_POST['contact_city'] ?? $profile->city),
+                            region: sanitize_text_field($_POST['contact_region'] ?? $profile->region),
+                            countryCode: sanitize_text_field($_POST['contact_country'] ?? $profile->countryCode),
+                            postalCode: sanitize_text_field($_POST['contact_postal'] ?? $profile->postalCode),
+                            geo: $geo,
+                            siteTemplate: $profile->siteTemplate,
+                            palette: sanitize_text_field($_POST['brand_palette'] ?? $profile->palette),
+                            industry: sanitize_text_field($_POST['brand_industry'] ?? $profile->industry),
+                            defaultLocale: $profile->defaultLocale,
+                            schemaVersion: $profile->schemaVersion,
+                            siteVersion: $profile->siteVersion,
+                            searchTerms: $profile->searchTerms
                         );
 
                         $savedVersion = $versionRepo->save($version);
