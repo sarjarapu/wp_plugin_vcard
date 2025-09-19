@@ -169,6 +169,7 @@ final class SitesController
                             createdAt: null,
                             publishedAt: null,
                             sourceVersionId: null,
+                            siteJson: $siteJson,
                             
                             // Profile fields from form data
                             slugs: $slugs,
@@ -185,7 +186,6 @@ final class SitesController
                             defaultLocale: $profile->defaultLocale,
                             schemaVersion: $profile->schemaVersion,
                             siteVersion: $profile->siteVersion,
-                            siteJson: $siteJson,
                             searchTerms: $profile->searchTerms
                         );
                         

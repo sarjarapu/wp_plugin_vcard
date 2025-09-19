@@ -17,8 +17,9 @@ final class Version
         public ?\DateTimeImmutable $createdAt,
         public ?\DateTimeImmutable $publishedAt,
         public ?int $sourceVersionId,  // For rollbacks: tracks what version was rolled back from
+        public array $siteJson,  // Required - contains the form data
         
-        // Profile fields for complete versioning
+        // Profile fields for complete versioning (all optional)
         public ?SlugPair $slugs = null,
         public ?string $title = null,
         public ?string $name = null,
@@ -33,7 +34,6 @@ final class Version
         public ?string $defaultLocale = null,
         public ?int $schemaVersion = null,
         public ?int $siteVersion = null,
-        public array $siteJson,  // Required - contains the form data
         public ?string $searchTerms = null
     ) {}
 

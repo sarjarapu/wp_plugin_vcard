@@ -216,6 +216,7 @@ final class VersionRepository implements VersionRepositoryInterface
             createdAt: $row['created_at'] ? new \DateTimeImmutable($row['created_at']) : null,
             publishedAt: $row['published_at'] ? new \DateTimeImmutable($row['published_at']) : null,
             sourceVersionId: $row['source_version_id'] ? (int) $row['source_version_id'] : null,
+            siteJson: $decodedSiteJson,
             
             // Profile fields
             slugs: $slugs,
@@ -232,7 +233,6 @@ final class VersionRepository implements VersionRepositoryInterface
             defaultLocale: $row['default_locale'] ?? null,
             schemaVersion: $row['schema_version'] ? (int) $row['schema_version'] : null,
             siteVersion: $row['site_version'] ? (int) $row['site_version'] : null,
-            siteJson: $decodedSiteJson,
             searchTerms: $row['search_terms'] ?? null
         );
     }

@@ -113,13 +113,12 @@ class VersionController
                 versionNumber: $nextVersion,
                 status: 'draft',
                 label: sanitize_text_field($_POST['label'] ?? "Version {$nextVersion}"),
-                // comment: sanitize_textarea_field($_POST['comment'] ?? ''),
                 comment: sanitize_textarea_field($_POST['version_comment'] ?? ''),
-                siteJson: $this->buildSiteJsonFromForm($_POST),
                 createdBy: (int) $currentUser->ID,
                 createdAt: null,
                 publishedAt: null,
-                sourceVersionId: null
+                sourceVersionId: null,
+                siteJson: $this->buildSiteJsonFromForm($_POST)
             );
 
             $savedVersion = $this->versionRepository->save($version);
@@ -321,11 +320,11 @@ class VersionController
             status: 'draft',
             label: "Rollback to v{$sourceVersion->versionNumber}",
             comment: "Rollback from version {$sourceVersion->versionNumber}",
-            siteJson: $sourceVersion->siteJson,
             createdBy: $userId,
             createdAt: null,
             publishedAt: null,
-            sourceVersionId: $sourceVersionId
+            sourceVersionId: $sourceVersionId,
+            siteJson: $sourceVersion->siteJson
         );
         
         return $this->versionRepository->save($rollbackVersion);
