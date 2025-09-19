@@ -1,0 +1,200 @@
+<!-- Contact Section -->
+<div id="contact-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-[var(--on-surface)]">Contact Information</h2>
+    <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+      <i class="fa-solid fa-arrow-up text-sm"></i>
+    </a>
+  </div>
+  <div class="space-y-6">
+    <!-- Phone -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label for="contact_phone_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Text</label>
+        <input id="contact_phone_text" name="contact_phone_text" type="text" value="{{ site_json.contact.phone.text|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="contact_phone_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Link</label>
+        <input id="contact_phone_link" name="contact_phone_link" type="tel" value="{{ site_json.contact.phone.link|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+    </div>
+
+    <!-- WhatsApp -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label for="contact_whatsapp_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Text</label>
+        <input id="contact_whatsapp_text" name="contact_whatsapp_text" type="text" value="{{ site_json.contact.whatsapp.text|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="contact_whatsapp_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Link</label>
+        <input id="contact_whatsapp_link" name="contact_whatsapp_link" type="tel" value="{{ site_json.contact.whatsapp.link|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+    </div>
+
+    <!-- Email -->
+    <div>
+      <label for="contact_email" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email Address</label>
+      <input id="contact_email" name="contact_email" type="email" value="{{ site_json.contact.email|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+
+    <!-- Website -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label for="contact_website_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website Text</label>
+        <input id="contact_website_text" name="contact_website_text" type="text" value="{{ site_json.contact.website.text|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="contact_website_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website URL</label>
+        <input id="contact_website_link" name="contact_website_link" type="url" value="{{ site_json.contact.website.link|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+    </div>
+
+    <!-- Address -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label for="contact_address1" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 1</label>
+        <input id="contact_address1" name="contact_address1" type="text" value="{{ site_json.contact.address_line1|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="contact_address2" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 2</label>
+        <input id="contact_address2" name="contact_address2" type="text" value="{{ site_json.contact.address_line2|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label for="contact_address3" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 3</label>
+        <input id="contact_address3" name="contact_address3" type="text" value="{{ site_json.contact.address_line3|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="contact_address4" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 4</label>
+        <input id="contact_address4" name="contact_address4" type="text" value="{{ site_json.contact.address_line4|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+    </div>
+
+    <!-- Plus Code -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label for="contact_pluscode" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
+        <input id="contact_pluscode" name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="contact_pluscode_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code URL</label>
+        <input id="contact_pluscode_url" name="contact_pluscode_url" type="url" value="{{ site_json.contact.plusCodeUrl|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+    </div>
+
+    <!-- Coordinates -->
+    <div class="grid md:grid-cols-2 gap-4">
+      <div>
+        <label for="contact_lat" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Latitude</label>
+        <input id="contact_lat" name="contact_lat" type="number" step="any" value="{{ profile.geo.lat|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="contact_lng" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Longitude</label>
+        <input id="contact_lng" name="contact_lng" type="number" step="any" value="{{ profile.geo.lng|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+    </div>
+
+    <!-- Business Hours -->
+    <div>
+      <h3 class="text-lg font-medium text-[var(--on-surface)] mb-4">Business Hours</h3>
+      {% set hours_data = site_json.contact.hours|default({}) %}
+      
+      <div class="overflow-x-auto">
+        <table class="w-full border-collapse text-sm">
+          <thead>
+            <tr class="border-b border-[var(--outline-variant)]">
+              <th class="text-left py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Day</th>
+              <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Closed</th>
+              <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Open Time</th>
+              <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Close Time</th>
+              <th class="text-center py-2 px-2 text-xs font-medium text-[var(--on-surface)]">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+            {% for day in days %}
+              <tr class="hours-row border-b border-[var(--outline-variant)] hover:bg-[var(--surface-1)]" data-day="{{ day|lower }}">
+                <!-- Day Column -->
+                <td class="py-2 px-2 text-sm font-medium text-[var(--on-surface)]">
+                  {{ day|slice(0, 3) }}
+                </td>
+                
+                <!-- Closed Toggle Column -->
+                <td class="py-2 px-2 text-center">
+                  <label class="inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="hours_{{ day|lower }}_closed" id="hours_{{ day|lower }}_closed" 
+                      class="sr-only peer hours-closed-toggle" {{ hours_data[day].closed|default(false) ? 'checked' : '' }}>
+                    <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
+                  </label>
+                </td>
+                
+                <!-- Open Time Column -->
+                <td class="py-2 px-2 text-center">
+                  <div class="hours-time-controls {{ hours_data[day].closed|default(false) ? 'opacity-50 pointer-events-none' : '' }}">
+                    {% set open_time = hours_data[day].open|default('09:00') %}
+                    {% if open_time matches '/\\b(AM|PM)\\b/i' %}
+                      {% set open_time = function('date', 'H:i', function('strtotime', open_time)) %}
+                    {% endif %}
+                    <input type="time" name="hours_{{ day|lower }}_open" value="{{ open_time }}"
+                      class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                  </div>
+                </td>
+                
+                <!-- Close Time Column -->
+                <td class="py-2 px-2 text-center">
+                  <div class="hours-time-controls {{ hours_data[day].closed|default(false) ? 'opacity-50 pointer-events-none' : '' }}">
+                    {% set close_time = hours_data[day].close|default('17:00') %}
+                    {% if close_time matches '/\\b(AM|PM)\\b/i' %}
+                      {% set close_time = function('date', 'H:i', function('strtotime', close_time)) %}
+                    {% endif %}
+                    <input type="time" name="hours_{{ day|lower }}_close" value="{{ close_time }}"
+                      class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                  </div>
+                </td>
+                
+                <!-- Actions Column -->
+                <td class="py-2 px-2 text-center">
+                  <div class="flex items-center justify-center gap-1">
+                    <button type="button" class="hours-copy-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                      title="Copy hours" data-day="{{ day|lower }}">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                      </svg>
+                    </button>
+                    <button type="button" class="hours-paste-btn inline-flex items-center justify-center w-8 h-8 rounded-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
+                      title="Paste hours" data-day="{{ day|lower }}" disabled>
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Hidden inputs for backward compatibility -->
+      {% for day in days %}
+        <input type="hidden" name="hours_{{ day }}" id="hours_{{ day }}_hidden" value="{{ hours_data[day].hours|default('') }}"/>
+      {% endfor %}
+    </div>
+  </div>
+</div>

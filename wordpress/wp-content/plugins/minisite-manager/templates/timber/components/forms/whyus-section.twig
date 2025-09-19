@@ -1,0 +1,29 @@
+<!-- WhyUs Section -->
+<div id="whyus-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-[var(--on-surface)]">Why Choose Us</h2>
+    <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+      <i class="fa-solid fa-arrow-up text-sm"></i>
+    </a>
+  </div>
+  <div class="space-y-4">
+    <div>
+      <label for="whyus_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
+      <input id="whyus_title" name="whyus_title" type="text" value="{{ site_json.whyUs.title|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="whyus_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content</label>
+      <div class="ql-editor-container" style="height: 240px;">
+        <div id="whyus_html_editor">{{ site_json.whyUs.html|default('') }}</div>
+        <textarea id="whyus_html" name="whyus_html" style="display: none;">{{ site_json.whyUs.html|default('') }}</textarea>
+      </div>
+      <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your content. HTML tags are automatically handled.</p>
+    </div>
+    <div>
+      <label for="whyus_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
+      <input id="whyus_image" name="whyus_image" type="url" value="{{ site_json.whyUs.image|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+  </div>
+</div>

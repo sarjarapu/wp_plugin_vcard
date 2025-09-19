@@ -1,0 +1,41 @@
+<!-- Social Media Section -->
+<div id="social-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-[var(--on-surface)]">Social Media Links</h2>
+    <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+      <i class="fa-solid fa-arrow-up text-sm"></i>
+    </a>
+  </div>
+  <div class="grid md:grid-cols-2 gap-4">
+    <div>
+      <label for="social_facebook" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
+      <input id="social_facebook" name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="social_instagram" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
+      <input id="social_instagram" name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="social_x" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">X (Twitter)</label>
+      <input id="social_x" name="social_x" type="url" value="{{ site_json.social.x|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="social_youtube" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
+      <input id="social_youtube" name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="social_linkedin" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
+      <input id="social_linkedin" name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="social_tiktok" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">TikTok</label>
+      <input id="social_tiktok" name="social_tiktok" type="url" value="{{ site_json.social.tiktok|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+  </div>
+</div>

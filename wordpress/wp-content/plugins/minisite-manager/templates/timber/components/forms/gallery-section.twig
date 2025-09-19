@@ -1,0 +1,41 @@
+<!-- Gallery Section -->
+<div id="gallery-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-3">
+      <h2 class="text-xl font-semibold text-[var(--on-surface)]">Image Gallery</h2>
+      <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+      </a>
+    </div>
+    <button type="button" id="addGalleryImage" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+      <i class="fa-solid fa-plus"></i> Add Image
+    </button>
+  </div>
+
+  <div id="galleryContainer" class="space-y-4">
+    {% for image in site_json.gallery|default([]) %}
+      <div class="gallery-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-medium text-[var(--on-surface)]">Image {{ loop.index }}</h3>
+          <button type="button" class="removeGalleryImage bg-[var(--surface-1)] hover:bg-[var(--surface)] text-[var(--primary)] hover:text-[var(--primary)]/80">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="gallery_{{ loop.index0 }}_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+            <input id="gallery_{{ loop.index0 }}_image" name="gallery_{{ loop.index0 }}_image" type="url" value="{{ image.src|default('') }}"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          </div>
+          <div>
+            <label for="gallery_{{ loop.index0 }}_alt" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Alt Text</label>
+            <input id="gallery_{{ loop.index0 }}_alt" name="gallery_{{ loop.index0 }}_alt" type="text" value="{{ image.alt|default('') }}"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <input type="hidden" name="gallery_count" id="galleryCount" value="{{ site_json.gallery|default([])|length }}"/>
+</div>

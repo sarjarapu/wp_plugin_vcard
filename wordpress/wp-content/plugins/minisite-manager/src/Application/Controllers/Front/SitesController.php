@@ -219,8 +219,9 @@ final class SitesController
 
         // Render edit form
         if (class_exists('Timber\\Timber')) {
-            $base = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
-            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$base])));
+            $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
+            $componentsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
+            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$viewsBase, $componentsBase])));
 
             // Use editing version data (should always be available now)
             $siteJson = $editingVersion ? $editingVersion->siteJson : $profile->siteJson;

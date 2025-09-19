@@ -39,8 +39,13 @@ final class NewMinisiteController
         ];
 
         // Render the template
-        $renderer = new \Minisite\Application\Rendering\TimberRenderer();
-        $renderer->render('account-sites-new.twig', $context);
+        if (class_exists('Timber\\Timber')) {
+            $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
+            $componentsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
+            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$viewsBase, $componentsBase])));
+            
+            \Timber\Timber::render('account-sites-new.twig', $context);
+        }
     }
 
     /**

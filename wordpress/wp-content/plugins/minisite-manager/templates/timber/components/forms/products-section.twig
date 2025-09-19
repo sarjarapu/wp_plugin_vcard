@@ -1,0 +1,76 @@
+<!-- Products & Services Section -->
+<div id="products-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-3">
+      <h2 class="text-xl font-semibold text-[var(--on-surface)]">Products & Services</h2>
+      <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+      </a>
+    </div>
+    <button type="button" id="addProduct" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+      <i class="fa-solid fa-plus"></i> Add Item
+    </button>
+  </div>
+  
+  <div class="mb-4">
+    <label for="products_section_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
+    <input id="products_section_title" name="products_section_title" type="text" value="{{ site_json.services.title|default('Products & Services') }}"
+      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+  </div>
+
+  <div id="productsContainer" class="space-y-4">
+    {% for item in site_json.services.listing|default([]) %}
+      <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-medium text-[var(--on-surface)]">Product {{ loop.index }}</h3>
+          <button type="button" class="removeProduct bg-[var(--surface-1)] hover:bg-[var(--surface)] text-[var(--primary)] hover:text-[var(--primary)]/80">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <label for="product_{{ loop.index0 }}_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Title</label>
+            <input id="product_{{ loop.index0 }}_title" name="product_{{ loop.index0 }}_title" type="text" value="{{ item.title|default('') }}"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          </div>
+          <div>
+            <label for="product_{{ loop.index0 }}_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+            <input id="product_{{ loop.index0 }}_image" name="product_{{ loop.index0 }}_image" type="url" value="{{ item.image|default('') }}"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          </div>
+          <div>
+            <label for="product_{{ loop.index0 }}_price" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Price</label>
+            <input id="product_{{ loop.index0 }}_price" name="product_{{ loop.index0 }}_price" type="text" value="{{ item.price|default('') }}"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          </div>
+          <div>
+            <label for="product_{{ loop.index0 }}_icon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Font Awesome Icon</label>
+            <input id="product_{{ loop.index0 }}_icon" name="product_{{ loop.index0 }}_icon" type="text" value="{{ item.icon|default('') }}" placeholder="fa-solid fa-star"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          </div>
+          <div>
+            <label for="product_{{ loop.index0 }}_cta_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
+            <input id="product_{{ loop.index0 }}_cta_text" name="product_{{ loop.index0 }}_cta_text" type="text" value="{{ item.cta|default('') }}"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          </div>
+          <div>
+            <label for="product_{{ loop.index0 }}_cta_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
+            <input id="product_{{ loop.index0 }}_cta_url" name="product_{{ loop.index0 }}_cta_url" type="text" value="{{ item.url|default('') }}"
+              class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+              placeholder="https://example.com or #section or /page"/>
+          </div>
+        </div>
+        <div class="mt-4">
+          <label for="product_{{ loop.index0 }}_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
+          <div class="ql-editor-container" style="height: 200px;">
+            <div id="product_{{ loop.index0 }}_description_editor">{{ item.description|default('') }}</div>
+            <textarea id="product_{{ loop.index0 }}_description" name="product_{{ loop.index0 }}_description" style="display: none;">{{ item.description|default('') }}</textarea>
+          </div>
+          <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your description. HTML tags are automatically handled.</p>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <input type="hidden" name="product_count" id="productCount" value="{{ site_json.services.listing|default([])|length }}"/>
+</div>
