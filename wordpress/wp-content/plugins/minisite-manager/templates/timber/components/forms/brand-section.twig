@@ -1,0 +1,37 @@
+<!-- Brand Section -->
+<div id="brand-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-[var(--on-surface)]">Brand & Logo</h2>
+    <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+      <i class="fa-solid fa-arrow-up text-sm"></i>
+    </a>
+  </div>
+  <div class="space-y-4">
+    <div>
+      <label for="brand_name" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Business Name</label>
+      <input id="brand_name" name="brand_name" type="text" value="{{ site_json.brand.name|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="brand_logo" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Logo URL</label>
+      <input id="brand_logo" name="brand_logo" type="url" value="{{ site_json.brand.logo|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="brand_industry" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Industry</label>
+      <input id="brand_industry" name="brand_industry" type="text" value="{{ site_json.brand.industry|default('') }}"
+        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+    <div>
+      <label for="brand_palette" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Color Palette</label>
+      <select id="brand_palette" name="brand_palette" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
+        <option value="blue" {{ site_json.brand.palette|default('blue') == 'blue' ? 'selected' : '' }}>Blue</option>
+        <option value="teal" {{ site_json.brand.palette|default('blue') == 'teal' ? 'selected' : '' }}>Teal</option>
+        <option value="green" {{ site_json.brand.palette|default('blue') == 'green' ? 'selected' : '' }}>Green</option>
+        <option value="purple" {{ site_json.brand.palette|default('blue') == 'purple' ? 'selected' : '' }}>Purple</option>
+        <option value="red" {{ site_json.brand.palette|default('blue') == 'red' ? 'selected' : '' }}>Red</option>
+        <option value="orange" {{ site_json.brand.palette|default('blue') == 'orange' ? 'selected' : '' }}>Orange</option>
+      </select>
+    </div>
+  </div>
+</div>

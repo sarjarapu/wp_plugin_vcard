@@ -1,0 +1,200 @@
+{% extends "components/layouts/minisite-form-layout.twig" %}
+
+{% block form_content %}
+  <!-- Quick Navigation -->
+  <div class="bg-[var(--surface)] rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 mb-6">
+    <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-4">Quick Navigation</h3>
+    <div class="flex flex-wrap gap-2">
+      <a href="#seo-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">SEO</a>
+      <a href="#brand-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Brand</a>
+      <a href="#hero-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Hero</a>
+      <a href="#about-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">About</a>
+      <a href="#contact-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Contact</a>
+      <a href="#products-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Products</a>
+      <a href="#social-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Social</a>
+      <a href="#gallery-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Gallery</a>
+    </div>
+  </div>
+
+  <!-- SEO Section -->
+  {% include "components/forms/seo-section.twig" %}
+
+  <!-- Brand Section -->
+  {% include "components/forms/brand-section.twig" %}
+
+  <!-- Hero Section -->
+  {% include "components/forms/hero-section.twig" %}
+
+  <!-- About Section -->
+  {% include "components/forms/about-section.twig" %}
+
+  <!-- Contact Section -->
+  <div id="contact-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-[var(--on-surface)]">Contact Information</h2>
+      <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+      </a>
+    </div>
+    <div class="space-y-4">
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label for="contact_phone" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone</label>
+          <input id="contact_phone" name="contact_phone" type="tel" value="{{ site_json.contact.phone.text|default('') }}"
+            class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        </div>
+        <div>
+          <label for="contact_whatsapp" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp</label>
+          <input id="contact_whatsapp" name="contact_whatsapp" type="tel" value="{{ site_json.contact.whatsapp.text|default('') }}"
+            class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        </div>
+      </div>
+      <div>
+        <label for="contact_email" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email</label>
+        <input id="contact_email" name="contact_email" type="email" value="{{ site_json.contact.email|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="contact_website" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website</label>
+        <input id="contact_website" name="contact_website" type="url" value="{{ site_json.contact.website.text|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label for="contact_city" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">City</label>
+          <input id="contact_city" name="contact_city" type="text" value="{{ site_json.contact.city|default('') }}"
+            class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        </div>
+        <div>
+          <label for="contact_region" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Region/State</label>
+          <input id="contact_region" name="contact_region" type="text" value="{{ site_json.contact.region|default('') }}"
+            class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label for="contact_country" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Country</label>
+          <input id="contact_country" name="contact_country" type="text" value="{{ site_json.contact.country|default('') }}"
+            class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        </div>
+        <div>
+          <label for="contact_postal" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Postal Code</label>
+          <input id="contact_postal" name="contact_postal" type="text" value="{{ site_json.contact.postal|default('') }}"
+            class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-4">
+        <div>
+          <label for="contact_lat" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Latitude</label>
+          <input id="contact_lat" name="contact_lat" type="number" step="any" value="{{ site_json.contact.lat|default('') }}"
+            class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        </div>
+        <div>
+          <label for="contact_lng" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Longitude</label>
+          <input id="contact_lng" name="contact_lng" type="number" step="any" value="{{ site_json.contact.lng|default('') }}"
+            class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products & Services Section -->
+  <div id="products-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-[var(--on-surface)]">Products & Services</h2>
+      <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+      </a>
+    </div>
+    <div id="products-container" class="space-y-4">
+      <!-- Products will be added dynamically -->
+    </div>
+    <button type="button" id="add-product" class="mt-4 inline-flex items-center px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] rounded-lg hover:bg-[var(--primary)]/90 transition">
+      <i class="fa-solid fa-plus mr-2"></i>
+      Add Product/Service
+    </button>
+  </div>
+
+  <!-- Social Media Section -->
+  <div id="social-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-[var(--on-surface)]">Social Media</h2>
+      <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+      </a>
+    </div>
+    <div class="space-y-4">
+      <div>
+        <label for="social_facebook" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Facebook</label>
+        <input id="social_facebook" name="social_facebook" type="url" value="{{ site_json.social.facebook|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="social_instagram" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Instagram</label>
+        <input id="social_instagram" name="social_instagram" type="url" value="{{ site_json.social.instagram|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="social_twitter" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Twitter/X</label>
+        <input id="social_twitter" name="social_twitter" type="url" value="{{ site_json.social.x|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="social_youtube" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">YouTube</label>
+        <input id="social_youtube" name="social_youtube" type="url" value="{{ site_json.social.youtube|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+      <div>
+        <label for="social_linkedin" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">LinkedIn</label>
+        <input id="social_linkedin" name="social_linkedin" type="url" value="{{ site_json.social.linkedin|default('') }}"
+          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gallery Section -->
+  <div id="gallery-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-semibold text-[var(--on-surface)]">Image Gallery</h2>
+      <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+      </a>
+    </div>
+    <div id="gallery-container" class="space-y-4">
+      <!-- Gallery items will be added dynamically -->
+    </div>
+    <button type="button" id="add-gallery-item" class="mt-4 inline-flex items-center px-4 py-2 bg-[var(--primary)] text-[var(--on-primary)] rounded-lg hover:bg-[var(--primary)]/90 transition">
+      <i class="fa-solid fa-plus mr-2"></i>
+      Add Gallery Image
+    </button>
+  </div>
+{% endblock %}
+
+{% block sidebar_content %}
+  <!-- Action Buttons -->
+  <div class="bg-[var(--surface)] rounded-2xl ring-1 ring-[var(--outline-variant)] p-6">
+    <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-4">Actions</h3>
+    <div class="space-y-3">
+      <button type="submit" id="create-minisite-button" class="w-full inline-flex items-center justify-center px-4 py-3 bg-[var(--primary)] text-[var(--on-primary)] rounded-lg hover:bg-[var(--primary)]/90 transition">
+        <i id="create-icon" class="fa-solid fa-plus mr-2"></i>
+        <span id="create-text">Create Minisite</span>
+        <div id="create-loading" class="hidden ml-2">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+        </div>
+      </button>
+      <a href="/account/sites" class="w-full inline-flex items-center justify-center px-4 py-3 bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--surface)] transition">
+        <i class="fa-solid fa-arrow-left mr-2"></i>
+        Back to Sites
+      </a>
+    </div>
+  </div>
+
+  <!-- Preview Section -->
+  <div class="bg-[var(--surface)] rounded-2xl ring-1 ring-[var(--outline-variant)] p-6">
+    <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-4">Preview</h3>
+    <div class="text-center text-[var(--on-surface-variant)]">
+      <i class="fa-solid fa-eye text-4xl mb-2"></i>
+      <p class="text-sm">Preview will be available after creating the minisite</p>
+    </div>
+  </div>
+{% endblock %}

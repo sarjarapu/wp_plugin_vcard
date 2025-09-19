@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth" data-theme="blue">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ page_title }}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+  <style>
+    :root {
+      --primary:#2563EB; --on-primary:#fff;
+      --secondary:#0EA5E9; --on-secondary:#03283A;
+      --background:#F8FAFC; --on-background:#0F172A;
+      --surface:#FFFFFF; --on-surface:#0F172A;
+      --surface-1:#F1F5F9; --on-surface-variant:#475569;
+      --outline:#CBD5E1; --outline-variant:#E2E8F0;
+      --focus-ring: color-mix(in srgb, var(--primary) 40%, transparent);
+      --surface-0:var(--surface);
+    }
+    :is(a,button,input,textarea,select):focus-visible {
+      outline:none; box-shadow:0 0 0 2px var(--focus-ring), 0 0 0 4px white;
+      border-radius:.5rem;
+    }
+    
+    /* Quill.js Rich Text Editor Styles */
+    .ql-editor-container {
+      border: 1px solid var(--outline-variant);
+      border-radius: 0.5rem;
+      background: var(--surface-1);
+      overflow: hidden;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+      position: relative;
+      resize: vertical;
+      min-height: 120px;
+      max-height: 500px;
+    }
+    
+    .ql-editor-container:focus-within {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px var(--focus-ring);
+    }
+    
+    /* Resize handle styling */
+    .ql-editor-container::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(-45deg, transparent 30%, var(--outline-variant) 30%, var(--outline-variant) 40%, transparent 40%, transparent 60%, var(--outline-variant) 60%, var(--outline-variant) 70%, transparent 70%);
+      cursor: nw-resize;
+      opacity: 0.6;
+    }
+    
+    .ql-editor-container:hover::after {
+      opacity: 1;
+    }
+    
+    .ql-editor {
+      font-size: 1rem;
+      line-height: 1.5;
+      padding: 0.75rem 1rem;
+      min-height: 100px;
+    }
+    
+    .ql-toolbar {
+      border-bottom: 1px solid var(--outline-variant);
+      background: var(--surface);
+    }
+    
+    .ql-toolbar .ql-stroke {
+      stroke: var(--on-surface-variant);
+    }
+    
+    .ql-toolbar .ql-fill {
+      fill: var(--on-surface-variant);
+    }
+    
+    .ql-toolbar button {
+      width: 28px;
+      height: 28px;
+    }
+    
+    .ql-toolbar button:hover {
+      color: var(--primary);
+    }
+    
+    .ql-toolbar button.ql-active {
+      color: var(--primary);
+    }
+    
+    .ql-toolbar button.ql-active .ql-stroke {
+      stroke: var(--primary);
+    }
+    
+    .ql-toolbar button.ql-active .ql-fill {
+      fill: var(--primary);
+    }
+  </style>
+</head>
+<body class="bg-[var(--background)] text-[var(--on-background)]">
+  <div class="min-h-screen">
+    <!-- Header -->
+    <header class="bg-[var(--surface)] border-b border-[var(--outline-variant)]">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-4">
+          <div>
+            <h1 class="text-2xl font-bold text-[var(--on-surface)]">{{ page_title }}</h1>
+            <p class="text-sm text-[var(--on-surface-variant)] mt-1">{{ page_subtitle|default('') }}</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <form id="minisite-form" method="post">
+        <div class="grid lg:grid-cols-3 gap-8">
+          <!-- Left Column: Form -->
+          <div class="lg:col-span-2 space-y-10">
+            {% block form_content %}{% endblock %}
+          </div>
+          
+          <!-- Right Column: Version Info & Preview -->
+          <div class="space-y-6">
+            {% block sidebar_content %}{% endblock %}
+          </div>
+        </div>
+      </form>
+    </main>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Global editors object
+    window.editors = {};
+    
+    // Initialize Quill editors
+    function initializeEditors() {
+      const editorConfigs = [
+        { id: 'about_html_editor', textareaId: 'about_html' },
+        { id: 'whyus_html_editor', textareaId: 'whyus_html' },
+        { id: 'hero_subheading_editor', textareaId: 'hero_subheading' }
+      ];
+      
+      editorConfigs.forEach(config => {
+        const editorElement = document.getElementById(config.id);
+        const textareaElement = document.getElementById(config.textareaId);
+        
+        if (editorElement && textareaElement) {
+          const quill = new Quill('#' + config.id, {
+            theme: 'snow',
+            modules: {
+              toolbar: [
+                ['bold', 'italic', 'underline'],
+                ['link'],
+                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                ['clean']
+              ]
+            }
+          });
+          
+          // Set initial content
+          quill.root.innerHTML = textareaElement.value;
+          
+          // Sync content to textarea on change
+          quill.on('text-change', function() {
+            textareaElement.value = quill.root.innerHTML;
+          });
+          
+          // Store editor reference
+          window.editors[config.id] = quill;
+          
+          // Resize observer for dynamic height adjustment
+          const container = editorElement.closest('.ql-editor-container');
+          if (container) {
+            const resizeObserver = new ResizeObserver(entries => {
+              for (let entry of entries) {
+                const { height } = entry.contentRect;
+                if (height > 120) {
+                  editorElement.style.height = (height - 40) + 'px';
+                }
+              }
+            });
+            resizeObserver.observe(container);
+          }
+        }
+      });
+    }
+    
+    // Form submission handler
+    function setupFormSubmission() {
+      const form = document.getElementById('minisite-form');
+      const createButton = document.getElementById('create-minisite-button');
+      
+      if (!form) return;
+      
+      // Handle new minisite creation
+      if (createButton) {
+        createButton.addEventListener('click', function(e) {
+          e.preventDefault();
+          
+          // Show loading state
+          const icon = document.getElementById('create-icon');
+          const text = document.getElementById('create-text');
+          const loading = document.getElementById('create-loading');
+          
+          if (icon) icon.classList.add('hidden');
+          if (text) text.classList.add('hidden');
+          if (loading) loading.classList.remove('hidden');
+          createButton.disabled = true;
+          
+          // Sync all editor content before submission
+          Object.keys(window.editors).forEach(editorId => {
+            const editor = window.editors[editorId];
+            const textareaId = editorId.replace('_editor', '');
+            const textarea = document.getElementById(textareaId);
+            if (textarea) {
+              textarea.value = editor.root.innerHTML;
+            }
+          });
+          
+          // Prepare form data
+          const formData = new FormData(form);
+          formData.append('action', 'create_minisite');
+          formData.append('nonce', '{{ nonce }}');
+          
+          // Submit via AJAX
+          fetch('{{ function("admin_url", "admin-ajax.php") }}', {
+            method: 'POST',
+            body: formData
+          })
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              // Redirect to edit page
+              window.location.href = data.data.redirect_url;
+            } else {
+              // Show error
+              alert('Error: ' + (data.data || 'Failed to create minisite'));
+              
+              // Reset button state
+              if (icon) icon.classList.remove('hidden');
+              if (text) text.classList.remove('hidden');
+              if (loading) loading.classList.add('hidden');
+              createButton.disabled = false;
+            }
+          })
+          .catch(error => {
+            console.error('Error:', error);
+            alert('Error: Failed to create minisite');
+            
+            // Reset button state
+            if (icon) icon.classList.remove('hidden');
+            if (text) text.classList.remove('hidden');
+            if (loading) loading.classList.add('hidden');
+            createButton.disabled = false;
+          });
+        });
+      }
+      
+      // Handle regular form submission (for edit forms)
+      form.addEventListener('submit', function(e) {
+        // Sync all editor content before submission
+        Object.keys(window.editors).forEach(editorId => {
+          const editor = window.editors[editorId];
+          const textareaId = editorId.replace('_editor', '');
+          const textarea = document.getElementById(textareaId);
+          if (textarea) {
+            textarea.value = editor.root.innerHTML;
+          }
+        });
+      });
+    }
+    
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeEditors();
+      setupFormSubmission();
+    });
+  </script>
+</body>
+</html>

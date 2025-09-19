@@ -442,6 +442,21 @@ add_action('template_redirect', function () {
           nocache_headers();
           echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Sites listing unavailable</h1>';
           exit;
+        case 'new':
+          // Delegate to NewMinisiteController
+          if ($newMinisiteCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\NewMinisiteController::class)) {
+            global $wpdb;
+            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+            $newMinisiteCtrl = new $newMinisiteCtrlClass($profileRepo, $versionRepo);
+            $newMinisiteCtrl->handleNew();
+            break;
+          }
+          // Fallback if NewMinisiteController missing
+          status_header(503);
+          nocache_headers();
+          echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>New minisite creation unavailable</h1>';
+          exit;
         case 'edit':
           // Delegate to SitesController for editing
           if ($sitesCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\SitesController::class)) {
@@ -920,5 +935,32 @@ add_action('wp_ajax_remove_bookmark', function () {
 
   } catch (\Exception $e) {
     wp_send_json_error('Failed to remove bookmark: ' . $e->getMessage(), 500);
+  }
+});
+
+/**
+ * AJAX handler for creating new minisites
+ */
+add_action('wp_ajax_create_minisite', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_new')) {
+    wp_send_json_error('Security check failed', 403);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+    
+    $newMinisiteCtrl->handleCreate();
+    
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to create minisite: ' . $e->getMessage(), 500);
   }
 });
