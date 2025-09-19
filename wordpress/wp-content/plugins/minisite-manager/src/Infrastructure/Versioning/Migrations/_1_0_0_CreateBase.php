@@ -89,19 +89,19 @@ class _1_0_0_CreateBase implements Migration
         $versions = $wpdb->prefix . 'minisite_versions';
         DbDelta::run("
         CREATE TABLE {$versions} (
+          -- Version-specific fields (front)
           id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
           minisite_id      BIGINT UNSIGNED NOT NULL,
           version_number   INT UNSIGNED    NOT NULL,
           status           ENUM('draft','published') NOT NULL,
           label            VARCHAR(120)    NULL,
           comment          TEXT            NULL,
-          data_json        LONGTEXT        NOT NULL,
           created_by       BIGINT UNSIGNED NOT NULL,
           created_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
           published_at     DATETIME        NULL,
           source_version_id BIGINT UNSIGNED NULL,
 
-          -- Profile fields for complete versioning
+          -- Profile fields (exact match with profiles table order and types)
           business_slug     VARCHAR(120)    NULL,
           location_slug     VARCHAR(120)    NULL,
           title             VARCHAR(200)    NULL,
@@ -119,6 +119,7 @@ class _1_0_0_CreateBase implements Migration
           default_locale    VARCHAR(10)     NULL,
           schema_version    SMALLINT UNSIGNED NULL,
           site_version      INT UNSIGNED    NULL,
+          site_json         LONGTEXT        NOT NULL,
           search_terms      TEXT            NULL,
 
           PRIMARY KEY (id),
@@ -716,11 +717,12 @@ class _1_0_0_CreateBase implements Migration
                 'status'           => 'published',
                 'label'            => 'Initial version',
                 'comment'          => 'Migrated from existing data',
-                'data_json'        => $siteJson,
                 'created_by'       => $nowUser,
+                'created_at'       => current_time('mysql'),
                 'published_at'     => current_time('mysql'),
+                'source_version_id' => null,
                 
-                // Profile fields
+                // Profile fields (exact match with profiles table order)
                 'business_slug'    => $profile['business_slug'] ?? null,
                 'location_slug'    => $profile['location_slug'] ?? null,
                 'title'            => $profile['title'] ?? null,
@@ -738,12 +740,14 @@ class _1_0_0_CreateBase implements Migration
                 'default_locale'   => $profile['default_locale'] ?? null,
                 'schema_version'   => $profile['schema_version'] ?? null,
                 'site_version'     => $profile['site_version'] ?? null,
+                'site_json'        => $siteJson,
                 'search_terms'     => $profile['search_terms'] ?? null,
             ];
 
             $wpdb->insert($versionsT, $versionData, [
-                '%d','%d','%s','%s','%s','%s','%d','%s',
-                '%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%d','%d','%s'
+                '%d','%d','%s','%s','%s','%d','%s','%s','%d',
+                '%s','%s','%s','%s','%s','%s','%s','%s','%f','%f','%s',
+                '%s','%s','%s','%s','%d','%d','%s','%s'
             ]);
 
             $versionId = (int) $wpdb->insert_id;

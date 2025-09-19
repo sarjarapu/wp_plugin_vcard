@@ -13,7 +13,6 @@ final class Version
         public string $status,        // draft|published
         public ?string $label,
         public ?string $comment,
-        public array $dataJson,
         public int $createdBy,
         public ?\DateTimeImmutable $createdAt,
         public ?\DateTimeImmutable $publishedAt,
@@ -34,6 +33,7 @@ final class Version
         public ?string $defaultLocale = null,
         public ?int $schemaVersion = null,
         public ?int $siteVersion = null,
+        public array $siteJson,  // Required - contains the form data
         public ?string $searchTerms = null
     ) {}
 

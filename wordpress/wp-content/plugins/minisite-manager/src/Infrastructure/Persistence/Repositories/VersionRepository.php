@@ -20,7 +20,6 @@ final class VersionRepository implements VersionRepositoryInterface
             'status' => $version->status,
             'label' => $version->label,
             'comment' => $version->comment,
-            'data_json' => wp_json_encode($version->dataJson),
             'created_by' => $version->createdBy,
             'published_at' => $version->publishedAt?->format('Y-m-d H:i:s'),
             'source_version_id' => $version->sourceVersionId,
@@ -43,12 +42,13 @@ final class VersionRepository implements VersionRepositoryInterface
             'default_locale' => $version->defaultLocale,
             'schema_version' => $version->schemaVersion,
             'site_version' => $version->siteVersion,
+            'site_json' => wp_json_encode($version->siteJson),
             'search_terms' => $version->searchTerms,
         ];
 
         $formats = [
-            '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%s', '%d',
-            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s'
+            '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
         ];
 
         if ($version->id === null) {
@@ -180,7 +180,6 @@ final class VersionRepository implements VersionRepositoryInterface
             status: $row['status'],
             label: $row['label'],
             comment: $row['comment'],
-            dataJson: json_decode($row['data_json'], true) ?: [],
             createdBy: (int) $row['created_by'],
             createdAt: $row['created_at'] ? new \DateTimeImmutable($row['created_at']) : null,
             publishedAt: $row['published_at'] ? new \DateTimeImmutable($row['published_at']) : null,
@@ -201,6 +200,7 @@ final class VersionRepository implements VersionRepositoryInterface
             defaultLocale: $row['default_locale'] ?? null,
             schemaVersion: $row['schema_version'] ? (int) $row['schema_version'] : null,
             siteVersion: $row['site_version'] ? (int) $row['site_version'] : null,
+            siteJson: json_decode($row['site_json'], true) ?: [],
             searchTerms: $row['search_terms'] ?? null
         );
     }

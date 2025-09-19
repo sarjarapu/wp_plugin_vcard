@@ -29,11 +29,32 @@ CREATE TABLE wp_minisite_versions (
   status ENUM('draft', 'published') NOT NULL,
   label VARCHAR(120) NULL,
   comment TEXT NULL,
-  data_json LONGTEXT NOT NULL,
   created_by BIGINT NOT NULL,
   created_at DATETIME NOT NULL,
   published_at DATETIME NULL, -- NULL for drafts, timestamp for published
   source_version_id BIGINT NULL, -- For rollbacks: tracks what version was rolled back from
+  
+  -- Profile fields for complete versioning (exact match with profiles table)
+  business_slug VARCHAR(120) NULL,
+  location_slug VARCHAR(120) NULL,
+  title VARCHAR(200) NULL,
+  name VARCHAR(200) NULL,
+  city VARCHAR(120) NULL,
+  region VARCHAR(120) NULL,
+  country_code CHAR(2) NULL,
+  postal_code VARCHAR(20) NULL,
+  lat DECIMAL(9,6) NULL,
+  lng DECIMAL(9,6) NULL,
+  location_point POINT NULL,
+  site_template VARCHAR(32) NULL,
+  palette VARCHAR(24) NULL,
+  industry VARCHAR(40) NULL,
+  default_locale VARCHAR(10) NULL,
+  schema_version SMALLINT UNSIGNED NULL,
+  site_version INT UNSIGNED NULL,
+  site_json LONGTEXT NOT NULL, -- Contains the form data (replaces data_json)
+  search_terms TEXT NULL,
+  
   INDEX(minisite_id, status),
   INDEX(minisite_id, version_number),
   INDEX(minisite_id, created_at),
@@ -79,7 +100,7 @@ POST /account/sites/{id}/versions
 Body: {
   "label": "Updated hero section",
   "comment": "Changed heading and added CTA",
-  "data_json": {...}
+  "site_json": {...}
 }
 Response: {
   "id": 2,
@@ -122,7 +143,7 @@ public function saveDraft(int $minisiteId, array $formData, int $userId): Versio
         'status' => 'draft',
         'label' => $formData['label'] ?? "Version {$nextVersion}",
         'comment' => $formData['comment'] ?? '',
-        'data_json' => json_encode($this->buildSiteJsonFromForm($formData)),
+        'site_json' => json_encode($this->buildSiteJsonFromForm($formData)),
         'created_by' => $userId,
         'created_at' => current_time('mysql'),
         'published_at' => null,
@@ -191,7 +212,7 @@ public function rollbackToVersion(int $minisiteId, int $sourceVersionId, int $us
         'status' => 'draft',
         'label' => "Rollback to v{$sourceVersion->version_number}",
         'comment' => "Rollback from version {$sourceVersion->version_number}",
-        'data_json' => $sourceVersion->data_json, // Copy source data
+        'site_json' => $sourceVersion->site_json, // Copy source data
         'created_by' => $userId,
         'created_at' => current_time('mysql'),
         'published_at' => null,
@@ -262,7 +283,7 @@ CREATE TABLE wp_minisite_versions (
   status ENUM('draft', 'published') NOT NULL,
   label VARCHAR(120) NULL,
   comment TEXT NULL,
-  data_json LONGTEXT NOT NULL,
+  site_json LONGTEXT NOT NULL,
   created_by BIGINT NOT NULL,
   created_at DATETIME NOT NULL,
   published_at DATETIME NULL,
@@ -292,7 +313,7 @@ public function migrateExistingProfiles(): void
         // Create version 1 as published
         $this->db->query($this->db->prepare(
             "INSERT INTO wp_minisite_versions 
-             (minisite_id, version_number, status, label, comment, data_json, created_by, created_at, published_at) 
+             (minisite_id, version_number, status, label, comment, site_json, created_by, created_at, published_at) 
              VALUES (%d, 1, 'published', 'Initial version', 'Migrated from existing data', %s, %d, NOW(), NOW())",
             $profile->id,
             $profile->site_json,

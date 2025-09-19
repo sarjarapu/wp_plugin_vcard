@@ -165,7 +165,6 @@ final class SitesController
                             status: 'draft',
                             label: sanitize_text_field($_POST['version_label'] ?? "Version {$nextVersion}"),
                             comment: sanitize_textarea_field($_POST['version_comment'] ?? ''),
-                            dataJson: $siteJson,
                             createdBy: (int) $currentUser->ID,
                             createdAt: null,
                             publishedAt: null,
@@ -186,6 +185,7 @@ final class SitesController
                             defaultLocale: $profile->defaultLocale,
                             schemaVersion: $profile->schemaVersion,
                             siteVersion: $profile->siteVersion,
+                            siteJson: $siteJson,
                             searchTerms: $profile->searchTerms
                         );
 
@@ -292,7 +292,7 @@ final class SitesController
                 wp_redirect(home_url('/account/sites/' . $siteId . '/preview/current'));
                 exit;
             }
-            $siteJson = $version->dataJson;
+            $siteJson = $version->siteJson;
         }
         
         // Update profile with version-specific data for rendering

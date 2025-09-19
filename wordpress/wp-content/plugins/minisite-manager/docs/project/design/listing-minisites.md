@@ -51,7 +51,7 @@ Create a custom table for precise state + atomicity:
   - `status` ENUM('draft','published','unpublished') NOT NULL
   - `label` VARCHAR(120) NULL (optional user label)
   - `comment` TEXT NULL (notes at save time)
-  - `data_json` LONGTEXT NOT NULL (full serialized payload; e.g., blocks/fields/sections config)
+  - `site_json` LONGTEXT NOT NULL (full serialized payload; e.g., blocks/fields/sections config)
   - `created_by` BIGINT NOT NULL
   - `created_at` DATETIME NOT NULL
   - `published_at` DATETIME NULL
@@ -67,7 +67,7 @@ Create a custom table for precise state + atomicity:
   2) Set target draft → `published` (set `published_at`) and set `_minisite_current_version_id`.
   3) Wrapped in a DB transaction.
 - Rollback to an older version:
-  - Create a **new** version row with `data_json` copied from target, `status='draft'`, `source_version_id=target_id`, add comment (“rollback from #X”).
+  - Create a **new** version row with `site_json` copied from target, `status='draft'`, `source_version_id=target_id`, add comment ("rollback from #X").
   - Then publish that draft as above.
 
 ### 2.3 Subscriptions
@@ -189,7 +189,7 @@ Use a slim table you control and **sync** with Woo/PMPro events:
   - Permission: owner/assigned/admin
   - Returns: versions `[ {id, status, label, comment, created_by, created_at, published_at, source_version_id} ]`
 - `POST /sites/{id}/versions` (create draft)
-  - Body: `{label?, comment?, data_json}`
+  - Body: `{label?, comment?, site_json}`
   - Permission: owner/assigned/admin
 - `POST /sites/{id}/versions/{version_id}/publish`
   - Preconditions: subscription active
@@ -232,7 +232,7 @@ When resolving `/b/{business}/{location}`:
 4) If **online=false**:
    - Render **Offline Message**:
      > “The minisite ‘{name}’ is currently offline. If you are the owner, set it online to make it visible.”
-5) Else: render the **published version** content from `data_json`.
+5) Else: render the **published version** content from `site_json`.
 
 > SEO: When showing messages 2–4, return `200` (human-friendly placeholder) or `404` if you prefer not to disclose existence. Add `noindex` for non-public states.
 
@@ -351,7 +351,7 @@ if !online:
 render Offline message (noindex)
 return
 
-render published_version.data_json
+render published_version.site_json
 ```
 
 ---
