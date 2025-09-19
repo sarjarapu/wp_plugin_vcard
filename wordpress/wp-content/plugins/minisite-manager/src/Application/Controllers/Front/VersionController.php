@@ -293,10 +293,50 @@ class VersionController
             // Update profile with published version data and current version ID
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$wpdb->prefix}minisite_profiles 
-                 SET site_json = %s, _minisite_current_version_id = %d, updated_at = NOW() 
+                 SET site_json = %s, 
+                     title = %s,
+                     name = %s,
+                     city = %s,
+                     region = %s,
+                     country_code = %s,
+                     postal_code = %s,
+                     site_template = %s,
+                     palette = %s,
+                     industry = %s,
+                     default_locale = %s,
+                     schema_version = %d,
+                     site_version = %d,
+                     search_terms = %s,
+                     _minisite_current_version_id = %d, 
+                     updated_at = NOW() 
                  WHERE id = %d",
-                wp_json_encode($version->siteJson), $versionId, $minisiteId
+                wp_json_encode($version->siteJson),
+                $version->title,
+                $version->name,
+                $version->city,
+                $version->region,
+                $version->countryCode,
+                $version->postalCode,
+                $version->siteTemplate,
+                $version->palette,
+                $version->industry,
+                $version->defaultLocale,
+                $version->schemaVersion,
+                $version->siteVersion,
+                $version->searchTerms,
+                $versionId,
+                $minisiteId
             ));
+            
+            // Update location_point if geo data exists
+            if ($version->geo && $version->geo->lat && $version->geo->lng) {
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$wpdb->prefix}minisite_profiles 
+                     SET location_point = ST_SRID(POINT(%f, %f), 4326) 
+                     WHERE id = %d",
+                    $version->geo->lng, $version->geo->lat, $minisiteId
+                ));
+            }
             
             $wpdb->query('COMMIT');
         } catch (\Exception $e) {
