@@ -130,17 +130,10 @@ final class SitesController
 
         // Handle form submission
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_edit_nonce'])) {
-
-            error_log('==> Form data POST: ' . print_r($_POST, true));
-
             if (!wp_verify_nonce($_POST['minisite_edit_nonce'], 'minisite_edit')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 try {
-                    // Temporary debug: Log key fields
-                    error_log('Version comment value: ' . ($_POST['version_comment'] ?? 'NOT FOUND'));
-                    error_log('Version label value: ' . ($_POST['version_label'] ?? 'NOT FOUND'));
-                    
                     // Build siteJson from form data
                     $siteJson = $this->buildSiteJsonFromForm($_POST);
                     

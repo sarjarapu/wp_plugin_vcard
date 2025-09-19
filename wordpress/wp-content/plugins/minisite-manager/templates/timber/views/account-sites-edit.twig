@@ -1263,42 +1263,13 @@
     const saveIcon = document.getElementById('save-icon');
     const saveText = document.getElementById('save-text');
     const saveLoading = document.getElementById('save-loading');
-    
-    console.log('Form elements found:', {
-      form: !!form,
-      saveButton: !!saveButton,
-      saveIcon: !!saveIcon,
-      saveText: !!saveText,
-      saveLoading: !!saveLoading
-    });
-    
-    // Test if button click works at all
-    if (saveButton) {
-      console.log('Save button element:', saveButton);
-      console.log('Save button type:', saveButton.type);
-      console.log('Save button form:', saveButton.form);
-    }
 
     let isSubmitting = false;
 
     if (form) {
       form.addEventListener('submit', function(e) {
-      console.log('Form submission triggered');
-      
-      // Debug: Check if version_comment field exists and has value
-      const versionCommentField = document.getElementById('version_comment');
-      const versionLabelField = document.getElementById('version_label');
-      console.log('version_comment field:', versionCommentField);
-      console.log('version_comment value:', versionCommentField ? versionCommentField.value : 'FIELD NOT FOUND');
-      console.log('version_label field:', versionLabelField);
-      console.log('version_label value:', versionLabelField ? versionLabelField.value : 'FIELD NOT FOUND');
-      
-      // Allow form to submit normally
-      console.log('Form submission allowed');
-
       // Sync all Quill editors before submission
       if (window.editors) {
-        console.log('Syncing editors:', Object.keys(window.editors));
         Object.keys(window.editors).forEach(function(key) {
           const editor = window.editors[key];
           if (editor && editor.root) {
@@ -1306,12 +1277,9 @@
             const textarea = document.getElementById(textareaId);
             if (textarea) {
               textarea.value = editor.root.innerHTML;
-              console.log('Synced editor', key, 'to textarea', textareaId, 'with content:', textarea.value);
             }
           }
         });
-      } else {
-        console.log('No editors found');
       }
 
       // Set loading state
@@ -1324,26 +1292,13 @@
       // Allow form to submit normally
       // The page will reload with success/error message
       });
-    } else {
-      console.error('Form element not found!');
     }
 
     // Add direct click handler to Save Draft button as backup
     if (saveButton) {
       saveButton.addEventListener('click', function(e) {
-        console.log('Save Draft button clicked directly');
-        
-        // Debug: Check if version_comment field exists and has value
-        const versionCommentField = document.getElementById('version_comment');
-        const versionLabelField = document.getElementById('version_label');
-        console.log('version_comment field:', versionCommentField);
-        console.log('version_comment value:', versionCommentField ? versionCommentField.value : 'FIELD NOT FOUND');
-        console.log('version_label field:', versionLabelField);
-        console.log('version_label value:', versionLabelField ? versionLabelField.value : 'FIELD NOT FOUND');
-        
         // Sync all Quill editors before submission
         if (window.editors) {
-          console.log('Syncing editors on button click:', Object.keys(window.editors));
           Object.keys(window.editors).forEach(function(key) {
             const editor = window.editors[key];
             if (editor && editor.root) {
@@ -1351,18 +1306,13 @@
               const textarea = document.getElementById(textareaId);
               if (textarea) {
                 textarea.value = editor.root.innerHTML;
-                console.log('Synced editor', key, 'to textarea', textareaId, 'with content:', textarea.value);
               }
             }
           });
         }
         
-        // Allow form to submit normally
-        console.log('Save Draft button clicked - allowing form submission');
-        
         // Submit the form programmatically
         if (form) {
-          console.log('Submitting form programmatically');
           form.submit();
         }
       });
@@ -1382,10 +1332,6 @@
         formData.append('nonce', '{{ function("wp_create_nonce", "minisite_version") }}');
         formData.append('site_id', '{{ profile.id }}');
         formData.append('version_id', '{{ editing_version.id|default("") }}');
-        
-        // Debug logging
-        console.log('Publishing version:', '{{ editing_version.id|default("") }}');
-        console.log('Site ID:', '{{ profile.id }}');
 
         publishButton.disabled = true;
         publishButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
@@ -1406,7 +1352,6 @@
           }
         })
         .catch(error => {
-          console.error('Error:', error);
           alert('Failed to publish: Network error');
           publishButton.disabled = false;
           publishButton.innerHTML = '<i class="fa-solid fa-rocket"></i> <span>Publish</span>';

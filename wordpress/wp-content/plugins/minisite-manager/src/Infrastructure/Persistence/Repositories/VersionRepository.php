@@ -43,14 +43,6 @@ final class VersionRepository implements VersionRepositoryInterface
             'site_json' => wp_json_encode($version->siteJson),
             'search_terms' => $version->searchTerms,
         ];
-        
-        // Temporary debug: Log what we're saving
-        error_log('Save($version): ' . print_r($version, true));
-        error_log('Saving version data - label: ' . $data['label'] . ', comment: ' . $data['comment'] . ', title: ' . $data['title']);
-        error_log('Full data array: ' . print_r($data, true));
-        error_log('Formats array: ' . print_r($formats, true));
-        
-        
 
         $formats = [
             '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
