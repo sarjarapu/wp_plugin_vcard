@@ -222,7 +222,7 @@ final class SitesController
             \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$base])));
 
             // Use editing version data (should always be available now)
-            $siteJson = $editingVersion ? $editingVersion->dataJson : $profile->siteJson;
+            $siteJson = $editingVersion ? $editingVersion->siteJson : $profile->siteJson;
             
             \Timber\Timber::render('account-sites-edit.twig', [
                 'page_title' => 'Edit: ' . $profile->title,

@@ -668,7 +668,7 @@ add_action('wp_ajax_publish_version', function () {
         "UPDATE {$wpdb->prefix}minisite_profiles 
          SET site_json = %s, _minisite_current_version_id = %d, updated_at = NOW() 
          WHERE id = %d",
-        wp_json_encode($version->dataJson), $versionId, $siteId
+        wp_json_encode($version->siteJson), $versionId, $siteId
       ));
       
       $wpdb->query('COMMIT');
@@ -740,7 +740,7 @@ add_action('wp_ajax_rollback_version', function () {
       status: 'draft',
       label: "Copy to v{$sourceVersion->versionNumber}",
       comment: "Copy of version {$sourceVersion->versionNumber}",
-      dataJson: $sourceVersion->dataJson,
+      siteJson: $sourceVersion->siteJson,
       createdBy: get_current_user_id(),
       createdAt: null,
       publishedAt: null,

@@ -33,9 +33,7 @@ final class VersionRepository implements VersionRepositoryInterface
             'region' => $version->region,
             'country_code' => $version->countryCode,
             'postal_code' => $version->postalCode,
-            'lat' => $version->geo?->lat,
-            'lng' => $version->geo?->lng,
-            'location_point' => $version->geo ? "POINT({$version->geo->lng} {$version->geo->lat})" : null,
+            'location_point' => null, // Will be set separately if needed
             'site_template' => $version->siteTemplate,
             'palette' => $version->palette,
             'industry' => $version->industry,
@@ -48,13 +46,21 @@ final class VersionRepository implements VersionRepositoryInterface
 
         $formats = [
             '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
-            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
         ];
 
         if ($version->id === null) {
             // Insert new version
             $this->db->insert($this->table(), $data, $formats);
             $version->id = (int) $this->db->insert_id;
+            
+            // Set location_point if lat/lng exist
+            if ($version->geo && $version->geo->lat && $version->geo->lng) {
+                $this->db->query($this->db->prepare(
+                    "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                    $version->geo->lng, $version->geo->lat, $version->id
+                ));
+            }
         } else {
             // Update existing version
             $this->db->update(
@@ -64,6 +70,20 @@ final class VersionRepository implements VersionRepositoryInterface
                 $formats, 
                 ['%d']
             );
+            
+            // Update location_point if lat/lng exist
+            if ($version->geo && $version->geo->lat && $version->geo->lng) {
+                $this->db->query($this->db->prepare(
+                    "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                    $version->geo->lng, $version->geo->lat, $version->id
+                ));
+            } else {
+                // Clear location_point if no geo data
+                $this->db->query($this->db->prepare(
+                    "UPDATE {$this->table()} SET location_point = NULL WHERE id = %d",
+                    $version->id
+                ));
+            }
         }
 
         return $version;
@@ -164,13 +184,21 @@ final class VersionRepository implements VersionRepositoryInterface
             );
         }
 
-        // Create GeoPoint if lat/lng exist
+        // Create GeoPoint from location_point geometry
         $geo = null;
-        if (!empty($row['lat']) && !empty($row['lng'])) {
-            $geo = new \Minisite\Domain\ValueObjects\GeoPoint(
-                lat: (float) $row['lat'],
-                lng: (float) $row['lng']
-            );
+        if (!empty($row['location_point'])) {
+            // Extract lat/lng from POINT geometry
+            $pointResult = $this->db->get_row($this->db->prepare(
+                "SELECT ST_Y(location_point) as lat, ST_X(location_point) as lng FROM {$this->table()} WHERE id = %d",
+                $row['id']
+            ), ARRAY_A);
+            
+            if ($pointResult && $pointResult['lat'] && $pointResult['lng']) {
+                $geo = new \Minisite\Domain\ValueObjects\GeoPoint(
+                    lat: (float) $pointResult['lat'],
+                    lng: (float) $pointResult['lng']
+                );
+            }
         }
 
         return new Version(

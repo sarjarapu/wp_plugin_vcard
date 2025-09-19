@@ -112,7 +112,7 @@ class VersionController
                 status: 'draft',
                 label: sanitize_text_field($_POST['label'] ?? "Version {$nextVersion}"),
                 comment: sanitize_textarea_field($_POST['comment'] ?? ''),
-                dataJson: $this->buildSiteJsonFromForm($_POST),
+                siteJson: $this->buildSiteJsonFromForm($_POST),
                 createdBy: (int) $currentUser->ID,
                 createdAt: null,
                 publishedAt: null,
@@ -293,7 +293,7 @@ class VersionController
                 "UPDATE {$wpdb->prefix}minisite_profiles 
                  SET site_json = %s, _minisite_current_version_id = %d, updated_at = NOW() 
                  WHERE id = %d",
-                wp_json_encode($version->dataJson), $versionId, $minisiteId
+                wp_json_encode($version->siteJson), $versionId, $minisiteId
             ));
             
             $wpdb->query('COMMIT');
@@ -318,7 +318,7 @@ class VersionController
             status: 'draft',
             label: "Rollback to v{$sourceVersion->versionNumber}",
             comment: "Rollback from version {$sourceVersion->versionNumber}",
-            dataJson: $sourceVersion->dataJson,
+            siteJson: $sourceVersion->siteJson,
             createdBy: $userId,
             createdAt: null,
             publishedAt: null,

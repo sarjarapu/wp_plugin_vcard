@@ -35,8 +35,6 @@ class _1_0_0_CreateBase implements Migration
           country_code      CHAR(2)         NOT NULL,
           postal_code       VARCHAR(20)     NULL,
 
-          lat               DECIMAL(9,6)    NULL,
-          lng               DECIMAL(9,6)    NULL,
           location_point    POINT           NULL,
 
           site_template     VARCHAR(32)     NOT NULL DEFAULT 'v2025',
@@ -110,8 +108,6 @@ class _1_0_0_CreateBase implements Migration
           region            VARCHAR(120)    NULL,
           country_code      CHAR(2)         NULL,
           postal_code       VARCHAR(20)     NULL,
-          lat               DECIMAL(9,6)    NULL,
-          lng               DECIMAL(9,6)    NULL,
           location_point    POINT           NULL,
           site_template     VARCHAR(32)     NULL,
           palette           VARCHAR(24)     NULL,
@@ -261,8 +257,6 @@ class _1_0_0_CreateBase implements Migration
             'region'         => 'TX',
             'country_code'   => 'US',
             'postal_code'    => '75201',
-            'lat'            => 32.7767,
-            'lng'            => -96.7970,
             'site_template'  => 'v2025',
             'palette'        => 'blue',
             'industry'       => 'dentist',
@@ -384,7 +378,7 @@ class _1_0_0_CreateBase implements Migration
         ];
         $wpdb->insert($profilesT, $acme, [
             '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%f','%f','%s','%s','%s','%s',
+            '%s','%s','%s','%s',
             '%d','%d','%s','%s','%s','%s','%d','%d'
         ]);
         $acmeId = (int) $wpdb->insert_id;
@@ -393,7 +387,7 @@ class _1_0_0_CreateBase implements Migration
         if ($acmeId) {
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
-                $acme['lng'], $acme['lat'], $acmeId
+                -96.7970, 32.7767, $acmeId
             ));
         }
 
@@ -407,8 +401,6 @@ class _1_0_0_CreateBase implements Migration
             'region'         => 'MH',
             'country_code'   => 'IN',
             'postal_code'    => '400001',
-            'lat'            => 19.0760,
-            'lng'            => 72.8777,
             'site_template'  => 'v2025',
             'palette'        => 'rose',
             'industry'       => 'textile',
@@ -486,7 +478,7 @@ class _1_0_0_CreateBase implements Migration
         ];
         $wpdb->insert($profilesT, $lotus, [
             '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%f','%f','%s','%s','%s','%s',
+            '%s','%s','%s','%s',
             '%d','%d','%s','%s','%s','%s','%d','%d'
         ]);
         $lotusId = (int) $wpdb->insert_id;
@@ -494,7 +486,7 @@ class _1_0_0_CreateBase implements Migration
         if ($lotusId) {
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
-                $lotus['lng'], $lotus['lat'], $lotusId
+                72.8777, 19.0760, $lotusId
             ));
         }
 
@@ -508,8 +500,6 @@ class _1_0_0_CreateBase implements Migration
             'region'         => 'London',
             'country_code'   => 'GB',
             'postal_code'    => 'EC1A 1AA',
-            'lat'            => 51.509865,
-            'lng'            => -0.118092,
             'site_template'  => 'v2025',
             'palette'        => 'amber',
             'industry'       => 'restaurant',
@@ -587,14 +577,14 @@ class _1_0_0_CreateBase implements Migration
         ];
         $wpdb->insert($profilesT, $green, [
             '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%f','%f','%s','%s','%s','%s',
+            '%s','%s','%s','%s',
             '%d','%d','%s','%s','%s','%s','%d','%d'
         ]);
         $greenId = (int) $wpdb->insert_id;
         if ($greenId) {
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
-                $green['lng'], $green['lat'], $greenId
+                -0.118092, 51.509865, $greenId
             ));
         }
 
@@ -608,8 +598,6 @@ class _1_0_0_CreateBase implements Migration
             'region'         => 'NSW',
             'country_code'   => 'AU',
             'postal_code'    => '2000',
-            'lat'            => -33.8688,
-            'lng'            => 151.2093,
             'site_template'  => 'v2025',
             'palette'        => 'teal',
             'industry'       => 'transport',
@@ -689,14 +677,14 @@ class _1_0_0_CreateBase implements Migration
         ];
         $wpdb->insert($profilesT, $swift, [
             '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%f','%f','%s','%s','%s','%s',
+            '%s','%s','%s','%s',
             '%d','%d','%s','%s','%s','%s','%d','%d'
         ]);
         $swiftId = (int) $wpdb->insert_id;
         if ($swiftId) {
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
-                $swift['lng'], $swift['lat'], $swiftId
+                151.2093, -33.8688, $swiftId
             ));
         }
 
@@ -731,8 +719,6 @@ class _1_0_0_CreateBase implements Migration
                 'region'           => $profile['region'] ?? null,
                 'country_code'     => $profile['country_code'] ?? null,
                 'postal_code'      => $profile['postal_code'] ?? null,
-                'lat'              => $profile['lat'] ?? null,
-                'lng'              => $profile['lng'] ?? null,
                 'location_point'   => null, // Will be set separately if needed
                 'site_template'    => $profile['site_template'] ?? null,
                 'palette'          => $profile['palette'] ?? null,
@@ -746,17 +732,25 @@ class _1_0_0_CreateBase implements Migration
 
             $wpdb->insert($versionsT, $versionData, [
                 '%d','%d','%s','%s','%s','%d','%s','%s','%d',
-                '%s','%s','%s','%s','%s','%s','%s','%s','%f','%f','%s',
+                '%s','%s','%s','%s','%s','%s','%s','%s','%s',
                 '%s','%s','%s','%s','%d','%d','%s','%s'
             ]);
 
             $versionId = (int) $wpdb->insert_id;
 
-            // Set location_point if lat/lng exist
-            if (!empty($profile['lat']) && !empty($profile['lng'])) {
+            // Set location_point based on profile ID (hardcoded coordinates)
+            $coordinates = [
+                $acmeId => [-96.7970, 32.7767],   // Dallas, TX
+                $lotusId => [72.8777, 19.0760],   // Mumbai, IN
+                $greenId => [-0.118092, 51.509865], // London, GB
+                $swiftId => [151.2093, -33.8688]   // Sydney, AU
+            ];
+            
+            if (isset($coordinates[$pid])) {
+                [$lng, $lat] = $coordinates[$pid];
                 $wpdb->query($wpdb->prepare(
                     "UPDATE {$versionsT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
-                    $profile['lng'], $profile['lat'], $versionId
+                    $lng, $lat, $versionId
                 ));
             }
 

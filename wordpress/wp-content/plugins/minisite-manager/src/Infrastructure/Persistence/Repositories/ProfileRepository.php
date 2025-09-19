@@ -76,8 +76,8 @@ final class ProfileRepository implements ProfileRepositoryInterface
     public function updateSiteJsonWithCoordinates(int $id, array $siteJson, ?float $lat, ?float $lng, int $updatedBy): Profile
     {
         $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET site_json=%s, lat=%f, lng=%f, updated_by=%d, updated_at=NOW() WHERE id=%d",
-            wp_json_encode($siteJson), $lat, $lng, $updatedBy, $id
+            "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%d",
+            wp_json_encode($siteJson), $updatedBy, $id
         );
         $this->db->query($sql);
         
@@ -90,6 +90,12 @@ final class ProfileRepository implements ProfileRepositoryInterface
             $this->db->query($this->db->prepare(
                 "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
                 $lng, $lat, $id
+            ));
+        } else {
+            // Clear location_point if no coordinates
+            $this->db->query($this->db->prepare(
+                "UPDATE {$this->table()} SET location_point = NULL WHERE id = %d",
+                $id
             ));
         }
         
@@ -118,8 +124,8 @@ final class ProfileRepository implements ProfileRepositoryInterface
     public function updateCoordinates(int $id, ?float $lat, ?float $lng, int $updatedBy): void
     {
         $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET lat = %f, lng = %f, updated_by = %d, updated_at = NOW() WHERE id = %d",
-            $lat, $lng, $updatedBy, $id
+            "UPDATE {$this->table()} SET updated_by = %d, updated_at = NOW() WHERE id = %d",
+            $updatedBy, $id
         );
         $this->db->query($sql);
         
@@ -132,6 +138,12 @@ final class ProfileRepository implements ProfileRepositoryInterface
             $this->db->query($this->db->prepare(
                 "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
                 $lng, $lat, $id
+            ));
+        } else {
+            // Clear location_point if no coordinates
+            $this->db->query($this->db->prepare(
+                "UPDATE {$this->table()} SET location_point = NULL WHERE id = %d",
+                $id
             ));
         }
     }
@@ -149,8 +161,6 @@ final class ProfileRepository implements ProfileRepositoryInterface
             'region'         => $p->region,
             'country_code'   => $p->countryCode,
             'postal_code'    => $p->postalCode,
-            'lat'            => $p->geo->lat,
-            'lng'            => $p->geo->lng,
             'site_template'  => $p->siteTemplate,
             'palette'        => $p->palette,
             'industry'       => $p->industry,
@@ -161,18 +171,18 @@ final class ProfileRepository implements ProfileRepositoryInterface
             'status'         => $p->status,
             'updated_by'     => $p->updatedBy,
         ];
-        $format = ['%s','%s','%s','%s','%s','%s','%f','%f','%s','%s','%s','%s','%d','%s','%s','%s','%d'];
+        $format = ['%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%d','%s','%s','%s','%d'];
 
         // If row exists, update w/ optimistic lock
         $sql = $this->db->prepare(
             "UPDATE {$this->table()}
              SET title=%s,name=%s,city=%s,region=%s,country_code=%s,postal_code=%s,
-                 lat=%f,lng=%f,site_template=%s,palette=%s,industry=%s,default_locale=%s,
+                 site_template=%s,palette=%s,industry=%s,default_locale=%s,
                  schema_version=%d,site_json=%s,search_terms=%s,status=%s,updated_by=%d,
                  site_version = site_version + 1
              WHERE business_slug=%s AND location_slug=%s AND site_version=%d",
             $data['title'],$data['name'],$data['city'],$data['region'],$data['country_code'],$data['postal_code'],
-            $data['lat'],$data['lng'],$data['site_template'],$data['palette'],$data['industry'],$data['default_locale'],
+            $data['site_template'],$data['palette'],$data['industry'],$data['default_locale'],
             $data['schema_version'],$data['site_json'],$data['search_terms'],$data['status'],$data['updated_by'],
             $p->slugs->business,$p->slugs->location,$expectedSiteVersion
         );
@@ -199,6 +209,22 @@ final class ProfileRepository implements ProfileRepositoryInterface
 
     private function mapRow(array $r): Profile
     {
+        // Extract lat/lng from location_point geometry
+        $geo = null;
+        if (!empty($r['location_point'])) {
+            $pointResult = $this->db->get_row($this->db->prepare(
+                "SELECT ST_Y(location_point) as lat, ST_X(location_point) as lng FROM {$this->table()} WHERE id = %d",
+                $r['id']
+            ), ARRAY_A);
+            
+            if ($pointResult && $pointResult['lat'] && $pointResult['lng']) {
+                $geo = new GeoPoint(
+                    lat: (float) $pointResult['lat'],
+                    lng: (float) $pointResult['lng']
+                );
+            }
+        }
+
         return new Profile(
             id:            (int)$r['id'],
             slugs:         new SlugPair($r['business_slug'], $r['location_slug']),
@@ -208,7 +234,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
             region:        $r['region'] ?: null,
             countryCode:   $r['country_code'],
             postalCode:    $r['postal_code'] ?: null,
-            geo:           new GeoPoint($r['lat'] !== null ? (float)$r['lat'] : null, $r['lng'] !== null ? (float)$r['lng'] : null),
+            geo:           $geo,
             siteTemplate:  $r['site_template'],
             palette:       $r['palette'],
             industry:      $r['industry'],

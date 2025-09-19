@@ -43,9 +43,7 @@ CREATE TABLE wp_minisite_versions (
   region VARCHAR(120) NULL,
   country_code CHAR(2) NULL,
   postal_code VARCHAR(20) NULL,
-  lat DECIMAL(9,6) NULL,
-  lng DECIMAL(9,6) NULL,
-  location_point POINT NULL,
+  location_point POINT NULL, -- Single geometry column for spatial data (lat/lng extracted as needed)
   site_template VARCHAR(32) NULL,
   palette VARCHAR(24) NULL,
   industry VARCHAR(40) NULL,
@@ -61,6 +59,12 @@ CREATE TABLE wp_minisite_versions (
   FOREIGN KEY (minisite_id) REFERENCES wp_minisite_profiles(id) ON DELETE CASCADE
 );
 ```
+
+### Spatial Data Handling
+- **Single Source of Truth**: Uses `location_point POINT` geometry column only
+- **Performance**: Enables efficient spatial queries with GiST indexes
+- **Extraction**: Lat/lng values extracted using `ST_Y()` and `ST_X()` functions when needed
+- **Best Practice**: Follows PostGIS recommendations for geospatial applications
 
 ## Versioning Rules
 
