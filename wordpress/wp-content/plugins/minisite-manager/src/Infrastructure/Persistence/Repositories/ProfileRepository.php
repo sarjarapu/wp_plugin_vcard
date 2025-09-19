@@ -212,8 +212,9 @@ final class ProfileRepository implements ProfileRepositoryInterface
         // Extract lat/lng from location_point geometry
         $geo = null;
         if (!empty($r['location_point'])) {
+            // The migration data was inserted as POINT(lng, lat), so ST_Y() returns lng and ST_X() returns lat
             $pointResult = $this->db->get_row($this->db->prepare(
-                "SELECT ST_Y(location_point) as lat, ST_X(location_point) as lng FROM {$this->table()} WHERE id = %d",
+                "SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat FROM {$this->table()} WHERE id = %d",
                 $r['id']
             ), ARRAY_A);
             
