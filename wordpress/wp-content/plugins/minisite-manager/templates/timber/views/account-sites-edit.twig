@@ -130,9 +130,9 @@
     <div class="max-w-7xl mx-auto p-6">
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
-        <p class="mt-2 text-[var(--on-surface-variant)]">Edit your minisite content and settings.</p>
-      </div>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
+          <p class="mt-2 text-[var(--on-surface-variant)]">Edit your minisite content and settings.</p>
+        </div>
 
       {% if error_msg %}
         <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700 text-sm">
@@ -156,70 +156,38 @@
            class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]">
           <i class="fa-solid fa-history"></i> Version History
         </a>
-        {% if editing_version %}
-          {% if editing_version.status == 'draft' %}
+          {% if editing_version %}
+            {% if editing_version.status == 'draft' %}
             <span class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100 text-amber-800">
-              <i class="fa-solid fa-edit"></i> Editing Draft v{{ editing_version.versionNumber }}
-            </span>
-          {% else %}
+                <i class="fa-solid fa-edit"></i> Editing Draft v{{ editing_version.versionNumber }}
+              </span>
+            {% else %}
             <span class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-100 text-blue-800">
-              <i class="fa-solid fa-eye"></i> Viewing Published v{{ editing_version.versionNumber }}
-            </span>
+                <i class="fa-solid fa-eye"></i> Viewing Published v{{ editing_version.versionNumber }}
+              </span>
+            {% endif %}
           {% endif %}
-        {% endif %}
-        {% if latest_draft and editing_version.id != latest_draft.id %}
-          <a href="{{ edit_latest_url }}" 
-             class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-100 text-green-800 text-sm hover:bg-green-200">
-            <i class="fa-solid fa-arrow-up"></i> Edit Latest Draft v{{ latest_draft.versionNumber }}
+          {% if latest_draft and editing_version.id != latest_draft.id %}
+            <a href="{{ edit_latest_url }}" 
+               class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-100 text-green-800 text-sm hover:bg-green-200">
+              <i class="fa-solid fa-arrow-up"></i> Edit Latest Draft v{{ latest_draft.versionNumber }}
+            </a>
+          {% endif %}
+          <a href="{{ preview_url }}" target="_blank" 
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--secondary)] text-[var(--on-secondary)] shadow hover:brightness-95">
+            <i class="fa-solid fa-eye"></i> Preview
           </a>
-        {% endif %}
-        <a href="{{ preview_url }}" target="_blank" 
-           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--secondary)] text-[var(--on-secondary)] shadow hover:brightness-95">
-          <i class="fa-solid fa-eye"></i> Preview
-        </a>
       </div>
 
-      <!-- Quick Navigation -->
-      <div class="mb-6 p-4 rounded-xl bg-[var(--surface-0)] ring-1 ring-[var(--outline-variant)]">
-        <h3 class="text-sm font-medium text-[var(--on-surface)] mb-3">Quick Navigation</h3>
-        <div class="flex flex-wrap items-center gap-2">
-          <a href="#seo-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-search"></i> SEO
-          </a>
-          <a href="#brand-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-palette"></i> Brand
-          </a>
-          <a href="#hero-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-star"></i> Hero
-          </a>
-          <a href="#about-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-info-circle"></i> About
-          </a>
-          <a href="#whyus-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-thumbs-up"></i> Why Us
-          </a>
-          <a href="#contact-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-phone"></i> Contact
-          </a>
-          <a href="#products-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-box"></i> Products
-          </a>
-          <a href="#social-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-share-nodes"></i> Social
-          </a>
-          <a href="#gallery-section" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-            <i class="fa-solid fa-images"></i> Gallery
-          </a>
-        </div>
-      </div>
+      {% include 'layouts/quick-navigation.twig' %}
 
       <!-- Form and Preview Layout -->
       <form id="minisite-edit-form" method="post">
-        <div class="grid lg:grid-cols-2 gap-8">
-          <!-- Left: Edit Form -->
+      <div class="grid lg:grid-cols-2 gap-8">
+        <!-- Left: Edit Form -->
           <div class="space-y-10">
-              {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
-              
+            {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
+            
 
               {% include 'forms/seo-section.twig' %}
 
@@ -239,7 +207,7 @@
 
               {% include 'forms/gallery-section.twig' %}
 
-          </div>
+                </div>
 
           <!-- Right: Version Info & Actions + Live Preview -->
           <div class="lg:sticky lg:top-6 space-y-6">
@@ -253,67 +221,23 @@
                     value="{{ editing_version.label|default('') }}"
                     placeholder="e.g., Updated hero section"
                     class="max-w-[300px] rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
+              </div>
                 <div class="flex items-center gap-3">
                   <label for="version_comment" class="text-sm font-medium text-[var(--on-surface)] whitespace-nowrap w-[140px]">Version Comment:</label>
                   <input id="version_comment" name="version_comment" type="text" 
                     value="{{ editing_version.comment|default('') }}"
                     placeholder="e.g., Changed heading and added CTA"
                     class="max-w-[300px] rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
-                </div>
+              </div>
               </div>
               
-              <!-- Form Actions -->
-              <div class="mt-6 pt-4 border-t border-[var(--outline-variant)]">
-                <div class="flex items-center gap-3">
-                  <a href="{{ function('home_url','/account/sites') }}"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm font-medium">
-                    Cancel
-                  </a>
-                  <button type="submit" id="save-draft-button" name="action" value="save_draft"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
-                    <i class="fa-solid fa-save" id="save-icon"></i> 
-                    <span id="save-text">Save Draft</span>
-                    <span id="save-loading" class="hidden">
-                      <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Saving...
-                    </span>
-                  </button>
-                  {% if editing_version and editing_version.status == 'draft' %}
-                    <button type="button" id="publish-button" 
-                      class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium">
-                      <i class="fa-solid fa-rocket"></i> 
-                      <span>Publish</span>
-                    </button>
-                  {% endif %}
-                </div>
-              </div>
+            {% include 'layouts/form-actions-edit.twig' %}
             </div>
 
-            <!-- Live Preview -->
-            <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
-              <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-semibold text-[var(--on-surface)]">Live Preview</h2>
-                <a href="{{ preview_url }}" target="_blank" 
-                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-                  <i class="fa-solid fa-external-link-alt"></i> Open
-                </a>
-              </div>
-              <div class="border border-[var(--outline-variant)] rounded-lg overflow-hidden">
-                <iframe src="{{ preview_url }}" 
-                        class="w-full h-[600px] border-0"
-                        title="Preview of {{ profile.title }}">
-                  <p>Preview not available. <a href="{{ preview_url }}" target="_blank">Open in new tab</a></p>
-                </iframe>
-              </div>
-              <p class="mt-2 text-xs text-[var(--on-surface-variant)]">Preview updates when you save changes.</p>
+            {% include 'layouts/live-preview.twig' %}
+                </div>
             </div>
-          </div>
-        </div>
-      </form>
+          </form>
     </div>
   </main>
 
@@ -725,7 +649,7 @@
     let isSubmitting = false;
 
     if (form) {
-      form.addEventListener('submit', function(e) {
+    form.addEventListener('submit', function(e) {
       // Sync all Quill editors before submission
       if (window.editors) {
         Object.keys(window.editors).forEach(function(key) {
@@ -749,7 +673,7 @@
 
       // Allow form to submit normally
       // The page will reload with success/error message
-      });
+    });
     }
 
     // Add direct click handler to Save Draft button as backup

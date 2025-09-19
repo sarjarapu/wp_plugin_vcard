@@ -1,20 +1,7 @@
 {% extends "layouts/minisite-form-layout.twig" %}
 
 {% block form_content %}
-  <!-- Quick Navigation -->
-  <div class="bg-[var(--surface)] rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 mb-6">
-    <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-4">Quick Navigation</h3>
-    <div class="flex flex-wrap gap-2">
-      <a href="#seo-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">SEO</a>
-      <a href="#brand-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Brand</a>
-      <a href="#hero-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Hero</a>
-      <a href="#about-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">About</a>
-      <a href="#contact-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Contact</a>
-      <a href="#products-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Products</a>
-      <a href="#social-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Social</a>
-      <a href="#gallery-section" class="inline-flex items-center px-3 py-1.5 text-sm bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--primary)] hover:text-[var(--on-primary)] transition">Gallery</a>
-    </div>
-  </div>
+  {% include 'layouts/quick-navigation.twig' %}
 
   <!-- SEO Section -->
   {% include "forms/seo-section.twig" %}
@@ -46,30 +33,6 @@
 {% endblock %}
 
 {% block sidebar_content %}
-  <!-- Action Buttons -->
-  <div class="bg-[var(--surface)] rounded-2xl ring-1 ring-[var(--outline-variant)] p-6">
-    <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-4">Actions</h3>
-    <div class="space-y-3">
-      <button type="submit" id="create-minisite-button" class="w-full inline-flex items-center justify-center px-4 py-3 bg-[var(--primary)] text-[var(--on-primary)] rounded-lg hover:bg-[var(--primary)]/90 transition">
-        <i id="create-icon" class="fa-solid fa-plus mr-2"></i>
-        <span id="create-text">Create Minisite</span>
-        <div id="create-loading" class="hidden ml-2">
-          <i class="fa-solid fa-spinner fa-spin"></i>
-        </div>
-      </button>
-      <a href="/account/sites" class="w-full inline-flex items-center justify-center px-4 py-3 bg-[var(--surface-1)] text-[var(--on-surface)] rounded-lg hover:bg-[var(--surface)] transition">
-        <i class="fa-solid fa-arrow-left mr-2"></i>
-        Back to Sites
-      </a>
-    </div>
-  </div>
-
-  <!-- Preview Section -->
-  <div class="bg-[var(--surface)] rounded-2xl ring-1 ring-[var(--outline-variant)] p-6">
-    <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-4">Preview</h3>
-    <div class="text-center text-[var(--on-surface-variant)]">
-      <i class="fa-solid fa-eye text-4xl mb-2"></i>
-      <p class="text-sm">Preview will be available after creating the minisite</p>
-    </div>
-  </div>
+  {% include 'layouts/form-actions-new.twig' %}
+  {% include 'layouts/preview-placeholder.twig' %}
 {% endblock %}

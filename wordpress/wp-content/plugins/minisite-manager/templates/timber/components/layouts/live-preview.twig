@@ -1,0 +1,18 @@
+<!-- Live Preview -->
+<div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-[var(--on-surface)]">Live Preview</h2>
+    <a href="{{ preview_url }}" target="_blank" 
+      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
+      <i class="fa-solid fa-external-link-alt"></i> Open
+    </a>
+  </div>
+  <div class="border border-[var(--outline-variant)] rounded-lg overflow-hidden">
+    <iframe src="{{ preview_url }}" 
+            class="w-full h-[600px] border-0"
+            title="Preview of {{ profile.title }}">
+      <p>Preview not available. <a href="{{ preview_url }}" target="_blank">Open in new tab</a></p>
+    </iframe>
+  </div>
+  <p class="mt-2 text-xs text-[var(--on-surface-variant)]">Preview updates when you save changes.</p>
+</div>
