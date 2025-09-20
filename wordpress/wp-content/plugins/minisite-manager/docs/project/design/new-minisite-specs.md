@@ -190,7 +190,7 @@ This document outlines the specifications for the new minisite creation flow, im
 
 ### **Phase 1: Database Schema Changes**
 1. Update `minisites` table to use VARCHAR(32) for minisite_id
-2. Add `temp_slug` field for draft minisites
+2. Add `slug` field for draft and published minisites
 3. Add `publish_status` field to track draft vs. published
 4. Update unique constraints to support both temp and permanent slugs
 
@@ -201,9 +201,9 @@ This document outlines the specifications for the new minisite creation flow, im
 4. Implement temporary slug generation
 
 ### **Phase 3: Slug Management**
-1. Implement temporary slug generation (`draft-{hash}`)
+1. Implement slug generation (`draft-{hash}` for drafts, custom for published)
 2. Add slug availability checking
-3. Create slug migration system (temp → permanent)
+3. Create slug migration system (draft → permanent)
 4. Add reservation system for payment flow
 
 ### **Phase 4: Payment Integration**
@@ -220,22 +220,23 @@ This document outlines the specifications for the new minisite creation flow, im
 - **Collision Probability**: ~1 in 2^128 (practically impossible)
 - **Benefits**: Compact, secure, collision-free
 
-### **Temporary Slug System**
-- **Format**: `draft-{first12chars}` (e.g., `draft-a1b2c3d4e5f6`)
+### **Slug System**
+- **Draft Format**: `draft-{first12chars}` (e.g., `draft-a1b2c3d4e5f6`)
+- **Published Format**: Custom user-chosen slugs (e.g., `acme-dental`)
 - **Purpose**: Allow unlimited draft creation without conflicts
-- **Migration**: Seamless transition to permanent slugs after payment
+- **Migration**: Seamless transition from draft to permanent slugs after payment
 
 ### **Database Schema Changes**
 ```sql
 -- New approach
 CREATE TABLE wp_minisites (
     minisite_id VARCHAR(32) PRIMARY KEY, -- 16-byte hex ID
-    temp_slug VARCHAR(255) NULL,        -- For draft minisites
+    slug VARCHAR(255) NULL,             -- For draft and published minisites
     business_slug VARCHAR(255) NULL,    -- For published minisites
     location_slug VARCHAR(255) NULL,    -- For published minisites
     publish_status ENUM('draft', 'reserved', 'published') DEFAULT 'draft',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY unique_temp_slug (temp_slug),
+    UNIQUE KEY unique_slug (slug),
     UNIQUE KEY unique_business_slugs (business_slug, location_slug)
 );
 ```

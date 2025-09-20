@@ -18,13 +18,15 @@ class _1_0_0_CreateBase implements Migration
         $charset   = $wpdb->get_charset_collate();
         $profiles  = $wpdb->prefix . 'minisites';
         $reviews   = $wpdb->prefix . 'minisite_reviews';
+        $versions = $wpdb->prefix . 'minisite_versions';
+        $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
 
         // ——— minisites (live) ———
         DbDelta::run("
         CREATE TABLE {$profiles} (
           minisite_id       VARCHAR(32)     NOT NULL,
 
-          temp_slug         VARCHAR(255)    NULL,
+          slug              VARCHAR(255)    NULL,
           business_slug     VARCHAR(120)    NULL,
           location_slug     VARCHAR(120)    NULL,
 
@@ -59,14 +61,13 @@ class _1_0_0_CreateBase implements Migration
           _minisite_current_version_id BIGINT UNSIGNED NULL,
 
           PRIMARY KEY (minisite_id),
-          UNIQUE KEY uniq_temp_slug (temp_slug),
+          UNIQUE KEY uniq_slug (slug),
           UNIQUE KEY uniq_business_location (business_slug, location_slug)
         ) ENGINE=InnoDB {$charset};
         ");
 
 
         // ——— versions (new versioning system) ———
-        $versions = $wpdb->prefix . 'minisite_versions';
         DbDelta::run("
         CREATE TABLE {$versions} (
           -- Version-specific fields (front)
@@ -137,7 +138,6 @@ class _1_0_0_CreateBase implements Migration
         ");
 
         // ——— bookmarks ———
-        $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
         DbDelta::run("
         CREATE TABLE {$bookmarks} (
           id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
