@@ -825,7 +825,7 @@ class _1_0_0_CreateBase implements Migration
 
         // Get IDs for our seeded slugs
         $rows = $wpdb->get_results("
-            SELECT minisite_id FROM {$profilesT}
+            SELECT id FROM {$profilesT}
             WHERE (business_slug='acme-dental' AND location_slug='dallas')
                OR (business_slug='lotus-textiles' AND location_slug='mumbai')
                OR (business_slug='green-bites' AND location_slug='london')
@@ -833,13 +833,13 @@ class _1_0_0_CreateBase implements Migration
         ");
         if (!$rows) { return; }
 
-        $ids = array_map(fn($r) => $r->minisite_id, $rows);
+        $ids = array_map(fn($r) => $r->id, $rows);
         $in  = implode(',', array_fill(0, count($ids), '%s'));
 
         // Delete child tables first (only if they exist)
         $wpdb->query($wpdb->prepare("DELETE FROM {$reviewsT}   WHERE minisite_id IN ($in)", ...$ids));
         $wpdb->query($wpdb->prepare("DELETE FROM {$versionsT}  WHERE minisite_id IN ($in)", ...$ids));
         // Delete minisites
-        $wpdb->query($wpdb->prepare("DELETE FROM {$profilesT}  WHERE minisite_id IN ($in)", ...$ids));
+        $wpdb->query($wpdb->prepare("DELETE FROM {$profilesT}  WHERE id IN ($in)", ...$ids));
     }
 }
