@@ -1,16 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth" data-theme="{{ profile.palette|default('blue') }}" data-industry="{{ profile.industry|default('services') }}">
+<html lang="en" class="scroll-smooth" data-theme="{{ minisite.palette|default('blue') }}" data-industry="{{ minisite.industry|default('services') }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   {# Open Graph + Twitter Cards #}
-  {% set sj = profile.siteJson|default({}) %}
-  {% set ogTitle  = sj.seo.title|default(profile.title) %}
+  {% set sj = minisite.siteJson|default({}) %}
+  {% set ogTitle  = sj.seo.title|default(minisite.title) %}
   {# Build a robust description fallback #}
   {% set ogDesc   = sj.seo.description|default('')|striptags|trim %}
   {% if ogDesc is empty %}
     {% set aboutPlain = sj.about.html|default('')|striptags|trim %}
-    {% set ogDesc = sj.hero.subheading|default(aboutPlain)|default(profile.title)|trim %}
+    {% set ogDesc = sj.hero.subheading|default(aboutPlain)|default(minisite.title)|trim %}
   {% endif %}
   {% set ogDesc = ogDesc|slice(0, 200) %}
   {% set ogImage  = sj.seo.ogImage|default(sj.hero.image|default(sj.brand.logo|default(''))) %}
@@ -26,14 +26,14 @@
   {% endif %}
   {% set requestUri = function('add_query_arg', null, null) %}
   {% set ogUrl      = function('home_url', requestUri) %}
-  {% set ogSite   = sj.seo.siteName|default(profile.name|default(profile.title)) %}
-  {% set ogLocale = profile.defaultLocale|default('en-US')|replace({'-':'_'}) %}
-  {% set modified = profile.updatedAt is defined and profile.updatedAt ? (profile.updatedAt|date('c')) : '' %}
+  {% set ogSite   = sj.seo.siteName|default(minisite.name|default(minisite.title)) %}
+  {% set ogLocale = minisite.defaultLocale|default('en-US')|replace({'-':'_'}) %}
+  {% set modified = minisite.updatedAt is defined and minisite.updatedAt ? (minisite.updatedAt|date('c')) : '' %}
 
-  <title>{{ profile.siteJson.seo.title|default(profile.title) }}</title>
+  <title>{{ minisite.siteJson.seo.title|default(minisite.title) }}</title>
   <meta name="description" content="{{ ogDesc }}" />
-  <meta name="keywords" content="{{ profile.siteJson.seo.keywords|default('') }}" />
-  <link rel="icon" type="image/x-icon" href="{{ profile.siteJson.seo.favicon|default('favicon.png') }}">
+  <meta name="keywords" content="{{ minisite.siteJson.seo.keywords|default('') }}" />
+  <link rel="icon" type="image/x-icon" href="{{ minisite.siteJson.seo.favicon|default('favicon.png') }}">
 
   <meta property="og:locale" content="{{ ogLocale }}" />
   <meta property="og:type" content="website" />
@@ -52,7 +52,7 @@
   {% if imgType %}<meta property="og:image:type" content="{{ imgType }}" />{% endif %}
   {% if sj.seo.ogImageWidth is defined and sj.seo.ogImageWidth %}<meta property="og:image:width" content="{{ sj.seo.ogImageWidth }}" />{% endif %}
   {% if sj.seo.ogImageHeight is defined and sj.seo.ogImageHeight %}<meta property="og:image:height" content="{{ sj.seo.ogImageHeight }}" />{% endif %}
-  {% set imgAlt = sj.seo.ogImageAlt|default(sj.hero.imageAlt|default(profile.title)) %}
+  {% set imgAlt = sj.seo.ogImageAlt|default(sj.hero.imageAlt|default(minisite.title)) %}
   {% if imgAlt %}<meta property="og:image:alt" content="{{ imgAlt }}" />{% endif %}
   {% endif %}
   <meta name="twitter:card" content="summary_large_image" />
@@ -245,8 +245,8 @@
   </style>
 
   {# ===== Structured Data (JSON-LD) ===== #}
-  {% set sj = profile.siteJson|default({}) %}
-  {% set orgType = (profile.industry|default('') == 'dentist') ? 'Dentist' : 'LocalBusiness' %}
+  {% set sj = minisite.siteJson|default({}) %}
+  {% set orgType = (minisite.industry|default('') == 'dentist') ? 'Dentist' : 'LocalBusiness' %}
 
   {# Build sameAs from social links #}
   {% set sameAs = [] %}
@@ -317,7 +317,7 @@
     '@context': 'https://schema.org',
     '@type': orgType,
     '@id': ogUrl,
-    'name': profile.name|default(sj.name|default(profile.title|default(''))),
+    'name': minisite.name|default(sj.name|default(minisite.title|default(''))),
     'url': ogUrl,
     'image': ogImageAbs|default(''),
     'logo': logoAbs|default(''),
@@ -326,17 +326,17 @@
     'address': {
       '@type':'PostalAddress',
       'streetAddress': streetAddress,
-      'addressLocality': profile.city|default(''),
-      'addressRegion': profile.region|default(''),
-      'postalCode': profile.postalCode|default(''),
-      'addressCountry': profile.countryCode|default('')
+      'addressLocality': minisite.city|default(''),
+      'addressRegion': minisite.region|default(''),
+      'postalCode': minisite.postalCode|default(''),
+      'addressCountry': minisite.countryCode|default('')
     },
     'sameAs': sameAs,
     'openingHoursSpecification': opening
   } %}
 
-  {% if profile.geo.lat is defined and profile.geo.lat and profile.geo.lng is defined and profile.geo.lng %}
-    {% set business = business|merge({ 'geo': {'@type':'GeoCoordinates','latitude': profile.geo.lat, 'longitude': profile.geo.lng } }) %}
+  {% if minisite.geo.lat is defined and minisite.geo.lat and minisite.geo.lng is defined and minisite.geo.lng %}
+    {% set business = business|merge({ 'geo': {'@type':'GeoCoordinates','latitude': minisite.geo.lat, 'longitude': minisite.geo.lng } }) %}
   {% endif %}
   {% if aggregate %}
     {% set business = business|merge({ 'aggregateRating': aggregate }) %}
@@ -348,7 +348,7 @@
   <script type="application/ld+json">{{ business|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
 
   {# Optional: embed full site_json for client-side usage #}
-  <script id="profile-site-json" type="application/json">{{ sj|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
+  <script id="minisite-site-json" type="application/json">{{ sj|json_encode(constant('JSON_UNESCAPED_SLASHES'))|raw }}</script>
 
 </head>
 
@@ -362,9 +362,9 @@
           <nav class="flex items-center justify-between py-4">
             <!-- Brand -->
             <a href="#top" class="flex items-center gap-3 group">
-              <img src="{{ profile.siteJson.brand.logo|default('') }}" alt="{{ profile.name }} Logo"
+              <img src="{{ minisite.siteJson.brand.logo|default('') }}" alt="{{ minisite.name }} Logo"
                   class="h-12 w-12 rounded-lg ring-1 ring-white/20 group-hover:scale-105 transition" />
-              <span class="block font-semibold text-lg md:text-2xl">{{ profile.name }}</span>
+              <span class="block font-semibold text-lg md:text-2xl">{{ minisite.name }}</span>
             </a>
 
             <!-- Primary Menu (Large) -->
@@ -398,7 +398,7 @@
         <div class="absolute right-0 top-0 h-full w-60 max-w-[55vw] bg-[var(--surface-0)] shadow-xl p-6 flex flex-col gap-3 text-[var(--on-surface)]">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <img src="{{ profile.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}" alt="Company Logo" class="h-8 w-8 rounded-md ring-1 ring-[var(--outline-variant)]" />
+              <img src="{{ minisite.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}" alt="Company Logo" class="h-8 w-8 rounded-md ring-1 ring-[var(--outline-variant)]" />
               <div class="font-bold text-lg">Menu</div>
             </div>
             <button id="closeMenuBtn" class="p-2 rounded-lg hover:bg-[var(--surface-1)]" aria-label="Close menu">
@@ -437,34 +437,34 @@
               <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm
                           bg-[var(--tertiary-container)] text-[var(--on-tertiary-container)]
                           ring-1 ring-[var(--outline-variant)] shadow-sm">
-                <i class="fa-solid fa-circle-check"></i> {{ profile.siteJson.hero.badge|default('Verified Business') }}
+                <i class="fa-solid fa-circle-check"></i> {{ minisite.siteJson.hero.badge|default('Verified Business') }}
               </span>
               <h1 class="mt-5 text-3xl md:text-5xl font-extrabold leading-tight text-[var(--on-surface)]">
-                {{ profile.siteJson.hero.heading|default(profile.name) }}
+                {{ minisite.siteJson.hero.heading|default(minisite.name) }}
               </h1>
-              <p class="mt-4 text-lg text-[var(--on-surface-variant)]">{{ profile.siteJson.hero.subheading|default('') }}</p>
+              <p class="mt-4 text-lg text-[var(--on-surface-variant)]">{{ minisite.siteJson.hero.subheading|default('') }}</p>
               <div class="mt-6 flex flex-wrap gap-3">
                 <!-- Primary (Filled) -->
-                <a href="{{ profile.siteJson.hero.ctas[0].url|default('#request-info') }}" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
-                  <i class="fa-solid fa-paper-plane"></i> {{ profile.siteJson.hero.ctas[0].text|default('Request Info') }}
+                <a href="{{ minisite.siteJson.hero.ctas[0].url|default('#request-info') }}" class="inline-flex items-center gap-2 px-5 py-3 shadow-md rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
+                  <i class="fa-solid fa-paper-plane"></i> {{ minisite.siteJson.hero.ctas[0].text|default('Request Info') }}
                 </a>
                 <!-- Tonal (Primary Container) -->
-                <a href="{{ profile.siteJson.hero.ctas[1].url|default('#contact') }}"
+                <a href="{{ minisite.siteJson.hero.ctas[1].url|default('#contact') }}"
                   class="inline-flex items-center gap-2 px-6 py-3 rounded-lg
                           bg-[var(--secondary-container)] text-[var(--on-secondary-container)]
                           ring-1 ring-[var(--outline-variant)]
                           hover:brightness-95 transition">
-                  <i class="fa-solid fa-phone"></i> {{ profile.siteJson.hero.ctas[1].text|default('Contact Us') }}
+                  <i class="fa-solid fa-phone"></i> {{ minisite.siteJson.hero.ctas[1].text|default('Contact Us') }}
                 </a>
               </div>
               <div class="mt-6 flex items-center gap-6 text-[var(--on-surface)] font-semibold">
-                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> {{ profile.siteJson.hero.rating.value|default('') }}/5 ({{ profile.siteJson.hero.rating.count|default('') }} reviews)</span>
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> {{ minisite.siteJson.hero.rating.value|default('') }}/5 ({{ minisite.siteJson.hero.rating.count|default('') }} reviews)</span>
                 <span class="hidden sm:inline text-2xl">&#8226;</span>
-                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> {{ profile.city }}{% if profile.region %}, {{ profile.region }}{% endif %}</span>
+                <span class="inline-flex items-center gap-2"><i class="fa-solid fa-location-dot"></i> {{ minisite.city }}{% if minisite.region %}, {{ minisite.region }}{% endif %}</span>
               </div>
             </div>
             <div class="relative">
-              <img src="{{ profile.siteJson.hero.image|default('') }}" alt="{{ profile.siteJson.hero.imageAlt|default('') }}" class="w-full h-72 md:h-[22rem] object-cover rounded-2xl shadow-lg ring-1 ring-[var(--outline-variant)]" />
+              <img src="{{ minisite.siteJson.hero.image|default('') }}" alt="{{ minisite.siteJson.hero.imageAlt|default('') }}" class="w-full h-72 md:h-[22rem] object-cover rounded-2xl shadow-lg ring-1 ring-[var(--outline-variant)]" />
             </div>
           </div>
         </div>
@@ -480,9 +480,9 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between py-3">
           <a href="#top" class="flex items-center gap-2">
-            <img src="{{ profile.siteJson.brand.logo|default('favicon.png') }}"
+            <img src="{{ minisite.siteJson.brand.logo|default('favicon.png') }}"
                 class="h-8 w-8 rounded-md ring-1 ring-white/20" alt="">
-            <span class="font-bold hidden md:inline-flex">{{ profile.name }}</span>
+            <span class="font-bold hidden md:inline-flex">{{ minisite.name }}</span>
           </a>
           <div class="flex items-center gap-1 text-md">
             <a href="#top"      class="px-3 py-1.5 rounded bg-[var(--primary)]/25 text-[var(--on-primary)]">Home</a>
@@ -511,9 +511,9 @@
       <div class="px-4 py-2 flex items-center justify-between">
         
         <div class="flex items-center gap-2">
-          <img src="{{ profile.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}" alt="{{ profile.name }} Logo"
+          <img src="{{ minisite.siteJson.brand.logo|default('https://www.avivadentalcare.com/favicon.png') }}" alt="{{ minisite.name }} Logo"
                class="h-6 w-6 rounded ring-1 ring-white/20" />
-          <span class="font-semibold text-sm">{{ profile.name }}</span>
+          <span class="font-semibold text-sm">{{ minisite.name }}</span>
         </div>
         <button id="openMenuSticky" class="p-2 rounded hover:bg-[var(--primary)]/20" aria-label="Open menu">
           <i class="fa-solid fa-bars"></i>
@@ -551,16 +551,16 @@
           <div role="group" aria-labelledby="qa-contact-label" class="rounded-2xl p-4 md:col-start-1 md:justify-self-stretch md:min-w-0">
             <h3 id="qa-contact-label" class="text-md font-bold text-[var(--on-surface)] mb-3">Contact Information</h3>
             <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-              <a href="tel:{{ profile.siteJson.contact.phone.link|default('') }}" aria-label="Call Us" title="Call Us"
+              <a href="tel:{{ minisite.siteJson.contact.phone.link|default('') }}" aria-label="Call Us" title="Call Us"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-phone-volume text-emerald-600 text-2xl"></i>
               </a>
-              <a href="https://wa.me/{{ profile.siteJson.contact.phone.link|default('') }}?text=Hello%20{{ profile.name|url_encode }}" target="_blank" rel="noopener"
+              <a href="https://wa.me/{{ minisite.siteJson.contact.phone.link|default('') }}?text=Hello%20{{ minisite.name|url_encode }}" target="_blank" rel="noopener"
                 aria-label="WhatsApp" title="WhatsApp"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-brands fa-whatsapp text-green-600 text-2xl"></i>
               </a>
-              <a href="mailto:{{ profile.siteJson.contact.email|default('') }}?subject=Inquiry%20from%20Website" aria-label="Email" title="Email"
+              <a href="mailto:{{ minisite.siteJson.contact.email|default('') }}?subject=Inquiry%20from%20Website" aria-label="Email" title="Email"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-envelope text-rose-500 text-2xl"></i>
               </a>
@@ -568,7 +568,7 @@
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-map-location-dot text-sky-600 text-2xl"></i>
               </a>
-              <a href="{{ profile.siteJson.contact.website.link|default('') }}" target="_blank" rel="noopener" aria-label="Website URL" title="Website URL"
+              <a href="{{ minisite.siteJson.contact.website.link|default('') }}" target="_blank" rel="noopener" aria-label="Website URL" title="Website URL"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-globe text-violet-600 text-2xl"></i>
               </a>
@@ -586,20 +586,20 @@
           <div role="group" aria-labelledby="qa-manage-label" class="rounded-2xl p-4 md:col-start-2 md:justify-self-end">
             <h3 id="qa-manage-label" class="text-md text-right font-bold text-[var(--on-surface)] mb-3">My Bookmarks</h3>
             <div class="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-              {% if profile.canEdit %}
-                <a href="{{ function('home_url','/account/sites/' ~ profile.id ~ '/edit') }}" 
+              {% if minisite.canEdit %}
+                <a href="{{ function('home_url','/account/sites/' ~ minisite.id ~ '/edit') }}" 
                    aria-label="Edit" title="Edit"
                    class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                   <i class="fa-solid fa-pen-to-square text-[var(--on-surface)] text-2xl"></i>
                 </a>
               {% endif %}
               <button type="button" id="bookmarkBtn" 
-                aria-label="{% if profile.isBookmarked %}Remove from favorites{% else %}Save to favorites{% endif %}" 
-                title="{% if profile.isBookmarked %}Remove from favorites{% else %}Save to favorites{% endif %}"
+                aria-label="{% if minisite.isBookmarked %}Remove from favorites{% else %}Save to favorites{% endif %}" 
+                title="{% if minisite.isBookmarked %}Remove from favorites{% else %}Save to favorites{% endif %}"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition"
-                data-profile-id="{{ profile.id }}"
-                data-is-bookmarked="{{ profile.isBookmarked|default(false) ? 'true' : 'false' }}">
-                <i class="fa-{% if profile.isBookmarked %}solid{% else %}regular{% endif %} fa-star text-yellow-500 text-2xl"></i>
+                data-minisite-id="{{ minisite.id }}"
+                data-is-bookmarked="{{ minisite.isBookmarked|default(false) ? 'true' : 'false' }}">
+                <i class="fa-{% if minisite.isBookmarked %}solid{% else %}regular{% endif %} fa-star text-yellow-500 text-2xl"></i>
               </button>
               <button type="button" aria-label="Address Book" title="Address Book"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
@@ -607,21 +607,21 @@
               </button>
               <a id="downloadVcard" download href="#"
                 aria-label="Download Contact" title="Download Contact"
-                data-name="{{ profile.name }}"
-                data-org="{{ profile.name }}"
-                data-title="{{ profile.siteJson.brand.industry|default('') }}"
-                data-phone="{{ profile.siteJson.contact.phone.link|default('') }}"
-                data-email="{{ profile.siteJson.contact.email|default('') }}"
-                data-url="{{ profile.siteJson.contact.website.link|default('') }}"
-                data-addr1="{{ profile.siteJson.contact.address_line1|default('') }}"
-                data-addr2="{{ profile.siteJson.contact.address_line2|default('') }}"
-                data-addr3="{{ profile.siteJson.contact.address_line3|default('') }}"
-                data-addr4="{{ profile.siteJson.contact.address_line4|default('') }}"
-                data-city="{{ profile.city }}"
-                data-region="{{ profile.region|default('') }}"
-                data-postal="{{ profile.postalCode|default('') }}"
-                data-country="{{ profile.countryCode }}"
-                data-logo="{{ profile.siteJson.brand.logo|default('') }}"
+                data-name="{{ minisite.name }}"
+                data-org="{{ minisite.name }}"
+                data-title="{{ minisite.siteJson.brand.industry|default('') }}"
+                data-phone="{{ minisite.siteJson.contact.phone.link|default('') }}"
+                data-email="{{ minisite.siteJson.contact.email|default('') }}"
+                data-url="{{ minisite.siteJson.contact.website.link|default('') }}"
+                data-addr1="{{ minisite.siteJson.contact.address_line1|default('') }}"
+                data-addr2="{{ minisite.siteJson.contact.address_line2|default('') }}"
+                data-addr3="{{ minisite.siteJson.contact.address_line3|default('') }}"
+                data-addr4="{{ minisite.siteJson.contact.address_line4|default('') }}"
+                data-city="{{ minisite.city }}"
+                data-region="{{ minisite.region|default('') }}"
+                data-postal="{{ minisite.postalCode|default('') }}"
+                data-country="{{ minisite.countryCode }}"
+                data-logo="{{ minisite.siteJson.brand.logo|default('') }}"
                 class="inline-flex items-center justify-center h-10 w-10 rounded-full ring-1 ring-[var(--outline)] bg-[var(--surface-0)] hover:bg-[var(--surface-1)] transition">
                 <i class="fa-solid fa-address-card text-emerald-600 text-2xl"></i>
               </a>
@@ -636,23 +636,23 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-2xl md:text-3xl font-bold mb-4 text-[var(--on-surface)]">About Us</h2>
         <div class="prose dark:prose-invert max-w-none text-[var(--on-surface)]">
-          <p>{{ profile.siteJson.about.html|default('') }}</p>
+          <p>{{ minisite.siteJson.about.html|default('') }}</p>
         </div>
       </div>
     </section>
 
     <!-- ===== Parallax band (text card is SOLID) ===== -->
     <section id="band-2"
-      class="parallax-md bg-cover bg-center bg-no-repeat bg-[url('{{ profile.siteJson.whyUs.image|default(profile.siteJson.hero.image|default('')) }}')]"
+      class="parallax-md bg-cover bg-center bg-no-repeat bg-[url('{{ minisite.siteJson.whyUs.image|default(minisite.siteJson.hero.image|default('')) }}')]"
       data-palette="true">
       <div class="px-4 sm:px-6 lg:px-8 py-24">
         <div class="max-w-[600px] rounded-2xl shadow-xl
                     bg-[var(--section-a-bg)] ring-1 ring-[var(--outline-variant)]
                     text-[var(--on-surface)] p-8 py-16">
           <h2 class="text-[var(--on-surface)] text-2xl font-bold mb-4 ">
-            {{ profile.siteJson.whyUs.title|default('Why Choose Us?') }}
+            {{ minisite.siteJson.whyUs.title|default('Why Choose Us?') }}
           </h2>
-          <p>{{ profile.siteJson.whyUs.html|default('') }}</p>
+          <p>{{ minisite.siteJson.whyUs.html|default('') }}</p>
         </div>
       </div>
     </section>
@@ -660,10 +660,10 @@
     <!-- ======= Products & Services ======= -->
     <section id="products" class="pt-32 pb-16 bg-[var(--section-a-bg)]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl md:text-3xl font-bold mb-12 text-[var(--on-surface)]">{{profile.siteJson.services.title}}</h2>
+        <h2 class="text-2xl md:text-3xl font-bold mb-12 text-[var(--on-surface)]">{{minisite.siteJson.services.title}}</h2>
 
         <div class="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {% set services = profile.siteJson.services.listing|default([]) %}
+          {% set services = minisite.siteJson.services.listing|default([]) %}
           {% if services %}
             {% for svc in services %}
               <article class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] w-full mx-auto max-w-[350px] lg:max-w-none flex flex-col h-full shadow-sm hover:shadow-md transition-shadow drop-shadow-[0_8px_18px_rgba(0,0,0,0.12)] dark:drop-shadow-[0_8px_18px_rgba(255,255,255,0.08)] dark:hover:drop-shadow-[0_10px_28px_rgba(255,255,255,0.12)]">
@@ -706,8 +706,8 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-7 text-[var(--on-surface)]">Get in touch</h3>
               <ul class="space-y-3 text-[var(--on-surface)]">
-                {% set phone_link = profile.siteJson.contact.phone.link|default('')|trim %}
-                {% set phone_text = profile.siteJson.contact.phone.text|default('')|trim %}
+                {% set phone_link = minisite.siteJson.contact.phone.link|default('')|trim %}
+                {% set phone_text = minisite.siteJson.contact.phone.text|default('')|trim %}
                 {% if phone_link or phone_text %}
                   <li class="flex items-center gap-3">
                     <i class="fa-solid fa-phone text-emerald-500 text-xl"></i>
@@ -715,8 +715,8 @@
                   </li>
                 {% endif %}
 
-                {% set wa_link = profile.siteJson.contact.whatsapp.link|default('')|trim %}
-                {% set wa_text = profile.siteJson.contact.whatsapp.text|default('')|trim %}
+                {% set wa_link = minisite.siteJson.contact.whatsapp.link|default('')|trim %}
+                {% set wa_text = minisite.siteJson.contact.whatsapp.text|default('')|trim %}
                 {% if wa_link or wa_text %}
                   <li class="flex items-center gap-3">
                     <i class="fa-brands fa-whatsapp text-green-500 text-xl"></i>
@@ -724,7 +724,7 @@
                   </li>
                 {% endif %}
 
-                {% set email = profile.siteJson.contact.email|default('')|trim %}
+                {% set email = minisite.siteJson.contact.email|default('')|trim %}
                 {% if email %}
                   <li class="flex items-center gap-3">
                     <i class="fa-solid fa-envelope text-rose-500 text-xl"></i>
@@ -732,8 +732,8 @@
                   </li>
                 {% endif %}
 
-                {% set w_link = profile.siteJson.contact.website.link|default('')|trim %}
-                {% set w_text = profile.siteJson.contact.website.text|default('')|trim %}
+                {% set w_link = minisite.siteJson.contact.website.link|default('')|trim %}
+                {% set w_text = minisite.siteJson.contact.website.text|default('')|trim %}
                 {% if w_link or w_text %}
                   <li class="flex items-center gap-3">
                     <i class="fa-solid fa-globe text-violet-500 text-xl"></i>
@@ -762,22 +762,22 @@
             <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] p-6 bg-[var(--surface-0)]">
               <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Address</h3>
               <address class="not-italic text-[var(--on-surface)]">
-                <div>{{ profile.name }}</div>
-                <div>{{ profile.siteJson.contact.address_line1|default(profile.siteJson.contact.address|default('')) }}</div>
-                <div>{{ profile.siteJson.contact.address_line2|default('') }}</div>
-                {% if profile.siteJson.contact.address_line3|trim is not empty %}
-                <div>{{ profile.siteJson.contact.address_line3|default('') }}</div>
+                <div>{{ minisite.name }}</div>
+                <div>{{ minisite.siteJson.contact.address_line1|default(minisite.siteJson.contact.address|default('')) }}</div>
+                <div>{{ minisite.siteJson.contact.address_line2|default('') }}</div>
+                {% if minisite.siteJson.contact.address_line3|trim is not empty %}
+                <div>{{ minisite.siteJson.contact.address_line3|default('') }}</div>
                 {% endif %}
-                {% if profile.siteJson.contact.address_line4|trim is not empty %}
-                <div>{{ profile.siteJson.contact.address_line4|default('') }}</div>
+                {% if minisite.siteJson.contact.address_line4|trim is not empty %}
+                <div>{{ minisite.siteJson.contact.address_line4|default('') }}</div>
                 {% endif %}
                 <div>
-                  {{ profile.city }}{% if profile.region %}, {{ profile.region }}{% endif %}, {{ profile.countryCode }}{% if profile.postalCode %} {{ profile.postalCode }}{% endif %}
+                  {{ minisite.city }}{% if minisite.region %}, {{ minisite.region }}{% endif %}, {{ minisite.countryCode }}{% if minisite.postalCode %} {{ minisite.postalCode }}{% endif %}
                 </div>
                 <div>
                   Google Plus Code:
-                  <a class="text-primary font-medium" href="{{ profile.siteJson.contact.plusCodeUrl|default('https://www.google.com/maps/') }}" target="_blank">
-                    {{ profile.siteJson.contact.plusCode|default('') }}
+                  <a class="text-primary font-medium" href="{{ minisite.siteJson.contact.plusCodeUrl|default('https://www.google.com/maps/') }}" target="_blank">
+                    {{ minisite.siteJson.contact.plusCode|default('') }}
                   </a>
                 </div>
               </address>
@@ -788,7 +788,7 @@
               <h3 class="font-semibold text-lg mb-4 text-[var(--on-surface)]">Follow us</h3>
               <div class="flex flex-wrap justify-center md:justify-start gap-4">
                 {# Extract known socials from new key-value structure #}
-                {% set socialData = profile.siteJson.social|default({}) %}
+                {% set socialData = minisite.siteJson.social|default({}) %}
                 {% set fb = socialData.facebook|default(null) %}
                 {% set tw = socialData.x|default(null) %}
                 {% set ig = socialData.instagram|default(null) %}
@@ -838,7 +838,7 @@
               <ul class="grid gap-1 text-[var(--on-surface)] [&>li]:flex [&>li]:justify-between [&>li]:items-center [&>li]:py-2 [&>li]:px-3 [&>li]:rounded-lg [&>li:nth-child(even)]:bg-[var(--surface-1)]">
                 {# Define day order for consistent display #}
                 {% set dayOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
-                {% set hoursData = profile.siteJson.contact.hours|default({}) %}
+                {% set hoursData = minisite.siteJson.contact.hours|default({}) %}
                 {% for dayName in dayOrder %}
                   {% set dayData = hoursData[dayName]|default(null) %}
                   {% if dayData %}
@@ -860,14 +860,14 @@
             <!-- Map & Directions -->
             <div id="map" class="rounded-2xl overflow-hidden ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)]">
               <iframe
-                title="Map to {{ profile.name }}"
+                title="Map to {{ minisite.name }}"
                 width="100%" height="300" style="border:0;"
                 loading="lazy" allowfullscreen
                 referrerpolicy="no-referrer-when-downgrade"
-                src="{% if profile.siteJson.contact.mapEmbedUrl is defined and profile.siteJson.contact.mapEmbedUrl %}{{ profile.siteJson.contact.mapEmbedUrl }}{% elseif profile.geo.lat and profile.geo.lng %}https://www.google.com/maps?q={{ profile.geo.lat }},{{ profile.geo.lng }}&z=14&output=embed{% else %}https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3448.887!2d-97.743!3d30.267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8644b50b%3A0x0!2sTexas%20State%20Capitol!5e0!3m2!1sen!2sus!4v1682530000000{% endif %}">
+                src="{% if minisite.siteJson.contact.mapEmbedUrl is defined and minisite.siteJson.contact.mapEmbedUrl %}{{ minisite.siteJson.contact.mapEmbedUrl }}{% elseif minisite.geo.lat and minisite.geo.lng %}https://www.google.com/maps?q={{ minisite.geo.lat }},{{ minisite.geo.lng }}&z=14&output=embed{% else %}https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3448.887!2d-97.743!3d30.267!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x8644b50b%3A0x0!2sTexas%20State%20Capitol!5e0!3m2!1sen!2sus!4v1682530000000{% endif %}">
               </iframe>
               <div class="p-4 bg-[var(--surface-0)]">
-                <a target="_blank" rel="noopener" href="{% if profile.siteJson.contact.directionsUrl is defined and profile.siteJson.contact.directionsUrl %}{{ profile.siteJson.contact.directionsUrl }}{% elseif profile.geo.lat and profile.geo.lng %}https://www.google.com/maps/dir/?api=1&destination={{ profile.geo.lat }},{{ profile.geo.lng }}{% else %}https://www.google.com/maps/dir/?api=1&destination=Texas+State+Capitol{% endif %}"
+                <a target="_blank" rel="noopener" href="{% if minisite.siteJson.contact.directionsUrl is defined and minisite.siteJson.contact.directionsUrl %}{{ minisite.siteJson.contact.directionsUrl }}{% elseif minisite.geo.lat and minisite.geo.lng %}https://www.google.com/maps/dir/?api=1&destination={{ minisite.geo.lat }},{{ minisite.geo.lng }}{% else %}https://www.google.com/maps/dir/?api=1&destination=Texas+State+Capitol{% endif %}"
                    class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] hover:brightness-95">
                   <i class="fa-solid fa-turn-up"></i> Get Directions
                 </a>
@@ -913,7 +913,7 @@
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3" id="gallery-grid">
-          {% for img in profile.siteJson.gallery|default([]) %}
+          {% for img in minisite.siteJson.gallery|default([]) %}
             <a href="{{ img.src }}" data-gallery-index="{{ loop.index0 }}" data-caption="{{ img.caption|default(img.alt|default('')) }}" class="block group relative overflow-hidden rounded-xl ring-1 ring-[var(--outline-variant)]">
               <img src="{{ img.src }}" class="h-40 w-full object-cover group-hover:scale-105 transition" alt="{{ img.alt|default('') }}">
             </a>
@@ -1115,7 +1115,7 @@
 
     // Share
     async function sharePage() {
-      const data = { title: document.title, text: 'Check out this business profile!', url: window.location.href };
+      const data = { title: document.title, text: 'Check out this business minisite!', url: window.location.href };
       if (navigator.share) { try { await navigator.share(data); } catch(e) {} }
       else {
         try { await navigator.clipboard.writeText(window.location.href); alert('Link copied to clipboard!'); }
@@ -1357,7 +1357,7 @@
     // Bookmark functionality
     safeOn('bookmarkBtn', 'click', function() {
       const btn = this;
-      const profileId = btn.dataset.profileId;
+      const minisiteId = btn.dataset.minisiteId;
       const isBookmarked = btn.dataset.isBookmarked === 'true';
       const icon = btn.querySelector('i');
       
@@ -1372,7 +1372,7 @@
       const formData = new FormData();
       formData.append('action', isBookmarked ? 'remove_bookmark' : 'add_bookmark');
       formData.append('nonce', '{{ function("wp_create_nonce", "minisite_bookmark") }}');
-      formData.append('profile_id', profileId);
+      formData.append('profile_id', minisiteId);
       
       // Make AJAX request
       fetch('{{ function("admin_url", "admin-ajax.php") }}', {
