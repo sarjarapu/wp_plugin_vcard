@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the specifications for the new minisite creation flow, implementing a **freemium model** with a **try-before-you-buy** approach. The system allows users to explore and build minisites for free, then pay to publish and own their chosen slug.
+This document outlines the specifications for the new minisite creation flow, implementing a **freemium model** with a **try-before-you-buy** approach. The system allows users to explore and build minisites for free, then pay to publish and own their chosen slug with public access.
 
 ## Business Model
 
@@ -10,7 +10,8 @@ This document outlines the specifications for the new minisite creation flow, im
 - **First to pay wins**: Similar to domain registration (GoDaddy/Hostinger model)
 - **Fair competition**: No user can block others without payment
 - **Revenue generation**: Users must pay to secure and publish minisites
-- **Clear ownership**: Payment = ownership of the slug
+- **Clear ownership**: Payment = ownership of the slug + 1 year public access
+- **Time pressure**: 1-month grace period after expiration before slug becomes available to others
 
 ## Two-Phase User Journey
 
@@ -39,16 +40,19 @@ This document outlines the specifications for the new minisite creation flow, im
 **Features**:
 - Check slug availability for desired permanent URL
 - 5-minute reservation period to complete payment
-- Payment completion locks the slug to the user
+- Single payment for slug ownership + 1 year public access
 - Minisite goes live at chosen permanent URL
-- Full ownership and control
+- Full ownership and control for 1 year + 1 month grace period
 
 **User Flow**:
 ```
 1. User clicks "Publish" → Slug availability check
 2. User chooses desired slug → 5-minute reservation starts
-3. User completes payment → Slug gets locked
+3. User completes payment → Slug gets locked + 1 year public access
 4. Minisite goes live at chosen URL
+5. After 1 year → Website goes offline (grace period starts)
+6. Within 1 month → Can renew to keep slug ownership
+7. After 1 month → Slug becomes available for others to claim
 ```
 
 ## User Experience Scenarios
@@ -59,7 +63,10 @@ This document outlines the specifications for the new minisite creation flow, im
 2. Explores features → Builds understanding
 3. "Ready to publish?" → Checks slug availability
 4. Chooses slug → 5-minute reservation
-5. Pays → Minisite goes live at chosen URL
+5. Pays once → Minisite goes live at chosen URL for 1 year
+6. After 1 year → Website goes offline (grace period starts)
+7. Within 1 month → Can renew to keep slug ownership
+8. After 1 month → Slug becomes available for others
 ```
 
 ### Scenario 2: Returning User (Direct Payer)
@@ -67,16 +74,26 @@ This document outlines the specifications for the new minisite creation flow, im
 1. Knows platform → Checks slug availability
 2. Finds desired slug → Pays immediately
 3. Slug locked → Creates minisite
-4. Customizes → Minisite goes live
+4. Customizes → Minisite goes live for 1 year
+5. Renews before grace period ends → Keeps slug ownership
 ```
 
-### Scenario 3: Slug Conflict Resolution
+### Scenario 3: Slug Reclamation
 ```
-1. User A creates draft → temp-abc123
-2. User B wants "acme-dental" → Checks availability
-3. User B pays first → Gets "acme-dental"
-4. User A later wants "acme-dental" → Unavailable
-5. User A must choose different slug or wait
+1. User A pays for "acme-dental" → Gets 1 year access
+2. After 1 year → Website goes offline (grace period starts)
+3. User A doesn't renew within 1 month → Grace period ends
+4. User B wants "acme-dental" → Checks availability
+5. User B pays → Gets "acme-dental" (User A loses ownership)
+6. User A must start over with new slug
+```
+
+### Scenario 4: Renewal Flow
+```
+1. User pays for "acme-dental" → Gets 1 year access
+2. After 1 year → Website goes offline (grace period starts)
+3. User renews within 1 month → Keeps "acme-dental" ownership
+4. Website goes live again for another year
 ```
 
 ## Technical Considerations
@@ -92,13 +109,18 @@ This document outlines the specifications for the new minisite creation flow, im
 - **Payment system**: To be determined (WooCommerce, Stripe, PayPal)
 - **Reservation period**: 5 minutes for payment completion
 - **Auto-cleanup**: Expired reservations become available
+- **Single payment**: One payment for slug ownership + 1 year public access
+- **Grace period**: 1 month after expiration before slug becomes available
+- **Renewal system**: Users can renew before grace period ends
 - **Refund policy**: To be defined
 
 ### User Interface
 - **Draft mode**: Clear indication of temporary status
 - **Publishing flow**: Intuitive slug selection and payment
-- **Status indicators**: Available, reserved, owned, unavailable
+- **Status indicators**: Available, reserved, owned, unavailable, expired, grace period
 - **Progress tracking**: Clear steps in publishing process
+- **Renewal notifications**: Alerts before grace period ends
+- **Expiration warnings**: Clear indication of when access expires
 
 ## Business Rules
 
@@ -106,7 +128,9 @@ This document outlines the specifications for the new minisite creation flow, im
 1. **Payment required**: Only paid users can own permanent slugs
 2. **First-come, first-served**: First payment secures the slug
 3. **No squatting**: Free users cannot block paid users
-4. **Clear ownership**: Payment = permanent ownership
+4. **Time-limited ownership**: Payment = ownership for 1 year + 1 month grace period
+5. **Renewal required**: Must renew before grace period ends to maintain ownership
+6. **Reclamation**: Expired slugs become available for others to claim
 
 ### Draft Management
 1. **Unlimited editing**: Free users can edit drafts indefinitely
@@ -119,6 +143,14 @@ This document outlines the specifications for the new minisite creation flow, im
 2. **Auto-expiry**: Unpaid reservations automatically expire
 3. **Real-time updates**: Slug availability updates immediately
 4. **Conflict prevention**: Reserved slugs are unavailable to others
+
+### Payment & Access System
+1. **Single payment**: One payment for slug ownership + 1 year public access
+2. **Public access**: Website is live and publicly viewable for 1 year
+3. **Grace period**: 1 month after expiration before slug becomes available
+4. **Renewal system**: Users can renew before grace period ends
+5. **Access control**: Public access based on payment status
+6. **Slug reclamation**: Expired slugs become available for others to claim
 
 ## Success Metrics
 
@@ -133,6 +165,9 @@ This document outlines the specifications for the new minisite creation flow, im
 - **Average time to payment**: How quickly users pay after reservation
 - **Slug demand**: Most popular slug patterns
 - **Revenue per user**: Average spending per minisite
+- **Renewal rate**: Percentage of users who renew before grace period ends
+- **Slug reclamation rate**: How often expired slugs are claimed by new users
+- **Annual recurring revenue**: Revenue from renewals and new payments
 
 ## Future Enhancements
 
@@ -228,16 +263,64 @@ This document outlines the specifications for the new minisite creation flow, im
 
 ### **Database Schema Changes**
 ```sql
--- New approach
+-- Minisites table (existing, with minor updates)
 CREATE TABLE wp_minisites (
-    minisite_id VARCHAR(32) PRIMARY KEY, -- 16-byte hex ID
-    slug VARCHAR(255) NULL,             -- For draft and published minisites
-    business_slug VARCHAR(255) NULL,    -- For published minisites
-    location_slug VARCHAR(255) NULL,    -- For published minisites
+    id VARCHAR(32) PRIMARY KEY,                    -- 16-byte hex ID
+    slug VARCHAR(255) NULL,                        -- For draft and published minisites
+    business_slug VARCHAR(255) NULL,               -- For published minisites
+    location_slug VARCHAR(255) NULL,               -- For published minisites
     publish_status ENUM('draft', 'reserved', 'published') DEFAULT 'draft',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    -- ... existing fields ...
     UNIQUE KEY unique_slug (slug),
     UNIQUE KEY unique_business_slugs (business_slug, location_slug)
+);
+
+-- NEW: Single payment/subscription table with grace period
+CREATE TABLE wp_minisite_payments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    minisite_id VARCHAR(32) NOT NULL,
+    user_id BIGINT UNSIGNED NOT NULL,
+    status ENUM('active','expired','grace_period','reclaimed') DEFAULT 'active',
+    amount DECIMAL(10,2) NOT NULL,
+    currency CHAR(3) DEFAULT 'USD',
+    payment_method VARCHAR(100) NULL,              -- 'stripe', 'paypal', etc.
+    payment_reference VARCHAR(255) NULL,           -- External payment ID
+    paid_at DATETIME NOT NULL,                     -- When payment was made
+    expires_at DATETIME NOT NULL,                  -- When public access expires
+    grace_period_ends_at DATETIME NOT NULL,        -- When slug becomes available for others
+    renewed_at DATETIME NULL,                      -- When it was last renewed
+    reclaimed_at DATETIME NULL,                    -- When slug was reclaimed by someone else
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (minisite_id) REFERENCES wp_minisites(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES wp_users(ID) ON DELETE CASCADE,
+    INDEX idx_minisite_status (minisite_id, status),
+    INDEX idx_user_status (user_id, status),
+    INDEX idx_expires_at (expires_at),
+    INDEX idx_grace_period_ends_at (grace_period_ends_at)
+);
+
+-- NEW: Payment history table (for renewals and reclamations)
+CREATE TABLE wp_minisite_payment_history (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    minisite_id VARCHAR(32) NOT NULL,
+    payment_id BIGINT UNSIGNED NULL,               -- NULL for reclamations
+    action ENUM('initial_payment','renewal','expiration','grace_period_start','grace_period_end','reclamation') NOT NULL,
+    amount DECIMAL(10,2) NULL,                     -- NULL for non-payment actions
+    currency CHAR(3) NULL,
+    payment_reference VARCHAR(255) NULL,
+    expires_at DATETIME NULL,
+    grace_period_ends_at DATETIME NULL,
+    new_owner_user_id BIGINT UNSIGNED NULL,        -- For reclamations
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (minisite_id) REFERENCES wp_minisites(id) ON DELETE CASCADE,
+    FOREIGN KEY (payment_id) REFERENCES wp_minisite_payments(id) ON DELETE SET NULL,
+    FOREIGN KEY (new_owner_user_id) REFERENCES wp_users(ID) ON DELETE SET NULL,
+    INDEX idx_minisite (minisite_id),
+    INDEX idx_payment (payment_id),
+    INDEX idx_created_at (created_at)
 );
 ```
 
@@ -245,6 +328,7 @@ CREATE TABLE wp_minisites (
 - **New Migration**: `_1_1_0_UpdateToRandomIds.php`
 - **Approach**: Create new tables, migrate data, replace old tables
 - **Data Preservation**: All existing data preserved with new ID format
+- **Payment Tables**: Add new payment and payment history tables
 - **Rollback**: Not easily reversible due to ID format change
 
 ## Implementation Status
@@ -266,12 +350,70 @@ CREATE TABLE wp_minisites (
 - [ ] Reservation system implementation
 - [ ] Slug availability checking
 - [ ] User interface updates
+- [ ] Payment expiration and grace period management
+- [ ] Slug reclamation system
+- [ ] Renewal flow implementation
 - [ ] Testing and validation
 
 ## Conclusion
 
-This two-phase model provides the best user experience by allowing exploration without commitment while ensuring fair competition for valuable slugs. The payment-first approach prevents abuse while generating revenue from users who see value in the platform.
+This two-phase model provides the best user experience by allowing exploration without commitment while ensuring fair competition for valuable slugs. The single payment approach (slug ownership + 1 year public access) with a 1-month grace period creates urgency and prevents abuse while generating sustainable revenue.
 
-The system balances user freedom with business needs, creating a sustainable model that encourages both exploration and conversion to paid users.
+The system balances user freedom with business needs, creating a dynamic model that encourages both exploration and conversion to paid users, while ensuring popular slugs remain available through the reclamation system.
 
-**Next Steps**: Implement the new ID system and temporary slug support to enable the freemium model.
+**Key Benefits:**
+- **User-friendly**: Free exploration with clear upgrade path
+- **Revenue-generating**: Single payment for slug ownership + public access
+- **Fair competition**: Time-limited ownership with reclamation system
+- **Sustainable**: Annual recurring revenue with renewal pressure
+- **Dynamic**: Popular slugs can change hands, creating market competition
+
+**Next Steps**: Implement the new ID system, temporary slug support, and payment system to enable the freemium model with time-limited ownership.
+
+## Implementation Plan
+
+### **Phase 1: Core Workflow (Immediate)**
+1. **Update Database Schema**
+   - Add payment and payment history tables
+   - Update existing minisites table for new workflow
+   - Create migration for new schema
+
+2. **Modify NewMinisiteController**
+   - Add `handleCreateDraft()` method for free draft creation
+   - Add `handlePublish()` method for slug selection and payment
+   - Update existing methods for new workflow
+
+3. **Update Templates**
+   - Modify `account-sites-new-simple.twig` for draft creation flow
+   - Add publish flow with slug selection and payment
+   - Update status indicators and progress tracking
+
+### **Phase 2: Payment System (Next Session)**
+1. **Payment Integration**
+   - Integrate with payment system (WooCommerce/Stripe)
+   - Implement 5-minute reservation system
+   - Add payment completion handling
+
+2. **Access Control**
+   - Implement public access based on payment status
+   - Add expiration and grace period management
+   - Create renewal flow
+
+### **Phase 3: Advanced Features (Future)**
+1. **Automation**
+   - Automated grace period notifications
+   - Slug reclamation system
+   - Payment expiration handling
+
+2. **Analytics & Reporting**
+   - Payment and renewal tracking
+   - Slug demand analysis
+   - Revenue reporting
+
+### **Implementation Priority**
+1. ✅ **Database Schema** - Foundation for everything
+2. ✅ **Draft Creation** - Free exploration phase
+3. ✅ **Payment Flow** - Core revenue generation
+4. ✅ **Access Control** - Public/private access management
+5. ✅ **Renewal System** - Long-term sustainability
+6. ✅ **Automation** - Operational efficiency

@@ -163,6 +163,54 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         }
     }
 
+    /**
+     * Update the slug for a minisite (for draft creation)
+     */
+    public function updateSlug(string $id, string $slug): void
+    {
+        $sql = $this->db->prepare(
+            "UPDATE {$this->table()} SET slug=%s, updated_at=NOW() WHERE id=%s",
+            $slug, $id
+        );
+        $this->db->query($sql);
+        
+        if ($this->db->rows_affected === 0) {
+            throw new \RuntimeException('Minisite not found or update failed.');
+        }
+    }
+
+    /**
+     * Update business and location slugs for a minisite (for publishing)
+     */
+    public function updateSlugs(string $id, string $businessSlug, string $locationSlug): void
+    {
+        $sql = $this->db->prepare(
+            "UPDATE {$this->table()} SET business_slug=%s, location_slug=%s, updated_at=NOW() WHERE id=%s",
+            $businessSlug, $locationSlug, $id
+        );
+        $this->db->query($sql);
+        
+        if ($this->db->rows_affected === 0) {
+            throw new \RuntimeException('Minisite not found or update failed.');
+        }
+    }
+
+    /**
+     * Update the publish status for a minisite
+     */
+    public function updatePublishStatus(string $id, string $publishStatus): void
+    {
+        $sql = $this->db->prepare(
+            "UPDATE {$this->table()} SET publish_status=%s, updated_at=NOW() WHERE id=%s",
+            $publishStatus, $id
+        );
+        $this->db->query($sql);
+        
+        if ($this->db->rows_affected === 0) {
+            throw new \RuntimeException('Minisite not found or update failed.');
+        }
+    }
+
     public function save(Minisite $m, int $expectedSiteVersion): Minisite
     {
         // Build normalized search_terms (simple example; replace with your builder later)

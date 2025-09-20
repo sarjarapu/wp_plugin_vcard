@@ -10,7 +10,7 @@ class _1_0_0_CreateBase implements Migration
 
     public function description(): string
     {
-        return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), minisite_reviews, minisite_bookmarks + seed dev data';
+        return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), minisite_reviews, minisite_bookmarks, minisite_payments, minisite_payment_history + seed dev data';
     }
 
     public function up(\wpdb $wpdb): void
@@ -20,6 +20,8 @@ class _1_0_0_CreateBase implements Migration
         $reviews   = $wpdb->prefix . 'minisite_reviews';
         $versions = $wpdb->prefix . 'minisite_versions';
         $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
+        $payments = $wpdb->prefix . 'minisite_payments';
+        $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
 
         // ——— minisites (live) ———
         DbDelta::run("CREATE TABLE {$minisites} (
@@ -125,10 +127,58 @@ class _1_0_0_CreateBase implements Migration
           KEY idx_minisite (minisite_id)
         ) ENGINE=InnoDB {$charset};");
 
+        // ——— payments (single payment for slug ownership + 1 year public access) ———
+        DbDelta::run("CREATE TABLE {$payments} (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          minisite_id VARCHAR(32) NOT NULL,
+          user_id BIGINT UNSIGNED NOT NULL,
+          status ENUM('active','expired','grace_period','reclaimed') NOT NULL DEFAULT 'active',
+          amount DECIMAL(10,2) NOT NULL,
+          currency CHAR(3) NOT NULL DEFAULT 'USD',
+          payment_method VARCHAR(100) NULL,
+          payment_reference VARCHAR(255) NULL,
+          paid_at DATETIME NOT NULL,
+          expires_at DATETIME NOT NULL,
+          grace_period_ends_at DATETIME NOT NULL,
+          renewed_at DATETIME NULL,
+          reclaimed_at DATETIME NULL,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          KEY idx_minisite_status (minisite_id, status),
+          KEY idx_user_status (user_id, status),
+          KEY idx_expires_at (expires_at),
+          KEY idx_grace_period_ends_at (grace_period_ends_at)
+        ) ENGINE=InnoDB {$charset};");
+
+        // ——— payment history (for renewals and reclamations) ———
+        DbDelta::run("CREATE TABLE {$paymentHistory} (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          minisite_id VARCHAR(32) NOT NULL,
+          payment_id BIGINT UNSIGNED NULL,
+          action ENUM('initial_payment','renewal','expiration','grace_period_start','grace_period_end','reclamation') NOT NULL,
+          amount DECIMAL(10,2) NULL,
+          currency CHAR(3) NULL,
+          payment_reference VARCHAR(255) NULL,
+          expires_at DATETIME NULL,
+          grace_period_ends_at DATETIME NULL,
+          new_owner_user_id BIGINT UNSIGNED NULL,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          KEY idx_minisite (minisite_id),
+          KEY idx_payment (payment_id),
+          KEY idx_created_at (created_at)
+        ) ENGINE=InnoDB {$charset};");
+
         // Add foreign key constraints after table creation (only if they don't exist)
         $this->addForeignKeyIfNotExists($wpdb, $versions, 'fk_versions_minisite_id', 'minisite_id', $minisites, 'id');
         $this->addForeignKeyIfNotExists($wpdb, $reviews, 'fk_reviews_minisite_id', 'minisite_id', $minisites, 'id');
         $this->addForeignKeyIfNotExists($wpdb, $bookmarks, 'fk_bookmarks_minisite_id', 'minisite_id', $minisites, 'id');
+        $this->addForeignKeyIfNotExists($wpdb, $payments, 'fk_payments_minisite_id', 'minisite_id', $minisites, 'id');
+        $this->addForeignKeyIfNotExists($wpdb, $payments, 'fk_payments_user_id', 'user_id', $wpdb->prefix . 'users', 'ID');
+        $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_minisite_id', 'minisite_id', $minisites, 'id');
+        $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_payment_id', 'payment_id', $payments, 'id');
+        $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_new_owner_user_id', 'new_owner_user_id', $wpdb->prefix . 'users', 'ID');
 
         // —— dev seed: insert two test minisites + revisions + reviews ——
         $this->seedTestData($wpdb);
@@ -162,7 +212,11 @@ class _1_0_0_CreateBase implements Migration
         $versions  = $wpdb->prefix . 'minisite_versions';
         $reviews   = $wpdb->prefix . 'minisite_reviews';
         $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
+        $payments = $wpdb->prefix . 'minisite_payments';
+        $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
 
+        $wpdb->query("DROP TABLE IF EXISTS {$paymentHistory}");
+        $wpdb->query("DROP TABLE IF EXISTS {$payments}");
         $wpdb->query("DROP TABLE IF EXISTS {$bookmarks}");
         $wpdb->query("DROP TABLE IF EXISTS {$reviews}");
         $wpdb->query("DROP TABLE IF EXISTS {$versions}");

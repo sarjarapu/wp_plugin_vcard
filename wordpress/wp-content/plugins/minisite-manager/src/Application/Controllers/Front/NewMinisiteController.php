@@ -47,7 +47,7 @@ final class NewMinisiteController
     }
 
     /**
-     * Handle the simple new minisite creation form submission
+     * Handle the simple new minisite creation form submission (now creates draft)
      */
     public function handleCreateSimple(): void
     {
@@ -68,53 +68,27 @@ final class NewMinisiteController
 
         $currentUser = wp_get_current_user();
         
-        // Sanitize and validate input
-        $businessSlug = sanitize_text_field($_POST['business_slug'] ?? '');
-        $locationSlug = sanitize_text_field($_POST['location_slug'] ?? '');
-        
-        // Validate business slug (required)
-        if (empty($businessSlug)) {
-            wp_redirect('/account/sites/new?error=' . urlencode('Business slug is required'));
-            exit;
-        }
-        
-        // Validate slug format
-        if (!preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
-            wp_redirect('/account/sites/new?error=' . urlencode('Business slug can only contain lowercase letters, numbers, and hyphens'));
-            exit;
-        }
-        
-        if (!empty($locationSlug) && !preg_match('/^[a-z0-9-]+$/', $locationSlug)) {
-            wp_redirect('/account/sites/new?error=' . urlencode('Location slug can only contain lowercase letters, numbers, and hyphens'));
-            exit;
-        }
-        
         try {
             // Use database transaction to prevent race conditions
             global $wpdb;
             $wpdb->query('START TRANSACTION');
             
-            // Check if combination already exists (with row lock to prevent race conditions)
-            $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
-            if ($existingMinisite) {
-                $wpdb->query('ROLLBACK');
-                wp_redirect('/account/sites/new?error=' . urlencode('A minisite with this business and location combination already exists'));
-                exit;
-            }
+            // Generate unique ID and temporary slug
+            $minisiteId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
+            $tempSlug = \Minisite\Domain\Services\MinisiteIdGenerator::generateTempSlug($minisiteId);
             
             // Create empty site JSON structure
             $emptySiteJson = $this->getEmptySiteJson();
             
-            // Create SlugPair and GeoPoint objects
-            $slugs = new SlugPair($businessSlug, $locationSlug);
-            $geo = new GeoPoint(0, 0); // Default coordinates
+            // Create GeoPoint object (default coordinates)
+            $geo = new GeoPoint(0, 0);
             
-            // Create new profile
+            // Create new profile with temporary slug
             $minisite = new Minisite(
-                id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
-                slugs: $slugs,
-                title: ucwords(str_replace('-', ' ', $businessSlug)), // Default title from slug
-                name: ucwords(str_replace('-', ' ', $businessSlug)), // Default name from slug
+                id: $minisiteId,
+                slugs: new SlugPair(null, null), // No business/location slugs for drafts
+                title: 'Untitled Minisite',
+                name: 'Untitled Minisite',
                 city: '',
                 region: null,
                 countryCode: '',
@@ -142,6 +116,9 @@ final class NewMinisiteController
             // Save profile
             $savedMinisite = $this->minisiteRepository->save($minisite, 0); // 0 for new minisite
             
+            // Update the minisite with the temporary slug
+            $this->minisiteRepository->updateSlug($savedMinisite->id, $tempSlug);
+            
             // Create initial version
             $version = new Version(
                 id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
@@ -149,13 +126,13 @@ final class NewMinisiteController
                 versionNumber: 1,
                 status: 'draft',
                 label: 'Initial Draft',
-                comment: 'Created from new minisite form',
+                comment: 'Created as draft - ready for customization',
                 createdBy: $currentUser->ID,
                 createdAt: null,
                 publishedAt: null,
                 sourceVersionId: null,
                 siteJson: $emptySiteJson,
-                slugs: $slugs,
+                slugs: new SlugPair(null, null), // No business/location slugs for drafts
                 title: $savedMinisite->title,
                 name: $savedMinisite->name,
                 city: $savedMinisite->city,
@@ -179,7 +156,7 @@ final class NewMinisiteController
             $wpdb->query('COMMIT');
 
             // Redirect to edit screen
-            wp_redirect(home_url("/account/sites/edit/{$savedMinisite->id}?success=" . urlencode('Minisite created successfully! You can now customize it.')));
+            wp_redirect(home_url("/account/sites/edit/{$savedMinisite->id}?success=" . urlencode('Draft created successfully! You can now customize it and publish when ready.')));
             exit;
 
         } catch (\Exception $e) {
@@ -187,8 +164,8 @@ final class NewMinisiteController
             if (isset($wpdb)) {
                 $wpdb->query('ROLLBACK');
             }
-            error_log('Minisite creation error: ' . $e->getMessage());
-            wp_redirect('/account/sites/new?error=' . urlencode('Failed to create minisite: ' . $e->getMessage()));
+            error_log('Draft creation error: ' . $e->getMessage());
+            wp_redirect('/account/sites/new?error=' . urlencode('Failed to create draft: ' . $e->getMessage()));
             exit;
         }
     }
@@ -461,6 +438,312 @@ final class NewMinisiteController
         ];
         
         return trim(strtolower(implode(' ', array_filter($terms))));
+    }
+
+    /**
+     * Handle slug availability checking (API endpoint)
+     */
+    public function handleCheckSlugAvailability(): void
+    {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authenticated', 401);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_send_json_error('Method not allowed', 405);
+            return;
+        }
+
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'check_slug_availability')) {
+            wp_send_json_error('Security check failed', 403);
+            return;
+        }
+
+        $businessSlug = sanitize_text_field($_POST['business_slug'] ?? '');
+        $locationSlug = sanitize_text_field($_POST['location_slug'] ?? '');
+
+        // Validate slug format
+        if (!preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
+            wp_send_json_error('Business slug can only contain lowercase letters, numbers, and hyphens', 400);
+            return;
+        }
+
+        if (!empty($locationSlug) && !preg_match('/^[a-z0-9-]+$/', $locationSlug)) {
+            wp_send_json_error('Location slug can only contain lowercase letters, numbers, and hyphens', 400);
+            return;
+        }
+
+        try {
+            // Check if combination already exists
+            $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
+            
+            if ($existingMinisite) {
+                wp_send_json_success([
+                    'available' => false,
+                    'message' => 'This slug combination is already taken'
+                ]);
+            } else {
+                wp_send_json_success([
+                    'available' => true,
+                    'message' => 'This slug combination is available'
+                ]);
+            }
+
+        } catch (\Exception $e) {
+            wp_send_json_error('Failed to check slug availability: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Handle slug reservation (5-minute window for payment)
+     */
+    public function handleReserveSlug(): void
+    {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authenticated', 401);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_send_json_error('Method not allowed', 405);
+            return;
+        }
+
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'reserve_slug')) {
+            wp_send_json_error('Security check failed', 403);
+            return;
+        }
+
+        $businessSlug = sanitize_text_field($_POST['business_slug'] ?? '');
+        $locationSlug = sanitize_text_field($_POST['location_slug'] ?? '');
+
+        // Validate slug format
+        if (!preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
+            wp_send_json_error('Business slug can only contain lowercase letters, numbers, and hyphens', 400);
+            return;
+        }
+
+        if (!empty($locationSlug) && !preg_match('/^[a-z0-9-]+$/', $locationSlug)) {
+            wp_send_json_error('Location slug can only contain lowercase letters, numbers, and hyphens', 400);
+            return;
+        }
+
+        try {
+            global $wpdb;
+            $wpdb->query('START TRANSACTION');
+
+            // Check if combination already exists (with row lock)
+            $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
+            if ($existingMinisite) {
+                $wpdb->query('ROLLBACK');
+                wp_send_json_error('This slug combination is no longer available', 409);
+                return;
+            }
+
+            // Create a temporary reservation record
+            $reservationId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
+            $expiresAt = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+
+            // Store reservation in a temporary table or use existing mechanism
+            // For now, we'll use the minisites table with a special status
+            $reservationSlug = 'reserved-' . $reservationId;
+            
+            // Create temporary minisite record for reservation
+            $reservationMinisite = new Minisite(
+                id: $reservationId,
+                slugs: new SlugPair($businessSlug, $locationSlug),
+                title: 'Reserved',
+                name: 'Reserved',
+                city: '',
+                region: null,
+                countryCode: '',
+                postalCode: null,
+                geo: new GeoPoint(0, 0),
+                siteTemplate: 'v2025',
+                palette: 'blue',
+                industry: '',
+                defaultLocale: 'en-US',
+                schemaVersion: 1,
+                siteVersion: 1,
+                siteJson: [],
+                searchTerms: null,
+                status: 'reserved',
+                createdAt: null,
+                updatedAt: null,
+                publishedAt: null,
+                createdBy: get_current_user_id(),
+                updatedBy: get_current_user_id(),
+                currentVersionId: null,
+                isBookmarked: false,
+                canEdit: false
+            );
+
+            $this->minisiteRepository->save($reservationMinisite, 0);
+            $this->minisiteRepository->updateSlug($reservationId, $reservationSlug);
+
+            $wpdb->query('COMMIT');
+
+            wp_send_json_success([
+                'reservation_id' => $reservationId,
+                'expires_at' => $expiresAt,
+                'message' => 'Slug reserved for 5 minutes. Complete payment to secure it.'
+            ]);
+
+        } catch (\Exception $e) {
+            if (isset($wpdb)) {
+                $wpdb->query('ROLLBACK');
+            }
+            wp_send_json_error('Failed to reserve slug: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Handle publishing (payment completion and slug migration)
+     */
+    public function handlePublish(): void
+    {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authenticated', 401);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_send_json_error('Method not allowed', 405);
+            return;
+        }
+
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'publish_minisite')) {
+            wp_send_json_error('Security check failed', 403);
+            return;
+        }
+
+        $minisiteId = sanitize_text_field($_POST['minisite_id'] ?? '');
+        $businessSlug = sanitize_text_field($_POST['business_slug'] ?? '');
+        $locationSlug = sanitize_text_field($_POST['location_slug'] ?? '');
+        $paymentReference = sanitize_text_field($_POST['payment_reference'] ?? '');
+
+        if (empty($minisiteId) || empty($businessSlug) || empty($paymentReference)) {
+            wp_send_json_error('Missing required fields', 400);
+            return;
+        }
+
+        try {
+            global $wpdb;
+            $wpdb->query('START TRANSACTION');
+
+            // Get the draft minisite
+            $draftMinisite = $this->minisiteRepository->findById($minisiteId);
+            if (!$draftMinisite) {
+                $wpdb->query('ROLLBACK');
+                wp_send_json_error('Draft minisite not found', 404);
+                return;
+            }
+
+            // Check if user owns this draft
+            if ($draftMinisite->createdBy !== get_current_user_id()) {
+                $wpdb->query('ROLLBACK');
+                wp_send_json_error('Unauthorized', 403);
+                return;
+            }
+
+            // Check if slug combination is still available
+            $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
+            if ($existingMinisite && $existingMinisite->id !== $minisiteId) {
+                $wpdb->query('ROLLBACK');
+                wp_send_json_error('This slug combination is no longer available', 409);
+                return;
+            }
+
+            // Update minisite with permanent slugs
+            $this->minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
+            $this->minisiteRepository->updatePublishStatus($minisiteId, 'published');
+
+            // Create payment record
+            $paymentId = $this->createPaymentRecord($minisiteId, get_current_user_id(), $paymentReference);
+
+            // Create payment history record
+            $this->createPaymentHistoryRecord($minisiteId, $paymentId, 'initial_payment', $paymentReference);
+
+            $wpdb->query('COMMIT');
+
+            wp_send_json_success([
+                'message' => 'Minisite published successfully!',
+                'minisite_id' => $minisiteId,
+                'payment_id' => $paymentId,
+                'redirect_url' => "/account/sites/{$minisiteId}"
+            ]);
+
+        } catch (\Exception $e) {
+            if (isset($wpdb)) {
+                $wpdb->query('ROLLBACK');
+            }
+            wp_send_json_error('Failed to publish minisite: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Create payment record
+     */
+    private function createPaymentRecord(string $minisiteId, int $userId, string $paymentReference): int
+    {
+        global $wpdb;
+        
+        $paidAt = current_time('mysql');
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 year'));
+        $gracePeriodEndsAt = date('Y-m-d H:i:s', strtotime('+1 year +1 month'));
+
+        $wpdb->insert(
+            $wpdb->prefix . 'minisite_payments',
+            [
+                'minisite_id' => $minisiteId,
+                'user_id' => $userId,
+                'status' => 'active',
+                'amount' => 99.00, // TODO: Make this configurable
+                'currency' => 'USD',
+                'payment_method' => 'stripe', // TODO: Make this configurable
+                'payment_reference' => $paymentReference,
+                'paid_at' => $paidAt,
+                'expires_at' => $expiresAt,
+                'grace_period_ends_at' => $gracePeriodEndsAt,
+                'renewed_at' => null,
+                'reclaimed_at' => null
+            ],
+            [
+                '%s', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'
+            ]
+        );
+
+        return (int) $wpdb->insert_id;
+    }
+
+    /**
+     * Create payment history record
+     */
+    private function createPaymentHistoryRecord(string $minisiteId, int $paymentId, string $action, string $paymentReference): void
+    {
+        global $wpdb;
+        
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+1 year'));
+        $gracePeriodEndsAt = date('Y-m-d H:i:s', strtotime('+1 year +1 month'));
+
+        $wpdb->insert(
+            $wpdb->prefix . 'minisite_payment_history',
+            [
+                'minisite_id' => $minisiteId,
+                'payment_id' => $paymentId,
+                'action' => $action,
+                'amount' => 99.00, // TODO: Make this configurable
+                'currency' => 'USD',
+                'payment_reference' => $paymentReference,
+                'expires_at' => $expiresAt,
+                'grace_period_ends_at' => $gracePeriodEndsAt,
+                'new_owner_user_id' => null
+            ],
+            [
+                '%s', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%d'
+            ]
+        );
     }
 
     /**
