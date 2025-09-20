@@ -101,11 +101,11 @@ final class VersionRepository implements VersionRepositoryInterface
         return $this->mapRow($row);
     }
 
-    public function findByMinisiteId(int $minisiteId, int $limit = 50, int $offset = 0): array
+    public function findByMinisiteId(string $minisiteId, int $limit = 50, int $offset = 0): array
     {
         $sql = $this->db->prepare(
             "SELECT * FROM {$this->table()} 
-             WHERE minisite_id = %d 
+             WHERE minisite_id = %s 
              ORDER BY version_number DESC 
              LIMIT %d OFFSET %d",
             $minisiteId, $limit, $offset
@@ -115,11 +115,11 @@ final class VersionRepository implements VersionRepositoryInterface
         return array_map(fn($row) => $this->mapRow($row), $rows);
     }
 
-    public function findLatestVersion(int $minisiteId): ?Version
+    public function findLatestVersion(string $minisiteId): ?Version
     {
         $sql = $this->db->prepare(
             "SELECT * FROM {$this->table()} 
-             WHERE minisite_id = %d 
+             WHERE minisite_id = %s 
              ORDER BY version_number DESC 
              LIMIT 1",
             $minisiteId
@@ -129,11 +129,11 @@ final class VersionRepository implements VersionRepositoryInterface
         return $row ? $this->mapRow($row) : null;
     }
 
-    public function findLatestDraft(int $minisiteId): ?Version
+    public function findLatestDraft(string $minisiteId): ?Version
     {
         $sql = $this->db->prepare(
             "SELECT * FROM {$this->table()} 
-             WHERE minisite_id = %d AND status = 'draft' 
+             WHERE minisite_id = %s AND status = 'draft' 
              ORDER BY version_number DESC 
              LIMIT 1",
             $minisiteId
@@ -143,11 +143,11 @@ final class VersionRepository implements VersionRepositoryInterface
         return $row ? $this->mapRow($row) : null;
     }
 
-    public function findPublishedVersion(int $minisiteId): ?Version
+    public function findPublishedVersion(string $minisiteId): ?Version
     {
         $sql = $this->db->prepare(
             "SELECT * FROM {$this->table()} 
-             WHERE minisite_id = %d AND status = 'published' 
+             WHERE minisite_id = %s AND status = 'published' 
              LIMIT 1",
             $minisiteId
         );
@@ -156,10 +156,10 @@ final class VersionRepository implements VersionRepositoryInterface
         return $row ? $this->mapRow($row) : null;
     }
 
-    public function getNextVersionNumber(int $minisiteId): int
+    public function getNextVersionNumber(string $minisiteId): int
     {
         $sql = $this->db->prepare(
-            "SELECT MAX(version_number) as max_version FROM {$this->table()} WHERE minisite_id = %d",
+            "SELECT MAX(version_number) as max_version FROM {$this->table()} WHERE minisite_id = %s",
             $minisiteId
         );
         
