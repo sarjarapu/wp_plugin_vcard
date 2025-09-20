@@ -161,7 +161,7 @@ final class NewMinisiteController
             $wpdb->query('COMMIT');
 
             // Redirect to edit screen
-            wp_redirect(home_url("/account/sites/edit/{$savedMinisite->id}?success=" . urlencode('Draft created successfully! You can now customize it and publish when ready.')));
+            wp_redirect(home_url("/account/sites/{$savedMinisite->id}/edit?success=" . urlencode('Draft created successfully! You can now customize it and publish when ready.')));
             exit;
 
         } catch (\Exception $e) {
