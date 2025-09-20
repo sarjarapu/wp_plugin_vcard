@@ -1,13 +1,13 @@
 <?php
 namespace Minisite\Application\Controllers\Front;
 
-use Minisite\Infrastructure\Persistence\Repositories\ProfileRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 
 class VersionController
 {
     public function __construct(
-        private ProfileRepository $minisiteRepository,
+        private MinisiteRepository $minisiteRepository,
         private VersionRepository $versionRepository
     ) {}
 

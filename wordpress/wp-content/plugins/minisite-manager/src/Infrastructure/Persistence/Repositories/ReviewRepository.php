@@ -28,11 +28,11 @@ final class ReviewRepository implements ReviewRepositoryInterface
         return $r;
     }
 
-    public function listApprovedForMinisite(int $minisiteId, int $limit = 20): array
+    public function listApprovedForMinisite(string $minisiteId, int $limit = 20): array
     {
         $sql = $this->db->prepare(
             // AND status='approved' 
-            "SELECT * FROM {$this->table()} WHERE minisite_id=%d ORDER BY created_at DESC LIMIT %d",
+            "SELECT * FROM {$this->table()} WHERE minisite_id=%s ORDER BY created_at DESC LIMIT %d",
             $minisiteId, $limit
         );
         $rows = $this->db->get_results($sql, ARRAY_A) ?: [];

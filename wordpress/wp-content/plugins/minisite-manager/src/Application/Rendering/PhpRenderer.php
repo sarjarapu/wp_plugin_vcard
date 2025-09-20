@@ -1,23 +1,23 @@
 <?php
 namespace Minisite\Application\Rendering;
 
-use Minisite\Domain\Entities\Profile;
+use Minisite\Domain\Entities\Minisite;
 
 final class PhpRenderer
 {
     public function __construct(private string $variant = 'default') {}
 
-    public function render(Profile $mrofile): void
+    public function render(Minisite $minisite): void
     {
         $base = trailingslashit(\MINISITE_PLUGIN_DIR) . 'templates/php';
         $candidates = [
-            $base . '/' . $this->variant . '/profile.php',
-            $base . '/default/profile.php',
+            $base . '/' . $this->variant . '/minisite.php',
+            $base . '/default/minisite.php',
         ];
         foreach ($candidates as $file) {
             if (is_readable($file)) {
-                /** @var Profile $mrofile */
-                $m = $mrofile; // local alias for template clarity
+                /** @var Minisite $minisite */
+                $m = $minisite; // local alias for template clarity
                 require $file;
                 return;
             }

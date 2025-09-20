@@ -15,7 +15,7 @@ final class Minisite
         public ?string $region,
         public string $countryCode,
         public ?string $postalCode,
-        public GeoPoint $geo,
+        public ?GeoPoint $geo,
         public string $siteTemplate,   // e.g. v2025
         public string $palette,        // e.g. blue
         public string $industry,       // e.g. services

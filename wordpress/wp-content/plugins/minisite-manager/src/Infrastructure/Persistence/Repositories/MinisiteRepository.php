@@ -208,7 +208,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         }
 
         // Sync POINT column if lat/lng set
-        if ($m->geo->isSet()) {
+        if ($m->geo && $m->geo->isSet()) {
             $this->db->query($this->db->prepare(
                 "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f,%f),4326)
                  WHERE business_slug=%s AND location_slug=%s",

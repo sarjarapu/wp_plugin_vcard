@@ -95,8 +95,8 @@ final class NewMinisiteController
             $wpdb->query('START TRANSACTION');
             
             // Check if combination already exists (with row lock to prevent race conditions)
-            $existingProfile = $this->profileRepository->findBySlugParams($businessSlug, $locationSlug);
-            if ($existingProfile) {
+            $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
+            if ($existingMinisite) {
                 $wpdb->query('ROLLBACK');
                 wp_redirect('/account/sites/new?error=' . urlencode('A minisite with this business and location combination already exists'));
                 exit;
@@ -140,12 +140,12 @@ final class NewMinisiteController
             );
 
             // Save profile
-            $savedProfile = $this->profileRepository->save($minisite, 0); // 0 for new profile
+            $savedMinisite = $this->minisiteRepository->save($minisite, 0); // 0 for new minisite
             
             // Create initial version
             $version = new Version(
                 id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
-                minisiteId: $savedProfile->id,
+                minisiteId: $savedMinisite->id,
                 versionNumber: 1,
                 status: 'draft',
                 label: 'Initial Draft',
@@ -156,20 +156,20 @@ final class NewMinisiteController
                 sourceVersionId: null,
                 siteJson: $emptySiteJson,
                 slugs: $slugs,
-                title: $savedProfile->title,
-                name: $savedProfile->name,
-                city: $savedProfile->city,
-                region: $savedProfile->region,
-                countryCode: $savedProfile->countryCode,
-                postalCode: $savedProfile->postalCode,
+                title: $savedMinisite->title,
+                name: $savedMinisite->name,
+                city: $savedMinisite->city,
+                region: $savedMinisite->region,
+                countryCode: $savedMinisite->countryCode,
+                postalCode: $savedMinisite->postalCode,
                 geo: $geo,
-                siteTemplate: $savedProfile->siteTemplate,
-                palette: $savedProfile->palette,
-                industry: $savedProfile->industry,
-                defaultLocale: $savedProfile->defaultLocale,
-                schemaVersion: $savedProfile->schemaVersion,
-                siteVersion: $savedProfile->siteVersion,
-                searchTerms: $savedProfile->searchTerms
+                siteTemplate: $savedMinisite->siteTemplate,
+                palette: $savedMinisite->palette,
+                industry: $savedMinisite->industry,
+                defaultLocale: $savedMinisite->defaultLocale,
+                schemaVersion: $savedMinisite->schemaVersion,
+                siteVersion: $savedMinisite->siteVersion,
+                searchTerms: $savedMinisite->searchTerms
             );
 
             // Save version
@@ -179,7 +179,7 @@ final class NewMinisiteController
             $wpdb->query('COMMIT');
 
             // Redirect to edit screen
-            wp_redirect(home_url("/account/sites/edit/{$savedProfile->id}?success=" . urlencode('Minisite created successfully! You can now customize it.')));
+            wp_redirect(home_url("/account/sites/edit/{$savedMinisite->id}?success=" . urlencode('Minisite created successfully! You can now customize it.')));
             exit;
 
         } catch (\Exception $e) {
@@ -270,12 +270,12 @@ final class NewMinisiteController
             );
 
             // Save profile
-            $savedProfile = $this->profileRepository->save($minisite, 0);
+            $savedMinisite = $this->minisiteRepository->save($minisite, 0);
 
             // Create initial version
             $version = new \Minisite\Domain\Entities\Version(
                 id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
-                minisiteId: $savedProfile->id,
+                minisiteId: $savedMinisite->id,
                 versionNumber: 1,
                 status: 'draft',
                 label: 'Initial Draft',
@@ -305,13 +305,13 @@ final class NewMinisiteController
             $savedVersion = $this->versionRepository->save($version);
 
             // Update profile with current version ID
-            $this->profileRepository->updateCurrentVersionId($savedProfile->id, $savedVersion->id);
+            $this->minisiteRepository->updateCurrentVersionId($savedMinisite->id, $savedVersion->id);
 
             wp_send_json_success([
                 'message' => 'Minisite created successfully',
-                'minisite_id' => $savedProfile->id,
+                'minisite_id' => $savedMinisite->id,
                 'version_id' => $savedVersion->id,
-                'redirect_url' => "/account/sites/{$savedProfile->id}/edit"
+                'redirect_url' => "/account/sites/{$savedMinisite->id}/edit"
             ]);
 
         } catch (\Exception $e) {
@@ -332,7 +332,7 @@ final class NewMinisiteController
         $slug = $baseSlug;
         $counter = 1;
 
-        while ($this->profileRepository->findBySlugs(new SlugPair($slug, 'temp')) !== null) {
+        while ($this->minisiteRepository->findBySlugs(new SlugPair($slug, 'temp')) !== null) {
             $slug = $baseSlug . '-' . $counter;
             $counter++;
             
@@ -357,7 +357,7 @@ final class NewMinisiteController
         $slug = $baseSlug;
         $counter = 1;
 
-        while ($this->profileRepository->findBySlugs(new SlugPair('temp', $slug)) !== null) {
+        while ($this->minisiteRepository->findBySlugs(new SlugPair('temp', $slug)) !== null) {
             $slug = $baseSlug . '-' . $counter;
             $counter++;
             

@@ -1,13 +1,13 @@
 <?php
 namespace Minisite\Application\Rendering;
 
-use Minisite\Domain\Entities\Profile;
+use Minisite\Domain\Entities\Minisite;
 
 final class TimberRenderer
 {
     public function __construct(private string $variant = 'v2025') {}
 
-    public function render(Profile $minisite): void
+    public function render(Minisite $minisite): void
     {
         if (!class_exists('Timber\\Timber')) {
             // Fallback: minimal echo if Timber is not present
@@ -25,7 +25,7 @@ final class TimberRenderer
         // Fetch reviews for the profile
         global $wpdb;
         $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository($wpdb);
-        $reviews = $reviewRepo->listApprovedForProfile($minisite->id);
+        $reviews = $reviewRepo->listApprovedForMinisite($minisite->id);
 
         // Check if current user has bookmarked this profile
         $isBookmarked = false;
@@ -45,8 +45,8 @@ final class TimberRenderer
             $canEdit = current_user_can('minisite_edit_profile', $minisite->id);
         }
 
-        // Create a new Profile object with the updated properties
-        $minisite = new \Minisite\Domain\Entities\Profile(
+        // Create a new Minisite object with the updated properties
+        $minisite = new \Minisite\Domain\Entities\Minisite(
             id: $minisite->id,
             slugs: $minisite->slugs,
             title: $minisite->title,
@@ -77,13 +77,12 @@ final class TimberRenderer
 
         // Pass the entity directly; use properties in Twig (no additional mapping)
         $context = [
-            'profile' => $minisite,
+            'minisite' => $minisite,
             'reviews' => $reviews,
         ];
 
         \Timber\Timber::render([
-            $this->variant . '/profile.twig',
-            'default/profile.twig',
+            $this->variant . '/minisite.twig',
         ], $context);
     }
 }
