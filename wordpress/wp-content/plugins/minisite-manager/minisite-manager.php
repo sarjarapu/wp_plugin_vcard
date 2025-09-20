@@ -836,7 +836,7 @@ add_action('wp_ajax_add_bookmark', function () {
     return;
   }
 
-  $profileId = (int) ($_POST['profile_id'] ?? 0);
+  $profileId = $_POST['profile_id'] ?? '';
   $userId = get_current_user_id();
   
   if (!$profileId) {
@@ -904,7 +904,7 @@ add_action('wp_ajax_remove_bookmark', function () {
     return;
   }
 
-  $profileId = (int) ($_POST['profile_id'] ?? 0);
+  $profileId = $_POST['profile_id'] ?? '';
   $userId = get_current_user_id();
   
   if (!$profileId) {

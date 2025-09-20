@@ -9,6 +9,11 @@ interface ProfileRepositoryInterface
     public function findBySlugs(SlugPair $slugs): ?Profile;
 
     /**
+     * Find profile by ID
+     */
+    public function findById(string $id): ?Profile;
+
+    /**
      * Save live row with optimistic locking.
      * @throws \RuntimeException if version check fails
      */

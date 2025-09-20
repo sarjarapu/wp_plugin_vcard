@@ -75,7 +75,7 @@ final class SitesController
             exit;
         }
 
-        $siteId = (int) get_query_var('minisite_site_id');
+        $siteId = get_query_var('minisite_site_id');
         if (!$siteId) {
             wp_redirect(home_url('/account/sites'));
             exit;
@@ -256,7 +256,7 @@ final class SitesController
             exit;
         }
 
-        $siteId = (int) get_query_var('minisite_site_id');
+        $siteId = get_query_var('minisite_site_id');
         $versionId = get_query_var('minisite_version_id');
         
         if (!$siteId) {

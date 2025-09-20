@@ -57,9 +57,9 @@ final class ProfileRepository implements ProfileRepositoryInterface
     /**
      * Find profile by ID
      */
-    public function findById(int $id): ?Profile
+    public function findById(string $id): ?Profile
     {
-        $sql = $this->db->prepare("SELECT * FROM {$this->table()} WHERE id=%d LIMIT 1", $id);
+        $sql = $this->db->prepare("SELECT * FROM {$this->table()} WHERE id=%s LIMIT 1", $id);
         $row = $this->db->get_row($sql, ARRAY_A);
         if (!$row) return null;
         return $this->mapRow($row);
