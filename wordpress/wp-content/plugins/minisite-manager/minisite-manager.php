@@ -463,6 +463,23 @@ add_action('template_redirect', function () {
           nocache_headers();
           echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>New minisite creation unavailable</h1>';
           exit;
+        case 'publish':
+          // Handle publish page
+          if (class_exists('Timber\\Timber')) {
+            $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
+            $componentsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
+            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$viewsBase, $componentsBase])));
+            
+            \Timber\Timber::render('account-sites-publish.twig', [
+              'page_title' => 'Publish Your Minisite',
+              'page_subtitle' => 'Choose your permanent URL and make your minisite live'
+            ]);
+          } else {
+            status_header(503);
+            nocache_headers();
+            echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Publish page unavailable</h1>';
+          }
+          exit;
         case 'edit':
           // Delegate to SitesController for editing
           if ($sitesCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\SitesController::class)) {
@@ -968,5 +985,71 @@ add_action('wp_ajax_create_minisite', function () {
     
   } catch (\Exception $e) {
     wp_send_json_error('Failed to create minisite: ' . $e->getMessage(), 500);
+  }
+});
+
+/**
+ * AJAX handler for checking slug availability
+ */
+add_action('wp_ajax_check_slug_availability', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+    
+    $newMinisiteCtrl->handleCheckSlugAvailability();
+    
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to check slug availability: ' . $e->getMessage(), 500);
+  }
+});
+
+/**
+ * AJAX handler for reserving slugs
+ */
+add_action('wp_ajax_reserve_slug', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+    
+    $newMinisiteCtrl->handleReserveSlug();
+    
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to reserve slug: ' . $e->getMessage(), 500);
+  }
+});
+
+/**
+ * AJAX handler for publishing minisites
+ */
+add_action('wp_ajax_publish_minisite', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+    
+    $newMinisiteCtrl->handlePublish();
+    
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to publish minisite: ' . $e->getMessage(), 500);
   }
 });

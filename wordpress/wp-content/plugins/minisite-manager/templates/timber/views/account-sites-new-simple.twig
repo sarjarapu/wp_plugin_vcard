@@ -56,109 +56,128 @@
         </div>
       {% endif %}
 
-      <!-- Create Minisite Form -->
+      <!-- Create Draft Section -->
       <div class="bg-[var(--surface)] rounded-2xl ring-1 ring-[var(--outline-variant)] p-8">
-        <h2 class="text-xl font-semibold text-[var(--on-surface)] mb-6">Minisite Details</h2>
-        
-        <form id="create-minisite-form" method="post" class="space-y-6">
-          {{ function('wp_nonce_field', 'minisite_create', 'minisite_nonce') }}
-          
-          <!-- Business Slug -->
-          <div>
-            <label for="business_slug" class="block text-sm font-medium text-[var(--on-surface)] mb-2">
-              Business Slug <span class="text-red-500">*</span>
-            </label>
-            <div class="relative">
-              <input 
-                type="text" 
-                id="business_slug" 
-                name="business_slug" 
-                value="{{ form_data.business_slug|default('') }}"
-                placeholder="e.g., acme-dental, lotus-textiles"
-                required
-                pattern="[a-z0-9-]+"
-                title="Only lowercase letters, numbers, and hyphens allowed"
-                class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3 pr-12 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--focus-ring)]"
-              />
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                <i class="fa-solid fa-building text-[var(--on-surface-variant)]"></i>
-              </div>
+        <div class="text-center">
+          <div class="mb-6">
+            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--primary)] flex items-center justify-center">
+              <i class="fa-solid fa-plus text-2xl text-[var(--on-primary)]"></i>
             </div>
-            <p class="mt-1 text-xs text-[var(--on-surface-variant)]">
-              This will be part of your minisite URL: <span class="font-mono text-[var(--primary)]">/b/{business-slug}/{location-slug}</span>
+            <h2 class="text-2xl font-semibold text-[var(--on-surface)] mb-2">Create Your Minisite</h2>
+            <p class="text-[var(--on-surface-variant)] max-w-md mx-auto">
+              Start with a free draft to explore and customize your minisite. 
+              You can publish it anytime when you're ready.
             </p>
           </div>
 
-          <!-- Location Slug -->
-          <div>
-            <label for="location_slug" class="block text-sm font-medium text-[var(--on-surface)] mb-2">
-              Location Slug <span class="text-[var(--on-surface-variant)]">(optional)</span>
-            </label>
-            <div class="relative">
-              <input 
-                type="text" 
-                id="location_slug" 
-                name="location_slug" 
-                value="{{ form_data.location_slug|default('') }}"
-                placeholder="e.g., dallas, mumbai, main-office"
-                pattern="[a-z0-9-]+"
-                title="Only lowercase letters, numbers, and hyphens allowed"
-                class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3 pr-12 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--focus-ring)]"
-              />
-              <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-                <i class="fa-solid fa-map-marker-alt text-[var(--on-surface-variant)]"></i>
-              </div>
+          <!-- Create Draft Form -->
+          <form id="create-draft-form" method="post" class="space-y-6">
+            {{ function('wp_nonce_field', 'minisite_create', 'minisite_nonce') }}
+            
+            <!-- Form Actions -->
+            <div class="flex items-center justify-center gap-4">
+              <button 
+                type="submit" 
+                id="create-draft-button"
+                class="inline-flex items-center gap-3 px-8 py-4 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-lg"
+              >
+                <i class="fa-solid fa-rocket" id="create-draft-icon"></i>
+                <span id="create-draft-text">Create Free Draft</span>
+                <div id="create-draft-loading" class="hidden">
+                  <i class="fa-solid fa-spinner fa-spin"></i>
+                </div>
+              </button>
+              <a href="{{ function('home_url','/account/sites') }}" 
+                 class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] font-medium">
+                Cancel
+              </a>
             </div>
-            <p class="mt-1 text-xs text-[var(--on-surface-variant)]">
-              Leave empty for single-location businesses. If provided, your URL will be: <span class="font-mono text-[var(--primary)]">/b/{business-slug}/{location-slug}</span>
-            </p>
-          </div>
-
-          <!-- Preview URL -->
-          <div id="url-preview" class="hidden p-4 rounded-lg bg-[var(--surface-1)] border border-[var(--outline-variant)]">
-            <h3 class="text-sm font-medium text-[var(--on-surface)] mb-2">Preview URL:</h3>
-            <p class="font-mono text-[var(--primary)] text-sm" id="preview-url"></p>
-          </div>
-
-          <!-- Form Actions -->
-          <div class="flex items-center gap-4 pt-6 border-t border-[var(--outline-variant)]">
-            <button 
-              type="submit" 
-              id="create-button"
-              class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              <i class="fa-solid fa-plus" id="create-icon"></i>
-              <span id="create-text">Create Minisite</span>
-              <div id="create-loading" class="hidden">
-                <i class="fa-solid fa-spinner fa-spin"></i>
-              </div>
-            </button>
-            <a href="{{ function('home_url','/account/sites') }}" 
-               class="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] font-medium">
-              Cancel
-            </a>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
 
-      <!-- Help Section -->
+      <!-- How It Works Section -->
       <div class="mt-8 bg-[var(--surface-1)] rounded-2xl ring-1 ring-[var(--outline-variant)] p-6">
-        <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-4">
+        <h3 class="text-lg font-semibold text-[var(--on-surface)] mb-6 text-center">
           <i class="fa-solid fa-lightbulb mr-2"></i>
           How it works
         </h3>
-        <div class="space-y-3 text-sm text-[var(--on-surface-variant)]">
-          <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-xs flex items-center justify-center font-medium">1</span>
-            <p>Provide a unique business slug (and optional location slug)</p>
+        <div class="grid md:grid-cols-2 gap-6">
+          <!-- Phase 1: Draft Creation -->
+          <div class="space-y-4">
+            <h4 class="font-semibold text-[var(--on-surface)] flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-xs flex items-center justify-center font-medium">1</span>
+              Free Draft Creation
+            </h4>
+            <div class="space-y-3 text-sm text-[var(--on-surface-variant)] ml-8">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                <p>Create a draft with a temporary URL (e.g., draft-abc123)</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                <p>Edit and customize your minisite for free</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                <p>No time limits - explore as long as you want</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-check text-green-500 mt-0.5"></i>
+                <p>All features available in draft mode</p>
+              </div>
+            </div>
           </div>
-          <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-xs flex items-center justify-center font-medium">2</span>
-            <p>We'll create an empty minisite profile for you</p>
+
+          <!-- Phase 2: Publishing -->
+          <div class="space-y-4">
+            <h4 class="font-semibold text-[var(--on-surface)] flex items-center gap-2">
+              <span class="w-6 h-6 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-xs flex items-center justify-center font-medium">2</span>
+              Publish When Ready
+            </h4>
+            <div class="space-y-3 text-sm text-[var(--on-surface-variant)] ml-8">
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-globe text-blue-500 mt-0.5"></i>
+                <p>Choose your permanent URL (e.g., acme-dental/dallas)</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-clock text-orange-500 mt-0.5"></i>
+                <p>5-minute reservation window to complete payment</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-credit-card text-green-500 mt-0.5"></i>
+                <p>Single payment for slug ownership + 1 year public access</p>
+              </div>
+              <div class="flex items-start gap-3">
+                <i class="fa-solid fa-calendar text-purple-500 mt-0.5"></i>
+                <p>1-month grace period after expiration before slug becomes available</p>
+              </div>
+            </div>
           </div>
-          <div class="flex items-start gap-3">
-            <span class="flex-shrink-0 w-6 h-6 rounded-full bg-[var(--primary)] text-[var(--on-primary)] text-xs flex items-center justify-center font-medium">3</span>
-            <p>You'll be redirected to the editor to customize your minisite</p>
+        </div>
+      </div>
+
+      <!-- Benefits Section -->
+      <div class="mt-8 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] rounded-2xl p-6 text-white">
+        <h3 class="text-lg font-semibold mb-4 text-center">
+          <i class="fa-solid fa-star mr-2"></i>
+          Why Choose Our Platform?
+        </h3>
+        <div class="grid md:grid-cols-3 gap-4 text-sm">
+          <div class="text-center">
+            <i class="fa-solid fa-shield-alt text-2xl mb-2"></i>
+            <p class="font-medium">No Risk</p>
+            <p class="opacity-90">Try before you buy - no commitment required</p>
+          </div>
+          <div class="text-center">
+            <i class="fa-solid fa-bolt text-2xl mb-2"></i>
+            <p class="font-medium">Fast Setup</p>
+            <p class="opacity-90">Get started in seconds with our intuitive editor</p>
+          </div>
+          <div class="text-center">
+            <i class="fa-solid fa-heart text-2xl mb-2"></i>
+            <p class="font-medium">Fair Competition</p>
+            <p class="opacity-90">First to pay wins - no slug squatting allowed</p>
           </div>
         </div>
       </div>
@@ -166,35 +185,12 @@
   </main>
 
   <script>
-    // URL Preview functionality
-    function updateUrlPreview() {
-      const businessSlug = document.getElementById('business_slug').value.trim();
-      const locationSlug = document.getElementById('location_slug').value.trim();
-      const previewDiv = document.getElementById('url-preview');
-      const previewUrl = document.getElementById('preview-url');
-      
-      if (businessSlug) {
-        let url = `/b/${businessSlug}`;
-        if (locationSlug) {
-          url += `/${locationSlug}`;
-        }
-        previewUrl.textContent = window.location.origin + url;
-        previewDiv.classList.remove('hidden');
-      } else {
-        previewDiv.classList.add('hidden');
-      }
-    }
-
-    // Add event listeners
-    document.getElementById('business_slug').addEventListener('input', updateUrlPreview);
-    document.getElementById('location_slug').addEventListener('input', updateUrlPreview);
-
     // Form submission handling
-    document.getElementById('create-minisite-form').addEventListener('submit', function(e) {
-      const button = document.getElementById('create-button');
-      const icon = document.getElementById('create-icon');
-      const text = document.getElementById('create-text');
-      const loading = document.getElementById('create-loading');
+    document.getElementById('create-draft-form').addEventListener('submit', function(e) {
+      const button = document.getElementById('create-draft-button');
+      const icon = document.getElementById('create-draft-icon');
+      const text = document.getElementById('create-draft-text');
+      const loading = document.getElementById('create-draft-loading');
       
       // Show loading state
       button.disabled = true;
@@ -202,24 +198,6 @@
       text.classList.add('hidden');
       loading.classList.remove('hidden');
     });
-
-    // Auto-format slugs (lowercase, replace spaces with hyphens)
-    function formatSlug(input) {
-      input.addEventListener('input', function() {
-        let value = this.value.toLowerCase();
-        value = value.replace(/[^a-z0-9-]/g, '-');
-        value = value.replace(/-+/g, '-');
-        value = value.replace(/^-|-$/g, '');
-        this.value = value;
-        updateUrlPreview();
-      });
-    }
-
-    formatSlug(document.getElementById('business_slug'));
-    formatSlug(document.getElementById('location_slug'));
-
-    // Initial URL preview
-    updateUrlPreview();
   </script>
 </body>
 </html>

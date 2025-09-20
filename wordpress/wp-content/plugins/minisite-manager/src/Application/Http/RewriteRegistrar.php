@@ -21,6 +21,9 @@ final class RewriteRegistrar
         // Account sites new route: /account/sites/new
         add_rewrite_rule('^account/sites/new/?$', 'index.php?minisite_account=1&minisite_account_action=new', 'top');
         
+        // Account sites publish route: /account/sites/publish
+        add_rewrite_rule('^account/sites/publish/?$', 'index.php?minisite_account=1&minisite_account_action=publish', 'top');
+        
         // Account sites management routes: /account/sites/{id}/edit, /account/sites/{id}/edit/{version_id}, /account/sites/{id}/preview/{version_id}, /account/sites/{id}/versions
         add_rewrite_tag('%minisite_site_id%', '([a-f0-9]{32})');
         add_rewrite_tag('%minisite_version_id%', '([0-9]+|current|latest)');
