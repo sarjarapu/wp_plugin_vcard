@@ -9,7 +9,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
 {
     public function __construct(private \wpdb $db) {}
 
-    private function table(): string { return $this->db->prefix . 'minisite_profiles'; }
+    private function table(): string { return $this->db->prefix . 'minisites'; }
 
     public function findBySlugs(SlugPair $slugs): ?Profile
     {

@@ -10,7 +10,7 @@ class _1_0_0_CreateBase implements Migration
 
     public function description(): string
     {
-        return 'Create base tables: minisite_profiles, minisite_profile_revisions, minisite_versions (with complete profile field versioning), minisite_reviews + seed dev data';
+        return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), minisite_reviews, minisite_bookmarks + seed dev data';
     }
 
     public function up(\wpdb $wpdb): void

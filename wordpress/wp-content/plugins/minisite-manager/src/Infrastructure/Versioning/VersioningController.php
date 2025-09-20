@@ -46,10 +46,10 @@ class VersioningController
     {
         $prefix = $wpdb->prefix;
         $tables = [
-            $prefix . 'minisite_profiles',
-            $prefix . 'minisite_profile_revisions',
+            $prefix . 'minisites',
             $prefix . 'minisite_versions',
             $prefix . 'minisite_reviews',
+            $prefix . 'minisite_bookmarks',
         ];
 
         foreach ($tables as $t) {

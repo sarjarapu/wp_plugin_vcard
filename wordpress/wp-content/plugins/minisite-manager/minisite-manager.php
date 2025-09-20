@@ -322,7 +322,7 @@ add_filter('minisite_user_owns_profile', function (bool $default, int $userId, i
   
   // Check if user owns the profile (using created_by as owner surrogate for now)
   $ownerId = $wpdb->get_var($wpdb->prepare(
-    "SELECT created_by FROM {$wpdb->prefix}minisite_profiles WHERE id = %d",
+    "SELECT created_by FROM {$wpdb->prefix}minisites WHERE id = %d",
     $profileId
   ));
   
@@ -340,7 +340,7 @@ add_filter('minisite_profile_is_public', function (bool $default, int $profileId
   
   // Check if profile is published
   $status = $wpdb->get_var($wpdb->prepare(
-    "SELECT status FROM {$wpdb->prefix}minisite_profiles WHERE id = %d",
+    "SELECT status FROM {$wpdb->prefix}minisites WHERE id = %d",
     $profileId
   ));
   
@@ -686,7 +686,7 @@ add_action('wp_ajax_publish_version', function () {
       
       // Update profile with published version data and current version ID
       $wpdb->query($wpdb->prepare(
-        "UPDATE {$wpdb->prefix}minisite_profiles 
+        "UPDATE {$wpdb->prefix}minisites 
          SET site_json = %s, 
              title = %s,
              name = %s,
@@ -725,7 +725,7 @@ add_action('wp_ajax_publish_version', function () {
       // Update location_point if geo data exists
       if ($version->geo && $version->geo->lat && $version->geo->lng) {
         $wpdb->query($wpdb->prepare(
-          "UPDATE {$wpdb->prefix}minisite_profiles 
+          "UPDATE {$wpdb->prefix}minisites 
            SET location_point = ST_SRID(POINT(%f, %f), 4326) 
            WHERE id = %d",
           $version->geo->lng, $version->geo->lat, $siteId

@@ -292,7 +292,7 @@ class VersionController
             
             // Update profile with published version data and current version ID
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisite_profiles 
+                "UPDATE {$wpdb->prefix}minisites 
                  SET site_json = %s, 
                      title = %s,
                      name = %s,
@@ -331,7 +331,7 @@ class VersionController
             // Update location_point if geo data exists
             if ($version->geo && $version->geo->lat && $version->geo->lng) {
                 $wpdb->query($wpdb->prepare(
-                    "UPDATE {$wpdb->prefix}minisite_profiles 
+                    "UPDATE {$wpdb->prefix}minisites 
                      SET location_point = ST_SRID(POINT(%f, %f), 4326) 
                      WHERE id = %d",
                     $version->geo->lng, $version->geo->lat, $minisiteId
