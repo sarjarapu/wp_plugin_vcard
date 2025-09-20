@@ -449,7 +449,13 @@ add_action('template_redirect', function () {
             $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
             $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
             $newMinisiteCtrl = new $newMinisiteCtrlClass($profileRepo, $versionRepo);
-            $newMinisiteCtrl->handleNew();
+            
+            // Handle form submission
+            if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_nonce'])) {
+              $newMinisiteCtrl->handleCreateSimple();
+            } else {
+              $newMinisiteCtrl->handleNew();
+            }
             break;
           }
           // Fallback if NewMinisiteController missing

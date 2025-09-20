@@ -24,6 +24,21 @@ final class ProfileRepository implements ProfileRepositoryInterface
     }
 
     /**
+     * Find profile by individual slug parameters (for race condition checking)
+     */
+    public function findBySlugParams(string $businessSlug, string $locationSlug): ?Profile
+    {
+        $sql = $this->db->prepare(
+            "SELECT * FROM {$this->table()} WHERE business_slug=%s AND location_slug=%s LIMIT 1 FOR UPDATE",
+            $businessSlug, $locationSlug
+        );
+        $row = $this->db->get_row($sql, ARRAY_A);
+        if (!$row) return null;
+
+        return $this->mapRow($row);
+    }
+
+    /**
      * List profiles owned by a user (v1 minimal: uses created_by as owner surrogate)
      * TODO: Switch to explicit owner_user_id column when added.
      *

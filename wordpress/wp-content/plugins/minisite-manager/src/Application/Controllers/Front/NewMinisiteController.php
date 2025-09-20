@@ -27,24 +27,169 @@ final class NewMinisiteController
 
         $currentUser = wp_get_current_user();
         
-        // Create empty site JSON structure for new minisite
-        $emptySiteJson = $this->getEmptySiteJson();
-        
         $context = [
             'page_title' => 'Create New Minisite',
-            'page_subtitle' => 'Build your business minisite from scratch',
-            'site_json' => $emptySiteJson,
+            'page_subtitle' => 'Start by providing your business and location slugs',
+            'form_data' => $_POST ?? [],
+            'error_msg' => $_GET['error'] ?? null,
+            'success_msg' => $_GET['success'] ?? null,
             'user' => $currentUser,
-            'nonce' => wp_create_nonce('minisite_new')
         ];
 
-        // Render the template
+        // Render the simple template
         if (class_exists('Timber\\Timber')) {
             $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
             $componentsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
             \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$viewsBase, $componentsBase])));
             
-            \Timber\Timber::render('account-sites-new.twig', $context);
+            \Timber\Timber::render('account-sites-new-simple.twig', $context);
+        }
+    }
+
+    /**
+     * Handle the simple new minisite creation form submission
+     */
+    public function handleCreateSimple(): void
+    {
+        if (!is_user_logged_in()) {
+            wp_redirect('/account/sites/new?error=' . urlencode('Not authenticated'));
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_redirect('/account/sites/new?error=' . urlencode('Method not allowed'));
+            exit;
+        }
+
+        if (!wp_verify_nonce($_POST['minisite_nonce'] ?? '', 'minisite_create')) {
+            wp_redirect('/account/sites/new?error=' . urlencode('Security check failed'));
+            exit;
+        }
+
+        $currentUser = wp_get_current_user();
+        
+        // Sanitize and validate input
+        $businessSlug = sanitize_text_field($_POST['business_slug'] ?? '');
+        $locationSlug = sanitize_text_field($_POST['location_slug'] ?? '');
+        
+        // Validate business slug (required)
+        if (empty($businessSlug)) {
+            wp_redirect('/account/sites/new?error=' . urlencode('Business slug is required'));
+            exit;
+        }
+        
+        // Validate slug format
+        if (!preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
+            wp_redirect('/account/sites/new?error=' . urlencode('Business slug can only contain lowercase letters, numbers, and hyphens'));
+            exit;
+        }
+        
+        if (!empty($locationSlug) && !preg_match('/^[a-z0-9-]+$/', $locationSlug)) {
+            wp_redirect('/account/sites/new?error=' . urlencode('Location slug can only contain lowercase letters, numbers, and hyphens'));
+            exit;
+        }
+        
+        try {
+            // Use database transaction to prevent race conditions
+            global $wpdb;
+            $wpdb->query('START TRANSACTION');
+            
+            // Check if combination already exists (with row lock to prevent race conditions)
+            $existingProfile = $this->profileRepository->findBySlugParams($businessSlug, $locationSlug);
+            if ($existingProfile) {
+                $wpdb->query('ROLLBACK');
+                wp_redirect('/account/sites/new?error=' . urlencode('A minisite with this business and location combination already exists'));
+                exit;
+            }
+            
+            // Create empty site JSON structure
+            $emptySiteJson = $this->getEmptySiteJson();
+            
+            // Create SlugPair and GeoPoint objects
+            $slugs = new SlugPair($businessSlug, $locationSlug);
+            $geo = new GeoPoint(0, 0); // Default coordinates
+            
+            // Create new profile
+            $profile = new Profile(
+                id: null,
+                slugs: $slugs,
+                title: ucwords(str_replace('-', ' ', $businessSlug)), // Default title from slug
+                name: ucwords(str_replace('-', ' ', $businessSlug)), // Default name from slug
+                city: '',
+                region: null,
+                countryCode: '',
+                postalCode: null,
+                geo: $geo,
+                siteTemplate: 'v2025',
+                palette: 'blue',
+                industry: '',
+                defaultLocale: 'en-US',
+                schemaVersion: 1,
+                siteVersion: 1,
+                siteJson: $emptySiteJson,
+                searchTerms: null,
+                status: 'draft',
+                createdAt: null,
+                updatedAt: null,
+                publishedAt: null,
+                createdBy: $currentUser->ID,
+                updatedBy: $currentUser->ID,
+                currentVersionId: null,
+                isBookmarked: false,
+                canEdit: true
+            );
+
+            // Save profile
+            $savedProfile = $this->profileRepository->save($profile, 0); // 0 for new profile
+            
+            // Create initial version
+            $version = new Version(
+                id: null,
+                minisiteId: $savedProfile->id,
+                versionNumber: 1,
+                status: 'draft',
+                label: 'Initial Draft',
+                comment: 'Created from new minisite form',
+                createdBy: $currentUser->ID,
+                createdAt: null,
+                publishedAt: null,
+                sourceVersionId: null,
+                siteJson: $emptySiteJson,
+                slugs: $slugs,
+                title: $savedProfile->title,
+                name: $savedProfile->name,
+                city: $savedProfile->city,
+                region: $savedProfile->region,
+                countryCode: $savedProfile->countryCode,
+                postalCode: $savedProfile->postalCode,
+                geo: $geo,
+                siteTemplate: $savedProfile->siteTemplate,
+                palette: $savedProfile->palette,
+                industry: $savedProfile->industry,
+                defaultLocale: $savedProfile->defaultLocale,
+                schemaVersion: $savedProfile->schemaVersion,
+                siteVersion: $savedProfile->siteVersion,
+                searchTerms: $savedProfile->searchTerms
+            );
+
+            // Save version
+            $this->versionRepository->save($version);
+            
+            // Commit transaction
+            $wpdb->query('COMMIT');
+
+            // Redirect to edit screen
+            wp_redirect(home_url("/account/sites/edit/{$savedProfile->id}?success=" . urlencode('Minisite created successfully! You can now customize it.')));
+            exit;
+
+        } catch (\Exception $e) {
+            // Rollback on error
+            if (isset($wpdb)) {
+                $wpdb->query('ROLLBACK');
+            }
+            error_log('Minisite creation error: ' . $e->getMessage());
+            wp_redirect('/account/sites/new?error=' . urlencode('Failed to create minisite: ' . $e->getMessage()));
+            exit;
         }
     }
 
