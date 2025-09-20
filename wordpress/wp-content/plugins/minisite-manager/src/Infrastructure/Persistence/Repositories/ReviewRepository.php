@@ -11,7 +11,7 @@ final class ReviewRepository implements ReviewRepositoryInterface
     public function add(Review $r): Review
     {
         $this->db->insert($this->table(), [
-            'profile_id'    => $r->profileId,
+            'minisite_id'   => $r->profileId,
             'author_name'   => $r->authorName,
             'author_url'    => $r->authorUrl,
             'rating'        => $r->rating,
@@ -32,14 +32,14 @@ final class ReviewRepository implements ReviewRepositoryInterface
     {
         $sql = $this->db->prepare(
             // AND status='approved' 
-            "SELECT * FROM {$this->table()} WHERE profile_id=%d ORDER BY created_at DESC LIMIT %d",
+            "SELECT * FROM {$this->table()} WHERE minisite_id=%d ORDER BY created_at DESC LIMIT %d",
             $profileId, $limit
         );
         $rows = $this->db->get_results($sql, ARRAY_A) ?: [];
         return array_map(function(array $r) {
             return new Review(
                 id:           (int)$r['id'],
-                profileId:    (int)$r['profile_id'],
+                profileId:    (int)$r['minisite_id'],
                 authorName:   $r['author_name'],
                 authorUrl:    $r['author_url'] ?: null,
                 rating:       (float)$r['rating'],

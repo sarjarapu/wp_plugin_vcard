@@ -858,7 +858,7 @@ add_action('wp_ajax_add_bookmark', function () {
     // Check if already bookmarked
     $existing = $wpdb->get_var($wpdb->prepare(
       "SELECT id FROM {$wpdb->prefix}minisite_bookmarks 
-       WHERE user_id = %d AND profile_id = %d",
+       WHERE user_id = %d AND minisite_id = %d",
       $userId, $profileId
     ));
 
@@ -872,7 +872,7 @@ add_action('wp_ajax_add_bookmark', function () {
       $wpdb->prefix . 'minisite_bookmarks',
       [
         'user_id' => $userId,
-        'profile_id' => $profileId,
+        'minisite_id' => $profileId,
         'created_at' => current_time('mysql')
       ],
       ['%d', '%d', '%s']
@@ -920,7 +920,7 @@ add_action('wp_ajax_remove_bookmark', function () {
       $wpdb->prefix . 'minisite_bookmarks',
       [
         'user_id' => $userId,
-        'profile_id' => $profileId
+        'minisite_id' => $profileId
       ],
       ['%d', '%d']
     );

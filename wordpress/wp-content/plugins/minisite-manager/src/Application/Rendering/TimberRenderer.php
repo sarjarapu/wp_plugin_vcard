@@ -33,7 +33,7 @@ final class TimberRenderer
             $userId = get_current_user_id();
             $bookmarkExists = $wpdb->get_var($wpdb->prepare(
                 "SELECT id FROM {$wpdb->prefix}minisite_bookmarks 
-                 WHERE user_id = %d AND profile_id = %d",
+                 WHERE user_id = %d AND minisite_id = %d",
                 $userId, $profile->id
             ));
             $isBookmarked = (bool) $bookmarkExists;
