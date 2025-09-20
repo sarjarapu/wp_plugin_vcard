@@ -69,10 +69,10 @@ final class ProfileRepository implements ProfileRepositoryInterface
      * Update profile's siteJson data (for editing)
      * TODO: Implement proper versioning with versions table
      */
-    public function updateSiteJson(int $id, array $siteJson, int $updatedBy): Profile
+    public function updateSiteJson(string $id, array $siteJson, int $updatedBy): Profile
     {
         $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%d",
+            "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%s",
             wp_json_encode($siteJson), $updatedBy, $id
         );
         $this->db->query($sql);
@@ -88,10 +88,10 @@ final class ProfileRepository implements ProfileRepositoryInterface
      * Update profile's siteJson data and coordinates (for editing)
      * TODO: Implement proper versioning with versions table
      */
-    public function updateSiteJsonWithCoordinates(int $id, array $siteJson, ?float $lat, ?float $lng, int $updatedBy): Profile
+    public function updateSiteJsonWithCoordinates(string $id, array $siteJson, ?float $lat, ?float $lng, int $updatedBy): Profile
     {
         $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%d",
+            "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%s",
             wp_json_encode($siteJson), $updatedBy, $id
         );
         $this->db->query($sql);
@@ -103,13 +103,13 @@ final class ProfileRepository implements ProfileRepositoryInterface
         // Update POINT column if coordinates are set
         if ($lat !== null && $lng !== null) {
             $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
                 $lng, $lat, $id
             ));
         } else {
             // Clear location_point if no coordinates
             $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = NULL WHERE id = %d",
+                "UPDATE {$this->table()} SET location_point = NULL WHERE id = %s",
                 $id
             ));
         }
@@ -120,10 +120,10 @@ final class ProfileRepository implements ProfileRepositoryInterface
     /**
      * Update the current version ID for a profile
      */
-    public function updateCurrentVersionId(int $id, int $versionId): void
+    public function updateCurrentVersionId(string $id, int $versionId): void
     {
         $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET _minisite_current_version_id = %d WHERE id = %d",
+            "UPDATE {$this->table()} SET _minisite_current_version_id = %d WHERE id = %s",
             $versionId, $id
         );
         $this->db->query($sql);
@@ -136,10 +136,10 @@ final class ProfileRepository implements ProfileRepositoryInterface
     /**
      * Update only coordinates for a profile (used when saving drafts)
      */
-    public function updateCoordinates(int $id, ?float $lat, ?float $lng, int $updatedBy): void
+    public function updateCoordinates(string $id, ?float $lat, ?float $lng, int $updatedBy): void
     {
         $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET updated_by = %d, updated_at = NOW() WHERE id = %d",
+            "UPDATE {$this->table()} SET updated_by = %d, updated_at = NOW() WHERE id = %s",
             $updatedBy, $id
         );
         $this->db->query($sql);
@@ -151,13 +151,13 @@ final class ProfileRepository implements ProfileRepositoryInterface
         // Update POINT column if coordinates are set
         if ($lat !== null && $lng !== null) {
             $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
                 $lng, $lat, $id
             ));
         } else {
             // Clear location_point if no coordinates
             $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = NULL WHERE id = %d",
+                "UPDATE {$this->table()} SET location_point = NULL WHERE id = %s",
                 $id
             ));
         }
@@ -229,7 +229,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
         if (!empty($r['location_point'])) {
             // The migration data was inserted as POINT(lng, lat), so ST_Y() returns lng and ST_X() returns lat
             $pointResult = $this->db->get_row($this->db->prepare(
-                "SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat FROM {$this->table()} WHERE id = %d",
+                "SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat FROM {$this->table()} WHERE id = %s",
                 $r['id']
             ), ARRAY_A);
             
@@ -242,7 +242,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
         }
 
         return new Profile(
-            id:            (int)$r['id'],
+            id:            (string)$r['id'],
             slugs:         new SlugPair($r['business_slug'], $r['location_slug']),
             title:         $r['title'],
             name:          $r['name'],

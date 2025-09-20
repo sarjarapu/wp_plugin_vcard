@@ -88,7 +88,7 @@ if (current_user_can(MINISITE_CAP_PUBLISH)) {
     // User can publish minisites
 }
 
-if (current_user_can('minisite_edit_profile', $profile_id)) {
+if (current_user_can('minisite_edit_profile', $minisite_id)) {
     // User can edit this specific profile
 }
 ```

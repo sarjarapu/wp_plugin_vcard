@@ -244,7 +244,7 @@ function minisite_add_or_update_role(string $slug, string $name, array $caps): v
 
 /**
  * Meta-cap mapping for object-specific checks on custom tables.
- * Enables calls like current_user_can('minisite_edit_profile', $profileId).
+ * Enables calls like current_user_can('minisite_edit_profile', $minisiteId).
  */
 add_filter('map_meta_cap', function (array $caps, string $cap, int $user_id, array $args) {
   $objectId = isset($args[0]) ? intval($args[0]) : 0;
@@ -290,58 +290,58 @@ add_filter('map_meta_cap', function (array $caps, string $cap, int $user_id, arr
  * The following helper stubs allow your domain layer to determine ownership/assignment/publication
  * for profiles stored in custom tables. Hook or implement them using repositories.
  */
-function minisite_user_owns_profile(int $userId, int $profileId): bool {
+function minisite_user_owns_profile(int $userId, string $minisiteId): bool {
   /**
    * Implement by querying your profiles table (e.g., owner_user_id column)
    * or hook via: add_filter('minisite_user_owns_profile', fn($v,$uid,$pid)=>bool, 10, 3)
    */
-  return (bool) apply_filters('minisite_user_owns_profile', false, $userId, $profileId);
+  return (bool) apply_filters('minisite_user_owns_profile', false, $userId, $minisiteId);
 }
 
-function minisite_user_is_assigned_to_profile(int $userId, int $profileId): bool {
+function minisite_user_is_assigned_to_profile(int $userId, string $minisiteId): bool {
   /**
    * Implement by querying an assignment table/profile_editors relation
    * or hook via: add_filter('minisite_user_is_assigned_to_profile', fn($v,$uid,$pid)=>bool, 10, 3)
    */
-  return (bool) apply_filters('minisite_user_is_assigned_to_profile', false, $userId, $profileId);
+  return (bool) apply_filters('minisite_user_is_assigned_to_profile', false, $userId, $minisiteId);
 }
 
-function minisite_profile_is_public(int $profileId): bool {
+function minisite_profile_is_public(string $minisiteId): bool {
   /**
    * Implement by checking profile status (e.g., published flag) in your custom table
    * or hook via: add_filter('minisite_profile_is_public', fn($v,$pid)=>bool, 10, 2)
    */
-  return (bool) apply_filters('minisite_profile_is_public', false, $profileId);
+  return (bool) apply_filters('minisite_profile_is_public', false, $minisiteId);
 }
 
 /**
  * Implement the permission helper functions using database queries
  */
-add_filter('minisite_user_owns_profile', function (bool $default, int $userId, int $profileId): bool {
+add_filter('minisite_user_owns_profile', function (bool $default, int $userId, string $minisiteId): bool {
   global $wpdb;
   
   // Check if user owns the profile (using created_by as owner surrogate for now)
   $ownerId = $wpdb->get_var($wpdb->prepare(
-    "SELECT created_by FROM {$wpdb->prefix}minisites WHERE id = %d",
-    $profileId
+    "SELECT created_by FROM {$wpdb->prefix}minisites WHERE id = %s",
+    $minisiteId
   ));
   
   return $ownerId && (int) $ownerId === $userId;
 }, 10, 3);
 
-add_filter('minisite_user_is_assigned_to_profile', function (bool $default, int $userId, int $profileId): bool {
+add_filter('minisite_user_is_assigned_to_profile', function (bool $default, int $userId, string $minisiteId): bool {
   // For now, no assignment system is implemented
   // This would check an assignment table or profile_editors relation
   return false;
 }, 10, 3);
 
-add_filter('minisite_profile_is_public', function (bool $default, int $profileId): bool {
+add_filter('minisite_profile_is_public', function (bool $default, string $minisiteId): bool {
   global $wpdb;
   
   // Check if profile is published
   $status = $wpdb->get_var($wpdb->prepare(
-    "SELECT status FROM {$wpdb->prefix}minisites WHERE id = %d",
-    $profileId
+    "SELECT status FROM {$wpdb->prefix}minisites WHERE id = %s",
+    $minisiteId
   ));
   
   return $status === 'published';
@@ -836,11 +836,11 @@ add_action('wp_ajax_add_bookmark', function () {
     return;
   }
 
-  $profileId = $_POST['profile_id'] ?? '';
+  $minisiteId = $_POST['profile_id'] ?? '';
   $userId = get_current_user_id();
   
-  if (!$profileId) {
-    wp_send_json_error('Invalid profile ID', 400);
+  if (!$minisiteId) {
+    wp_send_json_error('Invalid minisite ID', 400);
     return;
   }
 
@@ -849,7 +849,7 @@ add_action('wp_ajax_add_bookmark', function () {
     
     // Check if profile exists
     $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
-    $profile = $profileRepo->findById($profileId);
+    $profile = $profileRepo->findById($minisiteId);
     if (!$profile) {
       wp_send_json_error('Profile not found', 404);
       return;
@@ -858,8 +858,8 @@ add_action('wp_ajax_add_bookmark', function () {
     // Check if already bookmarked
     $existing = $wpdb->get_var($wpdb->prepare(
       "SELECT id FROM {$wpdb->prefix}minisite_bookmarks 
-       WHERE user_id = %d AND minisite_id = %d",
-      $userId, $profileId
+       WHERE user_id = %d AND minisite_id = %s",
+      $userId, $minisiteId
     ));
 
     if ($existing) {
@@ -872,7 +872,7 @@ add_action('wp_ajax_add_bookmark', function () {
       $wpdb->prefix . 'minisite_bookmarks',
       [
         'user_id' => $userId,
-        'minisite_id' => $profileId,
+        'minisite_id' => $minisiteId,
         'created_at' => current_time('mysql')
       ],
       ['%d', '%d', '%s']
@@ -904,11 +904,11 @@ add_action('wp_ajax_remove_bookmark', function () {
     return;
   }
 
-  $profileId = $_POST['profile_id'] ?? '';
+  $minisiteId = $_POST['profile_id'] ?? '';
   $userId = get_current_user_id();
   
-  if (!$profileId) {
-    wp_send_json_error('Invalid profile ID', 400);
+  if (!$minisiteId) {
+    wp_send_json_error('Invalid minisite ID', 400);
     return;
   }
 
@@ -920,9 +920,9 @@ add_action('wp_ajax_remove_bookmark', function () {
       $wpdb->prefix . 'minisite_bookmarks',
       [
         'user_id' => $userId,
-        'minisite_id' => $profileId
+        'minisite_id' => $minisiteId
       ],
-      ['%d', '%d']
+      ['%d', '%s']
     );
 
     if ($result === false) {

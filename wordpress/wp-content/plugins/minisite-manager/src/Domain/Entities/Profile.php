@@ -7,7 +7,7 @@ use Minisite\Domain\ValueObjects\GeoPoint;
 final class Profile
 {
     public function __construct(
-        public ?int $id,
+        public string $id,
         public SlugPair $slugs,
         public string $title,
         public string $name,

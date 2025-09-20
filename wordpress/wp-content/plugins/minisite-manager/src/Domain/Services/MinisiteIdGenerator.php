@@ -14,7 +14,7 @@ final class MinisiteIdGenerator
      */
     public static function generate(): string
     {
-        return bin2hex(random_bytes(16));
+        return bin2hex(random_bytes(8));
     }
 
     /**
@@ -25,7 +25,7 @@ final class MinisiteIdGenerator
      */
     public static function generateTempSlug(string $id): string
     {
-        return 'draft-' . substr($id, 0, 12);
+        return 'draft-' . substr($id, 0, 8);
     }
 
     /**
@@ -37,7 +37,7 @@ final class MinisiteIdGenerator
      */
     public static function generateTempSlugWithPrefix(string $id, string $prefix = 'draft'): string
     {
-        return $prefix . '-' . substr($id, 0, 12);
+        return $prefix . '-' . substr($id, 0, 8);
     }
 
     /**
@@ -48,7 +48,7 @@ final class MinisiteIdGenerator
      */
     public static function isValidId(string $id): bool
     {
-        return preg_match('/^[a-f0-9]{32}$/', $id) === 1;
+        return preg_match('/^[a-f0-9]{16}$/', $id) === 1;
     }
 
     /**
@@ -59,7 +59,7 @@ final class MinisiteIdGenerator
      */
     public static function isValidTempSlug(string $slug): bool
     {
-        return preg_match('/^draft-[a-f0-9]{12}$/', $slug) === 1;
+        return preg_match('/^draft-[a-f0-9]{16}$/', $slug) === 1;
     }
 
     /**
@@ -75,7 +75,7 @@ final class MinisiteIdGenerator
         }
         
         $idPart = substr($tempSlug, 6); // Remove 'draft-' prefix
-        return $idPart . str_repeat('0', 20); // Pad to 32 characters
+        return $idPart . str_repeat('0', 10); // Pad to 32 characters
     }
 
     /**

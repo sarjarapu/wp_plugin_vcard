@@ -65,7 +65,7 @@ final class ProfileRepositoryTest extends TestCase
 
         $repo = new ProfileRepository($wpdb);
         $profile = new Profile(
-            id: null,
+            id: 'test-id-123',
             slugs: new SlugPair('acme-dental','dallas'),
             title: 'Acme Dental — Dallas',
             name: 'Acme Dental',

@@ -5,7 +5,7 @@ final class Review
 {
     public function __construct(
         public ?int $id,
-        public int $profileId,
+        public int $minisiteId,
         public string $authorName,
         public ?string $authorUrl,
         public float $rating,

@@ -14,7 +14,7 @@ Minisite Manager is an internal WordPress plugin that powers **single-page busin
 - **Rendering**: Timber/Twig (if Timber is present) or PHP fallback.
 - **Routing**: pretty permalinks `/b/{biz}/{loc}`.
 - **Migrations**: PHP-only, `dbDelta()` + raw `ALTER` when needed.
-- **Caching**: transients keyed by `profile_id:site_version` (later step).
+- **Caching**: transients keyed by `minisite_id:site_version` (later step).
 
 ---
 
@@ -152,7 +152,7 @@ minisite-manager/
   ProfileRepository exposes methods like:
 - findBySlugs($biz, $loc)
 - updateLiveWithOptimisticLock($entity, $expectedSiteVersion)
-- saveRevision($profileId, $revision)
+- saveRevision($minisiteId, $revision)
 - Keeps location_point in sync and refreshes search_terms.
 - ViewModelFactory
   Builds the render VM from:
@@ -179,7 +179,7 @@ minisite-manager/
 3.	Repo loads live profile row (by slugs) → entity
 4.	VM factory merges JSON + computed fields
 5.	Renderer picks templates/v2025/index.twig → render
-6.	Cache keyed by profile_id:site_version (optional)
+6.	Cache keyed by minisite_id:site_version (optional)
 
 🧱 Admin flow (high level)
 - Admin UI calls ProfileRepository to load live and latest draft revision.

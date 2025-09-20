@@ -34,7 +34,7 @@ final class ProfileRepositoryMoreTest extends TestCase
         $repo = new ProfileRepository($wpdb);
 
         $profile = new Profile(
-            id: 123,                                // ?int $id
+            id: 'test-id-123',                      // string $id
             slugs: new SlugPair('acme', 'nyc'),     // SlugPair $slugs
             title: 'Acme Dental',                   // string $title
             name: 'Acme Dental NYC Office',         // string $name
@@ -110,7 +110,7 @@ final class ProfileRepositoryMoreTest extends TestCase
         $repo = new ProfileRepository($wpdb);
 
         $profile = new Profile(
-            id: 123,                                // ?int $id
+            id: 'test-id-123',                      // string $id
             slugs: new SlugPair('acme', 'nyc'),     // SlugPair $slugs
             title: 'Acme Dental',                   // string $title
             name: 'Acme Dental NYC Office',         // string $name

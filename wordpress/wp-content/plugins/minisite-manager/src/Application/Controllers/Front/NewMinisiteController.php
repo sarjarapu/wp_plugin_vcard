@@ -111,7 +111,7 @@ final class NewMinisiteController
             
             // Create new profile
             $profile = new Profile(
-                id: null,
+                id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
                 slugs: $slugs,
                 title: ucwords(str_replace('-', ' ', $businessSlug)), // Default title from slug
                 name: ucwords(str_replace('-', ' ', $businessSlug)), // Default name from slug
@@ -144,7 +144,7 @@ final class NewMinisiteController
             
             // Create initial version
             $version = new Version(
-                id: null,
+                id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
                 minisiteId: $savedProfile->id,
                 versionNumber: 1,
                 status: 'draft',
@@ -241,7 +241,7 @@ final class NewMinisiteController
 
             // Create new profile
             $profile = new Profile(
-                id: null,
+                id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
                 slugs: $slugs,
                 title: sanitize_text_field($_POST['seo_title'] ?? ''),
                 name: sanitize_text_field($_POST['brand_name'] ?? ''),
@@ -274,7 +274,7 @@ final class NewMinisiteController
 
             // Create initial version
             $version = new \Minisite\Domain\Entities\Version(
-                id: null,
+                id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
                 minisiteId: $savedProfile->id,
                 versionNumber: 1,
                 status: 'draft',
