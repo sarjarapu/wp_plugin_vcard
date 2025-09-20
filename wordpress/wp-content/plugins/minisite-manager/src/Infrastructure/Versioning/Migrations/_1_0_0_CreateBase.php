@@ -16,17 +16,17 @@ class _1_0_0_CreateBase implements Migration
     public function up(\wpdb $wpdb): void
     {
         $charset   = $wpdb->get_charset_collate();
-        $profiles  = $wpdb->prefix . 'minisite_profiles';
-        $revisions = $wpdb->prefix . 'minisite_profile_revisions';
+        $profiles  = $wpdb->prefix . 'minisites';
         $reviews   = $wpdb->prefix . 'minisite_reviews';
 
-        // ——— profiles (live) ———
+        // ——— minisites (live) ———
         DbDelta::run("
         CREATE TABLE {$profiles} (
-          id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          minisite_id       VARCHAR(32)     NOT NULL,
 
-          business_slug     VARCHAR(120)    NOT NULL,
-          location_slug     VARCHAR(120)    NOT NULL,
+          temp_slug         VARCHAR(255)    NULL,
+          business_slug     VARCHAR(120)    NULL,
+          location_slug     VARCHAR(120)    NULL,
 
           title             VARCHAR(200)    NOT NULL,
           name              VARCHAR(200)    NOT NULL,
@@ -49,6 +49,7 @@ class _1_0_0_CreateBase implements Migration
           search_terms      TEXT              NULL,
 
           status            ENUM('draft','published','archived') NOT NULL DEFAULT 'published',
+          publish_status    ENUM('draft', 'reserved', 'published') NOT NULL DEFAULT 'draft',
           created_at        DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
           updated_at        DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           published_at      DATETIME         NULL,
@@ -57,31 +58,12 @@ class _1_0_0_CreateBase implements Migration
 
           _minisite_current_version_id BIGINT UNSIGNED NULL,
 
-          PRIMARY KEY (id),
+          PRIMARY KEY (minisite_id),
+          UNIQUE KEY uniq_temp_slug (temp_slug),
           UNIQUE KEY uniq_business_location (business_slug, location_slug)
         ) ENGINE=InnoDB {$charset};
         ");
 
-        // ——— revisions ———
-        DbDelta::run("
-        CREATE TABLE {$revisions} (
-          id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          profile_id       BIGINT UNSIGNED NOT NULL,
-          revision_number  INT UNSIGNED    NOT NULL,
-          status           ENUM('draft','published','archived') NOT NULL DEFAULT 'draft',
-
-          schema_version   SMALLINT UNSIGNED NOT NULL,
-          site_json        LONGTEXT          NOT NULL,
-
-          created_at       DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          created_by       BIGINT UNSIGNED  NULL,
-
-          PRIMARY KEY (id),
-          UNIQUE KEY uniq_profile_revision (profile_id, revision_number),
-          KEY idx_profile_status (profile_id, status),
-          KEY idx_profile_created (profile_id, created_at)
-        ) ENGINE=InnoDB {$charset};
-        ");
 
         // ——— versions (new versioning system) ———
         $versions = $wpdb->prefix . 'minisite_versions';
@@ -89,7 +71,7 @@ class _1_0_0_CreateBase implements Migration
         CREATE TABLE {$versions} (
           -- Version-specific fields (front)
           id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          minisite_id      BIGINT UNSIGNED NOT NULL,
+          minisite_id      VARCHAR(16)     NOT NULL,
           version_number   INT UNSIGNED    NOT NULL,
           status           ENUM('draft','published') NOT NULL,
           label            VARCHAR(120)    NULL,
@@ -130,7 +112,7 @@ class _1_0_0_CreateBase implements Migration
         DbDelta::run("
         CREATE TABLE {$reviews} (
           id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          profile_id       BIGINT UNSIGNED NOT NULL,
+          minisite_id      VARCHAR(32)     NOT NULL,
 
           author_name      VARCHAR(160)     NOT NULL,
           author_url       VARCHAR(300)     NULL,
@@ -148,7 +130,7 @@ class _1_0_0_CreateBase implements Migration
           created_by       BIGINT UNSIGNED  NULL,
 
           PRIMARY KEY (id),
-          KEY idx_profile (profile_id),
+          KEY idx_minisite (minisite_id),
           KEY idx_status_date (status, created_at),
           KEY idx_rating (rating)
         ) ENGINE=InnoDB {$charset};
@@ -160,14 +142,14 @@ class _1_0_0_CreateBase implements Migration
         CREATE TABLE {$bookmarks} (
           id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
           user_id          BIGINT UNSIGNED NOT NULL,
-          profile_id       BIGINT UNSIGNED NOT NULL,
+          minisite_id      VARCHAR(32)     NOT NULL,
           created_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
           PRIMARY KEY (id),
-          UNIQUE KEY uniq_user_profile (user_id, profile_id),
+          UNIQUE KEY uniq_user_minisite (user_id, minisite_id),
           KEY idx_user (user_id),
-          KEY idx_profile (profile_id),
-          FOREIGN KEY (profile_id) REFERENCES {$profiles}(id) ON DELETE CASCADE
+          KEY idx_minisite (minisite_id),
+          FOREIGN KEY (minisite_id) REFERENCES {$profiles}(minisite_id) ON DELETE CASCADE
         ) ENGINE=InnoDB {$charset};
         ");
 
@@ -180,8 +162,7 @@ class _1_0_0_CreateBase implements Migration
         // Dev convenience: clear the seeded data then drop tables
         $this->clearTestData($wpdb);
 
-        $profiles  = $wpdb->prefix . 'minisite_profiles';
-        $revisions = $wpdb->prefix . 'minisite_profile_revisions';
+        $profiles  = $wpdb->prefix . 'minisites';
         $versions  = $wpdb->prefix . 'minisite_versions';
         $reviews   = $wpdb->prefix . 'minisite_reviews';
         $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
@@ -189,19 +170,19 @@ class _1_0_0_CreateBase implements Migration
         $wpdb->query("DROP TABLE IF EXISTS {$bookmarks}");
         $wpdb->query("DROP TABLE IF EXISTS {$reviews}");
         $wpdb->query("DROP TABLE IF EXISTS {$versions}");
-        $wpdb->query("DROP TABLE IF EXISTS {$revisions}");
         $wpdb->query("DROP TABLE IF EXISTS {$profiles}");
     }
 
     /**
-     * Seed two example businesses and their revisions & reviews.
+     * Seed four example minisites and their versions & reviews.
      * - 'acme-dental' / 'dallas'
      * - 'lotus-textiles' / 'mumbai'
+     * - 'green-bites' / 'london'
+     * - 'swift-transit' / 'sydney'
      */
     private function seedTestData(\wpdb $wpdb): void
     {
-        $profilesT  = $wpdb->prefix . 'minisite_profiles';
-        $revisionsT = $wpdb->prefix . 'minisite_profile_revisions';
+        $profilesT  = $wpdb->prefix . 'minisites';
         $reviewsT   = $wpdb->prefix . 'minisite_reviews';
 
         // Avoid duplicate seeding (check any of our seeded slugs)
@@ -248,7 +229,9 @@ class _1_0_0_CreateBase implements Migration
         };
 
         // Insert first profile: ACME Dental (Dallas, US)
+        $acmeId = bin2hex(random_bytes(16));
         $acme = [
+            'minisite_id'    => $acmeId,
             'business_slug'  => 'acme-dental',
             'location_slug'  => 'dallas',
             'title'          => 'Acme Dental — Dallas',
@@ -378,21 +361,24 @@ class _1_0_0_CreateBase implements Migration
         ];
         $wpdb->insert($profilesT, $acme, [
             '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%s',
-            '%d','%d','%s','%s','%s','%s','%d','%d'
+            '%s','%s','%s','%s','%s','%s','%s','%s',
+            '%d','%d','%s','%s','%s','%s','%s','%s',
+            '%s','%s','%d','%d','%d'
         ]);
-        $acmeId = (int) $wpdb->insert_id;
+        $acmeId = $acme['id']; // Use our custom ID
 
         // Set POINT (lng, lat) with SRID 4326 if available (MySQL 8)
         if ($acmeId) {
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
                 -96.7970, 32.7767, $acmeId
             ));
         }
 
         // Insert second profile: Lotus Textiles (Mumbai, IN)
+        $lotusId = bin2hex(random_bytes(16));
         $lotus = [
+            'minisite_id'    => $lotusId,
             'business_slug'  => 'lotus-textiles',
             'location_slug'  => 'mumbai',
             'title'          => 'Lotus Textiles — Mumbai',
@@ -478,20 +464,23 @@ class _1_0_0_CreateBase implements Migration
         ];
         $wpdb->insert($profilesT, $lotus, [
             '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%s',
-            '%d','%d','%s','%s','%s','%s','%d','%d'
+            '%s','%s','%s','%s','%s','%s','%s','%s',
+            '%d','%d','%s','%s','%s','%s','%s','%s',
+            '%s','%s','%d','%d','%d'
         ]);
-        $lotusId = (int) $wpdb->insert_id;
+        $lotusId = $lotus['id']; // Use our custom ID
 
         if ($lotusId) {
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
                 72.8777, 19.0760, $lotusId
             ));
         }
 
         // Insert third profile: Green Bites (London, GB)
+        $greenId = bin2hex(random_bytes(16));
         $green = [
+            'minisite_id'    => $greenId,
             'business_slug'  => 'green-bites',
             'location_slug'  => 'london',
             'title'          => 'Green Bites — London',
@@ -577,19 +566,22 @@ class _1_0_0_CreateBase implements Migration
         ];
         $wpdb->insert($profilesT, $green, [
             '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%s',
-            '%d','%d','%s','%s','%s','%s','%d','%d'
+            '%s','%s','%s','%s','%s','%s','%s','%s',
+            '%d','%d','%s','%s','%s','%s','%s','%s',
+            '%s','%s','%d','%d','%d'
         ]);
-        $greenId = (int) $wpdb->insert_id;
+        $greenId = $green['id']; // Use our custom ID
         if ($greenId) {
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
                 -0.118092, 51.509865, $greenId
             ));
         }
 
         // Insert fourth profile: Swift Transit (Sydney, AU)
+        $swiftId = bin2hex(random_bytes(16));
         $swift = [
+            'minisite_id'    => $swiftId,
             'business_slug'  => 'swift-transit',
             'location_slug'  => 'sydney',
             'title'          => 'Swift Transit — Sydney',
@@ -677,13 +669,14 @@ class _1_0_0_CreateBase implements Migration
         ];
         $wpdb->insert($profilesT, $swift, [
             '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%s',
-            '%d','%d','%s','%s','%s','%s','%d','%d'
+            '%s','%s','%s','%s','%s','%s','%s','%s',
+            '%d','%d','%s','%s','%s','%s','%s','%s',
+            '%s','%s','%d','%d','%d'
         ]);
-        $swiftId = (int) $wpdb->insert_id;
+        $swiftId = $swift['id']; // Use our custom ID
         if ($swiftId) {
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                "UPDATE {$profilesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
                 151.2093, -33.8688, $swiftId
             ));
         }
@@ -695,7 +688,7 @@ class _1_0_0_CreateBase implements Migration
             if (!$pid) { continue; }
 
             // Get the profile data for the initial version
-            $profile = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$profilesT} WHERE id = %d", $pid), ARRAY_A);
+            $profile = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$profilesT} WHERE id = %s", $pid), ARRAY_A);
             $siteJson = $profile ? $profile['site_json'] : wp_json_encode(['note'=>'initial version','country'=>$cc]);
             
             // Create version 1 as published with all profile fields
@@ -731,7 +724,7 @@ class _1_0_0_CreateBase implements Migration
             ];
 
             $wpdb->insert($versionsT, $versionData, [
-                '%d','%d','%s','%s','%s','%d','%s','%s','%d',
+                '%s','%d','%s','%s','%s','%d','%s','%s','%d',
                 '%s','%s','%s','%s','%s','%s','%s','%s','%s',
                 '%s','%s','%s','%s','%d','%d','%s','%s'
             ]);
@@ -756,40 +749,16 @@ class _1_0_0_CreateBase implements Migration
 
             // Update profile with current version ID
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$profilesT} SET _minisite_current_version_id = %d WHERE id = %d",
+                "UPDATE {$profilesT} SET _minisite_current_version_id = %d WHERE minisite_id = %s",
                 $versionId, $pid
             ));
         }
 
-        // ——— Revisions for each profile (legacy - keeping for backward compatibility) ———
-        foreach ([ $acmeId => 'US', $lotusId => 'IN', $greenId => 'GB', $swiftId => 'AU' ] as $pid => $cc) {
-            if (!$pid) { continue; }
 
-            // rev 1: draft
-            $wpdb->insert($revisionsT, [
-                'profile_id'      => $pid,
-                'revision_number' => 1,
-                'status'          => 'draft',
-                'schema_version'  => 1,
-                'site_json'       => wp_json_encode(['note'=>'draft seed','country'=>$cc]),
-                'created_by'      => $nowUser,
-            ], ['%d','%d','%s','%d','%s','%d']);
-
-            // rev 2: published snapshot
-            $wpdb->insert($revisionsT, [
-                'profile_id'      => $pid,
-                'revision_number' => 2,
-                'status'          => 'published',
-                'schema_version'  => 1,
-                'site_json'       => wp_json_encode(['note'=>'published seed','country'=>$cc]),
-                'created_by'      => $nowUser,
-            ], ['%d','%d','%s','%d','%s','%d']);
-        }
-
-        // ——— Reviews (2 per profile) ———
-        $insertReview = function(int $pid, string $name, float $rating, string $body, ?string $locale='en-US') use ($wpdb, $reviewsT, $nowUser) {
+        // ——— Reviews (5 per minisite) ———
+        $insertReview = function(string $pid, string $name, float $rating, string $body, ?string $locale='en-US') use ($wpdb, $reviewsT, $nowUser) {
             $wpdb->insert($reviewsT, [
-                'profile_id'   => $pid,
+                'minisite_id'  => $pid,
                 'author_name'  => $name,
                 'author_url'   => null,
                 'rating'       => $rating,
@@ -800,7 +769,7 @@ class _1_0_0_CreateBase implements Migration
                 'source_id'    => null,
                 'status'       => 'approved',
                 'created_by'   => $nowUser,
-            ], ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%d']);
+            ], ['%s','%s','%s','%f','%s','%s','%s','%s','%s','%d']);
         };
 
         if ($acmeId) {
@@ -842,8 +811,7 @@ class _1_0_0_CreateBase implements Migration
      */
     private function clearTestData(\wpdb $wpdb): void
     {
-        $profilesT  = $wpdb->prefix . 'minisite_profiles';
-        $revisionsT = $wpdb->prefix . 'minisite_profile_revisions';
+        $profilesT  = $wpdb->prefix . 'minisites';
         $versionsT  = $wpdb->prefix . 'minisite_versions';
         $reviewsT   = $wpdb->prefix . 'minisite_reviews';
 
@@ -861,20 +829,21 @@ class _1_0_0_CreateBase implements Migration
 
         // Get IDs for our seeded slugs
         $rows = $wpdb->get_results("
-            SELECT id FROM {$profilesT}
+            SELECT minisite_id FROM {$profilesT}
             WHERE (business_slug='acme-dental' AND location_slug='dallas')
                OR (business_slug='lotus-textiles' AND location_slug='mumbai')
+               OR (business_slug='green-bites' AND location_slug='london')
+               OR (business_slug='swift-transit' AND location_slug='sydney')
         ");
         if (!$rows) { return; }
 
-        $ids = array_map(fn($r) => (int)$r->id, $rows);
-        $in  = implode(',', array_fill(0, count($ids), '%d'));
+        $ids = array_map(fn($r) => $r->minisite_id, $rows);
+        $in  = implode(',', array_fill(0, count($ids), '%s'));
 
         // Delete child tables first (only if they exist)
-        $wpdb->query($wpdb->prepare("DELETE FROM {$reviewsT}   WHERE profile_id IN ($in)", ...$ids));
+        $wpdb->query($wpdb->prepare("DELETE FROM {$reviewsT}   WHERE minisite_id IN ($in)", ...$ids));
         $wpdb->query($wpdb->prepare("DELETE FROM {$versionsT}  WHERE minisite_id IN ($in)", ...$ids));
-        $wpdb->query($wpdb->prepare("DELETE FROM {$revisionsT} WHERE profile_id IN ($in)", ...$ids));
-        // Delete profiles
-        $wpdb->query($wpdb->prepare("DELETE FROM {$profilesT}  WHERE id IN ($in)", ...$ids));
+        // Delete minisites
+        $wpdb->query($wpdb->prepare("DELETE FROM {$profilesT}  WHERE minisite_id IN ($in)", ...$ids));
     }
 }

@@ -168,8 +168,109 @@ This document outlines the specifications for the new minisite creation flow, im
 3. API integration
 4. Mobile optimization
 
+## Current Issues & Technical Challenges
+
+### **Slug Constraint Problem**
+- **Current**: `business_slug` + `location_slug` combination must be unique
+- **Problem**: Temporary drafts would conflict with permanent slugs
+- **Example**: User creates draft `acme-dental` → Later wants permanent `acme-dental` → Conflict!
+
+### **Auto-increment ID Issues**
+- **Current**: Sequential `id` field (1, 2, 3, 4...)
+- **Problem**: Predictable, not suitable for public URLs
+- **Security**: Users can guess other site IDs
+
+### **Database Schema Limitations**
+- **Current**: No support for temporary slugs
+- **Current**: No draft vs. published status tracking
+- **Current**: No payment status tracking
+- **Current**: No reservation system
+
+## Implementation Plan
+
+### **Phase 1: Database Schema Changes**
+1. Update `minisites` table to use VARCHAR(32) for minisite_id
+2. Add `temp_slug` field for draft minisites
+3. Add `publish_status` field to track draft vs. published
+4. Update unique constraints to support both temp and permanent slugs
+
+### **Phase 2: ID Generation System**
+1. Create `MinisiteIdGenerator` class with 16-byte hex approach
+2. Update `Profile` entity to use new ID format
+3. Update repositories to handle new ID system
+4. Implement temporary slug generation
+
+### **Phase 3: Slug Management**
+1. Implement temporary slug generation (`draft-{hash}`)
+2. Add slug availability checking
+3. Create slug migration system (temp → permanent)
+4. Add reservation system for payment flow
+
+### **Phase 4: Payment Integration**
+1. Integrate with payment system (WooCommerce/Stripe)
+2. Implement 5-minute reservation system
+3. Add payment status tracking
+4. Create slug ownership transfer logic
+
+## Technical Implementation Details
+
+### **ID Generation Strategy**
+- **Format**: 16-byte hex string (32 characters)
+- **Example**: `a1b2c3d4e5f6789012345678901234ab`
+- **Collision Probability**: ~1 in 2^128 (practically impossible)
+- **Benefits**: Compact, secure, collision-free
+
+### **Temporary Slug System**
+- **Format**: `draft-{first12chars}` (e.g., `draft-a1b2c3d4e5f6`)
+- **Purpose**: Allow unlimited draft creation without conflicts
+- **Migration**: Seamless transition to permanent slugs after payment
+
+### **Database Schema Changes**
+```sql
+-- New approach
+CREATE TABLE wp_minisites (
+    minisite_id VARCHAR(32) PRIMARY KEY, -- 16-byte hex ID
+    temp_slug VARCHAR(255) NULL,        -- For draft minisites
+    business_slug VARCHAR(255) NULL,    -- For published minisites
+    location_slug VARCHAR(255) NULL,    -- For published minisites
+    publish_status ENUM('draft', 'reserved', 'published') DEFAULT 'draft',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_temp_slug (temp_slug),
+    UNIQUE KEY unique_business_slugs (business_slug, location_slug)
+);
+```
+
+### **Migration Strategy**
+- **New Migration**: `_1_1_0_UpdateToRandomIds.php`
+- **Approach**: Create new tables, migrate data, replace old tables
+- **Data Preservation**: All existing data preserved with new ID format
+- **Rollback**: Not easily reversible due to ID format change
+
+## Implementation Status
+
+### **✅ Completed**
+- [x] Created `MinisiteIdGenerator` service class
+- [x] Designed new database schema
+- [x] Created migration file for ID system update
+- [x] Documented technical approach
+
+### **🔄 In Progress**
+- [ ] Update Profile entity to use new ID format
+- [ ] Update repositories for new ID system
+- [ ] Implement temporary slug generation
+- [ ] Test migration process
+
+### **⏳ Pending**
+- [ ] Payment system integration
+- [ ] Reservation system implementation
+- [ ] Slug availability checking
+- [ ] User interface updates
+- [ ] Testing and validation
+
 ## Conclusion
 
 This two-phase model provides the best user experience by allowing exploration without commitment while ensuring fair competition for valuable slugs. The payment-first approach prevents abuse while generating revenue from users who see value in the platform.
 
 The system balances user freedom with business needs, creating a sustainable model that encourages both exploration and conversion to paid users.
+
+**Next Steps**: Implement the new ID system and temporary slug support to enable the freemium model.
