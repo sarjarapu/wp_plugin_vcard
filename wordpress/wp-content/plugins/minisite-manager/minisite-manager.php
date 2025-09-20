@@ -446,7 +446,7 @@ add_action('template_redirect', function () {
           // Delegate to NewMinisiteController
           if ($newMinisiteCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\NewMinisiteController::class)) {
             global $wpdb;
-            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
             $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
             $newMinisiteCtrl = new $newMinisiteCtrlClass($profileRepo, $versionRepo);
             
@@ -491,7 +491,7 @@ add_action('template_redirect', function () {
           // Delegate to VersionController for version management
           if ($versionCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\VersionController::class)) {
             global $wpdb;
-            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
             $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
             $versionCtrl = new $versionCtrlClass($profileRepo, $versionRepo);
             $versionCtrl->handleListVersions();
@@ -536,7 +536,7 @@ add_action('template_redirect', function () {
     }
 
     // Controller to build the view model
-    if ($ctrlClass = minisite_class(\Minisite\Application\Controllers\Front\ProfilePageController::class)) {
+    if ($ctrlClass = minisite_class(\Minisite\Application\Controllers\Front\MinisitePageController::class)) {
       $ctrl = new $ctrlClass($renderer);
       $ctrl->handle($biz, $loc);
       exit;
@@ -638,7 +638,7 @@ add_action('wp_ajax_publish_version', function () {
 
   try {
     global $wpdb;
-    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
     
     $profile = $profileRepo->findById($siteId);
@@ -770,7 +770,7 @@ add_action('wp_ajax_rollback_version', function () {
 
   try {
     global $wpdb;
-    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
     
     $profile = $profileRepo->findById($siteId);
@@ -848,10 +848,10 @@ add_action('wp_ajax_add_bookmark', function () {
     global $wpdb;
     
     // Check if profile exists
-    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     $profile = $profileRepo->findById($minisiteId);
     if (!$profile) {
-      wp_send_json_error('Profile not found', 404);
+      wp_send_json_error('Minisite not found', 404);
       return;
     }
 
@@ -960,7 +960,7 @@ add_action('wp_ajax_create_minisite', function () {
 
   try {
     global $wpdb;
-    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\ProfileRepository($wpdb);
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
     $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
     

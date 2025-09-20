@@ -19,7 +19,7 @@ final class Version
         public ?int $sourceVersionId,  // For rollbacks: tracks what version was rolled back from
         public array $siteJson,  // Required - contains the form data
         
-        // Profile fields for complete versioning (all optional)
+        // Minisite fields for complete versioning (all optional)
         public ?SlugPair $slugs = null,
         public ?string $title = null,
         public ?string $name = null,

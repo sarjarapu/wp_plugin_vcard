@@ -4,7 +4,7 @@ namespace Minisite\Domain\Entities;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
 
-final class Profile
+final class Minisite
 {
     public function __construct(
         public string $id,
@@ -31,7 +31,7 @@ final class Profile
         public ?int $createdBy,
         public ?int $updatedBy,
         public ?int $currentVersionId,  // Points to currently published version
-        public bool $isBookmarked = false,  // Whether current user has bookmarked this profile
-        public bool $canEdit = false        // Whether current user can edit this profile
+        public bool $isBookmarked = false,  // Whether current user has bookmarked this minisite
+        public bool $canEdit = false        // Whether current user can edit this minisite
     ) {}
 }

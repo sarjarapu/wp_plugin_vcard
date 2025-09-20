@@ -7,7 +7,7 @@ final class PhpRenderer
 {
     public function __construct(private string $variant = 'default') {}
 
-    public function render(Profile $profile): void
+    public function render(Profile $mrofile): void
     {
         $base = trailingslashit(\MINISITE_PLUGIN_DIR) . 'templates/php';
         $candidates = [
@@ -16,8 +16,8 @@ final class PhpRenderer
         ];
         foreach ($candidates as $file) {
             if (is_readable($file)) {
-                /** @var Profile $profile */
-                $p = $profile; // local alias for template clarity
+                /** @var Profile $mrofile */
+                $m = $mrofile; // local alias for template clarity
                 require $file;
                 return;
             }
@@ -26,9 +26,9 @@ final class PhpRenderer
         // Fallback inline render
         header('Content-Type: text/html; charset=utf-8');
         echo '<!doctype html><meta charset="utf-8">';
-        echo '<title>' . htmlspecialchars($profile->title) . '</title>';
-        echo '<h1>' . htmlspecialchars($profile->name) . '</h1>';
-        echo '<p>' . htmlspecialchars($profile->city) . '</p>';
+        echo '<title>' . htmlspecialchars($mrofile->title) . '</title>';
+        echo '<h1>' . htmlspecialchars($mrofile->name) . '</h1>';
+        echo '<p>' . htmlspecialchars($mrofile->city) . '</p>';
     }
 }
 

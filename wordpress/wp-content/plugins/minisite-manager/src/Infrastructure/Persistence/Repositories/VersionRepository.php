@@ -24,7 +24,7 @@ final class VersionRepository implements VersionRepositoryInterface
             'published_at' => $version->publishedAt?->format('Y-m-d H:i:s'),
             'source_version_id' => $version->sourceVersionId,
             
-            // Profile fields
+            // Minisite fields
             'business_slug' => $version->slugs?->business,
             'location_slug' => $version->slugs?->location,
             'title' => $version->title,
@@ -218,7 +218,7 @@ final class VersionRepository implements VersionRepositoryInterface
             sourceVersionId: $row['source_version_id'] ? (int) $row['source_version_id'] : null,
             siteJson: $decodedSiteJson,
             
-            // Profile fields
+            // Minisite fields
             slugs: $slugs,
             title: $row['title'] ?? null,
             name: $row['name'] ?? null,

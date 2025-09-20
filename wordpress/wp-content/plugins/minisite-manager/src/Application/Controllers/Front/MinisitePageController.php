@@ -1,10 +1,10 @@
 <?php
 namespace Minisite\Application\Controllers\Front;
 
-use Minisite\Infrastructure\Persistence\Repositories\ProfileRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Domain\ValueObjects\SlugPair;
 
-final class ProfilePageController
+final class MinisitePageController
 {
     public function __construct(private object $renderer) {}
 
@@ -12,10 +12,10 @@ final class ProfilePageController
     {
         global $wpdb;
 
-        $repo = new ProfileRepository($wpdb);
-        $profile = $repo->findBySlugs(new SlugPair($businessSlug, $locationSlug));
+        $repo = new MinisiteRepository($wpdb);
+        $minisite = $repo->findBySlugs(new SlugPair($businessSlug, $locationSlug));
 
-        if (!$profile) {
+        if (!$minisite) {
             global $wp_query;
             $wp_query->set_404();
             status_header(404);
@@ -26,13 +26,12 @@ final class ProfilePageController
 
         // Delegate to the renderer (PhpRenderer or TimberRenderer)
         if (method_exists($this->renderer, 'render')) {
-            $this->renderer->render($profile);
+            $this->renderer->render($minisite);
             return;
         }
 
         // If renderer is missing, show minimal details
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>' . htmlspecialchars($profile->name) . '</h1>';
+        echo '<!doctype html><meta charset="utf-8"><h1>' . htmlspecialchars($minisite->name) . '</h1>';
     }
 }
-

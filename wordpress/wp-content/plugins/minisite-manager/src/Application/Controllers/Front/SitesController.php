@@ -1,7 +1,7 @@
 <?php
 namespace Minisite\Application\Controllers\Front;
 
-use Minisite\Infrastructure\Persistence\Repositories\ProfileRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 
 final class SitesController
@@ -18,7 +18,7 @@ final class SitesController
         $currentUser = wp_get_current_user();
 
         global $wpdb;
-        $repo = new ProfileRepository($wpdb);
+        $repo = new MinisiteRepository($wpdb);
 
         // TODO: add pagination and filters
         $sites = $repo->listByOwner((int) $currentUser->ID, 50, 0);
@@ -83,17 +83,17 @@ final class SitesController
 
         $currentUser = wp_get_current_user();
         global $wpdb;
-        $profileRepo = new ProfileRepository($wpdb);
+        $minisiteRepo = new MinisiteRepository($wpdb);
         $versionRepo = new VersionRepository($wpdb);
         
-        $profile = $profileRepo->findById($siteId);
-        if (!$profile) {
+        $minisite = $minisiteRepo->findById($siteId);
+        if (!$minisite) {
             wp_redirect(home_url('/account/sites'));
             exit;
         }
 
         // Check ownership (v1: using created_by as owner surrogate)
-        if ($profile->createdBy !== (int) $currentUser->ID) {
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
             wp_redirect(home_url('/account/sites'));
             exit;
         }
@@ -150,7 +150,7 @@ final class SitesController
                         $nextVersion = $versionRepo->getNextVersionNumber($siteId);
                         
                         // Use existing profile slugs (slugs should not change during editing)
-                        $slugs = $profile->slugs;
+                        $slugs = $minisite->slugs;
 
                         // Create GeoPoint from form data
                         $geo = null;
@@ -173,20 +173,20 @@ final class SitesController
                             
                             // Profile fields from form data
                             slugs: $slugs,
-                            title: $profile->title, // Keep original profile title
-                            name: sanitize_text_field($_POST['brand_name'] ?? $profile->name),
-                            city: sanitize_text_field($_POST['contact_city'] ?? $profile->city),
-                            region: sanitize_text_field($_POST['contact_region'] ?? $profile->region),
-                            countryCode: sanitize_text_field($_POST['contact_country'] ?? $profile->countryCode),
-                            postalCode: sanitize_text_field($_POST['contact_postal'] ?? $profile->postalCode),
+                            title: $minisite->title, // Keep original profile title
+                            name: sanitize_text_field($_POST['brand_name'] ?? $minisite->name),
+                            city: sanitize_text_field($_POST['contact_city'] ?? $minisite->city),
+                            region: sanitize_text_field($_POST['contact_region'] ?? $minisite->region),
+                            countryCode: sanitize_text_field($_POST['contact_country'] ?? $minisite->countryCode),
+                            postalCode: sanitize_text_field($_POST['contact_postal'] ?? $minisite->postalCode),
                             geo: $geo,
-                            siteTemplate: $profile->siteTemplate,
-                            palette: sanitize_text_field($_POST['brand_palette'] ?? $profile->palette),
-                            industry: sanitize_text_field($_POST['brand_industry'] ?? $profile->industry),
-                            defaultLocale: $profile->defaultLocale,
-                            schemaVersion: $profile->schemaVersion,
-                            siteVersion: $profile->siteVersion,
-                            searchTerms: $profile->searchTerms
+                            siteTemplate: $minisite->siteTemplate,
+                            palette: sanitize_text_field($_POST['brand_palette'] ?? $minisite->palette),
+                            industry: sanitize_text_field($_POST['brand_industry'] ?? $minisite->industry),
+                            defaultLocale: $minisite->defaultLocale,
+                            schemaVersion: $minisite->schemaVersion,
+                            siteVersion: $minisite->siteVersion,
+                            searchTerms: $minisite->searchTerms
                         );
                         
 
@@ -196,7 +196,7 @@ final class SitesController
                         // Update profile coordinates if provided (coordinates are stored on profile, not in versions)
                         if ($lat !== null && $lng !== null) {
                             // Only update coordinates, not site_json
-                            $profileRepo->updateCoordinates($siteId, $lat, $lng, (int) $currentUser->ID);
+                            $minisiteRepo->updateCoordinates($siteId, $lat, $lng, (int) $currentUser->ID);
                         }
                         
                         $wpdb->query('COMMIT');
@@ -224,11 +224,11 @@ final class SitesController
             \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$viewsBase, $componentsBase])));
 
             // Use editing version data (should always be available now)
-            $siteJson = $editingVersion ? $editingVersion->siteJson : $profile->siteJson;
+            $siteJson = $editingVersion ? $editingVersion->siteJson : $minisite->siteJson;
             
             \Timber\Timber::render('account-sites-edit.twig', [
-                'page_title' => 'Edit: ' . $profile->title,
-                'profile' => $profile,
+                'page_title' => 'Edit: ' . $minisite->title,
+                'profile' => $minisite,
                 'site_json' => $siteJson,
                 'latest_draft' => $latestDraft,
                 'editing_version' => $editingVersion,
@@ -245,7 +245,7 @@ final class SitesController
 
         // Fallback
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>Edit: ' . htmlspecialchars($profile->title) . '</h1>';
+        echo '<!doctype html><meta charset="utf-8"><h1>Edit: ' . htmlspecialchars($minisite->title) . '</h1>';
         echo '<p>Edit form not available (Timber required).</p>';
     }
 
@@ -266,16 +266,16 @@ final class SitesController
 
         $currentUser = wp_get_current_user();
         global $wpdb;
-        $repo = new ProfileRepository($wpdb);
+        $repo = new MinisiteRepository($wpdb);
         
-        $profile = $repo->findById($siteId);
-        if (!$profile) {
+        $minisite = $repo->findById($siteId);
+        if (!$minisite) {
             wp_redirect(home_url('/account/sites'));
             exit;
         }
 
         // Check ownership (v1: using created_by as owner surrogate)
-        if ($profile->createdBy !== (int) $currentUser->ID) {
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
             wp_redirect(home_url('/account/sites'));
             exit;
         }
@@ -286,7 +286,7 @@ final class SitesController
         
         if ($versionId === 'current' || !$versionId) {
             // Show current published version (from profile.siteJson)
-            $siteJson = $profile->siteJson;
+            $siteJson = $minisite->siteJson;
         } else {
             // Show specific version
             $version = $versionRepo->findById((int) $versionId);
@@ -298,11 +298,11 @@ final class SitesController
         }
         
         // Update profile with version-specific data for rendering
-        $profile->siteJson = $siteJson;
+        $minisite->siteJson = $siteJson;
         
         // Use the existing TimberRenderer to render the profile
         if (class_exists('Timber\\Timber') && $this->renderer) {
-            $this->renderer->render($profile);
+            $this->renderer->render($minisite);
             return;
         }
 
@@ -312,14 +312,14 @@ final class SitesController
             \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$base])));
             
             \Timber\Timber::render('profile.twig', [
-                'profile' => $profile,
+                'profile' => $minisite,
             ]);
             return;
         }
 
         // Final fallback
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>Preview: ' . htmlspecialchars($profile->title) . '</h1>';
+        echo '<!doctype html><meta charset="utf-8"><h1>Preview: ' . htmlspecialchars($minisite->title) . '</h1>';
         echo '<p>Preview not available (Timber required).</p>';
     }
 

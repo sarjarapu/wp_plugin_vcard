@@ -7,5 +7,5 @@ interface ReviewRepositoryInterface
 {
     public function add(Review $review): Review;
     /** @return Review[] */
-    public function listApprovedForProfile(int $minisiteId, int $limit = 20): array;
+    public function listApprovedForMinisite(int $minisiteId, int $limit = 20): array;
 }

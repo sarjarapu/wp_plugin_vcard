@@ -1,17 +1,17 @@
 <?php
 namespace Minisite\Infrastructure\Persistence\Repositories;
 
-use Minisite\Domain\Entities\Profile;
+use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
 
-final class ProfileRepository implements ProfileRepositoryInterface
+final class MinisiteRepository implements MinisiteRepositoryInterface
 {
     public function __construct(private \wpdb $db) {}
 
     private function table(): string { return $this->db->prefix . 'minisites'; }
 
-    public function findBySlugs(SlugPair $slugs): ?Profile
+    public function findBySlugs(SlugPair $slugs): ?Minisite
     {
         $sql = $this->db->prepare(
             "SELECT * FROM {$this->table()} WHERE business_slug=%s AND location_slug=%s LIMIT 1",
@@ -24,9 +24,9 @@ final class ProfileRepository implements ProfileRepositoryInterface
     }
 
     /**
-     * Find profile by individual slug parameters (for race condition checking)
+     * Find minisite by individual slug parameters (for race condition checking)
      */
-    public function findBySlugParams(string $businessSlug, string $locationSlug): ?Profile
+    public function findBySlugParams(string $businessSlug, string $locationSlug): ?Minisite
     {
         $sql = $this->db->prepare(
             "SELECT * FROM {$this->table()} WHERE business_slug=%s AND location_slug=%s LIMIT 1 FOR UPDATE",
@@ -39,10 +39,10 @@ final class ProfileRepository implements ProfileRepositoryInterface
     }
 
     /**
-     * List profiles owned by a user (v1 minimal: uses created_by as owner surrogate)
+     * List minisites owned by a user (v1 minimal: uses created_by as owner surrogate)
      * TODO: Switch to explicit owner_user_id column when added.
      *
-     * @return Profile[]
+     * @return Minisite[]
      */
     public function listByOwner(int $userId, int $limit = 50, int $offset = 0): array
     {
@@ -55,9 +55,9 @@ final class ProfileRepository implements ProfileRepositoryInterface
     }
 
     /**
-     * Find profile by ID
+     * Find minisite by ID
      */
-    public function findById(string $id): ?Profile
+    public function findById(string $id): ?Minisite
     {
         $sql = $this->db->prepare("SELECT * FROM {$this->table()} WHERE id=%s LIMIT 1", $id);
         $row = $this->db->get_row($sql, ARRAY_A);
@@ -66,10 +66,10 @@ final class ProfileRepository implements ProfileRepositoryInterface
     }
 
     /**
-     * Update profile's siteJson data (for editing)
+     * Update minisite's siteJson data (for editing)
      * TODO: Implement proper versioning with versions table
      */
-    public function updateSiteJson(string $id, array $siteJson, int $updatedBy): Profile
+    public function updateSiteJson(string $id, array $siteJson, int $updatedBy): Minisite
     {
         $sql = $this->db->prepare(
             "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%s",
@@ -78,17 +78,17 @@ final class ProfileRepository implements ProfileRepositoryInterface
         $this->db->query($sql);
         
         if ($this->db->rows_affected === 0) {
-            throw new \RuntimeException('Profile not found or update failed.');
+            throw new \RuntimeException('Minisite not found or update failed.');
         }
         
         return $this->findById($id);
     }
 
     /**
-     * Update profile's siteJson data and coordinates (for editing)
+     * Update minisite's siteJson data and coordinates (for editing)
      * TODO: Implement proper versioning with versions table
      */
-    public function updateSiteJsonWithCoordinates(string $id, array $siteJson, ?float $lat, ?float $lng, int $updatedBy): Profile
+    public function updateSiteJsonWithCoordinates(string $id, array $siteJson, ?float $lat, ?float $lng, int $updatedBy): Minisite
     {
         $sql = $this->db->prepare(
             "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%s",
@@ -97,7 +97,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
         $this->db->query($sql);
         
         if ($this->db->rows_affected === 0) {
-            throw new \RuntimeException('Profile not found or update failed.');
+            throw new \RuntimeException('Minisite not found or update failed.');
         }
         
         // Update POINT column if coordinates are set
@@ -118,7 +118,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
     }
 
     /**
-     * Update the current version ID for a profile
+     * Update the current version ID for a minisite
      */
     public function updateCurrentVersionId(string $id, int $versionId): void
     {
@@ -129,12 +129,12 @@ final class ProfileRepository implements ProfileRepositoryInterface
         $this->db->query($sql);
         
         if ($this->db->rows_affected === 0) {
-            throw new \RuntimeException('Profile not found or update failed.');
+            throw new \RuntimeException('Minisite not found or update failed.');
         }
     }
 
     /**
-     * Update only coordinates for a profile (used when saving drafts)
+     * Update only coordinates for a minisite (used when saving drafts)
      */
     public function updateCoordinates(string $id, ?float $lat, ?float $lng, int $updatedBy): void
     {
@@ -145,7 +145,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
         $this->db->query($sql);
         
         if ($this->db->rows_affected === 0) {
-            throw new \RuntimeException('Profile not found or update failed.');
+            throw new \RuntimeException('Minisite not found or update failed.');
         }
         
         // Update POINT column if coordinates are set
@@ -163,28 +163,28 @@ final class ProfileRepository implements ProfileRepositoryInterface
         }
     }
 
-    public function save(Profile $p, int $expectedSiteVersion): Profile
+    public function save(Minisite $m, int $expectedSiteVersion): Minisite
     {
         // Build normalized search_terms (simple example; replace with your builder later)
-        $search = trim(strtolower("{$p->name} {$p->city} {$p->industry} {$p->palette} {$p->title}"));
+        $search = trim(strtolower("{$m->name} {$m->city} {$m->industry} {$m->palette} {$m->title}"));
 
         // Update existing by slugs + expected version (optimistic lock)
         $data = [
-            'title'          => $p->title,
-            'name'           => $p->name,
-            'city'           => $p->city,
-            'region'         => $p->region,
-            'country_code'   => $p->countryCode,
-            'postal_code'    => $p->postalCode,
-            'site_template'  => $p->siteTemplate,
-            'palette'        => $p->palette,
-            'industry'       => $p->industry,
-            'default_locale' => $p->defaultLocale,
-            'schema_version' => $p->schemaVersion,
-            'site_json'      => wp_json_encode($p->siteJson),
+            'title'          => $m->title,
+            'name'           => $m->name,
+            'city'           => $m->city,
+            'region'         => $m->region,
+            'country_code'   => $m->countryCode,
+            'postal_code'    => $m->postalCode,
+            'site_template'  => $m->siteTemplate,
+            'palette'        => $m->palette,
+            'industry'       => $m->industry,
+            'default_locale' => $m->defaultLocale,
+            'schema_version' => $m->schemaVersion,
+            'site_json'      => wp_json_encode($m->siteJson),
             'search_terms'   => $search,
-            'status'         => $p->status,
-            'updated_by'     => $p->updatedBy,
+            'status'         => $m->status,
+            'updated_by'     => $m->updatedBy,
         ];
         $format = ['%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%d','%s','%s','%s','%d'];
 
@@ -199,7 +199,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
             $data['title'],$data['name'],$data['city'],$data['region'],$data['country_code'],$data['postal_code'],
             $data['site_template'],$data['palette'],$data['industry'],$data['default_locale'],
             $data['schema_version'],$data['site_json'],$data['search_terms'],$data['status'],$data['updated_by'],
-            $p->slugs->business,$p->slugs->location,$expectedSiteVersion
+            $m->slugs->business,$m->slugs->location,$expectedSiteVersion
         );
         $this->db->query($sql);
 
@@ -208,21 +208,21 @@ final class ProfileRepository implements ProfileRepositoryInterface
         }
 
         // Sync POINT column if lat/lng set
-        if ($p->geo->isSet()) {
+        if ($m->geo->isSet()) {
             $this->db->query($this->db->prepare(
                 "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f,%f),4326)
                  WHERE business_slug=%s AND location_slug=%s",
-                $p->geo->lng, $p->geo->lat, $p->slugs->business, $p->slugs->location
+                $m->geo->lng, $m->geo->lat, $m->slugs->business, $m->slugs->location
             ));
         }
 
         // Re-fetch updated row to return fresh entity (with new site_version)
-        $fresh = $this->findBySlugs($p->slugs);
-        if (!$fresh) throw new \RuntimeException('Failed to reload profile after save.');
+        $fresh = $this->findBySlugs($m->slugs);
+        if (!$fresh) throw new \RuntimeException('Failed to reload minisite after save.');
         return $fresh;
     }
 
-    private function mapRow(array $r): Profile
+    private function mapRow(array $r): Minisite
     {
         // Extract lat/lng from location_point geometry
         $geo = null;
@@ -241,7 +241,7 @@ final class ProfileRepository implements ProfileRepositoryInterface
             }
         }
 
-        return new Profile(
+        return new Minisite(
             id:            (string)$r['id'],
             slugs:         new SlugPair($r['business_slug'], $r['location_slug']),
             title:         $r['title'],

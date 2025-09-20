@@ -7,7 +7,7 @@ use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 class VersionController
 {
     public function __construct(
-        private ProfileRepository $profileRepository,
+        private ProfileRepository $minisiteRepository,
         private VersionRepository $versionRepository
     ) {}
 
@@ -28,15 +28,15 @@ class VersionController
         }
 
         $currentUser = wp_get_current_user();
-        $profile = $this->profileRepository->findById($siteId);
+        $minisite = $this->profileRepository->findById($siteId);
         
-        if (!$profile) {
+        if (!$minisite) {
             wp_redirect(home_url('/account/sites'));
             exit;
         }
 
         // Check ownership
-        if ($profile->createdBy !== (int) $currentUser->ID) {
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
             wp_redirect(home_url('/account/sites'));
             exit;
         }
@@ -49,8 +49,8 @@ class VersionController
             \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$base])));
 
             \Timber\Timber::render('account-sites-versions.twig', [
-                'page_title' => 'Version History: ' . $profile->title,
-                'profile' => $profile,
+                'page_title' => 'Version History: ' . $minisite->title,
+                'profile' => $minisite,
                 'versions' => $versions,
             ]);
             return;
@@ -58,7 +58,7 @@ class VersionController
 
         // Fallback
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>Version History: ' . htmlspecialchars($profile->title) . '</h1>';
+        echo '<!doctype html><meta charset="utf-8"><h1>Version History: ' . htmlspecialchars($minisite->title) . '</h1>';
         echo '<p>Version history not available (Timber required).</p>';
     }
 
@@ -89,15 +89,15 @@ class VersionController
         }
 
         $currentUser = wp_get_current_user();
-        $profile = $this->profileRepository->findById($siteId);
+        $minisite = $this->profileRepository->findById($siteId);
         
-        if (!$profile) {
+        if (!$minisite) {
             wp_send_json_error('Site not found', 404);
             return;
         }
 
         // Check ownership
-        if ($profile->createdBy !== (int) $currentUser->ID) {
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
             wp_send_json_error('Access denied', 403);
             return;
         }
@@ -164,15 +164,15 @@ class VersionController
         }
 
         $currentUser = wp_get_current_user();
-        $profile = $this->profileRepository->findById($siteId);
+        $minisite = $this->profileRepository->findById($siteId);
         
-        if (!$profile) {
+        if (!$minisite) {
             wp_send_json_error('Site not found', 404);
             return;
         }
 
         // Check ownership
-        if ($profile->createdBy !== (int) $currentUser->ID) {
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
             wp_send_json_error('Access denied', 403);
             return;
         }
@@ -230,15 +230,15 @@ class VersionController
         }
 
         $currentUser = wp_get_current_user();
-        $profile = $this->profileRepository->findById($siteId);
+        $minisite = $this->profileRepository->findById($siteId);
         
-        if (!$profile) {
+        if (!$minisite) {
             wp_send_json_error('Site not found', 404);
             return;
         }
 
         // Check ownership
-        if ($profile->createdBy !== (int) $currentUser->ID) {
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
             wp_send_json_error('Access denied', 403);
             return;
         }

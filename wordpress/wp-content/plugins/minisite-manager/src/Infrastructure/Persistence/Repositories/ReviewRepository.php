@@ -28,7 +28,7 @@ final class ReviewRepository implements ReviewRepositoryInterface
         return $r;
     }
 
-    public function listApprovedForProfile(int $minisiteId, int $limit = 20): array
+    public function listApprovedForMinisite(int $minisiteId, int $limit = 20): array
     {
         $sql = $this->db->prepare(
             // AND status='approved' 

@@ -2,16 +2,16 @@
 
 namespace Minisite\Application\Controllers\Front;
 
-use Minisite\Domain\Entities\Profile;
+use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
-use Minisite\Infrastructure\Persistence\Repositories\ProfileRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 
 final class NewMinisiteController
 {
     public function __construct(
-        private ProfileRepository $profileRepository,
+        private MinisiteRepository $minisiteRepository,
         private VersionRepository $versionRepository
     ) {}
 
@@ -110,7 +110,7 @@ final class NewMinisiteController
             $geo = new GeoPoint(0, 0); // Default coordinates
             
             // Create new profile
-            $profile = new Profile(
+            $minisite = new Minisite(
                 id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
                 slugs: $slugs,
                 title: ucwords(str_replace('-', ' ', $businessSlug)), // Default title from slug
@@ -140,7 +140,7 @@ final class NewMinisiteController
             );
 
             // Save profile
-            $savedProfile = $this->profileRepository->save($profile, 0); // 0 for new profile
+            $savedProfile = $this->profileRepository->save($minisite, 0); // 0 for new profile
             
             // Create initial version
             $version = new Version(
@@ -240,7 +240,7 @@ final class NewMinisiteController
             $siteJson = $this->buildSiteJsonFromForm($_POST);
 
             // Create new profile
-            $profile = new Profile(
+            $minisite = new Minisite(
                 id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
                 slugs: $slugs,
                 title: sanitize_text_field($_POST['seo_title'] ?? ''),
@@ -270,7 +270,7 @@ final class NewMinisiteController
             );
 
             // Save profile
-            $savedProfile = $this->profileRepository->save($profile, 0);
+            $savedProfile = $this->profileRepository->save($minisite, 0);
 
             // Create initial version
             $version = new \Minisite\Domain\Entities\Version(
@@ -286,20 +286,20 @@ final class NewMinisiteController
                 sourceVersionId: null,
                 siteJson: $siteJson,
                 slugs: $slugs,
-                title: $profile->title,
-                name: $profile->name,
-                city: $profile->city,
-                region: $profile->region,
-                countryCode: $profile->countryCode,
-                postalCode: $profile->postalCode,
+                title: $minisite->title,
+                name: $minisite->name,
+                city: $minisite->city,
+                region: $minisite->region,
+                countryCode: $minisite->countryCode,
+                postalCode: $minisite->postalCode,
                 geo: $geo,
-                siteTemplate: $profile->siteTemplate,
-                palette: $profile->palette,
-                industry: $profile->industry,
-                defaultLocale: $profile->defaultLocale,
-                schemaVersion: $profile->schemaVersion,
-                siteVersion: $profile->siteVersion,
-                searchTerms: $profile->searchTerms
+                siteTemplate: $minisite->siteTemplate,
+                palette: $minisite->palette,
+                industry: $minisite->industry,
+                defaultLocale: $minisite->defaultLocale,
+                schemaVersion: $minisite->schemaVersion,
+                siteVersion: $minisite->siteVersion,
+                searchTerms: $minisite->searchTerms
             );
 
             $savedVersion = $this->versionRepository->save($version);
