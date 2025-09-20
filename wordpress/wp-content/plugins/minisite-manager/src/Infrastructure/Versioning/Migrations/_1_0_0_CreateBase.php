@@ -279,7 +279,7 @@ class _1_0_0_CreateBase implements Migration
         };
 
         // Insert first profile: ACME Dental (Dallas, US)
-        $acmeId = bin2hex(random_bytes(16));
+        $acmeId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $acme = [
             'id'             => $acmeId,
             'business_slug'  => 'acme-dental',
@@ -426,7 +426,7 @@ class _1_0_0_CreateBase implements Migration
         }
 
         // Insert second profile: Lotus Textiles (Mumbai, IN)
-        $lotusId = bin2hex(random_bytes(16));
+        $lotusId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $lotus = [
             'id'             => $lotusId,
             'business_slug'  => 'lotus-textiles',
@@ -528,7 +528,7 @@ class _1_0_0_CreateBase implements Migration
         }
 
         // Insert third profile: Green Bites (London, GB)
-        $greenId = bin2hex(random_bytes(16));
+        $greenId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $green = [
             'id'             => $greenId,
             'business_slug'  => 'green-bites',
@@ -629,7 +629,7 @@ class _1_0_0_CreateBase implements Migration
         }
 
         // Insert fourth profile: Swift Transit (Sydney, AU)
-        $swiftId = bin2hex(random_bytes(16));
+        $swiftId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $swift = [
             'id'             => $swiftId,
             'business_slug'  => 'swift-transit',

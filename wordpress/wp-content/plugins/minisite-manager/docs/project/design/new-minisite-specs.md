@@ -250,13 +250,13 @@ This document outlines the specifications for the new minisite creation flow, im
 ## Technical Implementation Details
 
 ### **ID Generation Strategy**
-- **Format**: 16-byte hex string (32 characters)
-- **Example**: `a1b2c3d4e5f6789012345678901234ab`
-- **Collision Probability**: ~1 in 2^128 (practically impossible)
+- **Format**: 12-byte hex string (24 characters)
+- **Example**: `a1b2c3d4e5f6789012345678`
+- **Collision Probability**: ~1 in 2^96 (practically impossible)
 - **Benefits**: Compact, secure, collision-free
 
 ### **Slug System**
-- **Draft Format**: `draft-{first12chars}` (e.g., `draft-a1b2c3d4e5f6`)
+- **Draft Format**: `biz-{first8chars}` and `loc-{next8chars}` (e.g., `biz-a1b2c3d4`, `loc-e5f67890`)
 - **Published Format**: Custom user-chosen slugs (e.g., `acme-dental`)
 - **Purpose**: Allow unlimited draft creation without conflicts
 - **Migration**: Seamless transition from draft to permanent slugs after payment
