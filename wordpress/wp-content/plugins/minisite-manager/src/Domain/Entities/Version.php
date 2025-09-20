@@ -8,7 +8,7 @@ final class Version
 {
     public function __construct(
         public ?int $id,
-        public int $minisiteId,
+        public string $minisiteId,
         public int $versionNumber,
         public string $status,        // draft|published
         public ?string $label,

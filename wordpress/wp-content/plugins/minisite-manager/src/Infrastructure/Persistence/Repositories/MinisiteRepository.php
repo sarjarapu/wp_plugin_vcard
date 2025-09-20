@@ -211,6 +211,58 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         }
     }
 
+    /**
+     * Insert a new minisite
+     */
+    public function insert(Minisite $m): Minisite
+    {
+        // Build normalized search_terms (simple example; replace with your builder later)
+        $search = trim(strtolower("{$m->name} {$m->city} {$m->industry} {$m->palette} {$m->title}"));
+
+        $data = [
+            'id'             => $m->id,
+            'slug'           => null, // Will be set later for drafts
+            'business_slug'  => $m->slugs->business,
+            'location_slug'  => $m->slugs->location,
+            'title'          => $m->title,
+            'name'           => $m->name,
+            'city'           => $m->city,
+            'region'         => $m->region,
+            'country_code'   => $m->countryCode,
+            'postal_code'    => $m->postalCode,
+            'site_template'  => $m->siteTemplate,
+            'palette'        => $m->palette,
+            'industry'       => $m->industry,
+            'default_locale' => $m->defaultLocale,
+            'schema_version' => $m->schemaVersion,
+            'site_version'   => $m->siteVersion,
+            'site_json'      => wp_json_encode($m->siteJson),
+            'search_terms'   => $search,
+            'status'         => $m->status,
+            'created_by'     => $m->createdBy,
+            'updated_by'     => $m->updatedBy,
+        ];
+
+        $result = $this->db->insert($this->table(), $data, [
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%d', '%d'
+        ]);
+
+        if ($result === false) {
+            throw new \RuntimeException('Failed to insert minisite.');
+        }
+
+        // Sync POINT column if lat/lng set
+        if ($m->geo && $m->geo->isSet()) {
+            $this->db->query($this->db->prepare(
+                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f,%f),4326) WHERE id = %s",
+                $m->geo->lng, $m->geo->lat, $m->id
+            ));
+        }
+
+        // Return the inserted minisite
+        return $this->findById($m->id);
+    }
+
     public function save(Minisite $m, int $expectedSiteVersion): Minisite
     {
         // Build normalized search_terms (simple example; replace with your builder later)

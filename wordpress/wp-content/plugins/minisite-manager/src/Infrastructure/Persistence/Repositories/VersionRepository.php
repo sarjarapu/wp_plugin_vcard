@@ -45,7 +45,7 @@ final class VersionRepository implements VersionRepositoryInterface
         ];
 
         $formats = [
-            '%d', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
+            '%s', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
             '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
         ];
 
@@ -207,7 +207,7 @@ final class VersionRepository implements VersionRepositoryInterface
 
         return new Version(
             id: (int) $row['id'],
-            minisiteId: (int) $row['minisite_id'],
+            minisiteId: $row['minisite_id'],
             versionNumber: (int) $row['version_number'],
             status: $row['status'],
             label: $row['label'],

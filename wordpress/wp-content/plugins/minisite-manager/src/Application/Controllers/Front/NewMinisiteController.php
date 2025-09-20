@@ -3,6 +3,7 @@
 namespace Minisite\Application\Controllers\Front;
 
 use Minisite\Domain\Entities\Minisite;
+use Minisite\Domain\Entities\Version;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
@@ -77,16 +78,20 @@ final class NewMinisiteController
             $minisiteId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
             $tempSlug = \Minisite\Domain\Services\MinisiteIdGenerator::generateTempSlug($minisiteId);
             
+            // Generate unique draft slugs to avoid constraint violations
+            $draftBusinessSlug = 'biz-' . substr($minisiteId, 0, 8);
+            $draftLocationSlug = 'loc-' . substr($minisiteId, 8, 8);
+            
             // Create empty site JSON structure
             $emptySiteJson = $this->getEmptySiteJson();
             
             // Create GeoPoint object (default coordinates)
             $geo = new GeoPoint(0, 0);
             
-            // Create new profile with temporary slug
+            // Create new profile with unique draft slugs
             $minisite = new Minisite(
                 id: $minisiteId,
-                slugs: new SlugPair(null, null), // No business/location slugs for drafts
+                slugs: new SlugPair($draftBusinessSlug, $draftLocationSlug), // Unique draft slugs
                 title: 'Untitled Minisite',
                 name: 'Untitled Minisite',
                 city: '',
@@ -113,16 +118,16 @@ final class NewMinisiteController
                 canEdit: true
             );
 
-            // Save profile
-            $savedMinisite = $this->minisiteRepository->save($minisite, 0); // 0 for new minisite
+            // Insert new minisite
+            $savedMinisite = $this->minisiteRepository->insert($minisite);
             
             // Update the minisite with the temporary slug
             $this->minisiteRepository->updateSlug($savedMinisite->id, $tempSlug);
             
             // Create initial version
             $version = new Version(
-                id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
-                minisiteId: $savedMinisite->id,
+                id: null, // null for new versions - will be set by repository
+                minisiteId: $savedMinisite->id, // String minisite ID
                 versionNumber: 1,
                 status: 'draft',
                 label: 'Initial Draft',
@@ -132,7 +137,7 @@ final class NewMinisiteController
                 publishedAt: null,
                 sourceVersionId: null,
                 siteJson: $emptySiteJson,
-                slugs: new SlugPair(null, null), // No business/location slugs for drafts
+                slugs: null, // No slugs for draft versions
                 title: $savedMinisite->title,
                 name: $savedMinisite->name,
                 city: $savedMinisite->city,

@@ -82,7 +82,7 @@ class VersionController
             return;
         }
 
-        $siteId = (int) ($_POST['site_id'] ?? 0);
+        $siteId = $_POST['site_id'] ?? '';
         if (!$siteId) {
             wp_send_json_error('Invalid site ID', 400);
             return;

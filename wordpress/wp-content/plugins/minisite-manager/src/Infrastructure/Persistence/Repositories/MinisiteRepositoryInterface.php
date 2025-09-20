@@ -19,6 +19,11 @@ interface MinisiteRepositoryInterface
     public function findBySlugParams(string $businessSlug, string $locationSlug): ?Minisite;
 
     /**
+     * Insert a new minisite
+     */
+    public function insert(Minisite $minisite): Minisite;
+
+    /**
      * Save live row with optimistic locking.
      * @throws \RuntimeException if version check fails
      */
