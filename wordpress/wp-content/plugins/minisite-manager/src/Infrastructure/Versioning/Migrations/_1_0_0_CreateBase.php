@@ -22,139 +22,135 @@ class _1_0_0_CreateBase implements Migration
         $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
 
         // ——— minisites (live) ———
-        DbDelta::run("
-        CREATE TABLE {$profiles} (
-          id       VARCHAR(32)     NOT NULL,
-
-          slug              VARCHAR(255)    NULL,
-          business_slug     VARCHAR(120)    NULL,
-          location_slug     VARCHAR(120)    NULL,
-
-          title             VARCHAR(200)    NOT NULL,
-          name              VARCHAR(200)    NOT NULL,
-          city              VARCHAR(120)    NOT NULL,
-          region            VARCHAR(120)    NULL,
-          country_code      CHAR(2)         NOT NULL,
-          postal_code       VARCHAR(20)     NULL,
-
-          location_point    POINT           NULL,
-
-          site_template     VARCHAR(32)     NOT NULL DEFAULT 'v2025',
-          palette           VARCHAR(24)     NOT NULL DEFAULT 'blue',
-          industry          VARCHAR(40)     NOT NULL DEFAULT 'services',
-          default_locale    VARCHAR(10)     NOT NULL DEFAULT 'en-US',
-
-          schema_version    SMALLINT UNSIGNED NOT NULL DEFAULT 1,
-          site_version      INT UNSIGNED      NOT NULL DEFAULT 1,
-          site_json         LONGTEXT          NOT NULL,
-
-          search_terms      TEXT              NULL,
-
-          status            ENUM('draft','published','archived') NOT NULL DEFAULT 'published',
-          publish_status    ENUM('draft','reserved','published') NOT NULL DEFAULT 'draft',
-          created_at        DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          updated_at        DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          published_at      DATETIME         NULL,
-          created_by        BIGINT UNSIGNED  NULL,
-          updated_by        BIGINT UNSIGNED  NULL,
-
+        DbDelta::run("CREATE TABLE {$profiles} (
+          id VARCHAR(32) NOT NULL,
+          slug VARCHAR(255) NULL,
+          business_slug VARCHAR(120) NULL,
+          location_slug VARCHAR(120) NULL,
+          title VARCHAR(200) NOT NULL,
+          name VARCHAR(200) NOT NULL,
+          city VARCHAR(120) NOT NULL,
+          region VARCHAR(120) NULL,
+          country_code CHAR(2) NOT NULL,
+          postal_code VARCHAR(20) NULL,
+          location_point POINT NULL,
+          site_template VARCHAR(32) NOT NULL DEFAULT 'v2025',
+          palette VARCHAR(24) NOT NULL DEFAULT 'blue',
+          industry VARCHAR(40) NOT NULL DEFAULT 'services',
+          default_locale VARCHAR(10) NOT NULL DEFAULT 'en-US',
+          schema_version SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+          site_version INT UNSIGNED NOT NULL DEFAULT 1,
+          site_json LONGTEXT NOT NULL,
+          search_terms TEXT NULL,
+          status ENUM('draft','published','archived') NOT NULL DEFAULT 'published',
+          publish_status ENUM('draft','reserved','published') NOT NULL DEFAULT 'draft',
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          published_at DATETIME NULL,
+          created_by BIGINT UNSIGNED NULL,
+          updated_by BIGINT UNSIGNED NULL,
           _minisite_current_version_id BIGINT UNSIGNED NULL,
-
           PRIMARY KEY (id),
           UNIQUE KEY uniq_slug (slug),
           UNIQUE KEY uniq_business_location (business_slug, location_slug)
-        ) ENGINE=InnoDB {$charset};
-        ");
+        ) ENGINE=InnoDB {$charset};");
 
 
         // ——— versions (new versioning system) ———
-        DbDelta::run("
-        CREATE TABLE {$versions} (
-          -- Version-specific fields (front)
-          id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          minisite_id      VARCHAR(32)     NOT NULL,
-          version_number   INT UNSIGNED    NOT NULL,
-          status           ENUM('draft','published') NOT NULL,
-          label            VARCHAR(120)    NULL,
-          comment          TEXT            NULL,
-          created_by       BIGINT UNSIGNED NOT NULL,
-          created_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          published_at     DATETIME        NULL,
+        DbDelta::run("CREATE TABLE {$versions} (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          minisite_id VARCHAR(32) NOT NULL,
+          version_number INT UNSIGNED NOT NULL,
+          status ENUM('draft','published') NOT NULL,
+          label VARCHAR(120) NULL,
+          comment TEXT NULL,
+          created_by BIGINT UNSIGNED NOT NULL,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          published_at DATETIME NULL,
           source_version_id BIGINT UNSIGNED NULL,
-
-          -- Profile fields (exact match with profiles table order and types)
-          business_slug     VARCHAR(120)    NULL,
-          location_slug     VARCHAR(120)    NULL,
-          title             VARCHAR(200)    NULL,
-          name              VARCHAR(200)    NULL,
-          city              VARCHAR(120)    NULL,
-          region            VARCHAR(120)    NULL,
-          country_code      CHAR(2)         NULL,
-          postal_code       VARCHAR(20)     NULL,
-          location_point    POINT           NULL,
-          site_template     VARCHAR(32)     NULL,
-          palette           VARCHAR(24)     NULL,
-          industry          VARCHAR(40)     NULL,
-          default_locale    VARCHAR(10)     NULL,
-          schema_version    SMALLINT UNSIGNED NULL,
-          site_version      INT UNSIGNED    NULL,
-          site_json         LONGTEXT        NOT NULL,
-          search_terms      TEXT            NULL,
-
+          business_slug VARCHAR(120) NULL,
+          location_slug VARCHAR(120) NULL,
+          title VARCHAR(200) NULL,
+          name VARCHAR(200) NULL,
+          city VARCHAR(120) NULL,
+          region VARCHAR(120) NULL,
+          country_code CHAR(2) NULL,
+          postal_code VARCHAR(20) NULL,
+          location_point POINT NULL,
+          site_template VARCHAR(32) NULL,
+          palette VARCHAR(24) NULL,
+          industry VARCHAR(40) NULL,
+          default_locale VARCHAR(10) NULL,
+          schema_version SMALLINT UNSIGNED NULL,
+          site_version INT UNSIGNED NULL,
+          site_json LONGTEXT NOT NULL,
+          search_terms TEXT NULL,
           PRIMARY KEY (id),
           UNIQUE KEY uniq_minisite_version (minisite_id, version_number),
           KEY idx_minisite_status (minisite_id, status),
-          KEY idx_minisite_created (minisite_id, created_at),
-          FOREIGN KEY (minisite_id) REFERENCES {$profiles}(id) ON DELETE CASCADE
-        ) ENGINE=InnoDB {$charset};
-        ");
+          KEY idx_minisite_created (minisite_id, created_at)
+        ) ENGINE=InnoDB {$charset};");
 
         // ——— reviews ———
-        DbDelta::run("
-        CREATE TABLE {$reviews} (
-          id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          minisite_id      VARCHAR(32)     NOT NULL,
-
-          author_name      VARCHAR(160)     NOT NULL,
-          author_url       VARCHAR(300)     NULL,
-          rating           DECIMAL(2,1)     NOT NULL,
-          body             MEDIUMTEXT       NOT NULL,
-          locale           VARCHAR(10)      NULL,
-          visited_month    CHAR(7)          NULL,
-
-          source           ENUM('manual','google','yelp','facebook','other') NOT NULL DEFAULT 'manual',
-          source_id        VARCHAR(160)     NULL,
-          status           ENUM('pending','approved','rejected') NOT NULL DEFAULT 'approved',
-
-          created_at       DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          updated_at       DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          created_by       BIGINT UNSIGNED  NULL,
-
+        DbDelta::run("CREATE TABLE {$reviews} (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          minisite_id VARCHAR(32) NOT NULL,
+          author_name VARCHAR(160) NOT NULL,
+          author_url VARCHAR(300) NULL,
+          rating DECIMAL(2,1) NOT NULL,
+          body MEDIUMTEXT NOT NULL,
+          locale VARCHAR(10) NULL,
+          visited_month CHAR(7) NULL,
+          source ENUM('manual','google','yelp','facebook','other') NOT NULL DEFAULT 'manual',
+          source_id VARCHAR(160) NULL,
+          status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'approved',
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+          created_by BIGINT UNSIGNED NULL,
           PRIMARY KEY (id),
           KEY idx_minisite (minisite_id),
           KEY idx_status_date (status, created_at),
           KEY idx_rating (rating)
-        ) ENGINE=InnoDB {$charset};
-        ");
+        ) ENGINE=InnoDB {$charset};");
 
         // ——— bookmarks ———
-        DbDelta::run("
-        CREATE TABLE {$bookmarks} (
-          id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          user_id          BIGINT UNSIGNED NOT NULL,
-          minisite_id      VARCHAR(32)     NOT NULL,
-          created_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
+        DbDelta::run("CREATE TABLE {$bookmarks} (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          user_id BIGINT UNSIGNED NOT NULL,
+          minisite_id VARCHAR(32) NOT NULL,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
           PRIMARY KEY (id),
           UNIQUE KEY uniq_user_minisite (user_id, minisite_id),
           KEY idx_user (user_id),
-          KEY idx_minisite (minisite_id),
-          FOREIGN KEY (minisite_id) REFERENCES {$profiles}(id) ON DELETE CASCADE
-        ) ENGINE=InnoDB {$charset};
-        ");
+          KEY idx_minisite (minisite_id)
+        ) ENGINE=InnoDB {$charset};");
+
+        // Add foreign key constraints after table creation (only if they don't exist)
+        $this->addForeignKeyIfNotExists($wpdb, $versions, 'fk_versions_minisite_id', 'minisite_id', $profiles, 'id');
+        $this->addForeignKeyIfNotExists($wpdb, $reviews, 'fk_reviews_minisite_id', 'minisite_id', $profiles, 'id');
+        $this->addForeignKeyIfNotExists($wpdb, $bookmarks, 'fk_bookmarks_minisite_id', 'minisite_id', $profiles, 'id');
 
         // —— dev seed: insert two test minisites + revisions + reviews ——
         $this->seedTestData($wpdb);
+    }
+
+    /**
+     * Add a foreign key constraint only if it doesn't already exist
+     */
+    private function addForeignKeyIfNotExists(\wpdb $wpdb, string $table, string $constraintName, string $column, string $referencedTable, string $referencedColumn): void
+    {
+        // Check if the constraint already exists
+        $constraintExists = $wpdb->get_var($wpdb->prepare("
+            SELECT COUNT(*) 
+            FROM information_schema.KEY_COLUMN_USAGE 
+            WHERE TABLE_SCHEMA = %s 
+            AND TABLE_NAME = %s 
+            AND CONSTRAINT_NAME = %s
+        ", DB_NAME, $table, $constraintName));
+
+        if (!$constraintExists) {
+            $wpdb->query("ALTER TABLE {$table} ADD CONSTRAINT {$constraintName} FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn}) ON DELETE CASCADE");
+        }
     }
 
     public function down(\wpdb $wpdb): void
