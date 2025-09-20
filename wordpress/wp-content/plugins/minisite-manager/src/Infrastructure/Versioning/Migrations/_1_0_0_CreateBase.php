@@ -24,7 +24,7 @@ class _1_0_0_CreateBase implements Migration
         // ——— minisites (live) ———
         DbDelta::run("
         CREATE TABLE {$profiles} (
-          minisite_id       VARCHAR(32)     NOT NULL,
+          id       VARCHAR(32)     NOT NULL,
 
           slug              VARCHAR(255)    NULL,
           business_slug     VARCHAR(120)    NULL,
@@ -51,7 +51,7 @@ class _1_0_0_CreateBase implements Migration
           search_terms      TEXT              NULL,
 
           status            ENUM('draft','published','archived') NOT NULL DEFAULT 'published',
-          publish_status    ENUM('draft', 'reserved', 'published') NOT NULL DEFAULT 'draft',
+          publish_status    ENUM('draft','reserved','published') NOT NULL DEFAULT 'draft',
           created_at        DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP,
           updated_at        DATETIME         NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           published_at      DATETIME         NULL,
@@ -60,7 +60,7 @@ class _1_0_0_CreateBase implements Migration
 
           _minisite_current_version_id BIGINT UNSIGNED NULL,
 
-          PRIMARY KEY (minisite_id),
+          PRIMARY KEY (id),
           UNIQUE KEY uniq_slug (slug),
           UNIQUE KEY uniq_business_location (business_slug, location_slug)
         ) ENGINE=InnoDB {$charset};
@@ -72,7 +72,7 @@ class _1_0_0_CreateBase implements Migration
         CREATE TABLE {$versions} (
           -- Version-specific fields (front)
           id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          minisite_id      VARCHAR(16)     NOT NULL,
+          minisite_id      VARCHAR(32)     NOT NULL,
           version_number   INT UNSIGNED    NOT NULL,
           status           ENUM('draft','published') NOT NULL,
           label            VARCHAR(120)    NULL,
@@ -149,7 +149,7 @@ class _1_0_0_CreateBase implements Migration
           UNIQUE KEY uniq_user_minisite (user_id, minisite_id),
           KEY idx_user (user_id),
           KEY idx_minisite (minisite_id),
-          FOREIGN KEY (minisite_id) REFERENCES {$profiles}(minisite_id) ON DELETE CASCADE
+          FOREIGN KEY (minisite_id) REFERENCES {$profiles}(id) ON DELETE CASCADE
         ) ENGINE=InnoDB {$charset};
         ");
 
@@ -231,7 +231,7 @@ class _1_0_0_CreateBase implements Migration
         // Insert first profile: ACME Dental (Dallas, US)
         $acmeId = bin2hex(random_bytes(16));
         $acme = [
-            'minisite_id'    => $acmeId,
+            'id'             => $acmeId,
             'business_slug'  => 'acme-dental',
             'location_slug'  => 'dallas',
             'title'          => 'Acme Dental — Dallas',
@@ -378,7 +378,7 @@ class _1_0_0_CreateBase implements Migration
         // Insert second profile: Lotus Textiles (Mumbai, IN)
         $lotusId = bin2hex(random_bytes(16));
         $lotus = [
-            'minisite_id'    => $lotusId,
+            'id'             => $lotusId,
             'business_slug'  => 'lotus-textiles',
             'location_slug'  => 'mumbai',
             'title'          => 'Lotus Textiles — Mumbai',
@@ -480,7 +480,7 @@ class _1_0_0_CreateBase implements Migration
         // Insert third profile: Green Bites (London, GB)
         $greenId = bin2hex(random_bytes(16));
         $green = [
-            'minisite_id'    => $greenId,
+            'id'             => $greenId,
             'business_slug'  => 'green-bites',
             'location_slug'  => 'london',
             'title'          => 'Green Bites — London',
@@ -581,7 +581,7 @@ class _1_0_0_CreateBase implements Migration
         // Insert fourth profile: Swift Transit (Sydney, AU)
         $swiftId = bin2hex(random_bytes(16));
         $swift = [
-            'minisite_id'    => $swiftId,
+            'id'             => $swiftId,
             'business_slug'  => 'swift-transit',
             'location_slug'  => 'sydney',
             'title'          => 'Swift Transit — Sydney',
@@ -725,7 +725,7 @@ class _1_0_0_CreateBase implements Migration
 
             $wpdb->insert($versionsT, $versionData, [
                 '%s','%d','%s','%s','%s','%d','%s','%s','%d',
-                '%s','%s','%s','%s','%s','%s','%s','%s','%s',
+                '%s','%s','%s','%s','%s','%s','%s','%s',
                 '%s','%s','%s','%s','%d','%d','%s','%s'
             ]);
 
@@ -749,7 +749,7 @@ class _1_0_0_CreateBase implements Migration
 
             // Update profile with current version ID
             $wpdb->query($wpdb->prepare(
-                "UPDATE {$profilesT} SET _minisite_current_version_id = %d WHERE minisite_id = %s",
+                "UPDATE {$profilesT} SET _minisite_current_version_id = %d WHERE id = %s",
                 $versionId, $pid
             ));
         }
