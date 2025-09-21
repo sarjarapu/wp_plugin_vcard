@@ -637,8 +637,22 @@ final class SitesController
         }
 
         try {
+            // Log the received data for debugging
+            error_log('Import JSON data length: ' . strlen($jsonData));
+            error_log('Import JSON data preview: ' . substr($jsonData, 0, 200));
+            
+            // The JSON data might be escaped due to FormData transmission
+            // Try to decode it first, and if that fails, try with stripslashes
             $importData = json_decode($jsonData, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
+                // Try with stripslashes to handle escaped quotes
+                $jsonData = stripslashes($jsonData);
+                error_log('Trying with stripslashes, new preview: ' . substr($jsonData, 0, 200));
+                $importData = json_decode($jsonData, true);
+            }
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log('JSON decode error: ' . json_last_error_msg());
+                error_log('JSON data causing error: ' . substr($jsonData, 0, 500));
                 wp_send_json_error('Invalid JSON format: ' . json_last_error_msg(), 400);
                 return;
             }
