@@ -843,6 +843,105 @@
         });
       }
       
+      // Helper function to add a product programmatically
+      function addProductProgrammatically() {
+        const container = document.getElementById('productsContainer');
+        const productHtml = `
+          <div class="product-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-medium text-[var(--on-surface)]">Product ${productCount + 1}</h3>
+              <button type="button" class="removeProduct text-[var(--primary)] hover:text-[var(--primary)]/80">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Title</label>
+                <input name="product_${productCount}_title" type="text" value=""
+                  class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+                <input name="product_${productCount}_image" type="url" value=""
+                  class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Price</label>
+                <input name="product_${productCount}_price" type="text" value=""
+                  class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Font Awesome Icon</label>
+                <input name="product_${productCount}_icon" type="text" value="" placeholder="fa-solid fa-star"
+                  class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA Text</label>
+                <input name="product_${productCount}_cta_text" type="text" value=""
+                  class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA URL</label>
+                <input name="product_${productCount}_cta_url" type="text" value=""
+                  class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+                  placeholder="https://example.com or #section or /page"/>
+              </div>
+            </div>
+            <div class="mt-4">
+              <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Description</label>
+              <div class="ql-editor-container" style="height: 120px;">
+                <div id="product_${productCount}_description_editor"></div>
+                <textarea name="product_${productCount}_description" style="display: none;"></textarea>
+              </div>
+              <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your description. HTML tags are automatically handled.</p>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', productHtml);
+        productCount++;
+        document.getElementById('productCount').value = productCount;
+        
+        // Initialize Quill editor for the new product description
+        const newEditorId = `product_${productCount - 1}_description_editor`;
+        const newTextareaId = `product_${productCount - 1}_description`;
+        if (window.initProductEditor) {
+          window.initProductEditor(newEditorId, newTextareaId);
+        }
+        
+        return productCount - 1; // Return the index of the added product
+      }
+
+      // Helper function to add a gallery item programmatically
+      function addGalleryItemProgrammatically() {
+        const container = document.getElementById('galleryContainer');
+        const galleryHtml = `
+          <div class="gallery-item border border-[var(--outline-variant)] rounded-lg p-4 bg-[var(--surface-1)]">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-medium text-[var(--on-surface)]">Gallery Image ${galleryCount + 1}</h3>
+              <button type="button" class="removeGallery text-[var(--primary)] hover:text-[var(--primary)]/80">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image URL</label>
+                <input name="gallery_${galleryCount}_image" type="url" value=""
+                  class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Alt Text</label>
+                <input name="gallery_${galleryCount}_alt" type="text" value=""
+                  class="w-full rounded-lg bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+              </div>
+            </div>
+          </div>
+        `;
+        container.insertAdjacentHTML('beforeend', galleryHtml);
+        galleryCount++;
+        document.getElementById('galleryCount').value = galleryCount;
+        return galleryCount - 1; // Return the index of the added gallery item
+      }
+
       // Function to populate form with imported data
       function populateFormWithData(data) {
         console.log('Populating form with data:', data);
@@ -994,14 +1093,13 @@
               
               // Add imported products
               siteData.services.listing.forEach((service, index) => {
-                addProduct();
-                const productIndex = productCount - 1;
+                const productIndex = addProductProgrammatically();
                 setFieldValue(`input[name="product_${productIndex}_title"]`, service.title);
                 setFieldValue(`input[name="product_${productIndex}_price"]`, service.price);
                 setFieldValue(`input[name="product_${productIndex}_image"]`, service.image);
                 setFieldValue(`input[name="product_${productIndex}_icon"]`, service.icon);
-                setFieldValue(`input[name="product_${productIndex}_cta_text"]`, service.cta?.text);
-                setFieldValue(`input[name="product_${productIndex}_cta_url"]`, service.cta?.url);
+                setFieldValue(`input[name="product_${productIndex}_cta_text"]`, service.cta);
+                setFieldValue(`input[name="product_${productIndex}_cta_url"]`, service.url);
                 
                 // Product description (rich text editor)
                 if (service.description) {
@@ -1027,13 +1125,12 @@
               galleryCount = 0;
             }
             
-            // Add imported gallery items
-            siteData.gallery.forEach((item, index) => {
-              addGalleryItem();
-              const galleryIndex = galleryCount - 1;
-              setFieldValue(`input[name="gallery_${galleryIndex}_image"]`, item.src || item.url);
-              setFieldValue(`input[name="gallery_${galleryIndex}_alt"]`, item.alt);
-            });
+              // Add imported gallery items
+              siteData.gallery.forEach((item, index) => {
+                const galleryIndex = addGalleryItemProgrammatically();
+                setFieldValue(`input[name="gallery_${galleryIndex}_image"]`, item.src || item.url);
+                setFieldValue(`input[name="gallery_${galleryIndex}_alt"]`, item.alt);
+              });
           }
           
         } catch (error) {
