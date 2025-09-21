@@ -32,6 +32,9 @@
           <div>
             <h1 class="text-3xl font-bold text-[var(--on-surface)]">Publish Your Minisite</h1>
             <p class="text-[var(--on-surface-variant)] mt-2">Choose your permanent URL and make your minisite live</p>
+            {% if minisite_id %}
+              <p class="text-xs text-[var(--on-surface-variant)] mt-1">Minisite ID: {{ minisite_id }}</p>
+            {% endif %}
           </div>
           <a href="{{ function('home_url','/account/sites') }}" 
              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)]">
@@ -180,11 +183,27 @@
 
         <!-- Reservation Timer -->
         <div id="reservation-timer" class="hidden bg-orange-50 border border-orange-200 rounded-lg p-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-clock text-orange-500"></i>
+              <div>
+                <p class="font-medium text-orange-800">Slug Reserved</p>
+                <p class="text-sm text-orange-700">Complete payment within <span id="timer-display">5:00</span> to secure your URL</p>
+              </div>
+            </div>
+            <button id="cancel-reservation-btn" class="text-orange-600 hover:text-orange-800 text-sm font-medium">
+              Cancel Reservation
+            </button>
+          </div>
+        </div>
+
+        <!-- Payment Processing -->
+        <div id="payment-processing" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div class="flex items-center gap-3">
-            <i class="fa-solid fa-clock text-orange-500"></i>
+            <i class="fa-solid fa-spinner fa-spin text-blue-500"></i>
             <div>
-              <p class="font-medium text-orange-800">Slug Reserved</p>
-              <p class="text-sm text-orange-700">Complete payment within <span id="timer-display">5:00</span> to secure your URL</p>
+              <p class="font-medium text-blue-800">Processing Payment</p>
+              <p class="text-sm text-blue-700">Please wait while we process your payment...</p>
             </div>
           </div>
         </div>
@@ -246,34 +265,54 @@
       button.disabled = true;
       button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
       
-      // TODO: Make AJAX call to check availability
-      // For now, simulate the check
-      setTimeout(() => {
+      // Make AJAX call to check availability
+      fetch('{{ function("admin_url", "admin-ajax.php") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          action: 'check_slug_availability',
+          nonce: '{{ function("wp_create_nonce", "check_slug_availability") }}',
+          business_slug: businessSlug,
+          location_slug: locationSlug
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
         button.disabled = false;
         button.innerHTML = '<i class="fa-solid fa-search"></i> Check Availability';
         
-        // Simulate availability check result
-        const isAvailable = Math.random() > 0.5; // Random for demo
-        
-        if (isAvailable) {
-          result.innerHTML = '<div class="text-green-600"><i class="fa-solid fa-check-circle mr-2"></i>This URL is available!</div>';
-          document.getElementById('publish-button').disabled = false;
+        if (data.success) {
+          if (data.data.available) {
+            result.innerHTML = '<div class="text-green-600"><i class="fa-solid fa-check-circle mr-2"></i>' + data.data.message + '</div>';
+            document.getElementById('publish-button').disabled = false;
+          } else {
+            result.innerHTML = '<div class="text-red-600"><i class="fa-solid fa-times-circle mr-2"></i>' + data.data.message + '</div>';
+            document.getElementById('publish-button').disabled = true;
+          }
         } else {
-          result.innerHTML = '<div class="text-red-600"><i class="fa-solid fa-times-circle mr-2"></i>This URL is already taken. Please try a different one.</div>';
+          showError(data.data || 'Failed to check availability');
           document.getElementById('publish-button').disabled = true;
         }
         
         result.classList.remove('hidden');
-      }, 1000);
+      })
+      .catch(error => {
+        button.disabled = false;
+        button.innerHTML = '<i class="fa-solid fa-search"></i> Check Availability';
+        showError('Network error. Please try again.');
+        document.getElementById('publish-button').disabled = true;
+      });
     }
 
     // Start reservation timer
-    function startReservationTimer() {
+    function startReservationTimer(expiresInSeconds = 300) {
       const timerDisplay = document.getElementById('timer-display');
       const reservationDiv = document.getElementById('reservation-timer');
       
       reservationDiv.classList.remove('hidden');
-      reservationEndTime = Date.now() + (5 * 60 * 1000); // 5 minutes
+      reservationEndTime = Date.now() + (expiresInSeconds * 1000);
       
       reservationTimer = setInterval(() => {
         const now = Date.now();
@@ -284,6 +323,7 @@
           timerDisplay.textContent = '0:00';
           showError('Reservation expired. Please check availability again.');
           reservationDiv.classList.add('hidden');
+          document.getElementById('publish-button').disabled = false;
           return;
         }
         
@@ -291,6 +331,20 @@
         const seconds = Math.floor((remaining % 60000) / 1000);
         timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
       }, 1000);
+    }
+
+    // Cancel reservation
+    function cancelReservation() {
+      if (reservationTimer) {
+        clearInterval(reservationTimer);
+        reservationTimer = null;
+      }
+      
+      document.getElementById('reservation-timer').classList.add('hidden');
+      document.getElementById('publish-button').disabled = false;
+      
+      // TODO: Make AJAX call to cancel reservation on server
+      showSuccess('Reservation cancelled. You can try again.');
     }
 
     // Show error message
@@ -311,10 +365,24 @@
       setTimeout(() => successDiv.classList.add('hidden'), 5000);
     }
 
+    // Reset publish button to original state
+    function resetPublishButton() {
+      const button = document.getElementById('publish-button');
+      const icon = document.getElementById('publish-icon');
+      const text = document.getElementById('publish-text');
+      const loading = document.getElementById('publish-loading');
+      
+      button.disabled = false;
+      icon.classList.remove('hidden');
+      text.classList.remove('hidden');
+      loading.classList.add('hidden');
+    }
+
     // Event listeners
     document.getElementById('business_slug').addEventListener('input', updateUrlPreview);
     document.getElementById('location_slug').addEventListener('input', updateUrlPreview);
     document.getElementById('check-availability-btn').addEventListener('click', checkAvailability);
+    document.getElementById('cancel-reservation-btn').addEventListener('click', cancelReservation);
     
     document.getElementById('publish-button').addEventListener('click', function() {
       const button = document.getElementById('publish-button');
@@ -322,24 +390,96 @@
       const text = document.getElementById('publish-text');
       const loading = document.getElementById('publish-loading');
       
+      const businessSlug = document.getElementById('business_slug').value.trim();
+      const locationSlug = document.getElementById('location_slug').value.trim();
+      
+      if (!businessSlug) {
+        showError('Please enter a business slug');
+        return;
+      }
+      
       // Show loading state
       button.disabled = true;
       icon.classList.add('hidden');
       text.classList.add('hidden');
       loading.classList.remove('hidden');
       
-      // Start reservation timer
-      startReservationTimer();
-      
-      // TODO: Integrate with actual payment system
-      // For now, simulate payment success
-      setTimeout(() => {
-        showSuccess('Payment successful! Your minisite is now live.');
-        // Redirect to minisite or dashboard
-        setTimeout(() => {
-          window.location.href = '/account/sites';
-        }, 2000);
-      }, 3000);
+      // First, reserve the slug
+      fetch('{{ function("admin_url", "admin-ajax.php") }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: new URLSearchParams({
+          action: 'reserve_slug',
+          nonce: '{{ function("wp_create_nonce", "reserve_slug") }}',
+          business_slug: businessSlug,
+          location_slug: locationSlug
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Start reservation timer with actual expiration time
+          const expiresInSeconds = data.data.expires_in_seconds || 300;
+          startReservationTimer(expiresInSeconds);
+          
+          // Show payment processing
+          document.getElementById('payment-processing').classList.remove('hidden');
+          
+          // Simulate payment processing (replace with real payment integration)
+          setTimeout(() => {
+            // Simulate payment completion
+            const paymentReference = 'test_payment_' + Date.now();
+            
+            fetch('{{ function("admin_url", "admin-ajax.php") }}', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({
+                action: 'publish_minisite',
+                nonce: '{{ function("wp_create_nonce", "publish_minisite") }}',
+                minisite_id: '{{ minisite_id|default("") }}',
+                business_slug: businessSlug,
+                location_slug: locationSlug,
+                payment_reference: paymentReference
+              })
+            })
+            .then(response => response.json())
+            .then(publishData => {
+              // Hide processing indicator
+              document.getElementById('payment-processing').classList.add('hidden');
+              
+              if (publishData.success) {
+                showSuccess('Payment successful! Your minisite is now live.');
+                // Redirect to minisite or dashboard
+                setTimeout(() => {
+                  window.location.href = publishData.data.redirect_url || '/account/sites';
+                }, 2000);
+              } else {
+                showError(publishData.data || 'Failed to publish minisite');
+                resetPublishButton();
+              }
+            })
+            .catch(error => {
+              document.getElementById('payment-processing').classList.add('hidden');
+              showError('Payment processing failed. Please try again.');
+              resetPublishButton();
+            });
+          }, 3000); // Simulate 3-second payment processing
+        } else {
+          showError(data.data || 'Failed to reserve slug');
+          resetPublishButton();
+        }
+      })
+      .catch(error => {
+        showError('Network error. Please try again.');
+        button.disabled = false;
+        icon.classList.remove('hidden');
+        text.classList.remove('hidden');
+        loading.classList.add('hidden');
+      });
     });
 
     // Format slug inputs

@@ -470,9 +470,33 @@ add_action('template_redirect', function () {
             $componentsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
             \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$viewsBase, $componentsBase])));
             
+            // Get minisite ID from URL parameter or query var
+            $minisiteId = $_GET['minisite_id'] ?? get_query_var('minisite_site_id') ?? '';
+            
+            if (empty($minisiteId)) {
+              wp_redirect(home_url('/account/sites'));
+              exit;
+            }
+            
+            // Verify user owns this minisite
+            if (is_user_logged_in()) {
+              global $wpdb;
+              $repo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+              $minisite = $repo->findById($minisiteId);
+              
+              if (!$minisite || $minisite->createdBy !== get_current_user_id()) {
+                wp_redirect(home_url('/account/sites'));
+                exit;
+              }
+            } else {
+              wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+              exit;
+            }
+            
             \Timber\Timber::render('account-sites-publish.twig', [
               'page_title' => 'Publish Your Minisite',
-              'page_subtitle' => 'Choose your permanent URL and make your minisite live'
+              'page_subtitle' => 'Choose your permanent URL and make your minisite live',
+              'minisite_id' => $minisiteId
             ]);
           } else {
             status_header(503);

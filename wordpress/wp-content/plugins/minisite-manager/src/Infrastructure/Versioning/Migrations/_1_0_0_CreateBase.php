@@ -10,7 +10,7 @@ class _1_0_0_CreateBase implements Migration
 
     public function description(): string
     {
-        return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), minisite_reviews, minisite_bookmarks, minisite_payments, minisite_payment_history + seed dev data';
+        return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), minisite_reviews, minisite_bookmarks, minisite_payments, minisite_payment_history, minisite_reservations + auto-cleanup event + seed dev data';
     }
 
     public function up(\wpdb $wpdb): void
@@ -170,6 +170,23 @@ class _1_0_0_CreateBase implements Migration
           KEY idx_created_at (created_at)
         ) ENGINE=InnoDB {$charset};");
 
+        // Reservations table for 5-minute slug reservations
+        $reservations = $wpdb->prefix . 'minisite_reservations';
+        DbDelta::run("CREATE TABLE {$reservations} (
+          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+          business_slug VARCHAR(255) NOT NULL,
+          location_slug VARCHAR(255) NULL,
+          user_id BIGINT UNSIGNED NOT NULL,
+          minisite_id VARCHAR(32) NULL,
+          expires_at DATETIME NOT NULL,
+          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          PRIMARY KEY (id),
+          UNIQUE KEY unique_slug_reservation (business_slug, location_slug),
+          KEY idx_expires_at (expires_at),
+          KEY idx_user_id (user_id),
+          KEY idx_minisite_id (minisite_id)
+        ) ENGINE=InnoDB {$charset};");
+
         // Add foreign key constraints after table creation (only if they don't exist)
         $this->addForeignKeyIfNotExists($wpdb, $versions, 'fk_versions_minisite_id', 'minisite_id', $minisites, 'id');
         $this->addForeignKeyIfNotExists($wpdb, $reviews, 'fk_reviews_minisite_id', 'minisite_id', $minisites, 'id');
@@ -179,6 +196,17 @@ class _1_0_0_CreateBase implements Migration
         $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_minisite_id', 'minisite_id', $minisites, 'id');
         $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_payment_id', 'payment_id', $payments, 'id');
         $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_new_owner_user_id', 'new_owner_user_id', $wpdb->prefix . 'users', 'ID');
+        $this->addForeignKeyIfNotExists($wpdb, $reservations, 'fk_reservations_user_id', 'user_id', $wpdb->prefix . 'users', 'ID');
+        $this->addForeignKeyIfNotExists($wpdb, $reservations, 'fk_reservations_minisite_id', 'minisite_id', $minisites, 'id');
+
+        // Create MySQL event for auto-cleanup of expired reservations
+        $wpdb->query("
+            CREATE EVENT IF NOT EXISTS cleanup_expired_reservations
+            ON SCHEDULE EVERY 1 MINUTE
+            DO
+              DELETE FROM {$reservations} 
+              WHERE expires_at < NOW()
+        ");
 
         // —— dev seed: insert two test minisites + revisions + reviews ——
         $this->seedTestData($wpdb);
@@ -214,7 +242,12 @@ class _1_0_0_CreateBase implements Migration
         $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
         $payments = $wpdb->prefix . 'minisite_payments';
         $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
+        $reservations = $wpdb->prefix . 'minisite_reservations';
 
+        // Drop MySQL event
+        $wpdb->query("DROP EVENT IF EXISTS cleanup_expired_reservations");
+        
+        $wpdb->query("DROP TABLE IF EXISTS {$reservations}");
         $wpdb->query("DROP TABLE IF EXISTS {$paymentHistory}");
         $wpdb->query("DROP TABLE IF EXISTS {$payments}");
         $wpdb->query("DROP TABLE IF EXISTS {$bookmarks}");

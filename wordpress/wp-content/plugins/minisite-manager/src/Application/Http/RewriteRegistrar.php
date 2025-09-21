@@ -31,6 +31,7 @@ final class RewriteRegistrar
         add_rewrite_rule('^account/sites/([a-f0-9]{24,32})/edit/?$', 'index.php?minisite_account=1&minisite_account_action=edit&minisite_site_id=$matches[1]', 'top');
         add_rewrite_rule('^account/sites/([a-f0-9]{24,32})/preview/([0-9]+|current)/?$', 'index.php?minisite_account=1&minisite_account_action=preview&minisite_site_id=$matches[1]&minisite_version_id=$matches[2]', 'top');
         add_rewrite_rule('^account/sites/([a-f0-9]{24,32})/versions/?$', 'index.php?minisite_account=1&minisite_account_action=versions&minisite_site_id=$matches[1]', 'top');
+        add_rewrite_rule('^account/sites/([a-f0-9]{24,32})/?$', 'index.php?minisite_account=1&minisite_account_action=edit&minisite_site_id=$matches[1]', 'top');
     }
 }
 

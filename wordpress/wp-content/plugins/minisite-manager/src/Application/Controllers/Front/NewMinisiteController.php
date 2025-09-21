@@ -480,20 +480,44 @@ final class NewMinisiteController
         }
 
         try {
-            // Check if combination already exists
+            global $wpdb;
+            
+            // Check if combination already exists in minisites table
             $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
             
             if ($existingMinisite) {
                 wp_send_json_success([
                     'available' => false,
-                    'message' => 'This slug combination is already taken'
+                    'message' => 'This slug combination is already taken by an existing minisite'
                 ]);
-            } else {
-                wp_send_json_success([
-                    'available' => true,
-                    'message' => 'This slug combination is available'
-                ]);
+                return;
             }
+            
+            // Check if combination is currently reserved
+            $reservationsTable = $wpdb->prefix . 'minisite_reservations';
+            $reservation = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM {$reservationsTable} 
+                 WHERE business_slug = %s AND location_slug = %s 
+                 AND expires_at > NOW()",
+                $businessSlug, $locationSlug
+            ));
+            
+            if ($reservation) {
+                $expiresIn = strtotime($reservation->expires_at) - time();
+                $minutesLeft = max(0, ceil($expiresIn / 60));
+                
+                wp_send_json_success([
+                    'available' => false,
+                    'message' => "This slug combination is currently reserved (expires in {$minutesLeft} minutes)"
+                ]);
+                return;
+            }
+            
+            // Slug combination is available
+            wp_send_json_success([
+                'available' => true,
+                'message' => 'This slug combination is available'
+            ]);
 
         } catch (\Exception $e) {
             wp_send_json_error('Failed to check slug availability: ' . $e->getMessage(), 500);
@@ -546,52 +570,80 @@ final class NewMinisiteController
                 return;
             }
 
-            // Create a temporary reservation record
-            $reservationId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
-            $expiresAt = date('Y-m-d H:i:s', strtotime('+5 minutes'));
-
-            // Store reservation in a temporary table or use existing mechanism
-            // For now, we'll use the minisites table with a special status
-            $reservationSlug = 'reserved-' . $reservationId;
+            // Check if combination is currently reserved by another user
+            $reservationsTable = $wpdb->prefix . 'minisite_reservations';
+            $existingReservation = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM {$reservationsTable} 
+                 WHERE business_slug = %s AND location_slug = %s 
+                 AND expires_at > NOW() AND user_id != %d",
+                $businessSlug, $locationSlug, $userId
+            ));
             
-            // Create temporary minisite record for reservation
-            $reservationMinisite = new Minisite(
-                id: $reservationId,
-                slugs: new SlugPair($businessSlug, $locationSlug),
-                title: 'Reserved',
-                name: 'Reserved',
-                city: '',
-                region: null,
-                countryCode: '',
-                postalCode: null,
-                geo: new GeoPoint(0, 0),
-                siteTemplate: 'v2025',
-                palette: 'blue',
-                industry: '',
-                defaultLocale: 'en-US',
-                schemaVersion: 1,
-                siteVersion: 1,
-                siteJson: [],
-                searchTerms: null,
-                status: 'reserved',
-                createdAt: null,
-                updatedAt: null,
-                publishedAt: null,
-                createdBy: get_current_user_id(),
-                updatedBy: get_current_user_id(),
-                currentVersionId: null,
-                isBookmarked: false,
-                canEdit: false
-            );
+            if ($existingReservation) {
+                $wpdb->query('ROLLBACK');
+                wp_send_json_error('This slug combination is currently reserved by another user', 409);
+                return;
+            }
+            
+            // If user already has a reservation for this slug, extend it
+            $userReservation = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM {$reservationsTable} 
+                 WHERE business_slug = %s AND location_slug = %s 
+                 AND user_id = %d AND expires_at > NOW()",
+                $businessSlug, $locationSlug, $userId
+            ));
+            
+            if ($userReservation) {
+                // Extend existing reservation
+                $newExpiresAt = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$reservationsTable} 
+                     SET expires_at = %s, created_at = NOW() 
+                     WHERE id = %d",
+                    $newExpiresAt, $userReservation->id
+                ));
+                
+                $wpdb->query('COMMIT');
+                
+                wp_send_json_success([
+                    'reservation_id' => $userReservation->id,
+                    'expires_at' => $newExpiresAt,
+                    'expires_in_seconds' => 300,
+                    'message' => 'Slug reservation extended for 5 minutes. Complete payment to secure it.'
+                ]);
+                return;
+            }
 
-            $this->minisiteRepository->save($reservationMinisite, 0);
-            $this->minisiteRepository->updateSlug($reservationId, $reservationSlug);
+            // Create reservation record
+            $expiresAt = date('Y-m-d H:i:s', strtotime('+5 minutes'));
+            $userId = get_current_user_id();
+            
+            $result = $wpdb->insert(
+                $reservationsTable,
+                [
+                    'business_slug' => $businessSlug,
+                    'location_slug' => $locationSlug,
+                    'user_id' => $userId,
+                    'minisite_id' => null, // Will be set when payment completes
+                    'expires_at' => $expiresAt
+                ],
+                ['%s', '%s', '%d', '%s', '%s']
+            );
+            
+            if ($result === false) {
+                $wpdb->query('ROLLBACK');
+                wp_send_json_error('Failed to create reservation', 500);
+                return;
+            }
+            
+            $reservationId = $wpdb->insert_id;
 
             $wpdb->query('COMMIT');
 
             wp_send_json_success([
                 'reservation_id' => $reservationId,
                 'expires_at' => $expiresAt,
+                'expires_in_seconds' => 300, // 5 minutes
                 'message' => 'Slug reserved for 5 minutes. Complete payment to secure it.'
             ]);
 
@@ -663,6 +715,14 @@ final class NewMinisiteController
             // Update minisite with permanent slugs
             $this->minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
             $this->minisiteRepository->updatePublishStatus($minisiteId, 'published');
+
+            // Clean up any existing reservation for this slug combination
+            $reservationsTable = $wpdb->prefix . 'minisite_reservations';
+            $wpdb->query($wpdb->prepare(
+                "DELETE FROM {$reservationsTable} 
+                 WHERE business_slug = %s AND location_slug = %s",
+                $businessSlug, $locationSlug
+            ));
 
             // Create payment record
             $paymentId = $this->createPaymentRecord($minisiteId, get_current_user_id(), $paymentReference);

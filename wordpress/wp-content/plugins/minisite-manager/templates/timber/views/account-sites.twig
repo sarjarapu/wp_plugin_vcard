@@ -80,13 +80,21 @@
                 <div>Online: {{ s.online }}</div>
               </div>
               <div class="mt-4 flex items-center gap-2">
-                <a href="{{ s.route }}" class="inline-flex items-center gap-1 text-[var(--primary)] hover:underline text-sm">
-                  <i class="fa-solid fa-eye text-xs"></i> View
-                </a>
-                <span class="text-[var(--outline)]">•</span>
+                {% if s.status == 'published' %}
+                  <a href="{{ s.route }}" class="inline-flex items-center gap-1 text-[var(--primary)] hover:underline text-sm">
+                    <i class="fa-solid fa-eye text-xs"></i> View
+                  </a>
+                  <span class="text-[var(--outline)]">•</span>
+                {% endif %}
                 <a href="{{ function('home_url','/account/sites/' ~ s.id ~ '/edit') }}" class="inline-flex items-center gap-1 text-[var(--primary)] hover:underline text-sm">
                   <i class="fa-solid fa-edit text-xs"></i> Edit
                 </a>
+                {% if s.status == 'draft' %}
+                  <span class="text-[var(--outline)]">•</span>
+                  <a href="{{ function('home_url','/account/sites/publish?minisite_id=' ~ s.id) }}" class="inline-flex items-center gap-1 text-green-600 hover:underline text-sm font-medium">
+                    <i class="fa-solid fa-rocket text-xs"></i> Publish
+                  </a>
+                {% endif %}
                 <span class="text-[var(--outline)]">•</span>
                 <a href="{{ function('home_url','/account/sites/' ~ s.id ~ '/versions') }}" class="inline-flex items-center gap-1 text-[var(--primary)] hover:underline text-sm">
                   <i class="fa-solid fa-history text-xs"></i> Versions
