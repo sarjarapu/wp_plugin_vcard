@@ -1,0 +1,215 @@
+[
+    {
+        "id": "5",
+        "business_slug": "urban-lens-photography",
+        "location_slug": "new-york",
+        "title": "Urban Lens Photography — New York",
+        "name": "Urban Lens Photography",
+        "city": "New York",
+        "region": "NY",
+        "country_code": "US",
+        "postal_code": "10001",
+        "site_template": "v2025",
+        "palette": "gray",
+        "industry": "photography",
+        "default_locale": "en-US",
+        "schema_version": 1,
+        "site_version": 1,
+        "site_json": {
+            "name": "Urban Lens Photography",
+            "city": "New York",
+            "brand": {
+                "palette": "gray",
+                "industry": "photography",
+                "logo": "https://cdn-icons-png.flaticon.com/512/3342/3342137.png"
+            },
+            "seo": {
+                "title": "Urban Lens Photography — New York",
+                "description": "Capturing timeless moments in the heart of NYC. Specializing in portraits, weddings, and events.",
+                "keywords": "urban lens photography, new york, nyc, portraits, wedding photographer, events, corporate headshots",
+                "favicon": "https://cdn-icons-png.flaticon.com/512/3342/3342137.png"
+            },
+            "hero": {
+                "heading": "Urban Lens Photography",
+                "subheading": "Your New York City photography partner for personal portraits, corporate headshots, and event coverage. We deliver a stress-free and fun experience with exceptional, authentic images at transparent prices.",
+                "badge": "Award-Winning",
+                "image": "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1600&auto=format&fit=crop",
+                "rating": {
+                    "value": 4.9,
+                    "count": 512
+                },
+                "ctas": [
+                    {
+                        "text": "Book a Session",
+                        "url": "#contact"
+                    },
+                    {
+                        "text": "View Portfolio",
+                        "url": "#gallery"
+                    }
+                ]
+            },
+            "about": {
+                "html": "<p>At Urban Lens Photography, we believe every moment is worth capturing. Our photographers combine technical skill with a keen artistic eye to tell your story beautifully.</p><br/><p>From candid wedding shots to professional headshots, we tailor our approach to your unique needs. We work with natural light and stunning city backdrops to create authentic, emotional photographs.</p>"
+            },
+            "whyUs": {
+                "title": "Why Choose Us?",
+                "html": "<p>We offer a personalized and professional experience from start to finish. Our packages are designed to be flexible, and we'll work with you to plan every detail of your shoot.</p><br/><p>Our post-production process ensures every image is carefully edited to perfection, and our fast turnaround times mean you won't have to wait long to see your beautiful memories.</p>",
+                "image": "https://images.unsplash.com/photo-1527011046414-4781f1f94f8c?auto=format&fit=crop&w=1600"
+            },
+            "services": {
+                "title": "Our Services",
+                "listing": [
+                    {
+                        "title": "Wedding Photography",
+                        "image": "https://images.unsplash.com/photo-1533091090875-1ff4acc497dd?q=80&w=800&auto=format&fit=crop",
+                        "description": "Comprehensive wedding packages including full-day coverage, pre-wedding shoots, and custom albums.",
+                        "price": "From $2,500",
+                        "icon": "fa-camera",
+                        "cta": "Request Quote",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Personal & Family Photoshoots",
+                        "image": "https://images.unsplash.com/photo-1656177999031-0d3e8e62317a?q=80&w=800&auto=format&fit=crop",
+                        "description": "Customized portrait sessions for individuals, couples, and families at iconic NYC locations.",
+                        "price": "From $350",
+                        "icon": "fa-user-group",
+                        "cta": "Book Now",
+                        "url": "#contact"
+                    },
+                    {
+                        "title": "Corporate & Headshots",
+                        "image": "https://images.unsplash.com/photo-1641260783083-a0af6cf964ca?q=80&w=800&auto=format&fit=crop",
+                        "description": "Professional headshots and team photos for your business, with on-location or studio options.",
+                        "price": "From $150",
+                        "icon": "fa-briefcase",
+                        "cta": "Enquire",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Event Photography",
+                        "image": "https://images.unsplash.com/photo-1519702202685-64e7c7a7266a?q=80&w=800&auto=format&fit=crop",
+                        "description": "Capturing the energy and key moments of your corporate party, conference, or private gathering.",
+                        "price": "From $500",
+                        "icon": "fa-champagne-glasses",
+                        "cta": "Get Quote",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Prints & Albums",
+                        "image": "https://images.unsplash.com/photo-1588698944583-0498a964f434?q=80&w=800&auto=format&fit=crop",
+                        "description": "High-quality prints, canvas wraps, and handcrafted photo albums to preserve your memories.",
+                        "price": "From $80",
+                        "icon": "fa-image",
+                        "cta": "Learn More",
+                        "url": "#request-info"
+                    }
+                ]
+            },
+            "contact": {
+                "phone": {
+                    "text": "+1 (212) 555-0189",
+                    "link": "+12125550189"
+                },
+                "whatsapp": {
+                    "text": "+1 (212) 555-0189",
+                    "link": "12125550189"
+                },
+                "email": "info@urbanlens.nyc",
+                "website": {
+                    "text": "urbanlens.nyc",
+                    "link": "https://urbanlens.nyc"
+                },
+                "address": "100 Broadway, New York, NY 10001",
+                "address_line1": "100 Broadway",
+                "address_line2": "Suite 500",
+                "address_line3": "",
+                "address_line4": "",
+                "hours": {
+                    "Monday": {
+                        "open": "09:00",
+                        "close": "18:00",
+                        "closed": false
+                    },
+                    "Tuesday": {
+                        "open": "09:00",
+                        "close": "18:00",
+                        "closed": false
+                    },
+                    "Wednesday": {
+                        "open": "09:00",
+                        "close": "18:00",
+                        "closed": false
+                    },
+                    "Thursday": {
+                        "open": "09:00",
+                        "close": "18:00",
+                        "closed": false
+                    },
+                    "Friday": {
+                        "open": "09:00",
+                        "close": "17:00",
+                        "closed": false
+                    },
+                    "Saturday": {
+                        "open": "10:00",
+                        "close": "16:00",
+                        "closed": false
+                    },
+                    "Sunday": {
+                        "open": "",
+                        "close": "",
+                        "closed": true
+                    }
+                },
+                "plusCode": "PX5Q+7G New York",
+                "plusCodeUrl": "http://googleusercontent.com/maps.google.com/4"
+            },
+            "gallery": [
+                {
+                    "src": "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1600&auto=format&fit=crop",
+                    "alt": "Photographer in NYC"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1527011046414-4781f1f94f8c?auto=format&fit=crop&w=1600",
+                    "alt": "New York City skyline at dusk"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1533091090875-1ff4acc497dd?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Couple in NYC"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1641260783083-a0af6cf964ca?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Street photography"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1517404215738-15263e9f9178?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Camera and city"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1514195153638-0f25d3db91a4?q=80&w=800&auto=format&fit=crop",
+                    "alt": "NYC Portrait"
+                }
+            ],
+            "social": {
+                "instagram": "https://instagram.com/urbanlens.nyc",
+                "facebook": "https://facebook.com/urbanlens.nyc",
+                "pinterest": "https://pinterest.com/urbanlens.nyc",
+                "linkedin": "https://linkedin.com/urbanlens.nyc"
+            }
+        },
+        "search_terms": "urban lens photography nyc portraits wedding events",
+        "status": "published",
+        "created_by": "john.doe",
+        "updated_by": "john.doe"
+    }
+]
+
+{
+    "image": {
+        "url": "https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1600&auto=format&fit=crop",
+        "alt": "The Force",
+        "attribution": "Photo by <a href='https://unsplash.com/@christianw?utm_source=your_app_name&utm_medium=referral' target='_blank' rel='noopener noreferrer'>Christian Wiediger</a> on <a href='https://unsplash.com/?utm_source=your_app_name&utm_medium=referral' target='_blank' rel='noopener noreferrer'>Unsplash</a>"
+    }
+}
