@@ -853,192 +853,191 @@
           const siteData = data;
           console.log('Using site data directly:', siteData);
             
-            // SEO fields
-            if (siteData.seo) {
-              setFieldValue('input[name="seo_title"]', siteData.seo.title);
-              setFieldValue('textarea[name="seo_description"]', siteData.seo.description);
-              setFieldValue('input[name="seo_keywords"]', siteData.seo.keywords);
-              setFieldValue('input[name="seo_favicon"]', siteData.seo.favicon);
-            }
+          // SEO fields
+          if (siteData.seo) {
+            setFieldValue('input[name="seo_title"]', siteData.seo.title);
+            setFieldValue('textarea[name="seo_description"]', siteData.seo.description);
+            setFieldValue('input[name="seo_keywords"]', siteData.seo.keywords);
+            setFieldValue('input[name="seo_favicon"]', siteData.seo.favicon);
+          }
+          
+          // Brand fields
+          if (siteData.brand) {
+            setFieldValue('input[name="brand_name"]', siteData.brand.name);
+            setFieldValue('input[name="brand_logo"]', siteData.brand.logo);
+            setFieldValue('input[name="brand_industry"]', siteData.brand.industry);
+            setFieldValue('select[name="brand_palette"]', siteData.brand.palette);
+          }
+          
+          // Hero fields
+          if (siteData.hero) {
+            setFieldValue('input[name="hero_badge"]', siteData.hero.badge);
+            setFieldValue('input[name="hero_heading"]', siteData.hero.heading);
+            setFieldValue('input[name="hero_image"]', siteData.hero.image);
+            setFieldValue('input[name="hero_image_alt"]', siteData.hero.imageAlt);
+            setFieldValue('input[name="hero_cta1_text"]', siteData.hero.ctas?.[0]?.text);
+            setFieldValue('input[name="hero_cta1_url"]', siteData.hero.ctas?.[0]?.url);
+            setFieldValue('input[name="hero_cta2_text"]', siteData.hero.ctas?.[1]?.text);
+            setFieldValue('input[name="hero_cta2_url"]', siteData.hero.ctas?.[1]?.url);
+            setFieldValue('input[name="hero_rating_value"]', siteData.hero.rating?.value);
+            setFieldValue('input[name="hero_rating_count"]', siteData.hero.rating?.count);
             
-            // Brand fields
-            if (siteData.brand) {
-              setFieldValue('input[name="brand_name"]', siteData.brand.name);
-              setFieldValue('input[name="brand_logo"]', siteData.brand.logo);
-              setFieldValue('input[name="brand_industry"]', siteData.brand.industry);
-              setFieldValue('select[name="brand_palette"]', siteData.brand.palette);
-            }
-            
-            // Hero fields
-            if (siteData.hero) {
-              setFieldValue('input[name="hero_badge"]', siteData.hero.badge);
-              setFieldValue('input[name="hero_heading"]', siteData.hero.heading);
-              setFieldValue('input[name="hero_image"]', siteData.hero.image);
-              setFieldValue('input[name="hero_image_alt"]', siteData.hero.imageAlt);
-              setFieldValue('input[name="hero_cta1_text"]', siteData.hero.ctas?.[0]?.text);
-              setFieldValue('input[name="hero_cta1_url"]', siteData.hero.ctas?.[0]?.url);
-              setFieldValue('input[name="hero_cta2_text"]', siteData.hero.ctas?.[1]?.text);
-              setFieldValue('input[name="hero_cta2_url"]', siteData.hero.ctas?.[1]?.url);
-              setFieldValue('input[name="hero_rating_value"]', siteData.hero.rating?.value);
-              setFieldValue('input[name="hero_rating_count"]', siteData.hero.rating?.count);
-              
-              // Hero subheading (rich text editor)
-              if (siteData.hero.subheading) {
-                const heroEditor = document.querySelector('#hero_subheading_editor');
-                if (heroEditor) {
-                  heroEditor.innerHTML = siteData.hero.subheading;
-                }
-                const heroTextarea = document.querySelector('textarea[name="hero_subheading"]');
-                if (heroTextarea) {
-                  heroTextarea.value = siteData.hero.subheading;
-                }
+            // Hero subheading (rich text editor)
+            if (siteData.hero.subheading) {
+              const heroEditor = document.querySelector('#hero_subheading_editor');
+              if (heroEditor) {
+                heroEditor.innerHTML = siteData.hero.subheading;
+              }
+              const heroTextarea = document.querySelector('textarea[name="hero_subheading"]');
+              if (heroTextarea) {
+                heroTextarea.value = siteData.hero.subheading;
               }
             }
-            
-            // About section (rich text editor)
-            if (siteData.about && siteData.about.html) {
-              const aboutEditor = document.querySelector('#about_html_editor');
-              if (aboutEditor) {
-                aboutEditor.innerHTML = siteData.about.html;
-              }
-              const aboutTextarea = document.querySelector('textarea[name="about_html"]');
-              if (aboutTextarea) {
-                aboutTextarea.value = siteData.about.html;
-              }
+          }
+          
+          // About section (rich text editor)
+          if (siteData.about && siteData.about.html) {
+            const aboutEditor = document.querySelector('#about_html_editor');
+            if (aboutEditor) {
+              aboutEditor.innerHTML = siteData.about.html;
             }
-            
-            // Why Choose Us section
-            if (siteData.whyUs) {
-              setFieldValue('input[name="whyus_title"]', siteData.whyUs.title);
-              setFieldValue('input[name="whyus_image"]', siteData.whyUs.image);
-              
-              // WhyUs content (rich text editor)
-              if (siteData.whyUs.html) {
-                const whyusEditor = document.querySelector('#whyus_html_editor');
-                if (whyusEditor) {
-                  whyusEditor.innerHTML = siteData.whyUs.html;
-                }
-                const whyusTextarea = document.querySelector('textarea[name="whyus_html"]');
-                if (whyusTextarea) {
-                  whyusTextarea.value = siteData.whyUs.html;
-                }
-              }
+            const aboutTextarea = document.querySelector('textarea[name="about_html"]');
+            if (aboutTextarea) {
+              aboutTextarea.value = siteData.about.html;
             }
+          }
+          
+          // Why Choose Us section
+          if (siteData.whyUs) {
+            setFieldValue('input[name="whyus_title"]', siteData.whyUs.title);
+            setFieldValue('input[name="whyus_image"]', siteData.whyUs.image);
             
-            // Contact fields
-            if (siteData.contact) {
-              setFieldValue('input[name="contact_phone_text"]', siteData.contact.phone?.text);
-              setFieldValue('input[name="contact_phone_link"]', siteData.contact.phone?.link);
-              setFieldValue('input[name="contact_whatsapp_text"]', siteData.contact.whatsapp?.text);
-              setFieldValue('input[name="contact_whatsapp_link"]', siteData.contact.whatsapp?.link);
-              setFieldValue('input[name="contact_email"]', siteData.contact.email);
-              setFieldValue('input[name="contact_website_text"]', siteData.contact.website?.text);
-              setFieldValue('input[name="contact_website_link"]', siteData.contact.website?.link);
-              setFieldValue('input[name="contact_city"]', siteData.contact.city);
-              setFieldValue('input[name="contact_region"]', siteData.contact.region);
-              setFieldValue('input[name="contact_country"]', siteData.contact.country);
-              setFieldValue('input[name="contact_postal"]', siteData.contact.postal);
-              setFieldValue('input[name="contact_lat"]', siteData.contact.lat);
-              setFieldValue('input[name="contact_lng"]', siteData.contact.lng);
-              
-              // Address lines
-              setFieldValue('input[name="contact_address1"]', siteData.contact.address_line1);
-              setFieldValue('input[name="contact_address2"]', siteData.contact.address_line2);
-              setFieldValue('input[name="contact_address3"]', siteData.contact.address_line3);
-              setFieldValue('input[name="contact_address4"]', siteData.contact.address_line4);
-              
-              // Plus Code
-              setFieldValue('input[name="contact_pluscode"]', siteData.contact.plusCode);
-              setFieldValue('input[name="contact_pluscode_url"]', siteData.contact.plusCodeUrl);
-              
-              // Business Hours
-              if (siteData.contact.hours) {
-                Object.keys(siteData.contact.hours).forEach(day => {
-                  const dayData = siteData.contact.hours[day];
-                  const dayLower = day.toLowerCase();
-                  
-                  // Set closed checkbox
-                  const closedCheckbox = document.querySelector(`input[name="hours_${dayLower}_closed"]`);
-                  if (closedCheckbox) {
-                    closedCheckbox.checked = dayData.closed || false;
-                  }
-                  
-                  // Set open/close times
-                  setFieldValue(`input[name="hours_${dayLower}_open"]`, dayData.open);
-                  setFieldValue(`input[name="hours_${dayLower}_close"]`, dayData.close);
-                });
+            // WhyUs content (rich text editor)
+            if (siteData.whyUs.html) {
+              const whyusEditor = document.querySelector('#whyus_html_editor');
+              if (whyusEditor) {
+                whyusEditor.innerHTML = siteData.whyUs.html;
+              }
+              const whyusTextarea = document.querySelector('textarea[name="whyus_html"]');
+              if (whyusTextarea) {
+                whyusTextarea.value = siteData.whyUs.html;
               }
             }
+          }
+          
+          // Contact fields
+          if (siteData.contact) {
+            setFieldValue('input[name="contact_phone_text"]', siteData.contact.phone?.text);
+            setFieldValue('input[name="contact_phone_link"]', siteData.contact.phone?.link);
+            setFieldValue('input[name="contact_whatsapp_text"]', siteData.contact.whatsapp?.text);
+            setFieldValue('input[name="contact_whatsapp_link"]', siteData.contact.whatsapp?.link);
+            setFieldValue('input[name="contact_email"]', siteData.contact.email);
+            setFieldValue('input[name="contact_website_text"]', siteData.contact.website?.text);
+            setFieldValue('input[name="contact_website_link"]', siteData.contact.website?.link);
+            setFieldValue('input[name="contact_city"]', siteData.contact.city);
+            setFieldValue('input[name="contact_region"]', siteData.contact.region);
+            setFieldValue('input[name="contact_country"]', siteData.contact.country);
+            setFieldValue('input[name="contact_postal"]', siteData.contact.postal);
+            setFieldValue('input[name="contact_lat"]', siteData.contact.lat);
+            setFieldValue('input[name="contact_lng"]', siteData.contact.lng);
             
-            // Social fields
-            if (siteData.social) {
-              setFieldValue('input[name="social_facebook"]', siteData.social.facebook);
-              setFieldValue('input[name="social_instagram"]', siteData.social.instagram);
-              setFieldValue('input[name="social_x"]', siteData.social.x);
-              setFieldValue('input[name="social_youtube"]', siteData.social.youtube);
-              setFieldValue('input[name="social_linkedin"]', siteData.social.linkedin);
-            }
+            // Address lines
+            setFieldValue('input[name="contact_address1"]', siteData.contact.address_line1);
+            setFieldValue('input[name="contact_address2"]', siteData.contact.address_line2);
+            setFieldValue('input[name="contact_address3"]', siteData.contact.address_line3);
+            setFieldValue('input[name="contact_address4"]', siteData.contact.address_line4);
             
-            // Services/Products
-            if (siteData.services) {
-              // Set section title
-              setFieldValue('input[name="products_section_title"]', siteData.services.title);
-              
-              if (siteData.services.listing && Array.isArray(siteData.services.listing)) {
-                // Clear existing products
-                const productContainer = document.querySelector('#productsContainer');
-                if (productContainer) {
-                  productContainer.innerHTML = '';
-                  productCount = 0;
+            // Plus Code
+            setFieldValue('input[name="contact_pluscode"]', siteData.contact.plusCode);
+            setFieldValue('input[name="contact_pluscode_url"]', siteData.contact.plusCodeUrl);
+            
+            // Business Hours
+            if (siteData.contact.hours) {
+              Object.keys(siteData.contact.hours).forEach(day => {
+                const dayData = siteData.contact.hours[day];
+                const dayLower = day.toLowerCase();
+                
+                // Set closed checkbox
+                const closedCheckbox = document.querySelector(`input[name="hours_${dayLower}_closed"]`);
+                if (closedCheckbox) {
+                  closedCheckbox.checked = dayData.closed || false;
                 }
                 
-                // Add imported products
-                siteData.services.listing.forEach((service, index) => {
-                  addProduct();
-                  const productIndex = productCount - 1;
-                  setFieldValue(`input[name="product_${productIndex}_title"]`, service.title);
-                  setFieldValue(`input[name="product_${productIndex}_price"]`, service.price);
-                  setFieldValue(`input[name="product_${productIndex}_image"]`, service.image);
-                  setFieldValue(`input[name="product_${productIndex}_icon"]`, service.icon);
-                  setFieldValue(`input[name="product_${productIndex}_cta_text"]`, service.cta?.text);
-                  setFieldValue(`input[name="product_${productIndex}_cta_url"]`, service.cta?.url);
-                  
-                  // Product description (rich text editor)
-                  if (service.description) {
-                    const editor = document.querySelector(`#product_${productIndex}_description_editor`);
-                    if (editor) {
-                      editor.innerHTML = service.description;
-                    }
-                    const textarea = document.querySelector(`textarea[name="product_${productIndex}_description"]`);
-                    if (textarea) {
-                      textarea.value = service.description;
-                    }
-                  }
-                });
-              }
-            }
-            
-            // Gallery
-            if (siteData.gallery && Array.isArray(siteData.gallery)) {
-              // Clear existing gallery
-              const galleryContainer = document.querySelector('#galleryContainer');
-              if (galleryContainer) {
-                galleryContainer.innerHTML = '';
-                galleryCount = 0;
-              }
-              
-              // Add imported gallery items
-              siteData.gallery.forEach((item, index) => {
-                addGalleryItem();
-                const galleryIndex = galleryCount - 1;
-                setFieldValue(`input[name="gallery_${galleryIndex}_image"]`, item.src || item.url);
-                setFieldValue(`input[name="gallery_${galleryIndex}_alt"]`, item.alt);
+                // Set open/close times
+                setFieldValue(`input[name="hours_${dayLower}_open"]`, dayData.open);
+                setFieldValue(`input[name="hours_${dayLower}_close"]`, dayData.close);
               });
             }
-            
-          } catch (error) {
-            console.error('Error parsing site JSON:', error);
           }
+          
+          // Social fields
+          if (siteData.social) {
+            setFieldValue('input[name="social_facebook"]', siteData.social.facebook);
+            setFieldValue('input[name="social_instagram"]', siteData.social.instagram);
+            setFieldValue('input[name="social_x"]', siteData.social.x);
+            setFieldValue('input[name="social_youtube"]', siteData.social.youtube);
+            setFieldValue('input[name="social_linkedin"]', siteData.social.linkedin);
+          }
+          
+          // Services/Products
+          if (siteData.services) {
+            // Set section title
+            setFieldValue('input[name="products_section_title"]', siteData.services.title);
+            
+            if (siteData.services.listing && Array.isArray(siteData.services.listing)) {
+              // Clear existing products
+              const productContainer = document.querySelector('#productsContainer');
+              if (productContainer) {
+                productContainer.innerHTML = '';
+                productCount = 0;
+              }
+              
+              // Add imported products
+              siteData.services.listing.forEach((service, index) => {
+                addProduct();
+                const productIndex = productCount - 1;
+                setFieldValue(`input[name="product_${productIndex}_title"]`, service.title);
+                setFieldValue(`input[name="product_${productIndex}_price"]`, service.price);
+                setFieldValue(`input[name="product_${productIndex}_image"]`, service.image);
+                setFieldValue(`input[name="product_${productIndex}_icon"]`, service.icon);
+                setFieldValue(`input[name="product_${productIndex}_cta_text"]`, service.cta?.text);
+                setFieldValue(`input[name="product_${productIndex}_cta_url"]`, service.cta?.url);
+                
+                // Product description (rich text editor)
+                if (service.description) {
+                  const editor = document.querySelector(`#product_${productIndex}_description_editor`);
+                  if (editor) {
+                    editor.innerHTML = service.description;
+                  }
+                  const textarea = document.querySelector(`textarea[name="product_${productIndex}_description"]`);
+                  if (textarea) {
+                    textarea.value = service.description;
+                  }
+                }
+              });
+            }
+          }
+          
+          // Gallery
+          if (siteData.gallery && Array.isArray(siteData.gallery)) {
+            // Clear existing gallery
+            const galleryContainer = document.querySelector('#galleryContainer');
+            if (galleryContainer) {
+              galleryContainer.innerHTML = '';
+              galleryCount = 0;
+            }
+            
+            // Add imported gallery items
+            siteData.gallery.forEach((item, index) => {
+              addGalleryItem();
+              const galleryIndex = galleryCount - 1;
+              setFieldValue(`input[name="gallery_${galleryIndex}_image"]`, item.src || item.url);
+              setFieldValue(`input[name="gallery_${galleryIndex}_alt"]`, item.alt);
+            });
+          }
+          
+        } catch (error) {
+          console.error('Error parsing site JSON:', error);
         }
         
         // Re-initialize rich text editors after content is set
