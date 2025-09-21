@@ -508,9 +508,9 @@ add_action('template_redirect', function () {
           // Delegate to VersionController for version management
           if ($versionCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\VersionController::class)) {
             global $wpdb;
-            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+            $minisiteRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
             $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-            $versionCtrl = new $versionCtrlClass($profileRepo, $versionRepo);
+            $versionCtrl = new $versionCtrlClass($minisiteRepo, $versionRepo);
             $versionCtrl->handleListVersions();
             break;
           }

@@ -21,14 +21,14 @@ class VersionController
             exit;
         }
 
-        $siteId = (int) get_query_var('minisite_site_id');
+        $siteId = get_query_var('minisite_site_id');
         if (!$siteId) {
             wp_redirect(home_url('/account/sites'));
             exit;
         }
 
         $currentUser = wp_get_current_user();
-        $minisite = $this->profileRepository->findById($siteId);
+        $minisite = $this->minisiteRepository->findById($siteId);
         
         if (!$minisite) {
             wp_redirect(home_url('/account/sites'));
@@ -89,7 +89,7 @@ class VersionController
         }
 
         $currentUser = wp_get_current_user();
-        $minisite = $this->profileRepository->findById($siteId);
+        $minisite = $this->minisiteRepository->findById($siteId);
         
         if (!$minisite) {
             wp_send_json_error('Site not found', 404);
@@ -155,7 +155,7 @@ class VersionController
             return;
         }
 
-        $siteId = (int) ($_POST['site_id'] ?? 0);
+        $siteId = $_POST['site_id'] ?? '';
         $versionId = (int) ($_POST['version_id'] ?? 0);
         
         if (!$siteId || !$versionId) {
@@ -164,7 +164,7 @@ class VersionController
         }
 
         $currentUser = wp_get_current_user();
-        $minisite = $this->profileRepository->findById($siteId);
+        $minisite = $this->minisiteRepository->findById($siteId);
         
         if (!$minisite) {
             wp_send_json_error('Site not found', 404);
@@ -221,7 +221,7 @@ class VersionController
             return;
         }
 
-        $siteId = (int) ($_POST['site_id'] ?? 0);
+        $siteId = $_POST['site_id'] ?? '';
         $sourceVersionId = (int) ($_POST['source_version_id'] ?? 0);
         
         if (!$siteId || !$sourceVersionId) {
@@ -230,7 +230,7 @@ class VersionController
         }
 
         $currentUser = wp_get_current_user();
-        $minisite = $this->profileRepository->findById($siteId);
+        $minisite = $this->minisiteRepository->findById($siteId);
         
         if (!$minisite) {
             wp_send_json_error('Site not found', 404);
@@ -267,9 +267,15 @@ class VersionController
     /**
      * Publish a version (atomic operation)
      */
-    private function publishVersion(int $minisiteId, int $versionId): void
+    private function publishVersion(string $minisiteId, int $versionId): void
     {
         global $wpdb;
+        
+        // Get the version to publish
+        $version = $this->versionRepository->findById($versionId);
+        if (!$version) {
+            throw new \Exception('Version not found');
+        }
         
         $wpdb->query('START TRANSACTION');
         
@@ -278,7 +284,7 @@ class VersionController
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$wpdb->prefix}minisite_versions 
                  SET status = 'draft' 
-                 WHERE minisite_id = %d AND status = 'published'",
+                 WHERE minisite_id = %s AND status = 'published'",
                 $minisiteId
             ));
             
@@ -309,7 +315,7 @@ class VersionController
                      search_terms = %s,
                      _minisite_current_version_id = %d, 
                      updated_at = NOW() 
-                 WHERE id = %d",
+                 WHERE id = %s",
                 wp_json_encode($version->siteJson),
                 $version->title,
                 $version->name,
@@ -333,7 +339,7 @@ class VersionController
                 $wpdb->query($wpdb->prepare(
                     "UPDATE {$wpdb->prefix}minisites 
                      SET location_point = ST_SRID(POINT(%f, %f), 4326) 
-                     WHERE id = %d",
+                     WHERE id = %s",
                     $version->geo->lng, $version->geo->lat, $minisiteId
                 ));
             }
@@ -348,7 +354,7 @@ class VersionController
     /**
      * Create a rollback draft from a source version
      */
-    private function createRollbackVersion(int $minisiteId, int $sourceVersionId, int $userId): \Minisite\Domain\Entities\Version
+    private function createRollbackVersion(string $minisiteId, int $sourceVersionId, int $userId): \Minisite\Domain\Entities\Version
     {
         $sourceVersion = $this->versionRepository->findById($sourceVersionId);
         $nextVersion = $this->versionRepository->getNextVersionNumber($minisiteId);
