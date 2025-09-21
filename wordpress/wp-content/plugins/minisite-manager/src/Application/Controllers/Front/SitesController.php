@@ -523,6 +523,154 @@ final class SitesController
         
         return $gallery;
     }
+
+    /**
+     * Export minisite data as JSON
+     */
+    public function handleExport(): void
+    {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authenticated', 401);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_send_json_error('Method not allowed', 405);
+            return;
+        }
+
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'export_minisite')) {
+            wp_send_json_error('Security check failed', 403);
+            return;
+        }
+
+        $minisiteId = sanitize_text_field($_POST['minisite_id'] ?? '');
+        if (empty($minisiteId)) {
+            wp_send_json_error('Missing minisite ID', 400);
+            return;
+        }
+
+        try {
+            global $wpdb;
+            $repo = new MinisiteRepository($wpdb);
+            $minisite = $repo->findById($minisiteId);
+
+            if (!$minisite) {
+                wp_send_json_error('Minisite not found', 404);
+                return;
+            }
+
+            // Check ownership
+            if ($minisite->createdBy !== get_current_user_id()) {
+                wp_send_json_error('Unauthorized', 403);
+                return;
+            }
+
+            // Create export data
+            $exportData = [
+                'export_version' => '1.0',
+                'exported_at' => date('c'),
+                'minisite' => [
+                    'id' => $minisite->id,
+                    'title' => $minisite->title,
+                    'name' => $minisite->name,
+                    'city' => $minisite->city,
+                    'region' => $minisite->region,
+                    'country_code' => $minisite->countryCode,
+                    'postal_code' => $minisite->postalCode,
+                    'location' => $minisite->geo ? [
+                        'lat' => $minisite->geo->lat,
+                        'lng' => $minisite->geo->lng
+                    ] : null,
+                    'site_template' => $minisite->siteTemplate,
+                    'palette' => $minisite->palette,
+                    'industry' => $minisite->industry,
+                    'default_locale' => $minisite->defaultLocale,
+                    'site_json' => $minisite->siteJson
+                ],
+                'metadata' => [
+                    'original_created_at' => $minisite->createdAt?->format('c'),
+                    'original_updated_at' => $minisite->updatedAt?->format('c'),
+                    'exported_by' => wp_get_current_user()->user_email
+                ]
+            ];
+
+            // Set headers for file download
+            $filename = 'minisite-' . sanitize_file_name($minisite->title) . '-' . date('Y-m-d') . '.json';
+            
+            header('Content-Type: application/json');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Cache-Control: no-cache, must-revalidate');
+            
+            echo json_encode($exportData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            exit;
+
+        } catch (\Exception $e) {
+            wp_send_json_error('Export failed: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Import minisite data from JSON
+     */
+    public function handleImport(): void
+    {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authenticated', 401);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_send_json_error('Method not allowed', 405);
+            return;
+        }
+
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'import_minisite')) {
+            wp_send_json_error('Security check failed', 403);
+            return;
+        }
+
+        $jsonData = $_POST['json_data'] ?? '';
+        if (empty($jsonData)) {
+            wp_send_json_error('Missing JSON data', 400);
+            return;
+        }
+
+        try {
+            $importData = json_decode($jsonData, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                wp_send_json_error('Invalid JSON format: ' . json_last_error_msg(), 400);
+                return;
+            }
+
+            // Validate export format
+            if (!isset($importData['export_version']) || !isset($importData['minisite'])) {
+                wp_send_json_error('Invalid export format', 400);
+                return;
+            }
+
+            $minisiteData = $importData['minisite'];
+            
+            // Validate required fields
+            $requiredFields = ['title', 'name', 'city', 'country_code', 'site_template', 'palette', 'industry', 'default_locale', 'site_json'];
+            foreach ($requiredFields as $field) {
+                if (!isset($minisiteData[$field])) {
+                    wp_send_json_error("Missing required field: {$field}", 400);
+                    return;
+                }
+            }
+
+            // Return parsed data for form population
+            wp_send_json_success([
+                'message' => 'Import data validated successfully',
+                'data' => $minisiteData,
+                'metadata' => $importData['metadata'] ?? []
+            ]);
+
+        } catch (\Exception $e) {
+            wp_send_json_error('Import failed: ' . $e->getMessage(), 500);
+        }
+    }
 }
 
 

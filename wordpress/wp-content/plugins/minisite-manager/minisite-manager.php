@@ -1077,3 +1077,43 @@ add_action('wp_ajax_publish_minisite', function () {
     wp_send_json_error('Failed to publish minisite: ' . $e->getMessage(), 500);
   }
 });
+
+// Export minisite AJAX handler
+add_action('wp_ajax_export_minisite', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $sitesCtrl = new \Minisite\Application\Controllers\Front\SitesController();
+    
+    $sitesCtrl->handleExport();
+    
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to export minisite: ' . $e->getMessage(), 500);
+  }
+});
+
+// Import minisite AJAX handler
+add_action('wp_ajax_import_minisite', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $sitesCtrl = new \Minisite\Application\Controllers\Front\SitesController();
+    
+    $sitesCtrl->handleImport();
+    
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to import minisite: ' . $e->getMessage(), 500);
+  }
+});
