@@ -10,17 +10,17 @@
     <div>
       <label for="hero_badge" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Badge Text</label>
       <input id="hero_badge" name="hero_badge" type="text" value="{{ site_json.hero.badge|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="hero.badge" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
     <div>
       <label for="hero_heading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Main Heading</label>
       <input id="hero_heading" name="hero_heading" type="text" value="{{ site_json.hero.heading|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="hero.heading" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
     <div>
       <label for="hero_subheading" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Subheading</label>
       <div class="ql-editor-container" style="height: 160px;">
-        <div id="hero_subheading_editor">{{ site_json.hero.subheading|default('') }}</div>
+        <div id="hero_subheading_editor" data-field="hero.subheading">{{ site_json.hero.subheading|default('') }}</div>
         <textarea id="hero_subheading" name="hero_subheading" style="display: none;">{{ site_json.hero.subheading|default('') }}</textarea>
       </div>
       <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your subheading. HTML tags are automatically handled.</p>
@@ -28,23 +28,23 @@
     <div>
       <label for="hero_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Hero Image URL</label>
       <input id="hero_image" name="hero_image" type="url" value="{{ site_json.hero.image|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="hero.image" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
     <div>
       <label for="hero_image_alt" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Image Alt Text</label>
       <input id="hero_image_alt" name="hero_image_alt" type="text" value="{{ site_json.hero.imageAlt|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="hero.imageAlt" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
     <div class="grid md:grid-cols-2 gap-4">
       <div>
         <label for="hero_cta1_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 Text</label>
         <input id="hero_cta1_text" name="hero_cta1_text" type="text" value="{{ site_json.hero.ctas[0].text|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="hero.ctas.0.text" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="hero_cta1_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 1 URL</label>
         <input id="hero_cta1_url" name="hero_cta1_url" type="text" value="{{ site_json.hero.ctas[0].url|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+          data-field="hero.ctas.0.url" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
           placeholder="https://example.com or #section or /page"/>
       </div>
     </div>
@@ -52,12 +52,12 @@
       <div>
         <label for="hero_cta2_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 Text</label>
         <input id="hero_cta2_text" name="hero_cta2_text" type="text" value="{{ site_json.hero.ctas[1].text|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="hero.ctas.1.text" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="hero_cta2_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">CTA 2 URL</label>
         <input id="hero_cta2_url" name="hero_cta2_url" type="text" value="{{ site_json.hero.ctas[1].url|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
+          data-field="hero.ctas.1.url" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"
           placeholder="https://example.com or #section or /page"/>
       </div>
     </div>
@@ -65,12 +65,12 @@
       <div>
         <label for="hero_rating_value" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Value</label>
         <input id="hero_rating_value" name="hero_rating_value" type="text" value="{{ site_json.hero.rating.value|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="hero.rating.value" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="hero_rating_count" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Rating Count</label>
         <input id="hero_rating_count" name="hero_rating_count" type="text" value="{{ site_json.hero.rating.count|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="hero.rating.count" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
     </div>
   </div>

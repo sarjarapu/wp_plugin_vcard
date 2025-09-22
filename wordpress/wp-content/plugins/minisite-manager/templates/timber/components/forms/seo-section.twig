@@ -10,22 +10,22 @@
     <div>
       <label for="seo_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Page Title</label>
       <input id="seo_title" name="seo_title" type="text" value="{{ site_json.seo.title|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="seo.title" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
     <div>
       <label for="seo_description" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Meta Description</label>
       <textarea id="seo_description" name="seo_description" rows="3"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.seo.description|default('') }}</textarea>
+        data-field="seo.description" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">{{ site_json.seo.description|default('') }}</textarea>
     </div>
     <div>
       <label for="seo_keywords" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Keywords</label>
       <input id="seo_keywords" name="seo_keywords" type="text" value="{{ site_json.seo.keywords|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="seo.keywords" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
     <div>
       <label for="seo_favicon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Favicon URL</label>
       <input id="seo_favicon" name="seo_favicon" type="url" value="{{ site_json.seo.favicon|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="seo.favicon" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
   </div>
 </div>
