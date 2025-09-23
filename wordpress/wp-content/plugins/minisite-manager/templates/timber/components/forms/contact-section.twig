@@ -12,12 +12,12 @@
       <div>
         <label for="contact_phone_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Text</label>
         <input id="contact_phone_text" name="contact_phone_text" type="text" value="{{ site_json.contact.phone.text|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.phone.text" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="contact_phone_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Phone Link</label>
         <input id="contact_phone_link" name="contact_phone_link" type="tel" value="{{ site_json.contact.phone.link|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.phone.link" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
     </div>
 
@@ -26,12 +26,12 @@
       <div>
         <label for="contact_whatsapp_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Text</label>
         <input id="contact_whatsapp_text" name="contact_whatsapp_text" type="text" value="{{ site_json.contact.whatsapp.text|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.whatsapp.text" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="contact_whatsapp_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhatsApp Link</label>
         <input id="contact_whatsapp_link" name="contact_whatsapp_link" type="tel" value="{{ site_json.contact.whatsapp.link|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.whatsapp.link" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
     </div>
 
@@ -39,7 +39,7 @@
     <div>
       <label for="contact_email" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Email Address</label>
       <input id="contact_email" name="contact_email" type="email" value="{{ site_json.contact.email|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="contact.email" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
 
     <!-- Website -->
@@ -47,12 +47,12 @@
       <div>
         <label for="contact_website_text" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website Text</label>
         <input id="contact_website_text" name="contact_website_text" type="text" value="{{ site_json.contact.website.text|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.website.text" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="contact_website_link" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Website URL</label>
         <input id="contact_website_link" name="contact_website_link" type="url" value="{{ site_json.contact.website.link|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.website.link" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
     </div>
 
@@ -61,24 +61,24 @@
       <div>
         <label for="contact_address1" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 1</label>
         <input id="contact_address1" name="contact_address1" type="text" value="{{ site_json.contact.address_line1|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.address_line1" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="contact_address2" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 2</label>
         <input id="contact_address2" name="contact_address2" type="text" value="{{ site_json.contact.address_line2|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.address_line2" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
     </div>
     <div class="grid md:grid-cols-2 gap-4">
       <div>
         <label for="contact_address3" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 3</label>
         <input id="contact_address3" name="contact_address3" type="text" value="{{ site_json.contact.address_line3|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.address_line3" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="contact_address4" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Address Line 4</label>
         <input id="contact_address4" name="contact_address4" type="text" value="{{ site_json.contact.address_line4|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.address_line4" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
     </div>
 
@@ -87,12 +87,12 @@
       <div>
         <label for="contact_pluscode" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code</label>
         <input id="contact_pluscode" name="contact_pluscode" type="text" value="{{ site_json.contact.plusCode|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.plusCode" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="contact_pluscode_url" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Plus Code URL</label>
         <input id="contact_pluscode_url" name="contact_pluscode_url" type="url" value="{{ site_json.contact.plusCodeUrl|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.plusCodeUrl" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
     </div>
 
@@ -101,12 +101,12 @@
       <div>
         <label for="contact_lat" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Latitude</label>
         <input id="contact_lat" name="contact_lat" type="number" step="any" value="{{ profile.geo.lat|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.lat" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
       <div>
         <label for="contact_lng" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Longitude</label>
         <input id="contact_lng" name="contact_lng" type="number" step="any" value="{{ profile.geo.lng|default('') }}"
-          class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+          data-field="contact.lng" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
       </div>
     </div>
 

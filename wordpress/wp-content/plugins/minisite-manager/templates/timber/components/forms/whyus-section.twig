@@ -10,12 +10,12 @@
     <div>
       <label for="whyus_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
       <input id="whyus_title" name="whyus_title" type="text" value="{{ site_json.whyUs.title|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="whyUs.title" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
     <div>
       <label for="whyus_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Content</label>
       <div class="ql-editor-container" style="height: 240px;">
-        <div id="whyus_html_editor">{{ site_json.whyUs.html|default('') }}</div>
+        <div id="whyus_html_editor" data-field="whyUs.html">{{ site_json.whyUs.html|default('') }}</div>
         <textarea id="whyus_html" name="whyus_html" style="display: none;">{{ site_json.whyUs.html|default('') }}</textarea>
       </div>
       <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your content. HTML tags are automatically handled.</p>
@@ -23,7 +23,7 @@
     <div>
       <label for="whyus_image" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">WhyUs Image URL</label>
       <input id="whyus_image" name="whyus_image" type="url" value="{{ site_json.whyUs.image|default('') }}"
-        class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+        data-field="whyUs.image" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
   </div>
 </div>

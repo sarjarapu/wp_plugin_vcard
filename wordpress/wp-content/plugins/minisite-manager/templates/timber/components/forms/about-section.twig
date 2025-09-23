@@ -9,7 +9,7 @@
   <div>
     <label for="about_html" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">About Content</label>
     <div class="ql-editor-container" style="height: 240px;">
-      <div id="about_html_editor">{{ site_json.about.html|default('') }}</div>
+      <div id="about_html_editor" data-field="about.html">{{ site_json.about.html|default('') }}</div>
       <textarea id="about_html" name="about_html" style="display: none;">{{ site_json.about.html|default('') }}</textarea>
     </div>
     <p class="mt-1 text-xs text-[var(--on-surface-variant)]">Use the rich text editor above to format your content. HTML tags are automatically handled.</p>
