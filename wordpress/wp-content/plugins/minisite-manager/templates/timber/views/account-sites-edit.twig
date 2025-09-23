@@ -998,6 +998,24 @@
             }
           });
           
+          // Handle business hours section (special case)
+          if (data.contact && data.contact.hours) {
+            Object.keys(data.contact.hours).forEach(day => {
+              const dayData = data.contact.hours[day];
+              const dayLower = day.toLowerCase();
+              
+              // Set closed checkbox
+              const closedCheckbox = document.querySelector(`input[name="hours_${dayLower}_closed"]`);
+              if (closedCheckbox) {
+                closedCheckbox.checked = dayData.closed || false;
+              }
+              
+              // Set open/close times
+              setFieldValue(`input[name="hours_${dayLower}_open"]`, dayData.open);
+              setFieldValue(`input[name="hours_${dayLower}_close"]`, dayData.close);
+            });
+          }
+          
           // Handle dynamic sections (products and gallery)
           populateDynamicSection('products', data.services?.listing);
           populateDynamicSection('gallery', data.gallery);

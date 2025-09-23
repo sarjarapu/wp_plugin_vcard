@@ -15,7 +15,7 @@
   <div class="mb-4">
     <label for="products_section_title" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Section Title</label>
     <input id="products_section_title" name="products_section_title" type="text" value="{{ site_json.services.title|default('Products & Services') }}"
-      class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      data-field="services.title" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
   </div>
 
   <div id="productsContainer" class="space-y-4">

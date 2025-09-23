@@ -139,7 +139,7 @@
                 <td class="py-2 px-2 text-center">
                   <label class="inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="hours_{{ day|lower }}_closed" id="hours_{{ day|lower }}_closed" 
-                      class="sr-only peer hours-closed-toggle" {{ hours_data[day].closed|default(false) ? 'checked' : '' }}>
+                      data-field="contact.hours.{{ day }}.closed" class="sr-only peer hours-closed-toggle" {{ hours_data[day].closed|default(false) ? 'checked' : '' }}>
                     <div class="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-600"></div>
                   </label>
                 </td>
@@ -152,7 +152,7 @@
                       {% set open_time = function('date', 'H:i', function('strtotime', open_time)) %}
                     {% endif %}
                     <input type="time" name="hours_{{ day|lower }}_open" value="{{ open_time }}"
-                      class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                      data-field="contact.hours.{{ day }}.open" class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
                   </div>
                 </td>
                 
@@ -164,7 +164,7 @@
                       {% set close_time = function('date', 'H:i', function('strtotime', close_time)) %}
                     {% endif %}
                     <input type="time" name="hours_{{ day|lower }}_close" value="{{ close_time }}"
-                      class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
+                      data-field="contact.hours.{{ day }}.close" class="w-30 rounded bg-[var(--surface-0)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-2 py-1 text-sm"/>
                   </div>
                 </td>
                 
