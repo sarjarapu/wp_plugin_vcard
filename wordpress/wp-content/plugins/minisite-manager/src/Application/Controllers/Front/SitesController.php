@@ -234,6 +234,8 @@ final class SitesController
                 'editing_version' => $editingVersion,
                 'error_msg' => $error_msg,
                 'success_msg' => $success_msg,
+                'minisite_id' => $siteId,
+                'minisite_status' => $minisite->status,
                 'preview_url' => $editingVersion ? 
                     home_url('/account/sites/' . $siteId . '/preview/' . $editingVersion->id) : 
                     home_url('/account/sites/' . $siteId . '/preview/current'),

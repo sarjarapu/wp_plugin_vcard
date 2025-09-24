@@ -177,6 +177,12 @@
              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--secondary)] text-[var(--on-secondary)] shadow hover:brightness-95">
             <i class="fa-solid fa-eye"></i> Preview
           </a>
+          {% if minisite_status == 'draft' %}
+            <a href="{{ function('home_url','/account/sites/publish?minisite_id=' ~ minisite_id) }}" 
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 font-medium">
+              <i class="fa-solid fa-rocket"></i> Publish Minisite
+            </a>
+          {% endif %}
           <button type="button" id="export-btn" 
              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface-1)]">
             <i class="fa-solid fa-download"></i> Export
