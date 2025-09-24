@@ -1173,3 +1173,43 @@ add_action('woocommerce_order_status_completed', function ($order_id) {
     error_log('Failed to activate minisite subscription for order ' . $order_id . ': ' . $e->getMessage());
   }
 });
+
+// Admin AJAX handler for manual subscription activation
+add_action('wp_ajax_activate_minisite_subscription_admin', function () {
+  if (!current_user_can('manage_options')) {
+    wp_send_json_error('Insufficient permissions', 403);
+    return;
+  }
+
+  try {
+    $subscriptionCtrl = new \Minisite\Application\Controllers\Admin\SubscriptionController();
+    $subscriptionCtrl->handleActivateSubscription();
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
+  }
+});
+
+// Add admin menu for subscription management
+add_action('admin_menu', function () {
+  add_submenu_page(
+    'tools.php',
+    'Minisite Subscriptions',
+    'Minisite Subscriptions',
+    'manage_options',
+    'minisite-subscriptions',
+    function () {
+      $subscriptionCtrl = new \Minisite\Application\Controllers\Admin\SubscriptionController();
+      $subscriptionCtrl->handleList();
+    }
+  );
+});
+
+// Initialize minisite subscription product ID if not set
+add_action('init', function () {
+  // Set the minisite subscription product ID if not already set
+  // You'll need to create this product in WooCommerce and update this ID
+  if (!get_option('minisite_subscription_product_id')) {
+    // Default to 0 - you need to set this to your actual product ID
+    update_option('minisite_subscription_product_id', 0);
+  }
+});
