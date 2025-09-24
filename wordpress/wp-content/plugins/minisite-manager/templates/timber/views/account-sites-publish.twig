@@ -427,47 +427,42 @@
           // Show payment processing
           document.getElementById('payment-processing').classList.remove('hidden');
           
-          // Simulate payment processing (replace with real payment integration)
-          setTimeout(() => {
-            // Simulate payment completion
-            const paymentReference = 'test_payment_' + Date.now();
+          // Create WooCommerce order and redirect to checkout
+          fetch('{{ function("admin_url", "admin-ajax.php") }}', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              action: 'create_minisite_order',
+              nonce: '{{ function("wp_create_nonce", "create_minisite_order") }}',
+              minisite_id: '{{ minisite_id|default("") }}',
+              business_slug: businessSlug,
+              location_slug: locationSlug,
+              reservation_id: data.data.reservation_id
+            })
+          })
+          .then(response => response.json())
+          .then(orderData => {
+            // Hide processing indicator
+            document.getElementById('payment-processing').classList.add('hidden');
             
-            fetch('{{ function("admin_url", "admin-ajax.php") }}', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              body: new URLSearchParams({
-                action: 'publish_minisite',
-                nonce: '{{ function("wp_create_nonce", "publish_minisite") }}',
-                minisite_id: '{{ minisite_id|default("") }}',
-                business_slug: businessSlug,
-                location_slug: locationSlug,
-                payment_reference: paymentReference
-              })
-            })
-            .then(response => response.json())
-            .then(publishData => {
-              // Hide processing indicator
-              document.getElementById('payment-processing').classList.add('hidden');
-              
-              if (publishData.success) {
-                showSuccess('Payment successful! Your minisite is now live.');
-                // Redirect to minisite or dashboard
-                setTimeout(() => {
-                  window.location.href = publishData.data.redirect_url || '/account/sites';
-                }, 2000);
-              } else {
-                showError(publishData.data || 'Failed to publish minisite');
-                resetPublishButton();
-              }
-            })
-            .catch(error => {
-              document.getElementById('payment-processing').classList.add('hidden');
-              showError('Payment processing failed. Please try again.');
+            if (orderData.success) {
+              showSuccess('Order created! Redirecting to checkout...');
+              // Redirect to WooCommerce checkout
+              setTimeout(() => {
+                window.location.href = orderData.data.checkout_url;
+              }, 1500);
+            } else {
+              showError(orderData.data || 'Failed to create order');
               resetPublishButton();
-            });
-          }, 3000); // Simulate 3-second payment processing
+            }
+          })
+          .catch(error => {
+            document.getElementById('payment-processing').classList.add('hidden');
+            showError('Failed to create order. Please try again.');
+            resetPublishButton();
+          });
         } else {
           showError(data.data || 'Failed to reserve slug');
           resetPublishButton();

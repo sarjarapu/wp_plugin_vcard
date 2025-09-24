@@ -1117,3 +1117,59 @@ add_action('wp_ajax_import_minisite', function () {
     wp_send_json_error('Failed to import minisite: ' . $e->getMessage(), 500);
   }
 });
+
+// Create WooCommerce order for minisite subscription AJAX handler
+add_action('wp_ajax_create_minisite_order', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+    
+    $newMinisiteCtrl->handleCreateWooCommerceOrder();
+    
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to create order: ' . $e->getMessage(), 500);
+  }
+});
+
+// Activate minisite subscription AJAX handler
+add_action('wp_ajax_activate_minisite_subscription', function () {
+  if (!is_user_logged_in()) {
+    wp_send_json_error('Not authenticated', 401);
+    return;
+  }
+
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+    
+    $newMinisiteCtrl->handleActivateSubscription();
+    
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
+  }
+});
+
+// WooCommerce webhook: Auto-activate minisite subscription when order is completed
+add_action('woocommerce_order_status_completed', function ($order_id) {
+  try {
+    global $wpdb;
+    $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+    $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+    
+    $newMinisiteCtrl->activateMinisiteSubscription($order_id);
+    
+  } catch (\Exception $e) {
+    // Log error but don't break the order completion process
+    error_log('Failed to activate minisite subscription for order ' . $order_id . ': ' . $e->getMessage());
+  }
+});

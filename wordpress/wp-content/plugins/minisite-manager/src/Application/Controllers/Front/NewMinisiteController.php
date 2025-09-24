@@ -783,6 +783,208 @@ final class NewMinisiteController
     }
 
     /**
+     * Handle WooCommerce order creation for minisite subscription
+     */
+    public function handleCreateWooCommerceOrder(): void
+    {
+        if (!is_user_logged_in()) {
+            wp_send_json_error('Not authenticated', 401);
+            return;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_send_json_error('Method not allowed', 405);
+            return;
+        }
+
+        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'create_minisite_order')) {
+            wp_send_json_error('Security check failed', 403);
+            return;
+        }
+
+        $minisiteId = sanitize_text_field($_POST['minisite_id'] ?? '');
+        $businessSlug = sanitize_text_field($_POST['business_slug'] ?? '');
+        $locationSlug = sanitize_text_field($_POST['location_slug'] ?? '');
+        $reservationId = sanitize_text_field($_POST['reservation_id'] ?? '');
+
+        if (empty($minisiteId) || empty($businessSlug) || empty($reservationId)) {
+            wp_send_json_error('Missing required fields', 400);
+            return;
+        }
+
+        try {
+            // Check if WooCommerce is active
+            if (!class_exists('WooCommerce')) {
+                wp_send_json_error('WooCommerce is not active', 500);
+                return;
+            }
+
+            // Get the minisite subscription product ID (you'll need to set this)
+            $subscriptionProductId = get_option('minisite_subscription_product_id', 0);
+            if (!$subscriptionProductId) {
+                wp_send_json_error('Minisite subscription product not configured', 500);
+                return;
+            }
+
+            // Create WooCommerce order
+            $order = wc_create_order();
+            $order->set_customer_id(get_current_user_id());
+            $order->set_payment_method('upi_qr_code');
+            $order->set_payment_method_title('UPI QR Code');
+            $order->set_status('pending');
+
+            // Add the subscription product
+            $product = wc_get_product($subscriptionProductId);
+            if ($product) {
+                $order->add_product($product, 1);
+            }
+
+            // Add minisite-specific meta data
+            $order->update_meta_data('_minisite_id', $minisiteId);
+            $order->update_meta_data('_slug', $businessSlug . '/' . $locationSlug);
+            $order->update_meta_data('_reservation_id', $reservationId);
+
+            // Calculate totals
+            $order->calculate_totals();
+            $order->save();
+
+            // Get checkout URL
+            $checkoutUrl = $order->get_checkout_payment_url();
+
+            wp_send_json_success([
+                'order_id' => $order->get_id(),
+                'checkout_url' => $checkoutUrl,
+                'message' => 'Order created successfully. Redirecting to checkout...'
+            ]);
+
+        } catch (\Exception $e) {
+            wp_send_json_error('Failed to create order: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Handle minisite subscription activation after payment
+     */
+    public function handleActivateSubscription(): void
+    {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            wp_send_json_error('Method not allowed', 405);
+            return;
+        }
+
+        $orderId = intval($_POST['order_id'] ?? 0);
+        if (!$orderId) {
+            wp_send_json_error('Order ID required', 400);
+            return;
+        }
+
+        try {
+            $this->activateMinisiteSubscription($orderId);
+            wp_send_json_success(['message' => 'Subscription activated successfully']);
+        } catch (\Exception $e) {
+            wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Activate minisite subscription from WooCommerce order
+     */
+    public function activateMinisiteSubscription(int $orderId): void
+    {
+        global $wpdb;
+
+        $order = wc_get_order($orderId);
+        if (!$order) {
+            throw new \Exception('Order not found');
+        }
+
+        // Get minisite data from order meta
+        $minisiteId = $order->get_meta('_minisite_id');
+        $slug = $order->get_meta('_slug');
+        $reservationId = $order->get_meta('_reservation_id');
+
+        if (!$minisiteId) {
+            throw new \Exception('No minisite ID found in order');
+        }
+
+        // Parse slug
+        $slugParts = explode('/', $slug);
+        $businessSlug = $slugParts[0] ?? '';
+        $locationSlug = $slugParts[1] ?? '';
+
+        if (!$businessSlug) {
+            throw new \Exception('Invalid slug format');
+        }
+
+        $wpdb->query('START TRANSACTION');
+
+        try {
+            // Get current expiration date (if any)
+            $currentExpiration = $wpdb->get_var($wpdb->prepare(
+                "SELECT expires_at FROM {$wpdb->prefix}minisite_payments 
+                 WHERE minisite_id = %s AND status = 'active' 
+                 ORDER BY expires_at DESC LIMIT 1",
+                $minisiteId
+            ));
+
+            // Calculate new expiration date using WordPress current_time()
+            $baseDate = $currentExpiration ?: current_time('mysql');
+            $newExpiration = date('Y-m-d H:i:s', strtotime($baseDate . ' +12 months'));
+            $gracePeriodEnds = date('Y-m-d H:i:s', strtotime($newExpiration . ' +1 month'));
+
+            // Update minisite with permanent slugs
+            $this->minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
+            $this->minisiteRepository->updatePublishStatus($minisiteId, 'published');
+
+            // Create payment record
+            $paymentId = $wpdb->insert(
+                $wpdb->prefix . 'minisite_payments',
+                [
+                    'minisite_id' => $minisiteId,
+                    'woocommerce_order_id' => $orderId,
+                    'status' => 'active',
+                    'amount' => $order->get_total(),
+                    'currency' => $order->get_currency(),
+                    'payment_method' => 'upi_qr_code',
+                    'payment_reference' => $order->get_transaction_id() ?: 'order_' . $orderId,
+                    'paid_at' => current_time('mysql'),
+                    'expires_at' => $newExpiration,
+                    'grace_period_ends_at' => $gracePeriodEnds,
+                    'renewed_at' => null,
+                    'reclaimed_at' => null
+                ],
+                [
+                    '%s', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'
+                ]
+            );
+
+            if ($paymentId === false) {
+                throw new \Exception('Failed to create payment record');
+            }
+
+            $paymentId = $wpdb->insert_id;
+
+            // Create payment history record
+            $this->createPaymentHistoryRecord($minisiteId, $paymentId, 'initial_payment', 'order_' . $orderId);
+
+            // Clean up reservation
+            if ($reservationId) {
+                $reservationsTable = $wpdb->prefix . 'minisite_reservations';
+                $wpdb->query($wpdb->prepare(
+                    "DELETE FROM {$reservationsTable} WHERE id = %s",
+                    $reservationId
+                ));
+            }
+
+            $wpdb->query('COMMIT');
+
+        } catch (\Exception $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
+        }
+    }
+
+    /**
      * Create payment history record
      */
     private function createPaymentHistoryRecord(string $minisiteId, int $paymentId, string $action, string $paymentReference): void
