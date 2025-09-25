@@ -132,6 +132,7 @@ class _1_0_0_CreateBase implements Migration
           id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
           minisite_id VARCHAR(32) NOT NULL,
           user_id BIGINT UNSIGNED NOT NULL,
+          woocommerce_order_id BIGINT UNSIGNED NULL,
           status ENUM('active','expired','grace_period','reclaimed') NOT NULL DEFAULT 'active',
           amount DECIMAL(10,2) NOT NULL,
           currency CHAR(3) NOT NULL DEFAULT 'USD',
@@ -148,7 +149,8 @@ class _1_0_0_CreateBase implements Migration
           KEY idx_minisite_status (minisite_id, status),
           KEY idx_user_status (user_id, status),
           KEY idx_expires_at (expires_at),
-          KEY idx_grace_period_ends_at (grace_period_ends_at)
+          KEY idx_grace_period_ends_at (grace_period_ends_at),
+          KEY idx_woocommerce_order (woocommerce_order_id)
         ) ENGINE=InnoDB {$charset};");
 
         // ——— payment history (for renewals and reclamations) ———

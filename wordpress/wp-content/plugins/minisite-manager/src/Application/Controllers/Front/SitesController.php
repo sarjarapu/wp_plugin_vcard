@@ -173,7 +173,7 @@ final class SitesController
                             
                             // Profile fields from form data
                             slugs: $slugs,
-                            title: $minisite->title, // Keep original profile title
+                            title: sanitize_text_field($_POST['seo_title'] ?? $minisite->title),
                             name: sanitize_text_field($_POST['brand_name'] ?? $minisite->name),
                             city: sanitize_text_field($_POST['contact_city'] ?? $minisite->city),
                             region: sanitize_text_field($_POST['contact_region'] ?? $minisite->region),
@@ -197,6 +197,12 @@ final class SitesController
                         if ($lat !== null && $lng !== null) {
                             // Only update coordinates, not site_json
                             $minisiteRepo->updateCoordinates($siteId, $lat, $lng, (int) $currentUser->ID);
+                        }
+                        
+                        // Update profile title if provided
+                        $newTitle = sanitize_text_field($_POST['seo_title'] ?? '');
+                        if (!empty($newTitle) && $newTitle !== $minisite->title) {
+                            $minisiteRepo->updateTitle($siteId, $newTitle);
                         }
                         
                         $wpdb->query('COMMIT');

@@ -450,11 +450,19 @@
             document.getElementById('payment-processing').classList.add('hidden');
             
             if (orderData.success) {
-              showSuccess('Product added to cart! Redirecting to cart...');
-              // Redirect to WooCommerce cart
-              setTimeout(() => {
-                window.location.href = orderData.data.cart_url;
-              }, 1500);
+              if (orderData.data.redirect_url) {
+                // Direct publish (existing subscription)
+                showSuccess(orderData.data.message || 'Minisite published successfully!');
+                setTimeout(() => {
+                  window.location.href = orderData.data.redirect_url;
+                }, 1500);
+              } else {
+                // New subscription - go to cart
+                showSuccess('Product added to cart! Redirecting to cart...');
+                setTimeout(() => {
+                  window.location.href = orderData.data.cart_url;
+                }, 1500);
+              }
             } else {
               showError(orderData.data || 'Failed to add product to cart');
               resetPublishButton();

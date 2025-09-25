@@ -829,6 +829,30 @@ final class NewMinisiteController
                 return;
             }
 
+            // Get minisite repository for later use
+            global $wpdb;
+            $minisiteRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+
+            // Check if minisite already has an active subscription
+            $paymentsTable = $wpdb->prefix . 'minisite_payments';
+            $existingPayment = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM {$paymentsTable} 
+                 WHERE minisite_id = %s 
+                 AND status IN ('active', 'grace_period') 
+                 AND expires_at > NOW()",
+                $minisiteId
+            ));
+
+            if ($existingPayment) {
+                // Minisite already has active subscription, just publish it
+                $this->publishMinisiteDirectly($minisiteId, $businessSlug, $locationSlug, $reservationId);
+                wp_send_json_success([
+                    'message' => 'Minisite published successfully! You already have an active subscription.',
+                    'redirect_url' => home_url('/account/sites')
+                ]);
+                return;
+            }
+
             // Find the minisite subscription product by SKU
             $productId = wc_get_product_id_by_sku('NMS001');
             if (!$productId) {
@@ -879,6 +903,46 @@ final class NewMinisiteController
     }
 
     /**
+     * Publish minisite directly without payment (for existing subscribers)
+     */
+    private function publishMinisiteDirectly(string $minisiteId, string $businessSlug, string $locationSlug, string $reservationId): void
+    {
+        global $wpdb;
+        
+        try {
+            $wpdb->query('START TRANSACTION');
+            
+            // Update minisite status to published
+            $minisiteRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+            $minisiteRepo->updateStatus($minisiteId, 'published');
+            
+            // Update slugs if they're different from current ones
+            $currentMinisite = $minisiteRepo->findById($minisiteId);
+            if ($currentMinisite) {
+                $currentSlugs = $currentMinisite->slugs;
+                if ($currentSlugs->business !== $businessSlug || $currentSlugs->location !== $locationSlug) {
+                    $minisiteRepo->updateSlugs($minisiteId, $businessSlug, $locationSlug);
+                }
+            }
+            
+            // Clean up reservation
+            if ($reservationId) {
+                $reservationsTable = $wpdb->prefix . 'minisite_reservations';
+                $wpdb->query($wpdb->prepare(
+                    "DELETE FROM {$reservationsTable} WHERE id = %s",
+                    $reservationId
+                ));
+            }
+            
+            $wpdb->query('COMMIT');
+            
+        } catch (\Exception $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
+        }
+    }
+
+    /**
      * Handle minisite subscription activation after payment
      */
     public function handleActivateSubscription(): void
@@ -914,12 +978,27 @@ final class NewMinisiteController
             throw new \Exception('Order not found');
         }
 
+
         // Get minisite data from order meta (fallback) or session
         $minisiteId = $order->get_meta('_minisite_id');
         $slug = $order->get_meta('_slug');
         $reservationId = $order->get_meta('_reservation_id');
         
-        // If not found in order meta, try to get from session (cart-based flow)
+        
+        // If not found in order meta, try to get from order items (cart-based flow)
+        if (!$minisiteId) {
+            foreach ($order->get_items() as $item) {
+                $itemMinisiteId = $item->get_meta('_minisite_id');
+                if ($itemMinisiteId) {
+                    $minisiteId = $itemMinisiteId;
+                    $slug = $item->get_meta('_minisite_slug') ?: '';
+                    $reservationId = $item->get_meta('_minisite_reservation_id') ?: '';
+                    break;
+                }
+            }
+        }
+        
+        // If still not found, try to get from session (fallback)
         if (!$minisiteId && WC()->session) {
             $cartData = WC()->session->get('minisite_cart_data');
             if ($cartData) {
@@ -970,6 +1049,7 @@ final class NewMinisiteController
                 $wpdb->prefix . 'minisite_payments',
                 [
                     'minisite_id' => $minisiteId,
+                    'user_id' => $order->get_customer_id(),
                     'woocommerce_order_id' => $orderId,
                     'status' => 'active',
                     'amount' => $order->get_total(),
@@ -983,7 +1063,7 @@ final class NewMinisiteController
                     'reclaimed_at' => null
                 ],
                 [
-                    '%s', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'
+                    '%s', '%d', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s'
                 ]
             );
 

@@ -1176,6 +1176,34 @@ add_action('wp_ajax_activate_minisite_subscription', function () {
   }
 });
 
+// Transfer minisite data from cart to order metadata
+add_action('woocommerce_checkout_create_order', function ($order, $data) {
+  // Check if there's minisite data in the session
+  if (WC()->session && WC()->session->get('minisite_cart_data')) {
+    $cartData = WC()->session->get('minisite_cart_data');
+    
+    // Transfer minisite data to order metadata
+    $order->update_meta_data('_minisite_id', $cartData['minisite_id'] ?? '');
+    $order->update_meta_data('_slug', $cartData['minisite_slug'] ?? '');
+    $order->update_meta_data('_reservation_id', $cartData['minisite_reservation_id'] ?? '');
+  }
+}, 10, 2);
+
+// Transfer cart item metadata to order item metadata
+add_action('woocommerce_checkout_create_order_line_item', function ($item, $cart_item_key, $values, $order) {
+  // Check if this cart item has minisite data
+  if (isset($values['minisite_id'])) {
+    $item->add_meta_data('_minisite_id', $values['minisite_id']);
+    $item->add_meta_data('_minisite_slug', $values['minisite_slug'] ?? '');
+    $item->add_meta_data('_minisite_reservation_id', $values['minisite_reservation_id'] ?? '');
+    
+    // Also transfer to order metadata for easier access
+    $order->update_meta_data('_minisite_id', $values['minisite_id']);
+    $order->update_meta_data('_slug', $values['minisite_slug'] ?? '');
+    $order->update_meta_data('_reservation_id', $values['minisite_reservation_id'] ?? '');
+  }
+}, 10, 4);
+
 // WooCommerce webhook: Auto-activate minisite subscription when order is completed
 add_action('woocommerce_order_status_completed', function ($order_id) {
   try {
@@ -1221,6 +1249,7 @@ add_action('admin_menu', function () {
     }
   );
 });
+
 
 
 // Schedule cleanup of expired reservations

@@ -370,4 +370,36 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             canEdit:       false   // Will be set by TimberRenderer
         );
     }
+
+    /**
+     * Update minisite title
+     */
+    public function updateTitle(string $minisiteId, string $title): bool
+    {
+        $result = $this->db->update(
+            $this->table(),
+            ['title' => $title],
+            ['id' => $minisiteId],
+            ['%s'],
+            ['%s']
+        );
+        
+        return $result !== false;
+    }
+
+    /**
+     * Update minisite status
+     */
+    public function updateStatus(string $minisiteId, string $status): bool
+    {
+        $result = $this->db->update(
+            $this->table(),
+            ['status' => $status, 'published_at' => $status === 'published' ? current_time('mysql') : null],
+            ['id' => $minisiteId],
+            ['%s', '%s'],
+            ['%s']
+        );
+        
+        return $result !== false;
+    }
 }
