@@ -482,6 +482,7 @@ final class NewMinisiteController
 
         try {
             global $wpdb;
+            $reservationsTable = $wpdb->prefix . 'minisite_reservations';
             
             // Clean up expired reservations first
             ReservationCleanup::cleanupExpired();
@@ -563,6 +564,10 @@ final class NewMinisiteController
 
         try {
             global $wpdb;
+            $reservationsTable = $wpdb->prefix . 'minisite_reservations';
+            $userId = get_current_user_id();
+            
+            
             $wpdb->query('START TRANSACTION');
 
             // Clean up expired reservations first
@@ -831,33 +836,41 @@ final class NewMinisiteController
                 return;
             }
 
-            // Create WooCommerce order
-            $order = wc_create_order();
-            $order->set_customer_id(get_current_user_id());
-            $order->set_payment_method('upi_qr_code');
-            $order->set_payment_method_title('UPI QR Code');
-            $order->set_status('pending');
-
-            // Add the subscription product
+            // Add product to cart instead of creating order directly
             $product = wc_get_product($productId);
-            $order->add_product($product, 1);
-
-            // Add minisite-specific meta data
-            $order->update_meta_data('_minisite_id', $minisiteId);
-            $order->update_meta_data('_slug', $businessSlug . '/' . $locationSlug);
-            $order->update_meta_data('_reservation_id', $reservationId);
-
-            // Calculate totals
-            $order->calculate_totals();
-            $order->save();
-
-            // Get checkout URL
-            $checkoutUrl = $order->get_checkout_payment_url();
+            
+            // Clear any existing cart items to avoid confusion
+            WC()->cart->empty_cart();
+            
+            // Add the subscription product to cart
+            $cartItemKey = WC()->cart->add_to_cart($productId, 1);
+            
+            if (!$cartItemKey) {
+                wp_send_json_error('Failed to add product to cart', 500);
+                return;
+            }
+            
+            // Add minisite-specific meta data to cart item
+            WC()->cart->cart_contents[$cartItemKey]['minisite_id'] = $minisiteId;
+            WC()->cart->cart_contents[$cartItemKey]['minisite_slug'] = $businessSlug . '/' . $locationSlug;
+            WC()->cart->cart_contents[$cartItemKey]['minisite_reservation_id'] = $reservationId;
+            
+            // Also store in session for later retrieval
+            WC()->session->set('minisite_cart_data', [
+                'minisite_id' => $minisiteId,
+                'minisite_slug' => $businessSlug . '/' . $locationSlug,
+                'minisite_reservation_id' => $reservationId
+            ]);
+            
+            // Save cart
+            WC()->cart->set_session();
+            
+            // Get cart URL instead of checkout URL
+            $cartUrl = wc_get_cart_url();
 
             wp_send_json_success([
-                'order_id' => $order->get_id(),
-                'checkout_url' => $checkoutUrl,
-                'message' => 'Order created successfully. Redirecting to checkout...'
+                'cart_url' => $cartUrl,
+                'message' => 'Product added to cart successfully. Redirecting to cart...'
             ]);
 
         } catch (\Exception $e) {
@@ -901,13 +914,26 @@ final class NewMinisiteController
             throw new \Exception('Order not found');
         }
 
-        // Get minisite data from order meta
+        // Get minisite data from order meta (fallback) or session
         $minisiteId = $order->get_meta('_minisite_id');
         $slug = $order->get_meta('_slug');
         $reservationId = $order->get_meta('_reservation_id');
+        
+        // If not found in order meta, try to get from session (cart-based flow)
+        if (!$minisiteId && WC()->session) {
+            $cartData = WC()->session->get('minisite_cart_data');
+            if ($cartData) {
+                $minisiteId = $cartData['minisite_id'] ?? '';
+                $slug = $cartData['minisite_slug'] ?? '';
+                $reservationId = $cartData['minisite_reservation_id'] ?? '';
+                
+                // Clear session data after use
+                WC()->session->set('minisite_cart_data', null);
+            }
+        }
 
         if (!$minisiteId) {
-            throw new \Exception('No minisite ID found in order');
+            throw new \Exception('No minisite ID found in order or session');
         }
 
         // Parse slug
