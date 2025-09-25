@@ -8,6 +8,7 @@ use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
+use Minisite\Infrastructure\Utils\ReservationCleanup;
 
 final class NewMinisiteController
 {
@@ -482,6 +483,9 @@ final class NewMinisiteController
         try {
             global $wpdb;
             
+            // Clean up expired reservations first
+            ReservationCleanup::cleanupExpired();
+            
             // Check if combination already exists in minisites table
             $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
             
@@ -494,7 +498,6 @@ final class NewMinisiteController
             }
             
             // Check if combination is currently reserved
-            $reservationsTable = $wpdb->prefix . 'minisite_reservations';
             $reservation = $wpdb->get_row($wpdb->prepare(
                 "SELECT * FROM {$reservationsTable} 
                  WHERE business_slug = %s AND location_slug = %s 
@@ -562,6 +565,9 @@ final class NewMinisiteController
             global $wpdb;
             $wpdb->query('START TRANSACTION');
 
+            // Clean up expired reservations first
+            ReservationCleanup::cleanupExpired();
+
             // Check if combination already exists (with row lock)
             $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
             if ($existingMinisite) {
@@ -571,7 +577,6 @@ final class NewMinisiteController
             }
 
             // Check if combination is currently reserved by another user
-            $reservationsTable = $wpdb->prefix . 'minisite_reservations';
             $existingReservation = $wpdb->get_row($wpdb->prepare(
                 "SELECT * FROM {$reservationsTable} 
                  WHERE business_slug = %s AND location_slug = %s 

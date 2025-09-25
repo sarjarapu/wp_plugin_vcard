@@ -1213,3 +1213,39 @@ add_action('init', function () {
     update_option('minisite_subscription_product_id', 0);
   }
 });
+
+// Schedule cleanup of expired reservations
+add_action('wp', function () {
+  if (!wp_next_scheduled('minisite_cleanup_expired_reservations')) {
+    wp_schedule_event(time(), 'hourly', 'minisite_cleanup_expired_reservations');
+  }
+});
+
+// Clean up expired reservations
+add_action('minisite_cleanup_expired_reservations', function () {
+  $deleted = \Minisite\Infrastructure\Utils\ReservationCleanup::cleanupExpired();
+  
+  if ($deleted > 0) {
+    error_log("Minisite: Cleaned up {$deleted} expired reservations");
+  }
+});
+
+// Clean up on plugin deactivation
+register_deactivation_hook(__FILE__, function () {
+  wp_clear_scheduled_hook('minisite_cleanup_expired_reservations');
+});
+
+// Manual cleanup AJAX handler (for debugging)
+add_action('wp_ajax_cleanup_expired_reservations', function () {
+  if (!current_user_can('manage_options')) {
+    wp_send_json_error('Insufficient permissions', 403);
+    return;
+  }
+
+  $deleted = \Minisite\Infrastructure\Utils\ReservationCleanup::cleanupExpired();
+  
+  wp_send_json_success([
+    'message' => "Cleaned up {$deleted} expired reservations",
+    'deleted_count' => $deleted
+  ]);
+});
