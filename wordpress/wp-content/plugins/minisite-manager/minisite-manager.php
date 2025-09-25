@@ -80,6 +80,8 @@ function minisite_class($class) {
  * Activation / Deactivation
  */
 register_activation_hook(__FILE__, function () {
+  // Sync roles and capabilities on activation
+  minisite_sync_roles_and_caps();
   // In non-production, optionally drop and reset before migrating (dev convenience)
   if (!MINISITE_LIVE_PRODUCTION) {
     global $wpdb;
@@ -195,6 +197,9 @@ function minisite_sync_roles_and_caps(): void {
     MINISITE_CAP_READ_PRIVATE => true,
     MINISITE_CAP_VIEW_CONTACT_REPORTS_OWN => true,
     MINISITE_CAP_MANAGE_REFERRALS => true,
+    // WordPress AJAX capabilities
+    'edit_posts' => true,
+    'upload_files' => true,
   ];
 
   $powerCaps = $memberCaps + [
@@ -609,6 +614,19 @@ add_filter('query_vars', function (array $vars) {
  * Hide wp-admin for non-privileged users (redirect to front-end login)
  */
 add_action('admin_init', function () {
+  // Allow AJAX calls for minisite_member users
+  if (defined('DOING_AJAX') && DOING_AJAX) {
+    if (is_user_logged_in()) {
+      $user = wp_get_current_user();
+      if (in_array(MINISITE_ROLE_MEMBER, $user->roles) || 
+          in_array(MINISITE_ROLE_POWER, $user->roles) || 
+          in_array(MINISITE_ROLE_ADMIN, $user->roles) ||
+          user_can($user, 'manage_options')) {
+        return; // Allow AJAX access
+      }
+    }
+  }
+  
   if (is_user_logged_in()) {
     $user = wp_get_current_user();
     // Allow access for administrators and minisite_power/minisite_admin roles
@@ -1249,3 +1267,22 @@ add_action('wp_ajax_cleanup_expired_reservations', function () {
     'deleted_count' => $deleted
   ]);
 });
+
+// Manual role sync AJAX handler (for debugging)
+add_action('wp_ajax_sync_minisite_roles', function () {
+  if (!current_user_can('manage_options')) {
+    wp_send_json_error('Insufficient permissions', 403);
+    return;
+  }
+
+  try {
+    minisite_sync_roles_and_caps();
+    
+    wp_send_json_success([
+      'message' => 'Minisite roles and capabilities synced successfully'
+    ]);
+  } catch (\Exception $e) {
+    wp_send_json_error('Failed to sync roles: ' . $e->getMessage(), 500);
+  }
+});
+
