@@ -824,10 +824,10 @@ final class NewMinisiteController
                 return;
             }
 
-            // Get the minisite subscription product ID (you'll need to set this)
-            $subscriptionProductId = get_option('minisite_subscription_product_id', 0);
-            if (!$subscriptionProductId) {
-                wp_send_json_error('Minisite subscription product not configured', 500);
+            // Find the minisite subscription product by SKU
+            $productId = wc_get_product_id_by_sku('NMS001');
+            if (!$productId) {
+                wp_send_json_error('Minisite subscription product (SKU: NMS001) not found', 500);
                 return;
             }
 
@@ -839,10 +839,8 @@ final class NewMinisiteController
             $order->set_status('pending');
 
             // Add the subscription product
-            $product = wc_get_product($subscriptionProductId);
-            if ($product) {
-                $order->add_product($product, 1);
-            }
+            $product = wc_get_product($productId);
+            $order->add_product($product, 1);
 
             // Add minisite-specific meta data
             $order->update_meta_data('_minisite_id', $minisiteId);

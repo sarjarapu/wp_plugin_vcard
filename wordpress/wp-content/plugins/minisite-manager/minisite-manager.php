@@ -1222,15 +1222,6 @@ add_action('admin_menu', function () {
   );
 });
 
-// Initialize minisite subscription product ID if not set
-add_action('init', function () {
-  // Set the minisite subscription product ID if not already set
-  // You'll need to create this product in WooCommerce and update this ID
-  if (!get_option('minisite_subscription_product_id')) {
-    // Default to 0 - you need to set this to your actual product ID
-    update_option('minisite_subscription_product_id', 0);
-  }
-});
 
 // Schedule cleanup of expired reservations
 add_action('wp', function () {
