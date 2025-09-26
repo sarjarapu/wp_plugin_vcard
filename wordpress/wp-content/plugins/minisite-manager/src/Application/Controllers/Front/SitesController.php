@@ -113,11 +113,9 @@ final class SitesController
         $editingVersion = null;
         
         if ($requestedVersionId === 'latest' || !$requestedVersionId) {
-            // Edit latest version (draft or published)
-            $latestVersion = $versionRepo->findLatestVersion($siteId);
+            // Edit latest version (draft or published) - use smart method
+            $editingVersion = $versionRepo->getLatestDraftForEditing($siteId);
             $latestDraft = $versionRepo->findLatestDraft($siteId);
-            // If there's a draft, edit the draft; otherwise edit the latest version
-            $editingVersion = $latestDraft ?: $latestVersion;
             
         } else {
             // Edit specific version

@@ -163,6 +163,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
     /**
      * Publish a minisite using the versioning system
      * Uses latest draft version, with fallback to latest version if no draft exists
+     * Does NOT demote published versions - keeps them as published for history
      */
     public function publishMinisite(string $id): void
     {
@@ -186,21 +187,13 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
                 
                 // If latest version is already published, create a new draft from it
                 if ($latestVersion->status === 'published') {
-                    $versionToPublish = $this->createDraftFromVersion($latestVersion, $versionRepo);
+                    $versionToPublish = $versionRepo->createDraftFromVersion($latestVersion);
                 } else {
                     $versionToPublish = $latestVersion;
                 }
             }
             
-            // Move current published version to draft (if exists)
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisite_versions 
-                 SET status = 'draft' 
-                 WHERE minisite_id = %s AND status = 'published'",
-                $id
-            ));
-            
-            // Publish the target version
+            // Publish the target version (don't demote existing published versions)
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$wpdb->prefix}minisite_versions 
                  SET status = 'published', published_at = NOW() 
@@ -266,46 +259,6 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         }
     }
     
-    /**
-     * Create a new draft version from an existing version
-     */
-    private function createDraftFromVersion(\Minisite\Domain\Entities\Version $sourceVersion, \Minisite\Infrastructure\Persistence\Repositories\VersionRepository $versionRepo): \Minisite\Domain\Entities\Version
-    {
-        $nextVersion = $versionRepo->getNextVersionNumber($sourceVersion->minisiteId);
-        
-        $draftVersion = new \Minisite\Domain\Entities\Version(
-            id: null,
-            minisiteId: $sourceVersion->minisiteId,
-            versionNumber: $nextVersion,
-            status: 'draft',
-            label: "Draft from v{$sourceVersion->versionNumber}",
-            comment: "Created from version {$sourceVersion->versionNumber} for publishing",
-            createdBy: $sourceVersion->createdBy,
-            createdAt: null,
-            publishedAt: null,
-            sourceVersionId: $sourceVersion->id,
-            siteJson: $sourceVersion->siteJson,
-            
-            // Copy all minisite fields
-            slugs: $sourceVersion->slugs,
-            title: $sourceVersion->title,
-            name: $sourceVersion->name,
-            city: $sourceVersion->city,
-            region: $sourceVersion->region,
-            countryCode: $sourceVersion->countryCode,
-            postalCode: $sourceVersion->postalCode,
-            geo: $sourceVersion->geo,
-            siteTemplate: $sourceVersion->siteTemplate,
-            palette: $sourceVersion->palette,
-            industry: $sourceVersion->industry,
-            defaultLocale: $sourceVersion->defaultLocale,
-            schemaVersion: $sourceVersion->schemaVersion,
-            siteVersion: $sourceVersion->siteVersion,
-            searchTerms: $sourceVersion->searchTerms
-        );
-        
-        return $versionRepo->save($draftVersion);
-    }
 
     /**
      * Insert a new minisite

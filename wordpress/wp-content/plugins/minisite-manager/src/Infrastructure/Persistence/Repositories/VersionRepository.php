@@ -143,6 +143,68 @@ final class VersionRepository implements VersionRepositoryInterface
         return $row ? $this->mapRow($row) : null;
     }
 
+    /**
+     * Get the latest draft for editing, creating one from published version if needed
+     * This ensures there's always a draft available for editing
+     */
+    public function getLatestDraftForEditing(string $minisiteId): Version
+    {
+        // 1. Find the latest version (could be draft or published)
+        $latestVersion = $this->findLatestVersion($minisiteId);
+        if (!$latestVersion) {
+            throw new \RuntimeException('No version found for minisite.');
+        }
+        
+        // 2. If latest version is published, create a draft copy from it
+        if ($latestVersion->status === 'published') {
+            return $this->createDraftFromVersion($latestVersion);
+        }
+        
+        // 3. If latest version is already a draft, return it
+        return $latestVersion;
+    }
+
+    /**
+     * Create a new draft version from an existing version
+     */
+    private function createDraftFromVersion(Version $sourceVersion): Version
+    {
+        $nextVersion = $this->getNextVersionNumber($sourceVersion->minisiteId);
+        
+        $draftVersion = new Version(
+            id: null,
+            minisiteId: $sourceVersion->minisiteId,
+            versionNumber: $nextVersion,
+            status: 'draft',
+            label: "Draft from v{$sourceVersion->versionNumber}",
+            comment: "Created from version {$sourceVersion->versionNumber} for editing",
+            createdBy: $sourceVersion->createdBy,
+            createdAt: null,
+            publishedAt: null,
+            sourceVersionId: $sourceVersion->id,
+            siteJson: $sourceVersion->siteJson,
+            
+            // Copy all minisite fields
+            slugs: $sourceVersion->slugs,
+            title: $sourceVersion->title,
+            name: $sourceVersion->name,
+            city: $sourceVersion->city,
+            region: $sourceVersion->region,
+            countryCode: $sourceVersion->countryCode,
+            postalCode: $sourceVersion->postalCode,
+            geo: $sourceVersion->geo,
+            siteTemplate: $sourceVersion->siteTemplate,
+            palette: $sourceVersion->palette,
+            industry: $sourceVersion->industry,
+            defaultLocale: $sourceVersion->defaultLocale,
+            schemaVersion: $sourceVersion->schemaVersion,
+            siteVersion: $sourceVersion->siteVersion,
+            searchTerms: $sourceVersion->searchTerms
+        );
+        
+        return $this->save($draftVersion);
+    }
+
     public function findPublishedVersion(string $minisiteId): ?Version
     {
         $sql = $this->db->prepare(
