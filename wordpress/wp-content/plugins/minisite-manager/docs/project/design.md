@@ -135,11 +135,37 @@
 
 ---
 
+## Database Architecture & Versioning
+
+### Table Structure Overview
+
+**wp_minisites** (Main Profile Table):
+- Stores the **currently published version's data** for fast public access
+- Contains `_minisite_current_version_id` pointing to the published version
+- Optimized for public site rendering and search functionality
+- **Draft content is NEVER stored here**
+
+**wp_minisite_versions** (Version History Table):
+- Stores **ALL versions** (drafts and published) with complete audit trail
+- Every save creates a NEW row - never overwrites existing versions
+- Draft versions have `status='draft'` and `published_at=NULL`
+- Published versions have `status='published'` and `published_at=timestamp`
+- Enables rollback functionality and complete change history
+
+### Data Flow:
+1. **Draft Creation**: New row in `wp_minisite_versions` with `status='draft'`
+2. **Publishing**: Draft becomes `status='published'`, content copied to `wp_minisites`
+3. **Public Access**: Always reads from `wp_minisites` for performance
+4. **Editing**: Loads latest draft from `wp_minisite_versions`
+
+**See `docs/project/design/versioning-specs.md` for complete implementation details.**
+
 ## Notes on Complexity
 
 - **Custom front-end auth pages**: moderate effort. Use WP core functions (`wp_signon`, `wp_create_user`, `retrieve_password`, `reset_password`) behind your own branded templates.  
 - **Dashboard & reporting UI**: medium-high effort. Needs custom pages + REST endpoints, but gives you full control of UX.  
 - **Minisite CPT + assignment logic**: moderate. Use `map_meta_cap` filter to enforce author/assigned editor rules.  
+- **Versioning system**: medium effort. Requires careful transaction handling and data synchronization between tables.
 - **Payments & subscriptions**: integrate with **WooCommerce Subscriptions** or **Paid Memberships Pro** to handle billing + automatic role upgrades/downgrades.  
 - **Hiding wp-admin**: easy (redirect + disable admin bar for non-privileged roles).  
 - **What you lose by skipping WP defaults**:  

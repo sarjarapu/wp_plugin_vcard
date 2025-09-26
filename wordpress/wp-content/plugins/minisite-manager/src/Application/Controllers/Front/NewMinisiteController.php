@@ -722,9 +722,9 @@ final class NewMinisiteController
                 return;
             }
 
-            // Update minisite with permanent slugs
+            // Update minisite with permanent slugs and publish it
             $this->minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
-            $this->minisiteRepository->updatePublishStatus($minisiteId, 'published');
+            $this->minisiteRepository->publishMinisite($minisiteId);
 
             // Clean up any existing reservation for this slug combination
             $reservationsTable = $wpdb->prefix . 'minisite_reservations';
@@ -1040,9 +1040,9 @@ final class NewMinisiteController
             $newExpiration = date('Y-m-d H:i:s', strtotime($baseDate . ' +12 months'));
             $gracePeriodEnds = date('Y-m-d H:i:s', strtotime($newExpiration . ' +1 month'));
 
-            // Update minisite with permanent slugs
+            // Update minisite with permanent slugs and publish it
             $this->minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
-            $this->minisiteRepository->updatePublishStatus($minisiteId, 'published');
+            $this->minisiteRepository->publishMinisite($minisiteId);
 
             // Create payment record
             $paymentId = $wpdb->insert(

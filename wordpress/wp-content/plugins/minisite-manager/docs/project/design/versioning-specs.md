@@ -5,36 +5,44 @@ This document outlines the complete versioning system for minisites, including d
 
 ## Database Schema
 
-### Main Profile Table (Existing)
+### Main Profile Table (wp_minisites)
 ```sql
--- wp_minisite_profiles (existing table)
-id: BIGINT PRIMARY KEY
-title: VARCHAR(255)
-business_slug: VARCHAR(255)
-location_slug: VARCHAR(255)
-site_json: LONGTEXT (current published content - for performance)
-_minisite_current_version_id: BIGINT (points to currently published version)
-_minisite_online: BOOLEAN
-_minisite_owner_user_id: BIGINT
+-- wp_minisites (main profile table - stores CURRENT PUBLISHED state only)
+id: VARCHAR(32) PRIMARY KEY
+title: VARCHAR(200)
+business_slug: VARCHAR(120) NULL (for public URLs)
+location_slug: VARCHAR(120) NULL (for public URLs)
+site_json: LONGTEXT (CURRENT PUBLISHED content - for fast public access)
+status: ENUM('draft','published','archived') (overall minisite status)
+publish_status: ENUM('draft','reserved','published') (publishing workflow)
+_minisite_current_version_id: BIGINT (points to currently published version in versions table)
 created_at: DATETIME
 updated_at: DATETIME
+published_at: DATETIME NULL
+created_by: BIGINT
+updated_by: BIGINT
 ```
 
-### Versions Table (New)
+**IMPORTANT**: The `wp_minisites` table stores ONLY the currently published version's data for performance. 
+- Draft content is NEVER stored in this table
+- All content changes (drafts and published) go through the versioning system
+- This table is optimized for fast public access to live minisites
+
+### Versions Table (wp_minisite_versions)
 ```sql
 CREATE TABLE wp_minisite_versions (
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
-  minisite_id BIGINT NOT NULL,
-  version_number INT NOT NULL,
+  minisite_id VARCHAR(32) NOT NULL,
+  version_number INT UNSIGNED NOT NULL,
   status ENUM('draft', 'published') NOT NULL,
   label VARCHAR(120) NULL,
   comment TEXT NULL,
-  created_by BIGINT NOT NULL,
-  created_at DATETIME NOT NULL,
+  created_by BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   published_at DATETIME NULL, -- NULL for drafts, timestamp for published
-  source_version_id BIGINT NULL, -- For rollbacks: tracks what version was rolled back from
+  source_version_id BIGINT UNSIGNED NULL, -- For rollbacks: tracks what version was rolled back from
   
-  -- Profile fields for complete versioning (exact match with profiles table)
+  -- Complete profile fields for each version (exact match with main table)
   business_slug VARCHAR(120) NULL,
   location_slug VARCHAR(120) NULL,
   title VARCHAR(200) NULL,
@@ -43,22 +51,57 @@ CREATE TABLE wp_minisite_versions (
   region VARCHAR(120) NULL,
   country_code CHAR(2) NULL,
   postal_code VARCHAR(20) NULL,
-  location_point POINT NULL, -- Single geometry column for spatial data (lat/lng extracted as needed)
+  location_point POINT NULL, -- Single geometry column for spatial data
   site_template VARCHAR(32) NULL,
   palette VARCHAR(24) NULL,
   industry VARCHAR(40) NULL,
   default_locale VARCHAR(10) NULL,
   schema_version SMALLINT UNSIGNED NULL,
   site_version INT UNSIGNED NULL,
-  site_json LONGTEXT NOT NULL, -- Contains the form data (replaces data_json)
+  site_json LONGTEXT NOT NULL, -- Complete form data for this version
   search_terms TEXT NULL,
   
-  INDEX(minisite_id, status),
-  INDEX(minisite_id, version_number),
-  INDEX(minisite_id, created_at),
-  FOREIGN KEY (minisite_id) REFERENCES wp_minisite_profiles(id) ON DELETE CASCADE
+  UNIQUE KEY uniq_minisite_version (minisite_id, version_number),
+  KEY idx_minisite_status (minisite_id, status),
+  KEY idx_minisite_created (minisite_id, created_at),
+  FOREIGN KEY (minisite_id) REFERENCES wp_minisites(id) ON DELETE CASCADE
 );
 ```
+
+**IMPORTANT**: The `wp_minisite_versions` table stores ALL versions (drafts and published).
+- **Every save creates a NEW row** - never overwrites existing versions
+- **Draft versions** have `status='draft'` and `published_at=NULL`
+- **Published versions** have `status='published'` and `published_at=timestamp`
+- **Complete audit trail** - all changes are preserved forever
+- **Rollback support** - can create new drafts from any previous version
+
+## Data Flow & Storage Strategy
+
+### How Draft vs Published Content is Stored
+
+**CRITICAL UNDERSTANDING**: Draft versions are stored in `wp_minisite_versions` table, NOT in `wp_minisites` table.
+
+#### Draft Creation Flow:
+1. User saves changes in edit form
+2. **NEW row created** in `wp_minisite_versions` with `status='draft'`
+3. `wp_minisites` table remains **unchanged** (still shows published content)
+4. User can preview draft content from versions table
+
+#### Publishing Flow:
+1. User clicks "Publish" on a draft version
+2. **Database transaction**:
+   - Set current published version → `status='draft'` (if exists)
+   - Set target draft → `status='published'` + `published_at=NOW()`
+   - Update `wp_minisites._minisite_current_version_id` → point to new published version
+   - **Copy published content** to `wp_minisites.site_json` (for fast public access)
+3. Public site now shows new published content
+
+#### Key Rules:
+- **wp_minisites**: Always contains the currently published version's data
+- **wp_minisite_versions**: Contains ALL versions (drafts + published) with complete history
+- **Draft content**: Never stored in main table, only in versions table
+- **Public access**: Always reads from `wp_minisites` for performance
+- **Edit/preview**: Reads from latest draft in `wp_minisite_versions`
 
 ### Spatial Data Handling
 - **Single Source of Truth**: Uses `location_point POINT` geometry column only
@@ -393,16 +436,30 @@ public function migrateExistingProfiles(): void
 - Limit publish operations
 - Monitor for abuse patterns
 
+## Implementation Status
+
+✅ **COMPLETED**:
+- Versions table created with proper schema
+- VersionController with draft creation, publishing, and rollback
+- SitesController updated to use versioning system
+- Edit form saves drafts to versions table
+- Publish functionality with atomic transactions
+- Rollback system implemented
+- Proper data synchronization between tables
+
+⚠️ **LEGACY METHODS** (should be removed):
+- `MinisiteRepository::updateSiteJson()` - bypasses versioning (marked as TODO)
+- `MinisiteRepository::updateSiteJsonWithCoordinates()` - bypasses versioning (marked as TODO)
+
+These legacy methods are not used in the current implementation but should be removed to prevent confusion.
+
 ## Next Steps
 
-1. **Create migration** for versions table
-2. **Update SitesController** to use versioning
-3. **Modify edit form** to save drafts
-4. **Add publish functionality**
-5. **Implement rollback system**
-6. **Create version history UI**
-7. **Update preview system**
-8. **Add tests for all scenarios**
+1. **Remove legacy methods** from MinisiteRepository
+2. **Create version history UI** (account-sites-versions.twig)
+3. **Update preview system** to handle draft vs published content
+4. **Add comprehensive tests** for all versioning scenarios
+5. **Performance optimization** for large version histories
 
 ## Files to Modify
 

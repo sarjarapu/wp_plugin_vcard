@@ -212,6 +212,36 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
     }
 
     /**
+     * Publish a minisite by copying site_json from the latest version
+     */
+    public function publishMinisite(string $id): void
+    {
+        // Get the latest version's site_json
+        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($this->db);
+        $latestVersion = $versionRepo->findLatestVersion($id);
+        
+        if (!$latestVersion) {
+            throw new \RuntimeException('No version found for minisite.');
+        }
+        
+        // Update the minisite with the version's site_json and set status to published
+        $sql = $this->db->prepare(
+            "UPDATE {$this->table()} SET 
+                site_json = %s, 
+                status = 'published', 
+                publish_status = 'published', 
+                updated_at = NOW() 
+             WHERE id = %s",
+            $latestVersion->siteJson, $id
+        );
+        $this->db->query($sql);
+        
+        if ($this->db->rows_affected === 0) {
+            throw new \RuntimeException('Minisite not found or update failed.');
+        }
+    }
+
+    /**
      * Insert a new minisite
      */
     public function insert(Minisite $m): Minisite
