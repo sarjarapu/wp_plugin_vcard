@@ -1,0 +1,215 @@
+{
+    "export_version": "1.0",
+    "exported_at": "2025-09-25T23:07:48+00:00",
+    "minisite": {
+        "id": "b59fd6f8c8f9a9467d79507f",
+        "title": "Acme Dental — Dallas",
+        "name": "Acme Dental",
+        "city": "Dallas",
+        "region": "TX",
+        "country_code": "US",
+        "postal_code": "75201",
+        "location": {
+            "lat": 32.7767,
+            "lng": -96.797
+        },
+        "site_template": "v2025",
+        "palette": "blue",
+        "industry": "dentist",
+        "default_locale": "en-US",
+        "site_json": {
+            "seo": {
+                "title": "Acme Dental — Dallas",
+                "description": "Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.",
+                "keywords": "acme dental, dental care, dallas, tx, services, clinic",
+                "favicon": "https:\/\/cdn-icons-png.flaticon.com\/512\/8718\/8718971.png"
+            },
+            "brand": {
+                "palette": "blue",
+                "industry": "services",
+                "logo": "https:\/\/cdn-icons-png.flaticon.com\/512\/8718\/8718971.png",
+                "name": "Acme Dental"
+            },
+            "hero": {
+                "heading": "Acme Dental Care",
+                "subheading": "Your friendly Dallas,TX neighborhood dental clinic offering Preventative, cosmetic and emergency dentistry exceptional dental care in a very comfortable, relaxing stress-free environment at affordable prices.",
+                "badge": "Verified Business",
+                "image": "https:\/\/images.unsplash.com\/photo-1588776814546-1ffcf47267a5?w=1600&q=80&auto=format&fit=crop",
+                "rating": {
+                    "value": 4.8,
+                    "count": 238
+                },
+                "ctas": [
+                    {
+                        "text": "Request Info",
+                        "url": "#request-info"
+                    },
+                    {
+                        "text": "Contact Us",
+                        "url": "#contact"
+                    }
+                ]
+            },
+            "about": {
+                "html": "<p>Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.<\/p><p>From routine cleanings to implants and cosmetic treatments, our Dallas team creates a calm experience with lasting results.<\/p><p>We welcome families and offer flexible scheduling and transparent pricing.<\/p><br\/><p>Understanding the dental insurance plans, the different levels of participation and payout options you chose could be a daunting task for many patients. Ask our expertly trained dental professionals at Cedar Park office how you could utilize the plan benefits to the maximum and avoid paying any unnecessary out of pocket charges.<\/p>"
+            },
+            "whyUs": {
+                "title": "Why Choose Us?",
+                "html": "<p>The patient coordinators at Aviva Dental Care of Cedar Park ensure that you have plenty of time for each appointment. The additional time will allow us to know you and your dental priorities better. You will also have ample time to discuss any of your questions, concerns about oral health. We seldom run behind, so you should not have to wait for us after your scheduled appointment time.<\/p><br\/><p>Whether you need a routine exam or experiencing a dental emergency, we will thoroughly answer all your questions or concerns in a relaxed, pressure-free environment. Finally, you will never feel rushed or forced to take a treatment plan that you don't need. So, you won't have to worry about surprise costs or how to fit your dental goals into your budget.<\/p>",
+                "image": "https:\/\/images.unsplash.com\/photo-1704455306251-b4634215d98f?auto=format&fit=crop&w=1600"
+            },
+            "services": {
+                "title": "Products & Services",
+                "listing": [
+                    {
+                        "title": "General Dentistry",
+                        "image": "https:\/\/images.unsplash.com\/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop",
+                        "description": "A semi-annual visit to our dentist enables early detection of various oral complications and provide treatment early in the disease process.",
+                        "price": "$199",
+                        "icon": "fa-circle-info",
+                        "cta": "More info",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Teeth Whitening",
+                        "image": "https:\/\/images.unsplash.com\/photo-1489278353717-f64c6ee8a4d2?q=80&w=800&auto=format&fit=crop",
+                        "description": "Whitening is a painless procedure brightens your teeth by several within an hour. The teeth whitening is effective on natural tooth enamel but not on restorations.",
+                        "price": "$499",
+                        "icon": "fa-circle-info",
+                        "cta": "Contact Us",
+                        "url": "#contact"
+                    },
+                    {
+                        "title": "Dentures & Crowns",
+                        "image": "https:\/\/images.unsplash.com\/photo-1654373535457-383a0a4d00f9?q=80&w=1200&auto=format&fit=crop",
+                        "description": "The dental crowns are durable and natural-looking tooth-shaped caps fitted over any remaining healthy tooth structure or a dental implant to restore the tooth's health.",
+                        "price": "Call for pricing",
+                        "icon": "fa-crown",
+                        "cta": "Call Us",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Invisalign",
+                        "image": "https:\/\/images.unsplash.com\/photo-1609840114035-3c981b782dfe?q=80&w=800&auto=format&fit=crop",
+                        "description": "Show off your smile as people won't even notice you're wearing transparent Invisalign aligners when compared to the traditional metal braces options. It's easy to remove aligners and eat whatever you like. There are no wires to trap food or get in the way when you floss.",
+                        "price": "$3,999",
+                        "icon": "fa-bolt",
+                        "cta": "Enquire",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Dental Implants",
+                        "image": "https:\/\/images.unsplash.com\/photo-1593022356769-11f762e25ed9?q=80&w=1200&auto=format&fit=crop",
+                        "description": "A dental implant is a metal post that functions as a replacement tooth root. Once your dentist places the implant in the bone of the jaw, new bone forms around the implant to firmly hold it in place. Implants can also support dental restorations like crowns and bridges, just like regular teeth. They can even support full or partial dentures and give them more stability in the mouth.",
+                        "price": "Call for pricing",
+                        "icon": "fa-circle-info",
+                        "cta": "Enquire",
+                        "url": "#request-info"
+                    }
+                ]
+            },
+            "contact": {
+                "phone": {
+                    "text": "+1 (214) 555-0123",
+                    "link": "+12145550123"
+                },
+                "whatsapp": {
+                    "text": "+1 (214) 555-0123",
+                    "link": "12145550123"
+                },
+                "email": "care@acmedental.us",
+                "website": {
+                    "text": "acmedental.us",
+                    "link": "https:\/\/acmedental.us"
+                },
+                "address": "123 Main St, Dallas, TX 75201",
+                "address_line1": "123 Main St",
+                "address_line2": "Suite 200",
+                "address_line3": "",
+                "address_line4": "",
+                "hours": {
+                    "Monday": {
+                        "open": "08:00",
+                        "close": "17:00",
+                        "closed": false
+                    },
+                    "Tuesday": {
+                        "open": "08:00",
+                        "close": "17:00",
+                        "closed": false
+                    },
+                    "Wednesday": {
+                        "open": "08:00",
+                        "close": "17:00",
+                        "closed": false
+                    },
+                    "Thursday": {
+                        "open": "08:00",
+                        "close": "17:00",
+                        "closed": false
+                    },
+                    "Friday": {
+                        "open": "08:00",
+                        "close": "15:00",
+                        "closed": false
+                    },
+                    "Saturday": {
+                        "open": "09:00",
+                        "close": "13:00",
+                        "closed": false
+                    },
+                    "Sunday": {
+                        "open": "",
+                        "close": "",
+                        "closed": true
+                    }
+                },
+                "plusCode": "77CM+4R Dallas",
+                "plusCodeUrl": "https:\/\/maps.google.com\/?q=77CM+4R+Dallas"
+            },
+            "gallery": [
+                {
+                    "src": "https:\/\/images.unsplash.com\/photo-1670250492416-570b5b7343b1?q=80&w=1600&auto=format&fit=crop",
+                    "alt": "Dental checkup visit"
+                },
+                {
+                    "src": "https:\/\/images.unsplash.com\/photo-1606811971618-4486d14f3f99?q=80&w=1600&auto=format&fit=crop",
+                    "alt": "Cleaning and tar-tar removal"
+                },
+                {
+                    "src": "https:\/\/images.unsplash.com\/photo-1609840114035-3c981b782dfe?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Clear aligners"
+                },
+                {
+                    "src": "https:\/\/images.unsplash.com\/photo-1607613009820-a29f7bb81c04?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Dental hygiene"
+                },
+                {
+                    "src": "https:\/\/images.unsplash.com\/photo-1489278353717-f64c6ee8a4d2?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Teeth whitening"
+                },
+                {
+                    "src": "https:\/\/images.unsplash.com\/photo-1564420228450-d9a5bc8d6565?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Dental products"
+                },
+                {
+                    "src": "https:\/\/images.unsplash.com\/photo-1660737217837-95f00b9eae53?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Porcelain veneers"
+                }
+            ],
+            "social": {
+                "facebook": "https:\/\/facebook.com\/acmedental.dallas",
+                "instagram": "https:\/\/instagram.com\/acmedental.dallas",
+                "x": "https:\/\/x.com\/acmedental.dallas",
+                "linkedin": "https:\/\/linkedin.com\/acmedental.dallas",
+                "youtube": "https:\/\/youtube.com\/acmedental.dallas",
+                "tiktok": "https:\/\/tiktok.com\/acmedental.dallas"
+            }
+        }
+    },
+    "metadata": {
+        "original_created_at": "2025-09-25T23:07:19+00:00",
+        "original_updated_at": "2025-09-25T23:07:19+00:00",
+        "exported_by": "shyam.arjarapu@gmail.com"
+    }
+}
