@@ -65,57 +65,6 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         return $this->mapRow($row);
     }
 
-    /**
-     * Update minisite's siteJson data (for editing)
-     * TODO: Implement proper versioning with versions table
-     */
-    public function updateSiteJson(string $id, array $siteJson, int $updatedBy): Minisite
-    {
-        $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%s",
-            wp_json_encode($siteJson), $updatedBy, $id
-        );
-        $this->db->query($sql);
-        
-        if ($this->db->rows_affected === 0) {
-            throw new \RuntimeException('Minisite not found or update failed.');
-        }
-        
-        return $this->findById($id);
-    }
-
-    /**
-     * Update minisite's siteJson data and coordinates (for editing)
-     * TODO: Implement proper versioning with versions table
-     */
-    public function updateSiteJsonWithCoordinates(string $id, array $siteJson, ?float $lat, ?float $lng, int $updatedBy): Minisite
-    {
-        $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET site_json=%s, updated_by=%d, updated_at=NOW() WHERE id=%s",
-            wp_json_encode($siteJson), $updatedBy, $id
-        );
-        $this->db->query($sql);
-        
-        if ($this->db->rows_affected === 0) {
-            throw new \RuntimeException('Minisite not found or update failed.');
-        }
-        
-        // Update POINT column if coordinates are set
-        if ($lat !== null && $lng !== null) {
-            $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
-                $lng, $lat, $id
-            ));
-        } else {
-            // Clear location_point if no coordinates
-            $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = NULL WHERE id = %s",
-                $id
-            ));
-        }
-        
-        return $this->findById($id);
-    }
 
     /**
      * Update the current version ID for a minisite
@@ -212,33 +161,150 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
     }
 
     /**
-     * Publish a minisite by copying site_json from the latest version
+     * Publish a minisite using the versioning system
+     * Uses latest draft version, with fallback to latest version if no draft exists
      */
     public function publishMinisite(string $id): void
     {
-        // Get the latest version's site_json
-        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($this->db);
-        $latestVersion = $versionRepo->findLatestVersion($id);
+        global $wpdb;
         
-        if (!$latestVersion) {
-            throw new \RuntimeException('No version found for minisite.');
+        $wpdb->query('START TRANSACTION');
+        
+        try {
+            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($this->db);
+            
+            // Try to find latest draft first (preferred)
+            $versionToPublish = $versionRepo->findLatestDraft($id);
+            
+            if (!$versionToPublish) {
+                // Fallback: find latest version (could be published)
+                $latestVersion = $versionRepo->findLatestVersion($id);
+                
+                if (!$latestVersion) {
+                    throw new \RuntimeException('No version found for minisite.');
+                }
+                
+                // If latest version is already published, create a new draft from it
+                if ($latestVersion->status === 'published') {
+                    $versionToPublish = $this->createDraftFromVersion($latestVersion, $versionRepo);
+                } else {
+                    $versionToPublish = $latestVersion;
+                }
+            }
+            
+            // Move current published version to draft (if exists)
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$wpdb->prefix}minisite_versions 
+                 SET status = 'draft' 
+                 WHERE minisite_id = %s AND status = 'published'",
+                $id
+            ));
+            
+            // Publish the target version
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$wpdb->prefix}minisite_versions 
+                 SET status = 'published', published_at = NOW() 
+                 WHERE id = %d",
+                $versionToPublish->id
+            ));
+            
+            // Update main table with published content
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$this->table()} 
+                 SET site_json = %s, 
+                     title = %s,
+                     name = %s,
+                     city = %s,
+                     region = %s,
+                     country_code = %s,
+                     postal_code = %s,
+                     site_template = %s,
+                     palette = %s,
+                     industry = %s,
+                     default_locale = %s,
+                     schema_version = %d,
+                     site_version = %d,
+                     search_terms = %s,
+                     status = 'published',
+                     publish_status = 'published',
+                     _minisite_current_version_id = %d, 
+                     updated_at = NOW() 
+                 WHERE id = %s",
+                wp_json_encode($versionToPublish->siteJson),
+                $versionToPublish->title,
+                $versionToPublish->name,
+                $versionToPublish->city,
+                $versionToPublish->region,
+                $versionToPublish->countryCode,
+                $versionToPublish->postalCode,
+                $versionToPublish->siteTemplate,
+                $versionToPublish->palette,
+                $versionToPublish->industry,
+                $versionToPublish->defaultLocale,
+                $versionToPublish->schemaVersion,
+                $versionToPublish->siteVersion,
+                $versionToPublish->searchTerms,
+                $versionToPublish->id,
+                $id
+            ));
+            
+            // Update spatial data if coordinates exist
+            if ($versionToPublish->geo && $versionToPublish->geo->lat && $versionToPublish->geo->lng) {
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$this->table()} 
+                     SET location_point = ST_SRID(POINT(%f, %f), 4326) 
+                     WHERE id = %s",
+                    $versionToPublish->geo->lng, $versionToPublish->geo->lat, $id
+                ));
+            }
+            
+            $wpdb->query('COMMIT');
+            
+        } catch (\Exception $e) {
+            $wpdb->query('ROLLBACK');
+            throw $e;
         }
+    }
+    
+    /**
+     * Create a new draft version from an existing version
+     */
+    private function createDraftFromVersion(\Minisite\Domain\Entities\Version $sourceVersion, \Minisite\Infrastructure\Persistence\Repositories\VersionRepository $versionRepo): \Minisite\Domain\Entities\Version
+    {
+        $nextVersion = $versionRepo->getNextVersionNumber($sourceVersion->minisiteId);
         
-        // Update the minisite with the version's site_json and set status to published
-        $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET 
-                site_json = %s, 
-                status = 'published', 
-                publish_status = 'published', 
-                updated_at = NOW() 
-             WHERE id = %s",
-            $latestVersion->siteJson, $id
+        $draftVersion = new \Minisite\Domain\Entities\Version(
+            id: null,
+            minisiteId: $sourceVersion->minisiteId,
+            versionNumber: $nextVersion,
+            status: 'draft',
+            label: "Draft from v{$sourceVersion->versionNumber}",
+            comment: "Created from version {$sourceVersion->versionNumber} for publishing",
+            createdBy: $sourceVersion->createdBy,
+            createdAt: null,
+            publishedAt: null,
+            sourceVersionId: $sourceVersion->id,
+            siteJson: $sourceVersion->siteJson,
+            
+            // Copy all minisite fields
+            slugs: $sourceVersion->slugs,
+            title: $sourceVersion->title,
+            name: $sourceVersion->name,
+            city: $sourceVersion->city,
+            region: $sourceVersion->region,
+            countryCode: $sourceVersion->countryCode,
+            postalCode: $sourceVersion->postalCode,
+            geo: $sourceVersion->geo,
+            siteTemplate: $sourceVersion->siteTemplate,
+            palette: $sourceVersion->palette,
+            industry: $sourceVersion->industry,
+            defaultLocale: $sourceVersion->defaultLocale,
+            schemaVersion: $sourceVersion->schemaVersion,
+            siteVersion: $sourceVersion->siteVersion,
+            searchTerms: $sourceVersion->searchTerms
         );
-        $this->db->query($sql);
         
-        if ($this->db->rows_affected === 0) {
-            throw new \RuntimeException('Minisite not found or update failed.');
-        }
+        return $versionRepo->save($draftVersion);
     }
 
     /**

@@ -1010,13 +1010,13 @@ UNIQUE KEY uniq_minisite_version (minisite_id, version_number)
 - Proper data synchronization between tables
 - WooCommerce integration for auto-publishing
 
-⚠️ **LEGACY METHODS** (should be removed):
-- `MinisiteRepository::updateSiteJson()` - bypasses versioning (marked as TODO)
-- `MinisiteRepository::updateSiteJsonWithCoordinates()` - bypasses versioning (marked as TODO)
+✅ **LEGACY METHODS REMOVED**:
+- `MinisiteRepository::updateSiteJson()` - removed (bypassed versioning)
+- `MinisiteRepository::updateSiteJsonWithCoordinates()` - removed (bypassed versioning)
 
 ### Next Steps for Development
 
-1. **Remove legacy methods** from MinisiteRepository
+1. ✅ **Remove legacy methods** from MinisiteRepository - **COMPLETED**
 2. **Create version history UI** (account-sites-versions.twig)
 3. **Update preview system** to handle draft vs published content
 4. **Add comprehensive tests** for all versioning scenarios
