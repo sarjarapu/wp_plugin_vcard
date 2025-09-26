@@ -390,6 +390,170 @@ WHERE id = 'abc123'
 
 ---
 
+## Payment Completion & Auto-Publishing
+
+### How Payment Completion Triggers Publishing
+
+**Critical Understanding**: When a user completes payment, the system automatically publishes the latest draft version that was being edited.
+
+### Payment Completion Flow:
+
+1. **User edits minisite** → Loads latest draft version (if exists) or published version
+2. **User saves changes** → Creates new draft version in `wp_minisite_versions`
+3. **User clicks "Publish"** → Redirected to payment page
+4. **User completes payment** → WooCommerce order created
+5. **Admin changes order status to "completed"** → Triggers auto-publishing
+6. **WooCommerce hook fires**: `woocommerce_order_status_completed`
+7. **System automatically publishes** the latest draft version
+
+### Auto-Publishing Logic:
+
+**Key Rule**: Always publish the **latest DRAFT version**, not just the latest version.
+
+```php
+// WooCommerce hook: Auto-activate minisite subscription when order is completed
+add_action('woocommerce_order_status_completed', function ($order_id) {
+    $newMinisiteCtrl->activateMinisiteSubscription($order_id);
+});
+
+public function activateMinisiteSubscription(int $orderId): void
+{
+    // Get minisite data from order metadata
+    $minisiteId = $order->get_meta('_minisite_id');
+    $businessSlug = $order->get_meta('_business_slug');
+    $locationSlug = $order->get_meta('_location_slug');
+    
+    // Update minisite with permanent slugs and publish it
+    $this->minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
+    $this->minisiteRepository->publishMinisite($minisiteId); // Publishes latest DRAFT
+}
+```
+
+### Why Latest Draft is Correct:
+
+**Scenario 1: Normal Edit Flow**
+1. User edits minisite (loads latest draft)
+2. User saves changes → Creates new draft version (e.g., version 5)
+3. User clicks "Publish" → Goes to payment
+4. Payment completed → **Version 5 (latest draft) should be published**
+
+**Scenario 2: Rollback Flow**
+1. User rolls back to version 2 → Creates new draft (version 6) with version 2's content
+2. User edits version 6 → Makes changes
+3. User saves → Creates new draft (version 7) with the changes
+4. User clicks "Publish" → Goes to payment
+5. Payment completed → **Version 7 (latest draft) should be published**
+
+**Scenario 3: Multiple Drafts**
+1. User creates draft version 3
+2. User creates another draft version 4 (without publishing version 3)
+3. User clicks "Publish" → Goes to payment
+4. Payment completed → **Version 4 (latest draft) should be published**
+
+### Auto-Publishing Implementation:
+
+```php
+public function publishMinisite(string $id): void
+{
+    global $wpdb;
+    
+    $wpdb->query('START TRANSACTION');
+    
+    try {
+        // Get the latest DRAFT version (not just latest version)
+        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+        $latestDraft = $versionRepo->findLatestDraft($id);
+        
+        if (!$latestDraft) {
+            throw new \RuntimeException('No draft version found for minisite.');
+        }
+        
+        // Move current published version to draft (if exists)
+        $wpdb->query($wpdb->prepare(
+            "UPDATE {$wpdb->prefix}minisite_versions 
+             SET status = 'draft' 
+             WHERE minisite_id = %s AND status = 'published'",
+            $id
+        ));
+        
+        // Publish the latest draft
+        $wpdb->query($wpdb->prepare(
+            "UPDATE {$wpdb->prefix}minisite_versions 
+             SET status = 'published', published_at = NOW() 
+             WHERE id = %d",
+            $latestDraft->id
+        ));
+        
+        // Update main table with published content
+        $wpdb->query($wpdb->prepare(
+            "UPDATE {$wpdb->prefix}minisites 
+             SET site_json = %s, 
+                 title = %s,
+                 name = %s,
+                 city = %s,
+                 region = %s,
+                 country_code = %s,
+                 postal_code = %s,
+                 site_template = %s,
+                 palette = %s,
+                 industry = %s,
+                 default_locale = %s,
+                 schema_version = %d,
+                 site_version = %d,
+                 search_terms = %s,
+                 status = 'published',
+                 publish_status = 'published',
+                 _minisite_current_version_id = %d, 
+                 updated_at = NOW() 
+             WHERE id = %s",
+            wp_json_encode($latestDraft->siteJson),
+            $latestDraft->title,
+            $latestDraft->name,
+            $latestDraft->city,
+            $latestDraft->region,
+            $latestDraft->countryCode,
+            $latestDraft->postalCode,
+            $latestDraft->siteTemplate,
+            $latestDraft->palette,
+            $latestDraft->industry,
+            $latestDraft->defaultLocale,
+            $latestDraft->schemaVersion,
+            $latestDraft->siteVersion,
+            $latestDraft->searchTerms,
+            $latestDraft->id,
+            $id
+        ));
+        
+        // Update spatial data if coordinates exist
+        if ($latestDraft->geo && $latestDraft->geo->lat && $latestDraft->geo->lng) {
+            $wpdb->query($wpdb->prepare(
+                "UPDATE {$wpdb->prefix}minisites 
+                 SET location_point = ST_SRID(POINT(%f, %f), 4326) 
+                 WHERE id = %s",
+                $latestDraft->geo->lng, $latestDraft->geo->lat, $id
+            ));
+        }
+        
+        $wpdb->query('COMMIT');
+        
+    } catch (\Exception $e) {
+        $wpdb->query('ROLLBACK');
+        throw $e;
+    }
+}
+```
+
+### Key Points About Auto-Publishing:
+
+- **Latest Draft Only**: Always publishes the most recent draft version
+- **Atomic Operation**: All changes happen in a single transaction
+- **WooCommerce Integration**: Triggered by order status change to "completed"
+- **Complete Synchronization**: Both tables updated with proper versioning
+- **Audit Trail**: Previous published versions become drafts (preserved)
+- **Error Handling**: Failed publishing doesn't break order completion
+
+---
+
 ## Version History & Rollback
 
 ### How Rollback Works
@@ -590,6 +754,12 @@ Response: {
 
 ### Q: What happens when I publish a draft?
 **A**: The draft becomes published, and its content gets copied to wp_minisites for fast public access.
+
+### Q: What happens when payment is completed?
+**A**: The system automatically publishes the latest draft version that was being edited. This happens via WooCommerce hook when order status changes to "completed".
+
+### Q: Which version gets published when payment is completed?
+**A**: Always the latest DRAFT version. This ensures the version that was being edited gets published, whether it's a normal edit, rollback, or multiple drafts scenario.
 
 ### Q: Can I have multiple drafts?
 **A**: Yes, but only the latest draft is used for editing. All previous drafts are preserved for history.
