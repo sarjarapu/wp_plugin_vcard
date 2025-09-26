@@ -687,7 +687,7 @@ add_action('wp_ajax_publish_version', function () {
     return;
   }
 
-  $siteId = (int) ($_POST['site_id'] ?? 0);
+  $siteId = sanitize_text_field($_POST['site_id'] ?? '');
   $versionId = (int) ($_POST['version_id'] ?? 0);
   
   if (!$siteId || !$versionId) {
@@ -723,85 +723,13 @@ add_action('wp_ajax_publish_version', function () {
       return;
     }
 
-    // Publish version (atomic operation)
-    $wpdb->query('START TRANSACTION');
+    // Use the new publishMinisite method with proper versioning logic
+    $profileRepo->publishMinisite($siteId);
     
-    try {
-      // Move current published version to draft
-      $wpdb->query($wpdb->prepare(
-        "UPDATE {$wpdb->prefix}minisite_versions 
-         SET status = 'draft' 
-         WHERE minisite_id = %d AND status = 'published'",
-        $siteId
-      ));
-      
-      // Publish new version
-      $wpdb->query($wpdb->prepare(
-        "UPDATE {$wpdb->prefix}minisite_versions 
-         SET status = 'published', published_at = NOW() 
-         WHERE id = %d",
-        $versionId
-      ));
-      
-      // Update profile with published version data and current version ID
-      $wpdb->query($wpdb->prepare(
-        "UPDATE {$wpdb->prefix}minisites 
-         SET site_json = %s, 
-             title = %s,
-             name = %s,
-             city = %s,
-             region = %s,
-             country_code = %s,
-             postal_code = %s,
-             site_template = %s,
-             palette = %s,
-             industry = %s,
-             default_locale = %s,
-             schema_version = %d,
-             site_version = %d,
-             search_terms = %s,
-             _minisite_current_version_id = %d, 
-             updated_at = NOW() 
-         WHERE id = %d",
-        wp_json_encode($version->siteJson),
-        $version->title,
-        $version->name,
-        $version->city,
-        $version->region,
-        $version->countryCode,
-        $version->postalCode,
-        $version->siteTemplate,
-        $version->palette,
-        $version->industry,
-        $version->defaultLocale,
-        $version->schemaVersion,
-        $version->siteVersion,
-        $version->searchTerms,
-        $versionId,
-        $siteId
-      ));
-      
-      // Update location_point if geo data exists
-      if ($version->geo && $version->geo->lat && $version->geo->lng) {
-        $wpdb->query($wpdb->prepare(
-          "UPDATE {$wpdb->prefix}minisites 
-           SET location_point = ST_SRID(POINT(%f, %f), 4326) 
-           WHERE id = %d",
-          $version->geo->lng, $version->geo->lat, $siteId
-        ));
-      }
-      
-      $wpdb->query('COMMIT');
-      
-      wp_send_json_success([
-        'message' => 'Version published successfully',
-        'published_version_id' => $versionId
-      ]);
-      
-    } catch (\Exception $e) {
-      $wpdb->query('ROLLBACK');
-      throw $e;
-    }
+    wp_send_json_success([
+      'message' => 'Version published successfully',
+      'published_version_id' => $versionId
+    ]);
 
   } catch (\Exception $e) {
     wp_send_json_error('Failed to publish version: ' . $e->getMessage(), 500);
