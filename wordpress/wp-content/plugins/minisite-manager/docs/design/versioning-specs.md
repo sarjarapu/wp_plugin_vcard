@@ -466,27 +466,27 @@ class VersionController
      * @param int $userId The user making the changes
      * @return Version The newly created draft version
      */
-    public function saveDraft(string $minisiteId, array $formData, int $userId): Version
-    {
+public function saveDraft(string $minisiteId, array $formData, int $userId): Version
+{
         // Get the next version number (increments: 1, 2, 3, 4...)
-        $nextVersion = $this->versionRepository->getNextVersionNumber($minisiteId);
-        
+    $nextVersion = $this->versionRepository->getNextVersionNumber($minisiteId);
+    
         // Create NEW draft version (never overwrites existing ones)
-        $version = new Version([
-            'minisite_id' => $minisiteId,
-            'version_number' => $nextVersion,
-            'status' => 'draft',
-            'label' => $formData['label'] ?? "Version {$nextVersion}",
-            'comment' => $formData['comment'] ?? '',
-            'site_json' => json_encode($this->buildSiteJsonFromForm($formData)),
-            'created_by' => $userId,
-            'created_at' => current_time('mysql'),
-            'published_at' => null,
-            'source_version_id' => null
-        ]);
-        
-        return $this->versionRepository->save($version);
-    }
+    $version = new Version([
+        'minisite_id' => $minisiteId,
+        'version_number' => $nextVersion,
+        'status' => 'draft',
+        'label' => $formData['label'] ?? "Version {$nextVersion}",
+        'comment' => $formData['comment'] ?? '',
+        'site_json' => json_encode($this->buildSiteJsonFromForm($formData)),
+        'created_by' => $userId,
+        'created_at' => current_time('mysql'),
+        'published_at' => null,
+        'source_version_id' => null
+    ]);
+    
+    return $this->versionRepository->save($version);
+}
     
     /**
      * Publishes a draft version (atomic operation)
@@ -495,42 +495,42 @@ class VersionController
      * @param int $versionId The draft version to publish
      * @throws Exception If publishing fails
      */
-    public function publishVersion(string $minisiteId, int $versionId): void
-    {
-        global $wpdb;
-        
+public function publishVersion(string $minisiteId, int $versionId): void
+{
+    global $wpdb;
+    
         // Start atomic transaction - all changes happen together or not at all
-        $wpdb->query('START TRANSACTION');
-        
-        try {
+    $wpdb->query('START TRANSACTION');
+    
+    try {
             // Step 1: Demote current published version to draft (if exists)
             // This ensures only one published version exists at a time
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisite_versions 
-                 SET status = 'draft' 
-                 WHERE minisite_id = %s AND status = 'published'",
-                $minisiteId
-            ));
-            
+        $wpdb->query($wpdb->prepare(
+            "UPDATE {$wpdb->prefix}minisite_versions 
+             SET status = 'draft' 
+             WHERE minisite_id = %s AND status = 'published'",
+            $minisiteId
+        ));
+        
             // Step 2: Promote target draft to published
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisite_versions 
-                 SET status = 'published', published_at = NOW() 
-                 WHERE id = %d",
-                $versionId
-            ));
-            
+        $wpdb->query($wpdb->prepare(
+            "UPDATE {$wpdb->prefix}minisite_versions 
+             SET status = 'published', published_at = NOW() 
+             WHERE id = %d",
+            $versionId
+        ));
+        
             // Step 3: Get the version data to copy to main table
             $version = $this->versionRepository->findById($versionId);
             
             // Step 4: Update main table with published content
             // This is what the public site will read from
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisites 
-                 SET site_json = %s, 
-                     title = %s,
-                     name = %s,
-                     city = %s,
+        $wpdb->query($wpdb->prepare(
+            "UPDATE {$wpdb->prefix}minisites 
+             SET site_json = %s, 
+                 title = %s,
+                 name = %s,
+                 city = %s,
                      region = %s,
                      country_code = %s,
                      postal_code = %s,
@@ -545,13 +545,13 @@ class VersionController
                      search_terms = %s,
                      status = 'published',
                      publish_status = 'published',
-                     _minisite_current_version_id = %d, 
-                     updated_at = NOW() 
-                 WHERE id = %s",
-                wp_json_encode($version->siteJson),
-                $version->title,
-                $version->name,
-                $version->city,
+                 _minisite_current_version_id = %d, 
+                 updated_at = NOW() 
+             WHERE id = %s",
+            wp_json_encode($version->siteJson),
+            $version->title,
+            $version->name,
+            $version->city,
                 $version->region,
                 $version->countryCode,
                 $version->postalCode,
@@ -564,9 +564,9 @@ class VersionController
                 $version->schemaVersion,
                 $version->siteVersion,
                 $version->searchTerms,
-                $versionId,
-                $minisiteId
-            ));
+            $versionId,
+            $minisiteId
+        ));
             
             // Step 5: Update spatial data if coordinates exist
             if ($version->geo && $version->geo->lat && $version->geo->lng) {
@@ -621,14 +621,14 @@ class MinisiteRepository
             
             // Use the same publishing logic as manual publishing
             $this->publishVersion($minisiteId, $latestDraft->id);
+        
+        $wpdb->query('COMMIT');
             
-            $wpdb->query('COMMIT');
-            
-        } catch (Exception $e) {
-            $wpdb->query('ROLLBACK');
-            throw $e;
-        }
+    } catch (Exception $e) {
+        $wpdb->query('ROLLBACK');
+        throw $e;
     }
+}
     
     /**
      * Creates a new minisite with both registry entry and first draft
@@ -747,16 +747,16 @@ class VersionRepository
         $nextVersion = $this->getNextVersionNumber($minisiteId);
         
         // Create new rollback draft
-        $rollbackVersion = new Version([
-            'minisite_id' => $minisiteId,
-            'version_number' => $nextVersion,
-            'status' => 'draft',
-            'label' => "Rollback to v{$sourceVersion->version_number}",
-            'comment' => "Rollback from version {$sourceVersion->version_number}",
-            'site_json' => $sourceVersion->site_json, // Copy source data
-            'created_by' => $userId,
-            'created_at' => current_time('mysql'),
-            'published_at' => null,
+    $rollbackVersion = new Version([
+        'minisite_id' => $minisiteId,
+        'version_number' => $nextVersion,
+        'status' => 'draft',
+        'label' => "Rollback to v{$sourceVersion->version_number}",
+        'comment' => "Rollback from version {$sourceVersion->version_number}",
+        'site_json' => $sourceVersion->site_json, // Copy source data
+        'created_by' => $userId,
+        'created_at' => current_time('mysql'),
+        'published_at' => null,
             'source_version_id' => $sourceVersionId // Track what was rolled back from
         ]);
         

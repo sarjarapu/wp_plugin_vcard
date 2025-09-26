@@ -194,12 +194,16 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             }
             
             // Demote current published version to draft (for history)
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisite_versions 
-                 SET status = 'draft', label = CONCAT('Archived - ', label)
-                 WHERE minisite_id = %s AND status = 'published'",
-                $id
-            ));
+            // Only if there's a current published version
+            $currentPublishedVersion = $versionRepo->findPublishedVersion($id);
+            if ($currentPublishedVersion) {
+                $wpdb->query($wpdb->prepare(
+                    "UPDATE {$wpdb->prefix}minisite_versions 
+                     SET status = 'draft', label = CONCAT('Archived - ', label)
+                     WHERE id = %d",
+                    $currentPublishedVersion->id
+                ));
+            }
             
             // Publish the target version
             $wpdb->query($wpdb->prepare(

@@ -82,11 +82,6 @@
               <p class="text-xs text-[var(--on-surface-variant)] mb-3 line-clamp-2">{{ version.comment }}</p>
             {% endif %}
             
-            <!-- Debug info (temporary) -->
-            <div class="text-xs text-gray-500 mb-2">
-              Debug: version.id={{ version.id }}, profile.currentVersionId={{ profile.currentVersionId }}, version.status={{ version.status }}
-            </div>
-            
             <!-- Actions -->
             <div class="flex items-center gap-2">
               {% if version.status == 'draft' %}

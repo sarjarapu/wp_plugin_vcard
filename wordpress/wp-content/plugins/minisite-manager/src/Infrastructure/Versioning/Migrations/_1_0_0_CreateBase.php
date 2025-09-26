@@ -448,7 +448,7 @@ class _1_0_0_CreateBase implements Migration
             '%s','%s','%s','%s','%s','%s','%s','%s',
             '%s','%s','%s','%s','%s','%s','%s','%s',
             '%d','%d','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%d','%d','%d'
+            '%s','%s','%s','%d','%d'
         ]);
         $acmeId = $acme['id']; // Use our custom ID
 
@@ -551,7 +551,7 @@ class _1_0_0_CreateBase implements Migration
             '%s','%s','%s','%s','%s','%s','%s','%s',
             '%s','%s','%s','%s','%s','%s','%s','%s',
             '%d','%d','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%d','%d','%d'
+            '%s','%s','%s','%d','%d'
         ]);
         $lotusId = $lotus['id']; // Use our custom ID
 
@@ -653,7 +653,7 @@ class _1_0_0_CreateBase implements Migration
             '%s','%s','%s','%s','%s','%s','%s','%s',
             '%s','%s','%s','%s','%s','%s','%s','%s',
             '%d','%d','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%d','%d','%d'
+            '%s','%s','%s','%d','%d'
         ]);
         $greenId = $green['id']; // Use our custom ID
         if ($greenId) {
@@ -756,7 +756,7 @@ class _1_0_0_CreateBase implements Migration
             '%s','%s','%s','%s','%s','%s','%s','%s',
             '%s','%s','%s','%s','%s','%s','%s','%s',
             '%d','%d','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%d','%d','%d'
+            '%s','%s','%s','%d','%d'
         ]);
         $swiftId = $swift['id']; // Use our custom ID
         if ($swiftId) {
