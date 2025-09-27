@@ -8,6 +8,7 @@ use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use PDO;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
+use Tests\Support\SchemaLoader;
 
 /**
  * @group integration
@@ -31,47 +32,8 @@ class MinisiteRepositoryIntegrationTest extends TestCase
         ]);
         $this->db = new FakeWpdb($this->pdo);
 
-        $this->createSchema();
+        SchemaLoader::rebuild($this->pdo, 'wp_');
         $this->repo = new MinisiteRepository($this->db);
-    }
-
-    private function createSchema(): void
-    {
-        // Drop and recreate table for clean slate
-        $this->pdo->exec("DROP TABLE IF EXISTS wp_minisites");
-        $this->pdo->exec(<<<SQL
-            CREATE TABLE wp_minisites (
-                id VARCHAR(64) PRIMARY KEY,
-                slug VARCHAR(191) NULL,
-                business_slug VARCHAR(191) NOT NULL,
-                location_slug VARCHAR(191) NOT NULL,
-                title VARCHAR(191) NOT NULL,
-                name VARCHAR(191) NOT NULL,
-                city VARCHAR(191) NOT NULL,
-                region VARCHAR(191) NULL,
-                country_code CHAR(2) NOT NULL,
-                postal_code VARCHAR(32) NULL,
-                site_template VARCHAR(64) NOT NULL,
-                palette VARCHAR(64) NOT NULL,
-                industry VARCHAR(64) NOT NULL,
-                default_locale VARCHAR(16) NOT NULL,
-                schema_version INT NOT NULL,
-                site_version INT NOT NULL DEFAULT 1,
-                site_json JSON NOT NULL,
-                search_terms TEXT NULL,
-                status VARCHAR(32) NOT NULL,
-                publish_status VARCHAR(32) NULL,
-                created_at DATETIME NULL,
-                updated_at DATETIME NULL,
-                published_at DATETIME NULL,
-                created_by INT NULL,
-                updated_by INT NULL,
-                _minisite_current_version_id INT NULL,
-                location_point POINT NULL SRID 4326,
-                SPATIAL INDEX(location_point),
-                UNIQUE KEY uniq_slugs (business_slug, location_slug)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-        SQL);
     }
 
     public function test_insert_and_fetch_with_geometry(): void
