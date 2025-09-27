@@ -318,20 +318,21 @@ class _1_0_0_CreateBase implements Migration
             $wpdb->query($wpdb->prepare(
                 "INSERT INTO {$minisitesT} (
                     id, slug, business_slug, location_slug, title, name, city, region, 
-                    country_code, postal_code, site_template, palette, 
+                    country_code, postal_code, location_point, site_template, palette, 
                     industry, default_locale, schema_version, site_version, site_json, 
                     search_terms, status, publish_status, created_at, updated_at, 
                     published_at, created_by, updated_by, _minisite_current_version_id
                 ) VALUES (
                     %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, %s, %s, %s, %s, %d, 
+                    %s, %s, ST_SRID(POINT(%f, %f), 4326), %s, %s, %s, %s, %d, 
                     %d, %s, %s, %s, %s, %s, %s, %s, 
                     %d, %d, %s
                 )",
                 $minisiteData['id'], $minisiteData['slug'], $minisiteData['business_slug'], $minisiteData['location_slug'],
                 $minisiteData['title'], $minisiteData['name'], $minisiteData['city'], $minisiteData['region'],
-                $minisiteData['country_code'], $minisiteData['postal_code'], $minisiteData['site_template'],
-                $minisiteData['palette'], $minisiteData['industry'], $minisiteData['default_locale'], $minisiteData['schema_version'],
+                $minisiteData['country_code'], $minisiteData['postal_code'], 
+                $minisiteData['location_point']['longitude'], $minisiteData['location_point']['latitude'],
+                $minisiteData['site_template'], $minisiteData['palette'], $minisiteData['industry'], $minisiteData['default_locale'], $minisiteData['schema_version'],
                 $minisiteData['site_version'], $minisiteData['site_json'], $minisiteData['search_terms'], $minisiteData['status'],
                 'published', current_time('mysql'), current_time('mysql'), current_time('mysql'),
                 $minisiteData['created_by'], $minisiteData['updated_by'], null
@@ -360,6 +361,7 @@ class _1_0_0_CreateBase implements Migration
             'region'         => 'TX',
             'country_code'   => 'US',
             'postal_code'    => '75201',
+            'location_point' => ['longitude' => -96.7970, 'latitude' => 32.7767],
             'site_template'  => 'v2025',
             'palette'        => 'blue',
             'industry'       => 'dentist',
@@ -481,14 +483,6 @@ class _1_0_0_CreateBase implements Migration
         ];
         $acmeId = $insertMinisite($acme, 'ACME');
 
-        // Set POINT (lng, lat) with SRID 4326 if available (MySQL 8)
-        if ($acmeId) {
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$minisitesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
-                -96.7970, 32.7767, $acmeId
-            ));
-        }
-
         // Insert second profile: Lotus Textiles (Mumbai, IN)
         $lotusId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $lotus = [
@@ -502,6 +496,7 @@ class _1_0_0_CreateBase implements Migration
             'region'         => 'MH',
             'country_code'   => 'IN',
             'postal_code'    => '400001',
+            'location_point' => ['longitude' => 72.8777, 'latitude' => 19.0760],
             'site_template'  => 'v2025',
             'palette'        => 'rose',
             'industry'       => 'textile',
@@ -579,13 +574,6 @@ class _1_0_0_CreateBase implements Migration
         ];
         $lotusId = $insertMinisite($lotus, 'LOTUS');
 
-        if ($lotusId) {
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$minisitesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
-                72.8777, 19.0760, $lotusId
-            ));
-        }
-
         // Insert third profile: Green Bites (London, GB)
         $greenId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $green = [
@@ -599,6 +587,7 @@ class _1_0_0_CreateBase implements Migration
             'region'         => 'London',
             'country_code'   => 'GB',
             'postal_code'    => 'EC1A 1AA',
+            'location_point' => ['longitude' => -0.118092, 'latitude' => 51.509865],
             'site_template'  => 'v2025',
             'palette'        => 'amber',
             'industry'       => 'restaurant',
@@ -675,12 +664,6 @@ class _1_0_0_CreateBase implements Migration
             'updated_by'     => get_current_user_id() ?: null,
         ];
         $greenId = $insertMinisite($green, 'GREEN');
-        if ($greenId) {
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$minisitesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
-                -0.118092, 51.509865, $greenId
-            ));
-        }
 
         // Insert fourth profile: Swift Transit (Sydney, AU)
         $swiftId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
@@ -695,6 +678,7 @@ class _1_0_0_CreateBase implements Migration
             'region'         => 'NSW',
             'country_code'   => 'AU',
             'postal_code'    => '2000',
+            'location_point' => ['longitude' => 151.2093, 'latitude' => -33.8688],
             'site_template'  => 'v2025',
             'palette'        => 'teal',
             'industry'       => 'transport',
@@ -773,12 +757,6 @@ class _1_0_0_CreateBase implements Migration
             'updated_by'     => get_current_user_id() ?: null,
         ];
         $swiftId = $insertMinisite($swift, 'SWIFT');
-        if ($swiftId) {
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$minisitesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
-                151.2093, -33.8688, $swiftId
-            ));
-        }
 
         // ——— Versions for each profile (version 1 as published) ———
         $versionsT = $wpdb->prefix . 'minisite_versions';
