@@ -3,8 +3,8 @@
     "exported_at": "2025-09-26T04:28:44+00:00",
     "minisite": {
         "id": "1465e42f3a24fc14c497dd42",
-        "title": "Urban Lens Photography — New York",
-        "name": "Untitled Minisite",
+        "title": "Urban Lens Photography — TITLE",
+        "name": "Urban Lens Photography — NAME",
         "city": "New York",
         "region": "NY",
         "country_code": "US",
@@ -19,12 +19,13 @@
         "default_locale": "en-US",
         "site_json": {
             "seo": {
-                "title": "Urban Lens Photography",
+                "title": "Urban Lens Photography - SEO",
                 "description": "Capturing timeless moments in the heart of NYC. Specializing in portraits, weddings, and events.",
                 "keywords": "urban lens photography, new york, nyc, portraits, wedding photographer, events, corporate headshots",
                 "favicon": "https://cdn-icons-png.flaticon.com/512/3342/3342137.png"
             },
             "brand": {
+                "name": "Urban Lens Photography - BRAND",
                 "palette": "blue",
                 "industry": "photography",
                 "logo": "https://cdn-icons-png.flaticon.com/512/3342/3342137.png"
@@ -89,7 +90,7 @@
                     },
                     {
                         "title": "Event Photography",
-                        "image": "https://images.unsplash.com/photo-1519702202685-64e7c7a7266a?q=80&w=800&auto=format&fit=crop",
+                        "image": "https://images.unsplash.com/photo-1756143059109-76b40d384dba?q=80&w=800&auto=format&fit=crop",
                         "description": "Capturing the energy and key moments of your corporate party, conference, or private gathering.",
                         "price": "From $500",
                         "icon": "fa-champagne-glasses",
@@ -98,7 +99,7 @@
                     },
                     {
                         "title": "Prints & Albums",
-                        "image": "https://images.unsplash.com/photo-1588698944583-0498a964f434?q=80&w=800&auto=format&fit=crop",
+                        "image": "https://images.unsplash.com/photo-1502982720700-bfff97f2ecac?q=80&w=800&auto=format&fit=crop",
                         "description": "High-quality prints, canvas wraps, and handcrafted photo albums to preserve your memories.",
                         "price": "From $80",
                         "icon": "fa-image",
@@ -196,7 +197,10 @@
                 "instagram": "https://instagram.com/urbanlens.nyc",
                 "facebook": "https://facebook.com/urbanlens.nyc",
                 "pinterest": "https://pinterest.com/urbanlens.nyc",
-                "linkedin": "https://linkedin.com/urbanlens.nyc"
+                "linkedin": "https://linkedin.com/urbanlens.nyc",
+                "x": "https:\/\/x.com\/urbanlens.nyc",
+                "tiktok": "https:\/\/tiktok.com\/urbanlens.nyc",
+                "youtube": "https:\/\/youtube.com\/urbanlens.nyc"
             }
         },
         "search_terms": "urban lens photography nyc portraits wedding events",
