@@ -463,4 +463,35 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         
         return $result !== false;
     }
+
+    /**
+     * Update business info fields in main minisite table
+     */
+    public function updateBusinessInfo(string $minisiteId, array $fields, int $updatedBy): void
+    {
+        $updateFields = [
+            'updated_by' => $updatedBy,
+            'updated_at' => current_time('mysql')
+        ];
+        
+        $formatFields = ['%d', '%s'];
+        
+        // Add the business info fields
+        foreach ($fields as $field => $value) {
+            $updateFields[$field] = $value;
+            $formatFields[] = '%s';
+        }
+        
+        $result = $this->db->update(
+            $this->table(),
+            $updateFields,
+            ['id' => $minisiteId],
+            $formatFields,
+            ['%s']
+        );
+        
+        if ($result === false) {
+            throw new \RuntimeException('Failed to update business info fields.');
+        }
+    }
 }

@@ -203,6 +203,21 @@ final class SitesController
                             $minisiteRepo->updateTitle($siteId, $newTitle);
                         }
                         
+                        // Update other business info fields in main table
+                        $businessInfoFields = [
+                            'name' => sanitize_text_field($_POST['business_name'] ?? $minisite->name),
+                            'city' => sanitize_text_field($_POST['business_city'] ?? $minisite->city),
+                            'region' => sanitize_text_field($_POST['business_region'] ?? $minisite->region),
+                            'country_code' => sanitize_text_field($_POST['business_country'] ?? $minisite->countryCode),
+                            'postal_code' => sanitize_text_field($_POST['business_postal'] ?? $minisite->postalCode),
+                            'site_template' => sanitize_text_field($_POST['site_template'] ?? $minisite->siteTemplate),
+                            'palette' => sanitize_text_field($_POST['brand_palette'] ?? $minisite->palette),
+                            'industry' => sanitize_text_field($_POST['brand_industry'] ?? $minisite->industry),
+                            'default_locale' => sanitize_text_field($_POST['default_locale'] ?? $minisite->defaultLocale),
+                        ];
+                        
+                        $minisiteRepo->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
+                        
                         $wpdb->query('COMMIT');
                         
                         // Redirect to show the latest version after save
