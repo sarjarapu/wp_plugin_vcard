@@ -364,7 +364,7 @@ final class SitesController
             'hero' => [
                 'badge' => sanitize_text_field($postData['hero_badge'] ?? ''),
                 'heading' => sanitize_text_field($postData['hero_heading'] ?? ''),
-                'subheading' => wp_kses_post($postData['hero_subheading'] ?? ''),
+                'subheading' => $this->sanitizeRichTextContent($postData['hero_subheading'] ?? ''),
                 'image' => esc_url_raw($postData['hero_image'] ?? ''),
                 'imageAlt' => sanitize_text_field($postData['hero_image_alt'] ?? ''),
                 'ctas' => [
@@ -384,11 +384,11 @@ final class SitesController
             ],
             'whyUs' => [
                 'title' => sanitize_text_field($postData['whyus_title'] ?? ''),
-                'html' => wp_kses_post($postData['whyus_html'] ?? ''),
+                'html' => $this->sanitizeRichTextContent($postData['whyus_html'] ?? ''),
                 'image' => esc_url_raw($postData['whyus_image'] ?? ''),
             ],
             'about' => [
-                'html' => wp_kses_post($postData['about_html'] ?? ''),
+                'html' => $this->sanitizeRichTextContent($postData['about_html'] ?? ''),
             ],
             'contact' => [
                 'phone' => [
@@ -427,7 +427,7 @@ final class SitesController
             $services[] = [
                 'title' => sanitize_text_field($postData["product_{$i}_title"] ?? ''),
                 'image' => esc_url_raw($postData["product_{$i}_image"] ?? ''),
-                'description' => wp_kses_post($postData["product_{$i}_description"] ?? ''),
+                'description' => $this->sanitizeRichTextContent($postData["product_{$i}_description"] ?? ''),
                 'price' => sanitize_text_field($postData["product_{$i}_price"] ?? ''),
                 'icon' => sanitize_text_field($postData["product_{$i}_icon"] ?? ''),
                 'cta' => sanitize_text_field($postData["product_{$i}_cta_text"] ?? ''),
@@ -754,6 +754,40 @@ final class SitesController
         } catch (\Exception $e) {
             wp_send_json_error('Import failed: ' . $e->getMessage(), 500);
         }
+    }
+
+    /**
+     * Sanitize rich text content without causing cascading escapes
+     */
+    private function sanitizeRichTextContent(string $content): string
+    {
+        // Remove any existing slashes that might have been added by previous saves
+        $content = wp_unslash($content);
+        
+        // Allow safe HTML tags for rich text content
+        $allowedTags = [
+            'p' => [],
+            'br' => [],
+            'strong' => [],
+            'b' => [],
+            'em' => [],
+            'i' => [],
+            'u' => [],
+            'span' => ['class' => [], 'style' => []],
+            'div' => ['class' => [], 'style' => []],
+            'h1' => ['class' => [], 'style' => []],
+            'h2' => ['class' => [], 'style' => []],
+            'h3' => ['class' => [], 'style' => []],
+            'h4' => ['class' => [], 'style' => []],
+            'h5' => ['class' => [], 'style' => []],
+            'h6' => ['class' => [], 'style' => []],
+            'ul' => ['class' => [], 'style' => []],
+            'ol' => ['class' => [], 'style' => []],
+            'li' => ['class' => [], 'style' => []],
+            'a' => ['href' => [], 'target' => [], 'class' => [], 'style' => []],
+        ];
+        
+        return wp_kses($content, $allowedTags);
     }
 }
 
