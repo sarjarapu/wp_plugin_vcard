@@ -184,7 +184,7 @@ final class SitesController
                             defaultLocale: sanitize_text_field($_POST['default_locale'] ?? $minisite->defaultLocale),
                             schemaVersion: $minisite->schemaVersion,
                             siteVersion: $minisite->siteVersion,
-                            searchTerms: $minisite->searchTerms
+                            searchTerms: sanitize_text_field($_POST['search_terms'] ?? $minisite->searchTerms)
                         );
                         
 
@@ -214,6 +214,7 @@ final class SitesController
                             'palette' => sanitize_text_field($_POST['brand_palette'] ?? $minisite->palette),
                             'industry' => sanitize_text_field($_POST['brand_industry'] ?? $minisite->industry),
                             'default_locale' => sanitize_text_field($_POST['default_locale'] ?? $minisite->defaultLocale),
+                            'search_terms' => sanitize_text_field($_POST['search_terms'] ?? $minisite->searchTerms),
                         ];
                         
                         $minisiteRepo->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
@@ -573,9 +574,11 @@ final class SitesController
 
         try {
             global $wpdb;
-            $repo = new MinisiteRepository($wpdb);
-            $minisite = $repo->findById($minisiteId);
-
+            $minisiteRepo = new MinisiteRepository($wpdb);
+            $versionRepo = new VersionRepository($wpdb);
+            
+            // Get the minisite for ownership check
+            $minisite = $minisiteRepo->findById($minisiteId);
             if (!$minisite) {
                 wp_send_json_error('Minisite not found', 404);
                 return;
@@ -587,42 +590,58 @@ final class SitesController
                 return;
             }
 
-            // Debug: Log minisite data being exported
-            error_log('EXPORT DEBUG - Minisite data: ' . print_r([
-                'id' => $minisite->id,
-                'title' => $minisite->title,
-                'name' => $minisite->name,
-                'city' => $minisite->city,
-                'region' => $minisite->region,
-                'countryCode' => $minisite->countryCode,
-                'postalCode' => $minisite->postalCode,
-                'siteTemplate' => $minisite->siteTemplate,
-                'palette' => $minisite->palette,
-                'industry' => $minisite->industry,
-                'defaultLocale' => $minisite->defaultLocale,
+            // Get the latest draft version for export
+            $latestVersion = $versionRepo->findLatestDraft($minisiteId);
+            if (!$latestVersion) {
+                // Fallback to latest version if no draft exists
+                $latestVersion = $versionRepo->findLatestVersion($minisiteId);
+            }
+            
+            if (!$latestVersion) {
+                wp_send_json_error('No version found for export', 404);
+                return;
+            }
+
+            // Debug: Log version data being exported
+            error_log('EXPORT DEBUG - Version data: ' . print_r([
+                'version_id' => $latestVersion->id,
+                'version_number' => $latestVersion->versionNumber,
+                'status' => $latestVersion->status,
+                'title' => $latestVersion->title,
+                'name' => $latestVersion->name,
+                'city' => $latestVersion->city,
+                'region' => $latestVersion->region,
+                'countryCode' => $latestVersion->countryCode,
+                'postalCode' => $latestVersion->postalCode,
+                'siteTemplate' => $latestVersion->siteTemplate,
+                'palette' => $latestVersion->palette,
+                'industry' => $latestVersion->industry,
+                'defaultLocale' => $latestVersion->defaultLocale,
+                'searchTerms' => $latestVersion->searchTerms,
             ], true));
 
-            // Create export data
+            // Create export data from the latest version
             $exportData = [
                 'export_version' => '1.0',
                 'exported_at' => date('c'),
                 'minisite' => [
                     'id' => $minisite->id,
-                    'title' => $minisite->title,
-                    'name' => $minisite->name,
-                    'city' => $minisite->city,
-                    'region' => $minisite->region,
-                    'country_code' => $minisite->countryCode,
-                    'postal_code' => $minisite->postalCode,
-                    'location' => $minisite->geo ? [
-                        'lat' => $minisite->geo->lat,
-                        'lng' => $minisite->geo->lng
+                    'title' => $latestVersion->title,
+                    'name' => $latestVersion->name,
+                    'city' => $latestVersion->city,
+                    'region' => $latestVersion->region,
+                    'country_code' => $latestVersion->countryCode,
+                    'postal_code' => $latestVersion->postalCode,
+                    'location' => $latestVersion->geo ? [
+                        'lat' => $latestVersion->geo->lat,
+                        'lng' => $latestVersion->geo->lng
                     ] : null,
-                    'site_template' => $minisite->siteTemplate,
-                    'palette' => $minisite->palette,
-                    'industry' => $minisite->industry,
-                    'default_locale' => $minisite->defaultLocale,
-                    'site_json' => $minisite->siteJson
+                    'site_template' => $latestVersion->siteTemplate,
+                    'palette' => $latestVersion->palette,
+                    'industry' => $latestVersion->industry,
+                    'default_locale' => $latestVersion->defaultLocale,
+                    'search_terms' => $latestVersion->searchTerms,
+                    'site_json' => $latestVersion->siteJson
                 ],
                 'metadata' => [
                     'original_created_at' => $minisite->createdAt?->format('c'),
@@ -713,10 +732,11 @@ final class SitesController
                 'palette' => $minisiteData['palette'] ?? 'MISSING',
                 'industry' => $minisiteData['industry'] ?? 'MISSING',
                 'default_locale' => $minisiteData['default_locale'] ?? 'MISSING',
+                'search_terms' => $minisiteData['search_terms'] ?? 'MISSING',
             ], true));
             
             // Validate required fields
-            $requiredFields = ['title', 'name', 'city', 'country_code', 'site_template', 'palette', 'industry', 'default_locale', 'site_json'];
+            $requiredFields = ['title', 'name', 'city', 'country_code', 'site_template', 'palette', 'industry', 'default_locale', 'search_terms', 'site_json'];
             foreach ($requiredFields as $field) {
                 if (!isset($minisiteData[$field])) {
                     wp_send_json_error("Missing required field: {$field}", 400);

@@ -23,6 +23,12 @@
         data-field="seo.keywords" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
     </div>
     <div>
+      <label for="search_terms" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Search Terms</label>
+      <input id="search_terms" name="search_terms" type="text" value="{{ profile.searchTerms|default('') }}"
+        data-field="profile.searchTerms" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+      <p class="text-sm text-[var(--on-surface-variant)] mt-1">Comma-separated terms for internal search and categorization</p>
+    </div>
+    <div>
       <label for="seo_favicon" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Favicon URL</label>
       <input id="seo_favicon" name="seo_favicon" type="url" value="{{ site_json.seo.favicon|default('') }}"
         data-field="seo.favicon" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
