@@ -313,10 +313,45 @@ class _1_0_0_CreateBase implements Migration
             return wp_json_encode($data);
         };
 
+        // Helper function to insert minisite and debug
+        $insertMinisite = function($minisiteData, $name) use ($wpdb, $minisitesT) {
+            $wpdb->query($wpdb->prepare(
+                "INSERT INTO {$minisitesT} (
+                    id, slug, business_slug, location_slug, title, name, city, region, 
+                    country_code, postal_code, site_template, palette, 
+                    industry, default_locale, schema_version, site_version, site_json, 
+                    search_terms, status, publish_status, created_at, updated_at, 
+                    published_at, created_by, updated_by, _minisite_current_version_id
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, 
+                    %s, %s, %s, %s, %s, %s, %d, 
+                    %d, %s, %s, %s, %s, %s, %s, %s, 
+                    %d, %d, %s
+                )",
+                $minisiteData['id'], $minisiteData['slug'], $minisiteData['business_slug'], $minisiteData['location_slug'],
+                $minisiteData['title'], $minisiteData['name'], $minisiteData['city'], $minisiteData['region'],
+                $minisiteData['country_code'], $minisiteData['postal_code'], $minisiteData['site_template'],
+                $minisiteData['palette'], $minisiteData['industry'], $minisiteData['default_locale'], $minisiteData['schema_version'],
+                $minisiteData['site_version'], $minisiteData['site_json'], $minisiteData['search_terms'], $minisiteData['status'],
+                'published', current_time('mysql'), current_time('mysql'), current_time('mysql'),
+                $minisiteData['created_by'], $minisiteData['updated_by'], null
+            ));
+            
+            // Debug: Check if minisite was inserted correctly
+            $debugResult = $wpdb->get_row($wpdb->prepare(
+                "SELECT id, business_slug, location_slug, status, _minisite_current_version_id FROM {$minisitesT} WHERE id = %s",
+                $minisiteData['id']
+            ), ARRAY_A);
+            error_log("{$name} INSERT DEBUG: " . print_r($debugResult, true));
+            
+            return $minisiteData['id'];
+        };
+
         // Insert first profile: ACME Dental (Dallas, US)
         $acmeId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $acme = [
             'id'             => $acmeId,
+            'slug'           => null,
             'business_slug'  => 'acme-dental',
             'location_slug'  => 'dallas',
             'title'          => 'Acme Dental — Dallas',
@@ -444,13 +479,7 @@ class _1_0_0_CreateBase implements Migration
             'created_by'     => get_current_user_id() ?: null,
             'updated_by'     => get_current_user_id() ?: null,
         ];
-        $wpdb->insert($minisitesT, $acme, [
-            '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%d','%d','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%d','%d'
-        ]);
-        $acmeId = $acme['id']; // Use our custom ID
+        $acmeId = $insertMinisite($acme, 'ACME');
 
         // Set POINT (lng, lat) with SRID 4326 if available (MySQL 8)
         if ($acmeId) {
@@ -464,6 +493,7 @@ class _1_0_0_CreateBase implements Migration
         $lotusId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $lotus = [
             'id'             => $lotusId,
+            'slug'           => null,
             'business_slug'  => 'lotus-textiles',
             'location_slug'  => 'mumbai',
             'title'          => 'Lotus Textiles — Mumbai',
@@ -547,13 +577,7 @@ class _1_0_0_CreateBase implements Migration
             'created_by'     => get_current_user_id() ?: null,
             'updated_by'     => get_current_user_id() ?: null,
         ];
-        $wpdb->insert($minisitesT, $lotus, [
-            '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%d','%d','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%d','%d'
-        ]);
-        $lotusId = $lotus['id']; // Use our custom ID
+        $lotusId = $insertMinisite($lotus, 'LOTUS');
 
         if ($lotusId) {
             $wpdb->query($wpdb->prepare(
@@ -566,6 +590,7 @@ class _1_0_0_CreateBase implements Migration
         $greenId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $green = [
             'id'             => $greenId,
+            'slug'           => null,
             'business_slug'  => 'green-bites',
             'location_slug'  => 'london',
             'title'          => 'Green Bites — London',
@@ -649,13 +674,7 @@ class _1_0_0_CreateBase implements Migration
             'created_by'     => get_current_user_id() ?: null,
             'updated_by'     => get_current_user_id() ?: null,
         ];
-        $wpdb->insert($minisitesT, $green, [
-            '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%d','%d','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%d','%d'
-        ]);
-        $greenId = $green['id']; // Use our custom ID
+        $greenId = $insertMinisite($green, 'GREEN');
         if ($greenId) {
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$minisitesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
@@ -667,6 +686,7 @@ class _1_0_0_CreateBase implements Migration
         $swiftId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $swift = [
             'id'             => $swiftId,
+            'slug'           => null,
             'business_slug'  => 'swift-transit',
             'location_slug'  => 'sydney',
             'title'          => 'Swift Transit — Sydney',
@@ -752,13 +772,7 @@ class _1_0_0_CreateBase implements Migration
             'created_by'     => get_current_user_id() ?: null,
             'updated_by'     => get_current_user_id() ?: null,
         ];
-        $wpdb->insert($minisitesT, $swift, [
-            '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%s','%s','%s','%s','%s',
-            '%d','%d','%s','%s','%s','%s','%s','%s',
-            '%s','%s','%s','%d','%d'
-        ]);
-        $swiftId = $swift['id']; // Use our custom ID
+        $swiftId = $insertMinisite($swift, 'SWIFT');
         if ($swiftId) {
             $wpdb->query($wpdb->prepare(
                 "UPDATE {$minisitesT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
