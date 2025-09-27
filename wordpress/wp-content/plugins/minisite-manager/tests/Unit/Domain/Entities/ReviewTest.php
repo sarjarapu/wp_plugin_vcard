@@ -124,7 +124,7 @@ final class ReviewTest extends TestCase
         $factory();
     }
 
-    public function dpTypeErrorsOnInvalidTypes(): array
+    public static function dpTypeErrorsOnInvalidTypes(): array
     {
         return [
             'minisiteId must be int' => [function (): void {
@@ -163,7 +163,7 @@ final class ReviewTest extends TestCase
         $this->assertSame($status, $r->status);
     }
 
-    public function dpCommonStatuses(): array
+    public static function dpCommonStatuses(): array
     {
         return [
             ['pending'],

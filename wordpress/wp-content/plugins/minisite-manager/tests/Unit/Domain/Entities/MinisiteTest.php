@@ -190,27 +190,59 @@ final class MinisiteTest extends TestCase
         $factory();
     }
 
-    public function dpTypeErrorsOnInvalidTypes(): array
+    public static function dpTypeErrorsOnInvalidTypes(): array
     {
+        $base = function (array $overrides): void {
+            new Minisite(
+                id: $overrides['id'] ?? 'id',
+                slugs: $overrides['slugs'] ?? new SlugPair('biz', 'loc'),
+                title: 'Title',
+                name: 'Name',
+                city: 'City',
+                region: 'Region',
+                countryCode: 'US',
+                postalCode: '00000',
+                geo: $overrides['geo'] ?? new GeoPoint(0.0, 0.0),
+                siteTemplate: 'v2025',
+                palette: 'blue',
+                industry: 'services',
+                defaultLocale: 'en-US',
+                schemaVersion: $overrides['schemaVersion'] ?? 1,
+                siteVersion: 1,
+                siteJson: $overrides['siteJson'] ?? [],
+                searchTerms: 'terms',
+                status: 'draft',
+                createdAt: new DateTimeImmutable('2025-01-01T00:00:00Z'),
+                updatedAt: new DateTimeImmutable('2025-01-01T01:00:00Z'),
+                publishedAt: null,
+                createdBy: 1,
+                updatedBy: 1,
+                currentVersionId: null,
+                isBookmarked: false,
+                canEdit: false
+            );
+        };
+
         return [
-            'id must be string' => [function (): void {
-                $this->makeMinisite(['id' => 123]);
-            }],
-            'slugs must be SlugPair' => [function (): void {
+            'id must be string' => [function () use ($base): void {
                 /** @phpstan-ignore-next-line */
-                $this->makeMinisite(['slugs' => ['a', 'b']]);
+                $base(['id' => 123]);
             }],
-            'schemaVersion must be int' => [function (): void {
+            'slugs must be SlugPair' => [function () use ($base): void {
                 /** @phpstan-ignore-next-line */
-                $this->makeMinisite(['schemaVersion' => '3']);
+                $base(['slugs' => ['a', 'b']]);
             }],
-            'siteJson must be array' => [function (): void {
+            'schemaVersion must be int' => [function () use ($base): void {
                 /** @phpstan-ignore-next-line */
-                $this->makeMinisite(['siteJson' => (object)['a' => 1]]);
+                $base(['schemaVersion' => '3']);
             }],
-            'geo must be GeoPoint|null' => [function (): void {
+            'siteJson must be array' => [function () use ($base): void {
                 /** @phpstan-ignore-next-line */
-                $this->makeMinisite(['geo' => 'not-a-geo']);
+                $base(['siteJson' => (object)['a' => 1]]);
+            }],
+            'geo must be GeoPoint|null' => [function () use ($base): void {
+                /** @phpstan-ignore-next-line */
+                $base(['geo' => 'not-a-geo']);
             }],
         ];
     }
@@ -224,7 +256,7 @@ final class MinisiteTest extends TestCase
         $this->assertSame($status, $m->status);
     }
 
-    public function dpCommonStatuses(): array
+    public static function dpCommonStatuses(): array
     {
         return [
             ['draft'],
