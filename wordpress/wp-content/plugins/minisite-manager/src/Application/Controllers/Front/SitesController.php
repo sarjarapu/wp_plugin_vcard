@@ -172,16 +172,16 @@ final class SitesController
                             // Profile fields from form data
                             slugs: $slugs,
                             title: sanitize_text_field($_POST['seo_title'] ?? $minisite->title),
-                            name: sanitize_text_field($_POST['brand_name'] ?? $minisite->name),
-                            city: sanitize_text_field($_POST['contact_city'] ?? $minisite->city),
-                            region: sanitize_text_field($_POST['contact_region'] ?? $minisite->region),
-                            countryCode: sanitize_text_field($_POST['contact_country'] ?? $minisite->countryCode),
-                            postalCode: sanitize_text_field($_POST['contact_postal'] ?? $minisite->postalCode),
+                            name: sanitize_text_field($_POST['business_name'] ?? $minisite->name),
+                            city: sanitize_text_field($_POST['business_city'] ?? $minisite->city),
+                            region: sanitize_text_field($_POST['business_region'] ?? $minisite->region),
+                            countryCode: sanitize_text_field($_POST['business_country'] ?? $minisite->countryCode),
+                            postalCode: sanitize_text_field($_POST['business_postal'] ?? $minisite->postalCode),
                             geo: $geo,
-                            siteTemplate: $minisite->siteTemplate,
+                            siteTemplate: sanitize_text_field($_POST['site_template'] ?? $minisite->siteTemplate),
                             palette: sanitize_text_field($_POST['brand_palette'] ?? $minisite->palette),
                             industry: sanitize_text_field($_POST['brand_industry'] ?? $minisite->industry),
-                            defaultLocale: $minisite->defaultLocale,
+                            defaultLocale: sanitize_text_field($_POST['default_locale'] ?? $minisite->defaultLocale),
                             schemaVersion: $minisite->schemaVersion,
                             siteVersion: $minisite->siteVersion,
                             searchTerms: $minisite->searchTerms
@@ -572,6 +572,21 @@ final class SitesController
                 return;
             }
 
+            // Debug: Log minisite data being exported
+            error_log('EXPORT DEBUG - Minisite data: ' . print_r([
+                'id' => $minisite->id,
+                'title' => $minisite->title,
+                'name' => $minisite->name,
+                'city' => $minisite->city,
+                'region' => $minisite->region,
+                'countryCode' => $minisite->countryCode,
+                'postalCode' => $minisite->postalCode,
+                'siteTemplate' => $minisite->siteTemplate,
+                'palette' => $minisite->palette,
+                'industry' => $minisite->industry,
+                'defaultLocale' => $minisite->defaultLocale,
+            ], true));
+
             // Create export data
             $exportData = [
                 'export_version' => '1.0',
@@ -670,6 +685,20 @@ final class SitesController
             }
 
             $minisiteData = $importData['minisite'];
+            
+            // Debug: Log minisite data being imported
+            error_log('IMPORT DEBUG - Minisite data: ' . print_r([
+                'title' => $minisiteData['title'] ?? 'MISSING',
+                'name' => $minisiteData['name'] ?? 'MISSING',
+                'city' => $minisiteData['city'] ?? 'MISSING',
+                'region' => $minisiteData['region'] ?? 'MISSING',
+                'country_code' => $minisiteData['country_code'] ?? 'MISSING',
+                'postal_code' => $minisiteData['postal_code'] ?? 'MISSING',
+                'site_template' => $minisiteData['site_template'] ?? 'MISSING',
+                'palette' => $minisiteData['palette'] ?? 'MISSING',
+                'industry' => $minisiteData['industry'] ?? 'MISSING',
+                'default_locale' => $minisiteData['default_locale'] ?? 'MISSING',
+            ], true));
             
             // Validate required fields
             $requiredFields = ['title', 'name', 'city', 'country_code', 'site_template', 'palette', 'industry', 'default_locale', 'site_json'];

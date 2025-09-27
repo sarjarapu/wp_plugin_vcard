@@ -205,6 +205,7 @@
           <div>
             {{ function('wp_nonce_field', 'minisite_edit', 'minisite_edit_nonce') }}
             
+              {% include 'forms/location-section.twig' %}
 
               {% include 'forms/seo-section.twig' %}
 
@@ -832,6 +833,10 @@
                 
                 // Populate form directly with imported data
                 populateFormWithData(parsedData.minisite.site_json);
+                
+                // Also populate business info fields from minisite data
+                populateBusinessInfoFields(parsedData.minisite);
+                
                 alert('Minisite imported successfully! Review and save your changes.');
                 
               } catch (jsonError) {
@@ -1037,6 +1042,48 @@
         
         // Scroll to top to show the imported data
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      
+      // Function to populate business info fields from minisite data
+      function populateBusinessInfoFields(minisiteData) {
+        console.log('Populating business info fields with data:', minisiteData);
+        
+        // Helper function to set field value
+        function setFieldValue(selector, value) {
+          const field = document.querySelector(selector);
+          if (field && value !== undefined && value !== null) {
+            if (field.type === 'checkbox') {
+              field.checked = value;
+            } else {
+              field.value = value;
+            }
+            console.log(`Set ${selector} to:`, value);
+          } else {
+            console.log(`Field not found or no value: ${selector}`);
+          }
+        }
+        
+        // Populate business info fields
+        setFieldValue('#business_name', minisiteData.name);
+        setFieldValue('#business_city', minisiteData.city);
+        setFieldValue('#business_region', minisiteData.region);
+        setFieldValue('#business_country', minisiteData.country_code);
+        setFieldValue('#business_postal', minisiteData.postal_code);
+        setFieldValue('#site_template', minisiteData.site_template);
+        setFieldValue('#default_locale', minisiteData.default_locale);
+        
+        // Populate SEO title (from minisite title)
+        setFieldValue('#seo_title', minisiteData.title);
+        
+        // Populate brand fields
+        setFieldValue('#brand_palette', minisiteData.palette);
+        setFieldValue('#brand_industry', minisiteData.industry);
+        
+        // Populate coordinates if available
+        if (minisiteData.location && minisiteData.location.lat && minisiteData.location.lng) {
+          setFieldValue('#contact_lat', minisiteData.location.lat);
+          setFieldValue('#contact_lng', minisiteData.location.lng);
+        }
       }
       
       // Helper function to populate dynamic sections

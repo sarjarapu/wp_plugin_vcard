@@ -1,0 +1,87 @@
+<!-- Location Section -->
+<div id="location-section" class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6 pb-8 mb-4">
+  <div class="flex items-center justify-between mb-4">
+    <h2 class="text-xl font-semibold text-[var(--on-surface)]">Location & Business Info</h2>
+    <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+      <i class="fa-solid fa-arrow-up text-sm"></i>
+    </a>
+  </div>
+  <div class="space-y-4">
+    <!-- Business Name -->
+    <div>
+      <label for="business_name" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Business Name</label>
+      <input id="business_name" name="business_name" type="text" value="{{ profile.name|default('') }}"
+        data-field="profile.name" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+
+    <!-- City -->
+    <div>
+      <label for="business_city" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">City</label>
+      <input id="business_city" name="business_city" type="text" value="{{ profile.city|default('') }}"
+        data-field="profile.city" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+
+    <!-- Region/State -->
+    <div>
+      <label for="business_region" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">State/Region</label>
+      <input id="business_region" name="business_region" type="text" value="{{ profile.region|default('') }}"
+        data-field="profile.region" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+
+    <!-- Country -->
+    <div>
+      <label for="business_country" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Country</label>
+      <select id="business_country" name="business_country" data-field="profile.countryCode" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
+        <option value="US" {{ profile.countryCode|default('US') == 'US' ? 'selected' : '' }}>United States</option>
+        <option value="CA" {{ profile.countryCode|default('US') == 'CA' ? 'selected' : '' }}>Canada</option>
+        <option value="GB" {{ profile.countryCode|default('US') == 'GB' ? 'selected' : '' }}>United Kingdom</option>
+        <option value="AU" {{ profile.countryCode|default('US') == 'AU' ? 'selected' : '' }}>Australia</option>
+        <option value="IN" {{ profile.countryCode|default('US') == 'IN' ? 'selected' : '' }}>India</option>
+        <option value="DE" {{ profile.countryCode|default('US') == 'DE' ? 'selected' : '' }}>Germany</option>
+        <option value="FR" {{ profile.countryCode|default('US') == 'FR' ? 'selected' : '' }}>France</option>
+        <option value="ES" {{ profile.countryCode|default('US') == 'ES' ? 'selected' : '' }}>Spain</option>
+        <option value="IT" {{ profile.countryCode|default('US') == 'IT' ? 'selected' : '' }}>Italy</option>
+        <option value="JP" {{ profile.countryCode|default('US') == 'JP' ? 'selected' : '' }}>Japan</option>
+        <option value="CN" {{ profile.countryCode|default('US') == 'CN' ? 'selected' : '' }}>China</option>
+        <option value="BR" {{ profile.countryCode|default('US') == 'BR' ? 'selected' : '' }}>Brazil</option>
+        <option value="MX" {{ profile.countryCode|default('US') == 'MX' ? 'selected' : '' }}>Mexico</option>
+        <option value="OTHER" {{ profile.countryCode|default('US') == 'OTHER' ? 'selected' : '' }}>Other</option>
+      </select>
+    </div>
+
+    <!-- Postal Code -->
+    <div>
+      <label for="business_postal" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Postal Code</label>
+      <input id="business_postal" name="business_postal" type="text" value="{{ profile.postalCode|default('') }}"
+        data-field="profile.postalCode" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3"/>
+    </div>
+
+    <!-- Site Template -->
+    <div>
+      <label for="site_template" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Site Template</label>
+      <select id="site_template" name="site_template" data-field="profile.siteTemplate" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
+        <option value="v2025" {{ profile.siteTemplate|default('v2025') == 'v2025' ? 'selected' : '' }}>v2025 (Current)</option>
+        <option value="v2024" {{ profile.siteTemplate|default('v2025') == 'v2024' ? 'selected' : '' }}>v2024 (Legacy)</option>
+      </select>
+    </div>
+
+    <!-- Default Locale -->
+    <div>
+      <label for="default_locale" class="block text-sm font-medium mb-1 text-[var(--on-surface)]">Default Language</label>
+      <select id="default_locale" name="default_locale" data-field="profile.defaultLocale" class="w-full rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] border border-[var(--outline-variant)] px-4 py-3">
+        <option value="en-US" {{ profile.defaultLocale|default('en-US') == 'en-US' ? 'selected' : '' }}>English (US)</option>
+        <option value="en-GB" {{ profile.defaultLocale|default('en-US') == 'en-GB' ? 'selected' : '' }}>English (UK)</option>
+        <option value="en-AU" {{ profile.defaultLocale|default('en-US') == 'en-AU' ? 'selected' : '' }}>English (AU)</option>
+        <option value="en-IN" {{ profile.defaultLocale|default('en-US') == 'en-IN' ? 'selected' : '' }}>English (IN)</option>
+        <option value="es-ES" {{ profile.defaultLocale|default('en-US') == 'es-ES' ? 'selected' : '' }}>Spanish (ES)</option>
+        <option value="es-MX" {{ profile.defaultLocale|default('en-US') == 'es-MX' ? 'selected' : '' }}>Spanish (MX)</option>
+        <option value="fr-FR" {{ profile.defaultLocale|default('en-US') == 'fr-FR' ? 'selected' : '' }}>French (FR)</option>
+        <option value="de-DE" {{ profile.defaultLocale|default('en-US') == 'de-DE' ? 'selected' : '' }}>German (DE)</option>
+        <option value="it-IT" {{ profile.defaultLocale|default('en-US') == 'it-IT' ? 'selected' : '' }}>Italian (IT)</option>
+        <option value="pt-BR" {{ profile.defaultLocale|default('en-US') == 'pt-BR' ? 'selected' : '' }}>Portuguese (BR)</option>
+        <option value="ja-JP" {{ profile.defaultLocale|default('en-US') == 'ja-JP' ? 'selected' : '' }}>Japanese (JP)</option>
+        <option value="zh-CN" {{ profile.defaultLocale|default('en-US') == 'zh-CN' ? 'selected' : '' }}>Chinese (CN)</option>
+      </select>
+    </div>
+  </div>
+</div>
