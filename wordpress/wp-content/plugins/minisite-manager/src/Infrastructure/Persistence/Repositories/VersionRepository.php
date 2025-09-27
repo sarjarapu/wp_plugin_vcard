@@ -167,7 +167,7 @@ final class VersionRepository implements VersionRepositoryInterface
     /**
      * Create a new draft version from an existing version
      */
-    private function createDraftFromVersion(Version $sourceVersion): Version
+    public function createDraftFromVersion(Version $sourceVersion): Version
     {
         $nextVersion = $this->getNextVersionNumber($sourceVersion->minisiteId);
         
