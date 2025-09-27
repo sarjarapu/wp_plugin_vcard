@@ -352,7 +352,7 @@ class _1_0_0_CreateBase implements Migration
         $acmeId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $acme = [
             'id'             => $acmeId,
-            'slug'           => null,
+            'slug'           => 'acme-dental-dallas',
             'business_slug'  => 'acme-dental',
             'location_slug'  => 'dallas',
             'title'          => 'Acme Dental — Dallas',
@@ -487,7 +487,7 @@ class _1_0_0_CreateBase implements Migration
         $lotusId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $lotus = [
             'id'             => $lotusId,
-            'slug'           => null,
+            'slug'           => 'lotus-textiles-mumbai',
             'business_slug'  => 'lotus-textiles',
             'location_slug'  => 'mumbai',
             'title'          => 'Lotus Textiles — Mumbai',
@@ -578,7 +578,7 @@ class _1_0_0_CreateBase implements Migration
         $greenId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $green = [
             'id'             => $greenId,
-            'slug'           => null,
+            'slug'           => 'green-bites-london',
             'business_slug'  => 'green-bites',
             'location_slug'  => 'london',
             'title'          => 'Green Bites — London',
@@ -669,7 +669,7 @@ class _1_0_0_CreateBase implements Migration
         $swiftId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $swift = [
             'id'             => $swiftId,
-            'slug'           => null,
+            'slug'           => 'swift-transit-sydney',
             'business_slug'  => 'swift-transit',
             'location_slug'  => 'sydney',
             'title'          => 'Swift Transit — Sydney',
