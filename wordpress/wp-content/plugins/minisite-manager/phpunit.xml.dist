@@ -28,5 +28,22 @@
     <testsuite name="Unit">
       <directory>tests/Unit</directory>
     </testsuite>
+    <testsuite name="Integration">
+      <directory>tests/Integration</directory>
+    </testsuite>
   </testsuites>
+
+  <groups>
+    <include>
+      <!-- run all by default; use --group to select -->
+    </include>
+  </groups>
+
+  <php>
+    <env name="MYSQL_HOST" value="127.0.0.1"/>
+    <env name="MYSQL_PORT" value="3307"/>
+    <env name="MYSQL_DATABASE" value="minisite_test"/>
+    <env name="MYSQL_USER" value="minisite"/>
+    <env name="MYSQL_PASSWORD" value="minisite"/>
+  </php>
 </phpunit>

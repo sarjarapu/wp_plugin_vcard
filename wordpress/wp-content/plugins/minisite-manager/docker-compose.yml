@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: minisite_test
+      MYSQL_USER: minisite
+      MYSQL_PASSWORD: minisite
+    ports:
+      - "3307:3306"
+    command: --default-authentication-plugin=mysql_native_password --sql-mode=NO_ENGINE_SUBSTITUTION
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-pminisite"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
