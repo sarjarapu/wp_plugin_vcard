@@ -657,7 +657,7 @@ final class SitesController
             header('Content-Disposition: attachment; filename="' . $filename . '"');
             header('Cache-Control: no-cache, must-revalidate');
             
-            echo json_encode($exportData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            echo json_encode($exportData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             exit;
 
         } catch (\Exception $e) {
