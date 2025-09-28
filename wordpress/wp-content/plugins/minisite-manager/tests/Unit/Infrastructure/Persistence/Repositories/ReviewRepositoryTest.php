@@ -59,7 +59,14 @@ final class ReviewRepositoryTest extends TestCase
                            $data['updated_at'] === '2025-01-15 10:30:00' &&
                            $data['created_by'] === 1;
                 }),
-                ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%s','%s','%s','%d']
+                $this->callback(function ($formats) {
+                    // Should have 13 format specifiers: 11 base + 2 timestamps
+                    return count($formats) === 13 &&
+                           $formats[0] === '%d' && // minisite_id
+                           $formats[10] === '%d' && // created_by
+                           $formats[11] === '%s' && // created_at
+                           $formats[12] === '%s';   // updated_at
+                })
             )
             ->willReturn(1);
 
@@ -106,11 +113,16 @@ final class ReviewRepositoryTest extends TestCase
                            $data['source'] === 'manual' &&
                            $data['source_id'] === null &&
                            $data['status'] === 'pending' &&
-                           $data['created_at'] === null &&
-                           $data['updated_at'] === null &&
-                           $data['created_by'] === null;
+                           $data['created_by'] === null &&
+                           !isset($data['created_at']) && // Should not be in data array
+                           !isset($data['updated_at']);   // Should not be in data array
                 }),
-                ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%s','%s','%s','%d']
+                $this->callback(function ($formats) {
+                    // Should have 11 format specifiers: base fields only (no timestamps)
+                    return count($formats) === 11 &&
+                           $formats[0] === '%d' && // minisite_id
+                           $formats[10] === '%d';  // created_by
+                })
             )
             ->willReturn(1);
 
@@ -384,7 +396,10 @@ final class ReviewRepositoryTest extends TestCase
                 $this->callback(function ($data) {
                     return $data['rating'] === 3.7;
                 }),
-                ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%s','%s','%s','%d']
+                $this->callback(function ($formats) {
+                    // Should have 13 format specifiers: 11 base + 2 timestamps
+                    return count($formats) === 13;
+                })
             )
             ->willReturn(1);
 
@@ -408,7 +423,10 @@ final class ReviewRepositoryTest extends TestCase
                 $this->callback(function ($data) {
                     return $data['minisite_id'] === 999;
                 }),
-                ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%s','%s','%s','%d']
+                $this->callback(function ($formats) {
+                    // Should have 13 format specifiers: 11 base + 2 timestamps
+                    return count($formats) === 13;
+                })
             )
             ->willReturn(1);
 
