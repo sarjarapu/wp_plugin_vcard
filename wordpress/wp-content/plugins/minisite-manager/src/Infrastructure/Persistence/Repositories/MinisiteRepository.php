@@ -275,57 +275,58 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
     /**
      * Insert a new minisite
      */
-    public function insert(Minisite $m): Minisite
+    public function insert(Minisite $site): Minisite
     {
         // Build normalized search_terms (simple example; replace with your builder later)
-        $search = trim(strtolower("{$m->name} {$m->city} {$m->industry} {$m->palette} {$m->title}"));
+        $search = trim(strtolower("{$site->name} {$site->city} {$site->industry} {$site->palette} {$site->title}"));
 
         $data = [
-            'id'             => $m->id,
-            'slug'           => $m->slug,
-            'business_slug'  => $m->slugs->business,
-            'location_slug'  => $m->slugs->location,
-            'title'          => $m->title,
-            'name'           => $m->name,
-            'city'           => $m->city,
-            'region'         => $m->region,
-            'country_code'   => $m->countryCode,
-            'postal_code'    => $m->postalCode,
-            'site_template'  => $m->siteTemplate,
-            'palette'        => $m->palette,
-            'industry'       => $m->industry,
-            'default_locale' => $m->defaultLocale,
-            'schema_version' => $m->schemaVersion,
-            'site_version'   => $m->siteVersion,
-            'site_json'      => wp_json_encode($m->siteJson),
+            'id'             => $site->id,
+            'slug'           => $site->slug,
+            'business_slug'  => $site->slugs->business,
+            'location_slug'  => $site->slugs->location,
+            'title'          => $site->title,
+            'name'           => $site->name,
+            'city'           => $site->city,
+            'region'         => $site->region,
+            'country_code'   => $site->countryCode,
+            'postal_code'    => $site->postalCode,
+            'site_template'  => $site->siteTemplate,
+            'palette'        => $site->palette,
+            'industry'       => $site->industry,
+            'default_locale' => $site->defaultLocale,
+            'schema_version' => $site->schemaVersion,
+            'site_version'   => $site->siteVersion,
+            'site_json'      => wp_json_encode($site->siteJson),
             'search_terms'   => $search,
-            'status'         => $m->status,
-            'publish_status' => $m->status, // Set publish_status to same as status initially
-            'created_at'     => $m->createdAt->format('Y-m-d H:i:s'),
-            'updated_at'     => $m->updatedAt->format('Y-m-d H:i:s'),
-            'published_at'   => $m->publishedAt?->format('Y-m-d H:i:s'),
-            'created_by'     => $m->createdBy,
-            'updated_by'     => $m->updatedBy,
+            'status'         => $site->status,
+            'publish_status' => $site->status, // Set publish_status to same as status initially
+            'created_at'     => $site->createdAt->format('Y-m-d H:i:s'),
+            'updated_at'     => $site->updatedAt->format('Y-m-d H:i:s'),
+            'published_at'   => $site->publishedAt?->format('Y-m-d H:i:s'),
+            'created_by'     => $site->createdBy,
+            'updated_by'     => $site->updatedBy,
         ];
 
         $result = $this->db->insert($this->table(), $data, [
-            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d'
         ]);
 
+        // $result is int|false - number of affected rows on success, false on failure
         if ($result === false) {
             throw new \RuntimeException('Failed to insert minisite.');
         }
 
-        // Sync POINT column if lat/lng set
-        if ($m->geo && $m->geo->isSet()) {
+        // Update location_point if geo data is available
+        if ($site->geo && $site->geo->isSet()) {
             $this->db->query($this->db->prepare(
                 "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f,%f),4326) WHERE id = %s",
-                $m->geo->lng, $m->geo->lat, $m->id
+                $site->geo->lng, $site->geo->lat, $site->id
             ));
         }
 
         // Return the inserted minisite
-        return $this->findById($m->id);
+        return $this->findById($site->id);
     }
 
     public function save(Minisite $m, int $expectedSiteVersion): Minisite

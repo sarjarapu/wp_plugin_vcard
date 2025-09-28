@@ -21,8 +21,8 @@ final class ReviewRepository implements ReviewRepositoryInterface
             'source'        => $r->source,
             'source_id'     => $r->sourceId,
             'status'        => $r->status,
-            'created_at'    => $r->createdAt ? $r->createdAt->format('Y-m-d H:i:s') : date('Y-m-d H:i:s'),
-            'updated_at'    => $r->updatedAt ? $r->updatedAt->format('Y-m-d H:i:s') : date('Y-m-d H:i:s'),
+            'created_at'    => $r->createdAt ? $r->createdAt->format('Y-m-d H:i:s') : null,
+            'updated_at'    => $r->updatedAt ? $r->updatedAt->format('Y-m-d H:i:s') : null,
             'created_by'    => $r->createdBy,
         ];
         
