@@ -61,7 +61,7 @@ class SqlLoaderIntegrationTest extends TestCase
 
         // Verify variables were replaced
         $this->assertStringContainsString('CREATE TABLE wp_test_table', $processedSql);
-        $this->assertStringContainsString('utf8mb4_unicode_ci', $processedSql);
+        $this->assertStringContainsString('DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci', $processedSql);
         $this->assertStringNotContainsString('{$prefix}', $processedSql);
         $this->assertStringNotContainsString('{$charset}', $processedSql);
 
@@ -92,7 +92,7 @@ class SqlLoaderIntegrationTest extends TestCase
 
         // Verify variables were replaced
         $this->assertStringContainsString('CREATE TABLE wp_minisites', $processedSql);
-        $this->assertStringContainsString('utf8mb4_unicode_ci', $processedSql);
+        $this->assertStringContainsString('DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci', $processedSql);
         $this->assertStringNotContainsString('{$prefix}', $processedSql);
         $this->assertStringNotContainsString('{$charset}', $processedSql);
 
@@ -145,7 +145,7 @@ class SqlLoaderIntegrationTest extends TestCase
         $this->assertArrayHasKey('prefix', $variables);
         $this->assertArrayHasKey('charset', $variables);
         $this->assertEquals('wp_', $variables['prefix']);
-        $this->assertEquals('utf8mb4_unicode_ci', $variables['charset']);
+        $this->assertEquals('DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci', $variables['charset']);
     }
 
     public function test_table_creation_with_processed_sql(): void

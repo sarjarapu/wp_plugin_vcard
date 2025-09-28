@@ -5,4 +5,4 @@ CREATE TABLE {$prefix}test_table (
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY idx_name (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE={$charset};
+) ENGINE=InnoDB {$charset};

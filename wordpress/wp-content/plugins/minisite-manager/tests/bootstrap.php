@@ -16,7 +16,7 @@ if (!isset($GLOBALS['wpdb'])) {
     $GLOBALS['wpdb'] = new class {
         public $prefix = 'wp_';
         public function get_charset_collate() {
-            return 'utf8mb4_unicode_ci';
+            return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci';
         }
         public function prepare($query, ...$args) { return $query; }
         public function get_var($query) { return null; }
@@ -34,7 +34,7 @@ if (!class_exists('wpdb')) {
     class wpdb {
         public $prefix = 'wp_';
         public function get_charset_collate() {
-            return 'utf8mb4_unicode_ci';
+            return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci';
         }
         public function prepare($query, ...$args) { return $query; }
         public function get_var($query) { return null; }

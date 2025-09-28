@@ -29,4 +29,4 @@ CREATE TABLE {$prefix}minisites (
     PRIMARY KEY (id),
     UNIQUE KEY uniq_slug (slug),
     UNIQUE KEY uniq_business_location (business_slug, location_slug)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE={$charset};
+) ENGINE=InnoDB {$charset};

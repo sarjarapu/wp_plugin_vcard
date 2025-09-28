@@ -92,6 +92,6 @@ class FakeWpdb extends \wpdb
 
     public function get_charset_collate()
     {
-        return 'utf8mb4_unicode_ci';
+        return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci';
     }
 }
