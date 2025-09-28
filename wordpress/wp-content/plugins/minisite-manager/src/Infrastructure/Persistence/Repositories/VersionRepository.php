@@ -184,7 +184,7 @@ final class VersionRepository implements VersionRepositoryInterface
             label: "Draft from v{$sourceVersion->versionNumber}",
             comment: "Created from version {$sourceVersion->versionNumber} for editing",
             createdBy: $sourceVersion->createdBy,
-            createdAt: null,
+            createdAt: new \DateTimeImmutable(),
             publishedAt: null,
             sourceVersionId: $sourceVersion->id,
             siteJson: $sourceVersion->siteJson,
