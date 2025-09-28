@@ -5,9 +5,9 @@ use PDO;
 
 class FakeWpdb extends \wpdb
 {
-    public string $prefix = 'wp_';
-    public int $rows_affected = 0;
-    public int $insert_id = 0;
+    public $prefix = 'wp_';
+    public $rows_affected = 0;
+    public $insert_id = 0;
 
     private PDO $pdo;
 
@@ -88,5 +88,10 @@ class FakeWpdb extends \wpdb
         }
         $sql = "UPDATE {$table} SET " . implode(',', $sets) . " WHERE " . implode(' AND ', $conds);
         return $this->query($sql);
+    }
+
+    public function get_charset_collate()
+    {
+        return 'utf8mb4_unicode_ci';
     }
 }

@@ -1,4 +1,4 @@
-CREATE TABLE {$minisites} (
+CREATE TABLE {$prefix}minisites (
     id VARCHAR(32) NOT NULL,
     slug VARCHAR(255) NULL,
     business_slug VARCHAR(120) NULL,
@@ -29,4 +29,4 @@ CREATE TABLE {$minisites} (
     PRIMARY KEY (id),
     UNIQUE KEY uniq_slug (slug),
     UNIQUE KEY uniq_business_location (business_slug, location_slug)
-) ENGINE=InnoDB {$charset};
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE={$charset};
