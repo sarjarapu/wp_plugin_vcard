@@ -83,7 +83,7 @@ class DatabaseTestHelper
      */
     public function createMinisitesTable(): void
     {
-        $sql = file_get_contents(__DIR__ . '/../../db/schema/tables/minisites.sql');
+        $sql = file_get_contents(__DIR__ . '/../../data/db/tables/minisites.sql');
         $processedSql = str_replace(
             ['{$prefix}', '{$charset}'],
             ['wp_', 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci'],
@@ -97,7 +97,7 @@ class DatabaseTestHelper
      */
     public function createMinisiteVersionsTable(): void
     {
-        $sql = file_get_contents(__DIR__ . '/../../db/schema/tables/minisite_versions.sql');
+        $sql = file_get_contents(__DIR__ . '/../../data/db/tables/minisite_versions.sql');
         $processedSql = str_replace(
             ['{$prefix}', '{$charset}'],
             ['wp_', 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci'],
@@ -111,7 +111,7 @@ class DatabaseTestHelper
      */
     public function createMinisiteReviewsTable(): void
     {
-        $sql = file_get_contents(__DIR__ . '/../../db/schema/tables/minisite_reviews.sql');
+        $sql = file_get_contents(__DIR__ . '/../../data/db/tables/minisite_reviews.sql');
         $processedSql = str_replace(
             ['{$prefix}', '{$charset}'],
             ['wp_', 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci'],
@@ -125,7 +125,7 @@ class DatabaseTestHelper
      */
     public function createMinisiteReservationsTable(): void
     {
-        $sql = file_get_contents(__DIR__ . '/../../db/schema/tables/minisite_reservations.sql');
+        $sql = file_get_contents(__DIR__ . '/../../data/db/tables/minisite_reservations.sql');
         $processedSql = str_replace(
             ['{$prefix}', '{$charset}'],
             ['wp_', 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci'],

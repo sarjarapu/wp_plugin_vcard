@@ -69,9 +69,9 @@ class SqlLoader
         // Get plugin root directory
         $pluginRoot = dirname(__DIR__, 3); // Go up from src/Infrastructure/Utils to plugin root
         
-        // Ensure the path starts with db/schema/tables/ if it's just a filename
-        if (!str_starts_with($sqlFilePath, 'db/schema/tables/')) {
-            $sqlFilePath = 'db/schema/tables/' . ltrim($sqlFilePath, '/');
+        // Ensure the path starts with data/db/tables/ if it's just a filename
+        if (!str_starts_with($sqlFilePath, 'data/db/tables/')) {
+            $sqlFilePath = 'data/db/tables/' . ltrim($sqlFilePath, '/');
         }
         
         return $pluginRoot . '/' . $sqlFilePath;

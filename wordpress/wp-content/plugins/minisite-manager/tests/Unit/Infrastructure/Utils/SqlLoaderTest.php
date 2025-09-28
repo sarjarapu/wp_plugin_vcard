@@ -116,7 +116,7 @@ class SqlLoaderTest extends TestCase
         $method->setAccessible(true);
 
         $result = $method->invoke(null, 'minisites.sql');
-        $expected = $this->pluginRoot . '/db/schema/tables/minisites.sql';
+        $expected = $this->pluginRoot . '/data/db/tables/minisites.sql';
         $this->assertEquals($expected, $result);
     }
 
@@ -126,8 +126,8 @@ class SqlLoaderTest extends TestCase
         $method = $reflection->getMethod('getFullPath');
         $method->setAccessible(true);
 
-        $result = $method->invoke(null, 'db/schema/tables/minisites.sql');
-        $expected = $this->pluginRoot . '/db/schema/tables/minisites.sql';
+        $result = $method->invoke(null, 'data/db/tables/minisites.sql');
+        $expected = $this->pluginRoot . '/data/db/tables/minisites.sql';
         $this->assertEquals($expected, $result);
     }
 
