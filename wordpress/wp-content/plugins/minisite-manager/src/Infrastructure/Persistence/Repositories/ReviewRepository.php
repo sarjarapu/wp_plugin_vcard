@@ -21,8 +21,10 @@ final class ReviewRepository implements ReviewRepositoryInterface
             'source'        => $r->source,
             'source_id'     => $r->sourceId,
             'status'        => $r->status,
+            'created_at'    => $r->createdAt?->format('Y-m-d H:i:s'),
+            'updated_at'    => $r->updatedAt?->format('Y-m-d H:i:s'),
             'created_by'    => $r->createdBy,
-        ], ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%s','%d']);
+        ], ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%s','%s','%s','%d']);
 
         $r->id = (int)$this->db->insert_id;
         return $r;
