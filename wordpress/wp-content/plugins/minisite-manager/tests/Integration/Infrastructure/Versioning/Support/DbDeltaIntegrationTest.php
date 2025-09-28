@@ -37,8 +37,8 @@ class DbDeltaIntegrationTest extends TestCase
         // Set the global $wpdb to our test database
         $GLOBALS['wpdb'] = $this->dbHelper->getWpdb();
         
-        // Load our mock upgrade.php file
-        $this->loadMockUpgradeFile();
+        // Create a mock dbDelta function for testing
+        $this->createMockDbDeltaFunction();
     }
 
     protected function tearDown(): void
@@ -50,11 +50,31 @@ class DbDeltaIntegrationTest extends TestCase
         $GLOBALS['wpdb'] = $this->originalWpdb;
     }
 
-    private function loadMockUpgradeFile(): void
+    private function createMockDbDeltaFunction(): void
     {
-        // Load our mock upgrade.php file that provides the dbDelta function
-        $mockFile = dirname(__DIR__, 4) . '/Support/mock-upgrade.php';
-        require_once $mockFile;
+        // Create a mock dbDelta function that actually executes SQL
+        if (!function_exists('dbDelta')) {
+            eval("
+                function dbDelta(\$queries) {
+                    global \$wpdb;
+                    if (is_string(\$queries)) {
+                        \$queries = [\$queries];
+                    }
+                    \$results = [];
+                    foreach (\$queries as \$query) {
+                        if (trim(\$query)) {
+                            try {
+                                \$wpdb->query(\$query);
+                                \$results[] = 'Query executed successfully';
+                            } catch (Exception \$e) {
+                                \$results[] = 'Query failed: ' . \$e->getMessage();
+                            }
+                        }
+                    }
+                    return \$results;
+                }
+            ");
+        }
     }
 
     public function test_run_creates_simple_table(): void

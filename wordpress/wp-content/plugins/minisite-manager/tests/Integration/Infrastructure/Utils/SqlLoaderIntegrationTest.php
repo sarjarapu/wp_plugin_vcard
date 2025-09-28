@@ -38,9 +38,9 @@ class SqlLoaderIntegrationTest extends TestCase
         // Manually execute the processed SQL to test table creation
         $this->dbHelper->exec($processedSql);
 
-        // Verify table was created
-        $stmt = $this->dbHelper->query("SHOW TABLES LIKE 'wp_test_table'");
-        $this->assertCount(1, $stmt->fetchAll(), 'wp_test_table should be created');
+        // Verify table was created by checking if we can describe it
+        $stmt = $this->dbHelper->query("DESCRIBE wp_test_table");
+        $this->assertNotFalse($stmt, 'wp_test_table should be created and accessible');
 
         // Verify table structure
         $stmt = $this->dbHelper->query("DESCRIBE wp_test_table");

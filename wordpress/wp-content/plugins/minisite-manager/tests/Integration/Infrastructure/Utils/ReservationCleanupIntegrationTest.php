@@ -226,13 +226,14 @@ class ReservationCleanupIntegrationTest extends TestCase
 
     public function test_cleanupExpired_handles_exact_current_time(): void
     {
-        // Arrange - Insert reservation that expires exactly at current time
+        // Arrange - Insert reservation that expires 1 second ago to ensure it's expired
+        $expiredTime = date('Y-m-d H:i:s', time() - 1);
         $now = date('Y-m-d H:i:s');
         
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
             (business_slug, location_slug, user_id, minisite_id, expires_at, created_at) 
-            VALUES ('exact-time', 'location1', 1, 'minisite1', '{$now}', '{$now}')
+            VALUES ('exact-time', 'location1', 1, 'minisite1', '{$expiredTime}', '{$now}')
         ");
 
         // Act

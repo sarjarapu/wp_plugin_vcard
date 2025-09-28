@@ -16,12 +16,20 @@ class DbDeltaTest extends TestCase
         // Store original dbDelta function if it exists
         $this->originalDbDeltaFunction = function_exists('dbDelta') ? 'dbDelta' : null;
         
+        // Reset global variables
+        unset($GLOBALS['__mock_dbDelta_called']);
+        unset($GLOBALS['__mock_dbDelta_sql']);
+        
         // Create a mock dbDelta function for testing
         $this->mockDbDeltaFunction();
     }
 
     protected function tearDown(): void
     {
+        // Clean up global variables
+        unset($GLOBALS['__mock_dbDelta_called']);
+        unset($GLOBALS['__mock_dbDelta_sql']);
+        
         // Restore original function if it existed
         if ($this->originalDbDeltaFunction) {
             // Function already exists, no need to restore
@@ -40,8 +48,8 @@ class DbDeltaTest extends TestCase
         DbDelta::run($createTableSql);
 
         // Assert - The mock function should have been called
-        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']));
-        $this->assertEquals($createTableSql, $GLOBALS['__mock_dbDelta_sql']);
+        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']), 'Mock dbDelta function should have been called');
+        $this->assertEquals($createTableSql, $GLOBALS['__mock_dbDelta_sql'], 'Mock dbDelta should have received the correct SQL');
     }
 
     public function test_run_ignores_return_value_from_dbDelta(): void
@@ -53,7 +61,7 @@ class DbDeltaTest extends TestCase
         DbDelta::run($createTableSql);
 
         // Assert
-        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']));
+        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']), 'Mock dbDelta function should have been called');
     }
 
     public function test_run_handles_empty_sql(): void
@@ -65,8 +73,8 @@ class DbDeltaTest extends TestCase
         DbDelta::run($emptySql);
 
         // Assert
-        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']));
-        $this->assertEquals($emptySql, $GLOBALS['__mock_dbDelta_sql']);
+        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']), 'Mock dbDelta function should have been called');
+        $this->assertEquals($emptySql, $GLOBALS['__mock_dbDelta_sql'], 'Mock dbDelta should have received the empty SQL');
     }
 
     public function test_run_handles_complex_sql(): void
@@ -87,8 +95,8 @@ class DbDeltaTest extends TestCase
         DbDelta::run($complexSql);
 
         // Assert
-        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']));
-        $this->assertEquals($complexSql, $GLOBALS['__mock_dbDelta_sql']);
+        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']), 'Mock dbDelta function should have been called');
+        $this->assertEquals($complexSql, $GLOBALS['__mock_dbDelta_sql'], 'Mock dbDelta should have received the complex SQL');
     }
 
     public function test_run_is_static_method(): void
