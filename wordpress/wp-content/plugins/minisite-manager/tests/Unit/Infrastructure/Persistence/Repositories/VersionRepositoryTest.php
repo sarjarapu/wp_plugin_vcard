@@ -219,15 +219,27 @@ final class VersionRepositoryTest extends TestCase
             ->method('update')
             ->willReturn(1);
         
-        $this->mockDb->expects($this->once())
+        // Mock both the geo clear query and findById call that happen after save
+        $this->mockDb->expects($this->exactly(2))
             ->method('prepare')
-            ->with($this->stringContains('UPDATE wp_minisite_versions SET location_point = NULL WHERE id = %d'))
-            ->willReturn('geo clear query');
+            ->willReturnCallback(function($query, ...$params) {
+                if (strpos($query, 'UPDATE wp_minisite_versions SET location_point = NULL WHERE id = %d') !== false) {
+                    return 'geo clear query';
+                } elseif (strpos($query, 'SELECT * FROM wp_minisite_versions WHERE id = %d LIMIT 1') !== false) {
+                    return 'find query';
+                }
+                return 'default query';
+            });
         
         $this->mockDb->expects($this->once())
             ->method('query')
             ->with('geo clear query')
             ->willReturn(1);
+            
+        $this->mockDb->expects($this->once())
+            ->method('get_row')
+            ->with('find query', \ARRAY_A)
+            ->willReturn($this->createTestRow());
         
         $result = $this->repository->save($version);
         
@@ -685,8 +697,8 @@ final class VersionRepositoryTest extends TestCase
         $publishedVersion->status = 'published';
         $publishedVersion->versionNumber = 2;
 
-        // Mock findLatestVersion call
-        $this->mockDb->expects($this->exactly(2))
+        // Mock findLatestVersion call and save call (which includes findById)
+        $this->mockDb->expects($this->exactly(3))
             ->method('prepare')
             ->willReturnCallback(function($query, $param) {
                 if (strpos($query, 'SELECT * FROM wp_minisite_versions') !== false && 
@@ -694,14 +706,25 @@ final class VersionRepositoryTest extends TestCase
                     return 'prepared query 1';
                 } elseif (strpos($query, 'SELECT MAX(version_number)') !== false) {
                     return 'prepared query 2';
+                } elseif (strpos($query, 'SELECT * FROM wp_minisite_versions WHERE id = %d LIMIT 1') !== false) {
+                    return 'find query';
                 }
                 return 'default query';
             });
 
-        $this->mockDb->expects($this->once())
+        // Create a test row for the new draft with version number 3
+        $draftRow = $this->createTestRow();
+        $draftRow['version_number'] = '3';
+        $draftRow['status'] = 'draft';
+        $draftRow['label'] = 'Draft from v2';
+        $draftRow['source_version_id'] = '123';
+        
+        $this->mockDb->expects($this->exactly(2))
             ->method('get_row')
-            ->with('prepared query 1', \ARRAY_A)
-            ->willReturn($this->versionToArray($publishedVersion));
+            ->willReturnMap([
+                ['prepared query 1', \ARRAY_A, $this->versionToArray($publishedVersion)],
+                ['find query', \ARRAY_A, $draftRow]
+            ]);
 
         $this->mockDb->expects($this->once())
             ->method('get_var')
@@ -747,13 +770,17 @@ final class VersionRepositoryTest extends TestCase
         $sourceVersion->status = 'published';
         $sourceVersion->versionNumber = 2;
 
-        $this->mockDb->expects($this->once())
+        // Mock both the getNextVersionNumber call and save call (which includes findById)
+        $this->mockDb->expects($this->exactly(2))
             ->method('prepare')
-            ->with(
-                $this->stringContains('SELECT MAX(version_number) as max_version FROM wp_minisite_versions WHERE minisite_id = %s'),
-                'test-minisite'
-            )
-            ->willReturn('prepared query');
+            ->willReturnCallback(function($query, $param) {
+                if (strpos($query, 'SELECT MAX(version_number) as max_version FROM wp_minisite_versions WHERE minisite_id = %s') !== false) {
+                    return 'prepared query';
+                } elseif (strpos($query, 'SELECT * FROM wp_minisite_versions WHERE id = %d LIMIT 1') !== false) {
+                    return 'find query';
+                }
+                return 'default query';
+            });
 
         $this->mockDb->expects($this->once())
             ->method('get_var')
@@ -765,6 +792,18 @@ final class VersionRepositoryTest extends TestCase
             ->willReturn(1);
 
         $this->mockDb->insert_id = 124;
+        
+        // Create a test row for the new draft with version number 3
+        $draftRow = $this->createTestRow();
+        $draftRow['version_number'] = '3';
+        $draftRow['status'] = 'draft';
+        $draftRow['label'] = 'Draft from v2';
+        $draftRow['source_version_id'] = '123';
+        
+        $this->mockDb->expects($this->once())
+            ->method('get_row')
+            ->with('find query', \ARRAY_A)
+            ->willReturn($draftRow);
 
         $result = $this->repository->createDraftFromVersion($sourceVersion);
         
