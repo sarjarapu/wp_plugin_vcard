@@ -1,0 +1,20 @@
+CREATE TABLE {$prefix}minisite_reviews (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    minisite_id VARCHAR(32) NOT NULL,
+    author_name VARCHAR(160) NOT NULL,
+    author_url VARCHAR(300) NULL,
+    rating DECIMAL(2,1) NOT NULL,
+    body MEDIUMTEXT NOT NULL,
+    locale VARCHAR(10) NULL,
+    visited_month CHAR(7) NULL,
+    source ENUM('manual','google','yelp','facebook','other') NOT NULL DEFAULT 'manual',
+    source_id VARCHAR(160) NULL,
+    status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'approved',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    created_by BIGINT UNSIGNED NULL,
+    PRIMARY KEY (id),
+    KEY idx_minisite (minisite_id),
+    KEY idx_status_date (status, created_at),
+    KEY idx_rating (rating)
+) ENGINE=InnoDB {$charset};

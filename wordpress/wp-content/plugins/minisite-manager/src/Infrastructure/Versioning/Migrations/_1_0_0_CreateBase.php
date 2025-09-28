@@ -16,148 +16,35 @@ class _1_0_0_CreateBase implements Migration
 
     public function up(\wpdb $wpdb): void
     {
-        $charset   = $wpdb->get_charset_collate();
         $minisites  = $wpdb->prefix . 'minisites';
         $reviews   = $wpdb->prefix . 'minisite_reviews';
         $versions = $wpdb->prefix . 'minisite_versions';
         $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
         $payments = $wpdb->prefix . 'minisite_payments';
         $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
+        $reservations = $wpdb->prefix . 'minisite_reservations';
 
         // ——— minisites (live) ———
         SqlLoader::loadAndExecute($wpdb, 'minisites.sql', SqlLoader::createStandardVariables($wpdb));
 
 
         // ——— versions (new versioning system) ———
-        DbDelta::run("CREATE TABLE {$versions} (
-          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          minisite_id VARCHAR(32) NOT NULL,
-          version_number INT UNSIGNED NOT NULL,
-          status ENUM('draft','published') NOT NULL,
-          label VARCHAR(120) NULL,
-          comment TEXT NULL,
-          created_by BIGINT UNSIGNED NOT NULL,
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          published_at DATETIME NULL,
-          source_version_id BIGINT UNSIGNED NULL,
-          business_slug VARCHAR(120) NULL,
-          location_slug VARCHAR(120) NULL,
-          title VARCHAR(200) NULL,
-          name VARCHAR(200) NULL,
-          city VARCHAR(120) NULL,
-          region VARCHAR(120) NULL,
-          country_code CHAR(2) NULL,
-          postal_code VARCHAR(20) NULL,
-          location_point POINT NULL,
-          site_template VARCHAR(32) NULL,
-          palette VARCHAR(24) NULL,
-          industry VARCHAR(40) NULL,
-          default_locale VARCHAR(10) NULL,
-          schema_version SMALLINT UNSIGNED NULL,
-          site_version INT UNSIGNED NULL,
-          site_json LONGTEXT NOT NULL,
-          search_terms TEXT NULL,
-          PRIMARY KEY (id),
-          UNIQUE KEY uniq_minisite_version (minisite_id, version_number),
-          KEY idx_minisite_status (minisite_id, status),
-          KEY idx_minisite_created (minisite_id, created_at)
-        ) ENGINE=InnoDB {$charset};");
+        SqlLoader::loadAndExecute($wpdb, 'minisite_versions.sql', SqlLoader::createStandardVariables($wpdb));
 
         // ——— reviews ———
-        DbDelta::run("CREATE TABLE {$reviews} (
-          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          minisite_id VARCHAR(32) NOT NULL,
-          author_name VARCHAR(160) NOT NULL,
-          author_url VARCHAR(300) NULL,
-          rating DECIMAL(2,1) NOT NULL,
-          body MEDIUMTEXT NOT NULL,
-          locale VARCHAR(10) NULL,
-          visited_month CHAR(7) NULL,
-          source ENUM('manual','google','yelp','facebook','other') NOT NULL DEFAULT 'manual',
-          source_id VARCHAR(160) NULL,
-          status ENUM('pending','approved','rejected') NOT NULL DEFAULT 'approved',
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          created_by BIGINT UNSIGNED NULL,
-          PRIMARY KEY (id),
-          KEY idx_minisite (minisite_id),
-          KEY idx_status_date (status, created_at),
-          KEY idx_rating (rating)
-        ) ENGINE=InnoDB {$charset};");
+        SqlLoader::loadAndExecute($wpdb, 'minisite_reviews.sql', SqlLoader::createStandardVariables($wpdb));
 
         // ——— bookmarks ———
-        DbDelta::run("CREATE TABLE {$bookmarks} (
-          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          user_id BIGINT UNSIGNED NOT NULL,
-          minisite_id VARCHAR(32) NOT NULL,
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          PRIMARY KEY (id),
-          UNIQUE KEY uniq_user_minisite (user_id, minisite_id),
-          KEY idx_user (user_id),
-          KEY idx_minisite (minisite_id)
-        ) ENGINE=InnoDB {$charset};");
+        SqlLoader::loadAndExecute($wpdb, 'minisite_bookmarks.sql', SqlLoader::createStandardVariables($wpdb));
 
         // ——— payments (single payment for slug ownership + 1 year public access) ———
-        DbDelta::run("CREATE TABLE {$payments} (
-          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          minisite_id VARCHAR(32) NOT NULL,
-          user_id BIGINT UNSIGNED NOT NULL,
-          woocommerce_order_id BIGINT UNSIGNED NULL,
-          status ENUM('active','expired','grace_period','reclaimed') NOT NULL DEFAULT 'active',
-          amount DECIMAL(10,2) NOT NULL,
-          currency CHAR(3) NOT NULL DEFAULT 'USD',
-          payment_method VARCHAR(100) NULL,
-          payment_reference VARCHAR(255) NULL,
-          paid_at DATETIME NOT NULL,
-          expires_at DATETIME NOT NULL,
-          grace_period_ends_at DATETIME NOT NULL,
-          renewed_at DATETIME NULL,
-          reclaimed_at DATETIME NULL,
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          PRIMARY KEY (id),
-          KEY idx_minisite_status (minisite_id, status),
-          KEY idx_user_status (user_id, status),
-          KEY idx_expires_at (expires_at),
-          KEY idx_grace_period_ends_at (grace_period_ends_at),
-          KEY idx_woocommerce_order (woocommerce_order_id)
-        ) ENGINE=InnoDB {$charset};");
+        SqlLoader::loadAndExecute($wpdb, 'minisite_payments.sql', SqlLoader::createStandardVariables($wpdb));
 
         // ——— payment history (for renewals and reclamations) ———
-        DbDelta::run("CREATE TABLE {$paymentHistory} (
-          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          minisite_id VARCHAR(32) NOT NULL,
-          payment_id BIGINT UNSIGNED NULL,
-          action ENUM('initial_payment','renewal','expiration','grace_period_start','grace_period_end','reclamation') NOT NULL,
-          amount DECIMAL(10,2) NULL,
-          currency CHAR(3) NULL,
-          payment_reference VARCHAR(255) NULL,
-          expires_at DATETIME NULL,
-          grace_period_ends_at DATETIME NULL,
-          new_owner_user_id BIGINT UNSIGNED NULL,
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          PRIMARY KEY (id),
-          KEY idx_minisite (minisite_id),
-          KEY idx_payment (payment_id),
-          KEY idx_created_at (created_at)
-        ) ENGINE=InnoDB {$charset};");
+        SqlLoader::loadAndExecute($wpdb, 'minisite_payment_history.sql', SqlLoader::createStandardVariables($wpdb));
 
         // Reservations table for 5-minute slug reservations
-        $reservations = $wpdb->prefix . 'minisite_reservations';
-        DbDelta::run("CREATE TABLE {$reservations} (
-          id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-          business_slug VARCHAR(255) NOT NULL,
-          location_slug VARCHAR(255) NULL,
-          user_id BIGINT UNSIGNED NOT NULL,
-          minisite_id VARCHAR(32) NULL,
-          expires_at DATETIME NOT NULL,
-          created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          PRIMARY KEY (id),
-          UNIQUE KEY unique_slug_reservation (business_slug, location_slug),
-          KEY idx_expires_at (expires_at),
-          KEY idx_user_id (user_id),
-          KEY idx_minisite_id (minisite_id)
-        ) ENGINE=InnoDB {$charset};");
+        SqlLoader::loadAndExecute($wpdb, 'minisite_reservations.sql', SqlLoader::createStandardVariables($wpdb));
 
         // Add foreign key constraints after table creation (only if they don't exist)
         $this->addForeignKeyIfNotExists($wpdb, $versions, 'fk_versions_minisite_id', 'minisite_id', $minisites, 'id');
