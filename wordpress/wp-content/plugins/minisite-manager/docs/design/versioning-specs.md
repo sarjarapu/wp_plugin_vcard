@@ -572,7 +572,7 @@ public function publishVersion(string $minisiteId, int $versionId): void
             if ($version->geo && $version->geo->lat && $version->geo->lng) {
                 $wpdb->query($wpdb->prepare(
                     "UPDATE {$wpdb->prefix}minisites 
-                     SET location_point = ST_SRID(POINT(%f, %f), 4326) 
+                     SET location_point = POINT(%f, %f) 
                      WHERE id = %s",
                     $version->geo->lng, $version->geo->lat, $minisiteId
                 ));

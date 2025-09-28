@@ -181,7 +181,7 @@ class _1_0_0_CreateBase implements Migration
                     published_at, created_by, updated_by, _minisite_current_version_id
                 ) VALUES (
                     %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, ST_SRID(POINT(%f, %f), 4326), %s, %s, %s, %s, %d, 
+                    %s, %s, POINT(%f, %f), %s, %s, %s, %s, %d, 
                     %d, %s, %s, %s, %s, %s, %s, %s, 
                     %d, %d, %s
                 )",
@@ -676,7 +676,7 @@ class _1_0_0_CreateBase implements Migration
             if (isset($coordinates[$pid])) {
                 [$lng, $lat] = $coordinates[$pid];
                 $wpdb->query($wpdb->prepare(
-                    "UPDATE {$versionsT} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                    "UPDATE {$versionsT} SET location_point = POINT(%f, %f) WHERE id = %d",
                     $lng, $lat, $versionId
                 ));
             }

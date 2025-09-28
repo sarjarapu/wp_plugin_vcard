@@ -192,8 +192,8 @@ final class MinisiteRepositoryIntegrationTest extends TestCase
         
         $updated = $this->repository->findById($minisite->id);
         $this->assertNotNull($updated->geo);
-        $this->assertSame(40.7128, $updated->geo->latitude);
-        $this->assertSame(-74.0060, $updated->geo->longitude);
+        $this->assertSame(40.7128, $updated->geo->lat);
+        $this->assertSame(-74.0060, $updated->geo->lng);
     }
 
     public function testUpdateCoordinatesWithNullValues(): void

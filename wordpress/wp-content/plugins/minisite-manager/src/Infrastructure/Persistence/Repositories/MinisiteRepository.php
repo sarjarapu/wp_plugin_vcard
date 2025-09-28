@@ -100,7 +100,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         // Update POINT column if coordinates are set
         if ($lat !== null && $lng !== null) {
             $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %s",
+                "UPDATE {$this->table()} SET location_point = POINT(%f, %f) WHERE id = %s",
                 $lng, $lat, $id
             ));
         } else {
@@ -257,7 +257,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             if ($versionToPublish->geo && $versionToPublish->geo->lat && $versionToPublish->geo->lng) {
                 $wpdb->query($wpdb->prepare(
                     "UPDATE {$this->table()} 
-                     SET location_point = ST_SRID(POINT(%f, %f), 4326) 
+                     SET location_point = POINT(%f, %f) 
                      WHERE id = %s",
                     $versionToPublish->geo->lng, $versionToPublish->geo->lat, $id
                 ));
@@ -320,7 +320,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         // Update location_point if geo data is available
         if ($site->geo && $site->geo->isSet()) {
             $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f,%f),4326) WHERE id = %s",
+                "UPDATE {$this->table()} SET location_point = POINT(%f,%f) WHERE id = %s",
                 $site->geo->lng, $site->geo->lat, $site->id
             ));
         }
@@ -376,7 +376,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         // Sync POINT column if lat/lng set
         if ($m->geo && $m->geo->isSet()) {
             $this->db->query($this->db->prepare(
-                "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f,%f),4326)
+                "UPDATE {$this->table()} SET location_point = POINT(%f,%f)
                  WHERE business_slug=%s AND location_slug=%s",
                 $m->geo->lng, $m->geo->lat, $m->slugs->business, $m->slugs->location
             ));
@@ -393,9 +393,9 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
         // Extract lat/lng from location_point geometry
         $geo = null;
         if (!empty($r['location_point'])) {
-            // The migration data was inserted as POINT(lng, lat), so ST_Y() returns lng and ST_X() returns lat
+            // POINT is stored as POINT(lng, lat), so ST_X() returns lng and ST_Y() returns lat
             $pointResult = $this->db->get_row($this->db->prepare(
-                "SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat FROM {$this->table()} WHERE id = %s",
+                "SELECT ST_X(location_point) as lng, ST_Y(location_point) as lat FROM {$this->table()} WHERE id = %s",
                 $r['id']
             ), ARRAY_A);
             
