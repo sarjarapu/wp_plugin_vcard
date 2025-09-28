@@ -47,16 +47,8 @@ class DbDeltaTest extends TestCase
         // Act
         DbDelta::run($createTableSql);
 
-        // Assert - Check if our unit test mock was called, or if integration test mock exists
-        if (isset($GLOBALS['__mock_dbDelta_called'])) {
-            // Unit test mock was called
-            $this->assertTrue(true, 'Mock dbDelta function should have been called');
-            $this->assertEquals($createTableSql, $GLOBALS['__mock_dbDelta_sql'], 'Mock dbDelta should have received the correct SQL');
-        } else {
-            // Integration test mock exists, just verify the function exists and can be called
-            $this->assertTrue(function_exists('dbDelta'), 'dbDelta function should exist');
-            $this->assertTrue(true, 'dbDelta function exists and can be called');
-        }
+        // Assert
+        $this->assertDbDeltaWasCalled($createTableSql);
     }
 
     public function test_run_ignores_return_value_from_dbDelta(): void
@@ -67,14 +59,8 @@ class DbDeltaTest extends TestCase
         // Act - should not throw any exceptions
         DbDelta::run($createTableSql);
 
-        // Assert - Check if our unit test mock was called, or if integration test mock exists
-        if (isset($GLOBALS['__mock_dbDelta_called'])) {
-            // Unit test mock was called
-            $this->assertTrue(true, 'Mock dbDelta function should have been called');
-        } else {
-            // Integration test mock exists, just verify the function exists and can be called
-            $this->assertTrue(function_exists('dbDelta'), 'dbDelta function should exist');
-        }
+        // Assert
+        $this->assertDbDeltaWasCalled();
     }
 
     public function test_run_handles_empty_sql(): void
@@ -85,15 +71,8 @@ class DbDeltaTest extends TestCase
         // Act
         DbDelta::run($emptySql);
 
-        // Assert - Check if our unit test mock was called, or if integration test mock exists
-        if (isset($GLOBALS['__mock_dbDelta_called'])) {
-            // Unit test mock was called
-            $this->assertTrue(true, 'Mock dbDelta function should have been called');
-            $this->assertEquals($emptySql, $GLOBALS['__mock_dbDelta_sql'], 'Mock dbDelta should have received the empty SQL');
-        } else {
-            // Integration test mock exists, just verify the function exists and can be called
-            $this->assertTrue(function_exists('dbDelta'), 'dbDelta function should exist');
-        }
+        // Assert
+        $this->assertDbDeltaWasCalled($emptySql);
     }
 
     public function test_run_handles_complex_sql(): void
@@ -113,15 +92,8 @@ class DbDeltaTest extends TestCase
         // Act
         DbDelta::run($complexSql);
 
-        // Assert - Check if our unit test mock was called, or if integration test mock exists
-        if (isset($GLOBALS['__mock_dbDelta_called'])) {
-            // Unit test mock was called
-            $this->assertTrue(true, 'Mock dbDelta function should have been called');
-            $this->assertEquals($complexSql, $GLOBALS['__mock_dbDelta_sql'], 'Mock dbDelta should have received the complex SQL');
-        } else {
-            // Integration test mock exists, just verify the function exists and can be called
-            $this->assertTrue(function_exists('dbDelta'), 'dbDelta function should exist');
-        }
+        // Assert
+        $this->assertDbDeltaWasCalled($complexSql);
     }
 
     public function test_run_is_static_method(): void
@@ -305,6 +277,24 @@ class DbDeltaTest extends TestCase
                     return ['Mock dbDelta executed'];
                 }
             ");
+        }
+    }
+
+    /**
+     * Helper method to assert that dbDelta was called with optional SQL verification
+     * This method handles both unit test mock and integration test scenarios
+     */
+    private function assertDbDeltaWasCalled(?string $expectedSql = null): void
+    {
+        if (isset($GLOBALS['__mock_dbDelta_called'])) {
+            // Unit test mock was called
+            $this->assertTrue(true, 'Mock dbDelta function should have been called');
+            if ($expectedSql !== null) {
+                $this->assertEquals($expectedSql, $GLOBALS['__mock_dbDelta_sql'], 'Mock dbDelta should have received the correct SQL');
+            }
+        } else {
+            // Integration test mock exists, just verify the function exists and can be called
+            $this->assertTrue(function_exists('dbDelta'), 'dbDelta function should exist');
         }
     }
 }
