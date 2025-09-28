@@ -1,32 +1,32 @@
-# Git Pre-commit Hook for Minisite Manager Plugin
+# Git Pre-push Hook for Minisite Manager Plugin
 
-This repository includes a Git pre-commit hook that automatically runs unit tests, integration tests, and verifies test coverage before allowing commits.
+This repository includes a Git pre-push hook that automatically runs unit tests, integration tests, and verifies test coverage before allowing code to be pushed to the remote repository.
 
 ## What the Hook Does
 
-The pre-commit hook performs the following checks:
+The pre-push hook performs the following checks:
 
 1. **Unit Tests**: Runs all unit tests in the `tests/Unit` directory
 2. **Integration Tests**: Runs all integration tests in the `tests/Integration` directory  
-3. **Coverage Check**: Verifies that test coverage is at least 60%
+3. **Coverage Check**: Verifies that test coverage is at least 10%
 
-If any of these checks fail, the commit will be blocked.
+If any of these checks fail, the push will be blocked.
 
 ## How It Works
 
-The hook is located at `.git/hooks/pre-commit` and will automatically run whenever you attempt to commit changes. It:
+The hook is located at `.git/hooks/pre-push` and will automatically run whenever you attempt to push changes to the remote repository. It:
 
 - Changes to the plugin directory
 - Runs PHPUnit with coverage reporting
 - Extracts coverage percentage from the output
-- Compares coverage against the minimum threshold (60%)
-- Blocks the commit if tests fail or coverage is insufficient
+- Compares coverage against the minimum threshold (10%)
+- Blocks the push if tests fail or coverage is insufficient
 
 ## Requirements
 
 - PHPUnit must be installed via Composer (`composer install`)
 - Tests must be passing
-- Coverage must be at least 60%
+- Coverage must be at least 10%
 
 ## Testing the Hook
 
@@ -43,10 +43,10 @@ This will verify that:
 
 ## Bypassing the Hook (Not Recommended)
 
-If you absolutely need to bypass the hook for an emergency commit, you can use:
+If you absolutely need to bypass the hook for an emergency push, you can use:
 
 ```bash
-git commit --no-verify -m "Emergency commit message"
+git push --no-verify origin <branch-name>
 ```
 
 **Warning**: This should only be used in exceptional circumstances and you should fix any test issues immediately after.
