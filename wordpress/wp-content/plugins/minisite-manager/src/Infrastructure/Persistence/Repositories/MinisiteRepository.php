@@ -300,12 +300,13 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             'site_json'      => wp_json_encode($m->siteJson),
             'search_terms'   => $search,
             'status'         => $m->status,
+            'publish_status' => $m->status, // Set publish_status to same as status initially
             'created_by'     => $m->createdBy,
             'updated_by'     => $m->updatedBy,
         ];
 
         $result = $this->db->insert($this->table(), $data, [
-            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%d', '%d'
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d'
         ]);
 
         if ($result === false) {

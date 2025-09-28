@@ -2,11 +2,10 @@
 namespace Tests\Unit\Infrastructure\Utils;
 
 use Minisite\Infrastructure\Utils\SqlLoader;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @group unit
- */
+#[Group('unit')]
 class SqlLoaderTest extends TestCase
 {
     private string $testSqlPath;

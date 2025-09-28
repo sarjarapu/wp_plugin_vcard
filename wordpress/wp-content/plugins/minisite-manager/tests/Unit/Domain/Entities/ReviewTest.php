@@ -154,9 +154,7 @@ final class ReviewTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dpCommonStatuses
-     */
+    #[DataProvider('dpCommonStatuses')]
     public function testStoresCommonStatuses(string $status): void
     {
         $r = new Review(id: null, minisiteId: 1, authorName: 'A', authorUrl: null, rating: 5.0, body: 'x', locale: null, visitedMonth: null, source: 'manual', sourceId: null, status: $status, createdAt: null, updatedAt: null, createdBy: null);

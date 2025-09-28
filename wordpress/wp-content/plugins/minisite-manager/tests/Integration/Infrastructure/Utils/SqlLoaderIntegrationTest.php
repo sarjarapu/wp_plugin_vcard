@@ -3,12 +3,11 @@ namespace Tests\Integration\Infrastructure\Utils;
 
 use Minisite\Infrastructure\Utils\SqlLoader;
 use PDO;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
 
-/**
- * @group integration
- */
+#[Group('integration')]
 class SqlLoaderIntegrationTest extends TestCase
 {
     private PDO $pdo;

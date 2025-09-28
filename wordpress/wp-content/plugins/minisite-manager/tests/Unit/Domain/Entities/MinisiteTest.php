@@ -8,6 +8,7 @@ use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionNamedType;
@@ -181,9 +182,7 @@ final class MinisiteTest extends TestCase
         $this->assertNull($withoutGeo->geo);
     }
 
-    /**
-     * @dataProvider dpTypeErrorsOnInvalidTypes
-     */
+    #[DataProvider('dpTypeErrorsOnInvalidTypes')]
     public function testTypeErrorsOnInvalidTypes(callable $factory): void
     {
         $this->expectException(\TypeError::class);
@@ -247,9 +246,7 @@ final class MinisiteTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider dpCommonStatuses
-     */
+    #[DataProvider('dpCommonStatuses')]
     public function testStoresCommonStatuses(string $status): void
     {
         $m = $this->makeMinisite(['status' => $status]);
