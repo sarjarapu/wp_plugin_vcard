@@ -561,7 +561,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
             region: 'NY',
             countryCode: 'US',
             postalCode: '10001',
-            geo: new GeoPoint(40.7128, -74.0060), // New York coordinates
+            geo: new GeoPoint(45.7, 120.1), // Test coordinates (lat, lng)
             siteTemplate: 'v2025',
             palette: 'blue',
             industry: 'services',
@@ -574,14 +574,14 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $savedVersion = $this->repository->save($version);
         
         $this->assertNotNull($savedVersion->geo);
-        $this->assertSame(40.7128, $savedVersion->geo->latitude);
-        $this->assertSame(-74.0060, $savedVersion->geo->longitude);
+        $this->assertSame(45.7, $savedVersion->geo->lat);
+        $this->assertSame(120.1, $savedVersion->geo->lng);
 
         $retrievedVersion = $this->repository->findById($savedVersion->id);
         
         $this->assertNotNull($retrievedVersion->geo);
-        $this->assertSame(40.7128, $retrievedVersion->geo->latitude);
-        $this->assertSame(-74.0060, $retrievedVersion->geo->longitude);
+        $this->assertSame(45.7, $retrievedVersion->geo->lat);
+        $this->assertSame(120.1, $retrievedVersion->geo->lng);
     }
 
     public function testVersionWithSlugPairHandling(): void

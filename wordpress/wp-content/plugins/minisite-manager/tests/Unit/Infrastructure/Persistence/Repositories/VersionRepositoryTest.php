@@ -137,7 +137,7 @@ final class VersionRepositoryTest extends TestCase
     {
         $version = $this->createTestVersion();
         $version->id = null;
-        $version->geo = new GeoPoint(40.7128, -74.0060); // NYC coordinates
+        $version->geo = new GeoPoint(45.7, 120.1); // Test coordinates (lat, lng)
         
         $this->mockDb->expects($this->once())
             ->method('insert')
@@ -147,7 +147,7 @@ final class VersionRepositoryTest extends TestCase
         
         $this->mockDb->expects($this->once())
             ->method('prepare')
-            ->with($this->stringContains('UPDATE wp_minisite_versions SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d'))
+            ->with($this->stringContains('UPDATE wp_minisite_versions SET location_point = POINT(%f, %f) WHERE id = %d'))
             ->willReturn('geo update query');
         
         $this->mockDb->expects($this->once())
@@ -164,7 +164,7 @@ final class VersionRepositoryTest extends TestCase
     {
         $version = $this->createTestVersion();
         $version->id = 123;
-        $version->geo = new GeoPoint(40.7128, -74.0060);
+        $version->geo = new GeoPoint(45.7, 120.1);
         
         $this->mockDb->expects($this->once())
             ->method('update')
@@ -172,7 +172,7 @@ final class VersionRepositoryTest extends TestCase
         
         $this->mockDb->expects($this->once())
             ->method('prepare')
-            ->with($this->stringContains('UPDATE wp_minisite_versions SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d'))
+            ->with($this->stringContains('UPDATE wp_minisite_versions SET location_point = POINT(%f, %f) WHERE id = %d'))
             ->willReturn('geo update query');
         
         $this->mockDb->expects($this->once())
@@ -772,7 +772,7 @@ final class VersionRepositoryTest extends TestCase
             'region' => 'Test Region',
             'country_code' => 'US',
             'postal_code' => '12345',
-            'location_point' => 'POINT(-74.006000 40.712800)',
+            'location_point' => 'POINT(120.1 45.7)',
             'site_template' => 'v2025',
             'palette' => 'blue',
             'industry' => 'services',
@@ -795,7 +795,7 @@ final class VersionRepositoryTest extends TestCase
         $this->mockDb->expects($this->once())
             ->method('get_row')
             ->with('geo query', \ARRAY_A)
-            ->willReturn(['lat' => '40.712800', 'lng' => '-74.006000']);
+            ->willReturn(['lat' => '45.7', 'lng' => '120.1']);
 
         $reflection = new \ReflectionClass($this->repository);
         $method = $reflection->getMethod('mapRow');
@@ -805,8 +805,8 @@ final class VersionRepositoryTest extends TestCase
         
         $this->assertInstanceOf(Version::class, $result);
         $this->assertInstanceOf(GeoPoint::class, $result->geo);
-        $this->assertSame(40.7128, $result->geo->lat);
-        $this->assertSame(-74.006, $result->geo->lng);
+        $this->assertSame(45.7, $result->geo->lat);
+        $this->assertSame(120.1, $result->geo->lng);
     }
 
     public function testMapRowHandlesSlugPairCorrectly(): void
