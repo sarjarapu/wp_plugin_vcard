@@ -84,3 +84,14 @@ if (!function_exists('wp_json_encode')) {
         return json_encode($data, $options, $depth);
     }
 }
+
+// Define WordPress database constants
+if (!defined('ARRAY_A')) {
+    define('ARRAY_A', 'ARRAY_A');
+}
+if (!defined('ARRAY_N')) {
+    define('ARRAY_N', 'ARRAY_N');
+}
+if (!defined('OBJECT')) {
+    define('OBJECT', 'OBJECT');
+}

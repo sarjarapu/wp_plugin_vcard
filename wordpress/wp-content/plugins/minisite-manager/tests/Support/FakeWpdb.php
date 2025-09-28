@@ -58,6 +58,14 @@ class FakeWpdb extends \wpdb
         return $rows ?: [];
     }
 
+    public function get_var($query)
+    {
+        $stmt = $this->pdo->query($query);
+        if (!$stmt) return null;
+        $row = $stmt->fetch(PDO::FETCH_NUM);
+        return $row ? $row[0] : null;
+    }
+
     public function query($query)
     {
         $result = $this->pdo->exec($query);
@@ -70,7 +78,21 @@ class FakeWpdb extends \wpdb
     {
         $cols = array_keys($data);
         $vals = array_values($data);
-        $placeholders = array_map(fn($v) => is_numeric($v) ? (string)$v : "'" . addslashes((string)$v) . "'", $vals);
+        $placeholders = array_map(function($v) {
+            if (is_numeric($v)) {
+                return (string)$v;
+            } elseif (is_null($v)) {
+                return 'NULL';
+            } else {
+                // Don't escape JSON strings - they're already properly formatted
+                $str = (string)$v;
+                if (json_decode($str) !== null) {
+                    return "'" . $str . "'";
+                } else {
+                    return "'" . addslashes($str) . "'";
+                }
+            }
+        }, $vals);
         $sql = "INSERT INTO {$table} (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . ")";
         $res = $this->query($sql);
         return $res;
@@ -87,6 +109,16 @@ class FakeWpdb extends \wpdb
             $conds[] = sprintf("%s=%s", $k, is_numeric($v) ? (string)$v : "'" . addslashes((string)$v) . "'");
         }
         $sql = "UPDATE {$table} SET " . implode(',', $sets) . " WHERE " . implode(' AND ', $conds);
+        return $this->query($sql);
+    }
+
+    public function delete($table, $where, $where_format = [])
+    {
+        $conds = [];
+        foreach ($where as $k => $v) {
+            $conds[] = sprintf("%s=%s", $k, is_numeric($v) ? (string)$v : "'" . addslashes((string)$v) . "'");
+        }
+        $sql = "DELETE FROM {$table} WHERE " . implode(' AND ', $conds);
         return $this->query($sql);
     }
 
