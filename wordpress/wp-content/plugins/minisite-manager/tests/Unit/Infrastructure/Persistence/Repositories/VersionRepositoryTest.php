@@ -75,6 +75,17 @@ final class VersionRepositoryTest extends TestCase
 
         $this->mockDb->insert_id = 123;
         
+        // Mock the findById call that happens after save
+        $this->mockDb->expects($this->once())
+            ->method('prepare')
+            ->with('SELECT * FROM wp_minisite_versions WHERE id = %d LIMIT 1', 123)
+            ->willReturn('find query');
+            
+        $this->mockDb->expects($this->once())
+            ->method('get_row')
+            ->with('find query', \ARRAY_A)
+            ->willReturn($this->createTestRow());
+        
         $result = $this->repository->save($version);
         
         $this->assertSame(123, $result->id);
@@ -99,6 +110,23 @@ final class VersionRepositoryTest extends TestCase
                 ['%d']
             )
             ->willReturn(1);
+        
+        // Mock the geo location clear query and findById call that happen after save
+        $this->mockDb->expects($this->exactly(2))
+            ->method('prepare')
+            ->willReturnMap([
+                ['UPDATE wp_minisite_versions SET location_point = NULL WHERE id = %d', 123, 'geo clear query'],
+                ['SELECT * FROM wp_minisite_versions WHERE id = %d LIMIT 1', 123, 'find query']
+            ]);
+            
+        $this->mockDb->expects($this->once())
+            ->method('query')
+            ->with('geo clear query');
+            
+        $this->mockDb->expects($this->once())
+            ->method('get_row')
+            ->with('find query', \ARRAY_A)
+            ->willReturn($this->createTestRow());
         
         $result = $this->repository->save($version);
         
@@ -759,7 +787,7 @@ final class VersionRepositoryTest extends TestCase
         $this->mockDb->expects($this->once())
             ->method('prepare')
             ->with(
-                $this->stringContains('SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat FROM wp_minisite_versions WHERE id = %d'),
+                $this->stringContains('SELECT ST_X(location_point) as lng, ST_Y(location_point) as lat FROM wp_minisite_versions WHERE id = %d'),
                 123
             )
             ->willReturn('geo query');
@@ -889,6 +917,39 @@ final class VersionRepositoryTest extends TestCase
             'site_version' => $version->siteVersion ? (string) $version->siteVersion : null,
             'site_json' => json_encode($version->siteJson),
             'search_terms' => $version->searchTerms
+        ];
+    }
+    
+    private function createTestRow(): array
+    {
+        return [
+            'id' => '123',
+            'minisite_id' => 'test-minisite',
+            'version_number' => '1',
+            'status' => 'draft',
+            'label' => 'Test Version',
+            'comment' => 'Test comment',
+            'created_by' => '1',
+            'created_at' => '2025-01-01 00:00:00',
+            'published_at' => null,
+            'source_version_id' => null,
+            'business_slug' => 'test-business',
+            'location_slug' => 'test-location',
+            'title' => 'Test Title',
+            'name' => 'Test Name',
+            'city' => 'Test City',
+            'region' => 'Test Region',
+            'country_code' => 'US',
+            'postal_code' => '12345',
+            'location_point' => null,
+            'site_template' => 'v2025',
+            'palette' => 'blue',
+            'industry' => 'services',
+            'default_locale' => 'en-US',
+            'schema_version' => '1',
+            'site_version' => '1',
+            'site_json' => '{"test": "data"}',
+            'search_terms' => 'test terms'
         ];
     }
 }

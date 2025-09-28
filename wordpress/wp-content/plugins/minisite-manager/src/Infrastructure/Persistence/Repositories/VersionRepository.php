@@ -253,8 +253,8 @@ final class VersionRepository implements VersionRepositoryInterface
 
         // Create GeoPoint from location_point geometry
         $geo = null;
-        // Always try to extract geo data if the row has an id
-        if ($row['id']) {
+        // Check if we have location_point data and try to extract it
+        if (!empty($row['location_point']) && $row['id']) {
             try {
                 // Extract lat/lng from POINT geometry
                 // POINT is stored as POINT(lng, lat), so ST_X() returns lng and ST_Y() returns lat
@@ -271,7 +271,7 @@ final class VersionRepository implements VersionRepositoryInterface
                 }
             } catch (\Exception $e) {
                 // If spatial functions fail, geo remains null
-                // This is expected if MySQL spatial functions are not available
+                // This is expected if MySQL spatial functions are not available (e.g., in unit tests)
             }
         }
 
