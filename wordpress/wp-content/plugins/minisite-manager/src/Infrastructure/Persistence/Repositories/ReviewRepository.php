@@ -21,21 +21,12 @@ final class ReviewRepository implements ReviewRepositoryInterface
             'source'        => $r->source,
             'source_id'     => $r->sourceId,
             'status'        => $r->status,
+            'created_at'    => $r->createdAt ? $r->createdAt->format('Y-m-d H:i:s') : date('Y-m-d H:i:s'),
+            'updated_at'    => $r->updatedAt ? $r->updatedAt->format('Y-m-d H:i:s') : date('Y-m-d H:i:s'),
             'created_by'    => $r->createdBy,
         ];
         
-        $formats = ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%s','%d'];
-        
-        // Only add timestamps if they are not null
-        if ($r->createdAt !== null) {
-            $data['created_at'] = $r->createdAt->format('Y-m-d H:i:s');
-            $formats[] = '%s';
-        }
-        
-        if ($r->updatedAt !== null) {
-            $data['updated_at'] = $r->updatedAt->format('Y-m-d H:i:s');
-            $formats[] = '%s';
-        }
+        $formats = ['%d','%s','%s','%f','%s','%s','%s','%s','%s','%s','%s','%s','%d'];
 
         $this->db->insert($this->table(), $data, $formats);
 
