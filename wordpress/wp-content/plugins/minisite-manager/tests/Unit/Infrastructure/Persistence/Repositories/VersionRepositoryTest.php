@@ -145,15 +145,27 @@ final class VersionRepositoryTest extends TestCase
         
         $this->mockDb->insert_id = 123;
         
-        $this->mockDb->expects($this->once())
+        // Mock both the geo update query and findById call that happen after save
+        $this->mockDb->expects($this->exactly(2))
             ->method('prepare')
-            ->with($this->stringContains('UPDATE wp_minisite_versions SET location_point = POINT(%f, %f) WHERE id = %d'))
-            ->willReturn('geo update query');
+            ->willReturnCallback(function($query, ...$params) {
+                if (strpos($query, 'UPDATE wp_minisite_versions SET location_point = POINT') !== false) {
+                    return 'geo update query';
+                } elseif (strpos($query, 'SELECT * FROM wp_minisite_versions WHERE id = %d LIMIT 1') !== false) {
+                    return 'find query';
+                }
+                return 'default query';
+            });
         
         $this->mockDb->expects($this->once())
             ->method('query')
             ->with('geo update query')
             ->willReturn(1);
+            
+        $this->mockDb->expects($this->once())
+            ->method('get_row')
+            ->with('find query', \ARRAY_A)
+            ->willReturn($this->createTestRow());
         
         $result = $this->repository->save($version);
         
@@ -170,15 +182,27 @@ final class VersionRepositoryTest extends TestCase
             ->method('update')
             ->willReturn(1);
         
-        $this->mockDb->expects($this->once())
+        // Mock both the geo update query and findById call that happen after save
+        $this->mockDb->expects($this->exactly(2))
             ->method('prepare')
-            ->with($this->stringContains('UPDATE wp_minisite_versions SET location_point = POINT(%f, %f) WHERE id = %d'))
-            ->willReturn('geo update query');
+            ->willReturnCallback(function($query, ...$params) {
+                if (strpos($query, 'UPDATE wp_minisite_versions SET location_point = POINT') !== false) {
+                    return 'geo update query';
+                } elseif (strpos($query, 'SELECT * FROM wp_minisite_versions WHERE id = %d LIMIT 1') !== false) {
+                    return 'find query';
+                }
+                return 'default query';
+            });
         
         $this->mockDb->expects($this->once())
             ->method('query')
             ->with('geo update query')
             ->willReturn(1);
+            
+        $this->mockDb->expects($this->once())
+            ->method('get_row')
+            ->with('find query', \ARRAY_A)
+            ->willReturn($this->createTestRow());
         
         $result = $this->repository->save($version);
         

@@ -57,7 +57,7 @@ final class VersionRepository implements VersionRepositoryInterface
             // Set location_point if lat/lng exist
             if ($version->geo && $version->geo->isSet()) {
                 $result = $this->db->query($this->db->prepare(
-                    "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                    "UPDATE {$this->table()} SET location_point = POINT(%f, %f) WHERE id = %d",
                     $version->geo->lng, $version->geo->lat, $version->id
                 ));
                 // Debug: Check if the update was successful
@@ -78,7 +78,7 @@ final class VersionRepository implements VersionRepositoryInterface
             // Update location_point if lat/lng exist
             if ($version->geo && $version->geo->isSet()) {
                 $this->db->query($this->db->prepare(
-                    "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
+                    "UPDATE {$this->table()} SET location_point = POINT(%f, %f) WHERE id = %d",
                     $version->geo->lng, $version->geo->lat, $version->id
                 ));
             } else {
