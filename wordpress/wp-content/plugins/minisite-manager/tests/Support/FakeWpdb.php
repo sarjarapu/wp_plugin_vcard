@@ -19,9 +19,24 @@ class FakeWpdb extends \wpdb
     public function prepare($query, ...$args)
     {
         foreach ($args as $a) {
-            $query = preg_replace('/%[df]/', (string)(0 + $a), $query, 1);
-            if (preg_match('/%s/', $query)) {
-                $query = preg_replace('/%s/', "'" . addslashes((string)$a) . "'", $query, 1);
+            if (!preg_match('/%(s|d|f)/', $query, $m)) {
+                // No more placeholders, stop processing
+                break;
+            }
+            $placeholder = $m[0];
+            switch ($placeholder) {
+                case '%s':
+                    $replacement = "'" . addslashes((string)$a) . "'";
+                    $query = preg_replace('/%s/', $replacement, $query, 1);
+                    break;
+                case '%d':
+                    $num = is_numeric($a) ? (string)(int)$a : '0';
+                    $query = preg_replace('/%d/', $num, $query, 1);
+                    break;
+                case '%f':
+                    $num = is_numeric($a) ? (string)(float)$a : '0';
+                    $query = preg_replace('/%f/', $num, $query, 1);
+                    break;
             }
         }
         return $query;

@@ -15,6 +15,15 @@ if (!function_exists('wp_json_encode')) {
     function wp_json_encode($data) { return json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); }
 }
 
+// Provide a simple current_time() replacement for tests
+if (!function_exists('current_time')) {
+    function current_time($type = 'mysql') {
+        $ts = time();
+        if ($type === 'timestamp') return $ts;
+        // mimic WP's mysql format
+        return gmdate('Y-m-d H:i:s', $ts);
+    }
+}
 
 // Minimal wpdb stub if none exists yet:
 if (!class_exists('wpdb')) {
@@ -31,10 +40,17 @@ if (!class_exists('wpdb')) {
         }
         public function get_row($query, $output = null) { return null; }
         public function get_results($query, $output = null) { return []; }
+        public function get_var($query) { return null; }
         public function query($query) { return 0; }
         public function insert($table, $data, $format = []) { $this->insert_id = 1; return 1; }
     }
 }
+
+// Load test support classes (so tests can `use Tests\Support\...` without Composer autoload-dev)
+require_once __DIR__ . '/Support/FakeWpdb.php';
+require_once __DIR__ . '/Support/SchemaLoader.php';
+// Shadow VersionRepository with a test stub for unit tests
+require_once __DIR__ . '/Support/Stubs/VersionRepositoryStub.php';
 
 // Option storage stubs for versioning tests
 if (!function_exists('get_option')) {
