@@ -21,6 +21,7 @@ final class VersionRepository implements VersionRepositoryInterface
             'label' => $version->label,
             'comment' => $version->comment,
             'created_by' => $version->createdBy,
+            'created_at' => $version->createdAt?->format('Y-m-d H:i:s'),
             'published_at' => $version->publishedAt?->format('Y-m-d H:i:s'),
             'source_version_id' => $version->sourceVersionId,
             
@@ -44,7 +45,7 @@ final class VersionRepository implements VersionRepositoryInterface
         ];
 
         $formats = [
-            '%s', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
+            '%s', '%d', '%s', '%s', '%s', '%d', '%s', '%s', '%d',
             '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
         ];
 
@@ -54,11 +55,15 @@ final class VersionRepository implements VersionRepositoryInterface
             $version->id = (int) $this->db->insert_id;
             
             // Set location_point if lat/lng exist
-            if ($version->geo && $version->geo->lat && $version->geo->lng) {
-                $this->db->query($this->db->prepare(
+            if ($version->geo && $version->geo->isSet()) {
+                $result = $this->db->query($this->db->prepare(
                     "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
                     $version->geo->lng, $version->geo->lat, $version->id
                 ));
+                // Debug: Check if the update was successful
+                if ($result === false) {
+                    error_log("Failed to update location_point for version {$version->id}");
+                }
             }
         } else {
             // Update existing version
@@ -71,7 +76,7 @@ final class VersionRepository implements VersionRepositoryInterface
             );
             
             // Update location_point if lat/lng exist
-            if ($version->geo && $version->geo->lat && $version->geo->lng) {
+            if ($version->geo && $version->geo->isSet()) {
                 $this->db->query($this->db->prepare(
                     "UPDATE {$this->table()} SET location_point = ST_SRID(POINT(%f, %f), 4326) WHERE id = %d",
                     $version->geo->lng, $version->geo->lat, $version->id
@@ -85,7 +90,8 @@ final class VersionRepository implements VersionRepositoryInterface
             }
         }
 
-        return $version;
+        // Return the saved version with all data properly loaded from database
+        return $this->findById($version->id);
     }
 
     public function findById(int $id): ?Version
@@ -247,19 +253,25 @@ final class VersionRepository implements VersionRepositoryInterface
 
         // Create GeoPoint from location_point geometry
         $geo = null;
-        if (!empty($row['location_point'])) {
-            // Extract lat/lng from POINT geometry
-            // The migration data was inserted as POINT(lng, lat), so ST_Y() returns lng and ST_X() returns lat
-            $pointResult = $this->db->get_row($this->db->prepare(
-                "SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat FROM {$this->table()} WHERE id = %d",
-                $row['id']
-            ), ARRAY_A);
-            
-            if ($pointResult && $pointResult['lat'] && $pointResult['lng']) {
-                $geo = new \Minisite\Domain\ValueObjects\GeoPoint(
-                    lat: (float) $pointResult['lat'],
-                    lng: (float) $pointResult['lng']
-                );
+        // Always try to extract geo data if the row has an id
+        if ($row['id']) {
+            try {
+                // Extract lat/lng from POINT geometry
+                // POINT is stored as POINT(lng, lat), so ST_X() returns lng and ST_Y() returns lat
+                $pointResult = $this->db->get_row($this->db->prepare(
+                    "SELECT ST_X(location_point) as lng, ST_Y(location_point) as lat FROM {$this->table()} WHERE id = %d",
+                    $row['id']
+                ), ARRAY_A);
+                
+                if ($pointResult && $pointResult['lat'] !== null && $pointResult['lng'] !== null) {
+                    $geo = new \Minisite\Domain\ValueObjects\GeoPoint(
+                        lat: (float) $pointResult['lat'],
+                        lng: (float) $pointResult['lng']
+                    );
+                }
+            } catch (\Exception $e) {
+                // If spatial functions fail, geo remains null
+                // This is expected if MySQL spatial functions are not available
             }
         }
 
