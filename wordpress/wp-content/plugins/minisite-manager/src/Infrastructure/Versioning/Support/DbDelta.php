@@ -9,8 +9,19 @@ class DbDelta
 {
     public static function run(string $createTableSql): void
     {
-        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        self::ensureDbDeltaLoaded();
         // dbDelta returns array of messages; we don't need them here
         \dbDelta($createTableSql);
+    }
+
+    /**
+     * Ensures the WordPress dbDelta function is loaded
+     * This method can be mocked in tests to avoid file system dependencies
+     */
+    protected static function ensureDbDeltaLoaded(): void
+    {
+        if (!function_exists('dbDelta')) {
+            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        }
     }
 }
