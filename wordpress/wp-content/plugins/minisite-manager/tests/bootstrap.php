@@ -49,7 +49,6 @@ if (!class_exists('wpdb')) {
 
 // Load test support classes (so tests can `use Tests\Support\...` without Composer autoload-dev)
 require_once __DIR__ . '/Support/FakeWpdb.php';
-require_once __DIR__ . '/Support/SchemaLoader.php';
 
 // Option storage stubs for versioning tests
 if (!function_exists('get_option')) {
