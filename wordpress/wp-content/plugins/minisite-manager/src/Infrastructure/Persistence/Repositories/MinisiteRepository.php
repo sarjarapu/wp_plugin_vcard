@@ -167,15 +167,14 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
      */
     public function publishMinisite(string $id): void
     {
-        global $wpdb;
-        
-        $wpdb->query('START TRANSACTION');
+        $this->db->query('START TRANSACTION');
         
         try {
             $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($this->db);
             
             // Try to find latest draft first (preferred)
             $versionToPublish = $versionRepo->findLatestDraft($id);
+            
             
             if (!$versionToPublish) {
                 // Fallback: find latest version (could be published)
@@ -197,8 +196,8 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             // Only if there's a current published version
             $currentPublishedVersion = $versionRepo->findPublishedVersion($id);
             if ($currentPublishedVersion) {
-                $wpdb->query($wpdb->prepare(
-                    "UPDATE {$wpdb->prefix}minisite_versions 
+                $this->db->query($this->db->prepare(
+                    "UPDATE {$this->db->prefix}minisite_versions 
                      SET status = 'draft', label = CONCAT('Archived - ', label)
                      WHERE id = %d",
                     $currentPublishedVersion->id
@@ -206,56 +205,45 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             }
             
             // Publish the target version
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisite_versions 
+            $this->db->query($this->db->prepare(
+                "UPDATE {$this->db->prefix}minisite_versions 
                  SET status = 'published', published_at = NOW() 
                  WHERE id = %d",
                 $versionToPublish->id
             ));
             
             // Update main table with published content
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$this->table()} 
-                 SET site_json = %s, 
-                     title = %s,
-                     name = %s,
-                     city = %s,
-                     region = %s,
-                     country_code = %s,
-                     postal_code = %s,
-                     site_template = %s,
-                     palette = %s,
-                     industry = %s,
-                     default_locale = %s,
-                     schema_version = %d,
-                     site_version = %d,
-                     search_terms = %s,
-                     status = 'published',
-                     publish_status = 'published',
-                     _minisite_current_version_id = %d, 
-                     updated_at = NOW() 
-                 WHERE id = %s",
-                wp_json_encode($versionToPublish->siteJson),
-                $versionToPublish->title,
-                $versionToPublish->name,
-                $versionToPublish->city,
-                $versionToPublish->region,
-                $versionToPublish->countryCode,
-                $versionToPublish->postalCode,
-                $versionToPublish->siteTemplate,
-                $versionToPublish->palette,
-                $versionToPublish->industry,
-                $versionToPublish->defaultLocale,
-                $versionToPublish->schemaVersion,
-                $versionToPublish->siteVersion,
-                $versionToPublish->searchTerms,
-                $versionToPublish->id,
-                $id
-            ));
+            $updateData = [
+                'site_json' => wp_json_encode($versionToPublish->siteJson),
+                'title' => $versionToPublish->title,
+                'name' => $versionToPublish->name,
+                'city' => $versionToPublish->city,
+                'region' => $versionToPublish->region,
+                'country_code' => $versionToPublish->countryCode,
+                'postal_code' => $versionToPublish->postalCode,
+                'site_template' => $versionToPublish->siteTemplate,
+                'palette' => $versionToPublish->palette,
+                'industry' => $versionToPublish->industry,
+                'default_locale' => $versionToPublish->defaultLocale,
+                'schema_version' => $versionToPublish->schemaVersion,
+                'site_version' => $versionToPublish->siteVersion,
+                'search_terms' => $versionToPublish->searchTerms,
+                'status' => 'published',
+                'publish_status' => 'published',
+                '_minisite_current_version_id' => $versionToPublish->id,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            
+            $updateResult = $this->db->update(
+                $this->table(),
+                $updateData,
+                ['id' => $id]
+            );
+            
             
             // Update spatial data if coordinates exist
             if ($versionToPublish->geo && $versionToPublish->geo->lat && $versionToPublish->geo->lng) {
-                $wpdb->query($wpdb->prepare(
+                $this->db->query($this->db->prepare(
                     "UPDATE {$this->table()} 
                      SET location_point = POINT(%f, %f) 
                      WHERE id = %s",
@@ -263,10 +251,10 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
                 ));
             }
             
-            $wpdb->query('COMMIT');
+            $this->db->query('COMMIT');
             
         } catch (\Exception $e) {
-            $wpdb->query('ROLLBACK');
+            $this->db->query('ROLLBACK');
             throw $e;
         }
     }

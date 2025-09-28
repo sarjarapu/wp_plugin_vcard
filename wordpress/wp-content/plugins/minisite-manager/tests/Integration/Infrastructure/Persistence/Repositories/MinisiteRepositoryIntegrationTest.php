@@ -382,8 +382,8 @@ final class MinisiteRepositoryIntegrationTest extends TestCase
         ]);
         $this->versionRepository->save($publishedVersion);
         
-        // Publish should create a new draft from the published version
-        $this->repository->publishMinisite($minisite->id);
+        // Get latest draft for editing should create a new draft from the published version
+        $this->versionRepository->getLatestDraftForEditing($minisite->id);
         
         // Verify a new draft version was created
         $versions = $this->versionRepository->findByMinisiteId($minisite->id);

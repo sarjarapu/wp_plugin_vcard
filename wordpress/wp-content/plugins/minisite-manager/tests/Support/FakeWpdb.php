@@ -18,26 +18,28 @@ class FakeWpdb extends \wpdb
 
     public function prepare($query, ...$args)
     {
-        foreach ($args as $a) {
-            if (!preg_match('/%(s|d|f)/', $query, $m)) {
-                // No more placeholders, stop processing
-                break;
-            }
-            $placeholder = $m[0];
+        $argIndex = 0;
+        while ($argIndex < count($args) && preg_match('/%(s|d|f)/', $query, $m, PREG_OFFSET_CAPTURE)) {
+            $placeholder = $m[0][0];
+            $offset = $m[0][1];
+            $arg = $args[$argIndex];
+            
             switch ($placeholder) {
                 case '%s':
-                    $replacement = "'" . addslashes((string)$a) . "'";
-                    $query = preg_replace('/%s/', $replacement, $query, 1);
+                    $replacement = "'" . addslashes((string)$arg) . "'";
                     break;
                 case '%d':
-                    $num = is_numeric($a) ? (string)(int)$a : '0';
-                    $query = preg_replace('/%d/', $num, $query, 1);
+                    $replacement = is_numeric($arg) ? (string)(int)$arg : '0';
                     break;
                 case '%f':
-                    $num = is_numeric($a) ? (string)(float)$a : '0';
-                    $query = preg_replace('/%f/', $num, $query, 1);
+                    $replacement = is_numeric($arg) ? (string)(float)$arg : '0';
                     break;
+                default:
+                    $replacement = $placeholder;
             }
+            
+            $query = substr_replace($query, $replacement, $offset, strlen($placeholder));
+            $argIndex++;
         }
         return $query;
     }
