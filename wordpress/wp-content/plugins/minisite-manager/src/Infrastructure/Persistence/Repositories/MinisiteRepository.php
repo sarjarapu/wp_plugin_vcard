@@ -282,7 +282,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
 
         $data = [
             'id'             => $m->id,
-            'slug'           => null, // Will be set later for drafts
+            'slug'           => $m->slug,
             'business_slug'  => $m->slugs->business,
             'location_slug'  => $m->slugs->location,
             'title'          => $m->title,
@@ -301,12 +301,15 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             'search_terms'   => $search,
             'status'         => $m->status,
             'publish_status' => $m->status, // Set publish_status to same as status initially
+            'created_at'     => $m->createdAt->format('Y-m-d H:i:s'),
+            'updated_at'     => $m->updatedAt->format('Y-m-d H:i:s'),
+            'published_at'   => $m->publishedAt?->format('Y-m-d H:i:s'),
             'created_by'     => $m->createdBy,
             'updated_by'     => $m->updatedBy,
         ];
 
         $result = $this->db->insert($this->table(), $data, [
-            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d'
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d'
         ]);
 
         if ($result === false) {
@@ -405,6 +408,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
 
         return new Minisite(
             id:            (string)$r['id'],
+            slug:          $r['slug'] ?: null,
             slugs:         new SlugPair($r['business_slug'], $r['location_slug']),
             title:         $r['title'],
             name:          $r['name'],
@@ -422,6 +426,7 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             siteJson:      json_decode((string)$r['site_json'], true) ?: [],
             searchTerms:   $r['search_terms'] ?: null,
             status:        $r['status'],
+            publishStatus: $r['publish_status'],
             createdAt:     $r['created_at'] ? new \DateTimeImmutable($r['created_at']) : null,
             updatedAt:     $r['updated_at'] ? new \DateTimeImmutable($r['updated_at']) : null,
             publishedAt:   $r['published_at'] ? new \DateTimeImmutable($r['published_at']) : null,

@@ -8,69 +8,30 @@ use Minisite\Domain\Entities\Version;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\FakeWpdb;
+use Tests\Support\DatabaseTestHelper;
 
 #[CoversClass(VersionRepository::class)]
 final class VersionRepositoryIntegrationTest extends TestCase
 {
     private VersionRepository $repository;
-    private FakeWpdb $db;
-    private PDO $pdo;
+    private DatabaseTestHelper $dbHelper;
 
     protected function setUp(): void
     {
-        // Set up in-memory SQLite database for integration tests
-        $this->pdo = new PDO('sqlite::memory:');
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper->cleanupTestTables();
+        $this->dbHelper->createMinisiteVersionsTable();
         
-        $this->db = new FakeWpdb($this->pdo);
-        $this->db->prefix = 'wp_';
-        
-        $this->repository = new VersionRepository($this->db);
-        
-        $this->createTestTable();
+        $this->repository = new VersionRepository($this->dbHelper->getWpdb());
     }
 
-    private function createTestTable(): void
+    protected function tearDown(): void
     {
-        $sql = "
-            CREATE TABLE wp_minisite_versions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                minisite_id TEXT NOT NULL,
-                version_number INTEGER NOT NULL,
-                status TEXT NOT NULL,
-                label TEXT,
-                comment TEXT,
-                created_by INTEGER NOT NULL,
-                created_at DATETIME,
-                published_at DATETIME,
-                source_version_id INTEGER,
-                business_slug TEXT,
-                location_slug TEXT,
-                title TEXT,
-                name TEXT,
-                city TEXT,
-                region TEXT,
-                country_code TEXT,
-                postal_code TEXT,
-                location_point TEXT,
-                site_template TEXT,
-                palette TEXT,
-                industry TEXT,
-                default_locale TEXT,
-                schema_version INTEGER,
-                site_version INTEGER,
-                site_json TEXT,
-                search_terms TEXT,
-                UNIQUE(minisite_id, version_number)
-            )
-        ";
-        
-        $this->pdo->exec($sql);
+        $this->dbHelper->cleanupTestTables();
     }
+
 
     public function testSaveAndRetrieveVersion(): void
     {
@@ -93,7 +54,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
             region: 'Test Region',
             countryCode: 'US',
             postalCode: '12345',
-            geo: null, // Skip geo for SQLite compatibility
+            geo: null, // Can be set to test geo coordinates with MySQL
             siteTemplate: 'v2025',
             palette: 'blue',
             industry: 'services',
@@ -116,7 +77,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->assertSame('Test Business', $savedVersion->title);
         $this->assertSame('test-business', $savedVersion->slugs->business);
         $this->assertSame('test-location', $savedVersion->slugs->location);
-        $this->assertNull($savedVersion->geo); // Geo is null for SQLite compatibility
+        $this->assertNull($savedVersion->geo); // Geo is null in this test
 
         // Retrieve the version
         $retrievedVersion = $this->repository->findById($savedVersion->id);
@@ -130,7 +91,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->assertSame('Test Business', $retrievedVersion->title);
         $this->assertSame('test-business', $retrievedVersion->slugs->business);
         $this->assertSame('test-location', $retrievedVersion->slugs->location);
-        $this->assertNull($retrievedVersion->geo); // Geo is null for SQLite compatibility
+        $this->assertNull($retrievedVersion->geo); // Geo is null in this test
     }
 
     public function testUpdateExistingVersion(): void
@@ -581,8 +542,46 @@ final class VersionRepositoryIntegrationTest extends TestCase
 
     public function testVersionWithGeoLocationHandling(): void
     {
-        // Skip geo location test for SQLite compatibility
-        $this->markTestSkipped('Geo location functionality requires MySQL with spatial extensions');
+        $version = new Version(
+            id: null,
+            minisiteId: 'test-minisite-geo',
+            versionNumber: 1,
+            status: 'draft',
+            label: 'Geo Version',
+            comment: 'Version with geo location',
+            createdBy: 1,
+            createdAt: new DateTimeImmutable('2025-01-01T10:00:00Z'),
+            publishedAt: null,
+            sourceVersionId: null,
+            siteJson: [],
+            slugs: new SlugPair('geo-business', 'geo-location'),
+            title: 'Geo Business',
+            name: 'Geo Business Name',
+            city: 'New York',
+            region: 'NY',
+            countryCode: 'US',
+            postalCode: '10001',
+            geo: new GeoPoint(40.7128, -74.0060), // New York coordinates
+            siteTemplate: 'v2025',
+            palette: 'blue',
+            industry: 'services',
+            defaultLocale: 'en-US',
+            schemaVersion: 1,
+            siteVersion: 1,
+            searchTerms: 'geo business new york'
+        );
+
+        $savedVersion = $this->repository->save($version);
+        
+        $this->assertNotNull($savedVersion->geo);
+        $this->assertSame(40.7128, $savedVersion->geo->latitude);
+        $this->assertSame(-74.0060, $savedVersion->geo->longitude);
+
+        $retrievedVersion = $this->repository->findById($savedVersion->id);
+        
+        $this->assertNotNull($retrievedVersion->geo);
+        $this->assertSame(40.7128, $retrievedVersion->geo->latitude);
+        $this->assertSame(-74.0060, $retrievedVersion->geo->longitude);
     }
 
     public function testVersionWithSlugPairHandling(): void

@@ -6,55 +6,30 @@ namespace Tests\Integration\Infrastructure\Persistence\Repositories;
 use DateTimeImmutable;
 use Minisite\Domain\Entities\Review;
 use Minisite\Infrastructure\Persistence\Repositories\ReviewRepository;
-use PDO;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\FakeWpdb;
+use Tests\Support\DatabaseTestHelper;
 
 #[CoversClass(ReviewRepository::class)]
 final class ReviewRepositoryIntegrationTest extends TestCase
 {
     private ReviewRepository $repository;
-    private FakeWpdb $db;
-    private PDO $pdo;
+    private DatabaseTestHelper $dbHelper;
 
     protected function setUp(): void
     {
-        // Set up in-memory SQLite database for integration tests
-        $this->pdo = new PDO('sqlite::memory:');
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper->cleanupTestTables();
+        $this->dbHelper->createMinisiteReviewsTable();
         
-        $this->db = new FakeWpdb($this->pdo);
-        $this->db->prefix = 'wp_';
-        
-        $this->repository = new ReviewRepository($this->db);
-        
-        $this->createTestTable();
+        $this->repository = new ReviewRepository($this->dbHelper->getWpdb());
     }
 
-    private function createTestTable(): void
+    protected function tearDown(): void
     {
-        $sql = "
-            CREATE TABLE wp_minisite_reviews (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                minisite_id INTEGER NOT NULL,
-                author_name TEXT NOT NULL,
-                author_url TEXT,
-                rating REAL NOT NULL,
-                body TEXT NOT NULL,
-                locale TEXT,
-                visited_month TEXT,
-                source TEXT NOT NULL,
-                source_id TEXT,
-                status TEXT NOT NULL,
-                created_at DATETIME,
-                updated_at DATETIME,
-                created_by INTEGER
-            )
-        ";
-        
-        $this->pdo->exec($sql);
+        $this->dbHelper->cleanupTestTables();
     }
+
 
     public function testAddAndRetrieveReview(): void
     {

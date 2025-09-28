@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Unit\Domain\Entities;
+namespace Tests\Unit\Domain\Entities;
 
 use DateTimeImmutable;
 use Minisite\Domain\Entities\Review;

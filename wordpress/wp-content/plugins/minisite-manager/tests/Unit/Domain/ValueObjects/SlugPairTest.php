@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Unit\Domain\ValueObjects;
+namespace Tests\Unit\Domain\ValueObjects;
 
 use Minisite\Domain\ValueObjects\SlugPair;
 use PHPUnit\Framework\Attributes\DataProvider;

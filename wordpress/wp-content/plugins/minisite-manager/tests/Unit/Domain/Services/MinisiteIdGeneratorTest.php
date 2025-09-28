@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Unit\Domain\Services;
+namespace Tests\Unit\Domain\Services;
 
 use Minisite\Domain\Services\MinisiteIdGenerator;
 use PHPUnit\Framework\TestCase;

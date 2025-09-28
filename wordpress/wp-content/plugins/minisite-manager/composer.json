@@ -16,6 +16,11 @@
             "Minisite\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "extra": {
         "branch-alias": {
             "dev-main": "1.x-dev"

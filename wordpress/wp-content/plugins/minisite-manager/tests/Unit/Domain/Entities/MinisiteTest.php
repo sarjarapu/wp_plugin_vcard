@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Unit\Domain\Entities;
+namespace Tests\Unit\Domain\Entities;
 
 use DateTimeImmutable;
 use Minisite\Domain\Entities\Minisite;
@@ -26,6 +26,7 @@ final class MinisiteTest extends TestCase
         // Expected constructor parameters in exact order with strict types and nullability
         $expected = [
             ['id', 'string', false],
+            ['slug', 'string', true],
             ['slugs', SlugPair::class, false],
             ['title', 'string', false],
             ['name', 'string', false],
@@ -43,6 +44,7 @@ final class MinisiteTest extends TestCase
             ['siteJson', 'array', false],
             ['searchTerms', 'string', true],
             ['status', 'string', false],
+            ['publishStatus', 'string', false],
             ['createdAt', DateTimeImmutable::class, true],
             ['updatedAt', DateTimeImmutable::class, true],
             ['publishedAt', DateTimeImmutable::class, true],
@@ -194,6 +196,7 @@ final class MinisiteTest extends TestCase
         $base = function (array $overrides): void {
             new Minisite(
                 id: $overrides['id'] ?? 'id',
+                slug: $overrides['slug'] ?? 'test-slug',
                 slugs: $overrides['slugs'] ?? new SlugPair('biz', 'loc'),
                 title: 'Title',
                 name: 'Name',
@@ -211,6 +214,7 @@ final class MinisiteTest extends TestCase
                 siteJson: $overrides['siteJson'] ?? [],
                 searchTerms: 'terms',
                 status: 'draft',
+                publishStatus: 'draft',
                 createdAt: new DateTimeImmutable('2025-01-01T00:00:00Z'),
                 updatedAt: new DateTimeImmutable('2025-01-01T01:00:00Z'),
                 publishedAt: null,
@@ -274,6 +278,7 @@ final class MinisiteTest extends TestCase
     {
         $defaults = [
             'id' => 'id',
+            'slug' => 'test-slug',
             'slugs' => new SlugPair('biz', 'loc'),
             'title' => 'Title',
             'name' => 'Name',
@@ -291,6 +296,7 @@ final class MinisiteTest extends TestCase
             'siteJson' => [],
             'searchTerms' => 'terms',
             'status' => 'draft',
+            'publishStatus' => 'draft',
             'createdAt' => new DateTimeImmutable('2025-01-01T00:00:00Z'),
             'updatedAt' => new DateTimeImmutable('2025-01-01T01:00:00Z'),
             'publishedAt' => null,
@@ -305,6 +311,7 @@ final class MinisiteTest extends TestCase
         // Named arguments ensure strict matching of parameter names
         return new Minisite(
             id: $args['id'],
+            slug: $args['slug'],
             slugs: $args['slugs'],
             title: $args['title'],
             name: $args['name'],
@@ -322,6 +329,7 @@ final class MinisiteTest extends TestCase
             siteJson: $args['siteJson'],
             searchTerms: $args['searchTerms'],
             status: $args['status'],
+            publishStatus: $args['publishStatus'],
             createdAt: $args['createdAt'],
             updatedAt: $args['updatedAt'],
             publishedAt: $args['publishedAt'],

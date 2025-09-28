@@ -8,6 +8,7 @@ final class Minisite
 {
     public function __construct(
         public string $id,
+        public ?string $slug,
         public SlugPair $slugs,
         public string $title,
         public string $name,
@@ -25,6 +26,7 @@ final class Minisite
         public array $siteJson,        // denormalized site data for rendering
         public ?string $searchTerms,   // normalized searchable text
         public string $status,         // draft|published|archived
+        public string $publishStatus,  // draft|reserved|published
         public ?\DateTimeImmutable $createdAt,
         public ?\DateTimeImmutable $updatedAt,
         public ?\DateTimeImmutable $publishedAt,

@@ -580,6 +580,7 @@ final class MinisiteRepositoryTest extends TestCase
     {
         return new Minisite(
             id: 'test-123',
+            slug: 'test-business-location',
             slugs: new SlugPair('test-business', 'test-location'),
             title: 'Test Business',
             name: 'Test Business Name',
@@ -597,6 +598,7 @@ final class MinisiteRepositoryTest extends TestCase
             siteJson: ['test' => 'data'],
             searchTerms: 'test business name new york blue test business',
             status: 'draft',
+            publishStatus: 'draft',
             createdAt: new DateTimeImmutable('2025-01-15T10:00:00Z'),
             updatedAt: new DateTimeImmutable('2025-01-15T10:30:00Z'),
             publishedAt: null,

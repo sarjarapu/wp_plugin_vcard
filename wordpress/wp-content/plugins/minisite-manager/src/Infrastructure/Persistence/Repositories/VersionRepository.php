@@ -33,7 +33,6 @@ final class VersionRepository implements VersionRepositoryInterface
             'region' => $version->region,
             'country_code' => $version->countryCode,
             'postal_code' => $version->postalCode,
-            'location_point' => null, // Will be set separately if needed
             'site_template' => $version->siteTemplate,
             'palette' => $version->palette,
             'industry' => $version->industry,
@@ -46,7 +45,7 @@ final class VersionRepository implements VersionRepositoryInterface
 
         $formats = [
             '%s', '%d', '%s', '%s', '%s', '%d', '%s', '%d',
-            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
+            '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s'
         ];
 
         if ($version->id === null) {
