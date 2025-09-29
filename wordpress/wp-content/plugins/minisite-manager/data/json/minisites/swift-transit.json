@@ -3,6 +3,9 @@
     "exported_at": "2025-09-29T12:54:20+00:00",
     "minisite": {
         "id": "a32c01c03585dc0c462d9ff0",
+        "slug": "swift-transit-sydney",
+        "business_slug": "swift-transit",
+        "location_slug": "sydney",
         "title": "Swift Transit — Sydney",
         "name": "Swift Transit",
         "city": "Sydney",
@@ -10,14 +13,24 @@
         "country_code": "AU",
         "postal_code": "2000",
         "location": {
-            "lat": -33.8688,
-            "lng": 151.2093
+            "latitude": -33.8688,
+            "longitude": 151.2093
         },
         "site_template": "v2025",
         "palette": "teal",
         "industry": "transport",
-        "default_locale": "0",
+        "default_locale": "en-AU",
+        "schema_version": 1,
+        "site_version": 1,
         "search_terms": "swift transit courier sydney logistics same day delivery",
+        "status": "published",
+        "publish_status": "published",
+        "created_at": "2025-09-29T12:51:33+00:00",
+        "updated_at": "2025-09-29T12:51:33+00:00",
+        "published_at": "2025-09-29T12:51:33+00:00",
+        "created_by": null,
+        "updated_by": null,
+        "_minisite_current_version_id": null,
         "site_json": {
             "seo": {
                 "title": "Swift Transit — Courier & Logistics",
@@ -206,6 +219,6 @@
     "metadata": {
         "original_created_at": "2025-09-29T12:51:33+00:00",
         "original_updated_at": "2025-09-29T12:51:33+00:00",
-        "exported_by": "shyam.arjarapu@gmail.com"
+        "exported_by": "wp-admin"
     }
 }

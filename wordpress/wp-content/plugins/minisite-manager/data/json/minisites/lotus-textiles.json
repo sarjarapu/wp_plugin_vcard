@@ -3,6 +3,9 @@
     "exported_at": "2025-09-29T12:54:13+00:00",
     "minisite": {
         "id": "d21b3902e9d8e5c9f676a030",
+        "slug": "lotus-textiles-mumbai",
+        "business_slug": "lotus-textiles",
+        "location_slug": "mumbai",
         "title": "Lotus Textiles — Mumbai",
         "name": "Lotus Textiles",
         "city": "Mumbai",
@@ -10,14 +13,24 @@
         "country_code": "IN",
         "postal_code": "400001",
         "location": {
-            "lat": 19.076,
-            "lng": 72.8777
+            "latitude": 19.0760,
+            "longitude": 72.8777
         },
         "site_template": "v2025",
         "palette": "rose",
         "industry": "textile",
-        "default_locale": "0",
+        "default_locale": "en-IN",
+        "schema_version": 1,
+        "site_version": 1,
         "search_terms": "lotus textiles fabric mumbai india showroom boutique",
+        "status": "published",
+        "publish_status": "published",
+        "created_at": "2025-09-29T12:51:33+00:00",
+        "updated_at": "2025-09-29T12:51:33+00:00",
+        "published_at": "2025-09-29T12:51:33+00:00",
+        "created_by": null,
+        "updated_by": null,
+        "_minisite_current_version_id": null,
         "site_json": {
             "seo": {
                 "title": "Lotus Textiles — Mumbai",
@@ -201,6 +214,6 @@
     "metadata": {
         "original_created_at": "2025-09-29T12:51:33+00:00",
         "original_updated_at": "2025-09-29T12:51:33+00:00",
-        "exported_by": "shyam.arjarapu@gmail.com"
+        "exported_by": "wp-admin"
     }
 }

@@ -3,6 +3,9 @@
     "exported_at": "2025-09-29T12:54:17+00:00",
     "minisite": {
         "id": "c2036eda6b54baec37b78f9d",
+        "slug": "green-bites-london",
+        "business_slug": "green-bites",
+        "location_slug": "london",
         "title": "Green Bites — London",
         "name": "Green Bites",
         "city": "London",
@@ -10,14 +13,24 @@
         "country_code": "GB",
         "postal_code": "EC1A 1AA",
         "location": {
-            "lat": 51.509865,
-            "lng": -0.118092
+            "latitude": 51.509865,
+            "longitude": -0.118092
         },
         "site_template": "v2025",
         "palette": "amber",
         "industry": "restaurant",
-        "default_locale": "0",
+        "default_locale": "en-GB",
+        "schema_version": 1,
+        "site_version": 1,
         "search_terms": "green bites lunch bowls london cafe vegan coffee",
+        "status": "published",
+        "publish_status": "published",
+        "created_at": "2025-09-29T12:51:33+00:00",
+        "updated_at": "2025-09-29T12:51:33+00:00",
+        "published_at": "2025-09-29T12:51:33+00:00",
+        "created_by": null,
+        "updated_by": null,
+        "_minisite_current_version_id": null,
         "site_json": {
             "seo": {
                 "title": "Green Bites — Plant-forward Kitchen",
@@ -201,6 +214,6 @@
     "metadata": {
         "original_created_at": "2025-09-29T12:51:33+00:00",
         "original_updated_at": "2025-09-29T12:51:33+00:00",
-        "exported_by": "shyam.arjarapu@gmail.com"
+        "exported_by": "wp-admin"
     }
 }
