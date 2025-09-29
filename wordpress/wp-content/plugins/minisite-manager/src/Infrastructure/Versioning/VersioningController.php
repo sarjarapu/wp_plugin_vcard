@@ -13,10 +13,10 @@ class VersioningController
 
     public function activate(): void
     {
-        $this->maybeRun(); // Ensure base schema exists on activation
+        $this->ensureDatabaseUpToDate(); // Ensure base schema exists on activation
     }
 
-    public function maybeRun(): void
+    public function ensureDatabaseUpToDate(): void
     {
         global $wpdb;
 

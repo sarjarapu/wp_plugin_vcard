@@ -135,7 +135,7 @@ register_deactivation_hook(__FILE__, function () {
 add_action('admin_init', function () {
   if ($vcClass = minisite_class(\Minisite\Infrastructure\Versioning\VersioningController::class)) {
     $vc = new $vcClass(MINISITE_DB_VERSION, MINISITE_DB_OPTION);
-    $vc->maybeRun();
+    $vc->ensureDatabaseUpToDate();
   }
 
   // Keep caps synchronized for existing roles (safe, idempotent)
