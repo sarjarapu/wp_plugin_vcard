@@ -11,6 +11,11 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/../');
 }
 
+// Define plugin constants needed for testing
+if (!defined('MINISITE_PLUGIN_DIR')) {
+    define('MINISITE_PLUGIN_DIR', __DIR__ . '/../');
+}
+
 // Mock WordPress global variables
 if (!isset($GLOBALS['wpdb'])) {
     $GLOBALS['wpdb'] = new class {
@@ -82,6 +87,18 @@ if (!function_exists('get_current_user_id')) {
 if (!function_exists('wp_json_encode')) {
     function wp_json_encode($data, $options = 0, $depth = 512) {
         return json_encode($data, $options, $depth);
+    }
+}
+
+if (!function_exists('trailingslashit')) {
+    function trailingslashit($string) {
+        return rtrim($string, '/') . '/';
+    }
+}
+
+if (!function_exists('untrailingslashit')) {
+    function untrailingslashit($string) {
+        return rtrim($string, '/');
     }
 }
 

@@ -42,7 +42,7 @@ class VersioningController
         }
     }
 
-    private function tablesMissing(\wpdb $wpdb): bool
+    protected function tablesMissing(\wpdb $wpdb): bool
     {
         $prefix = $wpdb->prefix;
         $tables = [

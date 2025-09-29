@@ -21,10 +21,15 @@ class MigrationLocator
 
         $migrations = [];
         foreach (get_declared_classes() as $class) {
-            if (is_subclass_of($class, Migration::class)) {
-                $ref = new \ReflectionClass($class);
+            $ref = new \ReflectionClass($class);
+            // Check if class implements Migration interface
+            if ($ref->implementsInterface(Migration::class)) {
                 // Only include classes that physically live under this directory (safety)
-                if (str_starts_with($ref->getFileName(), $this->dirAbsolute)) {
+                // Use realpath to handle symlinks (e.g., /var -> /private/var on macOS)
+                $fileRealPath = realpath($ref->getFileName());
+                $dirRealPath = realpath($this->dirAbsolute);
+                
+                if ($fileRealPath && $dirRealPath && str_starts_with($fileRealPath, $dirRealPath)) {
                     /** @var Migration $instance */
                     $instance = $ref->newInstance();
                     $migrations[] = $instance;
