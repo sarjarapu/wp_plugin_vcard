@@ -45,8 +45,8 @@ class MigrationLocatorIntegrationTest extends TestCase
     public function test_all_loads_real_migration_files(): void
     {
         // Arrange
-        $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [], 'RealCreateBase');
-        $this->createTestMigrationFile('_1_1_0_AddIndexes.php', '1.1.0', 'Add database indexes', [], 'RealAddIndexes');
+        $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables');
+        $this->createTestMigrationFile('_1_1_0_AddIndexes.php', '1.1.0', 'Add database indexes');
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
         // Act
@@ -102,11 +102,11 @@ class MigrationLocatorIntegrationTest extends TestCase
     public function test_all_handles_complex_migration_scenarios(): void
     {
         // Arrange
-        $this->createTestMigrationFile('_1_0_0_Initial.php', '1.0.0', 'Initial migration', [], 'ComplexInitial');
-        $this->createTestMigrationFile('_1_0_1_Hotfix.php', '1.0.1', 'Hotfix migration', [], 'ComplexHotfix');
-        $this->createTestMigrationFile('_1_1_0_Features.php', '1.1.0', 'New features', [], 'ComplexFeatures');
-        $this->createTestMigrationFile('_2_0_0_Breaking.php', '2.0.0', 'Breaking changes', [], 'ComplexBreaking');
-        $this->createTestMigrationFile('_2_0_1_PostBreaking.php', '2.0.1', 'Post-breaking fix', [], 'ComplexPostBreaking');
+        $this->createTestMigrationFile('_1_0_0_Initial_Complex.php', '1.0.0', 'Initial migration');
+        $this->createTestMigrationFile('_1_0_1_Hotfix.php', '1.0.1', 'Hotfix migration');
+        $this->createTestMigrationFile('_1_1_0_Features.php', '1.1.0', 'New features');
+        $this->createTestMigrationFile('_2_0_0_Breaking.php', '2.0.0', 'Breaking changes');
+        $this->createTestMigrationFile('_2_0_1_PostBreaking.php', '2.0.1', 'Post-breaking fix');
         
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
@@ -133,9 +133,9 @@ class MigrationLocatorIntegrationTest extends TestCase
     public function test_all_handles_migrations_with_different_file_naming_conventions(): void
     {
         // Arrange
-        $this->createTestMigrationFile('Migration_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [], 'NamingCreateBase');
-        $this->createTestMigrationFile('V1_1_0_AddFeatures.php', '1.1.0', 'Add features', [], 'NamingAddFeatures');
-        $this->createTestMigrationFile('_2_0_0_UpdateSchema.php', '2.0.0', 'Update schema', [], 'NamingUpdateSchema');
+        $this->createTestMigrationFile('Migration_1_0_0_CreateBase.php', '1.0.0', 'Create base tables');
+        $this->createTestMigrationFile('V1_1_0_AddFeatures.php', '1.1.0', 'Add features');
+        $this->createTestMigrationFile('_2_0_0_UpdateSchema.php', '2.0.0', 'Update schema');
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
         // Act
@@ -152,13 +152,13 @@ class MigrationLocatorIntegrationTest extends TestCase
     public function test_all_handles_migrations_with_complex_version_numbers(): void
     {
         // Arrange
-        $this->createTestMigrationFile('_1_0_0_Initial.php', '1.0.0', 'Initial', [], 'ComplexInitial');
-        $this->createTestMigrationFile('_1_0_0_alpha1_Alpha.php', '1.0.0-alpha1', 'Alpha', [], 'ComplexAlpha');
-        $this->createTestMigrationFile('_1_0_0_beta1_Beta.php', '1.0.0-beta1', 'Beta', [], 'ComplexBeta');
-        $this->createTestMigrationFile('_1_0_0_rc1_RC.php', '1.0.0-rc1', 'Release Candidate', [], 'ComplexRC');
-        $this->createTestMigrationFile('_1_0_1_Patch.php', '1.0.1', 'Patch', [], 'ComplexPatch');
-        $this->createTestMigrationFile('_1_10_0_Minor.php', '1.10.0', 'Minor', [], 'ComplexMinor');
-        $this->createTestMigrationFile('_10_0_0_Major.php', '10.0.0', 'Major', [], 'ComplexMajor');
+        $this->createTestMigrationFile('_1_0_0_Initial.php', '1.0.0', 'Initial');
+        $this->createTestMigrationFile('_1_0_0_alpha1_Alpha.php', '1.0.0-alpha1', 'Alpha');
+        $this->createTestMigrationFile('_1_0_0_beta1_Beta.php', '1.0.0-beta1', 'Beta');
+        $this->createTestMigrationFile('_1_0_0_rc1_RC.php', '1.0.0-rc1', 'Release Candidate');
+        $this->createTestMigrationFile('_1_0_1_Patch.php', '1.0.1', 'Patch');
+        $this->createTestMigrationFile('_1_10_0_Minor.php', '1.10.0', 'Minor');
+        $this->createTestMigrationFile('_10_0_0_Major.php', '10.0.0', 'Major');
         
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
@@ -185,7 +185,7 @@ class MigrationLocatorIntegrationTest extends TestCase
     {
         // Arrange
         // Valid migration
-        $this->createTestMigrationFile('_1_0_0_Valid.php', '1.0.0', 'Valid migration', [], 'InvalidValid');
+        $this->createTestMigrationFile('_1_0_0_Valid.php', '1.0.0', 'Valid migration');
         
         // Invalid files
         $this->createFile('invalid_syntax.php', '<?php class Invalid { public function test() { return "test"; } } // Valid syntax but not a migration');
@@ -251,10 +251,9 @@ class MigrationLocatorIntegrationTest extends TestCase
         string $filename, 
         string $version, 
         string $description, 
-        array $sql = [],
-        ?string $customClassName = null
+        array $sql = []
     ): void {
-        $className = $customClassName ?? $this->getClassNameFromFilename($filename);
+        $className = $this->getClassNameFromFilename($filename);
         $upSql = $sql['up'] ?? '-- Migration up SQL';
         $downSql = $sql['down'] ?? '-- Migration down SQL';
         
