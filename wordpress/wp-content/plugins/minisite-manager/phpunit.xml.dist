@@ -36,7 +36,7 @@
 
   <groups>
     <include>
-      <!-- run all by default; use the group option to select specific groups -->
+      <group>default</group>
     </include>
   </groups>
 
