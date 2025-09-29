@@ -1,0 +1,206 @@
+{
+    "export_version": "1.0",
+    "exported_at": "2025-09-29T12:54:13+00:00",
+    "minisite": {
+        "id": "d21b3902e9d8e5c9f676a030",
+        "title": "Lotus Textiles — Mumbai",
+        "name": "Lotus Textiles",
+        "city": "Mumbai",
+        "region": "MH",
+        "country_code": "IN",
+        "postal_code": "400001",
+        "location": {
+            "lat": 19.076,
+            "lng": 72.8777
+        },
+        "site_template": "v2025",
+        "palette": "rose",
+        "industry": "textile",
+        "default_locale": "0",
+        "search_terms": "lotus textiles fabric mumbai india showroom boutique",
+        "site_json": {
+            "seo": {
+                "title": "Lotus Textiles — Mumbai",
+                "description": "Fine silks, linens, and custom tailoring in Colaba. Contemporary designs rooted in Indian handloom traditions.",
+                "keywords": "lotus textiles, fabrics, handloom, mumbai, tailoring",
+                "favicon": "https://cdn-icons-png.flaticon.com/512/6010/6010534.png"
+            },
+            "brand": {
+                "palette": "rose",
+                "industry": "textile",
+                "logo": "https://cdn-icons-png.flaticon.com/512/6010/6010534.png",
+                "name": "Lotus Textiles"
+            },
+            "hero": {
+                "heading": "Lotus Textiles",
+                "subheading": "Your Colaba, Mumbai fabric house offering premium silks, breathable linens, and bespoke tailoring with attentive fittings in a relaxed studio at fair, transparent prices.",
+                "badge": "Trusted Supplier",
+                "image": "https://images.unsplash.com/photo-1542044801-30d3e45ae49a?w=1600&q=80&auto=format&fit=crop",
+                "rating": {
+                    "value": 4.7,
+                    "count": 412
+                },
+                "ctas": [
+                    {
+                        "text": "Browse Collection",
+                        "url": "#products"
+                    },
+                    {
+                        "text": "Contact",
+                        "url": "#contact"
+                    }
+                ]
+            },
+            "about": {
+                "html": "<p>At Lotus Textiles, we curate fine silks, linens, and cottons from across India. Our artisans and suppliers are carefully selected for quality and ethical practices.</p><br/><p>Our in-house designers craft contemporary styles while preserving handloom traditions. Whether you need luxury Banarasi silk or breathable linen, our team will help you match fabric to occasion and fit.</p><br/><p>We supply boutiques and provide made-to-measure services with transparent pricing and turnaround times.</p>"
+            },
+            "whyUs": {
+                "title": "Why Choose Us?",
+                "html": "<p>We combine premium materials with tailored service. Our consultants guide you through fabric selection, lining, and care so your garments last for years.</p><br/><p>Alterations and bespoke stitching are done in-house for consistency and speed. Enjoy convenient fittings and delivery across Mumbai.</p>",
+                "image": "https://images.unsplash.com/photo-1524292332709-b33366a7f165?auto=format&fit=crop&w=1600"
+            },
+            "services": {
+                "title": "Products & Services",
+                "listing": [
+                    {
+                        "title": "Handloom Silks",
+                        "image": "https://images.unsplash.com/photo-1534639077088-d702bcf685e7?q=80&w=800&auto=format&fit=crop",
+                        "description": "Banarasi, Kanchipuram, and more. Rich textures and timeless patterns.",
+                        "price": "From ₹3,999",
+                        "icon": "fa-swatchbook",
+                        "cta": "Enquire",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Linen Collections",
+                        "image": "https://images.unsplash.com/photo-1632421377986-0b1f70773812?q=80&w=800&auto=format&fit=crop",
+                        "description": "Lightweight linens ideal for Mumbai summers. Multiple shades and weights.",
+                        "price": "From ₹1,999",
+                        "icon": "fa-shirt",
+                        "cta": "Enquire",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Tailoring",
+                        "image": "https://images.unsplash.com/photo-1534126511673-b6899657816a?q=80&w=800&auto=format&fit=crop",
+                        "description": "Custom stitching & fittings for suits, blouses, and kurtas.",
+                        "price": "Quoted",
+                        "icon": "fa-scissors",
+                        "cta": "Book",
+                        "url": "tel:+912266601234"
+                    },
+                    {
+                        "title": "Embroidery",
+                        "image": "https://images.unsplash.com/photo-1623605004748-3af12342204f?q=80&w=800&auto=format&fit=crop",
+                        "description": "Hand and machine embroidery with zari and threadwork to match your design.",
+                        "price": "Quoted",
+                        "icon": "fa-needle",
+                        "cta": "Enquire",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Dyeing & Finishing",
+                        "image": "https://images.unsplash.com/photo-1506034844286-f98ed954e516?q=80&w=800&auto=format&fit=crop",
+                        "description": "Custom dye shades and fabric finishing for drape and handfeel.",
+                        "price": "Quoted",
+                        "icon": "fa-flask",
+                        "cta": "Enquire",
+                        "url": "#request-info"
+                    }
+                ]
+            },
+            "contact": {
+                "phone": {
+                    "text": "+91 22 6660 1234",
+                    "link": "+912266601234"
+                },
+                "whatsapp": {
+                    "text": "+91 22 6660 1234",
+                    "link": "912266601234"
+                },
+                "email": "hello@lotustextiles.in",
+                "website": {
+                    "text": "lotustextiles.in",
+                    "link": "https://lotustextiles.in"
+                },
+                "address": "12 Colaba Causeway, Mumbai 400001",
+                "address_line1": "12 Colaba Causeway",
+                "address_line2": "2nd Floor",
+                "address_line3": "",
+                "address_line4": "",
+                "hours": {
+                    "Monday": {
+                        "open": "",
+                        "close": "",
+                        "closed": true
+                    },
+                    "Tuesday": {
+                        "open": "11:00",
+                        "close": "19:00",
+                        "closed": false
+                    },
+                    "Wednesday": {
+                        "open": "11:00",
+                        "close": "19:00",
+                        "closed": false
+                    },
+                    "Thursday": {
+                        "open": "11:00",
+                        "close": "19:00",
+                        "closed": false
+                    },
+                    "Friday": {
+                        "open": "11:00",
+                        "close": "19:00",
+                        "closed": false
+                    },
+                    "Saturday": {
+                        "open": "10:00",
+                        "close": "16:00",
+                        "closed": false
+                    },
+                    "Sunday": {
+                        "open": "11:00",
+                        "close": "19:00",
+                        "closed": false
+                    }
+                },
+                "plusCode": "2RQP+6V Mumbai",
+                "plusCodeUrl": "https://maps.google.com/?q=2RQP+6V+Mumbai"
+            },
+            "gallery": [
+                {
+                    "src": "https://images.unsplash.com/photo-1534639077088-d702bcf685e7?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Fabric rolls"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1632421377986-0b1f70773812?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Linen collection"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1534126511673-b6899657816a?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Tailoring"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1623605004748-3af12342204f?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Embroidery"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1506034844286-f98ed954e516?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Dyeing & Finishing"
+                }
+            ],
+            "social": {
+                "facebook": "https://facebook.com/lotus.textiles",
+                "instagram": "https://instagram.com/lotus.textiles",
+                "x": "https://x.com/lotus.textiles",
+                "youtube": "https://youtube.com/lotus.textiles"
+            }
+        }
+    },
+    "metadata": {
+        "original_created_at": "2025-09-29T12:51:33+00:00",
+        "original_updated_at": "2025-09-29T12:51:33+00:00",
+        "exported_by": "shyam.arjarapu@gmail.com"
+    }
+}

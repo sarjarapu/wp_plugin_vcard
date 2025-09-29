@@ -1,0 +1,211 @@
+{
+    "export_version": "1.0",
+    "exported_at": "2025-09-29T12:54:20+00:00",
+    "minisite": {
+        "id": "a32c01c03585dc0c462d9ff0",
+        "title": "Swift Transit — Sydney",
+        "name": "Swift Transit",
+        "city": "Sydney",
+        "region": "NSW",
+        "country_code": "AU",
+        "postal_code": "2000",
+        "location": {
+            "lat": -33.8688,
+            "lng": 151.2093
+        },
+        "site_template": "v2025",
+        "palette": "teal",
+        "industry": "transport",
+        "default_locale": "0",
+        "search_terms": "swift transit courier sydney logistics same day delivery",
+        "site_json": {
+            "seo": {
+                "title": "Swift Transit — Courier & Logistics",
+                "description": "Reliable same‑day courier and scheduled logistics across NSW with real-time tracking and friendly support.",
+                "keywords": "swift transit, courier, logistics, sydney, same day delivery",
+                "favicon": "https://cdn-icons-png.flaticon.com/512/995/995260.png"
+            },
+            "brand": {
+                "palette": "teal",
+                "industry": "transport",
+                "logo": "https://cdn-icons-png.flaticon.com/512/995/995260.png",
+                "name": "Swift Transit"
+            },
+            "hero": {
+                "heading": "Swift Transit",
+                "subheading": "Your Sydney, NSW courier partner for same‑day and scheduled deliveries, last‑mile logistics, and careful handling with real‑time tracking, friendly support, and on‑time, transparent pricing.",
+                "badge": "On-Time Delivery",
+                "image": "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?w=1600&q=80&auto=format&fit=crop",
+                "rating": {
+                    "value": 4.9,
+                    "count": 189
+                },
+                "ctas": [
+                    {
+                        "text": "Get Quote",
+                        "url": "#request-info"
+                    },
+                    {
+                        "text": "Call",
+                        "url": "tel:+61255501234"
+                    }
+                ]
+            },
+            "about": {
+                "html": "<p>Swift Transit provides same‑day courier and scheduled deliveries for businesses across Sydney. Our fleet includes vans, bikes, and EVs to fit every job size.</p><br/><p>We're trusted by retailers, clinics, and agencies to handle time-critical consignments with care and visibility.</p><br/><p>Real-time tracking and dedicated support keep your operations moving.</p>"
+            },
+            "whyUs": {
+                "title": "Why Choose Us?",
+                "html": "<p>On-time performance, transparent pricing, and proactive communication are at the core of our service. Our drivers are trained to handle fragile and confidential items.</p><br/><p>We integrate with your workflows and provide proof-of-delivery instantly.</p>",
+                "image": "https://images.unsplash.com/photo-1498084393753-b411b2d26b34?auto=format&fit=crop&w=1600"
+            },
+            "services": {
+                "title": "Services",
+                "listing": [
+                    {
+                        "title": "Same‑Day Courier",
+                        "image": "https://plus.unsplash.com/premium_photo-1757583509874-59d774474cf3?q=80&w=800&auto=format&fit=crop",
+                        "description": "Intra-city urgent deliveries with live tracking.",
+                        "price": "From A$29",
+                        "icon": "fa-truck-fast",
+                        "cta": "Get Quote",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "Scheduled Routes",
+                        "image": "https://plus.unsplash.com/premium_photo-1723651354432-7796fb4ecebc?q=80&w=800&auto=format&fit=crop",
+                        "description": "Daily and weekly pickups tailored to your timetable.",
+                        "price": "Custom",
+                        "icon": "fa-route",
+                        "cta": "Contact",
+                        "url": "#contact"
+                    },
+                    {
+                        "title": "Warehouse Transfer",
+                        "image": "https://plus.unsplash.com/premium_photo-1749423089108-9ab9871fb9e2?q=80&w=800&auto=format&fit=crop",
+                        "description": "Pallet & bulk moves with pallet-jack ready vans.",
+                        "price": "Custom",
+                        "icon": "fa-dolly",
+                        "cta": "Call",
+                        "url": "tel:+61255501234"
+                    },
+                    {
+                        "title": "Medical Courier",
+                        "image": "https://images.unsplash.com/photo-1659353888323-1f5c85ea3952?q=80&w=800&auto=format&fit=crop",
+                        "description": "Specimens and documents with chain-of-custody.",
+                        "price": "Custom",
+                        "icon": "fa-briefcase-medical",
+                        "cta": "Get Quote",
+                        "url": "#request-info"
+                    },
+                    {
+                        "title": "After-hours Support",
+                        "image": "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=800&auto=format&fit=crop",
+                        "description": "Evening and weekend coverage on request.",
+                        "price": "Custom",
+                        "icon": "fa-clock",
+                        "cta": "Contact",
+                        "url": "#contact"
+                    }
+                ]
+            },
+            "contact": {
+                "phone": {
+                    "text": "+61 2 5550 1234",
+                    "link": "+61255501234"
+                },
+                "whatsapp": {
+                    "text": "+61 2 5550 1234",
+                    "link": "61255501234"
+                },
+                "email": "ops@swifttransit.au",
+                "website": {
+                    "text": "swifttransit.au",
+                    "link": "https://swifttransit.au"
+                },
+                "address": "200 George St, Sydney NSW 2000",
+                "address_line1": "200 George St",
+                "address_line2": "Level 20",
+                "address_line3": "",
+                "address_line4": "",
+                "hours": {
+                    "Monday": {
+                        "open": "07:00",
+                        "close": "16:00",
+                        "closed": false
+                    },
+                    "Tuesday": {
+                        "open": "07:00",
+                        "close": "16:00",
+                        "closed": false
+                    },
+                    "Wednesday": {
+                        "open": "07:00",
+                        "close": "16:00",
+                        "closed": false
+                    },
+                    "Thursday": {
+                        "open": "07:00",
+                        "close": "16:00",
+                        "closed": false
+                    },
+                    "Friday": {
+                        "open": "07:00",
+                        "close": "16:00",
+                        "closed": false
+                    },
+                    "Saturday": {
+                        "open": "09:00",
+                        "close": "14:00",
+                        "closed": false
+                    },
+                    "Sunday": {
+                        "open": "",
+                        "close": "",
+                        "closed": true
+                    }
+                },
+                "plusCode": "46R6+XM Sydney",
+                "plusCodeUrl": "https://maps.google.com/?q=46R6+XM+Sydney"
+            },
+            "gallery": [
+                {
+                    "src": "https://plus.unsplash.com/premium_photo-1757583509874-59d774474cf3?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Same-day delivery"
+                },
+                {
+                    "src": "https://plus.unsplash.com/premium_photo-1723651354432-7796fb4ecebc?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Route "
+                },
+                {
+                    "src": "https://plus.unsplash.com/premium_photo-1749423089108-9ab9871fb9e2?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Warehouse pickup"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1659353888323-1f5c85ea3952?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Medical Courier"
+                },
+                {
+                    "src": "https://plus.unsplash.com/premium_photo-1661963219843-f1a50a6cfcd3?q=80&w=800&auto=format&fit=crop",
+                    "alt": "Semi-truck delivering goods"
+                },
+                {
+                    "src": "https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?q=80&w=800&auto=format&fit=crop",
+                    "alt": "24x7 Support"
+                }
+            ],
+            "social": {
+                "facebook": "https://facebook.com/swifttransit.au",
+                "instagram": "https://instagram.com/swifttransit.au",
+                "youtube": "https://youtube.com/swifttransit.au",
+                "x": "https://x.com/swifttransit.au",
+                "linkedin": "https://linkedin.com/swifttransit.au"
+            }
+        }
+    },
+    "metadata": {
+        "original_created_at": "2025-09-29T12:51:33+00:00",
+        "original_updated_at": "2025-09-29T12:51:33+00:00",
+        "exported_by": "shyam.arjarapu@gmail.com"
+    }
+}
