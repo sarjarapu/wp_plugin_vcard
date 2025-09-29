@@ -13,6 +13,7 @@
     <exclude>
       <directory suffix=".php">vendor</directory>
       <directory suffix=".php">tests</directory>
+      <directory suffix=".twig">templates</directory>
     </exclude>
   </source>
 
