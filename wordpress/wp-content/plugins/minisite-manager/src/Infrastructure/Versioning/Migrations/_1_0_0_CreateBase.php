@@ -170,11 +170,71 @@ class _1_0_0_CreateBase implements Migration
         return $data;
     }
 
+    /**
+     * Insert a minisite into the database
+     */
+    protected function insertMinisite(\wpdb $wpdb, array $minisiteData, string $name): string
+    {
+        $minisitesT = $wpdb->prefix . 'minisites';
+        
+        $wpdb->query($wpdb->prepare(
+            "INSERT INTO {$minisitesT} (
+                id, slug, business_slug, location_slug, title, name, city, region, 
+                country_code, postal_code, location_point, site_template, palette, 
+                industry, default_locale, schema_version, site_version, site_json, 
+                search_terms, status, publish_status, created_at, updated_at, 
+                published_at, created_by, updated_by, _minisite_current_version_id
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s, %s, %s, 
+                %s, %s, POINT(%f, %f), %s, %s, %s, %s, %d, 
+                %d, %s, %s, %s, %s, %s, %s, %s, 
+                %d, %d, %s
+            )",
+            $minisiteData['id'], $minisiteData['slug'], $minisiteData['business_slug'], $minisiteData['location_slug'],
+            $minisiteData['title'], $minisiteData['name'], $minisiteData['city'], $minisiteData['region'],
+            $minisiteData['country_code'], $minisiteData['postal_code'], 
+            $minisiteData['location_point']['longitude'], $minisiteData['location_point']['latitude'],
+            $minisiteData['site_template'], $minisiteData['palette'], $minisiteData['industry'], $minisiteData['default_locale'], $minisiteData['schema_version'],
+            $minisiteData['site_version'], $minisiteData['site_json'], $minisiteData['search_terms'], $minisiteData['status'],
+            $minisiteData['publish_status'], $minisiteData['created_at'], $minisiteData['updated_at'], $minisiteData['published_at'],
+            $minisiteData['created_by'], $minisiteData['updated_by'], $minisiteData['_minisite_current_version_id']
+        ));
+        
+        // Debug: Check if minisite was inserted correctly
+        $debugResult = $wpdb->get_row($wpdb->prepare(
+            "SELECT id, business_slug, location_slug, status, _minisite_current_version_id FROM {$minisitesT} WHERE id = %s",
+            $minisiteData['id']
+        ), ARRAY_A);
+        error_log("{$name} INSERT DEBUG: " . print_r($debugResult, true));
+        
+        return $minisiteData['id'];
+    }
+
+    /**
+     * Insert a review into the database
+     */
+    protected function insertReview(\wpdb $wpdb, string $minisiteId, string $authorName, float $rating, string $body, ?string $locale = 'en-US'): void
+    {
+        $reviewsT = $wpdb->prefix . 'minisite_reviews';
+        $nowUser = get_current_user_id() ?: null;
+        
+        $wpdb->insert($reviewsT, [
+            'minisite_id'  => $minisiteId,
+            'author_name'  => $authorName,
+            'author_url'   => null,
+            'rating'       => $rating,
+            'body'         => $body,
+            'locale'       => $locale,
+            'visited_month'=> date('Y-m'),
+            'source'       => 'manual',
+            'source_id'    => null,
+            'status'       => 'approved',
+            'created_by'   => $nowUser,
+        ], ['%s','%s','%s','%f','%s','%s','%s','%s','%s','%d']);
+    }
+
     public function down(\wpdb $wpdb): void
     {
-        // Dev convenience: clear the seeded data then drop tables
-        $this->clearTestData($wpdb);
-
         $minisites  = $wpdb->prefix . 'minisites';
         $versions  = $wpdb->prefix . 'minisite_versions';
         $reviews   = $wpdb->prefix . 'minisite_reviews';
@@ -223,68 +283,34 @@ class _1_0_0_CreateBase implements Migration
             return;
         }
 
-        // Helper function to insert minisite and debug
-        $insertMinisite = function($minisiteData, $name) use ($wpdb, $minisitesT) {
-            $wpdb->query($wpdb->prepare(
-                "INSERT INTO {$minisitesT} (
-                    id, slug, business_slug, location_slug, title, name, city, region, 
-                    country_code, postal_code, location_point, site_template, palette, 
-                    industry, default_locale, schema_version, site_version, site_json, 
-                    search_terms, status, publish_status, created_at, updated_at, 
-                    published_at, created_by, updated_by, _minisite_current_version_id
-                ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, 
-                    %s, %s, POINT(%f, %f), %s, %s, %s, %s, %d, 
-                    %d, %s, %s, %s, %s, %s, %s, %s, 
-                    %d, %d, %s
-                )",
-                $minisiteData['id'], $minisiteData['slug'], $minisiteData['business_slug'], $minisiteData['location_slug'],
-                $minisiteData['title'], $minisiteData['name'], $minisiteData['city'], $minisiteData['region'],
-                $minisiteData['country_code'], $minisiteData['postal_code'], 
-                $minisiteData['location_point']['longitude'], $minisiteData['location_point']['latitude'],
-                $minisiteData['site_template'], $minisiteData['palette'], $minisiteData['industry'], $minisiteData['default_locale'], $minisiteData['schema_version'],
-                $minisiteData['site_version'], $minisiteData['site_json'], $minisiteData['search_terms'], $minisiteData['status'],
-                $minisiteData['publish_status'], $minisiteData['created_at'], $minisiteData['updated_at'], $minisiteData['published_at'],
-                $minisiteData['created_by'], $minisiteData['updated_by'], $minisiteData['_minisite_current_version_id']
-            ));
-            
-            // Debug: Check if minisite was inserted correctly
-            $debugResult = $wpdb->get_row($wpdb->prepare(
-                "SELECT id, business_slug, location_slug, status, _minisite_current_version_id FROM {$minisitesT} WHERE id = %s",
-                $minisiteData['id']
-            ), ARRAY_A);
-            error_log("{$name} INSERT DEBUG: " . print_r($debugResult, true));
-            
-            return $minisiteData['id'];
-        };
 
         // Insert first profile: ACME Dental (Dallas, US)
         $acmeId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $acme = $this->loadMinisiteFromJson('acme-dental.json', [
             'id' => $acmeId
         ]);
-        $acmeId = $insertMinisite($acme, 'ACME');
+        $acmeId = $this->insertMinisite($wpdb, $acme, 'ACME');
 
         // Insert second profile: Lotus Textiles (Mumbai, IN)
         $lotusId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $lotus = $this->loadMinisiteFromJson('lotus-textiles.json', [
             'id' => $lotusId
         ]);
-        $lotusId = $insertMinisite($lotus, 'LOTUS');
+        $lotusId = $this->insertMinisite($wpdb, $lotus, 'LOTUS');
 
         // Insert third profile: Green Bites (London, GB)
         $greenId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $green = $this->loadMinisiteFromJson('green-bites.json', [
             'id' => $greenId
         ]);
-        $greenId = $insertMinisite($green, 'GREEN');
+        $greenId = $this->insertMinisite($wpdb, $green, 'GREEN');
 
         // Insert fourth profile: Swift Transit (Sydney, AU)
         $swiftId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
         $swift = $this->loadMinisiteFromJson('swift-transit.json', [
             'id' => $swiftId
         ]);
-        $swiftId = $insertMinisite($swift, 'SWIFT');
+        $swiftId = $this->insertMinisite($wpdb, $swift, 'SWIFT');
 
         // ——— Versions for each profile (version 1 as published) ———
         $versionsT = $wpdb->prefix . 'minisite_versions';
@@ -361,94 +387,39 @@ class _1_0_0_CreateBase implements Migration
 
 
         // ——— Reviews (5 per minisite) ———
-        $insertReview = function(string $pid, string $name, float $rating, string $body, ?string $locale='en-US') use ($wpdb, $reviewsT, $nowUser) {
-            $wpdb->insert($reviewsT, [
-                'minisite_id'  => $pid,
-                'author_name'  => $name,
-                'author_url'   => null,
-                'rating'       => $rating,
-                'body'         => $body,
-                'locale'       => $locale,
-                'visited_month'=> date('Y-m'),
-                'source'       => 'manual',
-                'source_id'    => null,
-                'status'       => 'approved',
-                'created_by'   => $nowUser,
-            ], ['%s','%s','%s','%f','%s','%s','%s','%s','%s','%d']);
-        };
 
         if ($acmeId) {
             // ACME Dental reviews (5 total)
-            $insertReview($acmeId, 'Jane Doe', 5.0, 'The hygienist was incredibly gentle and explained every step before she started. The clinic is spotless and the equipment looks brand new. I left feeling well cared for and finally not dreading my next visit.');
-            $insertReview($acmeId, 'Mark T.', 4.5, 'Booked a last‑minute appointment for a chipped tooth and they fit me in the same day. The repair was quick and painless, and the billing was clear. Parking was easy which is a bonus in Dallas.');
-            $insertReview($acmeId, 'Priya S.', 4.8, 'I had whitening done here and the results were immediate. The dentist checked sensitivity throughout and gave me clear aftercare instructions. Front desk followed up the next day to see how I was doing.');
-            $insertReview($acmeId, 'Daniel K.', 4.9, 'Super organized practice with on‑time appointments. They walked me through options for a crown and never pushed extras. Waiting area is calm and the coffee machine is a nice touch.');
-            $insertReview($acmeId, 'Alicia M.', 5.0, 'Brought my teen for Invisalign and the consultation was thorough without being overwhelming. Clear timeline, fair pricing, and they answered all our questions. We feel confident continuing care here.');
+            $this->insertReview($wpdb, $acmeId, 'Jane Doe', 5.0, 'The hygienist was incredibly gentle and explained every step before she started. The clinic is spotless and the equipment looks brand new. I left feeling well cared for and finally not dreading my next visit.');
+            $this->insertReview($wpdb, $acmeId, 'Mark T.', 4.5, 'Booked a last‑minute appointment for a chipped tooth and they fit me in the same day. The repair was quick and painless, and the billing was clear. Parking was easy which is a bonus in Dallas.');
+            $this->insertReview($wpdb, $acmeId, 'Priya S.', 4.8, 'I had whitening done here and the results were immediate. The dentist checked sensitivity throughout and gave me clear aftercare instructions. Front desk followed up the next day to see how I was doing.');
+            $this->insertReview($wpdb, $acmeId, 'Daniel K.', 4.9, 'Super organized practice with on‑time appointments. They walked me through options for a crown and never pushed extras. Waiting area is calm and the coffee machine is a nice touch.');
+            $this->insertReview($wpdb, $acmeId, 'Alicia M.', 5.0, 'Brought my teen for Invisalign and the consultation was thorough without being overwhelming. Clear timeline, fair pricing, and they answered all our questions. We feel confident continuing care here.');
         }
         if ($lotusId) {
             // Lotus Textiles reviews (5 total)
-            $insertReview($lotusId, 'Asha P.', 5.0, 'Beautiful fabric selection and honest pricing. The team helped me pick the right silk and arranged quick alterations. I received so many compliments at the event.', 'en-IN');
-            $insertReview($lotusId, 'Rohit K.', 4.6, 'Quality linens and attentive staff. Turnaround for tailoring was faster than expected and the fit was perfect.', 'en-IN');
-            $insertReview($lotusId, 'Neha S.', 4.8, 'They sourced a specific shade of chiffon for me within two days. Great communication throughout and careful packaging.', 'en-IN');
-            $insertReview($lotusId, 'Imran V.', 4.7, 'Got a sherwani tailored here. Professional fittings and precise embroidery work. Delivery was on the promised date.', 'en-IN');
-            $insertReview($lotusId, 'Kavita D.', 4.9, 'Staff were patient while I compared several silks. They suggested blouse lining and care tips that really helped.', 'en-IN');
+            $this->insertReview($wpdb,$lotusId, 'Asha P.', 5.0, 'Beautiful fabric selection and honest pricing. The team helped me pick the right silk and arranged quick alterations. I received so many compliments at the event.', 'en-IN');
+            $this->insertReview($wpdb,$lotusId, 'Rohit K.', 4.6, 'Quality linens and attentive staff. Turnaround for tailoring was faster than expected and the fit was perfect.', 'en-IN');
+            $this->insertReview($wpdb,$lotusId, 'Neha S.', 4.8, 'They sourced a specific shade of chiffon for me within two days. Great communication throughout and careful packaging.', 'en-IN');
+            $this->insertReview($wpdb,$lotusId, 'Imran V.', 4.7, 'Got a sherwani tailored here. Professional fittings and precise embroidery work. Delivery was on the promised date.', 'en-IN');
+            $this->insertReview($wpdb,$lotusId, 'Kavita D.', 4.9, 'Staff were patient while I compared several silks. They suggested blouse lining and care tips that really helped.', 'en-IN');
         }
         if ($greenId) {
             // Green Bites reviews (5 total)
-            $insertReview($greenId, 'Alex P.', 5.0, 'Best sourdough in the City. The crust has real depth of flavor and the bowls are generous. Staff remembered my usual after two visits.', 'en-GB');
-            $insertReview($greenId, 'Maria G.', 4.7, 'Delicious bowls and quick service at lunch. Great coffee with oat milk, and I love the rotating specials.', 'en-GB');
-            $insertReview($greenId, 'Tom H.', 4.6, 'Great place for a quick, healthy lunch. Seating fills up at noon but the line moves fast.', 'en-GB');
-            $insertReview($greenId, 'Ella R.', 4.8, 'Excellent espresso and friendly baristas. The vegan bowl had great textures and bright flavors.', 'en-GB');
-            $insertReview($greenId, 'Ben S.', 4.9, 'Love the seasonal menu changes and the sourdough loaves on Fridays. Consistently great quality.', 'en-GB');
+            $this->insertReview($wpdb,$greenId, 'Alex P.', 5.0, 'Best sourdough in the City. The crust has real depth of flavor and the bowls are generous. Staff remembered my usual after two visits.', 'en-GB');
+            $this->insertReview($wpdb,$greenId, 'Maria G.', 4.7, 'Delicious bowls and quick service at lunch. Great coffee with oat milk, and I love the rotating specials.', 'en-GB');
+            $this->insertReview($wpdb,$greenId, 'Tom H.', 4.6, 'Great place for a quick, healthy lunch. Seating fills up at noon but the line moves fast.', 'en-GB');
+            $this->insertReview($wpdb,$greenId, 'Ella R.', 4.8, 'Excellent espresso and friendly baristas. The vegan bowl had great textures and bright flavors.', 'en-GB');
+            $this->insertReview($wpdb,$greenId, 'Ben S.', 4.9, 'Love the seasonal menu changes and the sourdough loaves on Fridays. Consistently great quality.', 'en-GB');
         }
         if ($swiftId) {
             // Swift Transit reviews (5 total)
-            $insertReview($swiftId, 'Zoe L.', 5.0, 'Super fast and careful with fragile items. They handled our clinic samples with documented chain-of-custody and delivered earlier than promised.', 'en-AU');
-            $insertReview($swiftId, 'Nick R.', 4.8, 'Great communication and tracking. Dispatch answered within seconds, and the driver called ahead for loading dock access.', 'en-AU');
-            $insertReview($swiftId, 'Sam D.', 4.7, 'Booked an urgent pickup at 4 pm and it reached the CBD in under an hour. Clear proof‑of‑delivery emailed instantly.', 'en-AU');
-            $insertReview($swiftId, 'Priya V.', 4.9, 'Courteous drivers and clean vehicles. Our bulk transfers were secured properly and arrived without damage.', 'en-AU');
-            $insertReview($swiftId, 'Owen C.', 4.8, 'We use their scheduled routes daily. Reliable timings and proactive updates whenever traffic is heavy.', 'en-AU');
+            $this->insertReview($wpdb,$swiftId, 'Zoe L.', 5.0, 'Super fast and careful with fragile items. They handled our clinic samples with documented chain-of-custody and delivered earlier than promised.', 'en-AU');
+            $this->insertReview($wpdb,$swiftId, 'Nick R.', 4.8, 'Great communication and tracking. Dispatch answered within seconds, and the driver called ahead for loading dock access.', 'en-AU');
+            $this->insertReview($wpdb,$swiftId, 'Sam D.', 4.7, 'Booked an urgent pickup at 4 pm and it reached the CBD in under an hour. Clear proof‑of‑delivery emailed instantly.', 'en-AU');
+            $this->insertReview($wpdb,$swiftId, 'Priya V.', 4.9, 'Courteous drivers and clean vehicles. Our bulk transfers were secured properly and arrived without damage.', 'en-AU');
+            $this->insertReview($wpdb,$swiftId, 'Owen C.', 4.8, 'We use their scheduled routes daily. Reliable timings and proactive updates whenever traffic is heavy.', 'en-AU');
         }
     }
 
-    /**
-     * Remove ONLY the seeded test data (safe to call repeatedly).
-     */
-    private function clearTestData(\wpdb $wpdb): void
-    {
-        $minisitesT  = $wpdb->prefix . 'minisites';
-        $versionsT  = $wpdb->prefix . 'minisite_versions';
-        $reviewsT   = $wpdb->prefix . 'minisite_reviews';
-
-        // Check if the main profiles table exists before trying to query it
-        $tableExists = $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = %s AND table_name = %s",
-            $wpdb->dbname,
-            $minisitesT
-        ));
-
-        if (!$tableExists) {
-            // Tables don't exist yet, nothing to clear
-            return;
-        }
-
-        // Get IDs for our seeded slugs
-        $rows = $wpdb->get_results("
-            SELECT id FROM {$minisitesT}
-            WHERE (business_slug='acme-dental' AND location_slug='dallas')
-               OR (business_slug='lotus-textiles' AND location_slug='mumbai')
-               OR (business_slug='green-bites' AND location_slug='london')
-               OR (business_slug='swift-transit' AND location_slug='sydney')
-        ");
-        if (!$rows) { return; }
-
-        $ids = array_map(fn($r) => $r->id, $rows);
-        $in  = implode(',', array_fill(0, count($ids), '%s'));
-
-        // Delete child tables first (only if they exist)
-        $wpdb->query($wpdb->prepare("DELETE FROM {$reviewsT}   WHERE minisite_id IN ($in)", ...$ids));
-        $wpdb->query($wpdb->prepare("DELETE FROM {$versionsT}  WHERE minisite_id IN ($in)", ...$ids));
-        // Delete minisites
-        $wpdb->query($wpdb->prepare("DELETE FROM {$minisitesT}  WHERE id IN ($in)", ...$ids));
-    }
 }
