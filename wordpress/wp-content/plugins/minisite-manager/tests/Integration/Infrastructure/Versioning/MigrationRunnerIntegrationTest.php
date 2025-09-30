@@ -4,12 +4,11 @@ namespace Tests\Integration\Infrastructure\Versioning;
 
 use Minisite\Infrastructure\Versioning\MigrationRunner;
 use Minisite\Infrastructure\Versioning\MigrationLocator;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Tests\Support\DatabaseTestHelper;
 use PHPUnit\Framework\TestCase;
 
-/**
- * @runTestsInSeparateProcesses
- */
+#[RunTestsInSeparateProcesses]
 class MigrationRunnerIntegrationTest extends TestCase
 {
     private MigrationRunner $runner;

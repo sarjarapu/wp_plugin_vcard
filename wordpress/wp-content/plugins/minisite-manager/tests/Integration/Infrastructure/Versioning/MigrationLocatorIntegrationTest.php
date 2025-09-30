@@ -5,9 +5,11 @@ namespace Tests\Integration\Infrastructure\Versioning;
 use Minisite\Infrastructure\Versioning\MigrationLocator;
 use Minisite\Infrastructure\Versioning\Contracts\Migration;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\DatabaseTestHelper;
 
+#[RunTestsInSeparateProcesses]
 #[Group('integration')]
 class MigrationLocatorIntegrationTest extends TestCase
 {

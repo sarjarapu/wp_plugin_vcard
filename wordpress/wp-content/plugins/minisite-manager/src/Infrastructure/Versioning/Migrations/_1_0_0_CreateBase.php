@@ -93,7 +93,7 @@ class _1_0_0_CreateBase implements Migration
     /**
      * Load minisite data from JSON file and apply overrides
      */
-    private function loadMinisiteFromJson(string $jsonFile, array $overrides = []): array
+    protected function loadMinisiteFromJson(string $jsonFile, array $overrides = []): array
     {
         $jsonPath = __DIR__ . '/../../../../data/json/minisites/' . $jsonFile;
         
@@ -129,7 +129,7 @@ class _1_0_0_CreateBase implements Migration
     /**
      * Convert location format between JSON and database formats
      */
-    private function convertLocationFormat(array $data): array
+    protected function convertLocationFormat(array $data): array
     {
         if (isset($data['location']) && is_array($data['location'])) {
             // Convert from JSON format {latitude, longitude} to database format {longitude, latitude}
@@ -147,7 +147,7 @@ class _1_0_0_CreateBase implements Migration
     /**
      * Set computed and audit fields that are not in JSON
      */
-    private function setComputedFields(array $data): array
+    protected function setComputedFields(array $data): array
     {
         $now = current_time('mysql');
         $userId = get_current_user_id() ?: null;
@@ -205,7 +205,7 @@ class _1_0_0_CreateBase implements Migration
             "SELECT id, business_slug, location_slug, status, _minisite_current_version_id FROM {$minisitesT} WHERE id = %s",
             $minisiteData['id']
         ), ARRAY_A);
-        error_log("{$name} INSERT DEBUG: " . print_r($debugResult, true));
+        // error_log("{$name} INSERT DEBUG: " . print_r($debugResult, true));
         
         return $minisiteData['id'];
     }

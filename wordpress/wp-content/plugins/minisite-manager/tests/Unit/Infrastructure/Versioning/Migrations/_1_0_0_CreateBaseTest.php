@@ -3,6 +3,7 @@
 namespace Minisite\Tests\Unit\Infrastructure\Versioning\Migrations;
 
 use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -38,9 +39,9 @@ class Testable_1_0_0_CreateBase extends _1_0_0_CreateBase
 
 /**
  * Unit tests for _1_0_0_CreateBase migration
- * 
- * @runTestsInSeparateProcesses
+ *
  */
+#[RunTestsInSeparateProcesses]
 class _1_0_0_CreateBaseTest extends TestCase
 {
     private Testable_1_0_0_CreateBase $migration;
@@ -209,19 +210,19 @@ class _1_0_0_CreateBaseTest extends TestCase
      */
     public function testLoadMinisiteFromJsonThrowsExceptionForInvalidJson(): void
     {
-        // Create a temporary invalid JSON file
-        $tempFile = tempnam(sys_get_temp_dir(), 'invalid-json');
+        // Create a temporary invalid JSON file in the minisites directory
+        $tempFile = __DIR__ . '/../../../../../data/json/minisites/invalid-test.json';
         file_put_contents($tempFile, '{"invalid": json}');
         
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Invalid JSON');
         
         try {
-            // We need to modify the method to accept a custom path for testing
-            // This would require a slight modification to the original method
-            $this->migration->publicLoadMinisiteFromJson($tempFile);
+            $this->migration->publicLoadMinisiteFromJson('invalid-test.json');
         } finally {
-            unlink($tempFile);
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
         }
     }
 
