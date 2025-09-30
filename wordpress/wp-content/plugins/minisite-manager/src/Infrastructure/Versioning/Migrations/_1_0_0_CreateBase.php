@@ -230,7 +230,7 @@ class _1_0_0_CreateBase implements Migration
             'source_id'    => null,
             'status'       => 'approved',
             'created_by'   => $nowUser,
-        ], ['%s','%s','%s','%f','%s','%s','%s','%s','%s','%d']);
+        ], ['%s','%s','%s','%f','%s','%s','%s','%s','%s','%s','%d']);
     }
 
     public function down(\wpdb $wpdb): void
