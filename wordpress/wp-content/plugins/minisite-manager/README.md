@@ -66,8 +66,7 @@ minisite-manager/
 │  │  │  └─ ProfileViewModelFactory.php       # Merge JSON+overrides+computed bits
 │  │  └─ Rendering/
 │  │     ├─ RendererInterface.php             # Twig or Plates behind an interface
-│  │     ├─ TimberRenderer.php                # Uses Timber/Twig if Timber present
-│  │     └─ PhpRenderer.php                   # Fallback simple PHP templates
+│  │     └─ TimberRenderer.php                # Uses Timber/Twig for rendering
 │  ├─ Domain/
 │  │  ├─ Entities/
 │  │  │  ├─ Profile.php
@@ -161,7 +160,7 @@ minisite-manager/
 - palette + template mapping,
 - plus SEO & LD blocks via builders.
 - Rendering
-  RendererInterface with TimberRenderer (Twig) if Timber exists; otherwise PhpRenderer.
+  TimberRenderer (Twig) for all template rendering.
   Template selection via site_template (e.g., v2025).
 - Templates
   templates/v2025/index.twig + partials mirror your current Tailwind/Twig sections.

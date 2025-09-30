@@ -573,12 +573,10 @@ add_action('template_redirect', function () {
     $biz = get_query_var('minisite_biz');
     $loc = get_query_var('minisite_loc');
 
-    // Resolve renderer: Timber if available, else PHP renderer
+    // Use Timber renderer (Timber is always available)
     $renderer = null;
     if (class_exists('Timber\Timber') && minisite_class(\Minisite\Application\Rendering\TimberRenderer::class)) {
       $renderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
-    } elseif ($phpRenderer = minisite_class(\Minisite\Application\Rendering\PhpRenderer::class)) {
-      $renderer = new $phpRenderer(MINISITE_DEFAULT_TEMPLATE);
     }
 
     // Controller to build the view model

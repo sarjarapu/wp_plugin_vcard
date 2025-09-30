@@ -24,7 +24,7 @@ final class MinisitePageController
             return;
         }
 
-        // Delegate to the renderer (PhpRenderer or TimberRenderer)
+        // Delegate to the Timber renderer
         if (method_exists($this->renderer, 'render')) {
             $this->renderer->render($minisite);
             return;
