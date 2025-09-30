@@ -9,6 +9,44 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * Testable subclass that exposes protected methods for testing
+ */
+class TestableVersioningController extends VersioningController
+{
+    private string $testTargetVersion;
+    private string $testOptionKey;
+    
+    public function __construct(string $targetVersion, string $optionKey)
+    {
+        parent::__construct($targetVersion, $optionKey);
+        $this->testTargetVersion = $targetVersion;
+        $this->testOptionKey = $optionKey;
+    }
+    
+    public function ensureDatabaseUpToDate(): void
+    {
+        global $wpdb;
+
+        // Safety (dev only): if our tables are missing but option says up-to-date, force a migration run
+        if ((defined('MINISITE_LIVE_PRODUCTION') ? !MINISITE_LIVE_PRODUCTION : true) && $this->tablesMissing($wpdb)) {
+            // Reset stored version so runner applies base migration
+            update_option($this->testOptionKey, '0.0.0', false);
+        }
+
+        // For unit tests, we don't actually run migrations - just verify the logic flow
+        // The actual migration testing is done in integration tests
+        
+        // Simulate version comparison without loading real migration files
+        $currentVersion = get_option($this->testOptionKey, '0.0.0');
+        if (version_compare($currentVersion, $this->testTargetVersion, '<')) {
+            // In a real scenario, this would run migrations
+            // For unit tests, we just verify the condition is met
+            // The actual assertion is done in the main test method
+        }
+    }
+}
+
 #[Group('unit')]
 class VersioningControllerTest extends TestCase
 {
@@ -344,42 +382,7 @@ class VersioningControllerTest extends TestCase
             update_option($this->testOptionKey, $case['current']);
             
             // Create test controller with specific target version
-            $testTargetVersion = $case['target'];
-            $testOptionKey = $this->testOptionKey;
-            
-            $controller = new class($testTargetVersion, $testOptionKey) extends VersioningController {
-                private string $testTargetVersion;
-                private string $testOptionKey;
-                
-                public function __construct(string $targetVersion, string $optionKey)
-                {
-                    parent::__construct($targetVersion, $optionKey);
-                    $this->testTargetVersion = $targetVersion;
-                    $this->testOptionKey = $optionKey;
-                }
-                
-                public function ensureDatabaseUpToDate(): void
-                {
-                    global $wpdb;
-
-                    // Safety (dev only): if our tables are missing but option says up-to-date, force a migration run
-                    if ((defined('MINISITE_LIVE_PRODUCTION') ? !MINISITE_LIVE_PRODUCTION : true) && $this->tablesMissing($wpdb)) {
-                        // Reset stored version so runner applies base migration
-                        update_option($this->testOptionKey, '0.0.0', false);
-                    }
-
-                    // For unit tests, we don't actually run migrations - just verify the logic flow
-                    // The actual migration testing is done in integration tests
-                    
-                    // Simulate version comparison without loading real migration files
-                    $currentVersion = get_option($this->testOptionKey, '0.0.0');
-                    if (version_compare($currentVersion, $this->testTargetVersion, '<')) {
-                        // In a real scenario, this would run migrations
-                        // For unit tests, we just verify the condition is met
-                        // Note: Actual assertion is done in the test method
-                    }
-                }
-            };
+            $controller = new TestableVersioningController($case['target'], $this->testOptionKey);
             
             // Mock global wpdb
             global $wpdb;
@@ -444,41 +447,6 @@ class VersioningControllerTest extends TestCase
      */
     private function createTestVersioningController(): VersioningController
     {
-        $testTargetVersion = $this->testTargetVersion;
-        $testOptionKey = $this->testOptionKey;
-        
-        return new class($testTargetVersion, $testOptionKey) extends VersioningController {
-            private string $testTargetVersion;
-            private string $testOptionKey;
-            
-            public function __construct(string $targetVersion, string $optionKey)
-            {
-                parent::__construct($targetVersion, $optionKey);
-                $this->testTargetVersion = $targetVersion;
-                $this->testOptionKey = $optionKey;
-            }
-            
-            public function ensureDatabaseUpToDate(): void
-            {
-                global $wpdb;
-
-                // Safety (dev only): if our tables are missing but option says up-to-date, force a migration run
-                if ((defined('MINISITE_LIVE_PRODUCTION') ? !MINISITE_LIVE_PRODUCTION : true) && $this->tablesMissing($wpdb)) {
-                    // Reset stored version so runner applies base migration
-                    update_option($this->testOptionKey, '0.0.0', false);
-                }
-
-                // For unit tests, we don't actually run migrations - just verify the logic flow
-                // The actual migration testing is done in integration tests
-                
-                // Simulate version comparison without loading real migration files
-                $currentVersion = get_option($this->testOptionKey, '0.0.0');
-                if (version_compare($currentVersion, $this->testTargetVersion, '<')) {
-                    // In a real scenario, this would run migrations
-                    // For unit tests, we just verify the condition is met
-                    // Note: Actual assertion is done in the test method
-                }
-            }
-        };
+        return new TestableVersioningController($this->testTargetVersion, $this->testOptionKey);
     }
 }
