@@ -6,6 +6,32 @@ build/
 dist/
 .phpunit.result.cache
 
+# No Node.js dependencies - pure PHP solution
+
+# Coverage reports
+coverage/
+*.coverage
+*.lcov
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# IDE
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+Thumbs.db
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/phpstorm+all
 # Edit at https://www.toptal.com/developers/gitignore?templates=phpstorm+all

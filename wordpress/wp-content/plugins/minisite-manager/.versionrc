@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "prebump": "composer test && composer quality",
+    "precommit": "composer pre-commit"
+  }
+}

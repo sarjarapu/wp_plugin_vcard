@@ -28,9 +28,14 @@ Minisite Manager is an internal WordPress plugin that powers **single-page busin
 
 ## Install (dev)
 1. Copy the plugin into `wp-content/plugins/minisite-manager/`.
-2. Run Composer install (for autoloading):
+2. Run the development setup script:
+   ```bash
+   ./scripts/setup-dev.sh
+   ```
+   Or manually:
    ```bash
    composer install
+   ```
 
    
 ## Plugin Structure
@@ -183,5 +188,71 @@ minisite-manager/
 🧱 Admin flow (high level)
 - Admin UI calls ProfileRepository to load live and latest draft revision.
 - Edits save to revisions; preview renders from revision JSON.
-- Publish uses optimistic lock on live row (site_version), snapshots previous live to “published” revision.
+- Publish uses optimistic lock on live row (site_version), snapshots previous live to "published" revision.
 
+---
+
+## Development
+
+### Available Commands
+
+```bash
+# Testing
+composer test                    # Run all tests
+composer test:unit              # Run unit tests only
+composer test:integration       # Run integration tests only
+composer test:coverage          # Generate coverage report
+
+# Code Quality
+composer quality                # Run all quality checks
+composer lint                   # Check code style
+composer lint:fix               # Fix code style issues
+composer analyze                # Run static analysis (PHPStan)
+composer security               # Security vulnerability check
+
+# Release Management
+./scripts/release.sh patch      # Create patch release
+./scripts/release.sh minor      # Create minor release
+./scripts/release.sh major      # Create major release
+./scripts/release.sh patch true # Dry run (no changes)
+```
+
+### Semantic Versioning
+
+This project follows [Semantic Versioning](https://semver.org/) with automated release management:
+
+- **MAJOR** (1.0.0 → 2.0.0): Breaking changes
+- **MINOR** (1.0.0 → 1.1.0): New features (backward compatible)
+- **PATCH** (1.0.0 → 1.0.1): Bug fixes (backward compatible)
+
+### Conventional Commits
+
+Use conventional commit messages for automated changelog generation:
+
+```bash
+feat: add user authentication system
+fix: resolve database connection timeout
+docs: update API documentation
+style: fix code formatting issues
+refactor: improve error handling
+test: add unit tests for user service
+chore: update dependencies
+```
+
+### Pre-push Hooks
+
+The repository includes pre-push hooks that automatically:
+- Run unit and integration tests
+- Check code coverage (minimum 20%)
+- Run code quality checks (PHPStan, PHPCS, security)
+- Block push if any checks fail
+
+### CI/CD Pipeline
+
+GitHub Actions automatically:
+- Run tests on multiple PHP versions (8.0-8.3)
+- Check code quality and security
+- Generate coverage reports
+- Create releases when tags are pushed
+
+---

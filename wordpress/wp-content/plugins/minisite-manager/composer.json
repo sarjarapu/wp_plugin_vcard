@@ -9,7 +9,12 @@
     },
     "require-dev": {
         "brain/monkey": "^2.0",
-        "phpunit/phpunit": "^11"
+        "phpunit/phpunit": "^11",
+        "phpstan/phpstan": "^1.10",
+        "squizlabs/php_codesniffer": "^3.7",
+        "wp-coding-standards/wpcs": "^3.0",
+        "enlightn/security-checker": "^2.0",
+        "cweagans/composer-patches": "^1.7"
     },
     "autoload": {
         "psr-4": {
@@ -26,9 +31,37 @@
             "dev-main": "1.x-dev"
         }
     },
+    "scripts": {
+        "test": "phpunit",
+        "test:unit": "phpunit --testsuite=Unit",
+        "test:integration": "phpunit --testsuite=Integration",
+        "test:coverage": "phpunit --coverage-html=build/coverage",
+        "analyze": "phpstan analyse src --level=8",
+        "lint": "phpcs --standard=WordPress src/",
+        "lint:fix": "phpcbf --standard=WordPress src/",
+        "security": "security-checker security:check",
+        "quality": [
+            "@lint",
+            "@analyze",
+            "@security"
+        ],
+        "pre-commit": [
+            "@quality",
+            "@test:unit"
+        ],
+        "changelog": "php scripts/generate-changelog.php",
+        "changelog:update": "php scripts/generate-changelog.php",
+        "post-install-cmd": [
+            "phpcs --config-set installed_paths vendor/wp-coding-standards/wpcs"
+        ]
+    },
     "config": {
         "optimize-autoloader": true,
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "cweagans/composer-patches": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     },
     "minimum-stability": "stable",
     "prefer-stable": true
