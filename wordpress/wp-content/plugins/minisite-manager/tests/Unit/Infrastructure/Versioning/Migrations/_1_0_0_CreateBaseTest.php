@@ -3,7 +3,6 @@
 namespace Minisite\Tests\Unit\Infrastructure\Versioning\Migrations;
 
 use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
-use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -51,7 +50,6 @@ class Testable_1_0_0_CreateBase extends _1_0_0_CreateBase
  * Unit tests for _1_0_0_CreateBase migration
  *
  */
-#[RunTestsInSeparateProcesses]
 class _1_0_0_CreateBaseTest extends TestCase
 {
     private Testable_1_0_0_CreateBase $migration;

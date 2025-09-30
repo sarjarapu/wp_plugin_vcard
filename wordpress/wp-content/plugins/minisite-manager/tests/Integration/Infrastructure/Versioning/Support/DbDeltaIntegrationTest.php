@@ -5,10 +5,12 @@ namespace Tests\Integration\Infrastructure\Versioning\Support;
 use Minisite\Infrastructure\Versioning\Support\DbDelta;
 use Minisite\Infrastructure\Versioning\Support\Db;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\DatabaseTestHelper;
 
 #[Group('integration')]
+#[RunTestsInSeparateProcesses]
 class DbDeltaIntegrationTest extends TestCase
 {
     private DatabaseTestHelper $dbHelper;

@@ -4,6 +4,7 @@ namespace Minisite\Tests\Integration\Infrastructure\Versioning\Migrations;
 
 use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
 use Tests\Support\DatabaseTestHelper;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,6 +17,7 @@ use PHPUnit\Framework\TestCase;
  * - Data seeding
  * - Rollback functionality
  */
+#[RunTestsInSeparateProcesses]
 class _1_0_0_CreateBaseIntegrationTest extends TestCase
 {
     private DatabaseTestHelper $dbHelper;
