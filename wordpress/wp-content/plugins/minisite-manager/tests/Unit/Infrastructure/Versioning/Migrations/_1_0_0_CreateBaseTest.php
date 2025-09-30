@@ -6,6 +6,16 @@ use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * Testable wpdb class with AllowDynamicProperties attribute
+ */
+#[\AllowDynamicProperties]
+class TestableWpdb extends \wpdb
+{
+    public $insert_id = 0;
+    public $prefix = 'wp_';
+}
+
+/**
  * Testable subclass that exposes protected methods for testing
  */
 class Testable_1_0_0_CreateBase extends _1_0_0_CreateBase
@@ -344,23 +354,7 @@ class _1_0_0_CreateBaseTest extends TestCase
      */
     public function testSeedTestDataFreshSeeding(): void
     {
-        $mockWpdb = $this->createMock(\wpdb::class);
-        $mockWpdb->prefix = 'wp_';
-        
-        // Mock get_var to return 0 (no existing data)
-        $mockWpdb->method('get_var')->willReturn(0);
-        
-        // Mock prepare to return the query as-is
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) {
-            return $query;
-        });
-        
-        // Mock query to return true (success)
-        $mockWpdb->method('query')->willReturn(true);
-        
-        // Mock insert to return true and set insert_id
-        $mockWpdb->method('insert')->willReturn(true);
-        $mockWpdb->insert_id = 123;
+        $mockWpdb = $this->createMock(TestableWpdb::class);
         
         // Mock get_row to return sample minisite data
         $mockWpdb->method('get_row')->willReturn([
@@ -409,8 +403,7 @@ class _1_0_0_CreateBaseTest extends TestCase
      */
     public function testSeedTestDataDuplicateCheckQuery(): void
     {
-        $mockWpdb = $this->createMock(\wpdb::class);
-        $mockWpdb->prefix = 'wp_';
+        $mockWpdb = $this->createMock(TestableWpdb::class);
         
         // Capture the duplicate check query
         $duplicateCheckQuery = '';
