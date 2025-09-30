@@ -33,7 +33,7 @@ The hook is located at `.git/hooks/pre-push` and will automatically run whenever
 You can test the hook functionality using the provided test script:
 
 ```bash
-./test-precommit-hook.sh
+./run-all-tests.sh
 ```
 
 This will verify that:
