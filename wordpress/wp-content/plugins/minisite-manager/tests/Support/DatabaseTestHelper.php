@@ -135,6 +135,20 @@ class DatabaseTestHelper
     }
 
     /**
+     * Create the minisite_bookmarks table using the actual schema
+     */
+    public function createMinisiteBookmarksTable(): void
+    {
+        $sql = file_get_contents(__DIR__ . '/../../data/db/tables/minisite_bookmarks.sql');
+        $processedSql = str_replace(
+            ['{$prefix}', '{$charset}'],
+            ['wp_', 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci'],
+            $sql
+        );
+        $this->pdo->exec($processedSql);
+    }
+
+    /**
      * Create all required tables for testing
      */
     public function createAllTables(): void
@@ -143,6 +157,7 @@ class DatabaseTestHelper
         $this->createMinisiteVersionsTable();
         $this->createMinisiteReviewsTable();
         $this->createMinisiteReservationsTable();
+        $this->createMinisiteBookmarksTable();
     }
 
     /**
