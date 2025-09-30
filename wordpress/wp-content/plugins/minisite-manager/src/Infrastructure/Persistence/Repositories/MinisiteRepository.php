@@ -456,10 +456,10 @@ final class MinisiteRepository implements MinisiteRepositoryInterface {
 				ARRAY_A
 			);
 
-			if ( $pointResult && $pointResult['lat'] && $pointResult['lng'] ) {
+			if ( $pointResult && ($pointResult['lat'] ?? null) && ($pointResult['lng'] ?? null) ) {
 				$geo = new GeoPoint(
-					lat: (float) $pointResult['lat'],
-					lng: (float) $pointResult['lng']
+					lat: (float) ($pointResult['lat'] ?? 0),
+					lng: (float) ($pointResult['lng'] ?? 0)
 				);
 			}
 		}

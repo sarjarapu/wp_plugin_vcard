@@ -26,7 +26,11 @@ class FakeWpdb extends \wpdb
             
             switch ($placeholder) {
                 case '%s':
-                    $replacement = "'" . addslashes((string)$arg) . "'";
+                    $safeArg = $arg ?? '';
+                    if (is_array($safeArg) || is_object($safeArg)) {
+                        $safeArg = '';
+                    }
+                    $replacement = "'" . addslashes((string)$safeArg) . "'";
                     break;
                 case '%d':
                     $replacement = is_numeric($arg) ? (string)(int)$arg : '0';
@@ -82,12 +86,12 @@ class FakeWpdb extends \wpdb
         $vals = array_values($data);
         $placeholders = array_map(function($v) {
             if (is_numeric($v)) {
-                return (string)$v;
+                return (string)($v ?? '');
             } elseif (is_null($v)) {
                 return 'NULL';
             } else {
                 // Don't escape JSON strings - they're already properly formatted
-                $str = (string)$v;
+                $str = (string)($v ?? '');
                 if (json_decode($str) !== null) {
                     return "'" . $str . "'";
                 } else {
@@ -104,11 +108,11 @@ class FakeWpdb extends \wpdb
     {
         $sets = [];
         foreach ($data as $k => $v) {
-            $sets[] = sprintf("%s=%s", $k, is_numeric($v) ? (string)$v : "'" . addslashes((string)$v) . "'");
+            $sets[] = sprintf("%s=%s", $k, is_numeric($v) ? (string)$v : "'" . addslashes((string)($v ?? '')) . "'");
         }
         $conds = [];
         foreach ($where as $k => $v) {
-            $conds[] = sprintf("%s=%s", $k, is_numeric($v) ? (string)$v : "'" . addslashes((string)$v) . "'");
+            $conds[] = sprintf("%s=%s", $k, is_numeric($v) ? (string)$v : "'" . addslashes((string)($v ?? '')) . "'");
         }
         $sql = "UPDATE {$table} SET " . implode(',', $sets) . " WHERE " . implode(' AND ', $conds);
         return $this->query($sql);
@@ -118,7 +122,7 @@ class FakeWpdb extends \wpdb
     {
         $conds = [];
         foreach ($where as $k => $v) {
-            $conds[] = sprintf("%s=%s", $k, is_numeric($v) ? (string)$v : "'" . addslashes((string)$v) . "'");
+            $conds[] = sprintf("%s=%s", $k, is_numeric($v) ? (string)$v : "'" . addslashes((string)($v ?? '')) . "'");
         }
         $sql = "DELETE FROM {$table} WHERE " . implode(' AND ', $conds);
         return $this->query($sql);

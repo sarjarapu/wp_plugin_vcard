@@ -344,7 +344,20 @@ class VersioningControllerTest extends TestCase
             update_option($this->testOptionKey, $case['current']);
             
             // Create test controller with specific target version
-            $controller = new class($case['target'], $this->testOptionKey) extends VersioningController {
+            $testTargetVersion = $case['target'];
+            $testOptionKey = $this->testOptionKey;
+            
+            $controller = new class($testTargetVersion, $testOptionKey) extends VersioningController {
+                private string $testTargetVersion;
+                private string $testOptionKey;
+                
+                public function __construct(string $targetVersion, string $optionKey)
+                {
+                    parent::__construct($targetVersion, $optionKey);
+                    $this->testTargetVersion = $targetVersion;
+                    $this->testOptionKey = $optionKey;
+                }
+                
                 public function ensureDatabaseUpToDate(): void
                 {
                     global $wpdb;
@@ -352,18 +365,18 @@ class VersioningControllerTest extends TestCase
                     // Safety (dev only): if our tables are missing but option says up-to-date, force a migration run
                     if ((defined('MINISITE_LIVE_PRODUCTION') ? !MINISITE_LIVE_PRODUCTION : true) && $this->tablesMissing($wpdb)) {
                         // Reset stored version so runner applies base migration
-                        update_option($this->optionKey, '0.0.0', false);
+                        update_option($this->testOptionKey, '0.0.0', false);
                     }
 
                     // For unit tests, we don't actually run migrations - just verify the logic flow
                     // The actual migration testing is done in integration tests
                     
                     // Simulate version comparison without loading real migration files
-                    $currentVersion = get_option($this->optionKey, '0.0.0');
-                    if (version_compare($currentVersion, $this->targetVersion, '<')) {
+                    $currentVersion = get_option($this->testOptionKey, '0.0.0');
+                    if (version_compare($currentVersion, $this->testTargetVersion, '<')) {
                         // In a real scenario, this would run migrations
                         // For unit tests, we just verify the condition is met
-                        $this->assertTrue(true, 'Migration would run here in real scenario');
+                        // Note: Actual assertion is done in the test method
                     }
                 }
             };
@@ -431,7 +444,20 @@ class VersioningControllerTest extends TestCase
      */
     private function createTestVersioningController(): VersioningController
     {
-        return new class($this->testTargetVersion, $this->testOptionKey) extends VersioningController {
+        $testTargetVersion = $this->testTargetVersion;
+        $testOptionKey = $this->testOptionKey;
+        
+        return new class($testTargetVersion, $testOptionKey) extends VersioningController {
+            private string $testTargetVersion;
+            private string $testOptionKey;
+            
+            public function __construct(string $targetVersion, string $optionKey)
+            {
+                parent::__construct($targetVersion, $optionKey);
+                $this->testTargetVersion = $targetVersion;
+                $this->testOptionKey = $optionKey;
+            }
+            
             public function ensureDatabaseUpToDate(): void
             {
                 global $wpdb;
@@ -439,18 +465,18 @@ class VersioningControllerTest extends TestCase
                 // Safety (dev only): if our tables are missing but option says up-to-date, force a migration run
                 if ((defined('MINISITE_LIVE_PRODUCTION') ? !MINISITE_LIVE_PRODUCTION : true) && $this->tablesMissing($wpdb)) {
                     // Reset stored version so runner applies base migration
-                    update_option($this->optionKey, '0.0.0', false);
+                    update_option($this->testOptionKey, '0.0.0', false);
                 }
 
                 // For unit tests, we don't actually run migrations - just verify the logic flow
                 // The actual migration testing is done in integration tests
                 
                 // Simulate version comparison without loading real migration files
-                $currentVersion = get_option($this->optionKey, '0.0.0');
-                if (version_compare($currentVersion, $this->targetVersion, '<')) {
+                $currentVersion = get_option($this->testOptionKey, '0.0.0');
+                if (version_compare($currentVersion, $this->testTargetVersion, '<')) {
                     // In a real scenario, this would run migrations
                     // For unit tests, we just verify the condition is met
-                    $this->assertTrue(true, 'Migration would run here in real scenario');
+                    // Note: Actual assertion is done in the test method
                 }
             }
         };
