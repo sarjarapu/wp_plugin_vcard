@@ -488,7 +488,7 @@ class _1_0_0_CreateBaseTest extends TestCase
         $this->migration->down($mockWpdb);
         
         // Verify the cleanup queries
-        $this->assertStringContainsString('DROP EVENT IF EXISTS cleanup_expired_reservations', $queries[0]);
+        $this->assertStringContainsString('DROP EVENT IF EXISTS wp_minisite_purge_reservations_event', $queries[0]);
         $this->assertStringContainsString('DROP TABLE IF EXISTS wp_minisite_reservations', $queries[1]);
         $this->assertStringContainsString('DROP TABLE IF EXISTS wp_minisite_payment_history', $queries[2]);
         $this->assertStringContainsString('DROP TABLE IF EXISTS wp_minisite_payments', $queries[3]);

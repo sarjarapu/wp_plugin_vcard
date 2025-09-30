@@ -59,13 +59,7 @@ class _1_0_0_CreateBase implements Migration
         $this->addForeignKeyIfNotExists($wpdb, $reservations, 'fk_reservations_minisite_id', 'minisite_id', $minisites, 'id');
 
         // Create MySQL event for auto-cleanup of expired reservations
-        $wpdb->query("
-            CREATE EVENT IF NOT EXISTS cleanup_expired_reservations
-            ON SCHEDULE EVERY 1 MINUTE
-            DO
-              DELETE FROM {$reservations} 
-              WHERE expires_at < NOW()
-        ");
+        SqlLoader::loadAndExecute($wpdb, 'event_purge_reservations.sql', SqlLoader::createStandardVariables($wpdb));
 
         // —— dev seed: insert two test minisites + revisions + reviews ——
         $this->seedTestData($wpdb);
@@ -244,7 +238,7 @@ class _1_0_0_CreateBase implements Migration
         $reservations = $wpdb->prefix . 'minisite_reservations';
 
         // Drop MySQL event
-        $wpdb->query("DROP EVENT IF EXISTS cleanup_expired_reservations");
+        $wpdb->query("DROP EVENT IF EXISTS {$wpdb->prefix}minisite_purge_reservations_event");
         
         $wpdb->query("DROP TABLE IF EXISTS {$reservations}");
         $wpdb->query("DROP TABLE IF EXISTS {$paymentHistory}");

@@ -179,7 +179,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
             SELECT EVENT_NAME 
             FROM information_schema.EVENTS 
             WHERE EVENT_SCHEMA = DATABASE() 
-            AND EVENT_NAME = 'cleanup_expired_reservations'
+            AND EVENT_NAME = 'wp_minisite_purge_reservations_event'
         ");
 
         $this->assertNotEmpty($events, 'Cleanup event should be created');
@@ -263,7 +263,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
             SELECT EVENT_NAME 
             FROM information_schema.EVENTS 
             WHERE EVENT_SCHEMA = DATABASE() 
-            AND EVENT_NAME = 'cleanup_expired_reservations'
+            AND EVENT_NAME = 'wp_minisite_purge_reservations_event'
         ");
 
         $this->assertEmpty($events, 'Cleanup event should be dropped');
@@ -420,7 +420,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
 
         // Clean up events
         try {
-            $this->wpdb->query("DROP EVENT IF EXISTS cleanup_expired_reservations");
+            $this->wpdb->query("DROP EVENT IF EXISTS wp_minisite_purge_reservations_event");
         } catch (\Exception $e) {
             // Ignore errors during cleanup
         }
