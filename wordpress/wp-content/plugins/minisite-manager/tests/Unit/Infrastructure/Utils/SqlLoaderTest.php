@@ -166,4 +166,80 @@ class SqlLoaderTest extends TestCase
         $expected = "CREATE TABLE wp_users (id INT) ENGINE=InnoDB {\$charset};";
         $this->assertEquals($expected, $result);
     }
+
+    /**
+     * @runInSeparateProcess
+     * @preserveGlobalState disabled
+     */
+    public function test_loadAndExecute_calls_loadAndProcess_and_dbDelta(): void
+    {
+        // Create a mock wpdb object
+        $mockWpdb = new class {
+            public $prefix = 'wp_';
+            public function get_charset_collate() {
+                return 'utf8mb4_unicode_ci';
+            }
+        };
+
+        // Mock DbDelta::run to verify it's called
+        $this->mockDbDeltaFunction();
+
+        // Test that loadAndExecute calls loadAndProcess and then DbDelta::run
+        SqlLoader::loadAndExecute($mockWpdb, $this->testSqlPath, [
+            'prefix' => 'wp_',
+            'charset' => 'utf8mb4_unicode_ci'
+        ]);
+
+        // Verify DbDelta was called
+        $this->assertTrue(isset($GLOBALS['__mock_dbDelta_called']));
+        $this->assertTrue($GLOBALS['__mock_dbDelta_called']);
+
+        // Verify the SQL passed to DbDelta contains processed variables
+        $this->assertStringContainsString('CREATE TABLE wp_test_table', $GLOBALS['__mock_dbDelta_sql']);
+        $this->assertStringContainsString('utf8mb4_unicode_ci', $GLOBALS['__mock_dbDelta_sql']);
+        $this->assertStringNotContainsString('{$prefix}', $GLOBALS['__mock_dbDelta_sql']);
+        $this->assertStringNotContainsString('{$charset}', $GLOBALS['__mock_dbDelta_sql']);
+
+        // Clean up global state
+        unset($GLOBALS['__mock_dbDelta_called']);
+        unset($GLOBALS['__mock_dbDelta_sql']);
+    }
+
+    public function test_loadAndExecute_throws_exception_for_nonexistent_file(): void
+    {
+        $mockWpdb = new class {
+            public $prefix = 'wp_';
+            public function get_charset_collate() {
+                return 'utf8mb4_unicode_ci';
+            }
+        };
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('SQL file not found');
+
+        SqlLoader::loadAndExecute($mockWpdb, 'nonexistent_file.sql', []);
+    }
+
+    private function mockDbDeltaFunction(): void
+    {
+        // Clean up any existing global state
+        unset($GLOBALS['__mock_dbDelta_called']);
+        unset($GLOBALS['__mock_dbDelta_sql']);
+        
+        // Create a mock dbDelta function for testing
+        if (!function_exists('dbDelta')) {
+            eval("
+                function dbDelta(\$queries) {
+                    global \$__mock_dbDelta_called, \$__mock_dbDelta_sql;
+                    \$__mock_dbDelta_called = true;
+                    if (is_string(\$queries)) {
+                        \$__mock_dbDelta_sql = \$queries;
+                    } else {
+                        \$__mock_dbDelta_sql = implode('; ', \$queries);
+                    }
+                    return ['Query executed successfully'];
+                }
+            ");
+        }
+    }
 }
