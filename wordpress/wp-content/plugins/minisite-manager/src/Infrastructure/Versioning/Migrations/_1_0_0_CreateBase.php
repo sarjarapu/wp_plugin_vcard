@@ -74,7 +74,7 @@ class _1_0_0_CreateBase implements Migration
     /**
      * Add a foreign key constraint only if it doesn't already exist
      */
-    private function addForeignKeyIfNotExists(\wpdb $wpdb, string $table, string $constraintName, string $column, string $referencedTable, string $referencedColumn): void
+    protected function addForeignKeyIfNotExists(\wpdb $wpdb, string $table, string $constraintName, string $column, string $referencedTable, string $referencedColumn): void
     {
         // Check if the constraint already exists
         $constraintExists = $wpdb->get_var($wpdb->prepare("
@@ -262,7 +262,7 @@ class _1_0_0_CreateBase implements Migration
      * - 'green-bites' / 'london'
      * - 'swift-transit' / 'sydney'
      */
-    private function seedTestData(\wpdb $wpdb): void
+    protected function seedTestData(\wpdb $wpdb): void
     {
         $minisitesT  = $wpdb->prefix . 'minisites';
         $reviewsT   = $wpdb->prefix . 'minisite_reviews';
