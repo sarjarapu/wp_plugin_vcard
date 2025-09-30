@@ -167,10 +167,8 @@ class SqlLoaderTest extends TestCase
         $this->assertEquals($expected, $result);
     }
 
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
+    #[\PHPUnit\Framework\Attributes\RunInSeparateProcess]
+    #[\PHPUnit\Framework\Attributes\PreserveGlobalState(false)]
     public function test_loadAndExecute_calls_loadAndProcess_and_dbDelta(): void
     {
         // Create a mock wpdb object

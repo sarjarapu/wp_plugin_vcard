@@ -34,11 +34,6 @@
     </testsuite>
   </testsuites>
 
-  <groups>
-    <include>
-      <!-- run all by default; use the group option to select specific groups -->
-    </include>
-  </groups>
 
   <php>
     <env name="MYSQL_HOST" value="127.0.0.1"/>
