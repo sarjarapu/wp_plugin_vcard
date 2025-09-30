@@ -195,6 +195,25 @@ class _1_0_0_CreateBaseTest extends TestCase
     }
 
     /**
+     * Test version method returns correct version
+     */
+    public function testVersion(): void
+    {
+        $this->assertEquals('1.0.0', $this->migration->version());
+    }
+
+    /**
+     * Test description method returns non-empty description
+     */
+    public function testDescription(): void
+    {
+        $description = $this->migration->description();
+        $this->assertIsString($description);
+        $this->assertNotEmpty($description);
+        $this->assertStringContainsString('minisites', $description);
+    }
+
+    /**
      * Test that JSON file loading throws exception for non-existent file
      */
     public function testLoadMinisiteFromJsonThrowsExceptionForNonExistentFile(): void
