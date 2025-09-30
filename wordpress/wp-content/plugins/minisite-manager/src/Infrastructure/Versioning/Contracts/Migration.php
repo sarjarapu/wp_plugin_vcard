@@ -1,17 +1,17 @@
 <?php
 namespace Minisite\Infrastructure\Versioning\Contracts;
 
-interface Migration
-{
-    /** Semantic version string, e.g. '1.0.0' */
-    public function version(): string;
+interface Migration {
 
-    /** Short human description (for logs) */
-    public function description(): string;
+	/** Semantic version string, e.g. '1.0.0' */
+	public function version(): string;
 
-    /** Apply this migration (must be idempotent). Throw on fatal. */
-    public function up(\wpdb $wpdb): void;
+	/** Short human description (for logs) */
+	public function description(): string;
 
-    /** Optional rollback (best-effort, idempotent). */
-    public function down(\wpdb $wpdb): void;
+	/** Apply this migration (must be idempotent). Throw on fatal. */
+	public function up( \wpdb $wpdb ): void;
+
+	/** Optional rollback (best-effort, idempotent). */
+	public function down( \wpdb $wpdb ): void;
 }

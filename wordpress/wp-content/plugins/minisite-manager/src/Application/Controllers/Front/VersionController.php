@@ -4,301 +4,310 @@ namespace Minisite\Application\Controllers\Front;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 
-class VersionController
-{
-    public function __construct(
-        private MinisiteRepository $minisiteRepository,
-        private VersionRepository $versionRepository
-    ) {}
+class VersionController {
 
-    /**
-     * Get all versions for a minisite
-     */
-    public function handleListVersions(): void
-    {
-        if (!is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
-            exit;
-        }
+	public function __construct(
+		private MinisiteRepository $minisiteRepository,
+		private VersionRepository $versionRepository
+	) {}
 
-        $siteId = get_query_var('minisite_site_id');
-        if (!$siteId) {
-            wp_redirect(home_url('/account/sites'));
-            exit;
-        }
+	/**
+	 * Get all versions for a minisite
+	 */
+	public function handleListVersions(): void {
+		if ( ! is_user_logged_in() ) {
+			wp_redirect( home_url( '/account/login?redirect_to=' . urlencode( $_SERVER['REQUEST_URI'] ) ) );
+			exit;
+		}
 
-        $currentUser = wp_get_current_user();
-        $minisite = $this->minisiteRepository->findById($siteId);
-        
-        if (!$minisite) {
-            wp_redirect(home_url('/account/sites'));
-            exit;
-        }
+		$siteId = get_query_var( 'minisite_site_id' );
+		if ( ! $siteId ) {
+			wp_redirect( home_url( '/account/sites' ) );
+			exit;
+		}
 
-        // Check ownership
-        if ($minisite->createdBy !== (int) $currentUser->ID) {
-            wp_redirect(home_url('/account/sites'));
-            exit;
-        }
+		$currentUser = wp_get_current_user();
+		$minisite    = $this->minisiteRepository->findById( $siteId );
 
-        $versions = $this->versionRepository->findByMinisiteId($siteId);
+		if ( ! $minisite ) {
+			wp_redirect( home_url( '/account/sites' ) );
+			exit;
+		}
 
-        // Render version history page
-        if (class_exists('Timber\\Timber')) {
-            $base = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
-            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$base])));
+		// Check ownership
+		if ( $minisite->createdBy !== (int) $currentUser->ID ) {
+			wp_redirect( home_url( '/account/sites' ) );
+			exit;
+		}
 
-            \Timber\Timber::render('account-sites-versions.twig', [
-                'page_title' => 'Version History: ' . $minisite->title,
-                'profile' => $minisite,
-                'versions' => $versions,
-            ]);
-            return;
-        }
+		$versions = $this->versionRepository->findByMinisiteId( $siteId );
 
-        // Fallback
-        header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>Version History: ' . htmlspecialchars($minisite->title) . '</h1>';
-        echo '<p>Version history not available (Timber required).</p>';
-    }
+		// Render version history page
+		if ( class_exists( 'Timber\\Timber' ) ) {
+			$base                      = trailingslashit( MINISITE_PLUGIN_DIR ) . 'templates/timber/views';
+			\Timber\Timber::$locations = array_values( array_unique( array_merge( \Timber\Timber::$locations ?? array(), array( $base ) ) ) );
 
-    /**
-     * Create a new draft version
-     */
-    public function handleCreateDraft(): void
-    {
-        if (!is_user_logged_in()) {
-            wp_send_json_error('Not authenticated', 401);
-            return;
-        }
+			\Timber\Timber::render(
+				'account-sites-versions.twig',
+				array(
+					'page_title' => 'Version History: ' . $minisite->title,
+					'profile'    => $minisite,
+					'versions'   => $versions,
+				)
+			);
+			return;
+		}
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            wp_send_json_error('Method not allowed', 405);
-            return;
-        }
+		// Fallback
+		header( 'Content-Type: text/html; charset=utf-8' );
+		echo '<!doctype html><meta charset="utf-8"><h1>Version History: ' . htmlspecialchars( $minisite->title ) . '</h1>';
+		echo '<p>Version history not available (Timber required).</p>';
+	}
 
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
-            wp_send_json_error('Security check failed', 403);
-            return;
-        }
+	/**
+	 * Create a new draft version
+	 */
+	public function handleCreateDraft(): void {
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( 'Not authenticated', 401 );
+			return;
+		}
 
-        $siteId = $_POST['site_id'] ?? '';
-        if (!$siteId) {
-            wp_send_json_error('Invalid site ID', 400);
-            return;
-        }
+		if ( $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			wp_send_json_error( 'Method not allowed', 405 );
+			return;
+		}
 
-        $currentUser = wp_get_current_user();
-        $minisite = $this->minisiteRepository->findById($siteId);
-        
-        if (!$minisite) {
-            wp_send_json_error('Site not found', 404);
-            return;
-        }
+		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'minisite_version' ) ) {
+			wp_send_json_error( 'Security check failed', 403 );
+			return;
+		}
 
-        // Check ownership
-        if ($minisite->createdBy !== (int) $currentUser->ID) {
-            wp_send_json_error('Access denied', 403);
-            return;
-        }
+		$siteId = $_POST['site_id'] ?? '';
+		if ( ! $siteId ) {
+			wp_send_json_error( 'Invalid site ID', 400 );
+			return;
+		}
 
-        try {
-            $nextVersion = $this->versionRepository->getNextVersionNumber($siteId);
+		$currentUser = wp_get_current_user();
+		$minisite    = $this->minisiteRepository->findById( $siteId );
 
-            error_log('Form data: ' . print_r($_POST, true));
-            
-            $version = new \Minisite\Domain\Entities\Version(
-                id: null,
-                minisiteId: $siteId,
-                versionNumber: $nextVersion,
-                status: 'draft',
-                label: sanitize_text_field($_POST['label'] ?? "Version {$nextVersion}"),
-                comment: sanitize_textarea_field($_POST['version_comment'] ?? ''),
-                createdBy: (int) $currentUser->ID,
-                createdAt: null,
-                publishedAt: null,
-                sourceVersionId: null,
-                siteJson: $this->buildSiteJsonFromForm($_POST)
-            );
+		if ( ! $minisite ) {
+			wp_send_json_error( 'Site not found', 404 );
+			return;
+		}
 
-            $savedVersion = $this->versionRepository->save($version);
+		// Check ownership
+		if ( $minisite->createdBy !== (int) $currentUser->ID ) {
+			wp_send_json_error( 'Access denied', 403 );
+			return;
+		}
 
-            wp_send_json_success([
-                'id' => $savedVersion->id,
-                'version_number' => $savedVersion->versionNumber,
-                'status' => $savedVersion->status,
-                'message' => 'Draft created successfully'
-            ]);
+		try {
+			$nextVersion = $this->versionRepository->getNextVersionNumber( $siteId );
 
-        } catch (\Exception $e) {
-            wp_send_json_error('Failed to create draft: ' . $e->getMessage(), 500);
-        }
-    }
+			error_log( 'Form data: ' . print_r( $_POST, true ) );
 
-    /**
-     * Publish a draft version
-     */
-    public function handlePublishVersion(): void
-    {
-        if (!is_user_logged_in()) {
-            wp_send_json_error('Not authenticated', 401);
-            return;
-        }
+			$version = new \Minisite\Domain\Entities\Version(
+				id: null,
+				minisiteId: $siteId,
+				versionNumber: $nextVersion,
+				status: 'draft',
+				label: sanitize_text_field( $_POST['label'] ?? "Version {$nextVersion}" ),
+				comment: sanitize_textarea_field( $_POST['version_comment'] ?? '' ),
+				createdBy: (int) $currentUser->ID,
+				createdAt: null,
+				publishedAt: null,
+				sourceVersionId: null,
+				siteJson: $this->buildSiteJsonFromForm( $_POST )
+			);
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            wp_send_json_error('Method not allowed', 405);
-            return;
-        }
+			$savedVersion = $this->versionRepository->save( $version );
 
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
-            wp_send_json_error('Security check failed', 403);
-            return;
-        }
+			wp_send_json_success(
+				array(
+					'id'             => $savedVersion->id,
+					'version_number' => $savedVersion->versionNumber,
+					'status'         => $savedVersion->status,
+					'message'        => 'Draft created successfully',
+				)
+			);
 
-        $siteId = $_POST['site_id'] ?? '';
-        $versionId = (int) ($_POST['version_id'] ?? 0);
-        
-        if (!$siteId || !$versionId) {
-            wp_send_json_error('Invalid parameters', 400);
-            return;
-        }
+		} catch ( \Exception $e ) {
+			wp_send_json_error( 'Failed to create draft: ' . $e->getMessage(), 500 );
+		}
+	}
 
-        $currentUser = wp_get_current_user();
-        $minisite = $this->minisiteRepository->findById($siteId);
-        
-        if (!$minisite) {
-            wp_send_json_error('Site not found', 404);
-            return;
-        }
+	/**
+	 * Publish a draft version
+	 */
+	public function handlePublishVersion(): void {
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( 'Not authenticated', 401 );
+			return;
+		}
 
-        // Check ownership
-        if ($minisite->createdBy !== (int) $currentUser->ID) {
-            wp_send_json_error('Access denied', 403);
-            return;
-        }
+		if ( $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			wp_send_json_error( 'Method not allowed', 405 );
+			return;
+		}
 
-        $version = $this->versionRepository->findById($versionId);
-        if (!$version || $version->minisiteId !== $siteId) {
-            wp_send_json_error('Version not found', 404);
-            return;
-        }
+		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'minisite_version' ) ) {
+			wp_send_json_error( 'Security check failed', 403 );
+			return;
+		}
 
-        if ($version->status !== 'draft') {
-            wp_send_json_error('Only draft versions can be published', 400);
-            return;
-        }
+		$siteId    = $_POST['site_id'] ?? '';
+		$versionId = (int) ( $_POST['version_id'] ?? 0 );
 
-        try {
-            $this->publishVersion($siteId, $versionId);
-            
-            wp_send_json_success([
-                'message' => 'Version published successfully',
-                'published_version_id' => $versionId
-            ]);
+		if ( ! $siteId || ! $versionId ) {
+			wp_send_json_error( 'Invalid parameters', 400 );
+			return;
+		}
 
-        } catch (\Exception $e) {
-            wp_send_json_error('Failed to publish version: ' . $e->getMessage(), 500);
-        }
-    }
+		$currentUser = wp_get_current_user();
+		$minisite    = $this->minisiteRepository->findById( $siteId );
 
-    /**
-     * Create a rollback draft from a previous version
-     */
-    public function handleRollbackVersion(): void
-    {
-        if (!is_user_logged_in()) {
-            wp_send_json_error('Not authenticated', 401);
-            return;
-        }
+		if ( ! $minisite ) {
+			wp_send_json_error( 'Site not found', 404 );
+			return;
+		}
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            wp_send_json_error('Method not allowed', 405);
-            return;
-        }
+		// Check ownership
+		if ( $minisite->createdBy !== (int) $currentUser->ID ) {
+			wp_send_json_error( 'Access denied', 403 );
+			return;
+		}
 
-        if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
-            wp_send_json_error('Security check failed', 403);
-            return;
-        }
+		$version = $this->versionRepository->findById( $versionId );
+		if ( ! $version || $version->minisiteId !== $siteId ) {
+			wp_send_json_error( 'Version not found', 404 );
+			return;
+		}
 
-        $siteId = $_POST['site_id'] ?? '';
-        $sourceVersionId = (int) ($_POST['source_version_id'] ?? 0);
-        
-        if (!$siteId || !$sourceVersionId) {
-            wp_send_json_error('Invalid parameters', 400);
-            return;
-        }
+		if ( $version->status !== 'draft' ) {
+			wp_send_json_error( 'Only draft versions can be published', 400 );
+			return;
+		}
 
-        $currentUser = wp_get_current_user();
-        $minisite = $this->minisiteRepository->findById($siteId);
-        
-        if (!$minisite) {
-            wp_send_json_error('Site not found', 404);
-            return;
-        }
+		try {
+			$this->publishVersion( $siteId, $versionId );
 
-        // Check ownership
-        if ($minisite->createdBy !== (int) $currentUser->ID) {
-            wp_send_json_error('Access denied', 403);
-            return;
-        }
+			wp_send_json_success(
+				array(
+					'message'              => 'Version published successfully',
+					'published_version_id' => $versionId,
+				)
+			);
 
-        $sourceVersion = $this->versionRepository->findById($sourceVersionId);
-        if (!$sourceVersion || $sourceVersion->minisiteId !== $siteId) {
-            wp_send_json_error('Source version not found', 404);
-            return;
-        }
+		} catch ( \Exception $e ) {
+			wp_send_json_error( 'Failed to publish version: ' . $e->getMessage(), 500 );
+		}
+	}
 
-        try {
-            $rollbackVersion = $this->createRollbackVersion($siteId, $sourceVersionId, (int) $currentUser->ID);
-            
-            wp_send_json_success([
-                'id' => $rollbackVersion->id,
-                'version_number' => $rollbackVersion->versionNumber,
-                'status' => $rollbackVersion->status,
-                'message' => 'Rollback draft created'
-            ]);
+	/**
+	 * Create a rollback draft from a previous version
+	 */
+	public function handleRollbackVersion(): void {
+		if ( ! is_user_logged_in() ) {
+			wp_send_json_error( 'Not authenticated', 401 );
+			return;
+		}
 
-        } catch (\Exception $e) {
-            wp_send_json_error('Failed to create rollback: ' . $e->getMessage(), 500);
-        }
-    }
+		if ( $_SERVER['REQUEST_METHOD'] !== 'POST' ) {
+			wp_send_json_error( 'Method not allowed', 405 );
+			return;
+		}
 
-    /**
-     * Publish a version (atomic operation)
-     */
-    private function publishVersion(string $minisiteId, int $versionId): void
-    {
-        global $wpdb;
-        
-        // Get the version to publish
-        $version = $this->versionRepository->findById($versionId);
-        if (!$version) {
-            throw new \Exception('Version not found');
-        }
-        
-        $wpdb->query('START TRANSACTION');
-        
-        try {
-            // Move current published version to draft
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisite_versions 
+		if ( ! wp_verify_nonce( $_POST['nonce'] ?? '', 'minisite_version' ) ) {
+			wp_send_json_error( 'Security check failed', 403 );
+			return;
+		}
+
+		$siteId          = $_POST['site_id'] ?? '';
+		$sourceVersionId = (int) ( $_POST['source_version_id'] ?? 0 );
+
+		if ( ! $siteId || ! $sourceVersionId ) {
+			wp_send_json_error( 'Invalid parameters', 400 );
+			return;
+		}
+
+		$currentUser = wp_get_current_user();
+		$minisite    = $this->minisiteRepository->findById( $siteId );
+
+		if ( ! $minisite ) {
+			wp_send_json_error( 'Site not found', 404 );
+			return;
+		}
+
+		// Check ownership
+		if ( $minisite->createdBy !== (int) $currentUser->ID ) {
+			wp_send_json_error( 'Access denied', 403 );
+			return;
+		}
+
+		$sourceVersion = $this->versionRepository->findById( $sourceVersionId );
+		if ( ! $sourceVersion || $sourceVersion->minisiteId !== $siteId ) {
+			wp_send_json_error( 'Source version not found', 404 );
+			return;
+		}
+
+		try {
+			$rollbackVersion = $this->createRollbackVersion( $siteId, $sourceVersionId, (int) $currentUser->ID );
+
+			wp_send_json_success(
+				array(
+					'id'             => $rollbackVersion->id,
+					'version_number' => $rollbackVersion->versionNumber,
+					'status'         => $rollbackVersion->status,
+					'message'        => 'Rollback draft created',
+				)
+			);
+
+		} catch ( \Exception $e ) {
+			wp_send_json_error( 'Failed to create rollback: ' . $e->getMessage(), 500 );
+		}
+	}
+
+	/**
+	 * Publish a version (atomic operation)
+	 */
+	private function publishVersion( string $minisiteId, int $versionId ): void {
+		global $wpdb;
+
+		// Get the version to publish
+		$version = $this->versionRepository->findById( $versionId );
+		if ( ! $version ) {
+			throw new \Exception( 'Version not found' );
+		}
+
+		$wpdb->query( 'START TRANSACTION' );
+
+		try {
+			// Move current published version to draft
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->prefix}minisite_versions 
                  SET status = 'draft' 
                  WHERE minisite_id = %s AND status = 'published'",
-                $minisiteId
-            ));
-            
-            // Publish new version
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisite_versions 
+					$minisiteId
+				)
+			);
+
+			// Publish new version
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->prefix}minisite_versions 
                  SET status = 'published', published_at = NOW() 
                  WHERE id = %d",
-                $versionId
-            ));
-            
-            // Update profile with published version data and current version ID
-            $wpdb->query($wpdb->prepare(
-                "UPDATE {$wpdb->prefix}minisites 
+					$versionId
+				)
+			);
+
+			// Update profile with published version data and current version ID
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->prefix}minisites 
                  SET site_json = %s, 
                      title = %s,
                      name = %s,
@@ -316,90 +325,93 @@ class VersionController
                      _minisite_current_version_id = %d, 
                      updated_at = NOW() 
                  WHERE id = %s",
-                wp_json_encode($version->siteJson),
-                $version->title,
-                $version->name,
-                $version->city,
-                $version->region,
-                $version->countryCode,
-                $version->postalCode,
-                $version->siteTemplate,
-                $version->palette,
-                $version->industry,
-                $version->defaultLocale,
-                $version->schemaVersion,
-                $version->siteVersion,
-                $version->searchTerms,
-                $versionId,
-                $minisiteId
-            ));
-            
-            // Update location_point if geo data exists
-            if ($version->geo && $version->geo->lat && $version->geo->lng) {
-                $wpdb->query($wpdb->prepare(
-                    "UPDATE {$wpdb->prefix}minisites 
+					wp_json_encode( $version->siteJson ),
+					$version->title,
+					$version->name,
+					$version->city,
+					$version->region,
+					$version->countryCode,
+					$version->postalCode,
+					$version->siteTemplate,
+					$version->palette,
+					$version->industry,
+					$version->defaultLocale,
+					$version->schemaVersion,
+					$version->siteVersion,
+					$version->searchTerms,
+					$versionId,
+					$minisiteId
+				)
+			);
+
+			// Update location_point if geo data exists
+			if ( $version->geo && $version->geo->lat && $version->geo->lng ) {
+				$wpdb->query(
+					$wpdb->prepare(
+						"UPDATE {$wpdb->prefix}minisites 
                      SET location_point = POINT(%f, %f) 
                      WHERE id = %s",
-                    $version->geo->lng, $version->geo->lat, $minisiteId
-                ));
-            }
-            
-            $wpdb->query('COMMIT');
-        } catch (\Exception $e) {
-            $wpdb->query('ROLLBACK');
-            throw $e;
-        }
-    }
+						$version->geo->lng,
+						$version->geo->lat,
+						$minisiteId
+					)
+				);
+			}
 
-    /**
-     * Create a rollback draft from a source version
-     */
-    private function createRollbackVersion(string $minisiteId, int $sourceVersionId, int $userId): \Minisite\Domain\Entities\Version
-    {
-        $sourceVersion = $this->versionRepository->findById($sourceVersionId);
-        $nextVersion = $this->versionRepository->getNextVersionNumber($minisiteId);
-        
-        $rollbackVersion = new \Minisite\Domain\Entities\Version(
-            id: null,
-            minisiteId: $minisiteId,
-            versionNumber: $nextVersion,
-            status: 'draft',
-            label: "Rollback to v{$sourceVersion->versionNumber}",
-            comment: "Rollback from version {$sourceVersion->versionNumber}",
-            createdBy: $userId,
-            createdAt: null,
-            publishedAt: null,
-            sourceVersionId: $sourceVersionId,
-            siteJson: $sourceVersion->siteJson
-        );
-        
-        return $this->versionRepository->save($rollbackVersion);
-    }
+			$wpdb->query( 'COMMIT' );
+		} catch ( \Exception $e ) {
+			$wpdb->query( 'ROLLBACK' );
+			throw $e;
+		}
+	}
 
-    /**
-     * Build site JSON from form data (copied from SitesController)
-     */
-    private function buildSiteJsonFromForm(array $formData): array
-    {
-        // This is a simplified version - you may want to expand this based on your form structure
-        return [
-            'seo' => [
-                'title' => sanitize_text_field($formData['seo_title'] ?? ''),
-                'description' => sanitize_textarea_field($formData['seo_description'] ?? ''),
-                'keywords' => sanitize_text_field($formData['seo_keywords'] ?? ''),
-            ],
-            'brand' => [
-                'name' => sanitize_text_field($formData['brand_name'] ?? ''),
-                'logo' => esc_url_raw($formData['brand_logo'] ?? ''),
-                'palette' => sanitize_text_field($formData['brand_palette'] ?? 'blue'),
-                'industry' => sanitize_text_field($formData['brand_industry'] ?? 'services'),
-            ],
-            'hero' => [
-                'heading' => sanitize_text_field($formData['hero_heading'] ?? ''),
-                'subheading' => sanitize_textarea_field($formData['hero_subheading'] ?? ''),
-                'image' => esc_url_raw($formData['hero_image'] ?? ''),
-            ],
-            // Add more sections as needed
-        ];
-    }
+	/**
+	 * Create a rollback draft from a source version
+	 */
+	private function createRollbackVersion( string $minisiteId, int $sourceVersionId, int $userId ): \Minisite\Domain\Entities\Version {
+		$sourceVersion = $this->versionRepository->findById( $sourceVersionId );
+		$nextVersion   = $this->versionRepository->getNextVersionNumber( $minisiteId );
+
+		$rollbackVersion = new \Minisite\Domain\Entities\Version(
+			id: null,
+			minisiteId: $minisiteId,
+			versionNumber: $nextVersion,
+			status: 'draft',
+			label: "Rollback to v{$sourceVersion->versionNumber}",
+			comment: "Rollback from version {$sourceVersion->versionNumber}",
+			createdBy: $userId,
+			createdAt: null,
+			publishedAt: null,
+			sourceVersionId: $sourceVersionId,
+			siteJson: $sourceVersion->siteJson
+		);
+
+		return $this->versionRepository->save( $rollbackVersion );
+	}
+
+	/**
+	 * Build site JSON from form data (copied from SitesController)
+	 */
+	private function buildSiteJsonFromForm( array $formData ): array {
+		// This is a simplified version - you may want to expand this based on your form structure
+		return array(
+			'seo'   => array(
+				'title'       => sanitize_text_field( $formData['seo_title'] ?? '' ),
+				'description' => sanitize_textarea_field( $formData['seo_description'] ?? '' ),
+				'keywords'    => sanitize_text_field( $formData['seo_keywords'] ?? '' ),
+			),
+			'brand' => array(
+				'name'     => sanitize_text_field( $formData['brand_name'] ?? '' ),
+				'logo'     => esc_url_raw( $formData['brand_logo'] ?? '' ),
+				'palette'  => sanitize_text_field( $formData['brand_palette'] ?? 'blue' ),
+				'industry' => sanitize_text_field( $formData['brand_industry'] ?? 'services' ),
+			),
+			'hero'  => array(
+				'heading'    => sanitize_text_field( $formData['hero_heading'] ?? '' ),
+				'subheading' => sanitize_textarea_field( $formData['hero_subheading'] ?? '' ),
+				'image'      => esc_url_raw( $formData['hero_image'] ?? '' ),
+			),
+			// Add more sections as needed
+		);
+	}
 }
