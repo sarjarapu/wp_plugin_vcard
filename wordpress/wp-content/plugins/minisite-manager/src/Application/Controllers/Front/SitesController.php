@@ -16,7 +16,7 @@ final class SitesController
         if (! is_user_logged_in()) {
             $redirect_url = home_url(
                 '/account/login?redirect_to=' . urlencode(
-                    isset($_SERVER['REQUEST_URI']) ? 
+                    isset($_SERVER['REQUEST_URI']) ?
                     sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
                 )
             );
@@ -103,7 +103,7 @@ final class SitesController
         if (! is_user_logged_in()) {
             $redirect_url = home_url(
                 '/account/login?redirect_to=' . urlencode(
-                    isset($_SERVER['REQUEST_URI']) ? 
+                    isset($_SERVER['REQUEST_URI']) ?
                     sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
                 )
             );
@@ -162,7 +162,10 @@ final class SitesController
         }
 
         // Handle form submission
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_edit_nonce'])) {
+        if (
+            isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &&
+            isset($_POST['minisite_edit_nonce'])
+        ) {
             if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_edit_nonce'])), 'minisite_edit')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
@@ -207,14 +210,28 @@ final class SitesController
                             title: sanitize_text_field(wp_unslash($_POST['seo_title'] ?? $minisite->title)),
                             name: sanitize_text_field(wp_unslash($_POST['business_name'] ?? $minisite->name)),
                             city: sanitize_text_field(wp_unslash($_POST['business_city'] ?? $minisite->city)),
-                            region: sanitize_text_field(wp_unslash($_POST['business_region'] ?? $minisite->region)),
-                            countryCode: sanitize_text_field(wp_unslash($_POST['business_country'] ?? $minisite->countryCode)),
-                            postalCode: sanitize_text_field(wp_unslash($_POST['business_postal'] ?? $minisite->postalCode)),
+                            region: sanitize_text_field(
+                                wp_unslash($_POST['business_region'] ?? $minisite->region)
+                            ),
+                            countryCode: sanitize_text_field(
+                                wp_unslash($_POST['business_country'] ?? $minisite->countryCode)
+                            ),
+                            postalCode: sanitize_text_field(
+                                wp_unslash($_POST['business_postal'] ?? $minisite->postalCode)
+                            ),
                             geo: $geo,
-                            siteTemplate: sanitize_text_field(wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)),
-                            palette: sanitize_text_field(wp_unslash($_POST['brand_palette'] ?? $minisite->palette)),
-                            industry: sanitize_text_field(wp_unslash($_POST['brand_industry'] ?? $minisite->industry)),
-                            defaultLocale: sanitize_text_field(wp_unslash($_POST['default_locale'] ?? $minisite->defaultLocale)),
+                            siteTemplate: sanitize_text_field(
+                                wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)
+                            ),
+                            palette: sanitize_text_field(
+                                wp_unslash($_POST['brand_palette'] ?? $minisite->palette)
+                            ),
+                            industry: sanitize_text_field(
+                                wp_unslash($_POST['brand_industry'] ?? $minisite->industry)
+                            ),
+                            defaultLocale: sanitize_text_field(
+                                wp_unslash($_POST['default_locale'] ?? $minisite->defaultLocale)
+                            ),
                             schemaVersion: $minisite->schemaVersion,
                             siteVersion: $minisite->siteVersion,
                             searchTerms: sanitize_text_field(wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms))
@@ -323,7 +340,7 @@ final class SitesController
         if (! is_user_logged_in()) {
             $redirect_url = home_url(
                 '/account/login?redirect_to=' . urlencode(
-                    isset($_SERVER['REQUEST_URI']) ? 
+                    isset($_SERVER['REQUEST_URI']) ?
                     sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
                 )
             );

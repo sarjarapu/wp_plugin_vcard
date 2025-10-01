@@ -16,7 +16,10 @@ final class AuthController
         $redirect_to = sanitize_text_field(wp_unslash($_GET['redirect_to'] ?? home_url('/account/dashboard')));
 
         // Handle login form submission
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_login_nonce'])) {
+        if (
+            isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &&
+            isset($_POST['minisite_login_nonce'])
+        ) {
             if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_login_nonce'])), 'minisite_login')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
@@ -38,7 +41,9 @@ final class AuthController
                         $error_msg = $user->get_error_message();
                     } else {
                         // Redirect to dashboard or intended page
-                        $redirect_to = sanitize_url(wp_unslash($_POST['redirect_to'] ?? home_url('/account/dashboard')));
+                        $redirect_to = sanitize_url(
+                            wp_unslash($_POST['redirect_to'] ?? home_url('/account/dashboard'))
+                        );
                         wp_redirect($redirect_to);
                         exit;
                     }
@@ -62,7 +67,10 @@ final class AuthController
         $success_msg = '';
 
         // Handle registration form submission
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_register_nonce'])) {
+        if (
+            isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &&
+            isset($_POST['minisite_register_nonce'])
+        ) {
             if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_register_nonce'])), 'minisite_register')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
@@ -108,7 +116,7 @@ final class AuthController
         if (! is_user_logged_in()) {
             $redirect_url = home_url(
                 '/account/login?redirect_to=' . urlencode(
-                    isset($_SERVER['REQUEST_URI']) ? 
+                    isset($_SERVER['REQUEST_URI']) ?
                     sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
                 )
             );

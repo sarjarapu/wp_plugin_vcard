@@ -21,7 +21,7 @@ class VersionController
         if (! is_user_logged_in()) {
             $redirect_url = home_url(
                 '/account/login?redirect_to=' . urlencode(
-                    isset($_SERVER['REQUEST_URI']) ? 
+                    isset($_SERVER['REQUEST_URI']) ?
                     sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
                 )
             );
@@ -390,8 +390,7 @@ class VersionController
         string $minisiteId,
         int $sourceVersionId,
         int $userId
-    ): \Minisite\Domain\Entities\Version
-    {
+    ): \Minisite\Domain\Entities\Version {
         $sourceVersion = $this->versionRepository->findById($sourceVersionId);
         $nextVersion   = $this->versionRepository->getNextVersionNumber($minisiteId);
 

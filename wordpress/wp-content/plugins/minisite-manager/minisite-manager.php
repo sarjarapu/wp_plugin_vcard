@@ -473,7 +473,7 @@ add_action('template_redirect', function () {
                   // Delegate to SitesController
                     if (
                         $sitesCtrlClass = minisite_class(
-                        \Minisite\Application\Controllers\Front\SitesController::class
+                            \Minisite\Application\Controllers\Front\SitesController::class
                         )
                     ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
@@ -490,7 +490,7 @@ add_action('template_redirect', function () {
                   // Delegate to NewMinisiteController
                     if (
                         $newMinisiteCtrlClass = minisite_class(
-                        \Minisite\Application\Controllers\Front\NewMinisiteController::class
+                            \Minisite\Application\Controllers\Front\NewMinisiteController::class
                         )
                     ) {
                         global $wpdb;
@@ -565,7 +565,7 @@ add_action('template_redirect', function () {
                   // Delegate to SitesController for editing
                     if (
                         $sitesCtrlClass = minisite_class(
-                        \Minisite\Application\Controllers\Front\SitesController::class
+                            \Minisite\Application\Controllers\Front\SitesController::class
                         )
                     ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
@@ -582,7 +582,7 @@ add_action('template_redirect', function () {
                   // Delegate to SitesController for previewing
                     if (
                         $sitesCtrlClass = minisite_class(
-                        \Minisite\Application\Controllers\Front\SitesController::class
+                            \Minisite\Application\Controllers\Front\SitesController::class
                         )
                     ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
@@ -599,7 +599,7 @@ add_action('template_redirect', function () {
                   // Delegate to VersionController for version management
                     if (
                         $versionCtrlClass = minisite_class(
-                        \Minisite\Application\Controllers\Front\VersionController::class
+                            \Minisite\Application\Controllers\Front\VersionController::class
                         )
                     ) {
                         global $wpdb;
@@ -855,17 +855,17 @@ add_action('wp_ajax_publish_version', function () {
             $nextVersion = $versionRepo->getNextVersionNumber($siteId);
 
             $rollbackVersion = new \Minisite\Domain\Entities\Version(
-            id: null,
-            minisiteId: $siteId,
-            versionNumber: $nextVersion,
-            status: 'draft',
-            label: "Copy to v{$sourceVersion->versionNumber}",
-            comment: "Copy of version {$sourceVersion->versionNumber}",
-            siteJson: $sourceVersion->siteJson,
-            createdBy: get_current_user_id(),
-            createdAt: null,
-            publishedAt: null,
-            sourceVersionId: $sourceVersionId
+                id: null,
+                minisiteId: $siteId,
+                versionNumber: $nextVersion,
+                status: 'draft',
+                label: "Copy to v{$sourceVersion->versionNumber}",
+                comment: "Copy of version {$sourceVersion->versionNumber}",
+                siteJson: $sourceVersion->siteJson,
+                createdBy: get_current_user_id(),
+                createdAt: null,
+                publishedAt: null,
+                sourceVersionId: $sourceVersionId
             );
 
             $savedVersion = $versionRepo->save($rollbackVersion);

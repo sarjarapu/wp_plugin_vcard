@@ -178,8 +178,7 @@ class _1_0_0_CreateBase implements Migration
         string $column,
         string $referencedTable,
         string $referencedColumn
-    ): void
-    {
+    ): void {
         // Check if the constraint already exists
         $constraintExists = $wpdb->get_var(
             $wpdb->prepare(
@@ -361,8 +360,7 @@ class _1_0_0_CreateBase implements Migration
         float $rating,
         string $body,
         ?string $locale = 'en-US'
-    ): void
-    {
+    ): void {
         $reviewsT = $wpdb->prefix . 'minisite_reviews';
         $nowUser  = get_current_user_id() ?: null;
 

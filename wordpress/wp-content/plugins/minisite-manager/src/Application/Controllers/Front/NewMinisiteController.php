@@ -969,8 +969,7 @@ final class NewMinisiteController
         string $businessSlug,
         string $locationSlug,
         string $reservationId
-    ): void
-    {
+    ): void {
         global $wpdb;
 
         try {
@@ -1179,8 +1178,7 @@ final class NewMinisiteController
         int $paymentId,
         string $action,
         string $paymentReference
-    ): void
-    {
+    ): void {
         global $wpdb;
 
         $expiresAt         = date('Y-m-d H:i:s', strtotime('+1 year'));
