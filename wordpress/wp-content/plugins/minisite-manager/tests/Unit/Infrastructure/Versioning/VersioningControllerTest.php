@@ -16,14 +16,14 @@ class TestableVersioningController extends VersioningController
 {
     private string $testTargetVersion;
     private string $testOptionKey;
-    
+
     public function __construct(string $targetVersion, string $optionKey)
     {
         parent::__construct($targetVersion, $optionKey);
         $this->testTargetVersion = $targetVersion;
         $this->testOptionKey = $optionKey;
     }
-    
+
     public function ensureDatabaseUpToDate(): void
     {
         global $wpdb;
@@ -36,7 +36,7 @@ class TestableVersioningController extends VersioningController
 
         // For unit tests, we don't actually run migrations - just verify the logic flow
         // The actual migration testing is done in integration tests
-        
+
         // Simulate version comparison without loading real migration files
         $currentVersion = get_option($this->testOptionKey, '0.0.0');
         if (version_compare($currentVersion, $this->testTargetVersion, '<')) {
@@ -60,10 +60,10 @@ class VersioningControllerTest extends TestCase
         $this->testTargetVersion = '2.0.0';
         $this->testOptionKey = 'minisite_unit_test_version_' . uniqid();
         $this->controller = new VersioningController($this->testTargetVersion, $this->testOptionKey);
-        
+
         // Create mock wpdb
         $this->mockWpdb = $this->createMock(\wpdb::class);
-        
+
         // Ensure options are clean before each test
         delete_option($this->testOptionKey);
     }
@@ -78,17 +78,17 @@ class VersioningControllerTest extends TestCase
     {
         $targetVersion = '1.5.0';
         $optionKey = 'test_option_key';
-        
+
         $controller = new VersioningController($targetVersion, $optionKey);
-        
+
         // Use reflection to verify private properties are set correctly
         $reflection = new \ReflectionClass($controller);
         $targetVersionProperty = $reflection->getProperty('targetVersion');
         $optionKeyProperty = $reflection->getProperty('optionKey');
-        
+
         $targetVersionProperty->setAccessible(true);
         $optionKeyProperty->setAccessible(true);
-        
+
         $this->assertEquals($targetVersion, $targetVersionProperty->getValue($controller));
         $this->assertEquals($optionKey, $optionKeyProperty->getValue($controller));
     }
@@ -100,10 +100,10 @@ class VersioningControllerTest extends TestCase
             ->setConstructorArgs([$this->testTargetVersion, $this->testOptionKey])
             ->onlyMethods(['ensureDatabaseUpToDate'])
             ->getMock();
-        
+
         $controller->expects($this->once())
             ->method('ensureDatabaseUpToDate');
-        
+
         $controller->activate();
     }
 
@@ -111,33 +111,33 @@ class VersioningControllerTest extends TestCase
     {
         // Set current version to match target version
         update_option($this->testOptionKey, $this->testTargetVersion);
-        
+
         // Mock global wpdb
         global $wpdb;
         $originalWpdb = $wpdb;
         $wpdb = $this->mockWpdb;
-        
+
         // Mock wpdb methods for table checking - all tables exist
         $this->mockWpdb->prefix = 'wp_';
         $this->mockWpdb->method('get_var')
-            ->willReturnCallback(function($query) {
+            ->willReturnCallback(function ($query) {
                 // Extract table name from query and return it to simulate table exists
                 if (preg_match("/SHOW TABLES LIKE '(.+)'/", $query, $matches)) {
                     return $matches[1];
                 }
                 return '';
             });
-        
+
         // Mock prepare method
         $this->mockWpdb->method('prepare')
-            ->willReturnCallback(function($query, $value) {
+            ->willReturnCallback(function ($query, $value) {
                 return str_replace('%s', "'" . $value . "'", $query);
             });
-        
+
         try {
             // This should not throw any exceptions and should not run migrations
             $this->controller->ensureDatabaseUpToDate();
-            
+
             // Verify the version wasn't changed
             $this->assertEquals($this->testTargetVersion, get_option($this->testOptionKey));
         } finally {
@@ -150,24 +150,24 @@ class VersioningControllerTest extends TestCase
     {
         // Set current version lower than target
         update_option($this->testOptionKey, '1.0.0');
-        
+
         // Create test controller that avoids loading real migration files
         $controller = $this->createTestVersioningController();
-        
+
         // Mock global wpdb
         global $wpdb;
         $originalWpdb = $wpdb;
         $wpdb = $this->mockWpdb;
-        
+
         // Mock wpdb methods for table checking
         $this->mockWpdb->prefix = 'wp_';
         $this->mockWpdb->method('get_var')
             ->willReturn('wp_minisites'); // Table exists
-        
+
         try {
             // This should run migrations when current version is less than target
             $controller->ensureDatabaseUpToDate();
-            
+
             // The method should complete without errors
             $this->assertTrue(true);
         } finally {
@@ -180,30 +180,30 @@ class VersioningControllerTest extends TestCase
     {
         // Set current version to target (would normally skip migrations)
         update_option($this->testOptionKey, $this->testTargetVersion);
-        
+
         // Create test controller that avoids loading real migration files
         $controller = $this->createTestVersioningController();
-        
+
         // Mock global wpdb
         global $wpdb;
         $originalWpdb = $wpdb;
         $wpdb = $this->mockWpdb;
-        
+
         // Mock wpdb methods to simulate missing tables
         $this->mockWpdb->prefix = 'wp_';
         $this->mockWpdb->method('get_var')
             ->willReturn(''); // Table doesn't exist
-        
+
         // Mock prepare method
         $this->mockWpdb->method('prepare')
-            ->willReturnCallback(function($query, $value) {
+            ->willReturnCallback(function ($query, $value) {
                 return str_replace('%s', "'" . $value . "'", $query);
             });
-        
+
         try {
             // This should reset the version to 0.0.0 in dev environment
             $controller->ensureDatabaseUpToDate();
-            
+
             // In dev environment, version should be reset to 0.0.0
             // Note: This test assumes we're in dev environment (MINISITE_LIVE_PRODUCTION not defined or false)
             $currentVersion = get_option($this->testOptionKey);
@@ -223,30 +223,30 @@ class VersioningControllerTest extends TestCase
         if (!defined('MINISITE_LIVE_PRODUCTION')) {
             define('MINISITE_LIVE_PRODUCTION', true);
         }
-        
+
         // Set current version to target
         update_option($this->testOptionKey, $this->testTargetVersion);
-        
+
         // Mock global wpdb
         global $wpdb;
         $originalWpdb = $wpdb;
         $wpdb = $this->mockWpdb;
-        
+
         // Mock wpdb methods to simulate missing tables
         $this->mockWpdb->prefix = 'wp_';
         $this->mockWpdb->method('get_var')
             ->willReturn(''); // Table doesn't exist
-        
+
         // Mock prepare method
         $this->mockWpdb->method('prepare')
-            ->willReturnCallback(function($query, $value) {
+            ->willReturnCallback(function ($query, $value) {
                 return str_replace('%s', "'" . $value . "'", $query);
             });
-        
+
         try {
             // This should NOT reset the version in production
             $this->controller->ensureDatabaseUpToDate();
-            
+
             // Version should remain unchanged in production
             $this->assertEquals($this->testTargetVersion, get_option($this->testOptionKey));
         } finally {
@@ -261,24 +261,24 @@ class VersioningControllerTest extends TestCase
         global $wpdb;
         $originalWpdb = $wpdb;
         $wpdb = $this->mockWpdb;
-        
+
         // Mock wpdb methods to simulate missing tables
         $this->mockWpdb->prefix = 'wp_';
         $this->mockWpdb->method('get_var')
             ->willReturn(''); // Table doesn't exist
-        
+
         // Mock prepare method
         $this->mockWpdb->method('prepare')
-            ->willReturnCallback(function($query, $value) {
+            ->willReturnCallback(function ($query, $value) {
                 return str_replace('%s', "'" . $value . "'", $query);
             });
-        
+
         try {
             // Use reflection to test private method
             $reflection = new \ReflectionClass($this->controller);
             $method = $reflection->getMethod('tablesMissing');
             $method->setAccessible(true);
-            
+
             $result = $method->invoke($this->controller, $this->mockWpdb);
             $this->assertTrue($result);
         } finally {
@@ -293,30 +293,30 @@ class VersioningControllerTest extends TestCase
         global $wpdb;
         $originalWpdb = $wpdb;
         $wpdb = $this->mockWpdb;
-        
+
         // Mock wpdb methods to simulate existing tables
         $this->mockWpdb->prefix = 'wp_';
         $this->mockWpdb->method('get_var')
-            ->willReturnCallback(function($query) {
+            ->willReturnCallback(function ($query) {
                 // Extract table name from query and return it to simulate table exists
                 if (preg_match("/SHOW TABLES LIKE '(.+)'/", $query, $matches)) {
                     return $matches[1];
                 }
                 return '';
             });
-        
+
         // Mock prepare method
         $this->mockWpdb->method('prepare')
-            ->willReturnCallback(function($query, $value) {
+            ->willReturnCallback(function ($query, $value) {
                 return str_replace('%s', "'" . $value . "'", $query);
             });
-        
+
         try {
             // Use reflection to test private method
             $reflection = new \ReflectionClass($this->controller);
             $method = $reflection->getMethod('tablesMissing');
             $method->setAccessible(true);
-            
+
             $result = $method->invoke($this->controller, $this->mockWpdb);
             $this->assertFalse($result);
         } finally {
@@ -331,11 +331,11 @@ class VersioningControllerTest extends TestCase
         global $wpdb;
         $originalWpdb = $wpdb;
         $wpdb = $this->mockWpdb;
-        
+
         // Mock wpdb methods to simulate some tables missing
         $this->mockWpdb->prefix = 'wp_';
         $this->mockWpdb->method('get_var')
-            ->willReturnCallback(function($query) {
+            ->willReturnCallback(function ($query) {
                 // Return table name for first few tables, empty for the last one
                 if (strpos($query, 'wp_minisite_bookmarks') !== false) {
                     return ''; // This table is missing
@@ -346,19 +346,19 @@ class VersioningControllerTest extends TestCase
                 }
                 return '';
             });
-        
+
         // Mock prepare method
         $this->mockWpdb->method('prepare')
-            ->willReturnCallback(function($query, $value) {
+            ->willReturnCallback(function ($query, $value) {
                 return str_replace('%s', "'" . $value . "'", $query);
             });
-        
+
         try {
             // Use reflection to test private method
             $reflection = new \ReflectionClass($this->controller);
             $method = $reflection->getMethod('tablesMissing');
             $method->setAccessible(true);
-            
+
             $result = $method->invoke($this->controller, $this->mockWpdb);
             $this->assertTrue($result);
         } finally {
@@ -380,24 +380,24 @@ class VersioningControllerTest extends TestCase
         foreach ($testCases as $case) {
             // Set current version
             update_option($this->testOptionKey, $case['current']);
-            
+
             // Create test controller with specific target version
             $controller = new TestableVersioningController($case['target'], $this->testOptionKey);
-            
+
             // Mock global wpdb
             global $wpdb;
             $originalWpdb = $wpdb;
             $wpdb = $this->mockWpdb;
-            
+
             // Mock wpdb methods for table checking
             $this->mockWpdb->prefix = 'wp_';
             $this->mockWpdb->method('get_var')
                 ->willReturn('wp_minisites'); // Table exists
-            
+
             try {
                 // This should not throw exceptions regardless of version comparison
                 $controller->ensureDatabaseUpToDate();
-                
+
                 // The method should complete without errors
                 $this->assertTrue(true, "Version comparison {$case['current']} vs {$case['target']} should not cause errors");
             } finally {
@@ -412,28 +412,28 @@ class VersioningControllerTest extends TestCase
         // This test verifies that the MigrationLocator is created with the correct directory
         // We can't easily mock the MigrationLocator constructor, but we can verify
         // that the method doesn't throw exceptions when the directory path is constructed
-        
+
         // Set current version lower than target to trigger migration logic
         update_option($this->testOptionKey, '1.0.0');
-        
+
         // Create test controller that avoids loading real migration files
         $controller = $this->createTestVersioningController();
-        
+
         // Mock global wpdb
         global $wpdb;
         $originalWpdb = $wpdb;
         $wpdb = $this->mockWpdb;
-        
+
         // Mock wpdb methods for table checking
         $this->mockWpdb->prefix = 'wp_';
         $this->mockWpdb->method('get_var')
             ->willReturn('wp_minisites'); // Table exists
-        
+
         try {
             // This should not throw exceptions even if the migration directory doesn't exist
             // The MigrationLocator will handle missing directories gracefully
             $controller->ensureDatabaseUpToDate();
-            
+
             // The method should complete without errors
             $this->assertTrue(true);
         } finally {

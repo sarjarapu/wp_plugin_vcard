@@ -17,16 +17,16 @@ class DbIntegrationTest extends TestCase
     {
         // Store the original $wpdb to restore later
         $this->originalWpdb = $GLOBALS['wpdb'] ?? null;
-        
+
         // Set up database helper
         $this->dbHelper = new DatabaseTestHelper();
-        
+
         // Clean up any existing test data
         $this->dbHelper->cleanupTestTables();
-        
+
         // Create a test table for our tests
         $this->createTestTable();
-        
+
         // Set the global $wpdb to our test database
         $GLOBALS['wpdb'] = $this->dbHelper->getWpdb();
     }
@@ -35,7 +35,7 @@ class DbIntegrationTest extends TestCase
     {
         // Clean up test data
         $this->dbHelper->cleanupTestTables();
-        
+
         // Restore the original $wpdb
         $GLOBALS['wpdb'] = $this->originalWpdb;
     }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Integration\Infrastructure\Persistence\Repositories;
@@ -23,7 +24,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->dbHelper = new DatabaseTestHelper();
         $this->dbHelper->cleanupTestTables();
         $this->dbHelper->createMinisiteVersionsTable();
-        
+
         $this->repository = new VersionRepository($this->dbHelper->getWpdb());
     }
 
@@ -66,7 +67,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
 
         // Save the version
         $savedVersion = $this->repository->save($version);
-        
+
         $this->assertNotNull($savedVersion->id);
         $this->assertSame('test-minisite-1', $savedVersion->minisiteId);
         $this->assertSame(1, $savedVersion->versionNumber);
@@ -81,7 +82,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
 
         // Retrieve the version
         $retrievedVersion = $this->repository->findById($savedVersion->id);
-        
+
         $this->assertNotNull($retrievedVersion);
         $this->assertSame($savedVersion->id, $retrievedVersion->id);
         $this->assertSame('test-minisite-1', $retrievedVersion->minisiteId);
@@ -143,7 +144,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
     public function testFindByMinisiteIdReturnsVersionsInCorrectOrder(): void
     {
         $minisiteId = 'test-minisite-3';
-        
+
         // Create multiple versions
         $version1 = new Version(
             id: null,
@@ -192,7 +193,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->repository->save($version3);
 
         $versions = $this->repository->findByMinisiteId($minisiteId);
-        
+
         $this->assertCount(3, $versions);
         // Should be ordered by version_number DESC
         $this->assertSame(3, $versions[0]->versionNumber);
@@ -203,7 +204,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
     public function testFindLatestVersionReturnsHighestVersionNumber(): void
     {
         $minisiteId = 'test-minisite-4';
-        
+
         // Create versions with different numbers
         $version1 = new Version(
             id: null,
@@ -252,7 +253,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->repository->save($version3);
 
         $latestVersion = $this->repository->findLatestVersion($minisiteId);
-        
+
         $this->assertNotNull($latestVersion);
         $this->assertSame(5, $latestVersion->versionNumber);
         $this->assertSame('Version 5', $latestVersion->label);
@@ -261,7 +262,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
     public function testFindLatestDraftReturnsLatestDraftVersion(): void
     {
         $minisiteId = 'test-minisite-5';
-        
+
         // Create mixed versions
         $draft1 = new Version(
             id: null,
@@ -310,7 +311,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->repository->save($draft2);
 
         $latestDraft = $this->repository->findLatestDraft($minisiteId);
-        
+
         $this->assertNotNull($latestDraft);
         $this->assertSame(3, $latestDraft->versionNumber);
         $this->assertSame('draft', $latestDraft->status);
@@ -320,7 +321,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
     public function testFindPublishedVersionReturnsPublishedVersion(): void
     {
         $minisiteId = 'test-minisite-6';
-        
+
         // Create versions with only one published
         $draft = new Version(
             id: null,
@@ -354,7 +355,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->repository->save($published);
 
         $publishedVersion = $this->repository->findPublishedVersion($minisiteId);
-        
+
         $this->assertNotNull($publishedVersion);
         $this->assertSame(2, $publishedVersion->versionNumber);
         $this->assertSame('published', $publishedVersion->status);
@@ -364,7 +365,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
     public function testGetNextVersionNumberCalculatesCorrectly(): void
     {
         $minisiteId = 'test-minisite-7';
-        
+
         // Create versions with gaps
         $version1 = new Version(
             id: null,
@@ -398,16 +399,16 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->repository->save($version5);
 
         $nextVersion = $this->repository->getNextVersionNumber($minisiteId);
-        
+
         $this->assertSame(6, $nextVersion);
     }
 
     public function testGetNextVersionNumberReturnsOneForNewMinisite(): void
     {
         $minisiteId = 'test-minisite-8';
-        
+
         $nextVersion = $this->repository->getNextVersionNumber($minisiteId);
-        
+
         $this->assertSame(1, $nextVersion);
     }
 
@@ -435,9 +436,9 @@ final class VersionRepositoryIntegrationTest extends TestCase
 
         // Delete it
         $result = $this->repository->delete($versionId);
-        
+
         $this->assertTrue($result);
-        
+
         // Verify it's gone
         $this->assertNull($this->repository->findById($versionId));
     }
@@ -445,7 +446,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
     public function testGetLatestDraftForEditingReturnsExistingDraft(): void
     {
         $minisiteId = 'test-minisite-10';
-        
+
         $draft = new Version(
             id: null,
             minisiteId: $minisiteId,
@@ -463,7 +464,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $this->repository->save($draft);
 
         $result = $this->repository->getLatestDraftForEditing($minisiteId);
-        
+
         $this->assertNotNull($result);
         $this->assertSame(2, $result->versionNumber);
         $this->assertSame('draft', $result->status);
@@ -473,7 +474,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
     public function testGetLatestDraftForEditingCreatesDraftFromPublished(): void
     {
         $minisiteId = 'test-minisite-11';
-        
+
         $published = new Version(
             id: null,
             minisiteId: $minisiteId,
@@ -493,7 +494,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $savedPublished = $this->repository->save($published);
 
         $result = $this->repository->getLatestDraftForEditing($minisiteId);
-        
+
         $this->assertNotNull($result);
         $this->assertSame(2, $result->versionNumber);
         $this->assertSame('draft', $result->status);
@@ -507,7 +508,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
     public function testCreateDraftFromVersionCreatesNewDraft(): void
     {
         $minisiteId = 'test-minisite-12';
-        
+
         $sourceVersion = new Version(
             id: null,
             minisiteId: $minisiteId,
@@ -528,7 +529,7 @@ final class VersionRepositoryIntegrationTest extends TestCase
         $savedSource = $this->repository->save($sourceVersion);
 
         $result = $this->repository->createDraftFromVersion($savedSource);
-        
+
         $this->assertNotNull($result);
         $this->assertSame(4, $result->versionNumber);
         $this->assertSame('draft', $result->status);
@@ -572,13 +573,13 @@ final class VersionRepositoryIntegrationTest extends TestCase
         );
 
         $savedVersion = $this->repository->save($version);
-        
+
         $this->assertNotNull($savedVersion->geo);
         $this->assertSame(45.7, $savedVersion->geo->lat);
         $this->assertSame(120.1, $savedVersion->geo->lng);
 
         $retrievedVersion = $this->repository->findById($savedVersion->id);
-        
+
         $this->assertNotNull($retrievedVersion->geo);
         $this->assertSame(45.7, $retrievedVersion->geo->lat);
         $this->assertSame(120.1, $retrievedVersion->geo->lng);
@@ -602,13 +603,13 @@ final class VersionRepositoryIntegrationTest extends TestCase
         );
 
         $savedVersion = $this->repository->save($version);
-        
+
         $this->assertNotNull($savedVersion->slugs);
         $this->assertSame('my-business', $savedVersion->slugs->business);
         $this->assertSame('my-location', $savedVersion->slugs->location);
 
         $retrievedVersion = $this->repository->findById($savedVersion->id);
-        
+
         $this->assertNotNull($retrievedVersion->slugs);
         $this->assertSame('my-business', $retrievedVersion->slugs->business);
         $this->assertSame('my-location', $retrievedVersion->slugs->location);
@@ -656,11 +657,11 @@ final class VersionRepositoryIntegrationTest extends TestCase
         );
 
         $savedVersion = $this->repository->save($version);
-        
+
         $this->assertSame($complexJson, $savedVersion->siteJson);
 
         $retrievedVersion = $this->repository->findById($savedVersion->id);
-        
+
         $this->assertSame($complexJson, $retrievedVersion->siteJson);
         $this->assertSame('Welcome', $retrievedVersion->siteJson['sections']['hero']['title']);
         $this->assertSame(['feature1', 'feature2', 'feature3'], $retrievedVersion->siteJson['sections']['about']['features']);

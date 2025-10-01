@@ -21,24 +21,24 @@ class DbDeltaIntegrationTest extends TestCase
     {
         // Store the original $wpdb to restore later
         $this->originalWpdb = $GLOBALS['wpdb'] ?? null;
-        
+
         // Store original ABSPATH
         $this->originalAbspath = defined('ABSPATH') ? ABSPATH : null;
-        
+
         // Define ABSPATH for testing if not already defined
         if (!defined('ABSPATH')) {
             define('ABSPATH', '/fake/wordpress/path/');
         }
-        
+
         // Set up database helper
         $this->dbHelper = new DatabaseTestHelper();
-        
+
         // Clean up any existing test data
         $this->dbHelper->cleanupTestTables();
-        
+
         // Set the global $wpdb to our test database
         $GLOBALS['wpdb'] = $this->dbHelper->getWpdb();
-        
+
         // Create a mock dbDelta function for testing
         $this->createMockDbDeltaFunction();
     }
@@ -47,7 +47,7 @@ class DbDeltaIntegrationTest extends TestCase
     {
         // Clean up test data
         $this->dbHelper->cleanupTestTables();
-        
+
         // Restore the original $wpdb
         $GLOBALS['wpdb'] = $this->originalWpdb;
     }
@@ -149,7 +149,7 @@ class DbDeltaIntegrationTest extends TestCase
         $this->assertTrue(Db::columnExists($this->dbHelper->getWpdb(), 'wp_complex_table', 'address'));
         $this->assertTrue(Db::columnExists($this->dbHelper->getWpdb(), 'wp_complex_table', 'created_at'));
         $this->assertTrue(Db::columnExists($this->dbHelper->getWpdb(), 'wp_complex_table', 'updated_at'));
-        
+
         // Check indexes
         $this->assertTrue(Db::indexExists($this->dbHelper->getWpdb(), 'wp_complex_table', 'PRIMARY'));
         $this->assertTrue(Db::indexExists($this->dbHelper->getWpdb(), 'wp_complex_table', 'idx_name'));

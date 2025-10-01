@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Integration\Application\Rendering;
@@ -27,7 +28,7 @@ final class TimberRendererIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Store original globals
         $this->originalGlobals = [
             'wpdb' => $GLOBALS['wpdb'] ?? null,
@@ -37,18 +38,18 @@ final class TimberRendererIntegrationTest extends TestCase
         $this->dbHelper = new DatabaseTestHelper();
         $this->dbHelper->cleanupTestTables();
         $this->dbHelper->createAllTables();
-        
+
         // Set the global $wpdb to our test database
         $GLOBALS['wpdb'] = $this->dbHelper->getWpdb();
-        
+
         $this->renderer = new TimberRenderer('v2025');
-        
+
         // Create test minisite
         $this->testMinisite = $this->createTestMinisite();
-        
+
         // Insert test minisite into database
         $this->insertTestMinisite();
-        
+
         // Mock WordPress functions
         $this->mockWordPressFunctions();
     }
@@ -57,10 +58,10 @@ final class TimberRendererIntegrationTest extends TestCase
     {
         // Clean up test data
         $this->dbHelper->cleanupTestTables();
-        
+
         // Restore original globals
         $GLOBALS['wpdb'] = $this->originalGlobals['wpdb'];
-        
+
         parent::tearDown();
     }
 
@@ -124,19 +125,19 @@ final class TimberRendererIntegrationTest extends TestCase
         if (!function_exists('is_user_logged_in')) {
             eval('function is_user_logged_in() { return true; }');
         }
-        
+
         if (!function_exists('get_current_user_id')) {
             eval('function get_current_user_id() { return 1; }');
         }
-        
+
         if (!function_exists('current_user_can')) {
             eval('function current_user_can($capability, $object_id = null) { return true; }');
         }
-        
+
         if (!function_exists('trailingslashit')) {
             eval('function trailingslashit($string) { return rtrim($string, "/") . "/"; }');
         }
-        
+
         if (!function_exists('esc_html')) {
             eval('function esc_html($text) { return htmlspecialchars($text, ENT_QUOTES, "UTF-8"); }');
         }
@@ -146,25 +147,25 @@ final class TimberRendererIntegrationTest extends TestCase
     {
         // Insert test reviews
         $this->insertTestReviews();
-        
+
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('fetchReviews');
         $method->setAccessible(true);
-        
+
         $reviews = $method->invoke($this->renderer, 'test-minisite-123');
-        
+
         $this->assertIsArray($reviews);
         $this->assertCount(2, $reviews);
-        
+
         // Verify review data
         $this->assertInstanceOf(Review::class, $reviews[0]);
         $this->assertSame(0, $reviews[0]->minisiteId); // ReviewRepository casts string to int, so 'test-minisite-123' becomes 0
-        
+
         // Check that we have the expected authors (order may vary)
         $authorNames = array_map(fn($review) => $review->authorName, $reviews);
         $this->assertContains('John Doe', $authorNames);
         $this->assertContains('Jane Smith', $authorNames);
-        
+
         // Check that we have the expected ratings
         $ratings = array_map(fn($review) => $review->rating, $reviews);
         $this->assertContains(5.0, $ratings);
@@ -176,17 +177,17 @@ final class TimberRendererIntegrationTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('checkIfBookmarked');
         $method->setAccessible(true);
-        
+
         // Test when no bookmark exists
         $result = $method->invoke($this->renderer, 'test-minisite-123');
         $this->assertFalse($result);
-        
+
         // Insert a bookmark
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_bookmarks (user_id, minisite_id, created_at)
             VALUES (1, 'test-minisite-123', NOW())
         ");
-        
+
         // Test when bookmark exists
         $result = $method->invoke($this->renderer, 'test-minisite-123');
         $this->assertTrue($result);
@@ -197,7 +198,7 @@ final class TimberRendererIntegrationTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('checkIfCanEdit');
         $method->setAccessible(true);
-        
+
         // Since current_user_can is mocked to return true, this should return true
         $result = $method->invoke($this->renderer, 'test-minisite-123');
         $this->assertTrue($result);
@@ -210,13 +211,13 @@ final class TimberRendererIntegrationTest extends TestCase
             INSERT INTO wp_minisite_bookmarks (user_id, minisite_id, created_at)
             VALUES (1, 'test-minisite-123', NOW())
         ");
-        
+
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('fetchMinisiteWithUserData');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke($this->renderer, $this->testMinisite);
-        
+
         $this->assertInstanceOf(Minisite::class, $result);
         $this->assertSame('test-minisite-123', $result->id);
         $this->assertSame('Test Minisite Title', $result->title);
@@ -232,21 +233,21 @@ final class TimberRendererIntegrationTest extends TestCase
             INSERT INTO wp_minisite_bookmarks (user_id, minisite_id, created_at)
             VALUES (1, 'test-minisite-123', NOW())
         ");
-        
+
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('getMinisiteData');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke($this->renderer, $this->testMinisite);
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('minisite', $result);
         $this->assertArrayHasKey('reviews', $result);
-        
+
         $this->assertInstanceOf(Minisite::class, $result['minisite']);
         $this->assertIsArray($result['reviews']);
         $this->assertCount(2, $result['reviews']);
-        
+
         // Verify the minisite has user data
         $this->assertTrue($result['minisite']->isBookmarked);
         $this->assertTrue($result['minisite']->canEdit);
@@ -257,12 +258,12 @@ final class TimberRendererIntegrationTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('renderFallback');
         $method->setAccessible(true);
-        
+
         // Capture output
         ob_start();
         $method->invoke($this->renderer, $this->testMinisite);
         $output = ob_get_clean();
-        
+
         // Assert fallback HTML is generated
         $this->assertStringContainsString('<!doctype html>', $output);
         $this->assertStringContainsString('Test Minisite Title', $output);

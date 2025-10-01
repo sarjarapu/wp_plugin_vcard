@@ -13,6 +13,21 @@
  * @package MinisiteManager
  */
 
+use Minisite\Application\Controllers\Admin\SubscriptionController;
+use Minisite\Application\Controllers\Front\AuthController;
+use Minisite\Application\Controllers\Front\MinisitePageController;
+use Minisite\Application\Controllers\Front\NewMinisiteController;
+use Minisite\Application\Controllers\Front\SitesController;
+use Minisite\Application\Controllers\Front\VersionController;
+use Minisite\Application\Http\RewriteRegistrar;
+use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Domain\Entities\Version;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
+use Minisite\Infrastructure\Utils\ReservationCleanup;
+use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
+use Minisite\Infrastructure\Versioning\VersioningController;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -87,8 +102,8 @@ register_activation_hook(__FILE__, function () {
   // In non-production, optionally drop and reset before migrating (dev convenience)
     if (!MINISITE_LIVE_PRODUCTION) {
         global $wpdb;
-        if (class_exists(\Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase::class)) {
-            $m = new \Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase();
+        if (class_exists(_1_0_0_CreateBase::class)) {
+            $m = new _1_0_0_CreateBase();
             $m->down($wpdb);
         }
       // Ensure runner applies base migration
@@ -96,7 +111,7 @@ register_activation_hook(__FILE__, function () {
     }
 
   // Apply DB migrations
-    if ($vcClass = minisite_class(\Minisite\Infrastructure\Versioning\VersioningController::class)) {
+    if ($vcClass = minisite_class(VersioningController::class)) {
         $vc = new $vcClass(MINISITE_DB_VERSION, MINISITE_DB_OPTION);
         $vc->activate();
     }
@@ -114,8 +129,8 @@ register_deactivation_hook(__FILE__, function () {
   // In non-production, drop plugin tables and clear version option on deactivation
     if (!MINISITE_LIVE_PRODUCTION) {
         global $wpdb;
-        if (class_exists(\Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase::class)) {
-            $m = new \Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase();
+        if (class_exists(_1_0_0_CreateBase::class)) {
+            $m = new _1_0_0_CreateBase();
             $m->down($wpdb);
         }
         delete_option(MINISITE_DB_OPTION);
@@ -134,7 +149,7 @@ register_deactivation_hook(__FILE__, function () {
  * On admin init, run pending migrations (cheap version compare)
  */
 add_action('admin_init', function () {
-    if ($vcClass = minisite_class(\Minisite\Infrastructure\Versioning\VersioningController::class)) {
+    if ($vcClass = minisite_class(VersioningController::class)) {
         $vc = new $vcClass(MINISITE_DB_VERSION, MINISITE_DB_OPTION);
         $vc->ensureDatabaseUpToDate();
     }
@@ -392,7 +407,7 @@ add_action('init', function () {
    * - add_rewrite_rule('^b/([^/]+)/([^/]+)/?$',
    *   'index.php?minisite=1&minisite_biz=$matches[1]&minisite_loc=$matches[2]', 'top');
    */
-    if ($rrClass = minisite_class(\Minisite\Application\Http\RewriteRegistrar::class)) {
+    if ($rrClass = minisite_class(RewriteRegistrar::class)) {
         $rr = new $rrClass();
         $rr->register();
     }
@@ -421,7 +436,7 @@ add_action('init', function () {
 /**
  * Map our query to a front controller if minisite=1 or minisite_account=1
  */
-add_action('parse_query', function (\WP_Query $q) {
+add_action('parse_query', function (WP_Query $q) {
     if (!is_admin()) {
       // Handle minisite profile routes
         if (isset($q->query_vars['minisite']) && (int)$q->query_vars['minisite'] === 1) {
@@ -451,12 +466,12 @@ add_action('template_redirect', function () {
 
       // Resolve renderer: Timber if available
         $renderer = null;
-        if (class_exists('Timber\Timber') && minisite_class(\Minisite\Application\Rendering\TimberRenderer::class)) {
-            $renderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
+        if (class_exists('Timber\Timber') && minisite_class(TimberRenderer::class)) {
+            $renderer = new TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
         }
 
       // Handle authentication actions
-        if ($authCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\AuthController::class)) {
+        if ($authCtrlClass = minisite_class(AuthController::class)) {
             $authCtrl = new $authCtrlClass($renderer);
 
             switch ($action) {
@@ -473,7 +488,7 @@ add_action('template_redirect', function () {
                   // Delegate to SitesController
                     if (
                         $sitesCtrlClass = minisite_class(
-                            \Minisite\Application\Controllers\Front\SitesController::class
+                            SitesController::class
                         )
                     ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
@@ -490,17 +505,19 @@ add_action('template_redirect', function () {
                   // Delegate to NewMinisiteController
                     if (
                         $newMinisiteCtrlClass = minisite_class(
-                            \Minisite\Application\Controllers\Front\NewMinisiteController::class
+                            NewMinisiteController::class
                         )
                     ) {
                         global $wpdb;
-                        $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+                        $profileRepo = new MinisiteRepository($wpdb);
+                        $versionRepo = new VersionRepository($wpdb);
                         $newMinisiteCtrl = new $newMinisiteCtrlClass($profileRepo, $versionRepo);
 
                       // Handle form submission
-                        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && 
-                            isset($_POST['minisite_nonce'])) {
+                        if (
+                            isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &&
+                            isset($_POST['minisite_nonce'])
+                        ) {
                               $newMinisiteCtrl->handleCreateSimple();
                         } else {
                             $newMinisiteCtrl->handleNew();
@@ -540,7 +557,7 @@ add_action('template_redirect', function () {
                       // Verify user owns this minisite
                         if (is_user_logged_in()) {
                             global $wpdb;
-                            $repo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+                            $repo = new MinisiteRepository($wpdb);
                             $minisite = $repo->findById($minisiteId);
 
                             if (!$minisite || $minisite->createdBy !== get_current_user_id()) {
@@ -550,7 +567,7 @@ add_action('template_redirect', function () {
                         } else {
                             $redirect_url = home_url(
                                 '/account/login?redirect_to=' . urlencode(
-                                    isset($_SERVER['REQUEST_URI']) ? 
+                                    isset($_SERVER['REQUEST_URI']) ?
                                     sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
                                 )
                             );
@@ -574,7 +591,7 @@ add_action('template_redirect', function () {
                   // Delegate to SitesController for editing
                     if (
                         $sitesCtrlClass = minisite_class(
-                            \Minisite\Application\Controllers\Front\SitesController::class
+                            SitesController::class
                         )
                     ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
@@ -591,7 +608,7 @@ add_action('template_redirect', function () {
                   // Delegate to SitesController for previewing
                     if (
                         $sitesCtrlClass = minisite_class(
-                            \Minisite\Application\Controllers\Front\SitesController::class
+                            SitesController::class
                         )
                     ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
@@ -608,12 +625,12 @@ add_action('template_redirect', function () {
                   // Delegate to VersionController for version management
                     if (
                         $versionCtrlClass = minisite_class(
-                            \Minisite\Application\Controllers\Front\VersionController::class
+                            VersionController::class
                         )
                     ) {
                         global $wpdb;
-                        $minisiteRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+                        $minisiteRepo = new MinisiteRepository($wpdb);
+                        $versionRepo = new VersionRepository($wpdb);
                         $versionCtrl = new $versionCtrlClass($minisiteRepo, $versionRepo);
                         $versionCtrl->handleListVersions();
                         break;
@@ -652,12 +669,12 @@ add_action('template_redirect', function () {
 
       // Use Timber renderer (Timber is always available)
         $renderer = null;
-        if (class_exists('Timber\Timber') && minisite_class(\Minisite\Application\Rendering\TimberRenderer::class)) {
-            $renderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
+        if (class_exists('Timber\Timber') && minisite_class(TimberRenderer::class)) {
+            $renderer = new TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
         }
 
       // Controller to build the view model
-        if ($ctrlClass = minisite_class(\Minisite\Application\Controllers\Front\MinisitePageController::class)) {
+        if ($ctrlClass = minisite_class(MinisitePageController::class)) {
             $ctrl = new $ctrlClass($renderer);
             $ctrl->handle($biz, $loc);
             exit;
@@ -721,7 +738,7 @@ add_action('admin_init', function () {
   // Redirect non-privileged users to front-end login
     $redirect_url = home_url(
         '/account/login?redirect_to=' . urlencode(
-            isset($_SERVER['REQUEST_URI']) ? 
+            isset($_SERVER['REQUEST_URI']) ?
             sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
         )
     );
@@ -786,8 +803,8 @@ add_action('wp_ajax_publish_version', function () {
 
     try {
         global $wpdb;
-        $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+        $profileRepo = new MinisiteRepository($wpdb);
+        $versionRepo = new VersionRepository($wpdb);
 
         $profile = $profileRepo->findById($siteId);
         if (!$profile) {
@@ -819,7 +836,7 @@ add_action('wp_ajax_publish_version', function () {
         'message' => 'Version published successfully',
         'published_version_id' => $versionId
         ]);
-    } catch (\Exception $e) {
+    } catch (Exception $e) {
         wp_send_json_error('Failed to publish version: ' . $e->getMessage(), 500);
     }
 });
@@ -845,8 +862,8 @@ add_action('wp_ajax_publish_version', function () {
 
         try {
             global $wpdb;
-            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+            $profileRepo = new MinisiteRepository($wpdb);
+            $versionRepo = new VersionRepository($wpdb);
 
             $profile = $profileRepo->findById($siteId);
             if (!$profile) {
@@ -869,7 +886,7 @@ add_action('wp_ajax_publish_version', function () {
           // Create rollback version
             $nextVersion = $versionRepo->getNextVersionNumber($siteId);
 
-            $rollbackVersion = new \Minisite\Domain\Entities\Version(
+            $rollbackVersion = new Version(
                 id: null,
                 minisiteId: $siteId,
                 versionNumber: $nextVersion,
@@ -891,7 +908,7 @@ add_action('wp_ajax_publish_version', function () {
             'status' => $savedVersion->status,
             'message' => 'Copy of version created'
             ]);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             wp_send_json_error('Failed to create copy: ' . $e->getMessage(), 500);
         }
     });
@@ -922,7 +939,7 @@ add_action('wp_ajax_publish_version', function () {
                 global $wpdb;
 
               // Check if profile exists
-                $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+                $profileRepo = new MinisiteRepository($wpdb);
                 $profile = $profileRepo->findById($minisiteId);
                 if (!$profile) {
                     wp_send_json_error('Minisite not found', 404);
@@ -962,7 +979,7 @@ add_action('wp_ajax_publish_version', function () {
                 'message' => 'Bookmark added successfully',
                 'bookmark_id' => $wpdb->insert_id
                 ]);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 wp_send_json_error('Failed to add bookmark: ' . $e->getMessage(), 500);
             }
         });
@@ -1012,7 +1029,7 @@ add_action('wp_ajax_publish_version', function () {
                     wp_send_json_success([
                     'message' => 'Bookmark removed successfully'
                     ]);
-                } catch (\Exception $e) {
+                } catch (Exception $e) {
                     wp_send_json_error('Failed to remove bookmark: ' . $e->getMessage(), 500);
                 }
             });
@@ -1033,15 +1050,15 @@ add_action('wp_ajax_publish_version', function () {
 
                     try {
                         global $wpdb;
-                        $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-                        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+                        $profileRepo = new MinisiteRepository($wpdb);
+                        $versionRepo = new VersionRepository($wpdb);
+                        $newMinisiteCtrl = new NewMinisiteController(
                             $profileRepo,
                             $versionRepo
                         );
 
                         $newMinisiteCtrl->handleCreate();
-                    } catch (\Exception $e) {
+                    } catch (Exception $e) {
                         wp_send_json_error('Failed to create minisite: ' . $e->getMessage(), 500);
                     }
                 });
@@ -1057,19 +1074,19 @@ add_action('wp_ajax_publish_version', function () {
 
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository(
+                            $profileRepo = new MinisiteRepository(
                                 $wpdb
                             );
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository(
+                            $versionRepo = new VersionRepository(
                                 $wpdb
                             );
-                            $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+                            $newMinisiteCtrl = new NewMinisiteController(
                                 $profileRepo,
                                 $versionRepo
                             );
 
                             $newMinisiteCtrl->handleCheckSlugAvailability();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to check slug availability: ' . $e->getMessage(), 500);
                         }
                     });
@@ -1085,15 +1102,19 @@ add_action('wp_ajax_publish_version', function () {
 
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-                            $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+                            $profileRepo = new MinisiteRepository(
+                                $wpdb
+                            );
+                            $versionRepo = new VersionRepository(
+                                $wpdb
+                            );
+                            $newMinisiteCtrl = new NewMinisiteController(
                                 $profileRepo,
                                 $versionRepo
                             );
 
                             $newMinisiteCtrl->handleReserveSlug();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to reserve slug: ' . $e->getMessage(), 500);
                         }
                     });
@@ -1109,15 +1130,19 @@ add_action('wp_ajax_publish_version', function () {
 
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-                            $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+                            $profileRepo = new MinisiteRepository(
+                                $wpdb
+                            );
+                            $versionRepo = new VersionRepository(
+                                $wpdb
+                            );
+                            $newMinisiteCtrl = new NewMinisiteController(
                                 $profileRepo,
                                 $versionRepo
                             );
 
                             $newMinisiteCtrl->handlePublish();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to publish minisite: ' . $e->getMessage(), 500);
                         }
                     });
@@ -1131,12 +1156,16 @@ add_action('wp_ajax_publish_version', function () {
 
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-                            $sitesCtrl = new \Minisite\Application\Controllers\Front\SitesController();
+                            $profileRepo = new MinisiteRepository(
+                                $wpdb
+                            );
+                            $versionRepo = new VersionRepository(
+                                $wpdb
+                            );
+                            $sitesCtrl = new SitesController();
 
                             $sitesCtrl->handleExport();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to export minisite: ' . $e->getMessage(), 500);
                         }
                     });
@@ -1150,12 +1179,16 @@ add_action('wp_ajax_publish_version', function () {
 
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-                            $sitesCtrl = new \Minisite\Application\Controllers\Front\SitesController();
+                            $profileRepo = new MinisiteRepository(
+                                $wpdb
+                            );
+                            $versionRepo = new VersionRepository(
+                                $wpdb
+                            );
+                            $sitesCtrl = new SitesController();
 
                             $sitesCtrl->handleImport();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to import minisite: ' . $e->getMessage(), 500);
                         }
                     });
@@ -1169,15 +1202,19 @@ add_action('wp_ajax_publish_version', function () {
 
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-                            $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+                            $profileRepo = new MinisiteRepository(
+                                $wpdb
+                            );
+                            $versionRepo = new VersionRepository(
+                                $wpdb
+                            );
+                            $newMinisiteCtrl = new NewMinisiteController(
                                 $profileRepo,
                                 $versionRepo
                             );
 
                             $newMinisiteCtrl->handleCreateWooCommerceOrder();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to create order: ' . $e->getMessage(), 500);
                         }
                     });
@@ -1191,15 +1228,19 @@ add_action('wp_ajax_publish_version', function () {
 
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-                            $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+                            $profileRepo = new MinisiteRepository(
+                                $wpdb
+                            );
+                            $versionRepo = new VersionRepository(
+                                $wpdb
+                            );
+                            $newMinisiteCtrl = new NewMinisiteController(
                                 $profileRepo,
                                 $versionRepo
                             );
 
                             $newMinisiteCtrl->handleActivateSubscription();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
                         }
                     });
@@ -1218,35 +1259,50 @@ add_action('wp_ajax_publish_version', function () {
                     }, 10, 2);
 
 // Transfer cart item metadata to order item metadata
-                    add_action('woocommerce_checkout_create_order_line_item', function ($item, $cart_item_key, $values, $order) {
-                      // Check if this cart item has minisite data
-                        if (isset($values['minisite_id'])) {
-                            $item->add_meta_data('_minisite_id', $values['minisite_id']);
-                            $item->add_meta_data('_minisite_slug', $values['minisite_slug'] ?? '');
-                            $item->add_meta_data('_minisite_reservation_id', $values['minisite_reservation_id'] ?? '');
+                    add_action(
+                        'woocommerce_checkout_create_order_line_item',
+                        function ($item, $cart_item_key, $values, $order) {
+                        // Check if this cart item has minisite data
+                            if (isset($values['minisite_id'])) {
+                                $item->add_meta_data('_minisite_id', $values['minisite_id']);
+                                $item->add_meta_data('_minisite_slug', $values['minisite_slug'] ?? '');
+                                $item->add_meta_data(
+                                    '_minisite_reservation_id',
+                                    $values['minisite_reservation_id'] ?? ''
+                                );
 
-                          // Also transfer to order metadata for easier access
-                            $order->update_meta_data('_minisite_id', $values['minisite_id']);
-                            $order->update_meta_data('_slug', $values['minisite_slug'] ?? '');
-                            $order->update_meta_data('_reservation_id', $values['minisite_reservation_id'] ?? '');
-                        }
-                    }, 10, 4);
+                              // Also transfer to order metadata for easier access
+                                $order->update_meta_data('_minisite_id', $values['minisite_id']);
+                                $order->update_meta_data('_slug', $values['minisite_slug'] ?? '');
+                                $order->update_meta_data('_reservation_id', $values['minisite_reservation_id'] ?? '');
+                            }
+                        },
+                        10,
+                        4
+                    );
 
 // WooCommerce webhook: Auto-activate minisite subscription when order is completed
                     add_action('woocommerce_order_status_completed', function ($order_id) {
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-                            $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+                            $profileRepo = new MinisiteRepository(
+                                $wpdb
+                            );
+                            $versionRepo = new VersionRepository(
+                                $wpdb
+                            );
+                            $newMinisiteCtrl = new NewMinisiteController(
                                 $profileRepo,
                                 $versionRepo
                             );
 
                             $newMinisiteCtrl->activateMinisiteSubscription($order_id);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                           // Log error but don't break the order completion process
-                            error_log('Failed to activate minisite subscription for order ' . $order_id . ': ' . $e->getMessage());
+                            error_log(
+                                'Failed to activate minisite subscription for order ' . $order_id . ': ' .
+                                $e->getMessage()
+                            );
                         }
                     });
 
@@ -1258,9 +1314,9 @@ add_action('wp_ajax_publish_version', function () {
                         }
 
                         try {
-                            $subscriptionCtrl = new \Minisite\Application\Controllers\Admin\SubscriptionController();
+                            $subscriptionCtrl = new SubscriptionController();
                             $subscriptionCtrl->handleActivateSubscription();
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
                         }
                     });
@@ -1274,7 +1330,7 @@ add_action('wp_ajax_publish_version', function () {
                             'manage_options',
                             'minisite-subscriptions',
                             function () {
-                                $subscriptionCtrl = new \Minisite\Application\Controllers\Admin\SubscriptionController();
+                                $subscriptionCtrl = new SubscriptionController();
                                 $subscriptionCtrl->handleList();
                             }
                         );
@@ -1291,7 +1347,7 @@ add_action('wp_ajax_publish_version', function () {
 
 // Clean up expired reservations
                     add_action('minisite_cleanup_expired_reservations', function () {
-                        $deleted = \Minisite\Infrastructure\Utils\ReservationCleanup::cleanupExpired();
+                        $deleted = ReservationCleanup::cleanupExpired();
 
                         if ($deleted > 0) {
                             error_log("Minisite: Cleaned up {$deleted} expired reservations");
@@ -1310,7 +1366,7 @@ add_action('wp_ajax_publish_version', function () {
                             return;
                         }
 
-                        $deleted = \Minisite\Infrastructure\Utils\ReservationCleanup::cleanupExpired();
+                        $deleted = ReservationCleanup::cleanupExpired();
 
                         wp_send_json_success([
                         'message' => "Cleaned up {$deleted} expired reservations",
@@ -1331,7 +1387,7 @@ add_action('wp_ajax_publish_version', function () {
                             wp_send_json_success([
                             'message' => 'Minisite roles and capabilities synced successfully'
                             ]);
-                        } catch (\Exception $e) {
+                        } catch (Exception $e) {
                             wp_send_json_error('Failed to sync roles: ' . $e->getMessage(), 500);
                         }
                     });

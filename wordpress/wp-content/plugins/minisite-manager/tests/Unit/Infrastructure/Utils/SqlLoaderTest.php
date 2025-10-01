@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Unit\Infrastructure\Utils;
 
 use Minisite\Infrastructure\Utils\SqlLoader;
@@ -78,7 +79,8 @@ class SqlLoaderTest extends TestCase
     {
         $mockWpdb = new class {
             public $prefix = 'wp_';
-            public function get_charset_collate() {
+            public function get_charset_collate()
+            {
                 return 'utf8mb4_unicode_ci';
             }
         };
@@ -95,7 +97,8 @@ class SqlLoaderTest extends TestCase
     {
         $mockWpdb = new class {
             public $prefix = 'test_';
-            public function get_charset_collate() {
+            public function get_charset_collate()
+            {
                 return 'utf8mb4_general_ci';
             }
         };
@@ -174,7 +177,8 @@ class SqlLoaderTest extends TestCase
         // Create a mock wpdb object
         $mockWpdb = new class {
             public $prefix = 'wp_';
-            public function get_charset_collate() {
+            public function get_charset_collate()
+            {
                 return 'utf8mb4_unicode_ci';
             }
         };
@@ -207,7 +211,8 @@ class SqlLoaderTest extends TestCase
     {
         $mockWpdb = new class {
             public $prefix = 'wp_';
-            public function get_charset_collate() {
+            public function get_charset_collate()
+            {
                 return 'utf8mb4_unicode_ci';
             }
         };
@@ -223,7 +228,7 @@ class SqlLoaderTest extends TestCase
         // Clean up any existing global state
         unset($GLOBALS['__mock_dbDelta_called']);
         unset($GLOBALS['__mock_dbDelta_sql']);
-        
+
         // Create a mock dbDelta function for testing
         if (!function_exists('dbDelta')) {
             eval("

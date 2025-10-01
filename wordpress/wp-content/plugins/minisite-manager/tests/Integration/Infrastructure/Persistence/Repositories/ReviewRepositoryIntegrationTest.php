@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Integration\Infrastructure\Persistence\Repositories;
@@ -21,7 +22,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $this->dbHelper = new DatabaseTestHelper();
         $this->dbHelper->cleanupTestTables();
         $this->dbHelper->createMinisiteReviewsTable();
-        
+
         $this->repository = new ReviewRepository($this->dbHelper->getWpdb());
     }
 
@@ -52,7 +53,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
 
         // Add the review
         $savedReview = $this->repository->add($review);
-        
+
         $this->assertNotNull($savedReview->id);
         $this->assertSame(123, $savedReview->minisiteId);
         $this->assertSame('Alice Johnson', $savedReview->authorName);
@@ -68,10 +69,10 @@ final class ReviewRepositoryIntegrationTest extends TestCase
 
         // Retrieve the review
         $retrievedReviews = $this->repository->listApprovedForMinisite('123');
-        
+
         $this->assertCount(1, $retrievedReviews);
         $retrievedReview = $retrievedReviews[0];
-        
+
         $this->assertSame($savedReview->id, $retrievedReview->id);
         $this->assertSame(123, $retrievedReview->minisiteId);
         $this->assertSame('Alice Johnson', $retrievedReview->authorName);
@@ -106,7 +107,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         );
 
         $savedReview = $this->repository->add($review);
-        
+
         $this->assertNotNull($savedReview->id);
         $this->assertSame(456, $savedReview->minisiteId);
         $this->assertSame('Bob Smith', $savedReview->authorName);
@@ -121,10 +122,10 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $this->assertNull($savedReview->createdBy);
 
         $retrievedReviews = $this->repository->listApprovedForMinisite('456');
-        
+
         $this->assertCount(1, $retrievedReviews);
         $retrievedReview = $retrievedReviews[0];
-        
+
         $this->assertSame($savedReview->id, $retrievedReview->id);
         $this->assertSame(456, $retrievedReview->minisiteId);
         $this->assertSame('Bob Smith', $retrievedReview->authorName);
@@ -142,7 +143,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     public function testListApprovedForMinisiteReturnsMultipleReviewsInCorrectOrder(): void
     {
         $minisiteId = '789';
-        
+
         // Create multiple reviews with different timestamps
         $review1 = new Review(
             id: null,
@@ -200,7 +201,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $this->repository->add($review3);
 
         $reviews = $this->repository->listApprovedForMinisite($minisiteId);
-        
+
         $this->assertCount(3, $reviews);
         // Should be ordered by created_at DESC (newest first)
         $this->assertSame('Eve Wilson', $reviews[0]->authorName);
@@ -211,7 +212,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     public function testListApprovedForMinisiteWithCustomLimit(): void
     {
         $minisiteId = '999';
-        
+
         // Create 5 reviews
         for ($i = 1; $i <= 5; $i++) {
             $review = new Review(
@@ -230,13 +231,13 @@ final class ReviewRepositoryIntegrationTest extends TestCase
                 updatedAt: null,
                 createdBy: $i
             );
-            
+
             $this->repository->add($review);
         }
 
         // Test with limit of 3
         $reviews = $this->repository->listApprovedForMinisite($minisiteId, 3);
-        
+
         $this->assertCount(3, $reviews);
         $this->assertSame('User 5', $reviews[0]->authorName);
         $this->assertSame('User 4', $reviews[1]->authorName);
@@ -246,7 +247,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     public function testListApprovedForMinisiteReturnsEmptyArrayForNonExistentMinisite(): void
     {
         $reviews = $this->repository->listApprovedForMinisite('99999');
-        
+
         $this->assertIsArray($reviews);
         $this->assertEmpty($reviews);
     }
@@ -255,7 +256,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     {
         $minisite1 = '100';
         $minisite2 = '200';
-        
+
         $review1 = new Review(
             id: null,
             minisiteId: (int)$minisite1,
@@ -295,13 +296,13 @@ final class ReviewRepositoryIntegrationTest extends TestCase
 
         $reviews1 = $this->repository->listApprovedForMinisite($minisite1);
         $reviews2 = $this->repository->listApprovedForMinisite($minisite2);
-        
+
         $this->assertCount(1, $reviews1);
         $this->assertCount(1, $reviews2);
-        
+
         $this->assertSame($savedReview1->id, $reviews1[0]->id);
         $this->assertSame($savedReview2->id, $reviews2[0]->id);
-        
+
         $this->assertSame('Review for minisite 1', $reviews1[0]->body);
         $this->assertSame('Review for minisite 2', $reviews2[0]->body);
     }
@@ -310,7 +311,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     {
         $sources = ['manual', 'google', 'yelp', 'facebook', 'other'];
         $minisiteId = '300';
-        
+
         foreach ($sources as $index => $source) {
             $review = new Review(
                 id: null,
@@ -328,16 +329,16 @@ final class ReviewRepositoryIntegrationTest extends TestCase
                 updatedAt: null,
                 createdBy: $index + 1
             );
-            
+
             $savedReview = $this->repository->add($review);
             $this->assertSame($source, $savedReview->source);
             $this->assertSame($source . '-123', $savedReview->sourceId);
         }
 
         $reviews = $this->repository->listApprovedForMinisite($minisiteId);
-        
+
         $this->assertCount(5, $reviews);
-        
+
         $sourcesFromDb = array_map(fn($r) => $r->source, $reviews);
         $this->assertContains('manual', $sourcesFromDb);
         $this->assertContains('google', $sourcesFromDb);
@@ -350,7 +351,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     {
         $statuses = ['pending', 'approved', 'rejected'];
         $minisiteId = '400';
-        
+
         foreach ($statuses as $index => $status) {
             $review = new Review(
                 id: null,
@@ -368,15 +369,15 @@ final class ReviewRepositoryIntegrationTest extends TestCase
                 updatedAt: null,
                 createdBy: $index + 1
             );
-            
+
             $savedReview = $this->repository->add($review);
             $this->assertSame($status, $savedReview->status);
         }
 
         $reviews = $this->repository->listApprovedForMinisite($minisiteId);
-        
+
         $this->assertCount(3, $reviews);
-        
+
         $statusesFromDb = array_map(fn($r) => $r->status, $reviews);
         $this->assertContains('pending', $statusesFromDb);
         $this->assertContains('approved', $statusesFromDb);
@@ -387,7 +388,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     {
         $ratings = [1.0, 2.5, 3.7, 4.2, 5.0];
         $minisiteId = '500';
-        
+
         foreach ($ratings as $index => $rating) {
             $review = new Review(
                 id: null,
@@ -405,15 +406,15 @@ final class ReviewRepositoryIntegrationTest extends TestCase
                 updatedAt: null,
                 createdBy: $index + 1
             );
-            
+
             $savedReview = $this->repository->add($review);
             $this->assertSame($rating, $savedReview->rating);
         }
 
         $reviews = $this->repository->listApprovedForMinisite($minisiteId);
-        
+
         $this->assertCount(5, $reviews);
-        
+
         $ratingsFromDb = array_map(fn($r) => $r->rating, $reviews);
         $this->assertContains(1.0, $ratingsFromDb);
         $this->assertContains(2.5, $ratingsFromDb);
@@ -442,17 +443,17 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         );
 
         $savedReview = $this->repository->add($review);
-        
+
         $this->assertSame('José María García-López', $savedReview->authorName);
         $this->assertSame('https://example.com/café', $savedReview->authorUrl);
         $this->assertSame('¡Excelente servicio! Muy recomendado. El personal es muy amable y profesional.', $savedReview->body);
         $this->assertSame('es-ES', $savedReview->locale);
 
         $retrievedReviews = $this->repository->listApprovedForMinisite('600');
-        
+
         $this->assertCount(1, $retrievedReviews);
         $retrievedReview = $retrievedReviews[0];
-        
+
         $this->assertSame('José María García-López', $retrievedReview->authorName);
         $this->assertSame('https://example.com/café', $retrievedReview->authorUrl);
         $this->assertSame('¡Excelente servicio! Muy recomendado. El personal es muy amable y profesional.', $retrievedReview->body);
@@ -462,7 +463,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     public function testAddReviewWithLongText(): void
     {
         $longBody = str_repeat('This is a very long review text. ', 100);
-        
+
         $review = new Review(
             id: null,
             minisiteId: 700,
@@ -481,14 +482,14 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         );
 
         $savedReview = $this->repository->add($review);
-        
+
         $this->assertSame($longBody, $savedReview->body);
 
         $retrievedReviews = $this->repository->listApprovedForMinisite('700');
-        
+
         $this->assertCount(1, $retrievedReviews);
         $retrievedReview = $retrievedReviews[0];
-        
+
         $this->assertSame($longBody, $retrievedReview->body);
     }
 
@@ -496,7 +497,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     {
         $createdAt = new DateTimeImmutable('2025-01-15T10:30:45Z');
         $updatedAt = new DateTimeImmutable('2025-01-15T11:00:00Z');
-        
+
         $review = new Review(
             id: null,
             minisiteId: 800,
@@ -515,15 +516,15 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         );
 
         $savedReview = $this->repository->add($review);
-        
+
         $this->assertSame($createdAt, $savedReview->createdAt);
         $this->assertSame($updatedAt, $savedReview->updatedAt);
 
         $retrievedReviews = $this->repository->listApprovedForMinisite('800');
-        
+
         $this->assertCount(1, $retrievedReviews);
         $retrievedReview = $retrievedReviews[0];
-        
+
         $this->assertInstanceOf(DateTimeImmutable::class, $retrievedReview->createdAt);
         $this->assertInstanceOf(DateTimeImmutable::class, $retrievedReview->updatedAt);
         $this->assertSame($createdAt->format('Y-m-d H:i:s'), $retrievedReview->createdAt->format('Y-m-d H:i:s'));

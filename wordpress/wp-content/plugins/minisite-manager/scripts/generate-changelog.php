@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHP-based Changelog Generator
  * Generates changelog from conventional commits
@@ -19,7 +20,7 @@ class ChangelogGenerator
     {
         $commits = $this->getConventionalCommits($version);
         $changelog = $this->formatChangelog($commits, $version);
-        
+
         if ($version) {
             $this->prependToChangelog($changelog);
         } else {
@@ -31,7 +32,7 @@ class ChangelogGenerator
     {
         $range = $version ? "v{$version}..HEAD" : "HEAD~10..HEAD";
         $command = "git log --pretty=format:'%H|%s|%b' {$range}";
-        
+
         $output = shell_exec($command);
         if (!$output) {
             return [];
@@ -39,24 +40,28 @@ class ChangelogGenerator
 
         $commits = [];
         $lines = explode("\n", trim($output));
-        
+
         foreach ($lines as $line) {
-            if (empty($line)) continue;
-            
+            if (empty($line)) {
+                continue;
+            }
+
             $parts = explode('|', $line, 3);
-            if (count($parts) < 2) continue;
-            
+            if (count($parts) < 2) {
+                continue;
+            }
+
             $hash = $parts[0];
             $subject = $parts[1];
             $body = $parts[2] ?? '';
-            
+
             // Parse conventional commit
             if (preg_match('/^(\w+)(\(.+\))?(!)?:\s*(.+)$/', $subject, $matches)) {
                 $type = $matches[1];
                 $scope = isset($matches[2]) ? trim($matches[2], '()') : '';
                 $breaking = !empty($matches[3]);
                 $description = $matches[4];
-                
+
                 $commits[] = [
                     'hash' => $hash,
                     'type' => $type,
@@ -67,7 +72,7 @@ class ChangelogGenerator
                 ];
             }
         }
-        
+
         return $commits;
     }
 
@@ -79,7 +84,7 @@ class ChangelogGenerator
 
         $date = date('Y-m-d');
         $header = $version ? "## [{$version}] - {$date}\n\n" : "## Unreleased\n\n";
-        
+
         $sections = [
             'feat' => '### Features',
             'fix' => '### Bug Fixes',
@@ -100,7 +105,7 @@ class ChangelogGenerator
             if ($commit['breaking']) {
                 $breakingChanges[] = $commit;
             }
-            
+
             $type = $commit['type'];
             if (!isset($groupedCommits[$type])) {
                 $groupedCommits[$type] = [];
@@ -146,7 +151,7 @@ class ChangelogGenerator
 
         $fullContent = $newContent . "\n" . $existingContent;
         file_put_contents($this->changelogFile, $fullContent);
-        
+
         echo "✅ Changelog updated: {$this->changelogFile}\n";
     }
 }

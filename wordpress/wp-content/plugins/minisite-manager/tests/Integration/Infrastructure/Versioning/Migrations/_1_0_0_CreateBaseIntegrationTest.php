@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Integration tests for _1_0_0_CreateBase migration
- * 
+ *
  * These tests run the actual migration with a real database to verify:
  * - Table creation with proper schemas
  * - Foreign key constraints
@@ -29,40 +29,40 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Store original globals
         $this->originalWpdb = $GLOBALS['wpdb'] ?? null;
         $this->originalAbspath = defined('ABSPATH') ? ABSPATH : null;
-        
+
         // Define ABSPATH for testing if not already defined
         if (!defined('ABSPATH')) {
             define('ABSPATH', '/fake/wordpress/path/');
         }
-        
+
         // Define DB_NAME for testing if not already defined
         if (!defined('DB_NAME')) {
             define('DB_NAME', 'test_database');
         }
-        
+
         // Set up database helper
         $this->dbHelper = new DatabaseTestHelper();
         $this->wpdb = $this->dbHelper->getWpdb();
-        
+
         // Set the global $wpdb to our test database
         $GLOBALS['wpdb'] = $this->wpdb;
-        
+
         // Create mock WordPress functions
         $this->createMockWordPressFunctions();
-        
+
         // Create mock dbDelta function
         $this->createMockDbDeltaFunction();
-        
+
         // Clean up any existing test data first
         $this->cleanupTestTables();
-        
+
         // Create minimal wp_users table for foreign key constraints
         $this->createMinimalUsersTable();
-        
+
         $this->migration = new _1_0_0_CreateBase();
     }
 
@@ -72,10 +72,10 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
         if (isset($this->wpdb)) {
             $this->cleanupTestTables();
         }
-        
+
         // Restore original globals
         $GLOBALS['wpdb'] = $this->originalWpdb;
-        
+
         parent::tearDown();
     }
 
@@ -90,7 +90,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
         // Assert - Verify all tables were created
         $expectedTables = [
             'minisites',
-            'minisite_versions', 
+            'minisite_versions',
             'minisite_reviews',
             'minisite_bookmarks',
             'minisite_payments',
@@ -150,12 +150,12 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
         ");
 
         $this->assertNotEmpty($constraints, 'Foreign key constraints should be created');
-        
+
         // Verify specific foreign key constraints
         $constraintNames = array_column($constraints, 'CONSTRAINT_NAME');
         $expectedConstraints = [
             'fk_versions_minisite_id',
-            'fk_reviews_minisite_id', 
+            'fk_reviews_minisite_id',
             'fk_bookmarks_minisite_id',
             'fk_payments_minisite_id',
             'fk_payment_history_minisite_id',
@@ -194,20 +194,23 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
     {
         // Ensure clean state - remove any existing test data
         $minisitesTable = $this->wpdb->prefix . 'minisites';
-        
+
         // Clean up any existing test data first
         $this->wpdb->query($this->wpdb->prepare(
             "DELETE FROM {$minisitesTable} WHERE business_slug IN (%s,%s,%s,%s)",
-            'acme-dental','lotus-textiles','green-bites','swift-transit'
+            'acme-dental',
+            'lotus-textiles',
+            'green-bites',
+            'swift-transit'
         ));
-        
+
         // Act - Run the migration
         $this->migration->up($this->wpdb);
 
         // Assert - Verify test data was seeded
         $minisitesTable = $this->wpdb->prefix . 'minisites';
         $minisiteCount = $this->wpdb->get_var("SELECT COUNT(*) FROM {$minisitesTable}");
-        
+
         $this->assertGreaterThan(0, $minisiteCount, 'Test data should be seeded');
 
         // Verify specific seeded minisites exist
@@ -222,7 +225,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
         // Verify reviews were seeded
         $reviewsTable = $this->wpdb->prefix . 'minisite_reviews';
         $reviewCount = $this->wpdb->get_var("SELECT COUNT(*) FROM {$reviewsTable}");
-        
+
         $this->assertGreaterThan(0, $minisiteCount, 'Test data should be seeded');
         $this->assertGreaterThan(0, $reviewCount, 'Reviews should be seeded');
     }
@@ -246,7 +249,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
         // Assert - Verify all tables were dropped
         $expectedTables = [
             'minisites',
-            'minisite_versions', 
+            'minisite_versions',
             'minisite_reviews',
             'minisite_bookmarks',
             'minisite_payments',
@@ -278,14 +281,14 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
     {
         // Act - Run the migration once
         $this->migration->up($this->wpdb);
-        
+
         // Get count after first run
         $minisitesTable = $this->wpdb->prefix . 'minisites';
         $firstRunCount = $this->wpdb->get_var("SELECT COUNT(*) FROM {$minisitesTable}");
-        
+
         // Assert - Should have seeded data
         $this->assertGreaterThan(0, $firstRunCount, 'Should have seeded data after first run');
-        
+
         // Note: We don't test running the migration twice because the foreign key constraints
         // would cause duplicate constraint errors. The migration is designed to be run once
         // and the duplicate check in seedTestData() prevents data duplication.
@@ -299,7 +302,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
         // This test would require mocking database errors
         // For now, we'll test that the migration completes successfully
         $this->expectNotToPerformAssertions();
-        
+
         try {
             $this->migration->up($this->wpdb);
             $this->migration->down($this->wpdb);
@@ -321,7 +324,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
                 }
             ");
         }
-        
+
         // Mock get_current_user_id function
         if (!function_exists('get_current_user_id')) {
             eval("
@@ -330,7 +333,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
                 }
             ");
         }
-        
+
         // Mock wp_json_encode function
         if (!function_exists('wp_json_encode')) {
             eval("
@@ -362,7 +365,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
             KEY user_nicename (user_nicename),
             KEY user_email (user_email)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-        
+
         $this->wpdb->query($createUsersTable);
     }
 
@@ -402,7 +405,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
     {
         $testTables = [
             'minisites',
-            'minisite_versions', 
+            'minisite_versions',
             'minisite_reviews',
             'minisite_bookmarks',
             'minisite_payments',
@@ -410,7 +413,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
             'minisite_reservations'
             // Note: Don't drop wp_users table as it's needed for foreign key constraints
         ];
-        
+
         foreach ($testTables as $table) {
             $fullTableName = $this->wpdb->prefix . $table;
             try {

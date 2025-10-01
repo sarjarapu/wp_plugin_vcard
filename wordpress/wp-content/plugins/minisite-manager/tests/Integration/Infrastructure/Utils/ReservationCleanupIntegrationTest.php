@@ -17,16 +17,16 @@ class ReservationCleanupIntegrationTest extends TestCase
     {
         // Store the original $wpdb to restore later
         $this->originalWpdb = $GLOBALS['wpdb'] ?? null;
-        
+
         // Set up database helper
         $this->dbHelper = new DatabaseTestHelper();
-        
+
         // Clean up any existing test data
         $this->dbHelper->cleanupTestTables();
-        
+
         // Create the reservations table
         $this->dbHelper->createMinisiteReservationsTable();
-        
+
         // Set the global $wpdb to our test database
         $GLOBALS['wpdb'] = $this->dbHelper->getWpdb();
     }
@@ -35,7 +35,7 @@ class ReservationCleanupIntegrationTest extends TestCase
     {
         // Clean up test data
         $this->dbHelper->cleanupTestTables();
-        
+
         // Restore the original $wpdb
         $GLOBALS['wpdb'] = $this->originalWpdb;
     }
@@ -46,21 +46,21 @@ class ReservationCleanupIntegrationTest extends TestCase
         $now = date('Y-m-d H:i:s');
         $expiredTime = date('Y-m-d H:i:s', strtotime('-1 hour')); // 1 hour ago
         $futureTime = date('Y-m-d H:i:s', strtotime('+1 hour'));   // 1 hour from now
-        
+
         // Insert expired reservation
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
             (business_slug, location_slug, user_id, minisite_id, expires_at, created_at) 
             VALUES ('expired-business', 'expired-location', 1, 'expired123', '{$expiredTime}', '{$now}')
         ");
-        
+
         // Insert future reservation
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
             (business_slug, location_slug, user_id, minisite_id, expires_at, created_at) 
             VALUES ('future-business', 'future-location', 2, 'future123', '{$futureTime}', '{$now}')
         ");
-        
+
         // Insert another expired reservation
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
@@ -79,11 +79,11 @@ class ReservationCleanupIntegrationTest extends TestCase
 
         // Assert
         $this->assertEquals(2, $deletedCount);
-        
+
         // Verify only expired reservations were removed
         $totalAfter = $this->dbHelper->getVar("SELECT COUNT(*) FROM wp_minisite_reservations");
         $remainingReservations = $this->dbHelper->getResults("SELECT business_slug FROM wp_minisite_reservations");
-        
+
         $this->assertEquals(1, $totalAfter);
         $this->assertEquals('future-business', $remainingReservations[0]['business_slug']);
     }
@@ -94,13 +94,13 @@ class ReservationCleanupIntegrationTest extends TestCase
         $now = date('Y-m-d H:i:s');
         $futureTime1 = date('Y-m-d H:i:s', strtotime('+1 hour'));
         $futureTime2 = date('Y-m-d H:i:s', strtotime('+2 hours'));
-        
+
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
             (business_slug, location_slug, user_id, minisite_id, expires_at, created_at) 
             VALUES ('business1', 'location1', 1, 'minisite1', '{$futureTime1}', '{$now}')
         ");
-        
+
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
             (business_slug, location_slug, user_id, minisite_id, expires_at, created_at) 
@@ -112,7 +112,7 @@ class ReservationCleanupIntegrationTest extends TestCase
 
         // Assert
         $this->assertEquals(0, $deletedCount);
-        
+
         $totalAfter = $this->dbHelper->getVar("SELECT COUNT(*) FROM wp_minisite_reservations");
         $this->assertEquals(2, $totalAfter);
     }
@@ -126,7 +126,7 @@ class ReservationCleanupIntegrationTest extends TestCase
         $expired3 = date('Y-m-d H:i:s', strtotime('-1 minute'));
         $future1 = date('Y-m-d H:i:s', strtotime('+1 minute'));
         $future2 = date('Y-m-d H:i:s', strtotime('+1 hour'));
-        
+
         $reservations = [
             ['expired-2h', 'location1', 1, 'minisite1', $expired1],
             ['expired-30m', 'location2', 2, 'minisite2', $expired2],
@@ -134,7 +134,7 @@ class ReservationCleanupIntegrationTest extends TestCase
             ['future-1m', 'location4', 4, 'minisite4', $future1],
             ['future-1h', 'location5', 5, 'minisite5', $future2],
         ];
-        
+
         foreach ($reservations as $reservation) {
             $this->dbHelper->exec("
                 INSERT INTO wp_minisite_reservations 
@@ -148,7 +148,7 @@ class ReservationCleanupIntegrationTest extends TestCase
 
         // Assert
         $this->assertEquals(3, $deletedCount);
-        
+
         $remainingReservations = $this->dbHelper->getResults("SELECT business_slug FROM wp_minisite_reservations ORDER BY business_slug");
         $this->assertCount(2, $remainingReservations);
         $this->assertEquals('future-1h', $remainingReservations[0]['business_slug']);
@@ -160,7 +160,7 @@ class ReservationCleanupIntegrationTest extends TestCase
         // Arrange - Insert only future reservations
         $now = date('Y-m-d H:i:s');
         $futureTime = date('Y-m-d H:i:s', strtotime('+1 hour'));
-        
+
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
             (business_slug, location_slug, user_id, minisite_id, expires_at, created_at) 
@@ -191,7 +191,7 @@ class ReservationCleanupIntegrationTest extends TestCase
         $now = date('Y-m-d H:i:s');
         $expiredTime = date('Y-m-d H:i:s', strtotime('-1 hour'));
         $futureTime = date('Y-m-d H:i:s', strtotime('+1 hour'));
-        
+
         // Insert 100 expired reservations
         for ($i = 1; $i <= 100; $i++) {
             $this->dbHelper->exec("
@@ -200,7 +200,7 @@ class ReservationCleanupIntegrationTest extends TestCase
                 VALUES ('expired-business-{$i}', 'expired-location-{$i}', {$i}, 'expired{$i}', '{$expiredTime}', '{$now}')
             ");
         }
-        
+
         // Insert 50 future reservations
         for ($i = 1; $i <= 50; $i++) {
             $this->dbHelper->exec("
@@ -219,7 +219,7 @@ class ReservationCleanupIntegrationTest extends TestCase
         // Assert
         $this->assertEquals(100, $deletedCount);
         $this->assertLessThan(1.0, $executionTime, 'Cleanup should complete within 1 second for 150 records');
-        
+
         $totalAfter = $this->dbHelper->getVar("SELECT COUNT(*) FROM wp_minisite_reservations");
         $this->assertEquals(50, $totalAfter);
     }
@@ -229,7 +229,7 @@ class ReservationCleanupIntegrationTest extends TestCase
         // Arrange - Insert reservation that expires 1 second ago to ensure it's expired
         $expiredTime = date('Y-m-d H:i:s', time() - 1);
         $now = date('Y-m-d H:i:s');
-        
+
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
             (business_slug, location_slug, user_id, minisite_id, expires_at, created_at) 
@@ -241,7 +241,7 @@ class ReservationCleanupIntegrationTest extends TestCase
 
         // Assert - Should delete the reservation since expires_at <= NOW()
         $this->assertEquals(1, $deletedCount);
-        
+
         $totalAfter = $this->dbHelper->getVar("SELECT COUNT(*) FROM wp_minisite_reservations");
         $this->assertEquals(0, $totalAfter);
     }
@@ -251,7 +251,7 @@ class ReservationCleanupIntegrationTest extends TestCase
         // Arrange - Insert test data
         $now = date('Y-m-d H:i:s');
         $expiredTime = date('Y-m-d H:i:s', strtotime('-1 hour'));
-        
+
         $this->dbHelper->exec("
             INSERT INTO wp_minisite_reservations 
             (business_slug, location_slug, user_id, minisite_id, expires_at, created_at) 
@@ -263,7 +263,7 @@ class ReservationCleanupIntegrationTest extends TestCase
 
         // Assert - Verify the query was executed correctly by checking the result
         $this->assertEquals(1, $deletedCount);
-        
+
         // Verify the table name and query structure by checking if the operation worked
         $totalAfter = $this->dbHelper->getVar("SELECT COUNT(*) FROM wp_minisite_reservations");
         $this->assertEquals(0, $totalAfter);

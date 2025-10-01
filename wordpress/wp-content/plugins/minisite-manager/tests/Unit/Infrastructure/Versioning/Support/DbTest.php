@@ -22,12 +22,12 @@ class DbTest extends TestCase
         $table = 'wp_test_table';
         $index = 'test_index';
         $expectedSql = "SHOW INDEX FROM {$table} WHERE Key_name = '{$index}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW INDEX FROM {$table} WHERE Key_name = %s", $index)
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->with($expectedSql)
@@ -46,12 +46,12 @@ class DbTest extends TestCase
         $table = 'wp_test_table';
         $index = 'nonexistent_index';
         $expectedSql = "SHOW INDEX FROM {$table} WHERE Key_name = '{$index}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW INDEX FROM {$table} WHERE Key_name = %s", $index)
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->with($expectedSql)
@@ -70,11 +70,11 @@ class DbTest extends TestCase
         $table = 'wp_test_table';
         $index = 'test_index';
         $expectedSql = "SHOW INDEX FROM {$table} WHERE Key_name = '{$index}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn(false);
@@ -92,11 +92,11 @@ class DbTest extends TestCase
         $table = 'wp_test_table';
         $index = 'test_index';
         $expectedSql = "SHOW INDEX FROM {$table} WHERE Key_name = '{$index}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn('');
@@ -114,12 +114,12 @@ class DbTest extends TestCase
         $table = 'wp_test_table';
         $column = 'test_column';
         $expectedSql = "SHOW COLUMNS FROM {$table} LIKE '{$column}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW COLUMNS FROM {$table} LIKE %s", $column)
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->with($expectedSql)
@@ -138,12 +138,12 @@ class DbTest extends TestCase
         $table = 'wp_test_table';
         $column = 'nonexistent_column';
         $expectedSql = "SHOW COLUMNS FROM {$table} LIKE '{$column}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW COLUMNS FROM {$table} LIKE %s", $column)
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->with($expectedSql)
@@ -162,11 +162,11 @@ class DbTest extends TestCase
         $table = 'wp_test_table';
         $column = 'test_column';
         $expectedSql = "SHOW COLUMNS FROM {$table} LIKE '{$column}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn(false);
@@ -183,12 +183,12 @@ class DbTest extends TestCase
         // Arrange
         $table = 'wp_test_table';
         $expectedSql = "SHOW TABLES LIKE '{$table}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW TABLES LIKE %s", $table)
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->with($expectedSql)
@@ -206,12 +206,12 @@ class DbTest extends TestCase
         // Arrange
         $table = 'wp_nonexistent_table';
         $expectedSql = "SHOW TABLES LIKE '{$table}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW TABLES LIKE %s", $table)
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->with($expectedSql)
@@ -229,11 +229,11 @@ class DbTest extends TestCase
         // Arrange
         $table = 'wp_test_table';
         $expectedSql = "SHOW TABLES LIKE '{$table}'";
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->willReturn($expectedSql);
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn(false);
@@ -250,12 +250,12 @@ class DbTest extends TestCase
         // Arrange
         $table = 'wp_test_table';
         $index = 'test_index';
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW INDEX FROM {$table} WHERE Key_name = %s", $index)
             ->willReturn('prepared_sql');
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn('1');
@@ -271,12 +271,12 @@ class DbTest extends TestCase
         // Arrange
         $table = 'wp_test_table';
         $column = 'test_column';
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW COLUMNS FROM {$table} LIKE %s", $column)
             ->willReturn('prepared_sql');
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn('test_column');
@@ -291,12 +291,12 @@ class DbTest extends TestCase
     {
         // Arrange
         $table = 'wp_test_table';
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('prepare')
             ->with("SHOW TABLES LIKE %s", $table)
             ->willReturn('prepared_sql');
-            
+
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn('wp_test_table');
@@ -313,7 +313,7 @@ class DbTest extends TestCase
         $this->mockWpdb->expects($this->exactly(3))
             ->method('prepare')
             ->willReturn('prepared_sql');
-            
+
         $this->mockWpdb->expects($this->exactly(3))
             ->method('get_var')
             ->willReturn('1');
@@ -335,11 +335,11 @@ class DbTest extends TestCase
         $table = 'wp_test_table_with_underscores';
         $index = 'test_index_with_underscores';
         $column = 'test_column_with_underscores';
-        
+
         $this->mockWpdb->expects($this->exactly(3))
             ->method('prepare')
             ->willReturn('prepared_sql');
-            
+
         $this->mockWpdb->expects($this->exactly(3))
             ->method('get_var')
             ->willReturn('1');

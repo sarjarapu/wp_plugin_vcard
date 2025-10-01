@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Support;
 
 use PDO;
@@ -23,7 +24,7 @@ class FakeWpdb extends \wpdb
             $placeholder = $m[0][0];
             $offset = $m[0][1];
             $arg = $args[$argIndex];
-            
+
             switch ($placeholder) {
                 case '%s':
                     $safeArg = $arg ?? '';
@@ -41,7 +42,7 @@ class FakeWpdb extends \wpdb
                 default:
                     $replacement = $placeholder;
             }
-            
+
             $query = substr_replace($query, $replacement, $offset, strlen($placeholder));
             $argIndex++;
         }
@@ -51,7 +52,9 @@ class FakeWpdb extends \wpdb
     public function get_row($query, $output = null)
     {
         $stmt = $this->pdo->query($query);
-        if (!$stmt) return null;
+        if (!$stmt) {
+            return null;
+        }
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         return $row ?: null;
     }
@@ -59,7 +62,9 @@ class FakeWpdb extends \wpdb
     public function get_results($query, $output = null)
     {
         $stmt = $this->pdo->query($query);
-        if (!$stmt) return [];
+        if (!$stmt) {
+            return [];
+        }
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
         return $rows ?: [];
     }
@@ -67,7 +72,9 @@ class FakeWpdb extends \wpdb
     public function get_var($query)
     {
         $stmt = $this->pdo->query($query);
-        if (!$stmt) return null;
+        if (!$stmt) {
+            return null;
+        }
         $row = $stmt->fetch(PDO::FETCH_NUM);
         return $row ? $row[0] : null;
     }
@@ -84,7 +91,7 @@ class FakeWpdb extends \wpdb
     {
         $cols = array_keys($data);
         $vals = array_values($data);
-        $placeholders = array_map(function($v) {
+        $placeholders = array_map(function ($v) {
             if (is_numeric($v)) {
                 return (string)($v ?? '');
             } elseif (is_null($v)) {

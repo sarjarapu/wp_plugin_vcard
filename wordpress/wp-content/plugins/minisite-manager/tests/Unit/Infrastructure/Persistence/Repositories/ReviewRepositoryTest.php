@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Persistence\Repositories;
@@ -29,9 +30,9 @@ final class ReviewRepositoryTest extends TestCase
         $reflection = new \ReflectionClass($this->repository);
         $method = $reflection->getMethod('table');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke($this->repository);
-        
+
         $this->assertSame('wp_minisite_reviews', $result);
     }
 
@@ -39,7 +40,7 @@ final class ReviewRepositoryTest extends TestCase
     {
         $review = $this->createTestReview();
         $review->id = null; // New review
-        
+
         $this->mockDb->expects($this->once())
             ->method('insert')
             ->with(
@@ -71,9 +72,9 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn(1);
 
         $this->mockDb->insert_id = 456;
-        
+
         $result = $this->repository->add($review);
-        
+
         $this->assertSame(456, $result->id);
         $this->assertSame(123, $result->minisiteId);
         $this->assertSame('John Doe', $result->authorName);
@@ -97,7 +98,7 @@ final class ReviewRepositoryTest extends TestCase
             updatedAt: null,
             createdBy: null
         );
-        
+
         $this->mockDb->expects($this->once())
             ->method('insert')
             ->with(
@@ -127,9 +128,9 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn(1);
 
         $this->mockDb->insert_id = 789;
-        
+
         $result = $this->repository->add($review);
-        
+
         $this->assertSame(789, $result->id);
         $this->assertSame('Jane Doe', $result->authorName);
         $this->assertNull($result->authorUrl);
@@ -176,7 +177,7 @@ final class ReviewRepositoryTest extends TestCase
         $this->mockDb->expects($this->once())
             ->method('prepare')
             ->with(
-                $this->callback(function($query) {
+                $this->callback(function ($query) {
                     return strpos($query, 'SELECT * FROM wp_minisite_reviews') !== false &&
                            strpos($query, 'WHERE minisite_id=%s') !== false &&
                            strpos($query, 'ORDER BY created_at DESC') !== false &&
@@ -193,12 +194,12 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn($rows);
 
         $result = $this->repository->listApprovedForMinisite('123');
-        
+
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertInstanceOf(Review::class, $result[0]);
         $this->assertInstanceOf(Review::class, $result[1]);
-        
+
         // Check first review
         $this->assertSame(1, $result[0]->id);
         $this->assertSame(123, $result[0]->minisiteId);
@@ -214,7 +215,7 @@ final class ReviewRepositoryTest extends TestCase
         $this->assertInstanceOf(DateTimeImmutable::class, $result[0]->createdAt);
         $this->assertInstanceOf(DateTimeImmutable::class, $result[0]->updatedAt);
         $this->assertSame(2, $result[0]->createdBy);
-        
+
         // Check second review
         $this->assertSame(2, $result[1]->id);
         $this->assertSame(123, $result[1]->minisiteId);
@@ -237,7 +238,7 @@ final class ReviewRepositoryTest extends TestCase
         $this->mockDb->expects($this->once())
             ->method('prepare')
             ->with(
-                $this->callback(function($query) {
+                $this->callback(function ($query) {
                     return strpos($query, 'SELECT * FROM wp_minisite_reviews') !== false &&
                            strpos($query, 'WHERE minisite_id=%s') !== false &&
                            strpos($query, 'ORDER BY created_at DESC') !== false &&
@@ -254,7 +255,7 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn([]);
 
         $result = $this->repository->listApprovedForMinisite('456', 10);
-        
+
         $this->assertIsArray($result);
         $this->assertEmpty($result);
     }
@@ -271,7 +272,7 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn(null);
 
         $result = $this->repository->listApprovedForMinisite('999');
-        
+
         $this->assertIsArray($result);
         $this->assertEmpty($result);
     }
@@ -307,10 +308,10 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn($rows);
 
         $result = $this->repository->listApprovedForMinisite('123');
-        
+
         $this->assertCount(1, $result);
         $review = $result[0];
-        
+
         $this->assertSame(1, $review->id);
         $this->assertSame(123, $review->minisiteId);
         $this->assertSame('Test User', $review->authorName);
@@ -333,15 +334,15 @@ final class ReviewRepositoryTest extends TestCase
         $review = $this->createTestReview();
         $review->id = null;
         $review->source = $source;
-        
+
         $this->mockDb->expects($this->once())
             ->method('insert')
             ->willReturn(1);
 
         $this->mockDb->insert_id = 100;
-        
+
         $result = $this->repository->add($review);
-        
+
         $this->assertSame($source, $result->source);
     }
 
@@ -362,15 +363,15 @@ final class ReviewRepositoryTest extends TestCase
         $review = $this->createTestReview();
         $review->id = null;
         $review->status = $status;
-        
+
         $this->mockDb->expects($this->once())
             ->method('insert')
             ->willReturn(1);
 
         $this->mockDb->insert_id = 100;
-        
+
         $result = $this->repository->add($review);
-        
+
         $this->assertSame($status, $result->status);
     }
 
@@ -388,7 +389,7 @@ final class ReviewRepositoryTest extends TestCase
         $review = $this->createTestReview();
         $review->id = null;
         $review->rating = 3.7;
-        
+
         $this->mockDb->expects($this->once())
             ->method('insert')
             ->with(
@@ -404,9 +405,9 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn(1);
 
         $this->mockDb->insert_id = 100;
-        
+
         $result = $this->repository->add($review);
-        
+
         $this->assertSame(3.7, $result->rating);
     }
 
@@ -415,7 +416,7 @@ final class ReviewRepositoryTest extends TestCase
         $review = $this->createTestReview();
         $review->id = null;
         $review->minisiteId = 999;
-        
+
         $this->mockDb->expects($this->once())
             ->method('insert')
             ->with(
@@ -431,9 +432,9 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn(1);
 
         $this->mockDb->insert_id = 100;
-        
+
         $result = $this->repository->add($review);
-        
+
         $this->assertSame(999, $result->minisiteId);
     }
 
@@ -468,10 +469,10 @@ final class ReviewRepositoryTest extends TestCase
             ->willReturn($rows);
 
         $result = $this->repository->listApprovedForMinisite('123');
-        
+
         $this->assertCount(1, $result);
         $review = $result[0];
-        
+
         $this->assertSame('José María', $review->authorName);
         $this->assertSame('https://example.com/café', $review->authorUrl);
         $this->assertSame('¡Excelente servicio! Muy recomendado.', $review->body);

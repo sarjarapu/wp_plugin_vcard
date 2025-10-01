@@ -21,7 +21,7 @@ class _2_0_0_TestBreaking implements Migration
         // Simulate breaking changes by dropping and recreating tables
         $wpdb->query("DROP TABLE IF EXISTS test_initial_table");
         $wpdb->query("DROP TABLE IF EXISTS test_features_table");
-        
+
         $wpdb->query("CREATE TABLE IF NOT EXISTS test_v2_table (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
@@ -36,14 +36,14 @@ class _2_0_0_TestBreaking implements Migration
     public function down(\wpdb $wpdb): void
     {
         $wpdb->query("DROP TABLE IF EXISTS test_v2_table");
-        
+
         // Restore original tables (simplified)
         $wpdb->query("CREATE TABLE test_initial_table (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
-        
+
         $wpdb->query("CREATE TABLE test_features_table (
             id INT AUTO_INCREMENT PRIMARY KEY,
             feature_name VARCHAR(255) NOT NULL,

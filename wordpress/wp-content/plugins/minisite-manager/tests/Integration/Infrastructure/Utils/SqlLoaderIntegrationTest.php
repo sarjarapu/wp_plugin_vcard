@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Integration\Infrastructure\Utils;
 
 use Minisite\Infrastructure\Utils\SqlLoader;
@@ -45,9 +46,9 @@ class SqlLoaderIntegrationTest extends TestCase
         // Verify table structure
         $stmt = $this->dbHelper->query("DESCRIBE wp_test_table");
         $columns = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
+
         $this->assertCount(4, $columns, 'Table should have 4 columns');
-        
+
         $columnNames = array_column($columns, 'Field');
         $this->assertContains('id', $columnNames);
         $this->assertContains('name', $columnNames);

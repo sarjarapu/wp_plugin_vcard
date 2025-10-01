@@ -15,12 +15,12 @@ class DbDeltaTest extends TestCase
     {
         // Store original dbDelta function if it exists
         $this->originalDbDeltaFunction = function_exists('dbDelta') ? 'dbDelta' : null;
-        
+
         // Reset global variables
         unset($GLOBALS['__mock_dbDelta_called']);
         unset($GLOBALS['__mock_dbDelta_sql']);
         unset($GLOBALS['__using_existing_dbDelta']);
-        
+
         // Create a mock dbDelta function for testing
         $this->mockDbDeltaFunction();
     }
@@ -31,7 +31,7 @@ class DbDeltaTest extends TestCase
         unset($GLOBALS['__mock_dbDelta_called']);
         unset($GLOBALS['__mock_dbDelta_sql']);
         unset($GLOBALS['__using_existing_dbDelta']);
-        
+
         // Restore original function if it existed
         if ($this->originalDbDeltaFunction) {
             // Function already exists, no need to restore
@@ -110,7 +110,7 @@ class DbDeltaTest extends TestCase
     {
         // This test verifies the method signature
         $reflection = new \ReflectionMethod(DbDelta::class, 'run');
-        
+
         // Assert
         $this->assertTrue($reflection->isStatic());
         $this->assertTrue($reflection->isPublic());
@@ -122,7 +122,7 @@ class DbDeltaTest extends TestCase
     {
         // This test verifies the return type
         $reflection = new \ReflectionMethod(DbDelta::class, 'run');
-        
+
         // Assert
         $this->assertTrue($reflection->hasReturnType());
         $this->assertEquals('void', $reflection->getReturnType()->getName());
@@ -147,7 +147,7 @@ class DbDeltaTest extends TestCase
         // This test verifies that the method has proper documentation
         $reflection = new \ReflectionMethod(DbDelta::class, 'run');
         $docComment = $reflection->getDocComment();
-        
+
         // Assert - The method doesn't have docblock, so we just verify it exists
         $this->assertTrue($reflection->isPublic());
         $this->assertTrue($reflection->isStatic());
@@ -158,7 +158,7 @@ class DbDeltaTest extends TestCase
         // This test verifies that the class has proper documentation
         $reflection = new \ReflectionClass(DbDelta::class);
         $docComment = $reflection->getDocComment();
-        
+
         // Assert
         $this->assertNotEmpty($docComment);
         $this->assertStringContainsString('Thin wrapper', $docComment);
@@ -170,7 +170,7 @@ class DbDeltaTest extends TestCase
         // This test verifies the parameter name
         $reflection = new \ReflectionMethod(DbDelta::class, 'run');
         $parameter = $reflection->getParameters()[0];
-        
+
         // Assert
         $this->assertEquals('createTableSql', $parameter->getName());
     }
@@ -180,7 +180,7 @@ class DbDeltaTest extends TestCase
         // This test verifies the parameter is required (no default value)
         $reflection = new \ReflectionMethod(DbDelta::class, 'run');
         $parameter = $reflection->getParameters()[0];
-        
+
         // Assert
         $this->assertFalse($parameter->isOptional());
         $this->assertFalse($parameter->isDefaultValueAvailable());
@@ -190,7 +190,7 @@ class DbDeltaTest extends TestCase
     {
         // This test verifies the class doesn't have a custom constructor
         $reflection = new \ReflectionClass(DbDelta::class);
-        
+
         // Assert
         $this->assertFalse($reflection->hasMethod('__construct'));
     }
@@ -200,7 +200,7 @@ class DbDeltaTest extends TestCase
         // This test verifies the class has only the expected public method
         $reflection = new \ReflectionClass(DbDelta::class);
         $methods = $reflection->getMethods(\ReflectionMethod::IS_PUBLIC);
-        
+
         // Assert
         $this->assertCount(1, $methods);
         $this->assertEquals('run', $methods[0]->getName());
@@ -211,7 +211,7 @@ class DbDeltaTest extends TestCase
         // This test verifies the class has no properties
         $reflection = new \ReflectionClass(DbDelta::class);
         $properties = $reflection->getProperties();
-        
+
         // Assert
         $this->assertCount(0, $properties);
     }
@@ -220,7 +220,7 @@ class DbDeltaTest extends TestCase
     {
         // This test verifies the class is not abstract
         $reflection = new \ReflectionClass(DbDelta::class);
-        
+
         // Assert
         $this->assertFalse($reflection->isAbstract());
     }
@@ -229,7 +229,7 @@ class DbDeltaTest extends TestCase
     {
         // This test verifies the class is not an interface
         $reflection = new \ReflectionClass(DbDelta::class);
-        
+
         // Assert
         $this->assertFalse($reflection->isInterface());
     }
@@ -238,7 +238,7 @@ class DbDeltaTest extends TestCase
     {
         // This test verifies the class is not a trait
         $reflection = new \ReflectionClass(DbDelta::class);
-        
+
         // Assert
         $this->assertFalse($reflection->isTrait());
     }
@@ -247,7 +247,7 @@ class DbDeltaTest extends TestCase
     {
         // This test verifies the ensureDbDeltaLoaded method is protected
         $reflection = new \ReflectionMethod(DbDelta::class, 'ensureDbDeltaLoaded');
-        
+
         // Assert
         $this->assertTrue($reflection->isProtected());
         $this->assertTrue($reflection->isStatic());
@@ -257,7 +257,7 @@ class DbDeltaTest extends TestCase
     {
         // This test verifies the method checks if dbDelta function exists
         $reflection = new \ReflectionMethod(DbDelta::class, 'ensureDbDeltaLoaded');
-        
+
         // Assert
         $this->assertTrue($reflection->isProtected());
         $this->assertTrue($reflection->isStatic());
@@ -270,7 +270,7 @@ class DbDeltaTest extends TestCase
     {
         // Create a mock dbDelta function that tracks calls
         // Use a different approach to avoid conflicts with integration tests
-        
+
         // Check if dbDelta already exists and is not our mock
         if (!function_exists('dbDelta')) {
             // Function doesn't exist, create our mock

@@ -19,7 +19,7 @@ class MigrationLocatorWithRealFilesTest extends TestCase
         // Use the actual test migrations directory
         $this->testMigrationsDir = realpath(__DIR__ . '/../../../Support/TestMigrations');
         $this->dbHelper = new DatabaseTestHelper();
-        
+
         // Clear any previously declared classes
         $this->clearDeclaredClasses();
     }
@@ -43,7 +43,7 @@ class MigrationLocatorWithRealFilesTest extends TestCase
         // Arrange
         $this->assertTrue(is_dir($this->testMigrationsDir), "Test migrations directory should exist: {$this->testMigrationsDir}");
         $this->assertTrue(file_exists($this->testMigrationsDir . '/_1_0_0_TestInitial.php'), 'Test migration file should exist');
-        
+
         $locator = new MigrationLocator($this->testMigrationsDir);
 
         // Act
@@ -51,12 +51,12 @@ class MigrationLocatorWithRealFilesTest extends TestCase
 
         // Assert
         $this->assertGreaterThanOrEqual(3, count($result), 'Should find at least 3 test migration files');
-        
+
         // Verify all returned items are Migration instances
         foreach ($result as $migration) {
             $this->assertInstanceOf(Migration::class, $migration);
         }
-        
+
         // Verify versions are sorted correctly
         $versions = array_map(fn($migration) => $migration->version(), $result);
         $sortedVersions = $versions;
@@ -74,20 +74,20 @@ class MigrationLocatorWithRealFilesTest extends TestCase
 
         // Assert
         $this->assertGreaterThanOrEqual(3, count($result));
-        
+
         // Check that we have the expected versions in order
         $versions = array_map(fn($migration) => $migration->version(), $result);
-        
+
         // Should include our test versions
         $this->assertContains('1.0.0', $versions);
         $this->assertContains('1.1.0', $versions);
         $this->assertContains('2.0.0', $versions);
-        
+
         // Verify ordering
         $index1_0_0 = array_search('1.0.0', $versions);
         $index1_1_0 = array_search('1.1.0', $versions);
         $index2_0_0 = array_search('2.0.0', $versions);
-        
+
         $this->assertLessThan($index1_1_0, $index1_0_0, '1.0.0 should come before 1.1.0');
         $this->assertLessThan($index2_0_0, $index1_1_0, '1.1.0 should come before 2.0.0');
     }
@@ -152,10 +152,13 @@ class MigrationLocatorWithRealFilesTest extends TestCase
             $version = $migration->version();
             $this->assertIsString($version);
             $this->assertNotEmpty($version);
-            
+
             // Basic semantic version validation (major.minor.patch)
-            $this->assertMatchesRegularExpression('/^\d+\.\d+\.\d+$/', $version, 
-                "Version '{$version}' should follow semantic versioning pattern (major.minor.patch)");
+            $this->assertMatchesRegularExpression(
+                '/^\d+\.\d+\.\d+$/',
+                $version,
+                "Version '{$version}' should follow semantic versioning pattern (major.minor.patch)"
+            );
         }
     }
 
@@ -174,12 +177,12 @@ class MigrationLocatorWithRealFilesTest extends TestCase
             $this->assertTrue(method_exists($migration, 'description'));
             $this->assertTrue(method_exists($migration, 'up'));
             $this->assertTrue(method_exists($migration, 'down'));
-            
+
             $this->assertTrue(is_callable([$migration, 'version']));
             $this->assertTrue(is_callable([$migration, 'description']));
             $this->assertTrue(is_callable([$migration, 'up']));
             $this->assertTrue(is_callable([$migration, 'down']));
-            
+
             // Verify return types
             $this->assertIsString($migration->version());
             $this->assertIsString($migration->description());

@@ -24,7 +24,7 @@ class _1_1_0_TestFeatures implements Migration
             is_active BOOLEAN DEFAULT TRUE,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )");
-        
+
         $wpdb->query("ALTER TABLE test_initial_table ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
     }
 

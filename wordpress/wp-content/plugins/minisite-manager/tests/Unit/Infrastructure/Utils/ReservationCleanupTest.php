@@ -16,11 +16,11 @@ class ReservationCleanupTest extends TestCase
     {
         // Store the original $wpdb to restore later
         $this->originalWpdb = $GLOBALS['wpdb'] ?? null;
-        
+
         // Create a mock wpdb object
         $this->mockWpdb = $this->createMock(\wpdb::class);
         $this->mockWpdb->prefix = 'wp_';
-        
+
         // Set the global $wpdb to our mock
         $GLOBALS['wpdb'] = $this->mockWpdb;
     }
@@ -112,7 +112,7 @@ class ReservationCleanupTest extends TestCase
         // Arrange
         $this->mockWpdb->prefix = 'test_';
         $expectedQuery = 'DELETE FROM test_minisite_reservations WHERE expires_at <= NOW()';
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('query')
             ->with($expectedQuery)
@@ -215,7 +215,7 @@ class ReservationCleanupTest extends TestCase
         // Arrange
         $this->mockWpdb->prefix = 'wp_test_';
         $expectedQuery = 'DELETE FROM wp_test_minisite_reservations WHERE expires_at <= NOW()';
-        
+
         $this->mockWpdb->expects($this->once())
             ->method('query')
             ->with($expectedQuery)

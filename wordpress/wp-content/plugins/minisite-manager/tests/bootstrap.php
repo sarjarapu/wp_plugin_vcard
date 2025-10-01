@@ -1,7 +1,8 @@
 <?php
+
 /**
  * PHPUnit Bootstrap File
- * 
+ *
  * This file sets up the test environment before any tests run.
  * It defines WordPress constants, loads test support classes, and mocks WordPress functions.
  */
@@ -20,35 +21,86 @@ if (!defined('MINISITE_PLUGIN_DIR')) {
 if (!isset($GLOBALS['wpdb'])) {
     $GLOBALS['wpdb'] = new class {
         public $prefix = 'wp_';
-        public function get_charset_collate() {
+        public function get_charset_collate()
+        {
             return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci';
         }
-        public function prepare($query, ...$args) { return $query; }
-        public function get_var($query) { return null; }
-        public function get_row($query) { return null; }
-        public function get_results($query) { return []; }
-        public function query($query) { return 0; }
-        public function insert($table, $data, $format = []) { return 1; }
-        public function update($table, $data, $where, $format = [], $where_format = []) { return 1; }
-        public function delete($table, $where, $where_format = []) { return 1; }
+        public function prepare($query, ...$args)
+        {
+            return $query;
+        }
+        public function get_var($query)
+        {
+            return null;
+        }
+        public function get_row($query)
+        {
+            return null;
+        }
+        public function get_results($query)
+        {
+            return [];
+        }
+        public function query($query)
+        {
+            return 0;
+        }
+        public function insert($table, $data, $format = [])
+        {
+            return 1;
+        }
+        public function update($table, $data, $where, $format = [], $where_format = [])
+        {
+            return 1;
+        }
+        public function delete($table, $where, $where_format = [])
+        {
+            return 1;
+        }
     };
 }
 
 // Database connection stubs
 if (!class_exists('wpdb')) {
-    class wpdb {
+    class wpdb
+    {
         public $prefix = 'wp_';
-        public function get_charset_collate() {
+        public function get_charset_collate()
+        {
             return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci';
         }
-        public function prepare($query, ...$args) { return $query; }
-        public function get_var($query) { return null; }
-        public function get_row($query) { return null; }
-        public function get_results($query) { return []; }
-        public function query($query) { return 0; }
-        public function insert($table, $data, $format = []) { return 1; }
-        public function update($table, $data, $where, $format = [], $where_format = []) { return 1; }
-        public function delete($table, $where, $where_format = []) { return 1; }
+        public function prepare($query, ...$args)
+        {
+            return $query;
+        }
+        public function get_var($query)
+        {
+            return null;
+        }
+        public function get_row($query)
+        {
+            return null;
+        }
+        public function get_results($query)
+        {
+            return [];
+        }
+        public function query($query)
+        {
+            return 0;
+        }
+        public function insert($table, $data, $format = [])
+        {
+            return 1;
+        }
+        public function update($table, $data, $where, $format = [], $where_format = [])
+        {
+            return 1;
+        }
+        public function delete($table, $where, $where_format = [])
+        {
+            return 1;
+        }
     }
 }
 
@@ -58,14 +110,17 @@ require_once __DIR__ . '/Support/FakeWpdb.php';
 // Option storage stubs for versioning tests
 if (!function_exists('get_option')) {
     $GLOBALS['__test_options'] = [];
-    function get_option($key, $default = false) {
+    function get_option($key, $default = false)
+    {
         return $GLOBALS['__test_options'][$key] ?? $default;
     }
-    function update_option($key, $value) {
+    function update_option($key, $value)
+    {
         $GLOBALS['__test_options'][$key] = $value;
         return true;
     }
-    function delete_option($key) {
+    function delete_option($key)
+    {
         unset($GLOBALS['__test_options'][$key]);
         return true;
     }
@@ -73,31 +128,36 @@ if (!function_exists('get_option')) {
 
 // WordPress function stubs
 if (!function_exists('current_time')) {
-    function current_time($type = 'mysql') {
+    function current_time($type = 'mysql')
+    {
         return date('Y-m-d H:i:s');
     }
 }
 
 if (!function_exists('get_current_user_id')) {
-    function get_current_user_id() {
+    function get_current_user_id()
+    {
         return 1;
     }
 }
 
 if (!function_exists('wp_json_encode')) {
-    function wp_json_encode($data, $options = 0, $depth = 512) {
+    function wp_json_encode($data, $options = 0, $depth = 512)
+    {
         return json_encode($data, $options, $depth);
     }
 }
 
 if (!function_exists('trailingslashit')) {
-    function trailingslashit($string) {
+    function trailingslashit($string)
+    {
         return rtrim($string, '/') . '/';
     }
 }
 
 if (!function_exists('untrailingslashit')) {
-    function untrailingslashit($string) {
+    function untrailingslashit($string)
+    {
         return rtrim($string, '/');
     }
 }

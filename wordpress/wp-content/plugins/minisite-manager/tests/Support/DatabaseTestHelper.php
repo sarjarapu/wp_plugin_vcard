@@ -7,7 +7,7 @@ use Tests\Support\FakeWpdb;
 
 /**
  * Database helper for integration tests
- * 
+ *
  * Provides common database connection and setup functionality for MySQL integration tests.
  */
 class DatabaseTestHelper
@@ -60,7 +60,7 @@ class DatabaseTestHelper
     {
         $tables = [
             'wp_minisites',
-            'wp_minisite_versions', 
+            'wp_minisite_versions',
             'wp_minisite_reviews',
             'wp_minisite_bookmarks',
             'wp_minisite_payments',
@@ -68,7 +68,7 @@ class DatabaseTestHelper
             'wp_minisite_reservations',
             'wp_test_table'
         ];
-        
+
         foreach ($tables as $table) {
             try {
                 $this->pdo->exec("DROP TABLE IF EXISTS {$table}");

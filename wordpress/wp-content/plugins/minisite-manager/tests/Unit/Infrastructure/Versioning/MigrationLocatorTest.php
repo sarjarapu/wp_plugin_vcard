@@ -17,7 +17,7 @@ class MigrationLocatorTest extends TestCase
         // Create temporary directory for test migrations
         $this->tempMigrationsDir = realpath(sys_get_temp_dir()) . '/minisite_migrations_unit_test_' . uniqid();
         mkdir($this->tempMigrationsDir, 0755, true);
-        
+
         // Clear any previously declared classes
         $this->clearDeclaredClasses();
     }
@@ -140,7 +140,7 @@ class MigrationLocatorTest extends TestCase
                 public function down(\wpdb $wpdb): void {}
             }
         ');
-        
+
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
         // Act
@@ -298,7 +298,7 @@ class MigrationLocatorTest extends TestCase
                 }
             }
         ";
-        
+
         $this->createFile($filename, $content);
     }
 
@@ -330,7 +330,7 @@ class MigrationLocatorTest extends TestCase
         if (!is_dir($dir)) {
             return;
         }
-        
+
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
             $path = $dir . '/' . $file;

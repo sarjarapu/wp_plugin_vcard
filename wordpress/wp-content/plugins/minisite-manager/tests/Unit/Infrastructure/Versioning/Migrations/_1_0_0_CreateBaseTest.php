@@ -68,12 +68,12 @@ class _1_0_0_CreateBaseTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Define DB_NAME constant if not already defined
         if (!defined('DB_NAME')) {
             define('DB_NAME', 'test_database');
         }
-        
+
         $this->migration = new Testable_1_0_0_CreateBase();
         $this->mockWpdb = $this->createMockWpdb();
     }
@@ -84,9 +84,9 @@ class _1_0_0_CreateBaseTest extends TestCase
     public function testLoadMinisiteFromJson(): void
     {
         $overrides = ['id' => 'test-id-123'];
-        
+
         $result = $this->migration->publicLoadMinisiteFromJson('acme-dental.json', $overrides);
-        
+
         $this->assertIsArray($result);
         $this->assertEquals('test-id-123', $result['id']);
         $this->assertEquals('acme-dental-dallas', $result['slug']);
@@ -111,9 +111,9 @@ class _1_0_0_CreateBaseTest extends TestCase
             ],
             'other_field' => 'test'
         ];
-        
+
         $result = $this->migration->publicConvertLocationFormat($data);
-        
+
         $this->assertArrayNotHasKey('location', $result);
         $this->assertArrayHasKey('location_point', $result);
         $this->assertEquals(['longitude' => -96.7970, 'latitude' => 32.7767], $result['location_point']);
@@ -131,9 +131,9 @@ class _1_0_0_CreateBaseTest extends TestCase
             'created_by' => null,
             'updated_by' => null
         ];
-        
+
         $result = $this->migration->publicSetComputedFields($data);
-        
+
         $this->assertArrayHasKey('slug', $result);
         $this->assertEquals('test-business-test-location', $result['slug']);
         $this->assertArrayHasKey('created_at', $result);
@@ -177,9 +177,9 @@ class _1_0_0_CreateBaseTest extends TestCase
             'updated_by' => 1,
             '_minisite_current_version_id' => null
         ];
-        
+
         $result = $this->migration->publicInsertMinisite($this->mockWpdb, $minisiteData, 'TEST');
-        
+
         $this->assertEquals('test-minisite-123', $result);
     }
 
@@ -196,7 +196,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             'Great service!',
             'en-US'
         );
-        
+
         // If we get here without exception, the method executed successfully
         $this->assertTrue(true);
     }
@@ -214,7 +214,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             'Excellent experience!',
             'en-GB'
         );
-        
+
         $this->assertTrue(true);
     }
 
@@ -244,7 +244,7 @@ class _1_0_0_CreateBaseTest extends TestCase
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('JSON file not found');
-        
+
         $this->migration->publicLoadMinisiteFromJson('non-existent-file.json');
     }
 
@@ -254,23 +254,23 @@ class _1_0_0_CreateBaseTest extends TestCase
     public function testAddForeignKeyIfNotExistsWhenConstraintDoesNotExist(): void
     {
         $mockWpdb = $this->createMock(\wpdb::class);
-        
+
         // Mock get_var to return 0 (constraint doesn't exist)
         $mockWpdb->method('get_var')->willReturn(0);
-        
+
         // Mock prepare to return the query as-is
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) {
+        $mockWpdb->method('prepare')->willReturnCallback(function ($query, ...$args) {
             return $query;
         });
-        
+
         // Mock query to return true (success)
         $mockWpdb->method('query')->willReturn(true);
-        
+
         // Expect query to be called with ALTER TABLE statement
         $mockWpdb->expects($this->once())
             ->method('query')
             ->with($this->stringContains('ALTER TABLE'));
-        
+
         $this->migration->publicAddForeignKeyIfNotExists(
             $mockWpdb,
             'wp_test_table',
@@ -287,19 +287,19 @@ class _1_0_0_CreateBaseTest extends TestCase
     public function testAddForeignKeyIfNotExistsWhenConstraintExists(): void
     {
         $mockWpdb = $this->createMock(\wpdb::class);
-        
+
         // Mock get_var to return 1 (constraint exists)
         $mockWpdb->method('get_var')->willReturn(1);
-        
+
         // Mock prepare to return the query as-is
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) {
+        $mockWpdb->method('prepare')->willReturnCallback(function ($query, ...$args) {
             return $query;
         });
-        
+
         // Expect query NOT to be called with ALTER TABLE statement
         $mockWpdb->expects($this->never())
             ->method('query');
-        
+
         $this->migration->publicAddForeignKeyIfNotExists(
             $mockWpdb,
             'wp_test_table',
@@ -316,22 +316,22 @@ class _1_0_0_CreateBaseTest extends TestCase
     public function testAddForeignKeyIfNotExistsSqlQueryStructure(): void
     {
         $mockWpdb = $this->createMock(\wpdb::class);
-        
+
         // Mock get_var to return 0 (constraint doesn't exist)
         $mockWpdb->method('get_var')->willReturn(0);
-        
+
         // Mock prepare to return the query as-is
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) {
+        $mockWpdb->method('prepare')->willReturnCallback(function ($query, ...$args) {
             return $query;
         });
-        
+
         // Capture the actual query that gets executed
         $actualQuery = '';
-        $mockWpdb->method('query')->willReturnCallback(function($query) use (&$actualQuery) {
+        $mockWpdb->method('query')->willReturnCallback(function ($query) use (&$actualQuery) {
             $actualQuery = $query;
             return true;
         });
-        
+
         $this->migration->publicAddForeignKeyIfNotExists(
             $mockWpdb,
             'wp_test_table',
@@ -340,7 +340,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             'wp_referenced_table',
             'referenced_column'
         );
-        
+
         // Verify the query structure
         $this->assertStringContainsString('ALTER TABLE wp_test_table', $actualQuery);
         $this->assertStringContainsString('ADD CONSTRAINT fk_test_constraint', $actualQuery);
@@ -355,7 +355,7 @@ class _1_0_0_CreateBaseTest extends TestCase
     public function testSeedTestDataFreshSeeding(): void
     {
         $mockWpdb = $this->createMock(TestableWpdb::class);
-        
+
         // Mock get_row to return sample minisite data
         $mockWpdb->method('get_row')->willReturn([
             'id' => 'test-minisite-123',
@@ -363,13 +363,13 @@ class _1_0_0_CreateBaseTest extends TestCase
             'location_slug' => 'test-location',
             'site_json' => '{"test": "data"}'
         ]);
-        
+
         // Expect multiple insert calls (minisites + versions + reviews)
         $mockWpdb->expects($this->atLeast(4))->method('insert');
-        
+
         // Expect multiple query calls (for version updates)
         $mockWpdb->expects($this->atLeast(4))->method('query');
-        
+
         $this->migration->publicSeedTestData($mockWpdb);
     }
 
@@ -380,21 +380,21 @@ class _1_0_0_CreateBaseTest extends TestCase
     {
         $mockWpdb = $this->createMock(\wpdb::class);
         $mockWpdb->prefix = 'wp_';
-        
+
         // Mock get_var to return 1 (existing data found)
         $mockWpdb->method('get_var')->willReturn(1);
-        
+
         // Mock prepare to return the query as-is
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) {
+        $mockWpdb->method('prepare')->willReturnCallback(function ($query, ...$args) {
             return $query;
         });
-        
+
         // Expect no insert calls since seeding should be skipped
         $mockWpdb->expects($this->never())->method('insert');
-        
+
         // Expect no query calls for version updates
         $mockWpdb->expects($this->never())->method('query');
-        
+
         $this->migration->publicSeedTestData($mockWpdb);
     }
 
@@ -404,19 +404,19 @@ class _1_0_0_CreateBaseTest extends TestCase
     public function testSeedTestDataDuplicateCheckQuery(): void
     {
         $mockWpdb = $this->createMock(TestableWpdb::class);
-        
+
         // Capture the duplicate check query
         $duplicateCheckQuery = '';
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) use (&$duplicateCheckQuery) {
+        $mockWpdb->method('prepare')->willReturnCallback(function ($query, ...$args) use (&$duplicateCheckQuery) {
             if (strpos($query, 'SELECT COUNT(*)') !== false) {
                 $duplicateCheckQuery = $query;
             }
             return $query;
         });
-        
+
         // Mock get_var to return 0 (no existing data)
         $mockWpdb->method('get_var')->willReturn(0);
-        
+
         // Mock other methods
         $mockWpdb->method('query')->willReturn(true);
         $mockWpdb->method('insert')->willReturn(true);
@@ -427,9 +427,9 @@ class _1_0_0_CreateBaseTest extends TestCase
             'location_slug' => 'test-location',
             'site_json' => '{"test": "data"}'
         ]);
-        
+
         $this->migration->publicSeedTestData($mockWpdb);
-        
+
         // Verify the duplicate check query structure (uses placeholders, not actual values)
         $this->assertStringContainsString('SELECT COUNT(*)', $duplicateCheckQuery);
         $this->assertStringContainsString('FROM wp_minisites', $duplicateCheckQuery);
@@ -448,7 +448,7 @@ class _1_0_0_CreateBaseTest extends TestCase
         // Test that up() method exists and is callable
         $this->assertTrue(method_exists($this->migration, 'up'));
         $this->assertTrue(is_callable([$this->migration, 'up']));
-        
+
         // Test that up() method has the correct signature
         $reflection = new \ReflectionMethod($this->migration, 'up');
         $this->assertEquals(1, $reflection->getNumberOfParameters());
@@ -462,22 +462,22 @@ class _1_0_0_CreateBaseTest extends TestCase
     {
         $mockWpdb = $this->createMock(\wpdb::class);
         $mockWpdb->prefix = 'wp_';
-        
+
         // Mock query to return true (success)
         $mockWpdb->method('query')->willReturn(true);
-        
+
         // Expect exactly 8 query calls for dropping tables and event
         $mockWpdb->expects($this->exactly(8))->method('query');
-        
+
         // Capture the queries to verify they're correct
         $queries = [];
-        $mockWpdb->method('query')->willReturnCallback(function($query) use (&$queries) {
+        $mockWpdb->method('query')->willReturnCallback(function ($query) use (&$queries) {
             $queries[] = $query;
             return true;
         });
-        
+
         $this->migration->down($mockWpdb);
-        
+
         // Verify the cleanup queries
         $this->assertStringContainsString('DROP EVENT IF EXISTS wp_minisite_purge_reservations_event', $queries[0]);
         $this->assertStringContainsString('DROP TABLE IF EXISTS wp_minisite_reservations', $queries[1]);
@@ -496,15 +496,15 @@ class _1_0_0_CreateBaseTest extends TestCase
     {
         $mockWpdb = $this->createMock(\wpdb::class);
         $mockWpdb->prefix = 'wp_';
-        
+
         // Mock query to return true (success)
         $mockWpdb->method('query')->willReturn(true);
-        
+
         // Mock prepare to return the query as-is
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) {
+        $mockWpdb->method('prepare')->willReturnCallback(function ($query, ...$args) {
             return $query;
         });
-        
+
         // Mock get_row to return sample data
         $mockWpdb->method('get_row')->willReturn([
             'id' => 'test-minisite-456',
@@ -513,7 +513,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             'status' => 'draft',
             '_minisite_current_version_id' => 456
         ]);
-        
+
         // Test with different data types
         $minisiteData = [
             'id' => 'test-minisite-456',
@@ -544,9 +544,9 @@ class _1_0_0_CreateBaseTest extends TestCase
             'updated_by' => 2,
             '_minisite_current_version_id' => 456
         ];
-        
+
         $result = $this->migration->publicInsertMinisite($mockWpdb, $minisiteData, 'TEST2');
-        
+
         $this->assertEquals('test-minisite-456', $result);
     }
 
@@ -557,19 +557,19 @@ class _1_0_0_CreateBaseTest extends TestCase
     {
         $mockWpdb = $this->createMock(\wpdb::class);
         $mockWpdb->prefix = 'wp_';
-        
+
         // Capture the actual query that gets executed
         $actualQuery = '';
-        $mockWpdb->method('query')->willReturnCallback(function($query) use (&$actualQuery) {
+        $mockWpdb->method('query')->willReturnCallback(function ($query) use (&$actualQuery) {
             $actualQuery = $query;
             return true;
         });
-        
+
         // Mock prepare to return the query as-is
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) {
+        $mockWpdb->method('prepare')->willReturnCallback(function ($query, ...$args) {
             return $query;
         });
-        
+
         // Mock get_row to return sample data
         $mockWpdb->method('get_row')->willReturn([
             'id' => 'test-minisite-789',
@@ -578,7 +578,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             'status' => 'published',
             '_minisite_current_version_id' => null
         ]);
-        
+
         $minisiteData = [
             'id' => 'test-minisite-789',
             'slug' => 'test-business-3-test-location-3',
@@ -608,12 +608,12 @@ class _1_0_0_CreateBaseTest extends TestCase
             'updated_by' => 3,
             '_minisite_current_version_id' => null
         ];
-        
+
         $this->migration->publicInsertMinisite($mockWpdb, $minisiteData, 'TEST3');
-        
+
         // Verify the SQL query structure (normalize whitespace for comparison)
         $normalizedQuery = preg_replace('/\s+/', ' ', trim($actualQuery));
-        
+
         $this->assertStringContainsString('INSERT INTO wp_minisites', $normalizedQuery);
         $this->assertStringContainsString('id, slug, business_slug, location_slug', $normalizedQuery);
         $this->assertStringContainsString('title, name, city, region', $normalizedQuery);
@@ -635,10 +635,10 @@ class _1_0_0_CreateBaseTest extends TestCase
         // Create a temporary invalid JSON file in the minisites directory
         $tempFile = __DIR__ . '/../../../../../data/json/minisites/invalid-test.json';
         file_put_contents($tempFile, '{"invalid": json}');
-        
+
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Invalid JSON');
-        
+
         try {
             $this->migration->publicLoadMinisiteFromJson('invalid-test.json');
         } finally {
@@ -654,21 +654,21 @@ class _1_0_0_CreateBaseTest extends TestCase
     private function createMockWpdb(): \wpdb
     {
         $mockWpdb = $this->createMock(\wpdb::class);
-        
+
         // Mock the prefix property
         $mockWpdb->prefix = 'wp_';
-        
+
         // Mock the query method to return true (success)
         $mockWpdb->method('query')->willReturn(true);
-        
+
         // Mock the prepare method to return the query as-is for testing
-        $mockWpdb->method('prepare')->willReturnCallback(function($query, ...$args) {
+        $mockWpdb->method('prepare')->willReturnCallback(function ($query, ...$args) {
             return $query;
         });
-        
+
         // Mock the insert method to return true (success)
         $mockWpdb->method('insert')->willReturn(true);
-        
+
         // Mock the get_row method for debug queries
         $mockWpdb->method('get_row')->willReturn((object)[
             'id' => 'test-minisite-123',
@@ -677,7 +677,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             'status' => 'published',
             '_minisite_current_version_id' => null
         ]);
-        
+
         return $mockWpdb;
     }
 }

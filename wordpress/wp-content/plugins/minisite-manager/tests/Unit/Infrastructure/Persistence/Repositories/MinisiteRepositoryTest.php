@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Unit\Infrastructure\Persistence\Repositories;
@@ -33,9 +34,9 @@ final class MinisiteRepositoryTest extends TestCase
         $reflection = new \ReflectionClass($this->repository);
         $method = $reflection->getMethod('table');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke($this->repository);
-        
+
         $this->assertSame('wp_minisites', $result);
     }
 
@@ -43,14 +44,14 @@ final class MinisiteRepositoryTest extends TestCase
     {
         $slugs = new SlugPair('test-business', 'test-location');
         $row = $this->createTestRow();
-        
+
         $this->mockDb->expects($this->exactly(2))
             ->method('prepare')
             ->willReturn('prepared query');
 
         $this->mockDb->expects($this->exactly(2))
             ->method('get_row')
-            ->willReturnCallback(function($query, $output) use ($row) {
+            ->willReturnCallback(function ($query, $output) use ($row) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
                     return ['lat' => '40.7128', 'lng' => '-74.0060'];
                 }
@@ -58,7 +59,7 @@ final class MinisiteRepositoryTest extends TestCase
             });
 
         $result = $this->repository->findBySlugs($slugs);
-        
+
         $this->assertInstanceOf(Minisite::class, $result);
         $this->assertSame('test-123', $result->id);
         $this->assertSame('Test Business', $result->title);
@@ -69,7 +70,7 @@ final class MinisiteRepositoryTest extends TestCase
     public function testFindBySlugsReturnsNullWhenNotFound(): void
     {
         $slugs = new SlugPair('nonexistent', 'location');
-        
+
         $this->mockDb->expects($this->once())
             ->method('prepare')
             ->willReturn('prepared query');
@@ -80,21 +81,21 @@ final class MinisiteRepositoryTest extends TestCase
             ->willReturn(null);
 
         $result = $this->repository->findBySlugs($slugs);
-        
+
         $this->assertNull($result);
     }
 
     public function testFindBySlugParamsReturnsMinisiteWithForUpdate(): void
     {
         $row = $this->createTestRow();
-        
+
         $this->mockDb->expects($this->exactly(2))
             ->method('prepare')
             ->willReturn('prepared query');
 
         $this->mockDb->expects($this->exactly(2))
             ->method('get_row')
-            ->willReturnCallback(function($query, $output) use ($row) {
+            ->willReturnCallback(function ($query, $output) use ($row) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
                     return ['lat' => '40.7128', 'lng' => '-74.0060'];
                 }
@@ -102,7 +103,7 @@ final class MinisiteRepositoryTest extends TestCase
             });
 
         $result = $this->repository->findBySlugParams('test-business', 'test-location');
-        
+
         $this->assertInstanceOf(Minisite::class, $result);
         $this->assertSame('test-123', $result->id);
     }
@@ -110,14 +111,14 @@ final class MinisiteRepositoryTest extends TestCase
     public function testFindByIdReturnsMinisiteWhenFound(): void
     {
         $row = $this->createTestRow();
-        
+
         $this->mockDb->expects($this->exactly(2))
             ->method('prepare')
             ->willReturn('prepared query');
 
         $this->mockDb->expects($this->exactly(2))
             ->method('get_row')
-            ->willReturnCallback(function($query, $output) use ($row) {
+            ->willReturnCallback(function ($query, $output) use ($row) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
                     return ['lat' => '40.7128', 'lng' => '-74.0060'];
                 }
@@ -125,7 +126,7 @@ final class MinisiteRepositoryTest extends TestCase
             });
 
         $result = $this->repository->findById('test-123');
-        
+
         $this->assertInstanceOf(Minisite::class, $result);
         $this->assertSame('test-123', $result->id);
     }
@@ -142,7 +143,7 @@ final class MinisiteRepositoryTest extends TestCase
             ->willReturn(null);
 
         $result = $this->repository->findById('nonexistent');
-        
+
         $this->assertNull($result);
     }
 
@@ -152,7 +153,7 @@ final class MinisiteRepositoryTest extends TestCase
             $this->createTestRow(['id' => 'test-1', 'title' => 'Business 1']),
             $this->createTestRow(['id' => 'test-2', 'title' => 'Business 2'])
         ];
-        
+
         $this->mockDb->expects($this->exactly(3))
             ->method('prepare')
             ->willReturn('prepared query');
@@ -165,7 +166,7 @@ final class MinisiteRepositoryTest extends TestCase
         // Mock spatial queries for each row
         $this->mockDb->expects($this->exactly(2))
             ->method('get_row')
-            ->willReturnCallback(function($query, $output) {
+            ->willReturnCallback(function ($query, $output) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
                     return ['lat' => '40.7128', 'lng' => '-74.0060'];
                 }
@@ -173,7 +174,7 @@ final class MinisiteRepositoryTest extends TestCase
             });
 
         $result = $this->repository->listByOwner(123);
-        
+
         $this->assertIsArray($result);
         $this->assertCount(2, $result);
         $this->assertInstanceOf(Minisite::class, $result[0]);
@@ -200,7 +201,7 @@ final class MinisiteRepositoryTest extends TestCase
             ->willReturn([]);
 
         $result = $this->repository->listByOwner(456, 10, 20);
-        
+
         $this->assertIsArray($result);
         $this->assertEmpty($result);
     }
@@ -223,7 +224,7 @@ final class MinisiteRepositoryTest extends TestCase
         $this->mockDb->rows_affected = 1;
 
         $this->repository->updateCurrentVersionId('test-123', 456);
-        
+
         // No exception should be thrown
         $this->assertTrue(true);
     }
@@ -242,7 +243,7 @@ final class MinisiteRepositoryTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Minisite not found or update failed.');
-        
+
         $this->repository->updateCurrentVersionId('nonexistent', 456);
     }
 
@@ -259,7 +260,7 @@ final class MinisiteRepositoryTest extends TestCase
         $this->mockDb->rows_affected = 1;
 
         $this->repository->updateCoordinates('test-123', 40.7128, -74.0060, 123);
-        
+
         // No exception should be thrown
         $this->assertTrue(true);
     }
@@ -277,7 +278,7 @@ final class MinisiteRepositoryTest extends TestCase
         $this->mockDb->rows_affected = 1;
 
         $this->repository->updateCoordinates('test-123', null, null, 123);
-        
+
         // No exception should be thrown
         $this->assertTrue(true);
     }
@@ -300,7 +301,7 @@ final class MinisiteRepositoryTest extends TestCase
         $this->mockDb->rows_affected = 1;
 
         $this->repository->updateSlug('test-123', 'new-slug');
-        
+
         // No exception should be thrown
         $this->assertTrue(true);
     }
@@ -324,7 +325,7 @@ final class MinisiteRepositoryTest extends TestCase
         $this->mockDb->rows_affected = 1;
 
         $this->repository->updateSlugs('test-123', 'new-business', 'new-location');
-        
+
         // No exception should be thrown
         $this->assertTrue(true);
     }
@@ -347,7 +348,7 @@ final class MinisiteRepositoryTest extends TestCase
         $this->mockDb->rows_affected = 1;
 
         $this->repository->updatePublishStatus('test-123', 'published');
-        
+
         // No exception should be thrown
         $this->assertTrue(true);
     }
@@ -355,7 +356,7 @@ final class MinisiteRepositoryTest extends TestCase
     public function testInsertMinisiteSuccess(): void
     {
         $minisite = $this->createTestMinisite();
-        
+
         $this->mockDb->expects($this->once())
             ->method('insert')
             ->with(
@@ -396,7 +397,7 @@ final class MinisiteRepositoryTest extends TestCase
         // Mock the findById call that returns the inserted minisite
         $this->mockDb->expects($this->exactly(2))
             ->method('get_row')
-            ->willReturnCallback(function($query, $output) {
+            ->willReturnCallback(function ($query, $output) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
                     return ['lat' => '40.7128', 'lng' => '-74.0060'];
                 }
@@ -404,7 +405,7 @@ final class MinisiteRepositoryTest extends TestCase
             });
 
         $result = $this->repository->insert($minisite);
-        
+
         $this->assertInstanceOf(Minisite::class, $result);
         $this->assertSame('test-123', $result->id);
     }
@@ -412,14 +413,14 @@ final class MinisiteRepositoryTest extends TestCase
     public function testInsertMinisiteThrowsExceptionOnFailure(): void
     {
         $minisite = $this->createTestMinisite();
-        
+
         $this->mockDb->expects($this->once())
             ->method('insert')
             ->willReturn(false);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Failed to insert minisite.');
-        
+
         $this->repository->insert($minisite);
     }
 
@@ -427,7 +428,7 @@ final class MinisiteRepositoryTest extends TestCase
     {
         $minisite = $this->createTestMinisite();
         $expectedSiteVersion = 1;
-        
+
         $this->mockDb->expects($this->exactly(4))
             ->method('prepare')
             ->willReturn('prepared query');
@@ -441,7 +442,7 @@ final class MinisiteRepositoryTest extends TestCase
         // Mock the findBySlugs call that returns the updated minisite
         $this->mockDb->expects($this->exactly(2))
             ->method('get_row')
-            ->willReturnCallback(function($query, $output) {
+            ->willReturnCallback(function ($query, $output) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
                     return ['lat' => '40.7128', 'lng' => '-74.0060'];
                 }
@@ -449,7 +450,7 @@ final class MinisiteRepositoryTest extends TestCase
             });
 
         $result = $this->repository->save($minisite, $expectedSiteVersion);
-        
+
         $this->assertInstanceOf(Minisite::class, $result);
         $this->assertSame('test-123', $result->id);
     }
@@ -458,7 +459,7 @@ final class MinisiteRepositoryTest extends TestCase
     {
         $minisite = $this->createTestMinisite();
         $expectedSiteVersion = 1;
-        
+
         $this->mockDb->expects($this->once())
             ->method('prepare')
             ->willReturn('prepared query');
@@ -471,7 +472,7 @@ final class MinisiteRepositoryTest extends TestCase
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Concurrent modification detected (optimistic lock failed).');
-        
+
         $this->repository->save($minisite, $expectedSiteVersion);
     }
 
@@ -489,7 +490,7 @@ final class MinisiteRepositoryTest extends TestCase
             ->willReturn(1);
 
         $result = $this->repository->updateTitle('test-123', 'New Title');
-        
+
         $this->assertTrue($result);
     }
 
@@ -500,7 +501,7 @@ final class MinisiteRepositoryTest extends TestCase
             ->willReturn(false);
 
         $result = $this->repository->updateTitle('test-123', 'New Title');
-        
+
         $this->assertFalse($result);
     }
 
@@ -520,7 +521,7 @@ final class MinisiteRepositoryTest extends TestCase
             ->willReturn(1);
 
         $result = $this->repository->updateStatus('test-123', 'published');
-        
+
         $this->assertTrue($result);
     }
 
@@ -531,7 +532,7 @@ final class MinisiteRepositoryTest extends TestCase
             'name' => 'New Name',
             'city' => 'New City'
         ];
-        
+
         $this->mockDb->expects($this->once())
             ->method('update')
             ->with(
@@ -550,7 +551,7 @@ final class MinisiteRepositoryTest extends TestCase
             ->willReturn(1);
 
         $this->repository->updateBusinessInfo('test-123', $fields, 123);
-        
+
         // No exception should be thrown
         $this->assertTrue(true);
     }
@@ -558,14 +559,14 @@ final class MinisiteRepositoryTest extends TestCase
     public function testUpdateBusinessInfoThrowsExceptionOnFailure(): void
     {
         $fields = ['title' => 'New Title'];
-        
+
         $this->mockDb->expects($this->once())
             ->method('update')
             ->willReturn(false);
 
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Failed to update business info fields.');
-        
+
         $this->repository->updateBusinessInfo('test-123', $fields, 123);
     }
 

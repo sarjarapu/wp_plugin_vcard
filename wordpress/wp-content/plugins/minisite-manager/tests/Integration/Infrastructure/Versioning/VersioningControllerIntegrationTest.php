@@ -28,10 +28,10 @@ class VersioningControllerIntegrationTest extends TestCase
 
         $this->testTargetVersion = '2.0.0';
         $this->testOptionKey = 'minisite_integration_test_version_' . uniqid();
-        
+
         // Create a test-specific controller that uses our temporary directory
         $this->controller = $this->createTestVersioningController($this->testTargetVersion, $this->testOptionKey, $this->tempMigrationsDir);
-        
+
         // Setup database helper
         $this->dbHelper = new DatabaseTestHelper();
 
@@ -44,7 +44,7 @@ class VersioningControllerIntegrationTest extends TestCase
 
         // Clean up any existing test tables
         $this->cleanupTestTables();
-        
+
         // Define production mode to disable safety mechanism for testing
         if (!defined('MINISITE_LIVE_PRODUCTION')) {
             define('MINISITE_LIVE_PRODUCTION', true);
@@ -68,7 +68,7 @@ class VersioningControllerIntegrationTest extends TestCase
      */
     private function createTestVersioningController(string $targetVersion, string $optionKey, string $migrationDir): VersioningController
     {
-        return new class($targetVersion, $optionKey, $migrationDir) extends VersioningController {
+        return new class ($targetVersion, $optionKey, $migrationDir) extends VersioningController {
             private string $migrationDir;
             private string $targetVersion;
             private string $optionKey;
@@ -93,7 +93,7 @@ class VersioningControllerIntegrationTest extends TestCase
 
                 $locator = new MigrationLocator($this->migrationDir);
                 $runner = new MigrationRunner($this->targetVersion, $this->optionKey, $locator);
-                
+
                 if (version_compare($runner->current(), $this->targetVersion, '<')) {
                     $runner->upgradeTo($wpdb, static function ($msg) {
                         // Use error_log for now; swap with your Logger if desired
@@ -110,16 +110,16 @@ class VersioningControllerIntegrationTest extends TestCase
     {
         // Ensure no tables exist
         $this->cleanupTestTables();
-        
+
         // Set version to 0.0.0 to trigger full migration
         update_option($this->testOptionKey, '0.0.0');
-        
+
         // Create test migration files
         $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisites (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))',
             'down' => 'DROP TABLE IF EXISTS wp_minisites'
         ]);
-        
+
         $this->createTestMigrationFile('_2_0_0_AddFeatures.php', '2.0.0', 'Add features', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisite_versions (id INT AUTO_INCREMENT PRIMARY KEY, minisite_id INT)',
             'down' => 'DROP TABLE IF EXISTS wp_minisite_versions'
@@ -146,7 +146,7 @@ class VersioningControllerIntegrationTest extends TestCase
     {
         // Set version to target version
         update_option($this->testOptionKey, $this->testTargetVersion);
-        
+
         // Create test migration files
         $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisites (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))',
@@ -166,13 +166,13 @@ class VersioningControllerIntegrationTest extends TestCase
     {
         // Set version to 1.0.0 (lower than target 2.0.0)
         update_option($this->testOptionKey, '1.0.0');
-        
+
         // Create test migration files
         $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisites (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))',
             'down' => 'DROP TABLE IF EXISTS wp_minisites'
         ]);
-        
+
         $this->createTestMigrationFile('_2_0_0_AddFeatures.php', '2.0.0', 'Add features', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisite_versions (id INT AUTO_INCREMENT PRIMARY KEY, minisite_id INT)',
             'down' => 'DROP TABLE IF EXISTS wp_minisite_versions'
@@ -191,10 +191,10 @@ class VersioningControllerIntegrationTest extends TestCase
     {
         // Set version to target (would normally skip migrations)
         update_option($this->testOptionKey, $this->testTargetVersion);
-        
+
         // Ensure no tables exist
         $this->cleanupTestTables();
-        
+
         // Create test migration files
         $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisites (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))',
@@ -219,18 +219,18 @@ class VersioningControllerIntegrationTest extends TestCase
     {
         // Start with no version set
         delete_option($this->testOptionKey);
-        
+
         // Create multiple test migration files
         $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisites (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))',
             'down' => 'DROP TABLE IF EXISTS wp_minisites'
         ]);
-        
+
         $this->createTestMigrationFile('_1_1_0_AddEmail.php', '1.1.0', 'Add email column', [
             'up' => 'ALTER TABLE wp_minisites ADD COLUMN email VARCHAR(255)',
             'down' => 'ALTER TABLE wp_minisites DROP COLUMN email'
         ]);
-        
+
         $this->createTestMigrationFile('_2_0_0_AddFeatures.php', '2.0.0', 'Add features', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisite_versions (id INT AUTO_INCREMENT PRIMARY KEY, minisite_id INT)',
             'down' => 'DROP TABLE IF EXISTS wp_minisite_versions'
@@ -243,15 +243,15 @@ class VersioningControllerIntegrationTest extends TestCase
 
         // Verify all migrations were applied
         $wpdb = $this->dbHelper->getWpdb();
-        
+
         // Check base table exists
         $tables = $wpdb->get_results("SHOW TABLES LIKE 'wp_minisites'");
         $this->assertNotEmpty($tables, 'wp_minisites table should be created');
-        
+
         // Check email column was added
         $columns = $wpdb->get_results("SHOW COLUMNS FROM wp_minisites LIKE 'email'");
         $this->assertNotEmpty($columns, 'email column should be added to wp_minisites');
-        
+
         // Check features table exists
         $tables = $wpdb->get_results("SHOW TABLES LIKE 'wp_minisite_versions'");
         $this->assertNotEmpty($tables, 'wp_minisite_versions table should be created');
@@ -264,7 +264,7 @@ class VersioningControllerIntegrationTest extends TestCase
     {
         // Set version to target
         update_option($this->testOptionKey, $this->testTargetVersion);
-        
+
         // Create test migration files
         $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisites (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))',
@@ -286,13 +286,13 @@ class VersioningControllerIntegrationTest extends TestCase
     {
         // Set version to 1.0.0 (lower than target 2.0.0)
         update_option($this->testOptionKey, '1.0.0');
-        
+
         // Create test migration files with one that will fail
         $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisites (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))',
             'down' => 'DROP TABLE IF EXISTS wp_minisites'
         ]);
-        
+
         $this->createTestMigrationFile('_2_0_0_InvalidMigration.php', '2.0.0', 'Invalid migration', [
             'up' => 'INVALID SQL SYNTAX THAT WILL FAIL',
             'down' => 'DROP TABLE IF EXISTS wp_minisites'
@@ -317,7 +317,7 @@ class VersioningControllerIntegrationTest extends TestCase
         // This test verifies the controller works with real WordPress functions
         // Set version to 1.0.0
         update_option($this->testOptionKey, '1.0.0');
-        
+
         // Create test migration files
         $this->createTestMigrationFile('_1_0_0_CreateBase.php', '1.0.0', 'Create base tables', [
             'up' => 'CREATE TABLE IF NOT EXISTS wp_minisites (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255))',
@@ -332,7 +332,7 @@ class VersioningControllerIntegrationTest extends TestCase
         // Verify WordPress functions were used correctly
         $this->assertTrue(function_exists('get_option'), 'WordPress get_option function should be available');
         $this->assertTrue(function_exists('update_option'), 'WordPress update_option function should be available');
-        
+
         // Verify version was updated to the highest available migration (1.0.0)
         // Since there's no 2.0.0 migration, it should stay at 1.0.0
         $this->assertEquals('1.0.0', get_option($this->testOptionKey));
@@ -347,14 +347,14 @@ class VersioningControllerIntegrationTest extends TestCase
         $className = $this->getClassNameFromFilename($filename);
         $upSql = $sql['up'] ?? '-- No up SQL';
         $downSql = $sql['down'] ?? '-- No down SQL';
-        
+
         // Add unique suffix to prevent class redeclaration
         $uniqueClassName = $className . 'Controller' . uniqid();
-        
+
         // Escape SQL for PHP string
         $escapedUpSql = str_replace("'", "\\'", $upSql);
         $escapedDownSql = str_replace("'", "\\'", $downSql);
-        
+
         $content = "<?php
 namespace Minisite\Infrastructure\Versioning\Migrations;
 use Minisite\Infrastructure\Versioning\Contracts\Migration;

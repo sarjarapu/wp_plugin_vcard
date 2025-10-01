@@ -32,7 +32,7 @@ class MigrationRunnerIntegrationTest extends TestCase
 
         // Clear any existing test options
         delete_option($this->testOptionKey);
-        
+
         // Clean up any existing test tables
         $this->cleanupTestTables();
     }
@@ -41,10 +41,10 @@ class MigrationRunnerIntegrationTest extends TestCase
     {
         // Clean up temporary directory
         $this->removeDirectory($this->tempMigrationsDir);
-        
+
         // Clean up test options
         delete_option($this->testOptionKey);
-        
+
         // Clean up test tables
         $this->cleanupTestTables();
     }
@@ -59,7 +59,7 @@ class MigrationRunnerIntegrationTest extends TestCase
             'test_posts',
             'test_table'
         ];
-        
+
         $wpdb = $this->dbHelper->getWpdb();
         foreach ($testTables as $table) {
             try {
@@ -77,14 +77,14 @@ class MigrationRunnerIntegrationTest extends TestCase
             'up' => 'CREATE TABLE IF NOT EXISTS test_users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL)',
             'down' => 'DROP TABLE IF EXISTS test_users'
         ]);
-        
+
         $this->createTestMigrationFile('_1_1_0_AddEmailRunner.php', '1.1.0', 'Add email column to users', [
             'up' => 'ALTER TABLE test_users ADD COLUMN email VARCHAR(255)',
             'down' => 'ALTER TABLE test_users DROP COLUMN email'
         ]);
 
         $loggedMessages = [];
-        $logger = function($msg) use (&$loggedMessages) {
+        $logger = function ($msg) use (&$loggedMessages) {
             $loggedMessages[] = $msg;
         };
 
@@ -117,7 +117,7 @@ class MigrationRunnerIntegrationTest extends TestCase
     {
         // Arrange - Set current version to 1.0.0
         update_option($this->testOptionKey, '1.0.0');
-        
+
         // Create the table that would have been created by the 1.0.0 migration
         $wpdb = $this->dbHelper->getWpdb();
         $wpdb->query('CREATE TABLE IF NOT EXISTS test_users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL)');
@@ -127,14 +127,14 @@ class MigrationRunnerIntegrationTest extends TestCase
             'up' => 'CREATE TABLE IF NOT EXISTS test_users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL)',
             'down' => 'DROP TABLE IF EXISTS test_users'
         ]);
-        
+
         $this->createTestMigrationFile('_1_1_0_AddEmailRunner.php', '1.1.0', 'Add email column to users', [
             'up' => 'ALTER TABLE test_users ADD COLUMN email VARCHAR(255)',
             'down' => 'ALTER TABLE test_users DROP COLUMN email'
         ]);
 
         $loggedMessages = [];
-        $logger = function($msg) use (&$loggedMessages) {
+        $logger = function ($msg) use (&$loggedMessages) {
             $loggedMessages[] = $msg;
         };
 
@@ -160,14 +160,14 @@ class MigrationRunnerIntegrationTest extends TestCase
             'up' => 'CREATE TABLE IF NOT EXISTS test_users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL)',
             'down' => 'DROP TABLE IF EXISTS test_users'
         ]);
-        
+
         $this->createTestMigrationFile('_1_1_0_AddEmailRunner.php', '1.1.0', 'Add email column to users', [
             'up' => 'ALTER TABLE test_users ADD COLUMN email VARCHAR(255)',
             'down' => 'ALTER TABLE test_users DROP COLUMN email'
         ]);
 
         $loggedMessages = [];
-        $logger = function($msg) use (&$loggedMessages) {
+        $logger = function ($msg) use (&$loggedMessages) {
             $loggedMessages[] = $msg;
         };
 
@@ -187,7 +187,7 @@ class MigrationRunnerIntegrationTest extends TestCase
     {
         // Arrange - Set up initial state with tables
         update_option($this->testOptionKey, '1.1.0');
-        
+
         $wpdb = $this->dbHelper->getWpdb();
         $wpdb->query('CREATE TABLE IF NOT EXISTS test_users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL, email VARCHAR(255))');
 
@@ -196,14 +196,14 @@ class MigrationRunnerIntegrationTest extends TestCase
             'up' => 'CREATE TABLE IF NOT EXISTS test_users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL)',
             'down' => 'DROP TABLE IF EXISTS test_users'
         ]);
-        
+
         $this->createTestMigrationFile('_1_1_0_AddEmailRunner.php', '1.1.0', 'Add email column to users', [
             'up' => 'ALTER TABLE test_users ADD COLUMN email VARCHAR(255)',
             'down' => 'ALTER TABLE test_users DROP COLUMN email'
         ]);
 
         $loggedMessages = [];
-        $logger = function($msg) use (&$loggedMessages) {
+        $logger = function ($msg) use (&$loggedMessages) {
             $loggedMessages[] = $msg;
         };
 
@@ -230,7 +230,7 @@ class MigrationRunnerIntegrationTest extends TestCase
     {
         // Arrange - Set up initial state with table
         update_option($this->testOptionKey, '1.0.0');
-        
+
         $wpdb = $this->dbHelper->getWpdb();
         $wpdb->query('CREATE TABLE IF NOT EXISTS test_users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL)');
 
@@ -241,7 +241,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         ]);
 
         $loggedMessages = [];
-        $logger = function($msg) use (&$loggedMessages) {
+        $logger = function ($msg) use (&$loggedMessages) {
             $loggedMessages[] = $msg;
         };
 
@@ -268,24 +268,24 @@ class MigrationRunnerIntegrationTest extends TestCase
             'up' => 'CREATE TABLE IF NOT EXISTS test_users (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL)',
             'down' => 'DROP TABLE IF EXISTS test_users'
         ]);
-        
+
         $this->createTestMigrationFile('_1_1_0_AddEmailRunner.php', '1.1.0', 'Add email column', [
             'up' => 'ALTER TABLE test_users ADD COLUMN email VARCHAR(255)',
             'down' => 'ALTER TABLE test_users DROP COLUMN email'
         ]);
-        
+
         $this->createTestMigrationFile('_1_2_0_CreatePostsRunner.php', '1.2.0', 'Create posts table', [
             'up' => 'CREATE TABLE IF NOT EXISTS test_posts (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255) NOT NULL, user_id INT)',
             'down' => 'DROP TABLE IF EXISTS test_posts'
         ]);
-        
+
         $this->createTestMigrationFile('_2_0_0_AddIndexesRunner.php', '2.0.0', 'Add database indexes', [
             'up' => 'ALTER TABLE test_users ADD INDEX idx_email (email); ALTER TABLE test_posts ADD INDEX idx_user_id (user_id)',
             'down' => 'ALTER TABLE test_users DROP INDEX idx_email; ALTER TABLE test_posts DROP INDEX idx_user_id'
         ]);
 
         $loggedMessages = [];
-        $logger = function($msg) use (&$loggedMessages) {
+        $logger = function ($msg) use (&$loggedMessages) {
             $loggedMessages[] = $msg;
         };
 
@@ -301,19 +301,19 @@ class MigrationRunnerIntegrationTest extends TestCase
 
         // Verify database state
         $wpdb = $this->dbHelper->getWpdb();
-        
+
         // Check users table
         $tableExists = $wpdb->get_var("SHOW TABLES LIKE 'test_users'");
         $this->assertNotNull($tableExists, 'Users table should exist');
-        
+
         $columns = $wpdb->get_results("SHOW COLUMNS FROM test_users");
         $columnNames = array_column($columns, 'Field');
         $this->assertContains('email', $columnNames);
-        
+
         // Check posts table
         $tableExists = $wpdb->get_var("SHOW TABLES LIKE 'test_posts'");
         $this->assertNotNull($tableExists, 'Posts table should exist');
-        
+
         // Check indexes
         $indexes = $wpdb->get_results("SHOW INDEX FROM test_users WHERE Key_name = 'idx_email'");
         $this->assertNotEmpty($indexes, 'Email index should exist');
@@ -331,7 +331,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         ]);
 
         $loggedMessages = [];
-        $logger = function($msg) use (&$loggedMessages) {
+        $logger = function ($msg) use (&$loggedMessages) {
             $loggedMessages[] = $msg;
         };
 
@@ -366,15 +366,15 @@ class MigrationRunnerIntegrationTest extends TestCase
      * Create a test migration file with the given parameters
      */
     private function createTestMigrationFile(
-        string $filename, 
-        string $version, 
-        string $description, 
+        string $filename,
+        string $version,
+        string $description,
         array $sql = []
     ): void {
         $className = $this->getClassNameFromFilename($filename);
         $upSql = $sql['up'] ?? '-- Migration up SQL';
         $downSql = $sql['down'] ?? '-- Migration down SQL';
-        
+
         $content = "<?php 
             namespace Minisite\Infrastructure\Versioning\Migrations;
             use Minisite\Infrastructure\Versioning\Contracts\Migration;
@@ -394,7 +394,7 @@ class MigrationRunnerIntegrationTest extends TestCase
                 }
             }
         ";
-        
+
         $this->createFile($filename, $content);
     }
 
@@ -424,7 +424,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         if (!is_dir($dir)) {
             return;
         }
-        
+
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
             $path = $dir . '/' . $file;

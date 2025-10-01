@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests\Unit\Application\Rendering;
@@ -6,10 +7,8 @@ namespace Tests\Unit\Application\Rendering;
 use DateTimeImmutable;
 use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Domain\Entities\Minisite;
-use Minisite\Domain\Entities\Review;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
-use Minisite\Infrastructure\Persistence\Repositories\ReviewRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
@@ -25,7 +24,7 @@ final class TimberRendererTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Store original globals
         $this->originalGlobals = [
             'wpdb' => $GLOBALS['wpdb'] ?? null,
@@ -39,12 +38,12 @@ final class TimberRendererTest extends TestCase
         $this->mockWpdb = $this->createMock(FakeWpdb::class);
         $this->mockWpdb->prefix = 'wp_';
         $GLOBALS['wpdb'] = $this->mockWpdb;
-        
+
         $this->renderer = new TimberRenderer('v2025');
-        
+
         // Create test minisite
         $this->testMinisite = $this->createTestMinisite();
-        
+
         // Mock WordPress functions
         $this->mockWordPressFunctions();
     }
@@ -56,10 +55,10 @@ final class TimberRendererTest extends TestCase
             if ($key === 'wpdb') {
                 $GLOBALS['wpdb'] = $value;
             } else {
-                // Functions will be restored automatically when test ends
+                // Functions will be restored automatically when the test ends
             }
         }
-        
+
         parent::tearDown();
     }
 
@@ -103,19 +102,19 @@ final class TimberRendererTest extends TestCase
         if (!function_exists('is_user_logged_in')) {
             eval('function is_user_logged_in() { return true; }');
         }
-        
+
         if (!function_exists('get_current_user_id')) {
             eval('function get_current_user_id() { return 1; }');
         }
-        
+
         if (!function_exists('current_user_can')) {
             eval('function current_user_can($capability, $object_id = null) { return true; }');
         }
-        
+
         if (!function_exists('trailingslashit')) {
             eval('function trailingslashit($string) { return rtrim($string, "/") . "/"; }');
         }
-        
+
         if (!function_exists('esc_html')) {
             eval('function esc_html($text) { return htmlspecialchars($text, ENT_QUOTES, "UTF-8"); }');
         }
@@ -134,12 +133,12 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('renderFallback');
         $method->setAccessible(true);
-        
+
         // Capture output
         ob_start();
         $method->invoke($this->renderer, $this->testMinisite);
         $output = ob_get_clean();
-        
+
         // Assert fallback HTML is generated
         $this->assertStringContainsString('<!doctype html>', $output);
         $this->assertStringContainsString('Test Minisite Title', $output);
@@ -151,9 +150,9 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('getMinisiteData');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke($this->renderer, $this->testMinisite);
-        
+
         $this->assertIsArray($result);
         $this->assertArrayHasKey('minisite', $result);
         $this->assertArrayHasKey('reviews', $result);
@@ -166,9 +165,9 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('fetchReviews');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke($this->renderer, 'test-minisite-123');
-        
+
         $this->assertIsArray($result);
     }
 
@@ -177,9 +176,9 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('fetchMinisiteWithUserData');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke($this->renderer, $this->testMinisite);
-        
+
         $this->assertInstanceOf(Minisite::class, $result);
         $this->assertSame('test-minisite-123', $result->id);
         $this->assertSame('Test Minisite Title', $result->title);
@@ -190,14 +189,14 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('checkIfBookmarked');
         $method->setAccessible(true);
-        
+
         // Mock wpdb->get_var to return a bookmark ID
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn('123');
-        
+
         $result = $method->invoke($this->renderer, 'test-minisite-123');
-        
+
         $this->assertTrue($result);
     }
 
@@ -206,15 +205,15 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('checkIfBookmarked');
         $method->setAccessible(true);
-        
-        // Since is_user_logged_in is mocked to return true in setUp, 
+
+        // Since is_user_logged_in is mocked to return true in setUp,
         // we'll test the database interaction
         $this->mockWpdb->expects($this->once())
             ->method('get_var')
             ->willReturn(null); // No bookmark found
-        
+
         $result = $method->invoke($this->renderer, 'test-minisite-123');
-        
+
         $this->assertFalse($result);
     }
 
@@ -223,9 +222,9 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('checkIfCanEdit');
         $method->setAccessible(true);
-        
+
         $result = $method->invoke($this->renderer, 'test-minisite-123');
-        
+
         // Since current_user_can is mocked to return true in setUp
         $this->assertTrue($result);
     }
@@ -235,11 +234,11 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('checkIfCanEdit');
         $method->setAccessible(true);
-        
+
         // Since is_user_logged_in is mocked to return true in setUp,
         // this test will still return true, but we're testing the method structure
         $result = $method->invoke($this->renderer, 'test-minisite-123');
-        
+
         $this->assertTrue($result);
     }
 
@@ -248,12 +247,12 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('renderFallback');
         $method->setAccessible(true);
-        
+
         // Capture output
         ob_start();
         $method->invoke($this->renderer, $this->testMinisite);
         $output = ob_get_clean();
-        
+
         // Assert fallback HTML is generated
         $this->assertStringContainsString('<!doctype html>', $output);
         $this->assertStringContainsString('Test Minisite Title', $output);
@@ -265,11 +264,10 @@ final class TimberRendererTest extends TestCase
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('registerTimberLocations');
         $method->setAccessible(true);
-        
+
         // This method modifies static properties, so we just test it doesn't throw
         $method->invoke($this->renderer);
-        
-        $this->assertTrue(true); // If we get here without exception, test passes
-    }
 
+        $this->assertTrue(true); // If we get here without exception, the test passes
+    }
 }

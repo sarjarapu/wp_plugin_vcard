@@ -21,9 +21,9 @@ class MigrationLocatorIntegrationTest extends TestCase
         // Create temporary directory for test migrations
         $this->tempMigrationsDir = realpath(sys_get_temp_dir()) . '/minisite_migrations_test_' . uniqid();
         mkdir($this->tempMigrationsDir, 0755, true);
-        
+
         $this->dbHelper = new DatabaseTestHelper();
-        
+
         // Clear any previously declared classes
         $this->clearDeclaredClasses();
     }
@@ -58,11 +58,11 @@ class MigrationLocatorIntegrationTest extends TestCase
         $this->assertCount(2, $result);
         $this->assertInstanceOf(Migration::class, $result[0]);
         $this->assertInstanceOf(Migration::class, $result[1]);
-        
+
         // Verify versions are sorted correctly
         $this->assertEquals('1.0.0', $result[0]->version());
         $this->assertEquals('1.1.0', $result[1]->version());
-        
+
         // Verify descriptions
         $this->assertEquals('Create base tables', $result[0]->description());
         $this->assertEquals('Add database indexes', $result[1]->description());
@@ -84,18 +84,18 @@ class MigrationLocatorIntegrationTest extends TestCase
         $this->assertCount(1, $result);
         $migration = $result[0];
         $this->assertInstanceOf(Migration::class, $migration);
-        
+
         // Test that the migration can be executed (up method)
         $wpdb = $this->dbHelper->getWpdb();
         $migration->up($wpdb);
-        
+
         // Verify table was created
         $tableExists = $wpdb->get_var("SHOW TABLES LIKE 'test_table'");
         $this->assertNotNull($tableExists);
-        
+
         // Test rollback (down method)
         $migration->down($wpdb);
-        
+
         // Verify table was dropped
         $tableExists = $wpdb->get_var("SHOW TABLES LIKE 'test_table'");
         $this->assertNull($tableExists);
@@ -109,7 +109,7 @@ class MigrationLocatorIntegrationTest extends TestCase
         $this->createTestMigrationFile('_1_1_0_Features.php', '1.1.0', 'New features');
         $this->createTestMigrationFile('_2_0_0_Breaking.php', '2.0.0', 'Breaking changes');
         $this->createTestMigrationFile('_2_0_1_PostBreaking.php', '2.0.1', 'Post-breaking fix');
-        
+
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
         // Act
@@ -117,11 +117,11 @@ class MigrationLocatorIntegrationTest extends TestCase
 
         // Assert
         $this->assertCount(5, $result);
-        
+
         $expectedVersions = ['1.0.0', '1.0.1', '1.1.0', '2.0.0', '2.0.1'];
         $actualVersions = array_map(fn($migration) => $migration->version(), $result);
         $this->assertEquals($expectedVersions, $actualVersions);
-        
+
         // Verify all migrations implement the interface correctly
         foreach ($result as $migration) {
             $this->assertInstanceOf(Migration::class, $migration);
@@ -145,7 +145,7 @@ class MigrationLocatorIntegrationTest extends TestCase
 
         // Assert
         $this->assertCount(3, $result);
-        
+
         $expectedVersions = ['1.0.0', '1.1.0', '2.0.0'];
         $actualVersions = array_map(fn($migration) => $migration->version(), $result);
         $this->assertEquals($expectedVersions, $actualVersions);
@@ -161,7 +161,7 @@ class MigrationLocatorIntegrationTest extends TestCase
         $this->createTestMigrationFile('_1_0_1_Patch.php', '1.0.1', 'Patch');
         $this->createTestMigrationFile('_1_10_0_Minor.php', '1.10.0', 'Minor');
         $this->createTestMigrationFile('_10_0_0_Major.php', '10.0.0', 'Major');
-        
+
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
         // Act
@@ -169,10 +169,10 @@ class MigrationLocatorIntegrationTest extends TestCase
 
         // Assert
         $this->assertCount(7, $result);
-        
+
         $expectedVersions = [
             '1.0.0-alpha1',
-            '1.0.0-beta1', 
+            '1.0.0-beta1',
             '1.0.0-rc1',
             '1.0.0',
             '1.0.1',
@@ -188,7 +188,7 @@ class MigrationLocatorIntegrationTest extends TestCase
         // Arrange
         // Valid migration
         $this->createTestMigrationFile('_1_0_0_Valid.php', '1.0.0', 'Valid migration');
-        
+
         // Invalid files
         $this->createFile('invalid_syntax.php', '<?php class Invalid { public function test() { return "test"; } } // Valid syntax but not a migration');
         $this->createFile('not_migration.php', '<?php class NotMigration {}');
@@ -196,7 +196,7 @@ class MigrationLocatorIntegrationTest extends TestCase
             namespace Minisite\Infrastructure\Versioning\Migrations;
             class WrongInterface {}
         ');
-        
+
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
         // Act
@@ -222,7 +222,7 @@ class MigrationLocatorIntegrationTest extends TestCase
                 public function down(\wpdb $wpdb): void {}
             }
         ');
-        
+
         $this->createFile('conflict2.php', '<?php 
             namespace Minisite\Infrastructure\Versioning\Migrations;
             use Minisite\Infrastructure\Versioning\Contracts\Migration;
@@ -234,14 +234,14 @@ class MigrationLocatorIntegrationTest extends TestCase
                 public function down(\wpdb $wpdb): void {}
             }
         ');
-        
+
         $locator = new MigrationLocator($this->tempMigrationsDir);
 
         // Act & Assert
         // This should handle the class name conflict gracefully
         // The last loaded class will be used (PHP behavior)
         $result = $locator->all();
-        
+
         // We expect at least one migration, but the exact behavior depends on PHP's class loading
         $this->assertGreaterThanOrEqual(1, count($result));
     }
@@ -250,15 +250,15 @@ class MigrationLocatorIntegrationTest extends TestCase
      * Create a test migration file with the given parameters
      */
     private function createTestMigrationFile(
-        string $filename, 
-        string $version, 
-        string $description, 
+        string $filename,
+        string $version,
+        string $description,
         array $sql = []
     ): void {
         $className = $this->getClassNameFromFilename($filename);
         $upSql = $sql['up'] ?? '-- Migration up SQL';
         $downSql = $sql['down'] ?? '-- Migration down SQL';
-        
+
         $content = "<?php 
             namespace Minisite\Infrastructure\Versioning\Migrations;
             use Minisite\Infrastructure\Versioning\Contracts\Migration;
@@ -278,7 +278,7 @@ class MigrationLocatorIntegrationTest extends TestCase
                 }
             }
         ";
-        
+
         $this->createFile($filename, $content);
     }
 
@@ -309,7 +309,7 @@ class MigrationLocatorIntegrationTest extends TestCase
         if (!is_dir($dir)) {
             return;
         }
-        
+
         $files = array_diff(scandir($dir), ['.', '..']);
         foreach ($files as $file) {
             $path = $dir . '/' . $file;
