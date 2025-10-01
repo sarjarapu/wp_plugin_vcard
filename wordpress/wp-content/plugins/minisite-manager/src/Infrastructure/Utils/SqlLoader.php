@@ -11,7 +11,8 @@ class SqlLoader
      *
      * @param \wpdb|object $wpdb WordPress database instance or object with prefix and get_charset_collate method
      * @param string       $sqlFilePath Path to the SQL file relative to plugin root
-     * @param array        $variables Variables to replace in the SQL (e.g., ['prefix' => 'wp_', 'charset' => 'utf8mb4_unicode_ci'])
+     * @param array        $variables Variables to replace in the SQL
+     *                               (e.g., ['prefix' => 'wp_', 'charset' => 'utf8mb4_unicode_ci'])
      * @return void
      * @throws \InvalidArgumentException If SQL file doesn't exist
      * @throws \RuntimeException If SQL file cannot be read

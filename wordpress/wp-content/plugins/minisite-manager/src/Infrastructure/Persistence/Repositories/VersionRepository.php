@@ -297,7 +297,8 @@ final class VersionRepository implements VersionRepositoryInterface
                 // POINT is stored as POINT(lng, lat), so ST_X() returns lng and ST_Y() returns lat
                 $pointResult = $this->db->get_row(
                     $this->db->prepare(
-                        "SELECT ST_X(location_point) as lng, ST_Y(location_point) as lat FROM {$this->table()} WHERE id = %d",
+                        "SELECT ST_X(location_point) as lng, ST_Y(location_point) as lat " .
+                        "FROM {$this->table()} WHERE id = %d",
                         $row['id']
                     ),
                     ARRAY_A

@@ -467,7 +467,8 @@ final class MinisiteRepository implements MinisiteRepositoryInterface
             // POINT is stored as POINT(lng, lat), so ST_X() returns lng and ST_Y() returns lat
             $pointResult = $this->db->get_row(
                 $this->db->prepare(
-                    "SELECT ST_X(location_point) as lng, ST_Y(location_point) as lat FROM {$this->table()} WHERE id = %s",
+                    "SELECT ST_X(location_point) as lng, ST_Y(location_point) as lat " .
+                    "FROM {$this->table()} WHERE id = %s",
                     $r['id']
                 ),
                 ARRAY_A

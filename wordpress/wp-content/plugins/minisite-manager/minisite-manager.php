@@ -2,7 +2,8 @@
 
 /**
  * Plugin Name: Minisite Manager
- * Description: Internal plugin powering business mini-sites (profiles) with revisions, templates, and optional Timber/Twig rendering.
+ * Description: Internal plugin powering business mini-sites (profiles) with revisions, templates,
+ *              and optional Timber/Twig rendering.
  * Version:     1.0.0
  * Author:      Shyam Arjarapu
  * Company:     Nimble AI Services LLC
@@ -266,11 +267,17 @@ add_filter('map_meta_cap', function (array $caps, string $cap, int $user_id, arr
                 return [MINISITE_CAP_EDIT_ANY];
             }
           // Assigned editors
-            if ($objectId && minisite_user_is_assigned_to_profile($user_id, $objectId) && user_can($user_id, MINISITE_CAP_EDIT_ASSIGNED)) {
+            if (
+                $objectId && minisite_user_is_assigned_to_profile($user_id, $objectId) &&
+                user_can($user_id, MINISITE_CAP_EDIT_ASSIGNED)
+            ) {
                 return [MINISITE_CAP_EDIT_ASSIGNED];
             }
           // Owners
-            if ($objectId && minisite_user_owns_profile($user_id, $objectId) && user_can($user_id, MINISITE_CAP_EDIT_OWN)) {
+            if (
+                $objectId && minisite_user_owns_profile($user_id, $objectId) &&
+                user_can($user_id, MINISITE_CAP_EDIT_OWN)
+            ) {
                 return [MINISITE_CAP_EDIT_OWN];
             }
             return ['do_not_allow'];
@@ -279,7 +286,10 @@ add_filter('map_meta_cap', function (array $caps, string $cap, int $user_id, arr
             if (user_can($user_id, MINISITE_CAP_DELETE_ANY)) {
                 return [MINISITE_CAP_DELETE_ANY];
             }
-            if ($objectId && minisite_user_owns_profile($user_id, $objectId) && user_can($user_id, MINISITE_CAP_DELETE_OWN)) {
+            if (
+                $objectId && minisite_user_owns_profile($user_id, $objectId) &&
+                user_can($user_id, MINISITE_CAP_DELETE_OWN)
+            ) {
                 return [MINISITE_CAP_DELETE_OWN];
             }
             return ['do_not_allow'];
@@ -295,7 +305,10 @@ add_filter('map_meta_cap', function (array $caps, string $cap, int $user_id, arr
             if (user_can($user_id, MINISITE_CAP_READ_PRIVATE)) {
                 return [MINISITE_CAP_READ_PRIVATE];
             }
-            if ($objectId && (minisite_user_owns_profile($user_id, $objectId) || minisite_user_is_assigned_to_profile($user_id, $objectId))) {
+            if (
+                $objectId && (minisite_user_owns_profile($user_id, $objectId) ||
+                minisite_user_is_assigned_to_profile($user_id, $objectId))
+            ) {
                 return ['exist'];
             }
             return ['do_not_allow'];
@@ -376,7 +389,8 @@ add_action('init', function () {
    * You’ll implement RewriteRegistrar to:
    * - add_rewrite_tag('%minisite_biz%','([^&]+)')
    * - add_rewrite_tag('%minisite_loc%','([^&]+)')
-   * - add_rewrite_rule('^b/([^/]+)/([^/]+)/?$', 'index.php?minisite=1&minisite_biz=$matches[1]&minisite_loc=$matches[2]', 'top');
+   * - add_rewrite_rule('^b/([^/]+)/([^/]+)/?$',
+   *   'index.php?minisite=1&minisite_biz=$matches[1]&minisite_loc=$matches[2]', 'top');
    */
     if ($rrClass = minisite_class(\Minisite\Application\Http\RewriteRegistrar::class)) {
         $rr = new $rrClass();
@@ -391,7 +405,11 @@ add_action('init', function () {
         add_rewrite_tag('%minisite%', '([0-1])');
         add_rewrite_tag('%minisite_biz%', '([^&]+)');
         add_rewrite_tag('%minisite_loc%', '([^&]+)');
-        add_rewrite_rule('^b/([^/]+)/([^/]+)/?$', 'index.php?minisite=1&minisite_biz=$matches[1]&minisite_loc=$matches[2]', 'top');
+        add_rewrite_rule(
+            '^b/([^/]+)/([^/]+)/?$',
+            'index.php?minisite=1&minisite_biz=$matches[1]&minisite_loc=$matches[2]',
+            'top'
+        );
     }
   // One-time flush after activation to avoid manual Permalinks save
     if (get_option('minisite_flush_rewrites')) {
@@ -453,7 +471,11 @@ add_action('template_redirect', function () {
                     break;
                 case 'sites':
                   // Delegate to SitesController
-                    if ($sitesCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\SitesController::class)) {
+                    if (
+                        $sitesCtrlClass = minisite_class(
+                        \Minisite\Application\Controllers\Front\SitesController::class
+                        )
+                    ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
                         $sitesCtrl->handleList();
                         break;
@@ -461,18 +483,23 @@ add_action('template_redirect', function () {
                   // Fallback if SitesController missing
                     status_header(503);
                     nocache_headers();
-                    echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Sites listing unavailable</h1>';
+                    echo '<!doctype html><meta charset="utf-8"><title>Account</title>' .
+                         '<h1>Sites listing unavailable</h1>';
                     exit;
                 case 'new':
                   // Delegate to NewMinisiteController
-                    if ($newMinisiteCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\NewMinisiteController::class)) {
+                    if (
+                        $newMinisiteCtrlClass = minisite_class(
+                        \Minisite\Application\Controllers\Front\NewMinisiteController::class
+                        )
+                    ) {
                         global $wpdb;
                         $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
                         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
                         $newMinisiteCtrl = new $newMinisiteCtrlClass($profileRepo, $versionRepo);
 
                       // Handle form submission
-                        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_nonce'])) {
+                        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_nonce'])) {
                               $newMinisiteCtrl->handleCreateSimple();
                         } else {
                             $newMinisiteCtrl->handleNew();
@@ -482,17 +509,25 @@ add_action('template_redirect', function () {
                   // Fallback if NewMinisiteController missing
                     status_header(503);
                     nocache_headers();
-                    echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>New minisite creation unavailable</h1>';
+                    echo '<!doctype html><meta charset="utf-8"><title>Account</title>' .
+                         '<h1>New minisite creation unavailable</h1>';
                     exit;
                 case 'publish':
                   // Handle publish page
                     if (class_exists('Timber\\Timber')) {
                         $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
                         $componentsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
-                        \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? [], [$viewsBase, $componentsBase])));
+                        \Timber\Timber::$locations = array_values(
+                            array_unique(
+                                array_merge(
+                                    \Timber\Timber::$locations ?? [],
+                                    [$viewsBase, $componentsBase]
+                                )
+                            )
+                        );
 
                       // Get minisite ID from URL parameter or query var
-                        $minisiteId = $_GET['minisite_id'] ?? get_query_var('minisite_site_id') ?? '';
+                        $minisiteId = sanitize_text_field(wp_unslash($_GET['minisite_id'] ?? get_query_var('minisite_site_id') ?? ''));
 
                         if (empty($minisiteId)) {
                               wp_redirect(home_url('/account/sites'));
@@ -510,7 +545,7 @@ add_action('template_redirect', function () {
                                 exit;
                             }
                         } else {
-                            wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+                            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
                             exit;
                         }
 
@@ -522,12 +557,17 @@ add_action('template_redirect', function () {
                     } else {
                         status_header(503);
                         nocache_headers();
-                        echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Publish page unavailable</h1>';
+                        echo '<!doctype html><meta charset="utf-8"><title>Account</title>' .
+                             '<h1>Publish page unavailable</h1>';
                     }
                     exit;
                 case 'edit':
                   // Delegate to SitesController for editing
-                    if ($sitesCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\SitesController::class)) {
+                    if (
+                        $sitesCtrlClass = minisite_class(
+                        \Minisite\Application\Controllers\Front\SitesController::class
+                        )
+                    ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
                         $sitesCtrl->handleEdit();
                         break;
@@ -535,11 +575,16 @@ add_action('template_redirect', function () {
                   // Fallback if SitesController missing
                     status_header(503);
                     nocache_headers();
-                    echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Edit unavailable</h1>';
+                    echo '<!doctype html><meta charset="utf-8"><title>Account</title>' .
+                         '<h1>Edit unavailable</h1>';
                     exit;
                 case 'preview':
                   // Delegate to SitesController for previewing
-                    if ($sitesCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\SitesController::class)) {
+                    if (
+                        $sitesCtrlClass = minisite_class(
+                        \Minisite\Application\Controllers\Front\SitesController::class
+                        )
+                    ) {
                         $sitesCtrl = new $sitesCtrlClass($renderer);
                         $sitesCtrl->handlePreview();
                         break;
@@ -547,11 +592,16 @@ add_action('template_redirect', function () {
                   // Fallback if SitesController missing
                     status_header(503);
                     nocache_headers();
-                    echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Preview unavailable</h1>';
+                    echo '<!doctype html><meta charset="utf-8"><title>Account</title>' .
+                         '<h1>Preview unavailable</h1>';
                     exit;
                 case 'versions':
                   // Delegate to VersionController for version management
-                    if ($versionCtrlClass = minisite_class(\Minisite\Application\Controllers\Front\VersionController::class)) {
+                    if (
+                        $versionCtrlClass = minisite_class(
+                        \Minisite\Application\Controllers\Front\VersionController::class
+                        )
+                    ) {
                         global $wpdb;
                         $minisiteRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
                         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
@@ -562,7 +612,8 @@ add_action('template_redirect', function () {
                   // Fallback if VersionController missing
                     status_header(503);
                     nocache_headers();
-                    echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Version management unavailable</h1>';
+                    echo '<!doctype html><meta charset="utf-8"><title>Account</title>' .
+                         '<h1>Version management unavailable</h1>';
                     exit;
                 case 'logout':
                     $authCtrl->handleLogout();
@@ -580,7 +631,8 @@ add_action('template_redirect', function () {
       // Fallback if AuthController not available
         status_header(503);
         nocache_headers();
-        echo '<!doctype html><meta charset="utf-8"><title>Account</title><h1>Account system not available</h1><p>AuthController not found.</p>';
+        echo '<!doctype html><meta charset="utf-8"><title>Account</title>' .
+             '<h1>Account system not available</h1><p>AuthController not found.</p>';
         exit;
     }
 
@@ -605,7 +657,9 @@ add_action('template_redirect', function () {
       // Temporary fallback: simple 503 until controllers are added
         status_header(503);
         nocache_headers();
-        echo '<!doctype html><meta charset="utf-8"><title>Minisite</title><h1>Minisite route detected</h1><p>Scaffold the controllers/renderers to complete rendering.</p>';
+        echo '<!doctype html><meta charset="utf-8"><title>Minisite</title>' .
+             '<h1>Minisite route detected</h1>' .
+             '<p>Scaffold the controllers/renderers to complete rendering.</p>';
         exit;
     }
 });
@@ -656,7 +710,7 @@ add_action('admin_init', function () {
     }
 
   // Redirect non-privileged users to front-end login
-    wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+    wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
     exit;
 });
 
@@ -702,13 +756,13 @@ add_action('wp_ajax_publish_version', function () {
         return;
     }
 
-    if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
+    if (!wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
         wp_send_json_error('Security check failed', 403);
         return;
     }
 
-    $siteId = sanitize_text_field($_POST['site_id'] ?? '');
-    $versionId = (int) ($_POST['version_id'] ?? 0);
+    $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
+    $versionId = (int) (wp_unslash($_POST['version_id'] ?? 0));
 
     if (!$siteId || !$versionId) {
         wp_send_json_error('Invalid parameters', 400);
@@ -761,13 +815,13 @@ add_action('wp_ajax_rollback_version', function () {
         return;
     }
 
-    if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
+    if (!wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
         wp_send_json_error('Security check failed', 403);
         return;
     }
 
-    $siteId = (int) ($_POST['site_id'] ?? 0);
-    $sourceVersionId = (int) ($_POST['source_version_id'] ?? 0);
+    $siteId = (int) (wp_unslash($_POST['site_id'] ?? 0));
+    $sourceVersionId = (int) (wp_unslash($_POST['source_version_id'] ?? 0));
 
     if (!$siteId || !$sourceVersionId) {
         wp_send_json_error('Invalid parameters', 400);
@@ -836,12 +890,12 @@ add_action('wp_ajax_add_bookmark', function () {
         return;
     }
 
-    if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_bookmark')) {
+    if (!wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_bookmark')) {
         wp_send_json_error('Security check failed', 403);
         return;
     }
 
-    $minisiteId = $_POST['profile_id'] ?? '';
+    $minisiteId = wp_unslash($_POST['profile_id'] ?? '');
     $userId = get_current_user_id();
 
     if (!$minisiteId) {
@@ -904,12 +958,12 @@ add_action('wp_ajax_remove_bookmark', function () {
         return;
     }
 
-    if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_bookmark')) {
+    if (!wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_bookmark')) {
         wp_send_json_error('Security check failed', 403);
         return;
     }
 
-    $minisiteId = $_POST['profile_id'] ?? '';
+    $minisiteId = wp_unslash($_POST['profile_id'] ?? '');
     $userId = get_current_user_id();
 
     if (!$minisiteId) {
@@ -957,7 +1011,7 @@ add_action('wp_ajax_create_minisite', function () {
         return;
     }
 
-    if (!wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_new')) {
+    if (!wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_new')) {
         wp_send_json_error('Security check failed', 403);
         return;
     }
@@ -966,7 +1020,10 @@ add_action('wp_ajax_create_minisite', function () {
         global $wpdb;
         $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
         $newMinisiteCtrl->handleCreate();
     } catch (\Exception $e) {
@@ -987,7 +1044,10 @@ add_action('wp_ajax_check_slug_availability', function () {
         global $wpdb;
         $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
         $newMinisiteCtrl->handleCheckSlugAvailability();
     } catch (\Exception $e) {
@@ -1008,7 +1068,10 @@ add_action('wp_ajax_reserve_slug', function () {
         global $wpdb;
         $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
         $newMinisiteCtrl->handleReserveSlug();
     } catch (\Exception $e) {
@@ -1029,7 +1092,10 @@ add_action('wp_ajax_publish_minisite', function () {
         global $wpdb;
         $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
         $newMinisiteCtrl->handlePublish();
     } catch (\Exception $e) {
@@ -1086,7 +1152,10 @@ add_action('wp_ajax_create_minisite_order', function () {
         global $wpdb;
         $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
         $newMinisiteCtrl->handleCreateWooCommerceOrder();
     } catch (\Exception $e) {
@@ -1105,7 +1174,10 @@ add_action('wp_ajax_activate_minisite_subscription', function () {
         global $wpdb;
         $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
         $newMinisiteCtrl->handleActivateSubscription();
     } catch (\Exception $e) {
@@ -1147,7 +1219,10 @@ add_action('woocommerce_order_status_completed', function ($order_id) {
         global $wpdb;
         $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+        $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
         $newMinisiteCtrl->activateMinisiteSubscription($order_id);
     } catch (\Exception $e) {

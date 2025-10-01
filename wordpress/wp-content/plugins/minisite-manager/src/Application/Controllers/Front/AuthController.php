@@ -13,15 +13,15 @@ final class AuthController
     public function handleLogin(): void
     {
         $error_msg   = '';
-        $redirect_to = $_GET['redirect_to'] ?? home_url('/account/dashboard');
+        $redirect_to = sanitize_text_field(wp_unslash($_GET['redirect_to'] ?? home_url('/account/dashboard')));
 
         // Handle login form submission
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_login_nonce'])) {
-            if (! wp_verify_nonce($_POST['minisite_login_nonce'], 'minisite_login')) {
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_login_nonce'])) {
+            if (! wp_verify_nonce(wp_unslash($_POST['minisite_login_nonce']), 'minisite_login')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
-                $user_login = sanitize_text_field($_POST['user_login'] ?? '');
-                $user_pass  = $_POST['user_pass'] ?? '';
+                $user_login = sanitize_text_field(wp_unslash($_POST['user_login'] ?? ''));
+                $user_pass  = wp_unslash($_POST['user_pass'] ?? '');
                 $remember   = isset($_POST['remember']);
 
                 if (empty($user_login) || empty($user_pass)) {
@@ -38,7 +38,7 @@ final class AuthController
                         $error_msg = $user->get_error_message();
                     } else {
                         // Redirect to dashboard or intended page
-                        $redirect_to = sanitize_url($_POST['redirect_to'] ?? home_url('/account/dashboard'));
+                        $redirect_to = sanitize_url(wp_unslash($_POST['redirect_to'] ?? home_url('/account/dashboard')));
                         wp_redirect($redirect_to);
                         exit;
                     }
@@ -62,14 +62,14 @@ final class AuthController
         $success_msg = '';
 
         // Handle registration form submission
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_register_nonce'])) {
-            if (! wp_verify_nonce($_POST['minisite_register_nonce'], 'minisite_register')) {
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_register_nonce'])) {
+            if (! wp_verify_nonce(wp_unslash($_POST['minisite_register_nonce']), 'minisite_register')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
-                $user_login        = sanitize_text_field($_POST['user_login'] ?? '');
-                $user_email        = sanitize_email($_POST['user_email'] ?? '');
-                $user_pass         = $_POST['user_pass'] ?? '';
-                $user_pass_confirm = $_POST['user_pass_confirm'] ?? '';
+                $user_login        = sanitize_text_field(wp_unslash($_POST['user_login'] ?? ''));
+                $user_email        = sanitize_email(wp_unslash($_POST['user_email'] ?? ''));
+                $user_pass         = wp_unslash($_POST['user_pass'] ?? '');
+                $user_pass_confirm = wp_unslash($_POST['user_pass_confirm'] ?? '');
 
                 if (empty($user_login) || empty($user_email) || empty($user_pass)) {
                     $error_msg = 'Please fill in all required fields.';
@@ -106,7 +106,7 @@ final class AuthController
     {
         // Check if user is logged in
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
             exit;
         }
 
@@ -135,11 +135,11 @@ final class AuthController
         $success_msg = '';
 
         // Handle forgot password form submission
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_forgot_nonce'])) {
-            if (! wp_verify_nonce($_POST['minisite_forgot_nonce'], 'minisite_forgot')) {
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_forgot_nonce'])) {
+            if (! wp_verify_nonce(wp_unslash($_POST['minisite_forgot_nonce']), 'minisite_forgot')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
-                $user_login = sanitize_text_field($_POST['user_login'] ?? '');
+                $user_login = sanitize_text_field(wp_unslash($_POST['user_login'] ?? ''));
 
                 if (empty($user_login)) {
                     $error_msg = 'Please enter your username or email address.';
@@ -175,7 +175,14 @@ final class AuthController
         // Fallback: render using Timber directly
         if (class_exists('Timber\\Timber')) {
             $base                      = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
-            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? array(), array( $base ))));
+            \Timber\Timber::$locations = array_values(
+                array_unique(
+                    array_merge(
+                        \Timber\Timber::$locations ?? array(),
+                        array( $base )
+                    )
+                )
+            );
 
             \Timber\Timber::render($template, $context);
             return;

@@ -36,12 +36,12 @@ final class SubscriptionController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'activate_minisite_subscription_admin')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'activate_minisite_subscription_admin')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -56,7 +56,10 @@ final class SubscriptionController
             global $wpdb;
             $profileRepo     = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
             $versionRepo     = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
-            $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController($profileRepo, $versionRepo);
+            $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
+                $profileRepo,
+                $versionRepo
+            );
 
             $newMinisiteCtrl->activateMinisiteSubscription($orderId);
 
@@ -220,12 +223,16 @@ final class SubscriptionController
                                         <button 
                                             class="button button-primary activate-subscription-btn" 
                                             data-order-id="<?php echo esc_attr($order['order_id']); ?>"
-                                            data-nonce="<?php echo esc_attr(wp_create_nonce('activate_minisite_subscription_admin')); ?>"
+                                            data-nonce="<?php echo esc_attr(
+                                                wp_create_nonce('activate_minisite_subscription_admin')
+                                            ); ?>"
                                         >
                                             Activate
                                         </button>
                                         <a 
-                                            href="<?php echo esc_url(admin_url('post.php?post=' . $order['order_id'] . '&action=edit')); ?>" 
+                                            href="<?php echo esc_url(
+                                                admin_url('post.php?post=' . $order['order_id'] . '&action=edit')
+                                            ); ?>" 
                                             class="button"
                                             target="_blank"
                                         >
@@ -281,7 +288,9 @@ final class SubscriptionController
                                     </td>
                                     <td>
                                         <?php if ($order['subscription']) : ?>
-                                            <span class="status-<?php echo esc_attr($order['subscription']->status); ?>">
+                                            <span class="status-<?php echo esc_attr(
+                                                $order['subscription']->status
+                                            ); ?>">
                                                 <?php echo esc_html(ucfirst($order['subscription']->status)); ?>
                                             </span>
                                         <?php else : ?>
@@ -290,7 +299,9 @@ final class SubscriptionController
                                     </td>
                                     <td>
                                         <a 
-                                            href="<?php echo esc_url(admin_url('post.php?post=' . $order['order_id'] . '&action=edit')); ?>" 
+                                            href="<?php echo esc_url(
+                                                admin_url('post.php?post=' . $order['order_id'] . '&action=edit')
+                                            ); ?>" 
                                             class="button"
                                             target="_blank"
                                         >
@@ -316,12 +327,14 @@ final class SubscriptionController
         <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Handle subscription activation
-            document.querySelectorAll('.activate-subscription-btn').forEach(button => {
+            document.querySelectorAll('.activate-subscription-btn').forEach(
+                button => {
                 button.addEventListener('click', function() {
                     const orderId = this.dataset.orderId;
                     const nonce = this.dataset.nonce;
                     
-                    if (!confirm('Are you sure you want to activate this subscription? This will make the minisite publicly accessible.')) {
+                    if (!confirm('Are you sure you want to activate this subscription? ' +
+                                 'This will make the minisite publicly accessible.')) {
                         return;
                     }
                     

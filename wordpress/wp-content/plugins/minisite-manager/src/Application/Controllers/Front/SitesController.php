@@ -14,7 +14,7 @@ final class SitesController
     public function handleList(): void
     {
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
             exit;
         }
 
@@ -29,7 +29,9 @@ final class SitesController
         $items = array_map(
             function ($p) {
                 // Derive presentational fields for v1
-                $route      = home_url('/b/' . rawurlencode($p->slugs->business) . '/' . rawurlencode($p->slugs->location));
+                $route      = home_url(
+                    '/b/' . rawurlencode($p->slugs->business) . '/' . rawurlencode($p->slugs->location)
+                );
                 $statusChip = $p->status === 'published' ? 'Published' : 'Draft';
                 return array(
                     'id'           => $p->id,
@@ -40,7 +42,11 @@ final class SitesController
                         'location' => $p->slugs->location,
                     ),
                     'route'        => $route,
-                    'location'     => trim($p->city . ( isset($p->region) && $p->region ? ', ' . $p->region : '' ) . ', ' . $p->countryCode, ', '),
+                    'location'     => trim(
+                        $p->city . ( isset($p->region) && $p->region ? ', ' . $p->region : '' ) .
+                        ', ' . $p->countryCode,
+                        ', '
+                    ),
                     'status'       => $p->status,
                     'status_chip'  => $statusChip,
                     'updated_at'   => $p->updatedAt ? $p->updatedAt->format('Y-m-d H:i') : null,
@@ -56,7 +62,14 @@ final class SitesController
         // Render via Timber directly for auth pages, keeping consistency with other account views
         if (class_exists('Timber\\Timber')) {
             $base                      = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
-            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? array(), array( $base ))));
+            \Timber\Timber::$locations = array_values(
+                array_unique(
+                    array_merge(
+                        \Timber\Timber::$locations ?? array(),
+                        array( $base )
+                    )
+                )
+            );
 
             \Timber\Timber::render(
                 'account-sites.twig',
@@ -73,14 +86,16 @@ final class SitesController
         header('Content-Type: text/html; charset=utf-8');
         echo '<!doctype html><meta charset="utf-8"><h1>My Minisites</h1>';
         foreach ($items as $it) {
-            echo '<div><a href="' . htmlspecialchars($it['route']) . '">' . htmlspecialchars($it['title']) . '</a> — ' . htmlspecialchars($it['status_chip']) . '</div>';
+            echo '<div><a href="' . htmlspecialchars($it['route']) . '">' .
+                 htmlspecialchars($it['title']) . '</a> — ' .
+                 htmlspecialchars($it['status_chip']) . '</div>';
         }
     }
 
     public function handleEdit(): void
     {
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
             exit;
         }
 
@@ -135,8 +150,8 @@ final class SitesController
         }
 
         // Handle form submission
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_edit_nonce'])) {
-            if (! wp_verify_nonce($_POST['minisite_edit_nonce'], 'minisite_edit')) {
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_edit_nonce'])) {
+            if (! wp_verify_nonce(wp_unslash($_POST['minisite_edit_nonce']), 'minisite_edit')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 try {
@@ -168,8 +183,8 @@ final class SitesController
                             minisiteId: $siteId,
                             versionNumber: $nextVersion,
                             status: 'draft',
-                            label: sanitize_text_field($_POST['version_label'] ?? "Version {$nextVersion}"),
-                            comment: sanitize_textarea_field($_POST['version_comment'] ?? ''),
+                            label: sanitize_text_field(wp_unslash($_POST['version_label'] ?? "Version {$nextVersion}")),
+                            comment: sanitize_textarea_field(wp_unslash($_POST['version_comment'] ?? '')),
                             createdBy: (int) $currentUser->ID,
                             createdAt: null,
                             publishedAt: null,
@@ -177,20 +192,20 @@ final class SitesController
                             siteJson: $siteJson,
                             // Profile fields from form data
                             slugs: $slugs,
-                            title: sanitize_text_field($_POST['seo_title'] ?? $minisite->title),
-                            name: sanitize_text_field($_POST['business_name'] ?? $minisite->name),
-                            city: sanitize_text_field($_POST['business_city'] ?? $minisite->city),
-                            region: sanitize_text_field($_POST['business_region'] ?? $minisite->region),
-                            countryCode: sanitize_text_field($_POST['business_country'] ?? $minisite->countryCode),
-                            postalCode: sanitize_text_field($_POST['business_postal'] ?? $minisite->postalCode),
+                            title: sanitize_text_field(wp_unslash($_POST['seo_title'] ?? $minisite->title)),
+                            name: sanitize_text_field(wp_unslash($_POST['business_name'] ?? $minisite->name)),
+                            city: sanitize_text_field(wp_unslash($_POST['business_city'] ?? $minisite->city)),
+                            region: sanitize_text_field(wp_unslash($_POST['business_region'] ?? $minisite->region)),
+                            countryCode: sanitize_text_field(wp_unslash($_POST['business_country'] ?? $minisite->countryCode)),
+                            postalCode: sanitize_text_field(wp_unslash($_POST['business_postal'] ?? $minisite->postalCode)),
                             geo: $geo,
-                            siteTemplate: sanitize_text_field($_POST['site_template'] ?? $minisite->siteTemplate),
-                            palette: sanitize_text_field($_POST['brand_palette'] ?? $minisite->palette),
-                            industry: sanitize_text_field($_POST['brand_industry'] ?? $minisite->industry),
-                            defaultLocale: sanitize_text_field($_POST['default_locale'] ?? $minisite->defaultLocale),
+                            siteTemplate: sanitize_text_field(wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)),
+                            palette: sanitize_text_field(wp_unslash($_POST['brand_palette'] ?? $minisite->palette)),
+                            industry: sanitize_text_field(wp_unslash($_POST['brand_industry'] ?? $minisite->industry)),
+                            defaultLocale: sanitize_text_field(wp_unslash($_POST['default_locale'] ?? $minisite->defaultLocale)),
                             schemaVersion: $minisite->schemaVersion,
                             siteVersion: $minisite->siteVersion,
-                            searchTerms: sanitize_text_field($_POST['search_terms'] ?? $minisite->searchTerms)
+                            searchTerms: sanitize_text_field(wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms))
                         );
 
                         $savedVersion = $versionRepo->save($version);
@@ -203,23 +218,27 @@ final class SitesController
                         }
 
                         // Update profile title if provided
-                        $newTitle = sanitize_text_field($_POST['seo_title'] ?? '');
+                        $newTitle = sanitize_text_field(wp_unslash($_POST['seo_title'] ?? ''));
                         if (! empty($newTitle) && $newTitle !== $minisite->title) {
                             $minisiteRepo->updateTitle($siteId, $newTitle);
                         }
 
                         // Update other business info fields in main table
                         $businessInfoFields = array(
-                            'name'           => sanitize_text_field($_POST['business_name'] ?? $minisite->name),
-                            'city'           => sanitize_text_field($_POST['business_city'] ?? $minisite->city),
-                            'region'         => sanitize_text_field($_POST['business_region'] ?? $minisite->region),
-                            'country_code'   => sanitize_text_field($_POST['business_country'] ?? $minisite->countryCode),
-                            'postal_code'    => sanitize_text_field($_POST['business_postal'] ?? $minisite->postalCode),
-                            'site_template'  => sanitize_text_field($_POST['site_template'] ?? $minisite->siteTemplate),
-                            'palette'        => sanitize_text_field($_POST['brand_palette'] ?? $minisite->palette),
-                            'industry'       => sanitize_text_field($_POST['brand_industry'] ?? $minisite->industry),
-                            'default_locale' => sanitize_text_field($_POST['default_locale'] ?? $minisite->defaultLocale),
-                            'search_terms'   => sanitize_text_field($_POST['search_terms'] ?? $minisite->searchTerms),
+                            'name'           => sanitize_text_field(wp_unslash($_POST['business_name'] ?? $minisite->name)),
+                            'city'           => sanitize_text_field(wp_unslash($_POST['business_city'] ?? $minisite->city)),
+                            'region'         => sanitize_text_field(wp_unslash($_POST['business_region'] ?? $minisite->region)),
+                            'country_code'   => sanitize_text_field(
+                                wp_unslash($_POST['business_country'] ?? $minisite->countryCode)
+                            ),
+                            'postal_code'    => sanitize_text_field(wp_unslash($_POST['business_postal'] ?? $minisite->postalCode)),
+                            'site_template'  => sanitize_text_field(wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)),
+                            'palette'        => sanitize_text_field(wp_unslash($_POST['brand_palette'] ?? $minisite->palette)),
+                            'industry'       => sanitize_text_field(wp_unslash($_POST['brand_industry'] ?? $minisite->industry)),
+                            'default_locale' => sanitize_text_field(
+                                wp_unslash($_POST['default_locale'] ?? $minisite->defaultLocale)
+                            ),
+                            'search_terms'   => sanitize_text_field(wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms)),
                         );
 
                         $minisiteRepo->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
@@ -243,7 +262,14 @@ final class SitesController
         if (class_exists('Timber\\Timber')) {
             $viewsBase                 = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
             $componentsBase            = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
-            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? array(), array( $viewsBase, $componentsBase ))));
+            \Timber\Timber::$locations = array_values(
+                array_unique(
+                    array_merge(
+                        \Timber\Timber::$locations ?? array(),
+                        array( $viewsBase, $componentsBase )
+                    )
+                )
+            );
 
             // Use editing version data (should always be available now)
             $siteJson = $editingVersion ? $editingVersion->siteJson : $minisite->siteJson;
@@ -279,7 +305,7 @@ final class SitesController
     public function handlePreview(): void
     {
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
             exit;
         }
 
@@ -336,7 +362,14 @@ final class SitesController
         // Fallback: render using existing profile template
         if (class_exists('Timber\\Timber')) {
             $base                      = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/v2025';
-            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? array(), array( $base ))));
+            \Timber\Timber::$locations = array_values(
+                array_unique(
+                    array_merge(
+                        \Timber\Timber::$locations ?? array(),
+                        array( $base )
+                    )
+                )
+            );
 
             \Timber\Timber::render(
                 'profile.twig',
@@ -570,17 +603,17 @@ final class SitesController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'export_minisite')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'export_minisite')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $minisiteId = sanitize_text_field($_POST['minisite_id'] ?? '');
+        $minisiteId = sanitize_text_field(wp_unslash($_POST['minisite_id'] ?? ''));
         if (empty($minisiteId)) {
             wp_send_json_error('Missing minisite ID', 400);
             return;
@@ -693,17 +726,17 @@ final class SitesController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'import_minisite')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'import_minisite')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $jsonData = $_POST['json_data'] ?? '';
+        $jsonData = wp_unslash($_POST['json_data'] ?? '');
         if (empty($jsonData)) {
             wp_send_json_error('Missing JSON data', 400);
             return;
@@ -759,7 +792,10 @@ final class SitesController
             );
 
             // Validate required fields
-            $requiredFields = array( 'title', 'name', 'city', 'country_code', 'site_template', 'palette', 'industry', 'default_locale', 'search_terms', 'site_json' );
+            $requiredFields = array(
+                'title', 'name', 'city', 'country_code', 'site_template',
+                'palette', 'industry', 'default_locale', 'search_terms', 'site_json'
+            );
             foreach ($requiredFields as $field) {
                 if (! isset($minisiteData[ $field ])) {
                     wp_send_json_error("Missing required field: {$field}", 400);

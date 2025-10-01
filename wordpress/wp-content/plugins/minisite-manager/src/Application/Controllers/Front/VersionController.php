@@ -19,7 +19,7 @@ class VersionController
     public function handleListVersions(): void
     {
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode($_SERVER['REQUEST_URI'])));
+            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
             exit;
         }
 
@@ -48,7 +48,14 @@ class VersionController
         // Render version history page
         if (class_exists('Timber\\Timber')) {
             $base                      = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
-            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? array(), array( $base ))));
+            \Timber\Timber::$locations = array_values(
+                array_unique(
+                    array_merge(
+                        \Timber\Timber::$locations ?? array(),
+                        array( $base )
+                    )
+                )
+            );
 
             \Timber\Timber::render(
                 'account-sites-versions.twig',
@@ -63,7 +70,8 @@ class VersionController
 
         // Fallback
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>Version History: ' . htmlspecialchars($minisite->title) . '</h1>';
+        echo '<!doctype html><meta charset="utf-8"><h1>Version History: ' .
+             htmlspecialchars($minisite->title) . '</h1>';
         echo '<p>Version history not available (Timber required).</p>';
     }
 
@@ -77,17 +85,17 @@ class VersionController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $siteId = $_POST['site_id'] ?? '';
+        $siteId = wp_unslash($_POST['site_id'] ?? '');
         if (! $siteId) {
             wp_send_json_error('Invalid site ID', 400);
             return;
@@ -117,8 +125,8 @@ class VersionController
                 minisiteId: $siteId,
                 versionNumber: $nextVersion,
                 status: 'draft',
-                label: sanitize_text_field($_POST['label'] ?? "Version {$nextVersion}"),
-                comment: sanitize_textarea_field($_POST['version_comment'] ?? ''),
+                label: sanitize_text_field(wp_unslash($_POST['label'] ?? "Version {$nextVersion}")),
+                comment: sanitize_textarea_field(wp_unslash($_POST['version_comment'] ?? '')),
                 createdBy: (int) $currentUser->ID,
                 createdAt: null,
                 publishedAt: null,
@@ -151,18 +159,18 @@ class VersionController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $siteId    = $_POST['site_id'] ?? '';
-        $versionId = (int) ( $_POST['version_id'] ?? 0 );
+        $siteId    = wp_unslash($_POST['site_id'] ?? '');
+        $versionId = (int) ( wp_unslash($_POST['version_id'] ?? 0) );
 
         if (! $siteId || ! $versionId) {
             wp_send_json_error('Invalid parameters', 400);
@@ -218,18 +226,18 @@ class VersionController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_version')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $siteId          = $_POST['site_id'] ?? '';
-        $sourceVersionId = (int) ( $_POST['source_version_id'] ?? 0 );
+        $siteId          = wp_unslash($_POST['site_id'] ?? '');
+        $sourceVersionId = (int) ( wp_unslash($_POST['source_version_id'] ?? 0) );
 
         if (! $siteId || ! $sourceVersionId) {
             wp_send_json_error('Invalid parameters', 400);
@@ -372,7 +380,11 @@ class VersionController
     /**
      * Create a rollback draft from a source version
      */
-    private function createRollbackVersion(string $minisiteId, int $sourceVersionId, int $userId): \Minisite\Domain\Entities\Version
+    private function createRollbackVersion(
+        string $minisiteId,
+        int $sourceVersionId,
+        int $userId
+    ): \Minisite\Domain\Entities\Version
     {
         $sourceVersion = $this->versionRepository->findById($sourceVersionId);
         $nextVersion   = $this->versionRepository->getNextVersionNumber($minisiteId);

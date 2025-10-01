@@ -50,7 +50,14 @@ final class TimberRenderer
     protected function registerTimberLocations(): void
     {
         $base                      = trailingslashit(\MINISITE_PLUGIN_DIR) . 'templates/timber';
-        \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? array(), array( $base ))));
+        \Timber\Timber::$locations = array_values(
+            array_unique(
+                array_merge(
+                    \Timber\Timber::$locations ?? array(),
+                    array( $base )
+                )
+            )
+        );
     }
 
     protected function fetchReviews(string $minisiteId): array

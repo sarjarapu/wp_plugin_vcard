@@ -34,8 +34,8 @@ final class NewMinisiteController
             'page_title'    => 'Create New Minisite',
             'page_subtitle' => 'Start by providing your business and location slugs',
             'form_data'     => $_POST ?? array(),
-            'error_msg'     => $_GET['error'] ?? null,
-            'success_msg'   => $_GET['success'] ?? null,
+            'error_msg'     => sanitize_text_field(wp_unslash($_GET['error'] ?? null)),
+            'success_msg'   => sanitize_text_field(wp_unslash($_GET['success'] ?? null)),
             'user'          => $currentUser,
         );
 
@@ -43,7 +43,14 @@ final class NewMinisiteController
         if (class_exists('Timber\\Timber')) {
             $viewsBase                 = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
             $componentsBase            = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
-            \Timber\Timber::$locations = array_values(array_unique(array_merge(\Timber\Timber::$locations ?? array(), array( $viewsBase, $componentsBase ))));
+            \Timber\Timber::$locations = array_values(
+                array_unique(
+                    array_merge(
+                        \Timber\Timber::$locations ?? array(),
+                        array( $viewsBase, $componentsBase )
+                    )
+                )
+            );
 
             \Timber\Timber::render('account-sites-new-simple.twig', $context);
         }
@@ -59,12 +66,12 @@ final class NewMinisiteController
             exit;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_redirect('/account/sites/new?error=' . urlencode('Method not allowed'));
             exit;
         }
 
-        if (! wp_verify_nonce($_POST['minisite_nonce'] ?? '', 'minisite_create')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['minisite_nonce'] ?? ''), 'minisite_create')) {
             wp_redirect('/account/sites/new?error=' . urlencode('Security check failed'));
             exit;
         }
@@ -163,7 +170,12 @@ final class NewMinisiteController
             $wpdb->query('COMMIT');
 
             // Redirect to edit screen
-            wp_redirect(home_url("/account/sites/{$savedMinisite->id}/edit?success=" . urlencode('Draft created successfully! You can now customize it and publish when ready.')));
+            wp_redirect(
+                home_url(
+                    "/account/sites/{$savedMinisite->id}/edit?success=" .
+                    urlencode('Draft created successfully! You can now customize it and publish when ready.')
+                )
+            );
             exit;
         } catch (\Exception $e) {
             // Rollback on error
@@ -186,12 +198,12 @@ final class NewMinisiteController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'minisite_new')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_new')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -200,8 +212,8 @@ final class NewMinisiteController
 
         try {
             // Generate unique slugs
-            $businessSlug = $this->generateUniqueBusinessSlug($_POST['brand_name'] ?? '');
-            $locationSlug = $this->generateUniqueLocationSlug($_POST['contact_city'] ?? '');
+            $businessSlug = $this->generateUniqueBusinessSlug(wp_unslash($_POST['brand_name'] ?? ''));
+            $locationSlug = $this->generateUniqueLocationSlug(wp_unslash($_POST['contact_city'] ?? ''));
 
             if (! $businessSlug || ! $locationSlug) {
                 wp_send_json_error('Unable to generate unique slugs. Please try different business name or city.', 400);
@@ -226,16 +238,16 @@ final class NewMinisiteController
             $minisite = new Minisite(
                 id: \Minisite\Domain\Services\MinisiteIdGenerator::generate(),
                 slugs: $slugs,
-                title: sanitize_text_field($_POST['seo_title'] ?? ''),
-                name: sanitize_text_field($_POST['brand_name'] ?? ''),
-                city: sanitize_text_field($_POST['contact_city'] ?? ''),
-                region: sanitize_text_field($_POST['contact_region'] ?? ''),
-                countryCode: sanitize_text_field($_POST['contact_country'] ?? ''),
-                postalCode: sanitize_text_field($_POST['contact_postal'] ?? ''),
+                title: sanitize_text_field(wp_unslash($_POST['seo_title'] ?? '')),
+                name: sanitize_text_field(wp_unslash($_POST['brand_name'] ?? '')),
+                city: sanitize_text_field(wp_unslash($_POST['contact_city'] ?? '')),
+                region: sanitize_text_field(wp_unslash($_POST['contact_region'] ?? '')),
+                countryCode: sanitize_text_field(wp_unslash($_POST['contact_country'] ?? '')),
+                postalCode: sanitize_text_field(wp_unslash($_POST['contact_postal'] ?? '')),
                 geo: $geo,
                 siteTemplate: 'v2025',
-                palette: sanitize_text_field($_POST['brand_palette'] ?? 'blue'),
-                industry: sanitize_text_field($_POST['brand_industry'] ?? ''),
+                palette: sanitize_text_field(wp_unslash($_POST['brand_palette'] ?? 'blue')),
+                industry: sanitize_text_field(wp_unslash($_POST['brand_industry'] ?? '')),
                 defaultLocale: 'en-US',
                 schemaVersion: 1,
                 siteVersion: 1,
@@ -457,18 +469,18 @@ final class NewMinisiteController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'check_slug_availability')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'check_slug_availability')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $businessSlug = sanitize_text_field($_POST['business_slug'] ?? '');
-        $locationSlug = sanitize_text_field($_POST['location_slug'] ?? '');
+        $businessSlug = sanitize_text_field(wp_unslash($_POST['business_slug'] ?? ''));
+        $locationSlug = sanitize_text_field(wp_unslash($_POST['location_slug'] ?? ''));
 
         // Validate slug format
         if (! preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
@@ -519,7 +531,8 @@ final class NewMinisiteController
                 wp_send_json_success(
                     array(
                         'available' => false,
-                        'message'   => "This slug combination is currently reserved (expires in {$minutesLeft} minutes)",
+                        'message'   => "This slug combination is currently reserved " .
+                                      "(expires in {$minutesLeft} minutes)",
                     )
                 );
                 return;
@@ -547,18 +560,18 @@ final class NewMinisiteController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'reserve_slug')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'reserve_slug')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $businessSlug = sanitize_text_field($_POST['business_slug'] ?? '');
-        $locationSlug = sanitize_text_field($_POST['location_slug'] ?? '');
+        $businessSlug = sanitize_text_field(wp_unslash($_POST['business_slug'] ?? ''));
+        $locationSlug = sanitize_text_field(wp_unslash($_POST['location_slug'] ?? ''));
 
         // Validate slug format
         if (! preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
@@ -639,7 +652,8 @@ final class NewMinisiteController
                         'reservation_id'     => $userReservation->id,
                         'expires_at'         => $newExpiresAt,
                         'expires_in_seconds' => 300,
-                        'message'            => 'Slug reservation extended for 5 minutes. Complete payment to secure it.',
+                        'message'            => 'Slug reservation extended for 5 minutes. ' .
+                                                'Complete payment to secure it.',
                     )
                 );
                 return;
@@ -697,20 +711,20 @@ final class NewMinisiteController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'publish_minisite')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'publish_minisite')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $minisiteId       = sanitize_text_field($_POST['minisite_id'] ?? '');
-        $businessSlug     = sanitize_text_field($_POST['business_slug'] ?? '');
-        $locationSlug     = sanitize_text_field($_POST['location_slug'] ?? '');
-        $paymentReference = sanitize_text_field($_POST['payment_reference'] ?? '');
+        $minisiteId       = sanitize_text_field(wp_unslash($_POST['minisite_id'] ?? ''));
+        $businessSlug     = sanitize_text_field(wp_unslash($_POST['business_slug'] ?? ''));
+        $locationSlug     = sanitize_text_field(wp_unslash($_POST['location_slug'] ?? ''));
+        $paymentReference = sanitize_text_field(wp_unslash($_POST['payment_reference'] ?? ''));
 
         if (empty($minisiteId) || empty($businessSlug) || empty($paymentReference)) {
             wp_send_json_error('Missing required fields', 400);
@@ -839,20 +853,20 @@ final class NewMinisiteController
             return;
         }
 
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
 
-        if (! wp_verify_nonce($_POST['nonce'] ?? '', 'create_minisite_order')) {
+        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'create_minisite_order')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $minisiteId    = sanitize_text_field($_POST['minisite_id'] ?? '');
-        $businessSlug  = sanitize_text_field($_POST['business_slug'] ?? '');
-        $locationSlug  = sanitize_text_field($_POST['location_slug'] ?? '');
-        $reservationId = sanitize_text_field($_POST['reservation_id'] ?? '');
+        $minisiteId    = sanitize_text_field(wp_unslash($_POST['minisite_id'] ?? ''));
+        $businessSlug  = sanitize_text_field(wp_unslash($_POST['business_slug'] ?? ''));
+        $locationSlug  = sanitize_text_field(wp_unslash($_POST['location_slug'] ?? ''));
+        $reservationId = sanitize_text_field(wp_unslash($_POST['reservation_id'] ?? ''));
 
         if (empty($minisiteId) || empty($businessSlug) || empty($reservationId)) {
             wp_send_json_error('Missing required fields', 400);
@@ -950,7 +964,12 @@ final class NewMinisiteController
     /**
      * Publish minisite directly without payment (for existing subscribers)
      */
-    private function publishMinisiteDirectly(string $minisiteId, string $businessSlug, string $locationSlug, string $reservationId): void
+    private function publishMinisiteDirectly(
+        string $minisiteId,
+        string $businessSlug,
+        string $locationSlug,
+        string $reservationId
+    ): void
     {
         global $wpdb;
 
@@ -993,7 +1012,7 @@ final class NewMinisiteController
      */
     public function handleActivateSubscription(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
             return;
         }
@@ -1155,7 +1174,12 @@ final class NewMinisiteController
     /**
      * Create payment history record
      */
-    private function createPaymentHistoryRecord(string $minisiteId, int $paymentId, string $action, string $paymentReference): void
+    private function createPaymentHistoryRecord(
+        string $minisiteId,
+        int $paymentId,
+        string $action,
+        string $paymentReference
+    ): void
     {
         global $wpdb;
 
