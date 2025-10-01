@@ -234,7 +234,9 @@ final class SitesController
                             ),
                             schemaVersion: $minisite->schemaVersion,
                             siteVersion: $minisite->siteVersion,
-                            searchTerms: sanitize_text_field(wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms))
+                            searchTerms: sanitize_text_field(
+                                wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms)
+                            )
                         );
 
                         $savedVersion = $versionRepo->save($version);
@@ -254,9 +256,15 @@ final class SitesController
 
                         // Update other business info fields in main table
                         $businessInfoFields = array(
-                            'name'           => sanitize_text_field(wp_unslash($_POST['business_name'] ?? $minisite->name)),
-                            'city'           => sanitize_text_field(wp_unslash($_POST['business_city'] ?? $minisite->city)),
-                            'region'         => sanitize_text_field(wp_unslash($_POST['business_region'] ?? $minisite->region)),
+                            'name'           => sanitize_text_field(
+                                wp_unslash($_POST['business_name'] ?? $minisite->name)
+                            ),
+                            'city'           => sanitize_text_field(
+                                wp_unslash($_POST['business_city'] ?? $minisite->city)
+                            ),
+                            'region'         => sanitize_text_field(
+                                wp_unslash($_POST['business_region'] ?? $minisite->region)
+                            ),
                             'country_code'   => sanitize_text_field(
                                 wp_unslash($_POST['business_country'] ?? $minisite->countryCode)
                             ),
