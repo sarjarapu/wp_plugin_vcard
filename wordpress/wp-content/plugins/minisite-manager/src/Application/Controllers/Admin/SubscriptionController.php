@@ -225,14 +225,14 @@ final class SubscriptionController
                                             data-order-id="<?php echo esc_attr($order['order_id']); ?>"
                                             data-nonce="<?php echo esc_attr(
                                                 wp_create_nonce('activate_minisite_subscription_admin')
-                                            ); ?>"
+                                                        ); ?>"
                                         >
                                             Activate
                                         </button>
                                         <a 
                                             href="<?php echo esc_url(
                                                 admin_url('post.php?post=' . $order['order_id'] . '&action=edit')
-                                            ); ?>" 
+                                                  ); ?>" 
                                             class="button"
                                             target="_blank"
                                         >
@@ -290,7 +290,7 @@ final class SubscriptionController
                                         <?php if ($order['subscription']) : ?>
                                             <span class="status-<?php echo esc_attr(
                                                 $order['subscription']->status
-                                            ); ?>">
+                                                                ); ?>">
                                                 <?php echo esc_html(ucfirst($order['subscription']->status)); ?>
                                             </span>
                                         <?php else : ?>
@@ -301,7 +301,7 @@ final class SubscriptionController
                                         <a 
                                             href="<?php echo esc_url(
                                                 admin_url('post.php?post=' . $order['order_id'] . '&action=edit')
-                                            ); ?>" 
+                                                  ); ?>" 
                                             class="button"
                                             target="_blank"
                                         >

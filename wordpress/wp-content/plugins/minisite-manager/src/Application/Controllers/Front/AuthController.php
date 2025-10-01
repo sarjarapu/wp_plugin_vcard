@@ -71,7 +71,10 @@ final class AuthController
             isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &&
             isset($_POST['minisite_register_nonce'])
         ) {
-            if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_register_nonce'])), 'minisite_register')) {
+            if (! wp_verify_nonce(
+                sanitize_text_field(wp_unslash($_POST['minisite_register_nonce'])), 
+                'minisite_register'
+            )) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 $user_login        = sanitize_text_field(wp_unslash($_POST['user_login'] ?? ''));
@@ -149,8 +152,12 @@ final class AuthController
         $success_msg = '';
 
         // Handle forgot password form submission
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_forgot_nonce'])) {
-            if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_forgot_nonce'])), 'minisite_forgot')) {
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && 
+            isset($_POST['minisite_forgot_nonce'])) {
+            if (! wp_verify_nonce(
+                sanitize_text_field(wp_unslash($_POST['minisite_forgot_nonce'])), 
+                'minisite_forgot'
+            )) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 $user_login = sanitize_text_field(wp_unslash($_POST['user_login'] ?? ''));

@@ -499,7 +499,8 @@ add_action('template_redirect', function () {
                         $newMinisiteCtrl = new $newMinisiteCtrlClass($profileRepo, $versionRepo);
 
                       // Handle form submission
-                        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_nonce'])) {
+                        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && 
+                            isset($_POST['minisite_nonce'])) {
                               $newMinisiteCtrl->handleCreateSimple();
                         } else {
                             $newMinisiteCtrl->handleNew();
@@ -527,7 +528,9 @@ add_action('template_redirect', function () {
                         );
 
                       // Get minisite ID from URL parameter or query var
-                        $minisiteId = sanitize_text_field(wp_unslash($_GET['minisite_id'] ?? get_query_var('minisite_site_id') ?? ''));
+                        $minisiteId = sanitize_text_field(
+                            wp_unslash($_GET['minisite_id'] ?? get_query_var('minisite_site_id') ?? '')
+                        );
 
                         if (empty($minisiteId)) {
                               wp_redirect(home_url('/account/sites'));
@@ -545,7 +548,13 @@ add_action('template_redirect', function () {
                                 exit;
                             }
                         } else {
-                            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '')));
+                            $redirect_url = home_url(
+                                '/account/login?redirect_to=' . urlencode(
+                                    isset($_SERVER['REQUEST_URI']) ? 
+                                    sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
+                                )
+                            );
+                            wp_redirect($redirect_url);
                             exit;
                         }
 
@@ -710,7 +719,13 @@ add_action('admin_init', function () {
     }
 
   // Redirect non-privileged users to front-end login
-    wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '')));
+    $redirect_url = home_url(
+        '/account/login?redirect_to=' . urlencode(
+            isset($_SERVER['REQUEST_URI']) ? 
+            sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
+        )
+    );
+    wp_redirect($redirect_url);
     exit;
 });
 
@@ -1042,8 +1057,12 @@ add_action('wp_ajax_publish_version', function () {
 
                         try {
                             global $wpdb;
-                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+                            $profileRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository(
+                                $wpdb
+                            );
+                            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository(
+                                $wpdb
+                            );
                             $newMinisiteCtrl = new \Minisite\Application\Controllers\Front\NewMinisiteController(
                                 $profileRepo,
                                 $versionRepo

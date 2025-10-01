@@ -274,12 +274,18 @@ final class SitesController
                             'site_template'  => sanitize_text_field(
                                 wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)
                             ),
-                            'palette'        => sanitize_text_field(wp_unslash($_POST['brand_palette'] ?? $minisite->palette)),
-                            'industry'       => sanitize_text_field(wp_unslash($_POST['brand_industry'] ?? $minisite->industry)),
+                            'palette'        => sanitize_text_field(
+                                wp_unslash($_POST['brand_palette'] ?? $minisite->palette)
+                            ),
+                            'industry'       => sanitize_text_field(
+                                wp_unslash($_POST['brand_industry'] ?? $minisite->industry)
+                            ),
                             'default_locale' => sanitize_text_field(
                                 wp_unslash($_POST['default_locale'] ?? $minisite->defaultLocale)
                             ),
-                            'search_terms'   => sanitize_text_field(wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms)),
+                            'search_terms'   => sanitize_text_field(
+                                wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms)
+                            ),
                         );
 
                         $minisiteRepo->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
