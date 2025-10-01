@@ -720,7 +720,7 @@ final class NewMinisiteController
             return;
         }
 
-        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'publish_minisite')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'publish_minisite')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -862,7 +862,7 @@ final class NewMinisiteController
             return;
         }
 
-        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'create_minisite_order')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'create_minisite_order')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }

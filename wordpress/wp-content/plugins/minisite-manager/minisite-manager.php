@@ -756,7 +756,7 @@ add_action('wp_ajax_publish_version', function () {
         return;
     }
 
-    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
+    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
         wp_send_json_error('Security check failed', 403);
         return;
 }
@@ -815,7 +815,7 @@ add_action('wp_ajax_publish_version', function () {
             return;
         }
 
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
+        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
         wp_send_json_error('Security check failed', 403);
         return;
     }
@@ -890,7 +890,7 @@ add_action('wp_ajax_publish_version', function () {
                 return;
             }
 
-            if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_bookmark')) {
+            if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_bookmark')) {
                 wp_send_json_error('Security check failed', 403);
                 return;
         }
@@ -958,7 +958,7 @@ add_action('wp_ajax_publish_version', function () {
                     return;
                 }
 
-                if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_bookmark')) {
+                if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_bookmark')) {
                     wp_send_json_error('Security check failed', 403);
                     return;
             }
@@ -1011,7 +1011,7 @@ add_action('wp_ajax_publish_version', function () {
                         return;
                     }
 
-                    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_new')) {
+                    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_new')) {
                         wp_send_json_error('Security check failed', 403);
                         return;
                 }
