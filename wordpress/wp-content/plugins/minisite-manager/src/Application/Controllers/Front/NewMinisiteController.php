@@ -71,7 +71,7 @@ final class NewMinisiteController
             exit;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['minisite_nonce'] ?? ''), 'minisite_create')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_nonce'] ?? ''), 'minisite_create')) {
             wp_redirect('/account/sites/new?error=' . urlencode('Security check failed'));
             exit;
         }
@@ -203,7 +203,7 @@ final class NewMinisiteController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_new')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_new')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -212,8 +212,8 @@ final class NewMinisiteController
 
         try {
             // Generate unique slugs
-            $businessSlug = $this->generateUniqueBusinessSlug(wp_unslash($_POST['brand_name'] ?? ''));
-            $locationSlug = $this->generateUniqueLocationSlug(wp_unslash($_POST['contact_city'] ?? ''));
+            $businessSlug = $this->generateUniqueBusinessSlug(sanitize_text_field(wp_unslash($_POST['brand_name'] ?? '')));
+            $locationSlug = $this->generateUniqueLocationSlug(sanitize_text_field(wp_unslash($_POST['contact_city'] ?? '')));
 
             if (! $businessSlug || ! $locationSlug) {
                 wp_send_json_error('Unable to generate unique slugs. Please try different business name or city.', 400);
@@ -474,7 +474,7 @@ final class NewMinisiteController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'check_slug_availability')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'check_slug_availability')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -565,7 +565,7 @@ final class NewMinisiteController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'reserve_slug')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'reserve_slug')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -716,7 +716,7 @@ final class NewMinisiteController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'publish_minisite')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'publish_minisite')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -858,7 +858,7 @@ final class NewMinisiteController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'create_minisite_order')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'create_minisite_order')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }

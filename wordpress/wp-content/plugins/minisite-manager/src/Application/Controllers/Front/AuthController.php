@@ -17,11 +17,11 @@ final class AuthController
 
         // Handle login form submission
         if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_login_nonce'])) {
-            if (! wp_verify_nonce(wp_unslash($_POST['minisite_login_nonce']), 'minisite_login')) {
+            if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_login_nonce'])), 'minisite_login')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 $user_login = sanitize_text_field(wp_unslash($_POST['user_login'] ?? ''));
-                $user_pass  = wp_unslash($_POST['user_pass'] ?? '');
+                $user_pass  = sanitize_text_field(wp_unslash($_POST['user_pass'] ?? ''));
                 $remember   = isset($_POST['remember']);
 
                 if (empty($user_login) || empty($user_pass)) {
@@ -63,13 +63,13 @@ final class AuthController
 
         // Handle registration form submission
         if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_register_nonce'])) {
-            if (! wp_verify_nonce(wp_unslash($_POST['minisite_register_nonce']), 'minisite_register')) {
+            if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_register_nonce'])), 'minisite_register')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 $user_login        = sanitize_text_field(wp_unslash($_POST['user_login'] ?? ''));
                 $user_email        = sanitize_email(wp_unslash($_POST['user_email'] ?? ''));
-                $user_pass         = wp_unslash($_POST['user_pass'] ?? '');
-                $user_pass_confirm = wp_unslash($_POST['user_pass_confirm'] ?? '');
+                $user_pass         = sanitize_text_field(wp_unslash($_POST['user_pass'] ?? ''));
+                $user_pass_confirm = sanitize_text_field(wp_unslash($_POST['user_pass_confirm'] ?? ''));
 
                 if (empty($user_login) || empty($user_email) || empty($user_pass)) {
                     $error_msg = 'Please fill in all required fields.';
@@ -106,7 +106,13 @@ final class AuthController
     {
         // Check if user is logged in
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
+            $redirect_url = home_url(
+                '/account/login?redirect_to=' . urlencode(
+                    isset($_SERVER['REQUEST_URI']) ? 
+                    sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
+                )
+            );
+            wp_redirect($redirect_url);
             exit;
         }
 
@@ -136,7 +142,7 @@ final class AuthController
 
         // Handle forgot password form submission
         if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_forgot_nonce'])) {
-            if (! wp_verify_nonce(wp_unslash($_POST['minisite_forgot_nonce']), 'minisite_forgot')) {
+            if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_forgot_nonce'])), 'minisite_forgot')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 $user_login = sanitize_text_field(wp_unslash($_POST['user_login'] ?? ''));
@@ -191,13 +197,13 @@ final class AuthController
         // Final fallback: simple HTML
         header('Content-Type: text/html; charset=utf-8');
         echo '<!doctype html><meta charset="utf-8">';
-        echo '<title>' . htmlspecialchars($context['page_title'] ?? 'Account') . '</title>';
-        echo '<h1>' . htmlspecialchars($context['page_title'] ?? 'Account') . '</h1>';
+        echo '<title>' . esc_html($context['page_title'] ?? 'Account') . '</title>';
+        echo '<h1>' . esc_html($context['page_title'] ?? 'Account') . '</h1>';
         if (! empty($context['error_msg'])) {
-            echo '<p style="color: red;">' . htmlspecialchars($context['error_msg']) . '</p>';
+            echo '<p style="color: red;">' . esc_html($context['error_msg']) . '</p>';
         }
         if (! empty($context['success_msg'])) {
-            echo '<p style="color: green;">' . htmlspecialchars($context['success_msg']) . '</p>';
+            echo '<p style="color: green;">' . esc_html($context['success_msg']) . '</p>';
         }
     }
 }

@@ -14,7 +14,13 @@ final class SitesController
     public function handleList(): void
     {
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
+            $redirect_url = home_url(
+                '/account/login?redirect_to=' . urlencode(
+                    isset($_SERVER['REQUEST_URI']) ? 
+                    sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
+                )
+            );
+            wp_redirect($redirect_url);
             exit;
         }
 
@@ -86,16 +92,22 @@ final class SitesController
         header('Content-Type: text/html; charset=utf-8');
         echo '<!doctype html><meta charset="utf-8"><h1>My Minisites</h1>';
         foreach ($items as $it) {
-            echo '<div><a href="' . htmlspecialchars($it['route']) . '">' .
-                 htmlspecialchars($it['title']) . '</a> — ' .
-                 htmlspecialchars($it['status_chip']) . '</div>';
+            echo '<div><a href="' . esc_url($it['route']) . '">' .
+                 esc_html($it['title']) . '</a> — ' .
+                 esc_html($it['status_chip']) . '</div>';
         }
     }
 
     public function handleEdit(): void
     {
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
+            $redirect_url = home_url(
+                '/account/login?redirect_to=' . urlencode(
+                    isset($_SERVER['REQUEST_URI']) ? 
+                    sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
+                )
+            );
+            wp_redirect($redirect_url);
             exit;
         }
 
@@ -151,7 +163,7 @@ final class SitesController
 
         // Handle form submission
         if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['minisite_edit_nonce'])) {
-            if (! wp_verify_nonce(wp_unslash($_POST['minisite_edit_nonce']), 'minisite_edit')) {
+            if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_edit_nonce'])), 'minisite_edit')) {
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 try {
@@ -231,8 +243,12 @@ final class SitesController
                             'country_code'   => sanitize_text_field(
                                 wp_unslash($_POST['business_country'] ?? $minisite->countryCode)
                             ),
-                            'postal_code'    => sanitize_text_field(wp_unslash($_POST['business_postal'] ?? $minisite->postalCode)),
-                            'site_template'  => sanitize_text_field(wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)),
+                            'postal_code'    => sanitize_text_field(
+                                wp_unslash($_POST['business_postal'] ?? $minisite->postalCode)
+                            ),
+                            'site_template'  => sanitize_text_field(
+                                wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)
+                            ),
                             'palette'        => sanitize_text_field(wp_unslash($_POST['brand_palette'] ?? $minisite->palette)),
                             'industry'       => sanitize_text_field(wp_unslash($_POST['brand_industry'] ?? $minisite->industry)),
                             'default_locale' => sanitize_text_field(
@@ -298,14 +314,20 @@ final class SitesController
 
         // Fallback
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>Edit: ' . htmlspecialchars($minisite->title) . '</h1>';
+        echo '<!doctype html><meta charset="utf-8"><h1>Edit: ' . esc_html($minisite->title) . '</h1>';
         echo '<p>Edit form not available (Timber required).</p>';
     }
 
     public function handlePreview(): void
     {
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
+            $redirect_url = home_url(
+                '/account/login?redirect_to=' . urlencode(
+                    isset($_SERVER['REQUEST_URI']) ? 
+                    sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
+                )
+            );
+            wp_redirect($redirect_url);
             exit;
         }
 
@@ -382,7 +404,7 @@ final class SitesController
 
         // Final fallback
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>Preview: ' . htmlspecialchars($minisite->title) . '</h1>';
+        echo '<!doctype html><meta charset="utf-8"><h1>Preview: ' . esc_html($minisite->title) . '</h1>';
         echo '<p>Preview not available (Timber required).</p>';
     }
 
@@ -608,7 +630,7 @@ final class SitesController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'export_minisite')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'export_minisite')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -731,12 +753,12 @@ final class SitesController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'import_minisite')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'import_minisite')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $jsonData = wp_unslash($_POST['json_data'] ?? '');
+        $jsonData = sanitize_textarea_field(wp_unslash($_POST['json_data'] ?? ''));
         if (empty($jsonData)) {
             wp_send_json_error('Missing JSON data', 400);
             return;

@@ -19,7 +19,13 @@ class VersionController
     public function handleListVersions(): void
     {
         if (! is_user_logged_in()) {
-            wp_redirect(home_url('/account/login?redirect_to=' . urlencode(isset($_SERVER['REQUEST_URI']) ? wp_unslash($_SERVER['REQUEST_URI']) : '')));
+            $redirect_url = home_url(
+                '/account/login?redirect_to=' . urlencode(
+                    isset($_SERVER['REQUEST_URI']) ? 
+                    sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
+                )
+            );
+            wp_redirect($redirect_url);
             exit;
         }
 
@@ -71,7 +77,7 @@ class VersionController
         // Fallback
         header('Content-Type: text/html; charset=utf-8');
         echo '<!doctype html><meta charset="utf-8"><h1>Version History: ' .
-             htmlspecialchars($minisite->title) . '</h1>';
+             esc_html($minisite->title) . '</h1>';
         echo '<p>Version history not available (Timber required).</p>';
     }
 
@@ -90,12 +96,12 @@ class VersionController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $siteId = wp_unslash($_POST['site_id'] ?? '');
+        $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
         if (! $siteId) {
             wp_send_json_error('Invalid site ID', 400);
             return;
@@ -164,13 +170,13 @@ class VersionController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $siteId    = wp_unslash($_POST['site_id'] ?? '');
-        $versionId = (int) ( wp_unslash($_POST['version_id'] ?? 0) );
+        $siteId    = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
+        $versionId = (int) ( sanitize_text_field(wp_unslash($_POST['version_id'] ?? 0)) );
 
         if (! $siteId || ! $versionId) {
             wp_send_json_error('Invalid parameters', 400);
@@ -231,13 +237,13 @@ class VersionController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''), 'minisite_version')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
 
-        $siteId          = wp_unslash($_POST['site_id'] ?? '');
-        $sourceVersionId = (int) ( wp_unslash($_POST['source_version_id'] ?? 0) );
+        $siteId          = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
+        $sourceVersionId = (int) ( sanitize_text_field(wp_unslash($_POST['source_version_id'] ?? 0)) );
 
         if (! $siteId || ! $sourceVersionId) {
             wp_send_json_error('Invalid parameters', 400);

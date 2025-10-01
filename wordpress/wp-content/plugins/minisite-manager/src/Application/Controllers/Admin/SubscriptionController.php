@@ -41,7 +41,7 @@ final class SubscriptionController
             return;
         }
 
-        if (! wp_verify_nonce(wp_unslash($_POST['nonce'] ?? ''), 'activate_minisite_subscription_admin')) {
+        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'activate_minisite_subscription_admin')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
@@ -225,14 +225,14 @@ final class SubscriptionController
                                             data-order-id="<?php echo esc_attr($order['order_id']); ?>"
                                             data-nonce="<?php echo esc_attr(
                                                 wp_create_nonce('activate_minisite_subscription_admin')
-                                            ); ?>"
+                                                        ); ?>"
                                         >
                                             Activate
                                         </button>
                                         <a 
                                             href="<?php echo esc_url(
                                                 admin_url('post.php?post=' . $order['order_id'] . '&action=edit')
-                                            ); ?>" 
+                                                  ); ?>" 
                                             class="button"
                                             target="_blank"
                                         >
@@ -290,7 +290,7 @@ final class SubscriptionController
                                         <?php if ($order['subscription']) : ?>
                                             <span class="status-<?php echo esc_attr(
                                                 $order['subscription']->status
-                                            ); ?>">
+                                                                ); ?>">
                                                 <?php echo esc_html(ucfirst($order['subscription']->status)); ?>
                                             </span>
                                         <?php else : ?>
@@ -301,7 +301,7 @@ final class SubscriptionController
                                         <a 
                                             href="<?php echo esc_url(
                                                 admin_url('post.php?post=' . $order['order_id'] . '&action=edit')
-                                            ); ?>" 
+                                                  ); ?>" 
                                             class="button"
                                             target="_blank"
                                         >
@@ -341,7 +341,7 @@ final class SubscriptionController
                     this.disabled = true;
                     this.textContent = 'Activating...';
                     
-                    fetch('<?php echo admin_url('admin-ajax.php'); ?>', {
+                    fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
