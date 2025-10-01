@@ -3,6 +3,7 @@
 namespace Minisite\Application\Rendering;
 
 use Minisite\Domain\Entities\Minisite;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 final class TimberRenderer
 {
@@ -112,13 +113,9 @@ final class TimberRenderer
 
         global $wpdb;
         $userId         = get_current_user_id();
-        $bookmarkExists = $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT id FROM {$wpdb->prefix}minisite_bookmarks 
-             WHERE user_id = %d AND minisite_id = %d",
-                $userId,
-                $minisiteId
-            )
+        $bookmarkExists = db::get_var(
+            "SELECT id FROM {$wpdb->prefix}minisite_bookmarks WHERE user_id = %d AND minisite_id = %d",
+            [$userId, $minisiteId]
         );
 
         return (bool) $bookmarkExists;

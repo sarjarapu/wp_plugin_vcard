@@ -4,6 +4,7 @@ namespace Minisite\Application\Controllers\Front;
 
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 final class SitesController
 {
@@ -178,7 +179,7 @@ final class SitesController
                     $lng = ! empty($_POST['contact_lng']) ? (float) $_POST['contact_lng'] : null;
 
                     // Start transaction for atomic draft save
-                    $wpdb->query('START TRANSACTION');
+                    db::query('START TRANSACTION');
 
                     try {
                         // Create new draft version
@@ -290,13 +291,13 @@ final class SitesController
 
                         $minisiteRepo->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
 
-                        $wpdb->query('COMMIT');
+                        db::query('COMMIT');
 
                         // Redirect to show the latest version after save
                         wp_redirect(home_url('/account/sites/' . $siteId . '/edit?draft_saved=1'));
                         exit;
                     } catch (\Exception $e) {
-                        $wpdb->query('ROLLBACK');
+                        db::query('ROLLBACK');
                         throw $e;
                     }
                 } catch (\Exception $e) {

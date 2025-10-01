@@ -2,6 +2,8 @@
 
 namespace Minisite\Infrastructure\Versioning;
 
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
+
 /**
  * Orchestrates migrations on activation and during admin requests.
  */
@@ -62,7 +64,7 @@ class VersioningController
 
         foreach ($tables as $t) {
             // SHOW TABLES LIKE is portable enough for our case
-            $exists = (string) $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $t));
+            $exists = (string) db::get_var('SHOW TABLES LIKE %s', [$t]);
             if ($exists !== $t) {
                 return true; // Missing at least one table
             }

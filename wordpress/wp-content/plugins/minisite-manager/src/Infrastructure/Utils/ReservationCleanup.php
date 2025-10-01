@@ -2,6 +2,8 @@
 
 namespace Minisite\Infrastructure\Utils;
 
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
+
 final class ReservationCleanup
 {
     /**
@@ -11,6 +13,6 @@ final class ReservationCleanup
     {
         global $wpdb;
         $reservationsTable = $wpdb->prefix . 'minisite_reservations';
-        return $wpdb->query("DELETE FROM {$reservationsTable} WHERE expires_at <= NOW()");
+        return db::query("DELETE FROM {$reservationsTable} WHERE expires_at <= NOW()");
     }
 }
