@@ -759,7 +759,7 @@ add_action('wp_ajax_publish_version', function () {
     if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
         wp_send_json_error('Security check failed', 403);
         return;
-}
+    }
 
     $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
     $versionId = (int) (sanitize_text_field(wp_unslash($_POST['version_id'] ?? 0)));
@@ -807,7 +807,7 @@ add_action('wp_ajax_publish_version', function () {
     } catch (\Exception $e) {
         wp_send_json_error('Failed to publish version: ' . $e->getMessage(), 500);
     }
-    });
+});
 
     add_action('wp_ajax_rollback_version', function () {
         if (!is_user_logged_in()) {
@@ -816,9 +816,9 @@ add_action('wp_ajax_publish_version', function () {
         }
 
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
-        wp_send_json_error('Security check failed', 403);
-        return;
-    }
+            wp_send_json_error('Security check failed', 403);
+            return;
+        }
 
         $siteId = (int) (sanitize_text_field(wp_unslash($_POST['site_id'] ?? 0)));
         $sourceVersionId = (int) (sanitize_text_field(wp_unslash($_POST['source_version_id'] ?? 0)));
@@ -879,7 +879,7 @@ add_action('wp_ajax_publish_version', function () {
         } catch (\Exception $e) {
             wp_send_json_error('Failed to create copy: ' . $e->getMessage(), 500);
         }
-        });
+    });
 
 /**
  * AJAX handlers for bookmark management
@@ -893,7 +893,7 @@ add_action('wp_ajax_publish_version', function () {
             if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_bookmark')) {
                 wp_send_json_error('Security check failed', 403);
                 return;
-        }
+            }
 
             $minisiteId = sanitize_text_field(wp_unslash($_POST['profile_id'] ?? ''));
             $userId = get_current_user_id();
@@ -950,7 +950,7 @@ add_action('wp_ajax_publish_version', function () {
             } catch (\Exception $e) {
                 wp_send_json_error('Failed to add bookmark: ' . $e->getMessage(), 500);
             }
-            });
+        });
 
             add_action('wp_ajax_remove_bookmark', function () {
                 if (!is_user_logged_in()) {
@@ -961,7 +961,7 @@ add_action('wp_ajax_publish_version', function () {
                 if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_bookmark')) {
                     wp_send_json_error('Security check failed', 403);
                     return;
-            }
+                }
 
                 $minisiteId = sanitize_text_field(wp_unslash($_POST['profile_id'] ?? ''));
                 $userId = get_current_user_id();
@@ -1000,7 +1000,7 @@ add_action('wp_ajax_publish_version', function () {
                 } catch (\Exception $e) {
                     wp_send_json_error('Failed to remove bookmark: ' . $e->getMessage(), 500);
                 }
-                });
+            });
 
 /**
  * AJAX handler for creating new minisites
@@ -1014,7 +1014,7 @@ add_action('wp_ajax_publish_version', function () {
                     if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_new')) {
                         wp_send_json_error('Security check failed', 403);
                         return;
-                }
+                    }
 
                     try {
                         global $wpdb;
@@ -1029,7 +1029,7 @@ add_action('wp_ajax_publish_version', function () {
                     } catch (\Exception $e) {
                         wp_send_json_error('Failed to create minisite: ' . $e->getMessage(), 500);
                     }
-                    });
+                });
 
 /**
  * AJAX handler for checking slug availability

@@ -35,6 +35,6 @@ final class MinisitePageController
 
         // If renderer is missing, show minimal details
         header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8"><h1>' . htmlspecialchars($minisite->name) . '</h1>';
+        echo '<!doctype html><meta charset="utf-8"><h1>' . esc_html($minisite->name) . '</h1>';
     }
 }

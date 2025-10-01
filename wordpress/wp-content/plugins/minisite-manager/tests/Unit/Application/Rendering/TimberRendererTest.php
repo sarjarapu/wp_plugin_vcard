@@ -115,6 +115,10 @@ final class TimberRendererTest extends TestCase
         if (!function_exists('trailingslashit')) {
             eval('function trailingslashit($string) { return rtrim($string, "/") . "/"; }');
         }
+        
+        if (!function_exists('esc_html')) {
+            eval('function esc_html($text) { return htmlspecialchars($text, ENT_QUOTES, "UTF-8"); }');
+        }
     }
 
     public function testRenderWithTimberAvailable(): void

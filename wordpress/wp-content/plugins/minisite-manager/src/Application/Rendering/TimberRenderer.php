@@ -43,8 +43,8 @@ final class TimberRenderer
     {
         header('Content-Type: text/html; charset=utf-8');
         echo '<!doctype html><meta charset="utf-8">';
-        echo '<title>' . htmlspecialchars($minisite->title) . '</title>';
-        echo '<h1>' . htmlspecialchars($minisite->name) . '</h1>';
+        echo '<title>' . esc_html($minisite->title) . '</title>';
+        echo '<h1>' . esc_html($minisite->name) . '</h1>';
     }
 
     protected function registerTimberLocations(): void
