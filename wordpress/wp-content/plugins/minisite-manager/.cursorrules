@@ -1,0 +1,146 @@
+# Minisite Manager - Cursor AI Coding Rules
+
+You are working on a WordPress plugin called "Minisite Manager" that follows strict WordPress coding standards. Follow these rules for ALL code generation, editing, and suggestions.
+
+## Project Context
+- **Plugin Name**: Minisite Manager
+- **Framework**: WordPress Plugin with Timber/Twig templating
+- **Architecture**: Clean Architecture (Domain, Application, Infrastructure layers)
+- **Testing**: PHPUnit with Brain Monkey for WordPress mocking
+- **Standards**: WordPress Coding Standards (WPCS)
+
+## File Naming Conventions
+- **PHP Files**: Use lowercase with hyphens, prefixed with "class-"
+  - ✅ `class-rewrite-registrar.php`
+  - ❌ `RewriteRegistrar.php`
+- **Class Names**: PascalCase matching the file purpose
+  - ✅ `class RewriteRegistrar`
+  - ❌ `class rewrite_registrar`
+
+## Variable and Method Naming
+- **Variables**: snake_case
+  - ✅ `$minisite_id`, `$user_data`, `$version_to_publish`
+  - ❌ `$minisiteId`, `$userData`, `$versionToPublish`
+- **Methods**: snake_case
+  - ✅ `get_minisite_data()`, `handle_activate_subscription()`
+  - ❌ `getMinisiteData()`, `handleActivateSubscription()`
+- **Object Properties**: snake_case
+  - ✅ `$country_code`, `$postal_code`, `$site_template`
+  - ❌ `$countryCode`, `$postalCode`, `$siteTemplate`
+
+## Documentation Requirements
+- **File Header**: Every PHP file MUST have a file doc comment
+- **Class Documentation**: Every class MUST have a class doc comment
+- **Method Documentation**: Every public/protected method MUST have a doc comment
+- **Parameter Documentation**: All parameters MUST be documented with @param
+- **Return Documentation**: All methods MUST document @return
+- **Exception Documentation**: Methods that throw exceptions MUST have @throws
+
+Example:
+```php
+<?php
+/**
+ * File doc comment describing the file's purpose.
+ *
+ * @package MinisiteManager
+ */
+
+/**
+ * Class doc comment describing the class purpose.
+ */
+class ExampleClass {
+    /**
+     * Method doc comment describing what this method does.
+     *
+     * @param int    $minisite_id The ID of the minisite.
+     * @param string $user_data   The user data to process.
+     * @return bool True if successful, false otherwise.
+     * @throws InvalidArgumentException When minisite_id is invalid.
+     */
+    public function process_minisite_data( $minisite_id, $user_data ) {
+        // Implementation here.
+    }
+}
+```
+
+## Comment Standards
+- **Inline Comments**: MUST end with proper punctuation (., !, or ?)
+  - ✅ `// This processes the user data.`
+  - ✅ `// Check if user can edit this minisite!`
+  - ✅ `// Is this a valid minisite?`
+  - ❌ `// This processes the user data`
+- **Block Comments**: Use proper sentence structure with punctuation.
+
+## WordPress-Specific Rules
+- **Yoda Conditions**: Use Yoda-style conditionals
+  - ✅ `if ( 'POST' === $_SERVER['REQUEST_METHOD'] )`
+  - ❌ `if ( $_SERVER['REQUEST_METHOD'] === 'POST' )`
+- **Superglobal Safety**: Always check superglobals with isset() or empty()
+  - ✅ `if ( isset( $_POST['nonce'] ) )`
+  - ❌ `if ( $_POST['nonce'] )`
+- **Input Sanitization**: Always sanitize and unslash inputs
+  - ✅ `$nonce = sanitize_text_field( wp_unslash( $_POST['nonce'] ) )`
+  - ❌ `$nonce = $_POST['nonce']`
+- **Output Escaping**: Always escape output
+  - ✅ `echo esc_html( $user_name )`
+  - ❌ `echo $user_name`
+
+## Security Requirements
+- **Database Queries**: Use WordPress database abstraction
+  - ✅ `$wpdb->prepare()`, `$wpdb->get_results()`
+  - ❌ Direct SQL without preparation
+- **Nonce Verification**: Always verify nonces for forms
+- **Capability Checks**: Use `current_user_can()` for permission checks
+- **Data Validation**: Validate all external data
+
+## Code Structure
+- **Indentation**: Use tabs (not spaces)
+- **Line Length**: Maximum 120 characters
+- **Spacing**: 
+  - One space after comma in function calls
+  - One space before and after operators
+  - No space before semicolon
+- **Parentheses**: One space inside parentheses for function calls
+  - ✅ `function_name( $param1, $param2 )`
+  - ❌ `function_name($param1,$param2)`
+
+## Architecture Guidelines
+- **Domain Layer**: Pure business logic, no WordPress dependencies
+- **Application Layer**: Use cases and controllers
+- **Infrastructure Layer**: WordPress-specific implementations
+- **Dependency Injection**: Use constructor injection for dependencies
+- **Interface Segregation**: Create focused interfaces
+
+## Testing Requirements
+- **Unit Tests**: Test business logic in isolation
+- **Integration Tests**: Test WordPress integration
+- **Mocking**: Use Brain Monkey for WordPress function mocking
+- **Test Naming**: Use descriptive test method names
+  - ✅ `test_should_throw_exception_when_minisite_id_is_invalid()`
+  - ❌ `testInvalidId()`
+
+## Common Violations to Avoid
+1. **Missing Documentation**: Always add complete docblocks
+2. **Snake Case**: Convert camelCase to snake_case
+3. **File Naming**: Use lowercase-hyphenated filenames with class- prefix
+4. **Comment Punctuation**: End comments with proper punctuation
+5. **Yoda Conditions**: Use WordPress-style conditionals
+6. **Input Sanitization**: Always sanitize and unslash inputs
+7. **Output Escaping**: Always escape output for security
+
+## When Editing Existing Code
+- Fix all linting violations in the file you're editing
+- Maintain existing functionality while improving code quality
+- Update documentation to match current implementation
+- Ensure all new code follows these standards
+
+## Error Prevention
+Before suggesting any code:
+1. Check variable naming (snake_case)
+2. Verify method naming (snake_case)
+3. Ensure proper documentation
+4. Validate WordPress security practices
+5. Confirm file naming conventions
+6. Check comment punctuation
+
+Remember: These rules are MANDATORY. All code must pass WordPress Coding Standards (WPCS) validation.

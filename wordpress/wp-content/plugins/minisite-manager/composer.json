@@ -37,18 +37,24 @@
         "test:integration": "phpunit --testsuite=Integration",
         "test:coverage": "phpunit --coverage-html=build/coverage",
         "analyze": "phpstan analyse src --level=8",
-        "lint": "phpcs --standard=WordPress src/",
-        "lint:fix": "phpcbf --standard=WordPress src/",
+        "lint": "phpcs --standard=phpcs.xml src/ minisite-manager.php",
+        "lint:fix": "phpcbf --standard=phpcs.xml src/ minisite-manager.php",
         "security": "security-checker security:check",
         "quality": [
             "@lint",
             "@analyze",
             "@security"
         ],
+        "check": [
+            "@quality",
+            "@test:unit"
+        ],
         "pre-commit": [
             "@quality",
             "@test:unit"
         ],
+        "setup:hooks": "bash scripts/setup-git-hooks.sh",
+        "test:all": "bash scripts/run-tests.sh",
         "changelog": "php scripts/generate-changelog.php",
         "changelog:update": "php scripts/generate-changelog.php",
         "post-install-cmd": [

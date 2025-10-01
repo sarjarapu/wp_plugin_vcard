@@ -1,16 +1,109 @@
 <?xml version="1.0"?>
 <ruleset name="Minisite Manager">
-  <description>WordPress coding standards for Minisite Manager</description>
+  <description>WordPress coding standards for Minisite Manager with enhanced rules</description>
   
   <file>src</file>
+  <file>minisite-manager.php</file>
   
+  <!-- Base WordPress standards -->
   <rule ref="WordPress"/>
   
+  <!-- Enhanced WordPress standards -->
+  <rule ref="WordPress-Core"/>
+  <rule ref="WordPress-Docs"/>
+  <rule ref="WordPress-Extra"/>
+  <rule ref="WordPress-VIP-Go"/>
+  
+  <!-- Custom rules for stricter enforcement -->
+  <rule ref="Generic.Commenting.DocComment">
+    <properties>
+      <property name="requiredTags" value="@package,@since"/>
+    </properties>
+  </rule>
+  
+  <!-- Enforce snake_case for variables and methods -->
+  <rule ref="WordPress.NamingConventions.ValidVariableName">
+    <properties>
+      <property name="customPropertiesWhitelist" type="array">
+        <element value="custom_property"/>
+      </property>
+    </properties>
+  </rule>
+  
+  <!-- Enforce proper file naming -->
+  <rule ref="WordPress.Files.FileName">
+    <properties>
+      <property name="strict_class_file_names" value="true"/>
+    </properties>
+  </rule>
+  
+  <!-- Enforce Yoda conditions -->
+  <rule ref="WordPress.PHP.YodaConditions"/>
+  
+  <!-- Enforce proper escaping -->
+  <rule ref="WordPress.Security.EscapeOutput"/>
+  <rule ref="WordPress.Security.ValidatedSanitizedInput"/>
+  
+  <!-- Enforce proper nonce usage -->
+  <rule ref="WordPress.Security.NonceVerification"/>
+  
+  <!-- Enforce capability checks -->
+  <rule ref="WordPress.Security.CapabilityCheck"/>
+  
+  <!-- Custom capabilities for this plugin -->
+  <rule ref="WordPress.Security.CapabilityCheck">
+    <properties>
+      <property name="custom_capabilities" type="array">
+        <element value="minisite_edit_profile"/>
+        <element value="minisite_create"/>
+        <element value="minisite_delete"/>
+        <element value="minisite_manage_subscriptions"/>
+      </property>
+    </properties>
+  </rule>
+  
+  <!-- Enforce proper database usage -->
+  <rule ref="WordPress.DB.DirectDatabaseQuery"/>
+  <rule ref="WordPress.DB.PreparedSQL"/>
+  
+  <!-- Enforce proper hook usage -->
+  <rule ref="WordPress.WP.GlobalVariablesOverride"/>
+  
+  <!-- Enforce proper array formatting -->
+  <rule ref="WordPress.Arrays.ArrayDeclarationSpacing"/>
+  <rule ref="WordPress.Arrays.ArrayIndentation"/>
+  
+  <!-- Enforce proper function call spacing -->
+  <rule ref="WordPress.Functions.FunctionCallSignature">
+    <properties>
+      <property name="requiredSpacesAfterOpen" value="1"/>
+      <property name="requiredSpacesBeforeClose" value="1"/>
+    </properties>
+  </rule>
+  
+  <!-- Enforce proper comment formatting -->
+  <rule ref="Squiz.Commenting.InlineComment">
+    <properties>
+      <property name="requiredSpacesAfter" value="1"/>
+    </properties>
+  </rule>
+  
+  <!-- Exclude patterns -->
   <exclude-pattern>*/vendor/*</exclude-pattern>
   <exclude-pattern>*/tests/*</exclude-pattern>
   <exclude-pattern>*/build/*</exclude-pattern>
   <exclude-pattern>*/scripts/*</exclude-pattern>
+  <exclude-pattern>*/templates/*</exclude-pattern>
   
+  <!-- Arguments -->
   <arg name="colors"/>
   <arg name="parallel" value="80"/>
+  <arg name="report-width" value="120"/>
+  <arg name="extensions" value="php"/>
+  
+  <!-- Show progress -->
+  <arg name="progress"/>
+  
+  <!-- Show sniff codes -->
+  <arg name="show-sniff-codes"/>
 </ruleset>
