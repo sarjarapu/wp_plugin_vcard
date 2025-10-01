@@ -15,7 +15,9 @@ class _1_0_0_CreateBase implements Migration
 
     public function description(): string
     {
-        return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), minisite_reviews, minisite_bookmarks, minisite_payments, minisite_payment_history, minisite_reservations + auto-cleanup event + seed dev data';
+        return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), ' .
+               'minisite_reviews, minisite_bookmarks, minisite_payments, minisite_payment_history, ' .
+               'minisite_reservations + auto-cleanup event + seed dev data';
     }
 
     public function up(\wpdb $wpdb): void
@@ -29,37 +31,135 @@ class _1_0_0_CreateBase implements Migration
         $reservations   = $wpdb->prefix . 'minisite_reservations';
 
         // ——— minisites (live) ———
-        SqlLoader::loadAndExecute($wpdb, 'minisites.sql', SqlLoader::createStandardVariables($wpdb));
+        SqlLoader::loadAndExecute(
+            $wpdb,
+            'minisites.sql',
+            SqlLoader::createStandardVariables($wpdb)
+        );
 
         // ——— versions (new versioning system) ———
-        SqlLoader::loadAndExecute($wpdb, 'minisite_versions.sql', SqlLoader::createStandardVariables($wpdb));
+        SqlLoader::loadAndExecute(
+            $wpdb,
+            'minisite_versions.sql',
+            SqlLoader::createStandardVariables($wpdb)
+        );
 
         // ——— reviews ———
-        SqlLoader::loadAndExecute($wpdb, 'minisite_reviews.sql', SqlLoader::createStandardVariables($wpdb));
+        SqlLoader::loadAndExecute(
+            $wpdb,
+            'minisite_reviews.sql',
+            SqlLoader::createStandardVariables($wpdb)
+        );
 
         // ——— bookmarks ———
-        SqlLoader::loadAndExecute($wpdb, 'minisite_bookmarks.sql', SqlLoader::createStandardVariables($wpdb));
+        SqlLoader::loadAndExecute(
+            $wpdb,
+            'minisite_bookmarks.sql',
+            SqlLoader::createStandardVariables($wpdb)
+        );
 
         // ——— payments (single payment for slug ownership + 1 year public access) ———
-        SqlLoader::loadAndExecute($wpdb, 'minisite_payments.sql', SqlLoader::createStandardVariables($wpdb));
+        SqlLoader::loadAndExecute(
+            $wpdb,
+            'minisite_payments.sql',
+            SqlLoader::createStandardVariables($wpdb)
+        );
 
         // ——— payment history (for renewals and reclamations) ———
-        SqlLoader::loadAndExecute($wpdb, 'minisite_payment_history.sql', SqlLoader::createStandardVariables($wpdb));
+        SqlLoader::loadAndExecute(
+            $wpdb,
+            'minisite_payment_history.sql',
+            SqlLoader::createStandardVariables($wpdb)
+        );
 
         // Reservations table for 5-minute slug reservations
-        SqlLoader::loadAndExecute($wpdb, 'minisite_reservations.sql', SqlLoader::createStandardVariables($wpdb));
+        SqlLoader::loadAndExecute(
+            $wpdb,
+            'minisite_reservations.sql',
+            SqlLoader::createStandardVariables($wpdb)
+        );
 
         // Add foreign key constraints after table creation (only if they don't exist)
-        $this->addForeignKeyIfNotExists($wpdb, $versions, 'fk_versions_minisite_id', 'minisite_id', $minisites, 'id');
-        $this->addForeignKeyIfNotExists($wpdb, $reviews, 'fk_reviews_minisite_id', 'minisite_id', $minisites, 'id');
-        $this->addForeignKeyIfNotExists($wpdb, $bookmarks, 'fk_bookmarks_minisite_id', 'minisite_id', $minisites, 'id');
-        $this->addForeignKeyIfNotExists($wpdb, $payments, 'fk_payments_minisite_id', 'minisite_id', $minisites, 'id');
-        $this->addForeignKeyIfNotExists($wpdb, $payments, 'fk_payments_user_id', 'user_id', $wpdb->prefix . 'users', 'ID');
-        $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_minisite_id', 'minisite_id', $minisites, 'id');
-        $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_payment_id', 'payment_id', $payments, 'id');
-        $this->addForeignKeyIfNotExists($wpdb, $paymentHistory, 'fk_payment_history_new_owner_user_id', 'new_owner_user_id', $wpdb->prefix . 'users', 'ID');
-        $this->addForeignKeyIfNotExists($wpdb, $reservations, 'fk_reservations_user_id', 'user_id', $wpdb->prefix . 'users', 'ID');
-        $this->addForeignKeyIfNotExists($wpdb, $reservations, 'fk_reservations_minisite_id', 'minisite_id', $minisites, 'id');
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $versions,
+            'fk_versions_minisite_id',
+            'minisite_id',
+            $minisites,
+            'id'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $reviews,
+            'fk_reviews_minisite_id',
+            'minisite_id',
+            $minisites,
+            'id'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $bookmarks,
+            'fk_bookmarks_minisite_id',
+            'minisite_id',
+            $minisites,
+            'id'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $payments,
+            'fk_payments_minisite_id',
+            'minisite_id',
+            $minisites,
+            'id'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $payments,
+            'fk_payments_user_id',
+            'user_id',
+            $wpdb->prefix . 'users',
+            'ID'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $paymentHistory,
+            'fk_payment_history_minisite_id',
+            'minisite_id',
+            $minisites,
+            'id'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $paymentHistory,
+            'fk_payment_history_payment_id',
+            'payment_id',
+            $payments,
+            'id'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $paymentHistory,
+            'fk_payment_history_new_owner_user_id',
+            'new_owner_user_id',
+            $wpdb->prefix . 'users',
+            'ID'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $reservations,
+            'fk_reservations_user_id',
+            'user_id',
+            $wpdb->prefix . 'users',
+            'ID'
+        );
+        $this->addForeignKeyIfNotExists(
+            $wpdb,
+            $reservations,
+            'fk_reservations_minisite_id',
+            'minisite_id',
+            $minisites,
+            'id'
+        );
 
         // Create MySQL event for auto-cleanup of expired reservations
         SqlLoader::loadAndExecute($wpdb, 'event_purge_reservations.sql', SqlLoader::createStandardVariables($wpdb));
@@ -71,7 +171,14 @@ class _1_0_0_CreateBase implements Migration
     /**
      * Add a foreign key constraint only if it doesn't already exist
      */
-    protected function addForeignKeyIfNotExists(\wpdb $wpdb, string $table, string $constraintName, string $column, string $referencedTable, string $referencedColumn): void
+    protected function addForeignKeyIfNotExists(
+        \wpdb $wpdb,
+        string $table,
+        string $constraintName,
+        string $column,
+        string $referencedTable,
+        string $referencedColumn
+    ): void
     {
         // Check if the constraint already exists
         $constraintExists = $wpdb->get_var(
@@ -90,7 +197,11 @@ class _1_0_0_CreateBase implements Migration
         );
 
         if (! $constraintExists) {
-            $wpdb->query("ALTER TABLE {$table} ADD CONSTRAINT {$constraintName} FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn}) ON DELETE CASCADE");
+            $wpdb->query(
+                "ALTER TABLE {$table} ADD CONSTRAINT {$constraintName} " .
+                "FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn}) " .
+                "ON DELETE CASCADE"
+            );
         }
     }
 
@@ -229,7 +340,8 @@ class _1_0_0_CreateBase implements Migration
         // Debug: Check if minisite was inserted correctly
         $debugResult = $wpdb->get_row(
             $wpdb->prepare(
-                "SELECT id, business_slug, location_slug, status, _minisite_current_version_id FROM {$minisitesT} WHERE id = %s",
+                "SELECT id, business_slug, location_slug, status, _minisite_current_version_id " .
+                "FROM {$minisitesT} WHERE id = %s",
                 $minisiteData['id']
             ),
             ARRAY_A
@@ -242,7 +354,14 @@ class _1_0_0_CreateBase implements Migration
     /**
      * Insert a review into the database
      */
-    protected function insertReview(\wpdb $wpdb, string $minisiteId, string $authorName, float $rating, string $body, ?string $locale = 'en-US'): void
+    protected function insertReview(
+        \wpdb $wpdb,
+        string $minisiteId,
+        string $authorName,
+        float $rating,
+        string $body,
+        ?string $locale = 'en-US'
+    ): void
     {
         $reviewsT = $wpdb->prefix . 'minisite_reviews';
         $nowUser  = get_current_user_id() ?: null;
@@ -486,35 +605,199 @@ class _1_0_0_CreateBase implements Migration
 
         if ($acmeId) {
             // ACME Dental reviews (5 total)
-            $this->insertReview($wpdb, $acmeId, 'Jane Doe', 5.0, 'The hygienist was incredibly gentle and explained every step before she started. The clinic is spotless and the equipment looks brand new. I left feeling well cared for and finally not dreading my next visit.');
-            $this->insertReview($wpdb, $acmeId, 'Mark T.', 4.5, 'Booked a last‑minute appointment for a chipped tooth and they fit me in the same day. The repair was quick and painless, and the billing was clear. Parking was easy which is a bonus in Dallas.');
-            $this->insertReview($wpdb, $acmeId, 'Priya S.', 4.8, 'I had whitening done here and the results were immediate. The dentist checked sensitivity throughout and gave me clear aftercare instructions. Front desk followed up the next day to see how I was doing.');
-            $this->insertReview($wpdb, $acmeId, 'Daniel K.', 4.9, 'Super organized practice with on‑time appointments. They walked me through options for a crown and never pushed extras. Waiting area is calm and the coffee machine is a nice touch.');
-            $this->insertReview($wpdb, $acmeId, 'Alicia M.', 5.0, 'Brought my teen for Invisalign and the consultation was thorough without being overwhelming. Clear timeline, fair pricing, and they answered all our questions. We feel confident continuing care here.');
+            $this->insertReview(
+                $wpdb,
+                $acmeId,
+                'Jane Doe',
+                5.0,
+                'The hygienist was incredibly gentle and explained every step before she started. ' .
+                'The clinic is spotless and the equipment looks brand new. ' .
+                'I left feeling well cared for and finally not dreading my next visit.'
+            );
+            $this->insertReview(
+                $wpdb,
+                $acmeId,
+                'Mark T.',
+                4.5,
+                'Booked a last‑minute appointment for a chipped tooth and they fit me in the same day. ' .
+                'The repair was quick and painless, and the billing was clear. ' .
+                'Parking was easy which is a bonus in Dallas.'
+            );
+            $this->insertReview(
+                $wpdb,
+                $acmeId,
+                'Priya S.',
+                4.8,
+                'I had whitening done here and the results were immediate. ' .
+                'The dentist checked sensitivity throughout and gave me clear aftercare instructions. ' .
+                'Front desk followed up the next day to see how I was doing.'
+            );
+            $this->insertReview(
+                $wpdb,
+                $acmeId,
+                'Daniel K.',
+                4.9,
+                'Super organized practice with on‑time appointments. ' .
+                'They walked me through options for a crown and never pushed extras. ' .
+                'Waiting area is calm and the coffee machine is a nice touch.'
+            );
+            $this->insertReview(
+                $wpdb,
+                $acmeId,
+                'Alicia M.',
+                5.0,
+                'Brought my teen for Invisalign and the consultation was thorough without being overwhelming. ' .
+                'Clear timeline, fair pricing, and they answered all our questions. ' .
+                'We feel confident continuing care here.'
+            );
         }
         if ($lotusId) {
             // Lotus Textiles reviews (5 total)
-            $this->insertReview($wpdb, $lotusId, 'Asha P.', 5.0, 'Beautiful fabric selection and honest pricing. The team helped me pick the right silk and arranged quick alterations. I received so many compliments at the event.', 'en-IN');
-            $this->insertReview($wpdb, $lotusId, 'Rohit K.', 4.6, 'Quality linens and attentive staff. Turnaround for tailoring was faster than expected and the fit was perfect.', 'en-IN');
-            $this->insertReview($wpdb, $lotusId, 'Neha S.', 4.8, 'They sourced a specific shade of chiffon for me within two days. Great communication throughout and careful packaging.', 'en-IN');
-            $this->insertReview($wpdb, $lotusId, 'Imran V.', 4.7, 'Got a sherwani tailored here. Professional fittings and precise embroidery work. Delivery was on the promised date.', 'en-IN');
-            $this->insertReview($wpdb, $lotusId, 'Kavita D.', 4.9, 'Staff were patient while I compared several silks. They suggested blouse lining and care tips that really helped.', 'en-IN');
+            $this->insertReview(
+                $wpdb,
+                $lotusId,
+                'Asha P.',
+                5.0,
+                'Beautiful fabric selection and honest pricing. ' .
+                'The team helped me pick the right silk and arranged quick alterations. ' .
+                'I received so many compliments at the event.',
+                'en-IN'
+            );
+            $this->insertReview(
+                $wpdb,
+                $lotusId,
+                'Rohit K.',
+                4.6,
+                'Quality linens and attentive staff. ' .
+                'Turnaround for tailoring was faster than expected and the fit was perfect.',
+                'en-IN'
+            );
+            $this->insertReview(
+                $wpdb,
+                $lotusId,
+                'Neha S.',
+                4.8,
+                'They sourced a specific shade of chiffon for me within two days. ' .
+                'Great communication throughout and careful packaging.',
+                'en-IN'
+            );
+            $this->insertReview(
+                $wpdb,
+                $lotusId,
+                'Imran V.',
+                4.7,
+                'Got a sherwani tailored here. ' .
+                'Professional fittings and precise embroidery work. ' .
+                'Delivery was on the promised date.',
+                'en-IN'
+            );
+            $this->insertReview(
+                $wpdb,
+                $lotusId,
+                'Kavita D.',
+                4.9,
+                'Staff were patient while I compared several silks. ' .
+                'They suggested blouse lining and care tips that really helped.',
+                'en-IN'
+            );
         }
         if ($greenId) {
             // Green Bites reviews (5 total)
-            $this->insertReview($wpdb, $greenId, 'Alex P.', 5.0, 'Best sourdough in the City. The crust has real depth of flavor and the bowls are generous. Staff remembered my usual after two visits.', 'en-GB');
-            $this->insertReview($wpdb, $greenId, 'Maria G.', 4.7, 'Delicious bowls and quick service at lunch. Great coffee with oat milk, and I love the rotating specials.', 'en-GB');
-            $this->insertReview($wpdb, $greenId, 'Tom H.', 4.6, 'Great place for a quick, healthy lunch. Seating fills up at noon but the line moves fast.', 'en-GB');
-            $this->insertReview($wpdb, $greenId, 'Ella R.', 4.8, 'Excellent espresso and friendly baristas. The vegan bowl had great textures and bright flavors.', 'en-GB');
-            $this->insertReview($wpdb, $greenId, 'Ben S.', 4.9, 'Love the seasonal menu changes and the sourdough loaves on Fridays. Consistently great quality.', 'en-GB');
+            $this->insertReview(
+                $wpdb,
+                $greenId,
+                'Alex P.',
+                5.0,
+                'Best sourdough in the City. ' .
+                'The crust has real depth of flavor and the bowls are generous. ' .
+                'Staff remembered my usual after two visits.',
+                'en-GB'
+            );
+            $this->insertReview(
+                $wpdb,
+                $greenId,
+                'Maria G.',
+                4.7,
+                'Delicious bowls and quick service at lunch. ' .
+                'Great coffee with oat milk, and I love the rotating specials.',
+                'en-GB'
+            );
+            $this->insertReview(
+                $wpdb,
+                $greenId,
+                'Tom H.',
+                4.6,
+                'Great place for a quick, healthy lunch. ' .
+                'Seating fills up at noon but the line moves fast.',
+                'en-GB'
+            );
+            $this->insertReview(
+                $wpdb,
+                $greenId,
+                'Ella R.',
+                4.8,
+                'Excellent espresso and friendly baristas. ' .
+                'The vegan bowl had great textures and bright flavors.',
+                'en-GB'
+            );
+            $this->insertReview(
+                $wpdb,
+                $greenId,
+                'Ben S.',
+                4.9,
+                'Love the seasonal menu changes and the sourdough loaves on Fridays. ' .
+                'Consistently great quality.',
+                'en-GB'
+            );
         }
         if ($swiftId) {
             // Swift Transit reviews (5 total)
-            $this->insertReview($wpdb, $swiftId, 'Zoe L.', 5.0, 'Super fast and careful with fragile items. They handled our clinic samples with documented chain-of-custody and delivered earlier than promised.', 'en-AU');
-            $this->insertReview($wpdb, $swiftId, 'Nick R.', 4.8, 'Great communication and tracking. Dispatch answered within seconds, and the driver called ahead for loading dock access.', 'en-AU');
-            $this->insertReview($wpdb, $swiftId, 'Sam D.', 4.7, 'Booked an urgent pickup at 4 pm and it reached the CBD in under an hour. Clear proof‑of‑delivery emailed instantly.', 'en-AU');
-            $this->insertReview($wpdb, $swiftId, 'Priya V.', 4.9, 'Courteous drivers and clean vehicles. Our bulk transfers were secured properly and arrived without damage.', 'en-AU');
-            $this->insertReview($wpdb, $swiftId, 'Owen C.', 4.8, 'We use their scheduled routes daily. Reliable timings and proactive updates whenever traffic is heavy.', 'en-AU');
+            $this->insertReview(
+                $wpdb,
+                $swiftId,
+                'Zoe L.',
+                5.0,
+                'Super fast and careful with fragile items. ' .
+                'They handled our clinic samples with documented chain-of-custody ' .
+                'and delivered earlier than promised.',
+                'en-AU'
+            );
+            $this->insertReview(
+                $wpdb,
+                $swiftId,
+                'Nick R.',
+                4.8,
+                'Great communication and tracking. ' .
+                'Dispatch answered within seconds, and the driver called ahead for loading dock access.',
+                'en-AU'
+            );
+            $this->insertReview(
+                $wpdb,
+                $swiftId,
+                'Sam D.',
+                4.7,
+                'Booked an urgent pickup at 4 pm and it reached the CBD in under an hour. ' .
+                'Clear proof‑of‑delivery emailed instantly.',
+                'en-AU'
+            );
+            $this->insertReview(
+                $wpdb,
+                $swiftId,
+                'Priya V.',
+                4.9,
+                'Courteous drivers and clean vehicles. ' .
+                'Our bulk transfers were secured properly and arrived without damage.',
+                'en-AU'
+            );
+            $this->insertReview(
+                $wpdb,
+                $swiftId,
+                'Owen C.',
+                4.8,
+                'We use their scheduled routes daily. ' .
+                'Reliable timings and proactive updates whenever traffic is heavy.',
+                'en-AU'
+            );
         }
     }
 }
