@@ -167,210 +167,40 @@ final class SubscriptionController
     }
 
     /**
-     * Render admin page
+     * Render admin page using Twig template
      */
     private function renderAdminPage(array $data): void
     {
-        ?>
-        <div class="wrap">
-            <h1>Minisite Subscriptions</h1>
-            
-            <!-- Pending Orders -->
-            <div class="card">
-                <h2>Pending Payments</h2>
-                <p>Orders waiting for UPI payment verification:</p>
-                
-                <?php if (empty($data['pending_orders'])) : ?>
-                    <p>No pending orders.</p>
-                <?php else : ?>
-                    <table class="wp-list-table widefat fixed striped">
-                        <thead>
-                            <tr>
-                                <th>Order</th>
-                                <th>Customer</th>
-                                <th>Amount</th>
-                                <th>Minisite</th>
-                                <th>Payment Method</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($data['pending_orders'] as $order) : ?>
-                                <tr>
-                                    <td>
-                                        <strong>#<?php echo esc_html($order['order_number']); ?></strong>
-                                        <br>
-                                        <small>ID: <?php echo esc_html($order['order_id']); ?></small>
-                                    </td>
-                                    <td>
-                                        <?php echo esc_html($order['customer_name']); ?>
-                                        <br>
-                                        <small><?php echo esc_html($order['customer_email']); ?></small>
-                                    </td>
-                                    <td>
-                                        <?php echo esc_html($order['currency'] . ' ' . $order['total']); ?>
-                                    </td>
-                                    <td>
-                                        <strong><?php echo esc_html($order['slug']); ?></strong>
-                                        <br>
-                                        <small>ID: <?php echo esc_html($order['minisite_id']); ?></small>
-                                    </td>
-                                    <td><?php echo esc_html($order['payment_method']); ?></td>
-                                    <td><?php echo esc_html($order['date_created']); ?></td>
-                                    <td>
-                                        <button 
-                                            class="button button-primary activate-subscription-btn" 
-                                            data-order-id="<?php echo esc_attr($order['order_id']); ?>"
-                                            data-nonce="<?php echo esc_attr(
-                                                wp_create_nonce('activate_minisite_subscription_admin')
-                                                        ); ?>"
-                                        >
-                                            Activate
-                                        </button>
-                                        <a 
-                                            href="<?php echo esc_url(
-                                                admin_url('post.php?post=' . $order['order_id'] . '&action=edit')
-                                                  ); ?>" 
-                                            class="button"
-                                            target="_blank"
-                                        >
-                                            View Order
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
-            </div>
+        // Use Timber renderer if available, otherwise fallback
+        if (class_exists('Timber\\Timber')) {
+            $base                      = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
+            \Timber\Timber::$locations = array_values(
+                array_unique(
+                    array_merge(
+                        \Timber\Timber::$locations ?? array(),
+                        array( $base )
+                    )
+                )
+            );
 
-            <!-- Completed Orders -->
-            <div class="card">
-                <h2>Active Subscriptions</h2>
-                <p>Recently completed orders with active subscriptions:</p>
-                
-                <?php if (empty($data['completed_orders'])) : ?>
-                    <p>No completed orders.</p>
-                <?php else : ?>
-                    <table class="wp-list-table widefat fixed striped">
-                        <thead>
-                            <tr>
-                                <th>Order</th>
-                                <th>Customer</th>
-                                <th>Minisite</th>
-                                <th>Expires</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($data['completed_orders'] as $order) : ?>
-                                <tr>
-                                    <td>
-                                        <strong>#<?php echo esc_html($order['order_number']); ?></strong>
-                                    </td>
-                                    <td>
-                                        <?php echo esc_html($order['customer_name']); ?>
-                                        <br>
-                                        <small><?php echo esc_html($order['customer_email']); ?></small>
-                                    </td>
-                                    <td>
-                                        <strong><?php echo esc_html($order['slug']); ?></strong>
-                                    </td>
-                                    <td>
-                                        <?php if ($order['subscription']) : ?>
-                                            <?php echo esc_html($order['subscription']->expires_at); ?>
-                                        <?php else : ?>
-                                            <em>No subscription data</em>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($order['subscription']) : ?>
-                                            <span class="status-<?php echo esc_attr(
-                                                $order['subscription']->status
-                                                                ); ?>">
-                                                <?php echo esc_html(ucfirst($order['subscription']->status)); ?>
-                                            </span>
-                                        <?php else : ?>
-                                            <em>Unknown</em>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <a 
-                                            href="<?php echo esc_url(
-                                                admin_url('post.php?post=' . $order['order_id'] . '&action=edit')
-                                                  ); ?>" 
-                                            class="button"
-                                            target="_blank"
-                                        >
-                                            View Order
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                <?php endif; ?>
-            </div>
-        </div>
+            \Timber\Timber::render(
+                'admin-subscriptions.twig',
+                array(
+                    'page_title'       => 'Minisite Subscriptions',
+                    'pending_orders'   => $data['pending_orders'],
+                    'completed_orders' => $data['completed_orders'],
+                    'nonce'            => wp_create_nonce('activate_minisite_subscription_admin'),
+                )
+            );
+            return;
+        }
 
-        <style>
-            .status-active { color: green; font-weight: bold; }
-            .status-expired { color: red; font-weight: bold; }
-            .status-grace_period { color: orange; font-weight: bold; }
-            .card { background: white; padding: 20px; margin: 20px 0; border: 1px solid #ccd0d4; }
-            .activate-subscription-btn { margin-right: 5px; }
-        </style>
-
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle subscription activation
-            document.querySelectorAll('.activate-subscription-btn').forEach(
-                button => {
-                button.addEventListener('click', function() {
-                    const orderId = this.dataset.orderId;
-                    const nonce = this.dataset.nonce;
-                    
-                    if (!confirm('Are you sure you want to activate this subscription? ' +
-                                 'This will make the minisite publicly accessible.')) {
-                        return;
-                    }
-                    
-                    this.disabled = true;
-                    this.textContent = 'Activating...';
-                    
-                    fetch('<?php echo esc_url(admin_url('admin-ajax.php')); ?>', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                        },
-                        body: new URLSearchParams({
-                            action: 'activate_minisite_subscription_admin',
-                            order_id: orderId,
-                            nonce: nonce
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Subscription activated successfully!');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + (data.data || 'Failed to activate subscription'));
-                            this.disabled = false;
-                            this.textContent = 'Activate';
-                        }
-                    })
-                    .catch(error => {
-                        alert('Error: ' + error.message);
-                        this.disabled = false;
-                        this.textContent = 'Activate';
-                    });
-                });
-            });
-        });
-        </script>
-        <?php
+        // Fallback: simple HTML (for development/testing)
+        header('Content-Type: text/html; charset=utf-8');
+        echo '<!doctype html><meta charset="utf-8">';
+        echo '<title>Minisite Subscriptions</title>';
+        echo '<h1>Minisite Subscriptions</h1>';
+        echo '<p>Timber/Twig not available. Please install Timber plugin for proper rendering.</p>';
+        echo '<pre>' . esc_html(print_r($data, true)) . '</pre>';
     }
 }
