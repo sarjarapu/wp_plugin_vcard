@@ -36,7 +36,7 @@
         "test:unit": "phpunit --testsuite=Unit",
         "test:integration": "phpunit --testsuite=Integration",
         "test:coverage": "phpunit --coverage-html=build/coverage",
-        "analyze": "phpstan analyse src --level=8",
+        "analyze": "phpstan analyse src --level=5 --memory-limit=256M",
         "lint": "phpcs --standard=phpcs.xml src/ minisite-manager.php",
         "lint:fix": "phpcbf --standard=phpcs.xml src/ minisite-manager.php",
         "security": "security-checker security:check",

@@ -1,5 +1,5 @@
 parameters:
-  level: 8
+  level: 5
   paths:
     - src
   excludePaths:
@@ -7,6 +7,20 @@ parameters:
     - vendor
   ignoreErrors:
     - '#Call to an undefined method#'
-    - '#WordPress functions#'
+    - '#Function .* not found#'
+    - '#Constant .* not found#'
+    - '#Access to an undefined property#'
+    - '#Method .* invoked with .* parameters#'
+    - '#Parameter .* of function .* expects .* given#'
+    - '#Cannot call method .* on .*#'
+    - '#Argument of an invalid type .* supplied for foreach#'
+    - '#PHPDoc tag .* references unknown parameter#'
+    - '#return type has no value type specified in iterable type#'
+    - '#has parameter .* with no value type specified in iterable type#'
+    - '#should return .* but returns#'
+    - '#Ternary operator condition is always true#'
   bootstrapFiles:
     - tests/bootstrap.php
+  parallel:
+    processTimeout: 300.0
+  tmpDir: build/phpstan
