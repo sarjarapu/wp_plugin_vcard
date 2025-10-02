@@ -59,7 +59,7 @@ fi
 echo -e "${GREEN} ✅ All pre-release checks passed!${NC}"
 
 # Get current version from plugin header
-CURRENT_VERSION=$(grep "Version:" minisite-manager.php | sed 's/.*Version:[[:space:]]*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')
+CURRENT_VERSION=$(grep "^\s*\*\s*Version:" minisite-manager.php | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
 echo -e "${GRAY} 📋 Current version: ${CURRENT_VERSION}${NC}"
 
 # Bump version manually
