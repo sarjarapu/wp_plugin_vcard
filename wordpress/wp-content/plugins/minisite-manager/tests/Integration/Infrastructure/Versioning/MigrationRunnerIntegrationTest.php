@@ -89,7 +89,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         };
 
         // Act
-        $this->runner->upgradeTo($this->dbHelper->getWpdb(), $logger);
+        $this->runner->upgradeTo($logger);
 
         // Assert
         $this->assertCount(2, $loggedMessages);
@@ -139,7 +139,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         };
 
         // Act
-        $this->runner->upgradeTo($this->dbHelper->getWpdb(), $logger);
+        $this->runner->upgradeTo($logger);
 
         // Assert - Only the second migration should run
         $this->assertCount(1, $loggedMessages);
@@ -246,7 +246,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         };
 
         // Act
-        $this->runner->downgradeTo($this->dbHelper->getWpdb(), '0.0.0', $logger);
+        $this->runner->downgradeTo('0.0.0', $logger);
 
         // Assert
         $this->assertCount(1, $loggedMessages);
@@ -290,7 +290,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         };
 
         // Act
-        $this->runner->upgradeTo($this->dbHelper->getWpdb(), $logger);
+        $this->runner->upgradeTo($logger);
 
         // Assert
         $this->assertCount(4, $loggedMessages);
@@ -336,9 +336,9 @@ class MigrationRunnerIntegrationTest extends TestCase
         };
 
         // Act - Run migration twice
-        $this->runner->upgradeTo($this->dbHelper->getWpdb(), $logger);
+        $this->runner->upgradeTo($logger);
         $loggedMessages = []; // Clear messages
-        $this->runner->upgradeTo($this->dbHelper->getWpdb(), $logger);
+        $this->runner->upgradeTo($logger);
 
         // Assert - Second run should not log anything (idempotent)
         $this->assertCount(0, $loggedMessages, 'Second run should not execute any migrations');

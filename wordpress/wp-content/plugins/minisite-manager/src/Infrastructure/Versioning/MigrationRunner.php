@@ -26,7 +26,7 @@ class MigrationRunner
      * Run all migrations whose version is > current and <= targetVersion.
      * Each migration must be idempotent.
      */
-    public function upgradeTo(\wpdb $wpdb, ?callable $logger = null): void
+    public function upgradeTo(?callable $logger = null): void
     {
         $logger ??= static function ($msg) {
         };
@@ -40,7 +40,7 @@ class MigrationRunner
                 // Skip if already at this version (only run strictly greater)
                 if (\version_compare($current, $ver, '<')) {
                     $logger(sprintf('[minisite] Applying migration %s: %s', $ver, $m->description()));
-                    $m->up($wpdb);
+                    $m->up();
                     update_option($this->optionKey, $ver, false);
                     $current = $ver;
                 }
@@ -51,7 +51,7 @@ class MigrationRunner
     /**
      * Optional downgrade (rare in WP plugins). Best-effort only.
      */
-    public function downgradeTo(\wpdb $wpdb, string $target, ?callable $logger = null): void
+    public function downgradeTo(string $target, ?callable $logger = null): void
     {
         $logger ??= static function ($msg) {
         };
@@ -65,7 +65,7 @@ class MigrationRunner
             $ver = $m->version();
             if (\version_compare($current, $ver, '>=') && \version_compare($ver, $target, '>')) {
                 $logger(sprintf('[minisite] Reverting migration %s: %s', $ver, $m->description()));
-                $m->down($wpdb);
+                $m->down();
                 update_option($this->optionKey, $target, false);
                 $current = $target;
             }

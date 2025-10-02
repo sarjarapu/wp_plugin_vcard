@@ -35,24 +35,24 @@ class Testable_1_0_0_CreateBase extends _1_0_0_CreateBase
         return $this->setComputedFields($data);
     }
 
-    public function publicInsertMinisite(\wpdb $wpdb, array $minisiteData, string $name): string
+    public function publicInsertMinisite(array $minisiteData, string $name): string
     {
-        return $this->insertMinisite($wpdb, $minisiteData, $name);
+        return $this->insertMinisite($minisiteData, $name);
     }
 
-    public function publicInsertReview(\wpdb $wpdb, string $minisiteId, string $authorName, float $rating, string $body, ?string $locale = 'en-US'): void
+    public function publicInsertReview(string $minisiteId, string $authorName, float $rating, string $body, ?string $locale = 'en-US'): void
     {
-        $this->insertReview($wpdb, $minisiteId, $authorName, $rating, $body, $locale);
+        $this->insertReview($minisiteId, $authorName, $rating, $body, $locale);
     }
 
-    public function publicAddForeignKeyIfNotExists(\wpdb $wpdb, string $table, string $constraintName, string $column, string $referencedTable, string $referencedColumn): void
+    public function publicAddForeignKeyIfNotExists(string $table, string $constraintName, string $column, string $referencedTable, string $referencedColumn): void
     {
-        $this->addForeignKeyIfNotExists($wpdb, $table, $constraintName, $column, $referencedTable, $referencedColumn);
+        $this->addForeignKeyIfNotExists($table, $constraintName, $column, $referencedTable, $referencedColumn);
     }
 
-    public function publicSeedTestData(\wpdb $wpdb): void
+    public function publicSeedTestData(): void
     {
-        $this->seedTestData($wpdb);
+        $this->seedTestData();
     }
 }
 
@@ -76,6 +76,10 @@ class _1_0_0_CreateBaseTest extends TestCase
 
         $this->migration = new Testable_1_0_0_CreateBase();
         $this->mockWpdb = $this->createMockWpdb();
+        
+        // Set the global $wpdb to our mock for DatabaseHelper to use
+        global $wpdb;
+        $wpdb = $this->mockWpdb;
     }
 
     /**
@@ -178,7 +182,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             '_minisite_current_version_id' => null
         ];
 
-        $result = $this->migration->publicInsertMinisite($this->mockWpdb, $minisiteData, 'TEST');
+        $result = $this->migration->publicInsertMinisite($minisiteData, 'TEST');
 
         $this->assertEquals('test-minisite-123', $result);
     }
@@ -189,7 +193,6 @@ class _1_0_0_CreateBaseTest extends TestCase
     public function testInsertReview(): void
     {
         $this->migration->publicInsertReview(
-            $this->mockWpdb,
             'test-minisite-123',
             'John Doe',
             4.5,
@@ -207,7 +210,6 @@ class _1_0_0_CreateBaseTest extends TestCase
     public function testInsertReviewWithCustomLocale(): void
     {
         $this->migration->publicInsertReview(
-            $this->mockWpdb,
             'test-minisite-123',
             'Jane Smith',
             5.0,
@@ -271,8 +273,11 @@ class _1_0_0_CreateBaseTest extends TestCase
             ->method('query')
             ->with($this->stringContains('ALTER TABLE'));
 
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
         $this->migration->publicAddForeignKeyIfNotExists(
-            $mockWpdb,
             'wp_test_table',
             'fk_test_constraint',
             'test_column',
@@ -300,8 +305,11 @@ class _1_0_0_CreateBaseTest extends TestCase
         $mockWpdb->expects($this->never())
             ->method('query');
 
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
         $this->migration->publicAddForeignKeyIfNotExists(
-            $mockWpdb,
             'wp_test_table',
             'fk_test_constraint',
             'test_column',
@@ -332,8 +340,11 @@ class _1_0_0_CreateBaseTest extends TestCase
             return true;
         });
 
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
         $this->migration->publicAddForeignKeyIfNotExists(
-            $mockWpdb,
             'wp_test_table',
             'fk_test_constraint',
             'test_column',
@@ -370,7 +381,11 @@ class _1_0_0_CreateBaseTest extends TestCase
         // Expect multiple query calls (for version updates)
         $mockWpdb->expects($this->atLeast(4))->method('query');
 
-        $this->migration->publicSeedTestData($mockWpdb);
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
+        $this->migration->publicSeedTestData();
     }
 
     /**
@@ -395,7 +410,11 @@ class _1_0_0_CreateBaseTest extends TestCase
         // Expect no query calls for version updates
         $mockWpdb->expects($this->never())->method('query');
 
-        $this->migration->publicSeedTestData($mockWpdb);
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
+        $this->migration->publicSeedTestData();
     }
 
     /**
@@ -428,7 +447,11 @@ class _1_0_0_CreateBaseTest extends TestCase
             'site_json' => '{"test": "data"}'
         ]);
 
-        $this->migration->publicSeedTestData($mockWpdb);
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
+        $this->migration->publicSeedTestData();
 
         // Verify the duplicate check query structure (uses placeholders, not actual values)
         $this->assertStringContainsString('SELECT COUNT(*)', $duplicateCheckQuery);
@@ -451,8 +474,7 @@ class _1_0_0_CreateBaseTest extends TestCase
 
         // Test that up() method has the correct signature
         $reflection = new \ReflectionMethod($this->migration, 'up');
-        $this->assertEquals(1, $reflection->getNumberOfParameters());
-        $this->assertEquals('wpdb', $reflection->getParameters()[0]->getType()->getName());
+        $this->assertEquals(0, $reflection->getNumberOfParameters());
     }
 
     /**
@@ -476,7 +498,11 @@ class _1_0_0_CreateBaseTest extends TestCase
             return true;
         });
 
-        $this->migration->down($mockWpdb);
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
+        $this->migration->down();
 
         // Verify the cleanup queries
         $this->assertStringContainsString('DROP EVENT IF EXISTS wp_minisite_purge_reservations_event', $queries[0]);
@@ -514,6 +540,10 @@ class _1_0_0_CreateBaseTest extends TestCase
             '_minisite_current_version_id' => 456
         ]);
 
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
         // Test with different data types
         $minisiteData = [
             'id' => 'test-minisite-456',
@@ -545,7 +575,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             '_minisite_current_version_id' => 456
         ];
 
-        $result = $this->migration->publicInsertMinisite($mockWpdb, $minisiteData, 'TEST2');
+        $result = $this->migration->publicInsertMinisite($minisiteData, 'TEST2');
 
         $this->assertEquals('test-minisite-456', $result);
     }
@@ -579,6 +609,10 @@ class _1_0_0_CreateBaseTest extends TestCase
             '_minisite_current_version_id' => null
         ]);
 
+        // Set the global $wpdb to this specific mock
+        global $wpdb;
+        $wpdb = $mockWpdb;
+
         $minisiteData = [
             'id' => 'test-minisite-789',
             'slug' => 'test-business-3-test-location-3',
@@ -609,7 +643,7 @@ class _1_0_0_CreateBaseTest extends TestCase
             '_minisite_current_version_id' => null
         ];
 
-        $this->migration->publicInsertMinisite($mockWpdb, $minisiteData, 'TEST3');
+        $this->migration->publicInsertMinisite($minisiteData, 'TEST3');
 
         // Verify the SQL query structure (normalize whitespace for comparison)
         $normalizedQuery = preg_replace('/\s+/', ' ', trim($actualQuery));
@@ -657,6 +691,9 @@ class _1_0_0_CreateBaseTest extends TestCase
 
         // Mock the prefix property
         $mockWpdb->prefix = 'wp_';
+        
+        // Mock the insert_id property
+        $mockWpdb->insert_id = 123;
 
         // Mock the query method to return true (success)
         $mockWpdb->method('query')->willReturn(true);
@@ -668,9 +705,12 @@ class _1_0_0_CreateBaseTest extends TestCase
 
         // Mock the insert method to return true (success)
         $mockWpdb->method('insert')->willReturn(true);
+        
+        // Mock the get_var method
+        $mockWpdb->method('get_var')->willReturn('0');
 
         // Mock the get_row method for debug queries
-        $mockWpdb->method('get_row')->willReturn((object)[
+        $mockWpdb->method('get_row')->willReturn([
             'id' => 'test-minisite-123',
             'business_slug' => 'test-business',
             'location_slug' => 'test-location',

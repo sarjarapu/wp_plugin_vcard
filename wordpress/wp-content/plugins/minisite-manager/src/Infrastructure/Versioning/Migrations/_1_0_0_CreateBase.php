@@ -5,6 +5,7 @@ namespace Minisite\Infrastructure\Versioning\Migrations;
 use Minisite\Infrastructure\Versioning\Contracts\Migration;
 use Minisite\Infrastructure\Versioning\Support\DbDelta;
 use Minisite\Infrastructure\Utils\SqlLoader;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 class _1_0_0_CreateBase implements Migration
 {
@@ -20,8 +21,9 @@ class _1_0_0_CreateBase implements Migration
                'minisite_reservations + auto-cleanup event + seed dev data';
     }
 
-    public function up(\wpdb $wpdb): void
+    public function up(): void
     {
+        global $wpdb;
         $minisites      = $wpdb->prefix . 'minisites';
         $reviews        = $wpdb->prefix . 'minisite_reviews';
         $versions       = $wpdb->prefix . 'minisite_versions';
@@ -81,7 +83,6 @@ class _1_0_0_CreateBase implements Migration
 
         // Add foreign key constraints after table creation (only if they don't exist)
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $versions,
             'fk_versions_minisite_id',
             'minisite_id',
@@ -89,7 +90,6 @@ class _1_0_0_CreateBase implements Migration
             'id'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $reviews,
             'fk_reviews_minisite_id',
             'minisite_id',
@@ -97,7 +97,6 @@ class _1_0_0_CreateBase implements Migration
             'id'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $bookmarks,
             'fk_bookmarks_minisite_id',
             'minisite_id',
@@ -105,7 +104,6 @@ class _1_0_0_CreateBase implements Migration
             'id'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $payments,
             'fk_payments_minisite_id',
             'minisite_id',
@@ -113,7 +111,6 @@ class _1_0_0_CreateBase implements Migration
             'id'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $payments,
             'fk_payments_user_id',
             'user_id',
@@ -121,7 +118,6 @@ class _1_0_0_CreateBase implements Migration
             'ID'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $paymentHistory,
             'fk_payment_history_minisite_id',
             'minisite_id',
@@ -129,7 +125,6 @@ class _1_0_0_CreateBase implements Migration
             'id'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $paymentHistory,
             'fk_payment_history_payment_id',
             'payment_id',
@@ -137,7 +132,6 @@ class _1_0_0_CreateBase implements Migration
             'id'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $paymentHistory,
             'fk_payment_history_new_owner_user_id',
             'new_owner_user_id',
@@ -145,7 +139,6 @@ class _1_0_0_CreateBase implements Migration
             'ID'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $reservations,
             'fk_reservations_user_id',
             'user_id',
@@ -153,7 +146,6 @@ class _1_0_0_CreateBase implements Migration
             'ID'
         );
         $this->addForeignKeyIfNotExists(
-            $wpdb,
             $reservations,
             'fk_reservations_minisite_id',
             'minisite_id',
@@ -165,41 +157,29 @@ class _1_0_0_CreateBase implements Migration
         SqlLoader::loadAndExecute($wpdb, 'event_purge_reservations.sql', SqlLoader::createStandardVariables($wpdb));
 
         // —— dev seed: insert two test minisites + revisions + reviews ——
-        $this->seedTestData($wpdb);
+        $this->seedTestData();
     }
 
     /**
      * Add a foreign key constraint only if it doesn't already exist
      */
     protected function addForeignKeyIfNotExists(
-        \wpdb $wpdb,
         string $table,
         string $constraintName,
         string $column,
         string $referencedTable,
         string $referencedColumn
     ): void {
+        global $wpdb;
         // Check if the constraint already exists
-        $constraintExists = $wpdb->get_var(
-            $wpdb->prepare(
-                '
-            SELECT COUNT(*) 
-            FROM information_schema.KEY_COLUMN_USAGE 
-            WHERE TABLE_SCHEMA = %s 
-            AND TABLE_NAME = %s 
-            AND CONSTRAINT_NAME = %s
-        ',
-                DB_NAME,
-                $table,
-                $constraintName
-            )
+        $constraintExists = db::get_var(
+            "SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND CONSTRAINT_NAME = %s",
+            [DB_NAME, $table, $constraintName]
         );
 
         if (! $constraintExists) {
-            $wpdb->query(
-                "ALTER TABLE {$table} ADD CONSTRAINT {$constraintName} " .
-                "FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn}) " .
-                "ON DELETE CASCADE"
+            db::query(
+                "ALTER TABLE {$table} ADD CONSTRAINT {$constraintName} FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn}) ON DELETE CASCADE"
             );
         }
     }
@@ -287,24 +267,14 @@ class _1_0_0_CreateBase implements Migration
     /**
      * Insert a minisite into the database
      */
-    protected function insertMinisite(\wpdb $wpdb, array $minisiteData, string $name): string
+    protected function insertMinisite(array $minisiteData, string $name): string
     {
+        global $wpdb;
         $minisitesT = $wpdb->prefix . 'minisites';
 
-        $wpdb->query(
-            $wpdb->prepare(
-                "INSERT INTO {$minisitesT} (
-                id, slug, business_slug, location_slug, title, name, city, region, 
-                country_code, postal_code, location_point, site_template, palette, 
-                industry, default_locale, schema_version, site_version, site_json, 
-                search_terms, status, publish_status, created_at, updated_at, 
-                published_at, created_by, updated_by, _minisite_current_version_id
-            ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, 
-                %s, %s, POINT(%f, %f), %s, %s, %s, %s, %d, 
-                %d, %s, %s, %s, %s, %s, %s, %s, 
-                %d, %d, %s
-            )",
+        db::query(
+            "INSERT INTO {$minisitesT} (id, slug, business_slug, location_slug, title, name, city, region, country_code, postal_code, location_point, site_template, palette, industry, default_locale, schema_version, site_version, site_json, search_terms, status, publish_status, created_at, updated_at, published_at, created_by, updated_by, _minisite_current_version_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, POINT(%f, %f), %s, %s, %s, %s, %d, %d, %s, %s, %s, %s, %s, %s, %s, %d, %d, %s)",
+            [
                 $minisiteData['id'],
                 $minisiteData['slug'],
                 $minisiteData['business_slug'],
@@ -333,17 +303,13 @@ class _1_0_0_CreateBase implements Migration
                 $minisiteData['created_by'],
                 $minisiteData['updated_by'],
                 $minisiteData['_minisite_current_version_id']
-            )
+            ]
         );
 
         // Debug: Check if minisite was inserted correctly
-        $debugResult = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT id, business_slug, location_slug, status, _minisite_current_version_id " .
-                "FROM {$minisitesT} WHERE id = %s",
-                $minisiteData['id']
-            ),
-            ARRAY_A
+        $debugResult = db::get_row(
+            "SELECT id, business_slug, location_slug, status, _minisite_current_version_id FROM {$minisitesT} WHERE id = %s",
+            [$minisiteData['id']]
         );
         // error_log("{$name} INSERT DEBUG: " . print_r($debugResult, true));
 
@@ -354,17 +320,17 @@ class _1_0_0_CreateBase implements Migration
      * Insert a review into the database
      */
     protected function insertReview(
-        \wpdb $wpdb,
         string $minisiteId,
         string $authorName,
         float $rating,
         string $body,
         ?string $locale = 'en-US'
     ): void {
+        global $wpdb;
         $reviewsT = $wpdb->prefix . 'minisite_reviews';
         $nowUser  = get_current_user_id() ?: null;
 
-        $wpdb->insert(
+        db::insert(
             $reviewsT,
             array(
                 'minisite_id'   => $minisiteId,
@@ -383,8 +349,9 @@ class _1_0_0_CreateBase implements Migration
         );
     }
 
-    public function down(\wpdb $wpdb): void
+    public function down(): void
     {
+        global $wpdb;
         $minisites      = $wpdb->prefix . 'minisites';
         $versions       = $wpdb->prefix . 'minisite_versions';
         $reviews        = $wpdb->prefix . 'minisite_reviews';
@@ -394,15 +361,15 @@ class _1_0_0_CreateBase implements Migration
         $reservations   = $wpdb->prefix . 'minisite_reservations';
 
         // Drop MySQL event
-        $wpdb->query("DROP EVENT IF EXISTS {$wpdb->prefix}minisite_purge_reservations_event");
+        db::query("DROP EVENT IF EXISTS {$wpdb->prefix}minisite_purge_reservations_event");
 
-        $wpdb->query("DROP TABLE IF EXISTS {$reservations}");
-        $wpdb->query("DROP TABLE IF EXISTS {$paymentHistory}");
-        $wpdb->query("DROP TABLE IF EXISTS {$payments}");
-        $wpdb->query("DROP TABLE IF EXISTS {$bookmarks}");
-        $wpdb->query("DROP TABLE IF EXISTS {$reviews}");
-        $wpdb->query("DROP TABLE IF EXISTS {$versions}");
-        $wpdb->query("DROP TABLE IF EXISTS {$minisites}");
+        db::query("DROP TABLE IF EXISTS {$reservations}");
+        db::query("DROP TABLE IF EXISTS {$paymentHistory}");
+        db::query("DROP TABLE IF EXISTS {$payments}");
+        db::query("DROP TABLE IF EXISTS {$bookmarks}");
+        db::query("DROP TABLE IF EXISTS {$reviews}");
+        db::query("DROP TABLE IF EXISTS {$versions}");
+        db::query("DROP TABLE IF EXISTS {$minisites}");
     }
 
     /**
@@ -412,28 +379,16 @@ class _1_0_0_CreateBase implements Migration
      * - 'green-bites' / 'london'
      * - 'swift-transit' / 'sydney'
      */
-    protected function seedTestData(\wpdb $wpdb): void
+    protected function seedTestData(): void
     {
+        global $wpdb;
         $minisitesT = $wpdb->prefix . 'minisites';
         $reviewsT   = $wpdb->prefix . 'minisite_reviews';
 
         // Avoid duplicate seeding (check any of our seeded slugs)
-        $exists = (int) $wpdb->get_var(
-            $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$minisitesT}
-             WHERE (business_slug=%s AND location_slug=%s)
-                OR (business_slug=%s AND location_slug=%s)
-                OR (business_slug=%s AND location_slug=%s)
-                OR (business_slug=%s AND location_slug=%s)",
-                'acme-dental',
-                'dallas',
-                'lotus-textiles',
-                'mumbai',
-                'green-bites',
-                'london',
-                'swift-transit',
-                'sydney'
-            )
+        $exists = (int) db::get_var(
+            "SELECT COUNT(*) FROM {$minisitesT} WHERE (business_slug=%s AND location_slug=%s) OR (business_slug=%s AND location_slug=%s) OR (business_slug=%s AND location_slug=%s) OR (business_slug=%s AND location_slug=%s)",
+            ['acme-dental', 'dallas', 'lotus-textiles', 'mumbai', 'green-bites', 'london', 'swift-transit', 'sydney']
         );
         if ($exists > 0) {
             return;
@@ -447,7 +402,7 @@ class _1_0_0_CreateBase implements Migration
                 'id' => $acmeId,
             )
         );
-        $acmeId = $this->insertMinisite($wpdb, $acme, 'ACME');
+        $acmeId = $this->insertMinisite($acme, 'ACME');
 
         // Insert second profile: Lotus Textiles (Mumbai, IN)
         $lotusId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
@@ -457,7 +412,7 @@ class _1_0_0_CreateBase implements Migration
                 'id' => $lotusId,
             )
         );
-        $lotusId = $this->insertMinisite($wpdb, $lotus, 'LOTUS');
+        $lotusId = $this->insertMinisite($lotus, 'LOTUS');
 
         // Insert third profile: Green Bites (London, GB)
         $greenId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
@@ -467,7 +422,7 @@ class _1_0_0_CreateBase implements Migration
                 'id' => $greenId,
             )
         );
-        $greenId = $this->insertMinisite($wpdb, $green, 'GREEN');
+        $greenId = $this->insertMinisite($green, 'GREEN');
 
         // Insert fourth profile: Swift Transit (Sydney, AU)
         $swiftId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
@@ -477,7 +432,7 @@ class _1_0_0_CreateBase implements Migration
                 'id' => $swiftId,
             )
         );
-        $swiftId = $this->insertMinisite($wpdb, $swift, 'SWIFT');
+        $swiftId = $this->insertMinisite($swift, 'SWIFT');
 
         // ——— Versions for each profile (version 1 as published) ———
         $versionsT = $wpdb->prefix . 'minisite_versions';
@@ -495,7 +450,7 @@ class _1_0_0_CreateBase implements Migration
             }
 
             // Get the profile data for the initial version
-            $minisite = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$minisitesT} WHERE id = %s", $pid), ARRAY_A);
+            $minisite = db::get_row("SELECT * FROM {$minisitesT} WHERE id = %s", [$pid]);
             $siteJson = $minisite ? $minisite['site_json'] : wp_json_encode(
                 array(
                     'note'    => 'initial version',
@@ -535,7 +490,7 @@ class _1_0_0_CreateBase implements Migration
                 'search_terms'      => $minisite['search_terms'] ?? null,
             );
 
-            $wpdb->insert(
+            db::insert(
                 $versionsT,
                 $versionData,
                 array(
@@ -567,7 +522,7 @@ class _1_0_0_CreateBase implements Migration
                 )
             );
 
-            $versionId = (int) $wpdb->insert_id;
+            $versionId = db::get_insert_id();
 
             // Set location_point based on profile ID (hardcoded coordinates)
             $coordinates = array(
@@ -579,23 +534,16 @@ class _1_0_0_CreateBase implements Migration
 
             if (isset($coordinates[ $pid ])) {
                 [$lng, $lat] = $coordinates[ $pid ];
-                $wpdb->query(
-                    $wpdb->prepare(
-                        "UPDATE {$versionsT} SET location_point = POINT(%f, %f) WHERE id = %d",
-                        $lng,
-                        $lat,
-                        $versionId
-                    )
+                db::query(
+                    "UPDATE {$versionsT} SET location_point = POINT(%f, %f) WHERE id = %d",
+                    [$lng, $lat, $versionId]
                 );
             }
 
             // Update profile with current version ID
-            $wpdb->query(
-                $wpdb->prepare(
-                    "UPDATE {$minisitesT} SET _minisite_current_version_id = %d WHERE id = %s",
-                    $versionId,
-                    $pid
-                )
+            db::query(
+                "UPDATE {$minisitesT} SET _minisite_current_version_id = %d WHERE id = %s",
+                [$versionId, $pid]
             );
         }
 
@@ -604,7 +552,6 @@ class _1_0_0_CreateBase implements Migration
         if ($acmeId) {
             // ACME Dental reviews (5 total)
             $this->insertReview(
-                $wpdb,
                 $acmeId,
                 'Jane Doe',
                 5.0,
@@ -613,7 +560,6 @@ class _1_0_0_CreateBase implements Migration
                 'I left feeling well cared for and finally not dreading my next visit.'
             );
             $this->insertReview(
-                $wpdb,
                 $acmeId,
                 'Mark T.',
                 4.5,
@@ -622,7 +568,6 @@ class _1_0_0_CreateBase implements Migration
                 'Parking was easy which is a bonus in Dallas.'
             );
             $this->insertReview(
-                $wpdb,
                 $acmeId,
                 'Priya S.',
                 4.8,
@@ -631,7 +576,6 @@ class _1_0_0_CreateBase implements Migration
                 'Front desk followed up the next day to see how I was doing.'
             );
             $this->insertReview(
-                $wpdb,
                 $acmeId,
                 'Daniel K.',
                 4.9,
@@ -640,7 +584,6 @@ class _1_0_0_CreateBase implements Migration
                 'Waiting area is calm and the coffee machine is a nice touch.'
             );
             $this->insertReview(
-                $wpdb,
                 $acmeId,
                 'Alicia M.',
                 5.0,
@@ -652,7 +595,6 @@ class _1_0_0_CreateBase implements Migration
         if ($lotusId) {
             // Lotus Textiles reviews (5 total)
             $this->insertReview(
-                $wpdb,
                 $lotusId,
                 'Asha P.',
                 5.0,
@@ -662,7 +604,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-IN'
             );
             $this->insertReview(
-                $wpdb,
                 $lotusId,
                 'Rohit K.',
                 4.6,
@@ -671,7 +612,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-IN'
             );
             $this->insertReview(
-                $wpdb,
                 $lotusId,
                 'Neha S.',
                 4.8,
@@ -680,7 +620,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-IN'
             );
             $this->insertReview(
-                $wpdb,
                 $lotusId,
                 'Imran V.',
                 4.7,
@@ -690,7 +629,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-IN'
             );
             $this->insertReview(
-                $wpdb,
                 $lotusId,
                 'Kavita D.',
                 4.9,
@@ -702,7 +640,6 @@ class _1_0_0_CreateBase implements Migration
         if ($greenId) {
             // Green Bites reviews (5 total)
             $this->insertReview(
-                $wpdb,
                 $greenId,
                 'Alex P.',
                 5.0,
@@ -712,7 +649,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-GB'
             );
             $this->insertReview(
-                $wpdb,
                 $greenId,
                 'Maria G.',
                 4.7,
@@ -721,7 +657,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-GB'
             );
             $this->insertReview(
-                $wpdb,
                 $greenId,
                 'Tom H.',
                 4.6,
@@ -730,7 +665,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-GB'
             );
             $this->insertReview(
-                $wpdb,
                 $greenId,
                 'Ella R.',
                 4.8,
@@ -739,7 +673,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-GB'
             );
             $this->insertReview(
-                $wpdb,
                 $greenId,
                 'Ben S.',
                 4.9,
@@ -751,7 +684,6 @@ class _1_0_0_CreateBase implements Migration
         if ($swiftId) {
             // Swift Transit reviews (5 total)
             $this->insertReview(
-                $wpdb,
                 $swiftId,
                 'Zoe L.',
                 5.0,
@@ -761,7 +693,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-AU'
             );
             $this->insertReview(
-                $wpdb,
                 $swiftId,
                 'Nick R.',
                 4.8,
@@ -770,7 +701,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-AU'
             );
             $this->insertReview(
-                $wpdb,
                 $swiftId,
                 'Sam D.',
                 4.7,
@@ -779,7 +709,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-AU'
             );
             $this->insertReview(
-                $wpdb,
                 $swiftId,
                 'Priya V.',
                 4.9,
@@ -788,7 +717,6 @@ class _1_0_0_CreateBase implements Migration
                 'en-AU'
             );
             $this->insertReview(
-                $wpdb,
                 $swiftId,
                 'Owen C.',
                 4.8,

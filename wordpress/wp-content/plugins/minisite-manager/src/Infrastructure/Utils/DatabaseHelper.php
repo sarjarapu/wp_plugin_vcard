@@ -86,5 +86,14 @@ final class DatabaseHelper
         global $wpdb;
         return $wpdb->delete($table, $where, $where_format);
     }
+    
+    /**
+     * Same as $wpdb->insert_id - drop-in replacement
+     */
+    public static function get_insert_id(): int
+    {
+        global $wpdb;
+        return (int) $wpdb->insert_id;
+    }
 }
 

@@ -80,7 +80,7 @@ class MigrationRunnerTest extends TestCase
             $loggerCalled = true;
         };
 
-        $this->runner->upgradeTo($this->mockWpdb, $logger);
+        $this->runner->upgradeTo($logger);
 
         $this->assertFalse($loggerCalled, 'Logger should not be called when no migrations to run');
     }
@@ -106,7 +106,7 @@ class MigrationRunnerTest extends TestCase
             $loggedMessages[] = $msg;
         };
 
-        $this->runner->upgradeTo($this->mockWpdb, $logger);
+        $this->runner->upgradeTo($logger);
 
         $this->assertCount(1, $loggedMessages);
         $this->assertStringContainsString($migrationVersion, $loggedMessages[0]);
@@ -140,7 +140,7 @@ class MigrationRunnerTest extends TestCase
             $loggedMessages[] = $msg;
         };
 
-        $this->runner->upgradeTo($this->mockWpdb, $logger);
+        $this->runner->upgradeTo($logger);
 
         $this->assertCount(3, $loggedMessages);
         $this->assertStringContainsString('1.1.0', $loggedMessages[0]);
@@ -174,7 +174,7 @@ class MigrationRunnerTest extends TestCase
             $loggedMessages[] = $msg;
         };
 
-        $this->runner->upgradeTo($this->mockWpdb, $logger);
+        $this->runner->upgradeTo($logger);
 
         $this->assertCount(1, $loggedMessages);
         $this->assertStringContainsString('1.2.0', $loggedMessages[0]);
@@ -247,7 +247,7 @@ class MigrationRunnerTest extends TestCase
             $loggedMessages[] = $msg;
         };
 
-        $this->runner->upgradeTo($this->mockWpdb, $logger);
+        $this->runner->upgradeTo($logger);
 
         $this->assertCount(4, $loggedMessages);
         $this->assertStringContainsString('1.0.0-alpha1', $loggedMessages[0]);
@@ -298,7 +298,7 @@ class MigrationRunnerTest extends TestCase
             $loggerCalled = true;
         };
 
-        $this->runner->downgradeTo($this->mockWpdb, $targetVersion, $logger);
+        $this->runner->downgradeTo($targetVersion, $logger);
 
         $this->assertFalse($loggerCalled, 'Logger should not be called when no migrations to rollback');
     }
@@ -324,7 +324,7 @@ class MigrationRunnerTest extends TestCase
             $loggedMessages[] = $msg;
         };
 
-        $this->runner->downgradeTo($this->mockWpdb, $targetVersion, $logger);
+        $this->runner->downgradeTo($targetVersion, $logger);
 
         $this->assertCount(1, $loggedMessages);
         $this->assertStringContainsString('1.1.0', $loggedMessages[0]);
@@ -360,7 +360,7 @@ class MigrationRunnerTest extends TestCase
             $loggedMessages[] = $msg;
         };
 
-        $this->runner->downgradeTo($this->mockWpdb, $targetVersion, $logger);
+        $this->runner->downgradeTo($targetVersion, $logger);
 
         // Based on the logic, only the first migration (1.3.0) should run
         // because after it runs, current becomes target (1.0.0), and subsequent
@@ -397,7 +397,7 @@ class MigrationRunnerTest extends TestCase
             $loggedMessages[] = $msg;
         };
 
-        $this->runner->downgradeTo($this->mockWpdb, $targetVersion, $logger);
+        $this->runner->downgradeTo($targetVersion, $logger);
 
         $this->assertCount(1, $loggedMessages);
         $this->assertStringContainsString('1.3.0', $loggedMessages[0]);
@@ -423,7 +423,7 @@ class MigrationRunnerTest extends TestCase
             ->willReturn([$mockMigration]);
 
         // Should not throw any exceptions with default logger
-        $this->runner->downgradeTo($this->mockWpdb, $targetVersion);
+        $this->runner->downgradeTo($targetVersion);
 
         $this->assertTrue(true, 'Should complete without errors');
     }

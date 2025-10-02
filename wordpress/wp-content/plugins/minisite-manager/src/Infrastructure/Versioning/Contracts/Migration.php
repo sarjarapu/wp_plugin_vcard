@@ -11,8 +11,8 @@ interface Migration
     public function description(): string;
 
     /** Apply this migration (must be idempotent). Throw on fatal. */
-    public function up(\wpdb $wpdb): void;
+    public function up(): void;
 
     /** Optional rollback (best-effort, idempotent). */
-    public function down(\wpdb $wpdb): void;
+    public function down(): void;
 }

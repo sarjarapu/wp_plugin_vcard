@@ -105,7 +105,7 @@ register_activation_hook(__FILE__, function () {
         global $wpdb;
         if (class_exists(_1_0_0_CreateBase::class)) {
             $m = new _1_0_0_CreateBase();
-            $m->down($wpdb);
+            $m->down();
         }
       // Ensure runner applies base migration
         update_option(MINISITE_DB_OPTION, '0.0.0', false);
@@ -132,7 +132,7 @@ register_deactivation_hook(__FILE__, function () {
         global $wpdb;
         if (class_exists(_1_0_0_CreateBase::class)) {
             $m = new _1_0_0_CreateBase();
-            $m->down($wpdb);
+            $m->down();
         }
         delete_option(MINISITE_DB_OPTION);
     }
