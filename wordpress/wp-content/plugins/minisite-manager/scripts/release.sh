@@ -87,7 +87,7 @@ echo -e "${GREEN} ✅ Version bumped to: ${NEW_VERSION}${NC}"
 # Update plugin header
 echo -e "${CYAN} 📝 Updating plugin header...${NC}"
 if [ "$DRY_RUN" = "false" ]; then
-    sed -i.bak "s/Version:     [0-9]\+\.[0-9]\+\.[0-9]\+/Version:     ${NEW_VERSION}/" minisite-manager.php
+    sed -i.bak "s/Version:      [0-9]\+\.[0-9]\+\.[0-9]\+/Version:      ${NEW_VERSION}/" minisite-manager.php
     rm minisite-manager.php.bak
 fi
 

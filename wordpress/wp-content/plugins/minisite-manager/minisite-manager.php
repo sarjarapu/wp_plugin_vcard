@@ -8,7 +8,7 @@
  * Plugin Name: Minisite Manager
  * Description: Internal plugin powering business mini-sites (profiles) with revisions, templates,
  *              and optional Timber/Twig rendering.
- * Version:     1.1.0
+ * Version:     1.1.1
  * Author:      Shyam Arjarapu
  * Company:     Nimble AI Services LLC
  * License:     Proprietary
