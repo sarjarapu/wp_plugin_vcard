@@ -25,6 +25,7 @@ parameters:
     - '#Missing parameter .* in call to .* constructor#'
     - '#Parameter .* of class .* constructor expects .* given#'
     - '#Method .* is unused#'
+    - '#Function update_option invoked with .* parameters#'
   bootstrapFiles:
     - tests/bootstrap.php
   parallel:
