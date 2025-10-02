@@ -305,7 +305,9 @@ class VersionController
         try {
             // Move current published version to draft
             db::query(
-                "UPDATE {$wpdb->prefix}minisite_versions SET status = 'draft' WHERE minisite_id = %s AND status = 'published'",
+                "UPDATE {$wpdb->prefix}minisite_versions 
+                 SET status = 'draft' 
+                 WHERE minisite_id = %s AND status = 'published'",
                 [$minisiteId]
             );
 
@@ -317,7 +319,12 @@ class VersionController
 
             // Update profile with published version data and current version ID
             db::query(
-                "UPDATE {$wpdb->prefix}minisites SET site_json = %s, title = %s, name = %s, city = %s, region = %s, country_code = %s, postal_code = %s, site_template = %s, palette = %s, industry = %s, default_locale = %s, schema_version = %d, site_version = %d, search_terms = %s, _minisite_current_version_id = %d, updated_at = NOW() WHERE id = %s",
+                "UPDATE {$wpdb->prefix}minisites 
+                 SET site_json = %s, title = %s, name = %s, city = %s, region = %s, 
+                     country_code = %s, postal_code = %s, site_template = %s, palette = %s, 
+                     industry = %s, default_locale = %s, schema_version = %d, site_version = %d, 
+                     search_terms = %s, _minisite_current_version_id = %d, updated_at = NOW() 
+                 WHERE id = %s",
                 [
                     wp_json_encode($version->siteJson),
                     $version->title,

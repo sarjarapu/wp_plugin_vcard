@@ -520,7 +520,8 @@ final class NewMinisiteController
 
             // Check if combination is currently reserved
             $reservation = db::get_row(
-                "SELECT * FROM {$reservationsTable} WHERE business_slug = %s AND location_slug = %s AND expires_at > NOW()",
+                "SELECT * FROM {$reservationsTable} 
+                 WHERE business_slug = %s AND location_slug = %s AND expires_at > NOW()",
                 [$businessSlug, $locationSlug]
             );
 

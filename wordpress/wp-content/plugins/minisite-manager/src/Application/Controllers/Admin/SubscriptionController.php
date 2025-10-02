@@ -43,7 +43,8 @@ final class SubscriptionController
             return;
         }
 
-        if (! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'activate_minisite_subscription_admin')) {
+        $nonce = sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''));
+        if (! wp_verify_nonce($nonce, 'activate_minisite_subscription_admin')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }
