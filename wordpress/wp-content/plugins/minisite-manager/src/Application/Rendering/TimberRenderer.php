@@ -5,7 +5,7 @@ namespace Minisite\Application\Rendering;
 use Minisite\Domain\Entities\Minisite;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
-final class TimberRenderer
+class TimberRenderer
 {
     public function __construct(private string $variant = 'v2025')
     {
