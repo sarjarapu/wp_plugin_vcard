@@ -1,16 +1,18 @@
-## No changes
+# Changelog
 
+All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+
+## [1.1.2] - 2025-10-02
+
+### Documentation
+
+- clean up changelog and add proper v1.1.1 release notes
 
 ## [1.1.1] - 2025-10-02
 
 ### Bug Fixes
 
 - correct plugin version to 1.1.1 and fix release script
-
-
-# Changelog
-
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
 ## [1.1.0](https://github.com/your-org/minisite-manager/compare/v0.10.0...v1.1.0) (2025-10-02)
 

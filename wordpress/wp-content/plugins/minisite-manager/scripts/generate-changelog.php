@@ -79,7 +79,7 @@ class ChangelogGenerator
     private function formatChangelog(array $commits, ?string $version = null): string
     {
         if (empty($commits)) {
-            return "## No changes\n\n";
+            return ""; // Don't add anything if no commits
         }
 
         $date = date('Y-m-d');
@@ -144,12 +144,33 @@ class ChangelogGenerator
 
     private function prependToChangelog(string $newContent): void
     {
+        // Don't update if no content
+        if (empty(trim($newContent))) {
+            echo "ℹ️  No changes to add to changelog\n";
+            return;
+        }
+
         $existingContent = '';
         if (file_exists($this->changelogFile)) {
             $existingContent = file_get_contents($this->changelogFile);
         }
 
-        $fullContent = $newContent . "\n" . $existingContent;
+        // Find the end of the header section (after the description line)
+        $lines = explode("\n", $existingContent);
+        $insertIndex = 0;
+        
+        // Look for the end of the header (after "See [standard-version]...")
+        for ($i = 0; $i < count($lines); $i++) {
+            if (strpos($lines[$i], 'See [standard-version]') !== false) {
+                $insertIndex = $i + 1;
+                break;
+            }
+        }
+        
+        // Insert the new content after the header
+        array_splice($lines, $insertIndex, 0, ['', $newContent]);
+        
+        $fullContent = implode("\n", $lines);
         file_put_contents($this->changelogFile, $fullContent);
 
         echo "✅ Changelog updated: {$this->changelogFile}\n";
