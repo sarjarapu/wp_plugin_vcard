@@ -11,14 +11,20 @@ final class GeoPoint
         if ($this->lat !== null) {
             if (! is_finite($this->lat) || $this->lat < -90.0 || $this->lat > 90.0) {
                 throw new \InvalidArgumentException(
-                    sprintf('Invalid latitude %s: must be a finite number between -90 and 90.', (string) $this->lat)
+                    sprintf(
+                        'Invalid latitude %s: must be a finite number between -90 and 90.',
+                        esc_html((string) $this->lat)
+                    )
                 );
             }
         }
         if ($this->lng !== null) {
             if (! is_finite($this->lng) || $this->lng < -180.0 || $this->lng > 180.0) {
                 throw new \InvalidArgumentException(
-                    sprintf('Invalid longitude %s: must be a finite number between -180 and 180.', (string) $this->lng)
+                    sprintf(
+                        'Invalid longitude %s: must be a finite number between -180 and 180.',
+                        esc_html((string) $this->lng)
+                    )
                 );
             }
         }

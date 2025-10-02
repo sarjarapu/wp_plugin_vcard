@@ -188,18 +188,22 @@ class _1_0_0_CreateBase implements Migration
         $jsonPath = __DIR__ . '/../../../../data/json/minisites/' . $jsonFile;
 
         if (! file_exists($jsonPath)) {
-            throw new \RuntimeException("JSON file not found: {$jsonPath}");
+            throw new \RuntimeException('JSON file not found: ' . esc_html($jsonPath));
         }
 
         $jsonContent = file_get_contents($jsonPath);
         $data        = json_decode($jsonContent, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException("Invalid JSON in file: {$jsonFile}. Error: " . json_last_error_msg());
+            throw new \RuntimeException(
+                'Invalid JSON in file: ' . esc_html($jsonFile) . '. Error: ' . esc_html(json_last_error_msg())
+            );
         }
 
         if (! isset($data['minisite'])) {
-            throw new \RuntimeException("Invalid JSON structure in file: {$jsonFile}. Missing 'minisite' property.");
+            throw new \RuntimeException(
+                'Invalid JSON structure in file: ' . esc_html($jsonFile) . '. Missing \'minisite\' property.'
+            );
         }
 
         $minisiteData = $data['minisite'];
