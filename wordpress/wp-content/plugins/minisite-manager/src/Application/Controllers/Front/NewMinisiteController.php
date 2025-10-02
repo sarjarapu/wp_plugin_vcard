@@ -81,7 +81,6 @@ final class NewMinisiteController
 
         try {
             // Use database transaction to prevent race conditions
-            global $wpdb;
             db::query('START TRANSACTION');
 
             // Generate unique ID and temporary slug
@@ -180,9 +179,7 @@ final class NewMinisiteController
             exit;
         } catch (\Exception $e) {
             // Rollback on error
-            if (isset($wpdb)) {
-                db::query('ROLLBACK');
-            }
+            db::query('ROLLBACK');
             error_log('Draft creation error: ' . $e->getMessage());
             wp_redirect('/account/sites/new?error=' . urlencode('Failed to create draft: ' . $e->getMessage()));
             exit;
@@ -604,15 +601,11 @@ final class NewMinisiteController
             }
 
             // Check if combination is currently reserved by another user
-            $existingReservation = $wpdb->get_row(
-                $wpdb->prepare(
-                    "SELECT * FROM {$reservationsTable} 
+            $existingReservation = db::get_row(
+                "SELECT * FROM {$reservationsTable} 
                  WHERE business_slug = %s AND location_slug = %s 
                  AND expires_at > NOW() AND user_id != %d",
-                    $businessSlug,
-                    $locationSlug,
-                    $userId
-                )
+                [$businessSlug, $locationSlug, $userId]
             );
 
             if ($existingReservation) {
@@ -622,28 +615,21 @@ final class NewMinisiteController
             }
 
             // If user already has a reservation for this slug, extend it
-            $userReservation = $wpdb->get_row(
-                $wpdb->prepare(
-                    "SELECT * FROM {$reservationsTable} 
+            $userReservation = db::get_row(
+                "SELECT * FROM {$reservationsTable} 
                  WHERE business_slug = %s AND location_slug = %s 
                  AND user_id = %d AND expires_at > NOW()",
-                    $businessSlug,
-                    $locationSlug,
-                    $userId
-                )
+                [$businessSlug, $locationSlug, $userId]
             );
 
             if ($userReservation) {
                 // Extend existing reservation
                 $newExpiresAt = date('Y-m-d H:i:s', strtotime('+5 minutes'));
-                $wpdb->query(
-                    $wpdb->prepare(
-                        "UPDATE {$reservationsTable} 
+                db::query(
+                    "UPDATE {$reservationsTable} 
                      SET expires_at = %s, created_at = NOW() 
                      WHERE id = %d",
-                        $newExpiresAt,
-                        $userReservation->id
-                    )
+                    [$newExpiresAt, $userReservation->id]
                 );
 
                 db::query('COMMIT');
@@ -664,7 +650,7 @@ final class NewMinisiteController
             $expiresAt = date('Y-m-d H:i:s', strtotime('+5 minutes'));
             $userId    = get_current_user_id();
 
-            $result = $wpdb->insert(
+            $result = db::insert(
                 $reservationsTable,
                 array(
                     'business_slug' => $businessSlug,
@@ -682,7 +668,7 @@ final class NewMinisiteController
                 return;
             }
 
-            $reservationId = $wpdb->insert_id;
+            $reservationId = db::get_insert_id();
 
             db::query('COMMIT');
 
@@ -695,9 +681,7 @@ final class NewMinisiteController
                 )
             );
         } catch (\Exception $e) {
-            if (isset($wpdb)) {
-                db::query('ROLLBACK');
-            }
+            db::query('ROLLBACK');
             wp_send_json_error('Failed to reserve slug: ' . $e->getMessage(), 500);
         }
     }
@@ -765,13 +749,10 @@ final class NewMinisiteController
 
             // Clean up any existing reservation for this slug combination
             $reservationsTable = $wpdb->prefix . 'minisite_reservations';
-            $wpdb->query(
-                $wpdb->prepare(
-                    "DELETE FROM {$reservationsTable} 
+            db::query(
+                "DELETE FROM {$reservationsTable} 
                  WHERE business_slug = %s AND location_slug = %s",
-                    $businessSlug,
-                    $locationSlug
-                )
+                [$businessSlug, $locationSlug]
             );
 
             // Create payment record
@@ -791,9 +772,7 @@ final class NewMinisiteController
                 )
             );
         } catch (\Exception $e) {
-            if (isset($wpdb)) {
-                db::query('ROLLBACK');
-            }
+            db::query('ROLLBACK');
             wp_send_json_error('Failed to publish minisite: ' . $e->getMessage(), 500);
         }
     }
@@ -809,7 +788,7 @@ final class NewMinisiteController
         $expiresAt         = date('Y-m-d H:i:s', strtotime('+1 year'));
         $gracePeriodEndsAt = date('Y-m-d H:i:s', strtotime('+1 year +1 month'));
 
-        $wpdb->insert(
+        db::insert(
             $wpdb->prefix . 'minisite_payments',
             array(
                 'minisite_id'          => $minisiteId,
@@ -841,7 +820,7 @@ final class NewMinisiteController
             )
         );
 
-        return (int) $wpdb->insert_id;
+        return (int) db::get_insert_id();
     }
 
     /**
@@ -887,14 +866,12 @@ final class NewMinisiteController
 
             // Check if minisite already has an active subscription
             $paymentsTable   = $wpdb->prefix . 'minisite_payments';
-            $existingPayment = $wpdb->get_row(
-                $wpdb->prepare(
-                    "SELECT * FROM {$paymentsTable} 
+            $existingPayment = db::get_row(
+                "SELECT * FROM {$paymentsTable} 
                  WHERE minisite_id = %s 
                  AND status IN ('active', 'grace_period') 
                  AND expires_at > NOW()",
-                    $minisiteId
-                )
+                [$minisiteId]
             );
 
             if ($existingPayment) {
@@ -992,11 +969,9 @@ final class NewMinisiteController
             // Clean up reservation
             if ($reservationId) {
                 $reservationsTable = $wpdb->prefix . 'minisite_reservations';
-                $wpdb->query(
-                    $wpdb->prepare(
-                        "DELETE FROM {$reservationsTable} WHERE id = %s",
-                        $reservationId
-                    )
+                db::query(
+                    "DELETE FROM {$reservationsTable} WHERE id = %s",
+                    [$reservationId]
                 );
             }
 
@@ -1091,13 +1066,11 @@ final class NewMinisiteController
 
         try {
             // Get current expiration date (if any)
-            $currentExpiration = $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT expires_at FROM {$wpdb->prefix}minisite_payments 
+            $currentExpiration = db::get_var(
+                "SELECT expires_at FROM {$wpdb->prefix}minisite_payments 
                  WHERE minisite_id = %s AND status = 'active' 
                  ORDER BY expires_at DESC LIMIT 1",
-                    $minisiteId
-                )
+                [$minisiteId]
             );
 
             // Calculate new expiration date using WordPress current_time()
@@ -1110,7 +1083,7 @@ final class NewMinisiteController
             $this->minisiteRepository->publishMinisite($minisiteId);
 
             // Create payment record
-            $paymentId = $wpdb->insert(
+            $paymentId = db::insert(
                 $wpdb->prefix . 'minisite_payments',
                 array(
                     'minisite_id'          => $minisiteId,
@@ -1148,7 +1121,7 @@ final class NewMinisiteController
                 throw new \Exception('Failed to create payment record');
             }
 
-            $paymentId = $wpdb->insert_id;
+            $paymentId = db::get_insert_id();
 
             // Create payment history record
             $this->createPaymentHistoryRecord($minisiteId, $paymentId, 'initial_payment', 'order_' . $orderId);
@@ -1156,11 +1129,9 @@ final class NewMinisiteController
             // Clean up reservation
             if ($reservationId) {
                 $reservationsTable = $wpdb->prefix . 'minisite_reservations';
-                $wpdb->query(
-                    $wpdb->prepare(
-                        "DELETE FROM {$reservationsTable} WHERE id = %s",
-                        $reservationId
-                    )
+                db::query(
+                    "DELETE FROM {$reservationsTable} WHERE id = %s",
+                    [$reservationId]
                 );
             }
 
@@ -1185,7 +1156,7 @@ final class NewMinisiteController
         $expiresAt         = date('Y-m-d H:i:s', strtotime('+1 year'));
         $gracePeriodEndsAt = date('Y-m-d H:i:s', strtotime('+1 year +1 month'));
 
-        $wpdb->insert(
+        db::insert(
             $wpdb->prefix . 'minisite_payment_history',
             array(
                 'minisite_id'          => $minisiteId,
