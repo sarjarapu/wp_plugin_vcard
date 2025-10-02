@@ -1,6 +1,8 @@
 <?php
-
-// phpcs:ignore WordPress.Files.FileName.InvalidClassFileName,Generic.Files.OneObjectStructurePerFile -- Main plugin file with mixed declarations and side effects
+/**
+ * @codingStandardsIgnoreFile
+ * Main plugin file with mixed declarations and side effects - this is acceptable for WordPress plugin main files
+ */
 
 /**
  * Plugin Name: Minisite Manager
@@ -1394,3 +1396,4 @@ add_action('wp_ajax_publish_version', function () {
                             wp_send_json_error('Failed to sync roles: ' . $e->getMessage(), 500);
                         }
                     });
+// phpcs:ignore PSR1.Files.SideEffects.FoundWithSymbols -- Main plugin file with mixed declarations and side effects

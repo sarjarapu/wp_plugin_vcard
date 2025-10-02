@@ -7,6 +7,7 @@ use Minisite\Infrastructure\Versioning\Support\DbDelta;
 use Minisite\Infrastructure\Utils\SqlLoader;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
+// phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps -- Migration class with version-based naming convention
 class _1_0_0_CreateBase implements Migration
 {
     public function version(): string
