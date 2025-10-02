@@ -25,6 +25,10 @@ class MigrationRunnerIntegrationTest extends TestCase
 
         // Setup database helper
         $this->dbHelper = new DatabaseTestHelper();
+        
+        // Set global $wpdb for DatabaseHelper to use
+        global $wpdb;
+        $wpdb = $this->dbHelper->getWpdb();
 
         // Create locator and runner
         $this->locator = new MigrationLocator($this->tempMigrationsDir);
@@ -172,7 +176,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         };
 
         // Act
-        $runner->upgradeTo($this->dbHelper->getWpdb(), $logger);
+        $runner->upgradeTo($logger);
 
         // Assert - Only the first migration should run (up to target version)
         $this->assertCount(1, $loggedMessages);
@@ -208,7 +212,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         };
 
         // Act
-        $this->runner->downgradeTo($this->dbHelper->getWpdb(), '1.0.0', $logger);
+        $this->runner->downgradeTo('1.0.0', $logger);
 
         // Assert
         $this->assertCount(1, $loggedMessages);
@@ -254,6 +258,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         $this->assertStringContainsString('Reverting', $loggedMessages[0]);
 
         // Verify table was removed
+        $wpdb = $this->dbHelper->getWpdb();
         $tableExists = $wpdb->get_var("SHOW TABLES LIKE 'test_users'");
         $this->assertNull($tableExists, 'Users table should be removed');
 
@@ -303,6 +308,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         $wpdb = $this->dbHelper->getWpdb();
 
         // Check users table
+        $wpdb = $this->dbHelper->getWpdb();
         $tableExists = $wpdb->get_var("SHOW TABLES LIKE 'test_users'");
         $this->assertNotNull($tableExists, 'Users table should exist');
 
@@ -359,7 +365,7 @@ class MigrationRunnerIntegrationTest extends TestCase
 
         // Act & Assert - Should throw exception
         $this->expectException(\Exception::class);
-        $this->runner->upgradeTo($this->dbHelper->getWpdb());
+        $this->runner->upgradeTo();
     }
 
     /**
@@ -378,6 +384,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         $content = "<?php 
             namespace Minisite\Infrastructure\Versioning\Migrations;
             use Minisite\Infrastructure\Versioning\Contracts\Migration;
+            use Minisite\Infrastructure\Utils\DatabaseHelper as db;
             
             class {$className} implements Migration {
                 public function version(): string { 
@@ -386,11 +393,11 @@ class MigrationRunnerIntegrationTest extends TestCase
                 public function description(): string { 
                     return '{$description}'; 
                 }
-                public function up(\wpdb \$wpdb): void {
-                    \$wpdb->query('{$upSql}');
+                public function up(): void {
+                    db::query('{$upSql}');
                 }
-                public function down(\wpdb \$wpdb): void {
-                    \$wpdb->query('{$downSql}');
+                public function down(): void {
+                    db::query('{$downSql}');
                 }
             }
         ";

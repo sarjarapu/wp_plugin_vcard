@@ -16,8 +16,9 @@ class _2_0_0_TestBreaking implements Migration
         return 'Test breaking changes migration for unit testing';
     }
 
-    public function up(\wpdb $wpdb): void
+    public function up(): void
     {
+        global $wpdb;
         // Simulate breaking changes by dropping and recreating tables
         $wpdb->query("DROP TABLE IF EXISTS test_initial_table");
         $wpdb->query("DROP TABLE IF EXISTS test_features_table");
@@ -33,8 +34,9 @@ class _2_0_0_TestBreaking implements Migration
         )");
     }
 
-    public function down(\wpdb $wpdb): void
+    public function down(): void
     {
+        global $wpdb;
         $wpdb->query("DROP TABLE IF EXISTS test_v2_table");
 
         // Restore original tables (simplified)

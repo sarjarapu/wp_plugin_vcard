@@ -16,8 +16,9 @@ class _1_1_0_TestFeatures implements Migration
         return 'Test features migration for unit testing';
     }
 
-    public function up(\wpdb $wpdb): void
+    public function up(): void
     {
+        global $wpdb;
         $wpdb->query("CREATE TABLE IF NOT EXISTS test_features_table (
             id INT AUTO_INCREMENT PRIMARY KEY,
             feature_name VARCHAR(255) NOT NULL,
@@ -28,8 +29,9 @@ class _1_1_0_TestFeatures implements Migration
         $wpdb->query("ALTER TABLE test_initial_table ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP");
     }
 
-    public function down(\wpdb $wpdb): void
+    public function down(): void
     {
+        global $wpdb;
         $wpdb->query("DROP TABLE IF EXISTS test_features_table");
         // Only drop column if table exists
         $result = $wpdb->get_results("SHOW TABLES LIKE 'test_initial_table'");

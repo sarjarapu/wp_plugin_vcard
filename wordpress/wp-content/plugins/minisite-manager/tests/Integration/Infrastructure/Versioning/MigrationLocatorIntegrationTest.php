@@ -87,14 +87,17 @@ class MigrationLocatorIntegrationTest extends TestCase
 
         // Test that the migration can be executed (up method)
         $wpdb = $this->dbHelper->getWpdb();
-        $migration->up($wpdb);
+        // Set the global $wpdb for the migration to use
+        global $wpdb;
+        $wpdb = $this->dbHelper->getWpdb();
+        $migration->up();
 
         // Verify table was created
         $tableExists = $wpdb->get_var("SHOW TABLES LIKE 'test_table'");
         $this->assertNotNull($tableExists);
 
         // Test rollback (down method)
-        $migration->down($wpdb);
+        $migration->down();
 
         // Verify table was dropped
         $tableExists = $wpdb->get_var("SHOW TABLES LIKE 'test_table'");
@@ -218,8 +221,8 @@ class MigrationLocatorIntegrationTest extends TestCase
             class ConflictTest1 implements Migration {
                 public function version(): string { return "1.0.0"; }
                 public function description(): string { return "First conflict"; }
-                public function up(\wpdb $wpdb): void {}
-                public function down(\wpdb $wpdb): void {}
+                public function up(): void {}
+                public function down(): void {}
             }
         ');
 
@@ -230,8 +233,8 @@ class MigrationLocatorIntegrationTest extends TestCase
             class ConflictTest2 implements Migration {
                 public function version(): string { return "1.1.0"; }
                 public function description(): string { return "Second conflict"; }
-                public function up(\wpdb $wpdb): void {}
-                public function down(\wpdb $wpdb): void {}
+                public function up(): void {}
+                public function down(): void {}
             }
         ');
 
@@ -270,10 +273,12 @@ class MigrationLocatorIntegrationTest extends TestCase
                 public function description(): string { 
                     return '{$description}'; 
                 }
-                public function up(\wpdb \$wpdb): void {
+                public function up(): void {
+                    global \$wpdb;
                     \$wpdb->query('{$upSql}');
                 }
-                public function down(\wpdb \$wpdb): void {
+                public function down(): void {
+                    global \$wpdb;
                     \$wpdb->query('{$downSql}');
                 }
             }

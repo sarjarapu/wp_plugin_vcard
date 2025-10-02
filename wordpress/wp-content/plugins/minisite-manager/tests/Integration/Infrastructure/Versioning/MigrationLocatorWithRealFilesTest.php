@@ -103,7 +103,7 @@ class MigrationLocatorWithRealFilesTest extends TestCase
         foreach ($migrations as $migration) {
             // Test that up() method can be called without errors
             $this->expectNotToPerformAssertions();
-            $migration->up($wpdb);
+            $migration->up();
         }
     }
 
@@ -118,7 +118,7 @@ class MigrationLocatorWithRealFilesTest extends TestCase
         foreach ($migrations as $migration) {
             // Test that down() method can be called without errors
             $this->expectNotToPerformAssertions();
-            $migration->down($wpdb);
+            $migration->down();
         }
     }
 

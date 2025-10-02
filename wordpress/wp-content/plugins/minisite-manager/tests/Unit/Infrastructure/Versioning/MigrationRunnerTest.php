@@ -212,7 +212,7 @@ class MigrationRunnerTest extends TestCase
             $loggedMessages[] = $msg;
         };
 
-        $runner->upgradeTo($this->mockWpdb, $logger);
+        $runner->upgradeTo($logger);
 
         $this->assertCount(2, $loggedMessages);
         $this->assertStringContainsString('1.1.0', $loggedMessages[0]);
@@ -275,7 +275,7 @@ class MigrationRunnerTest extends TestCase
             ->willReturn([$mockMigration]);
 
         // Should not throw any exceptions with default logger
-        $this->runner->upgradeTo($this->mockWpdb);
+        $this->runner->upgradeTo();
 
         $this->assertTrue(true, 'Should complete without errors');
     }

@@ -16,8 +16,9 @@ class _1_0_0_TestInitial implements Migration
         return 'Test initial migration for unit testing';
     }
 
-    public function up(\wpdb $wpdb): void
+    public function up(): void
     {
+        global $wpdb;
         $wpdb->query("CREATE TABLE IF NOT EXISTS test_initial_table (
             id INT AUTO_INCREMENT PRIMARY KEY,
             name VARCHAR(255) NOT NULL,
@@ -25,8 +26,9 @@ class _1_0_0_TestInitial implements Migration
         )");
     }
 
-    public function down(\wpdb $wpdb): void
+    public function down(): void
     {
+        global $wpdb;
         $wpdb->query("DROP TABLE IF EXISTS test_initial_table");
     }
 }
