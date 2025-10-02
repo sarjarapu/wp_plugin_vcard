@@ -34,8 +34,11 @@ final class NewMinisiteController
         $context = array(
             'page_title'    => 'Create New Minisite',
             'page_subtitle' => 'Start by providing your business and location slugs',
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Display method, form data passed through for template rendering
             'form_data'     => $_POST ?? array(),
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for display only
             'error_msg'     => sanitize_text_field(wp_unslash($_GET['error'] ?? null)),
+            // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for display only
             'success_msg'   => sanitize_text_field(wp_unslash($_GET['success'] ?? null)),
             'user'          => $currentUser,
         );
@@ -989,6 +992,12 @@ final class NewMinisiteController
     {
         if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             wp_send_json_error('Method not allowed', 405);
+            return;
+        }
+
+        // Verify nonce
+        if (! isset($_POST['nonce']) || ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'activate_minisite_subscription')) {
+            wp_send_json_error('Security check failed', 403);
             return;
         }
 

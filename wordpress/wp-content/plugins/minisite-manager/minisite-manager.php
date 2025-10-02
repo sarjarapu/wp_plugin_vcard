@@ -517,7 +517,8 @@ add_action('template_redirect', function () {
                       // Handle form submission
                         if (
                             isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &&
-                            isset($_POST['minisite_nonce'])
+                            isset($_POST['minisite_nonce']) &&
+                            wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_nonce'])), 'minisite_nonce')
                         ) {
                               $newMinisiteCtrl->handleCreateSimple();
                         } else {
@@ -546,6 +547,7 @@ add_action('template_redirect', function () {
                         );
 
                       // Get minisite ID from URL parameter or query var
+                        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for display only, authorization checked below
                         $minisiteId = sanitize_text_field(
                             wp_unslash($_GET['minisite_id'] ?? get_query_var('minisite_site_id') ?? '')
                         );
