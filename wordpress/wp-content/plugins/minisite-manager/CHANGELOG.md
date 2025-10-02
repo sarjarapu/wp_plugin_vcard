@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.1.2] - 2025-10-02
 
+### Bug Fixes
+
+- improve changelog generation and formatting
+
+
+
+## [1.1.2] - 2025-10-02
+
 ### Documentation
 
 - clean up changelog and add proper v1.1.1 release notes
