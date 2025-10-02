@@ -73,13 +73,12 @@ final class DatabaseHelper
      * Same as $wpdb->update() - drop-in replacement
      */
     public static function update(
-        string $table, 
-        array $data, 
-        array $where, 
-        array $format = [], 
+        string $table,
+        array $data,
+        array $where,
+        array $format = [],
         array $where_format = []
-    ): mixed
-    {
+    ): mixed {
         global $wpdb;
         return $wpdb->update($table, $data, $where, $format, $where_format);
     }
