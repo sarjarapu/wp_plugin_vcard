@@ -18,6 +18,7 @@ use Minisite\Application\Controllers\Front\AuthController;
 use Minisite\Application\Controllers\Front\MinisitePageController;
 use Minisite\Application\Controllers\Front\NewMinisiteController;
 use Minisite\Application\Controllers\Front\SitesController;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Minisite\Application\Controllers\Front\VersionController;
 use Minisite\Application\Http\RewriteRegistrar;
 use Minisite\Application\Rendering\TimberRenderer;
@@ -370,10 +371,10 @@ add_filter('minisite_user_owns_profile', function (bool $default, int $userId, s
     global $wpdb;
 
   // Check if user owns the profile (using created_by as owner surrogate for now)
-    $ownerId = $wpdb->get_var($wpdb->prepare(
+    $ownerId = db::get_var(
         "SELECT created_by FROM {$wpdb->prefix}minisites WHERE id = %s",
-        $minisiteId
-    ));
+        [$minisiteId]
+    );
 
     return $ownerId && (int) $ownerId === $userId;
 }, 10, 3);
@@ -388,10 +389,10 @@ add_filter('minisite_profile_is_public', function (bool $default, string $minisi
     global $wpdb;
 
   // Check if profile is published
-    $status = $wpdb->get_var($wpdb->prepare(
+    $status = db::get_var(
         "SELECT status FROM {$wpdb->prefix}minisites WHERE id = %s",
-        $minisiteId
-    ));
+        [$minisiteId]
+    );
 
     return $status === 'published';
 }, 10, 2);
@@ -947,12 +948,10 @@ add_action('wp_ajax_publish_version', function () {
                 }
 
               // Check if already bookmarked
-                $existing = $wpdb->get_var($wpdb->prepare(
-                    "SELECT id FROM {$wpdb->prefix}minisite_bookmarks 
-       WHERE user_id = %d AND minisite_id = %s",
-                    $userId,
-                    $minisiteId
-                ));
+                $existing = db::get_var(
+                    "SELECT id FROM {$wpdb->prefix}minisite_bookmarks WHERE user_id = %d AND minisite_id = %s",
+                    [$userId, $minisiteId]
+                );
 
                 if ($existing) {
                     wp_send_json_error('Already bookmarked', 400);
@@ -960,7 +959,7 @@ add_action('wp_ajax_publish_version', function () {
                 }
 
               // Add bookmark
-                $result = $wpdb->insert(
+                $result = db::insert(
                     $wpdb->prefix . 'minisite_bookmarks',
                     [
                     'user_id' => $userId,
@@ -1007,7 +1006,7 @@ add_action('wp_ajax_publish_version', function () {
                     global $wpdb;
 
                   // Remove bookmark
-                    $result = $wpdb->delete(
+                    $result = db::delete(
                         $wpdb->prefix . 'minisite_bookmarks',
                         [
                         'user_id' => $userId,

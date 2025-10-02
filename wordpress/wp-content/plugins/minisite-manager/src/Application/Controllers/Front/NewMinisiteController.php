@@ -9,6 +9,7 @@ use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Infrastructure\Utils\ReservationCleanup;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 final class NewMinisiteController
 {
@@ -81,7 +82,7 @@ final class NewMinisiteController
         try {
             // Use database transaction to prevent race conditions
             global $wpdb;
-            $wpdb->query('START TRANSACTION');
+            db::query('START TRANSACTION');
 
             // Generate unique ID and temporary slug
             $minisiteId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
@@ -167,7 +168,7 @@ final class NewMinisiteController
             $this->versionRepository->save($version);
 
             // Commit transaction
-            $wpdb->query('COMMIT');
+            db::query('COMMIT');
 
             // Redirect to edit screen
             wp_redirect(
@@ -180,7 +181,7 @@ final class NewMinisiteController
         } catch (\Exception $e) {
             // Rollback on error
             if (isset($wpdb)) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
             }
             error_log('Draft creation error: ' . $e->getMessage());
             wp_redirect('/account/sites/new?error=' . urlencode('Failed to create draft: ' . $e->getMessage()));
@@ -518,14 +519,9 @@ final class NewMinisiteController
             }
 
             // Check if combination is currently reserved
-            $reservation = $wpdb->get_row(
-                $wpdb->prepare(
-                    "SELECT * FROM {$reservationsTable} 
-                 WHERE business_slug = %s AND location_slug = %s 
-                 AND expires_at > NOW()",
-                    $businessSlug,
-                    $locationSlug
-                )
+            $reservation = db::get_row(
+                "SELECT * FROM {$reservationsTable} WHERE business_slug = %s AND location_slug = %s AND expires_at > NOW()",
+                [$businessSlug, $locationSlug]
             );
 
             if ($reservation) {
@@ -593,7 +589,7 @@ final class NewMinisiteController
             $reservationsTable = $wpdb->prefix . 'minisite_reservations';
             $userId            = get_current_user_id();
 
-            $wpdb->query('START TRANSACTION');
+            db::query('START TRANSACTION');
 
             // Clean up expired reservations first
             ReservationCleanup::cleanupExpired();
@@ -601,7 +597,7 @@ final class NewMinisiteController
             // Check if combination already exists (with row lock)
             $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
             if ($existingMinisite) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
                 wp_send_json_error('This slug combination is no longer available', 409);
                 return;
             }
@@ -619,7 +615,7 @@ final class NewMinisiteController
             );
 
             if ($existingReservation) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
                 wp_send_json_error('This slug combination is currently reserved by another user', 409);
                 return;
             }
@@ -649,7 +645,7 @@ final class NewMinisiteController
                     )
                 );
 
-                $wpdb->query('COMMIT');
+                db::query('COMMIT');
 
                 wp_send_json_success(
                     array(
@@ -680,14 +676,14 @@ final class NewMinisiteController
             );
 
             if ($result === false) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
                 wp_send_json_error('Failed to create reservation', 500);
                 return;
             }
 
             $reservationId = $wpdb->insert_id;
 
-            $wpdb->query('COMMIT');
+            db::query('COMMIT');
 
             wp_send_json_success(
                 array(
@@ -699,7 +695,7 @@ final class NewMinisiteController
             );
         } catch (\Exception $e) {
             if (isset($wpdb)) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
             }
             wp_send_json_error('Failed to reserve slug: ' . $e->getMessage(), 500);
         }
@@ -737,19 +733,19 @@ final class NewMinisiteController
 
         try {
             global $wpdb;
-            $wpdb->query('START TRANSACTION');
+            db::query('START TRANSACTION');
 
             // Get the draft minisite
             $draftMinisite = $this->minisiteRepository->findById($minisiteId);
             if (! $draftMinisite) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
                 wp_send_json_error('Draft minisite not found', 404);
                 return;
             }
 
             // Check if user owns this draft
             if ($draftMinisite->createdBy !== get_current_user_id()) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
                 wp_send_json_error('Unauthorized', 403);
                 return;
             }
@@ -757,7 +753,7 @@ final class NewMinisiteController
             // Check if slug combination is still available
             $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
             if ($existingMinisite && $existingMinisite->id !== $minisiteId) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
                 wp_send_json_error('This slug combination is no longer available', 409);
                 return;
             }
@@ -783,7 +779,7 @@ final class NewMinisiteController
             // Create payment history record
             $this->createPaymentHistoryRecord($minisiteId, $paymentId, 'initial_payment', $paymentReference);
 
-            $wpdb->query('COMMIT');
+            db::query('COMMIT');
 
             wp_send_json_success(
                 array(
@@ -795,7 +791,7 @@ final class NewMinisiteController
             );
         } catch (\Exception $e) {
             if (isset($wpdb)) {
-                $wpdb->query('ROLLBACK');
+                db::query('ROLLBACK');
             }
             wp_send_json_error('Failed to publish minisite: ' . $e->getMessage(), 500);
         }
@@ -977,7 +973,7 @@ final class NewMinisiteController
         global $wpdb;
 
         try {
-            $wpdb->query('START TRANSACTION');
+            db::query('START TRANSACTION');
 
             // Update minisite status to published
             $minisiteRepo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
@@ -1003,9 +999,9 @@ final class NewMinisiteController
                 );
             }
 
-            $wpdb->query('COMMIT');
+            db::query('COMMIT');
         } catch (\Exception $e) {
-            $wpdb->query('ROLLBACK');
+            db::query('ROLLBACK');
             throw $e;
         }
     }
@@ -1090,7 +1086,7 @@ final class NewMinisiteController
             throw new \Exception('Invalid slug format');
         }
 
-        $wpdb->query('START TRANSACTION');
+        db::query('START TRANSACTION');
 
         try {
             // Get current expiration date (if any)
@@ -1167,9 +1163,9 @@ final class NewMinisiteController
                 );
             }
 
-            $wpdb->query('COMMIT');
+            db::query('COMMIT');
         } catch (\Exception $e) {
-            $wpdb->query('ROLLBACK');
+            db::query('ROLLBACK');
             throw $e;
         }
     }
