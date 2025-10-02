@@ -187,7 +187,7 @@ class SqlLoaderTest extends TestCase
         $this->mockDbDeltaFunction();
 
         // Test that loadAndExecute calls loadAndProcess and then DbDelta::run
-        SqlLoader::loadAndExecute($mockWpdb, $this->testSqlPath, [
+        SqlLoader::loadAndExecute($this->testSqlPath, [
             'prefix' => 'wp_',
             'charset' => 'utf8mb4_unicode_ci'
         ]);
@@ -220,7 +220,7 @@ class SqlLoaderTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('SQL file not found');
 
-        SqlLoader::loadAndExecute($mockWpdb, 'nonexistent_file.sql', []);
+        SqlLoader::loadAndExecute('nonexistent_file.sql', []);
     }
 
     private function mockDbDeltaFunction(): void

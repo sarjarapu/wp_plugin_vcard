@@ -290,10 +290,10 @@ class MigrationLocatorTest extends TestCase
                 public function description(): string { 
                     return '{$description}'; 
                 }
-                public function up(\wpdb \$wpdb): void {
+                public function up(): void {
                     // Migration up logic
                 }
-                public function down(\wpdb \$wpdb): void {
+                public function down(): void {
                     // Migration down logic
                 }
             }
