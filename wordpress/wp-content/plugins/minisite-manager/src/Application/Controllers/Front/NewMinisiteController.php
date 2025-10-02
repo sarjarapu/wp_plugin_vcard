@@ -996,7 +996,8 @@ final class NewMinisiteController
         }
 
         // Verify nonce
-        if (! isset($_POST['nonce']) || ! wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'activate_minisite_subscription')) {
+        $nonce = sanitize_text_field(wp_unslash($_POST['nonce'] ?? ''));
+        if (! isset($_POST['nonce']) || ! wp_verify_nonce($nonce, 'activate_minisite_subscription')) {
             wp_send_json_error('Security check failed', 403);
             return;
         }

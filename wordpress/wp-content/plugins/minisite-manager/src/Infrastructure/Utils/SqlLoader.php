@@ -40,12 +40,12 @@ class SqlLoader
         $fullPath = self::getFullPath($sqlFilePath);
 
         if (! file_exists($fullPath)) {
-            throw new \InvalidArgumentException("SQL file not found: {$fullPath}");
+            throw new \InvalidArgumentException('SQL file not found: ' . esc_html($fullPath));
         }
 
         $sql = file_get_contents($fullPath);
         if ($sql === false) {
-            throw new \RuntimeException("Failed to read SQL file: {$fullPath}");
+            throw new \RuntimeException('Failed to read SQL file: ' . esc_html($fullPath));
         }
 
         return self::replaceVariables($sql, $variables);
