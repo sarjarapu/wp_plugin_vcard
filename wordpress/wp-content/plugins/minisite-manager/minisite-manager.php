@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:ignore WordPress.Files.FileName.InvalidClassFileName,Generic.Files.OneObjectStructurePerFile -- Main plugin file with mixed declarations and side effects
+
 /**
  * Plugin Name: Minisite Manager
  * Description: Internal plugin powering business mini-sites (profiles) with revisions, templates,
