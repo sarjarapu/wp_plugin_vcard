@@ -118,31 +118,91 @@ final class TimberRendererTest extends TestCase
         if (!function_exists('esc_html')) {
             eval('function esc_html($text) { return htmlspecialchars($text, ENT_QUOTES, "UTF-8"); }');
         }
+
+        if (!function_exists('get_template_directory')) {
+            eval('function get_template_directory() { return "/tmp"; }');
+        }
+
+        if (!function_exists('get_stylesheet_directory')) {
+            eval('function get_stylesheet_directory() { return "/tmp"; }');
+        }
+
+        if (!function_exists('get_theme_root')) {
+            eval('function get_theme_root() { return "/tmp"; }');
+        }
+
+        if (!function_exists('get_theme_roots')) {
+            eval('function get_theme_roots() { return ["/tmp"]; }');
+        }
+
+        if (!function_exists('apply_filters')) {
+            eval('function apply_filters($tag, $value) { return $value; }');
+        }
+
+        if (!function_exists('do_action')) {
+            eval('function do_action($tag) { return; }');
+        }
+
+        if (!function_exists('apply_filters_deprecated')) {
+            eval('function apply_filters_deprecated($tag, $value, $version, $replacement = null) { return $value; }');
+        }
     }
 
     public function testRenderWithTimberAvailable(): void
     {
-        // Since we can't easily mock Timber class, we'll test the fallback path
-        // which is more reliable for unit testing
-        $this->testRenderFallbackWhenTimberNotAvailable();
+        // Test the render method by testing the individual components
+        // Since we can't easily mock the static Timber class, we'll test the logic flow
+        
+        // Test that the method calls the right components
+        $reflection = new \ReflectionClass($this->renderer);
+        
+        // Test that getMinisiteData works correctly
+        $getMinisiteDataMethod = $reflection->getMethod('getMinisiteData');
+        $getMinisiteDataMethod->setAccessible(true);
+        $context = $getMinisiteDataMethod->invoke($this->renderer, $this->testMinisite);
+        
+        // Verify the context contains expected data
+        $this->assertIsArray($context);
+        $this->assertArrayHasKey('minisite', $context);
+        $this->assertArrayHasKey('reviews', $context);
+        $this->assertInstanceOf(\Minisite\Domain\Entities\Minisite::class, $context['minisite']);
+        $this->assertEquals($this->testMinisite->id, $context['minisite']->id);
+        $this->assertEquals($this->testMinisite->title, $context['minisite']->title);
+        $this->assertIsArray($context['reviews']);
     }
 
     public function testRenderFallbackWhenTimberNotAvailable(): void
     {
-        // Test the renderFallback method directly since it's more reliable
-        $reflection = new \ReflectionClass($this->renderer);
-        $method = $reflection->getMethod('renderFallback');
-        $method->setAccessible(true);
+        // Create a new renderer instance to ensure Timber class doesn't exist
+        $renderer = new TimberRenderer('v2025');
+        
+        // Ensure Timber class doesn't exist for this test
+        if (class_exists('Timber\\Timber')) {
+            // We can't easily remove a class, so we'll test the fallback path directly
+            $reflection = new \ReflectionClass($renderer);
+            $method = $reflection->getMethod('renderFallback');
+            $method->setAccessible(true);
 
-        // Capture output
-        ob_start();
-        $method->invoke($this->renderer, $this->testMinisite);
-        $output = ob_get_clean();
+            // Capture output
+            ob_start();
+            $method->invoke($renderer, $this->testMinisite);
+            $output = ob_get_clean();
 
-        // Assert fallback HTML is generated
-        $this->assertStringContainsString('<!doctype html>', $output);
-        $this->assertStringContainsString('Test Minisite Title', $output);
-        $this->assertStringContainsString('Test Minisite Name', $output);
+            // Assert fallback HTML is generated
+            $this->assertStringContainsString('<!doctype html>', $output);
+            $this->assertStringContainsString('Test Minisite Title', $output);
+            $this->assertStringContainsString('Test Minisite Name', $output);
+        } else {
+            // If Timber doesn't exist, test the full render method
+            ob_start();
+            $renderer->render($this->testMinisite);
+            $output = ob_get_clean();
+
+            // Assert fallback HTML is generated
+            $this->assertStringContainsString('<!doctype html>', $output);
+            $this->assertStringContainsString('Test Minisite Title', $output);
+            $this->assertStringContainsString('Test Minisite Name', $output);
+        }
     }
 
     public function testGetMinisiteData(): void
@@ -261,13 +321,59 @@ final class TimberRendererTest extends TestCase
 
     public function testRegisterTimberLocations(): void
     {
+        // Mock the Timber class to test location registration
+        if (!class_exists('Timber\\Timber')) {
+            eval('
+                namespace Timber {
+                    class Timber {
+                        public static $locations = [];
+                    }
+                }
+            ');
+        }
+
         $reflection = new \ReflectionClass($this->renderer);
         $method = $reflection->getMethod('registerTimberLocations');
         $method->setAccessible(true);
 
-        // This method modifies static properties, so we just test it doesn't throw
+        // Store original locations
+        $originalLocations = \Timber\Timber::$locations ?? [];
+
+        // Call the method
         $method->invoke($this->renderer);
 
-        $this->assertTrue(true); // If we get here without exception, the test passes
+        // Verify that the plugin template directory was added
+        $this->assertIsArray(\Timber\Timber::$locations);
+        $this->assertContains(
+            trailingslashit(\MINISITE_PLUGIN_DIR) . 'templates/timber',
+            \Timber\Timber::$locations
+        );
+
+        // Restore original locations
+        \Timber\Timber::$locations = $originalLocations;
+    }
+
+    public function testConstructorSetsVariant(): void
+    {
+        $renderer = new TimberRenderer('v2024');
+        
+        // Use reflection to access the private variant property
+        $reflection = new \ReflectionClass($renderer);
+        $property = $reflection->getProperty('variant');
+        $property->setAccessible(true);
+        
+        $this->assertSame('v2024', $property->getValue($renderer));
+    }
+
+    public function testConstructorUsesDefaultVariant(): void
+    {
+        $renderer = new TimberRenderer();
+        
+        // Use reflection to access the private variant property
+        $reflection = new \ReflectionClass($renderer);
+        $property = $reflection->getProperty('variant');
+        $property->setAccessible(true);
+        
+        $this->assertSame('v2025', $property->getValue($renderer));
     }
 }
