@@ -58,18 +58,29 @@ fi
 
 echo -e "${GREEN} ✅ All pre-release checks passed!${NC}"
 
-# Get current version
-CURRENT_VERSION=$(composer version --no-format)
+# Get current version from plugin header
+CURRENT_VERSION=$(grep "Version:" minisite-manager.php | sed 's/.*Version:[[:space:]]*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/')
 echo -e "${GRAY} 📋 Current version: ${CURRENT_VERSION}${NC}"
 
-# Bump version
+# Bump version manually
 echo -e "${CYAN} 📈 Bumping version...${NC}"
-if [ "$DRY_RUN" = "true" ]; then
-    echo -e "${GRAY} 🔍 DRY RUN: Would bump version to next ${VERSION_TYPE}${NC}"
-    NEW_VERSION=$(composer version ${VERSION_TYPE} --dry-run --no-format)
-else
-    NEW_VERSION=$(composer version ${VERSION_TYPE} --no-format)
-fi
+IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+case $VERSION_TYPE in
+    "major")
+        NEW_VERSION="$((MAJOR + 1)).0.0"
+        ;;
+    "minor")
+        NEW_VERSION="${MAJOR}.$((MINOR + 1)).0"
+        ;;
+    "patch")
+        NEW_VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+        ;;
+    *)
+        echo -e "${RED} ❌ Invalid version type: ${VERSION_TYPE}${NC}"
+        exit 1
+        ;;
+esac
 
 echo -e "${GREEN} ✅ Version bumped to: ${NEW_VERSION}${NC}"
 
