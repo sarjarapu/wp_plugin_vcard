@@ -1,14 +1,28 @@
-## No changes
-
-
-## No changes
-
-
 # Changelog
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [1.0.0](https://github.com/your-org/minisite-manager/compare/v0.0.0...v1.0.0) (2024-01-01)
+## [1.1.0](https://github.com/your-org/minisite-manager/compare/v0.10.0...v1.1.0) (2025-10-02)
+
+### Features
+
+* **Admin Interface Refactoring**: Extracted HTML from SubscriptionController into modern Twig template
+* **Modern UI Design**: Upgraded admin subscription page with Tailwind CSS styling
+* **Improved Code Architecture**: Better separation of concerns between controllers and templates
+
+### Code Quality
+
+* **PHPStan Configuration**: Fixed memory limits and ignore patterns for WordPress compatibility
+* **Release Process**: Improved automated release script with proper version bumping
+* **Template System**: Consistent Twig template usage following established patterns
+
+### Technical
+
+* Enhanced SubscriptionController with Timber/Twig rendering
+* Improved maintainability and code organization
+* Better error handling and fallback mechanisms
+
+## [1.0.0](https://github.com/your-org/minisite-manager/compare/v0.0.0...v1.0.0) (2025-09-12)
 
 ### Features
 
