@@ -439,7 +439,8 @@ class _1_0_0_CreateBaseTest extends TestCase
         // Mock other methods
         $mockWpdb->method('query')->willReturn(true);
         $mockWpdb->method('insert')->willReturn(true);
-        $mockWpdb->insert_id = 123;
+        // @phpstan-ignore-next-line - Dynamic property assignment for mock object
+        @$mockWpdb->insert_id = 123;
         $mockWpdb->method('get_row')->willReturn([
             'id' => 'test-minisite-123',
             'business_slug' => 'test-business',
@@ -690,10 +691,12 @@ class _1_0_0_CreateBaseTest extends TestCase
         $mockWpdb = $this->createMock(\wpdb::class);
 
         // Mock the prefix property
-        $mockWpdb->prefix = 'wp_';
+        // @phpstan-ignore-next-line - Dynamic property assignment for mock object
+        @$mockWpdb->prefix = 'wp_';
         
         // Mock the insert_id property
-        $mockWpdb->insert_id = 123;
+        // @phpstan-ignore-next-line - Dynamic property assignment for mock object
+        @$mockWpdb->insert_id = 123;
 
         // Mock the query method to return true (success)
         $mockWpdb->method('query')->willReturn(true);
