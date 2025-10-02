@@ -43,7 +43,7 @@ if (!defined('ABSPATH')) {
 define('MINISITE_PLUGIN_FILE', __FILE__);
 define('MINISITE_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('MINISITE_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('MINISITE_DB_VERSION', '1.1.0');        // target schema version
+define('MINISITE_DB_VERSION', '1.0.1');        // target schema version
 define('MINISITE_DB_OPTION', 'minisite_db_version');
 define('MINISITE_DEFAULT_TEMPLATE', 'v2025');
 // Environment: set to true in production to prevent destructive dev resets
