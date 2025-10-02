@@ -358,6 +358,7 @@ class VersioningControllerIntegrationTest extends TestCase
         $content = "<?php
 namespace Minisite\Infrastructure\Versioning\Migrations;
 use Minisite\Infrastructure\Versioning\Contracts\Migration;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 class {$uniqueClassName} implements Migration {
     public function version(): string {
@@ -368,12 +369,12 @@ class {$uniqueClassName} implements Migration {
         return '{$description}';
     }
     
-    public function up(\\wpdb \$wpdb): void {
-        \$wpdb->query('{$escapedUpSql}');
+    public function up(): void {
+        db::query('{$escapedUpSql}');
     }
     
-    public function down(\\wpdb \$wpdb): void {
-        \$wpdb->query('{$escapedDownSql}');
+    public function down(): void {
+        db::query('{$escapedDownSql}');
     }
 }
 ";
