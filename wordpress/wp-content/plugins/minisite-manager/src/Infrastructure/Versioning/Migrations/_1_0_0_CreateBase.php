@@ -34,49 +34,42 @@ class _1_0_0_CreateBase implements Migration
 
         // ——— minisites (live) ———
         SqlLoader::loadAndExecute(
-            $wpdb,
             'minisites.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
 
         // ——— versions (new versioning system) ———
         SqlLoader::loadAndExecute(
-            $wpdb,
             'minisite_versions.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
 
         // ——— reviews ———
         SqlLoader::loadAndExecute(
-            $wpdb,
             'minisite_reviews.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
 
         // ——— bookmarks ———
         SqlLoader::loadAndExecute(
-            $wpdb,
             'minisite_bookmarks.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
 
         // ——— payments (single payment for slug ownership + 1 year public access) ———
         SqlLoader::loadAndExecute(
-            $wpdb,
             'minisite_payments.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
 
         // ——— payment history (for renewals and reclamations) ———
         SqlLoader::loadAndExecute(
-            $wpdb,
             'minisite_payment_history.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
 
         // Reservations table for 5-minute slug reservations
         SqlLoader::loadAndExecute(
-            $wpdb,
             'minisite_reservations.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
@@ -154,7 +147,7 @@ class _1_0_0_CreateBase implements Migration
         );
 
         // Create MySQL event for auto-cleanup of expired reservations
-        SqlLoader::loadAndExecute($wpdb, 'event_purge_reservations.sql', SqlLoader::createStandardVariables($wpdb));
+        SqlLoader::loadAndExecute('event_purge_reservations.sql', SqlLoader::createStandardVariables($wpdb));
 
         // —— dev seed: insert two test minisites + revisions + reviews ——
         $this->seedTestData();

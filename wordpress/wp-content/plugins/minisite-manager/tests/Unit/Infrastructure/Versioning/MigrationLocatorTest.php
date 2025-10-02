@@ -136,8 +136,8 @@ class MigrationLocatorTest extends TestCase
             class TestExternalMigration implements Migration {
                 public function version(): string { return "1.0.0"; }
                 public function description(): string { return "External migration"; }
-                public function up(\wpdb $wpdb): void {}
-                public function down(\wpdb $wpdb): void {}
+                public function up(): void {}
+                public function down(): void {}
             }
         ');
 
@@ -258,8 +258,8 @@ class MigrationLocatorTest extends TestCase
             class TestCustomNamespaceMigration implements Migration {
                 public function version(): string { return "1.0.0"; }
                 public function description(): string { return "Custom namespace migration"; }
-                public function up(\wpdb $wpdb): void {}
-                public function down(\wpdb $wpdb): void {}
+                public function up(): void {}
+                public function down(): void {}
             }
         ');
         $locator = new MigrationLocator($this->tempMigrationsDir);

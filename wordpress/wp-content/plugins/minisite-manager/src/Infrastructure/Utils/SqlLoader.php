@@ -17,7 +17,7 @@ class SqlLoader
      * @throws \InvalidArgumentException If SQL file doesn't exist
      * @throws \RuntimeException If SQL file cannot be read
      */
-    public static function loadAndExecute($wpdb, string $sqlFilePath, array $variables = array()): void
+    public static function loadAndExecute(string $sqlFilePath, array $variables = array()): void
     {
         // Reuse loadAndProcess to get the processed SQL
         $processedSql = self::loadAndProcess($sqlFilePath, $variables);
