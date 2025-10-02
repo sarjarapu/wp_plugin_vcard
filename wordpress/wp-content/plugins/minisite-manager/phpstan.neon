@@ -6,14 +6,10 @@ parameters:
     - tests
     - vendor
   ignoreErrors:
-    - '#Call to an undefined method#'
     - '#Function .* not found#'
     - '#Constant .* not found#'
     - '#Access to an undefined property#'
     - '#Method .* invoked with .* parameters#'
-    - '#Parameter .* of function .* expects .* given#'
-    - '#Cannot call method .* on .*#'
-    - '#Argument of an invalid type .* supplied for foreach#'
     - '#PHPDoc tag .* references unknown parameter#'
     - '#return type has no value type specified in iterable type#'
     - '#has parameter .* with no value type specified in iterable type#'
