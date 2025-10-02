@@ -2,6 +2,8 @@
 
 namespace Minisite\Application\Controllers\Admin;
 
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
+
 final class SubscriptionController
 {
     /**
@@ -140,13 +142,9 @@ final class SubscriptionController
             $slug       = $order->get_meta('_slug');
 
             // Get subscription details
-            $subscription = $wpdb->get_row(
-                $wpdb->prepare(
-                    "SELECT * FROM {$wpdb->prefix}minisite_payments 
-                 WHERE minisite_id = %s AND woocommerce_order_id = %d",
-                    $minisiteId,
-                    $order->get_id()
-                )
+            $subscription = db::get_row(
+                "SELECT * FROM {$wpdb->prefix}minisite_payments WHERE minisite_id = %s AND woocommerce_order_id = %d",
+                [$minisiteId, $order->get_id()]
             );
 
             $result[] = array(

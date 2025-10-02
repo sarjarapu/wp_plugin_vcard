@@ -4,6 +4,7 @@ namespace Minisite\Application\Controllers\Front;
 
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 class VersionController
 {
@@ -299,50 +300,25 @@ class VersionController
             throw new \Exception('Version not found');
         }
 
-        $wpdb->query('START TRANSACTION');
+        db::query('START TRANSACTION');
 
         try {
             // Move current published version to draft
-            $wpdb->query(
-                $wpdb->prepare(
-                    "UPDATE {$wpdb->prefix}minisite_versions 
-                 SET status = 'draft' 
-                 WHERE minisite_id = %s AND status = 'published'",
-                    $minisiteId
-                )
+            db::query(
+                "UPDATE {$wpdb->prefix}minisite_versions SET status = 'draft' WHERE minisite_id = %s AND status = 'published'",
+                [$minisiteId]
             );
 
             // Publish new version
-            $wpdb->query(
-                $wpdb->prepare(
-                    "UPDATE {$wpdb->prefix}minisite_versions 
-                 SET status = 'published', published_at = NOW() 
-                 WHERE id = %d",
-                    $versionId
-                )
+            db::query(
+                "UPDATE {$wpdb->prefix}minisite_versions SET status = 'published', published_at = NOW() WHERE id = %d",
+                [$versionId]
             );
 
             // Update profile with published version data and current version ID
-            $wpdb->query(
-                $wpdb->prepare(
-                    "UPDATE {$wpdb->prefix}minisites 
-                 SET site_json = %s, 
-                     title = %s,
-                     name = %s,
-                     city = %s,
-                     region = %s,
-                     country_code = %s,
-                     postal_code = %s,
-                     site_template = %s,
-                     palette = %s,
-                     industry = %s,
-                     default_locale = %s,
-                     schema_version = %d,
-                     site_version = %d,
-                     search_terms = %s,
-                     _minisite_current_version_id = %d, 
-                     updated_at = NOW() 
-                 WHERE id = %s",
+            db::query(
+                "UPDATE {$wpdb->prefix}minisites SET site_json = %s, title = %s, name = %s, city = %s, region = %s, country_code = %s, postal_code = %s, site_template = %s, palette = %s, industry = %s, default_locale = %s, schema_version = %d, site_version = %d, search_terms = %s, _minisite_current_version_id = %d, updated_at = NOW() WHERE id = %s",
+                [
                     wp_json_encode($version->siteJson),
                     $version->title,
                     $version->name,
@@ -359,26 +335,20 @@ class VersionController
                     $version->searchTerms,
                     $versionId,
                     $minisiteId
-                )
+                ]
             );
 
             // Update location_point if geo data exists
             if ($version->geo && $version->geo->lat && $version->geo->lng) {
-                $wpdb->query(
-                    $wpdb->prepare(
-                        "UPDATE {$wpdb->prefix}minisites 
-                     SET location_point = POINT(%f, %f) 
-                     WHERE id = %s",
-                        $version->geo->lng,
-                        $version->geo->lat,
-                        $minisiteId
-                    )
+                db::query(
+                    "UPDATE {$wpdb->prefix}minisites SET location_point = POINT(%f, %f) WHERE id = %s",
+                    [$version->geo->lng, $version->geo->lat, $minisiteId]
                 );
             }
 
-            $wpdb->query('COMMIT');
+            db::query('COMMIT');
         } catch (\Exception $e) {
-            $wpdb->query('ROLLBACK');
+            db::query('ROLLBACK');
             throw $e;
         }
     }
