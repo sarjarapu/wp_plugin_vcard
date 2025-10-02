@@ -5,7 +5,7 @@ namespace Tests\Integration\Infrastructure\Versioning;
 use Minisite\Infrastructure\Versioning\MigrationRunner;
 use Minisite\Infrastructure\Versioning\MigrationLocator;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 use PHPUnit\Framework\TestCase;
 
 #[RunTestsInSeparateProcesses]
@@ -14,7 +14,7 @@ class MigrationRunnerIntegrationTest extends TestCase
     private MigrationRunner $runner;
     private MigrationLocator $locator;
     private string $tempMigrationsDir;
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
     private string $testOptionKey = 'minisite_integration_test_version';
 
     protected function setUp(): void
@@ -24,7 +24,7 @@ class MigrationRunnerIntegrationTest extends TestCase
         mkdir($this->tempMigrationsDir, 0755, true);
 
         // Setup database helper
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
         
         // Set global $wpdb for DatabaseHelper to use
         global $wpdb;

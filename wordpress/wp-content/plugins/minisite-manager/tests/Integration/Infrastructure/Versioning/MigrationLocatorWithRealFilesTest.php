@@ -6,19 +6,19 @@ use Minisite\Infrastructure\Versioning\MigrationLocator;
 use Minisite\Infrastructure\Versioning\Contracts\Migration;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[Group('integration')]
 class MigrationLocatorWithRealFilesTest extends TestCase
 {
     private string $testMigrationsDir;
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
 
     protected function setUp(): void
     {
         // Use the actual test migrations directory
         $this->testMigrationsDir = realpath(__DIR__ . '/../../../Support/TestMigrations');
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
 
         // Clear any previously declared classes
         $this->clearDeclaredClasses();

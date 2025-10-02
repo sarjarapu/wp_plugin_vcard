@@ -3,7 +3,7 @@
 namespace Tests\Integration\Infrastructure\Utils;
 
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 use Minisite\Infrastructure\Utils\DatabaseHelper;
 
 /**
@@ -14,14 +14,14 @@ use Minisite\Infrastructure\Utils\DatabaseHelper;
  */
 class DatabaseHelperIntegrationTest extends TestCase
 {
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
     private string $testTable;
 
     protected function setUp(): void
     {
         parent::setUp();
         
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
         $this->testTable = $this->dbHelper->getWpdb()->prefix . 'test_table';
         
         // Set global $wpdb for DatabaseHelper to use

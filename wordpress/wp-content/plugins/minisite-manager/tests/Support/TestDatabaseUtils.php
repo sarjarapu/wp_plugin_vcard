@@ -6,11 +6,11 @@ use PDO;
 use Tests\Support\FakeWpdb;
 
 /**
- * Database helper for integration tests
+ * Database utilities for integration tests
  *
  * Provides common database connection and setup functionality for MySQL integration tests.
  */
-class DatabaseTestHelper
+class TestDatabaseUtils
 {
     private PDO $pdo;
     private FakeWpdb $wpdb;

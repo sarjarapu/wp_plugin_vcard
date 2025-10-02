@@ -13,18 +13,18 @@ use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[CoversClass(MinisiteRepository::class)]
 final class MinisiteRepositoryIntegrationTest extends TestCase
 {
     private MinisiteRepository $repository;
     private VersionRepository $versionRepository;
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
 
     protected function setUp(): void
     {
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
         $this->dbHelper->cleanupTestTables();
         $this->dbHelper->createAllTables();
 

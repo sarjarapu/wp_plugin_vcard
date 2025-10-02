@@ -3,7 +3,7 @@
 namespace Minisite\Tests\Integration\Infrastructure\Versioning\Migrations;
 
 use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
@@ -20,7 +20,7 @@ use PHPUnit\Framework\TestCase;
 #[RunTestsInSeparateProcesses]
 class _1_0_0_CreateBaseIntegrationTest extends TestCase
 {
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
     private _1_0_0_CreateBase $migration;
     private \wpdb $wpdb;
     private $originalWpdb;
@@ -45,7 +45,7 @@ class _1_0_0_CreateBaseIntegrationTest extends TestCase
         }
 
         // Set up database helper
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
         $this->wpdb = $this->dbHelper->getWpdb();
 
         // Set the global $wpdb to our test database

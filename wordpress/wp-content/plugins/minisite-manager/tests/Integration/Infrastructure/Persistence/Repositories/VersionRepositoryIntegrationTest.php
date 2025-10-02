@@ -11,17 +11,17 @@ use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[CoversClass(VersionRepository::class)]
 final class VersionRepositoryIntegrationTest extends TestCase
 {
     private VersionRepository $repository;
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
 
     protected function setUp(): void
     {
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
         $this->dbHelper->cleanupTestTables();
         $this->dbHelper->createMinisiteVersionsTable();
 

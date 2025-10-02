@@ -7,7 +7,7 @@ use Minisite\Infrastructure\Versioning\MigrationLocator;
 use Minisite\Infrastructure\Versioning\MigrationRunner;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[Group('integration')]
 class VersioningControllerIntegrationTest extends TestCase
@@ -15,7 +15,7 @@ class VersioningControllerIntegrationTest extends TestCase
     private VersioningController $controller;
     private string $testTargetVersion;
     private string $testOptionKey;
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
     private string $tempMigrationsDir;
 
     protected function setUp(): void
@@ -33,7 +33,7 @@ class VersioningControllerIntegrationTest extends TestCase
         $this->controller = $this->createTestVersioningController($this->testTargetVersion, $this->testOptionKey, $this->tempMigrationsDir);
 
         // Setup database helper
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
 
         // Set up global wpdb for VersioningController
         global $wpdb;

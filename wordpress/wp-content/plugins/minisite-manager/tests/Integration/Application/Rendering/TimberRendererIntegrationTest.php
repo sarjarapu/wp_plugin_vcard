@@ -14,14 +14,14 @@ use Minisite\Infrastructure\Persistence\Repositories\ReviewRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[CoversClass(TimberRenderer::class)]
 #[Group('integration')]
 final class TimberRendererIntegrationTest extends TestCase
 {
     private TimberRenderer $renderer;
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
     private Minisite $testMinisite;
     private array $originalGlobals;
 
@@ -35,7 +35,7 @@ final class TimberRendererIntegrationTest extends TestCase
         ];
 
         // Set up database helper
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
         $this->dbHelper->cleanupTestTables();
         $this->dbHelper->createAllTables();
 

@@ -7,14 +7,14 @@ use Minisite\Infrastructure\Versioning\Contracts\Migration;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[RunTestsInSeparateProcesses]
 #[Group('integration')]
 class MigrationLocatorIntegrationTest extends TestCase
 {
     private string $tempMigrationsDir;
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
 
     protected function setUp(): void
     {
@@ -22,7 +22,7 @@ class MigrationLocatorIntegrationTest extends TestCase
         $this->tempMigrationsDir = realpath(sys_get_temp_dir()) . '/minisite_migrations_test_' . uniqid();
         mkdir($this->tempMigrationsDir, 0755, true);
 
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
 
         // Clear any previously declared classes
         $this->clearDeclaredClasses();

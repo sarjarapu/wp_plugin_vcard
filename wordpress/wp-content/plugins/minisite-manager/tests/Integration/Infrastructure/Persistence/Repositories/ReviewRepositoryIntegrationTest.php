@@ -9,17 +9,17 @@ use Minisite\Domain\Entities\Review;
 use Minisite\Infrastructure\Persistence\Repositories\ReviewRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[CoversClass(ReviewRepository::class)]
 final class ReviewRepositoryIntegrationTest extends TestCase
 {
     private ReviewRepository $repository;
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
 
     protected function setUp(): void
     {
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
         $this->dbHelper->cleanupTestTables();
         $this->dbHelper->createMinisiteReviewsTable();
 

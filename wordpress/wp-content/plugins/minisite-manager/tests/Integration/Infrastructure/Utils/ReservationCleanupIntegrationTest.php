@@ -5,12 +5,12 @@ namespace Tests\Integration\Infrastructure\Utils;
 use Minisite\Infrastructure\Utils\ReservationCleanup;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[Group('integration')]
 class ReservationCleanupIntegrationTest extends TestCase
 {
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
     private $originalWpdb;
 
     protected function setUp(): void
@@ -19,7 +19,7 @@ class ReservationCleanupIntegrationTest extends TestCase
         $this->originalWpdb = $GLOBALS['wpdb'] ?? null;
 
         // Set up database helper
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
 
         // Clean up any existing test data
         $this->dbHelper->cleanupTestTables();

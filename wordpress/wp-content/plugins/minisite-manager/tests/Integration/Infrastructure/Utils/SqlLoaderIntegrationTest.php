@@ -5,17 +5,17 @@ namespace Tests\Integration\Infrastructure\Utils;
 use Minisite\Infrastructure\Utils\SqlLoader;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
-use Tests\Support\DatabaseTestHelper;
+use Tests\Support\TestDatabaseUtils;
 
 #[Group('integration')]
 class SqlLoaderIntegrationTest extends TestCase
 {
-    private DatabaseTestHelper $dbHelper;
+    private TestDatabaseUtils $dbHelper;
     private string $testTableName;
 
     protected function setUp(): void
     {
-        $this->dbHelper = new DatabaseTestHelper();
+        $this->dbHelper = new TestDatabaseUtils();
         $this->testTableName = 'wp_test_table_' . uniqid();
         $this->dbHelper->cleanupTestTables();
     }
