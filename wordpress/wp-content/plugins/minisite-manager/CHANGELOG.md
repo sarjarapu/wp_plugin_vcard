@@ -1,7 +1,8 @@
-## No changes
+## [1.1.1] - 2025-10-02
 
+### Bug Fixes
 
-## No changes
+- correct plugin version to 1.1.1 and fix release script
 
 
 # Changelog
