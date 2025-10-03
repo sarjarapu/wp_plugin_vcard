@@ -204,4 +204,29 @@ class TestDatabaseUtils
         $stmt = $this->query($sql, $params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Static method to set up test database
+     */
+    public static function setUpTestDatabase(): void
+    {
+        $instance = new self();
+        $instance->cleanupTestTables();
+        $instance->createAllTables();
+        
+        // Set global wpdb for testing
+        $GLOBALS['wpdb'] = $instance->getWpdb();
+    }
+
+    /**
+     * Static method to tear down test database
+     */
+    public static function tearDownTestDatabase(): void
+    {
+        $instance = new self();
+        $instance->cleanupTestTables();
+        
+        // Clean up global wpdb
+        unset($GLOBALS['wpdb']);
+    }
 }

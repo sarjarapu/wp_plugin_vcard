@@ -6,7 +6,7 @@ use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
 
-final class MinisiteRepository implements MinisiteRepositoryInterface
+class MinisiteRepository implements MinisiteRepositoryInterface
 {
     public function __construct(private \wpdb $db)
     {

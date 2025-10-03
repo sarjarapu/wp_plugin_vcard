@@ -4,18 +4,19 @@ namespace Minisite\Application\Controllers\Front;
 
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 final class MinisitePageController
 {
-    public function __construct(private object $renderer)
-    {
+    public function __construct(
+        private object $renderer,
+        private ?MinisiteRepository $repository = null
+    ) {
     }
 
     public function handle(string $businessSlug, string $locationSlug): void
     {
-        global $wpdb;
-
-        $repo     = new MinisiteRepository($wpdb);
+        $repo = $this->repository ?? new MinisiteRepository(db::getWpdb());
         $minisite = $repo->findBySlugs(new SlugPair($businessSlug, $locationSlug));
 
         if (! $minisite) {

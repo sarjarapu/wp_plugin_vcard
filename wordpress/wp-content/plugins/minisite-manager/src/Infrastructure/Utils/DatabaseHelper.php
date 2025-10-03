@@ -115,4 +115,13 @@ final class DatabaseHelper
         global $wpdb;
         return (int) $wpdb->insert_id;
     }
+
+    /**
+     * Get the global $wpdb object - useful for dependency injection
+     */
+    public static function getWpdb(): object
+    {
+        global $wpdb;
+        return $wpdb;
+    }
 }
