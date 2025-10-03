@@ -859,7 +859,7 @@ add_action('wp_ajax_publish_version', function () {
             return;
         }
 
-        $siteId = (int) (sanitize_text_field(wp_unslash($_POST['site_id'] ?? 0)));
+        $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
         $sourceVersionId = (int) (sanitize_text_field(wp_unslash($_POST['source_version_id'] ?? 0)));
 
         if (!$siteId || !$sourceVersionId) {
