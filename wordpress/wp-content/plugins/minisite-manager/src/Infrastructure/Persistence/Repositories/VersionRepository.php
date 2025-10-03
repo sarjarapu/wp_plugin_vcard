@@ -4,7 +4,7 @@ namespace Minisite\Infrastructure\Persistence\Repositories;
 
 use Minisite\Domain\Entities\Version;
 
-final class VersionRepository implements VersionRepositoryInterface
+class VersionRepository implements VersionRepositoryInterface
 {
     public function __construct(private \wpdb $db)
     {
@@ -24,7 +24,7 @@ final class VersionRepository implements VersionRepositoryInterface
             'label'             => $version->label,
             'comment'           => $version->comment,
             'created_by'        => $version->createdBy,
-            'created_at'        => $version->createdAt?->format('Y-m-d H:i:s'),
+            'created_at'        => $version->createdAt?->format('Y-m-d H:i:s') ?? current_time('mysql'),
             'published_at'      => $version->publishedAt?->format('Y-m-d H:i:s'),
             'source_version_id' => $version->sourceVersionId,
 
