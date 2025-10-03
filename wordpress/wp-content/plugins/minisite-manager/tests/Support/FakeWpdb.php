@@ -97,13 +97,9 @@ class FakeWpdb extends \wpdb
             } elseif (is_null($v)) {
                 return 'NULL';
             } else {
-                // Don't escape JSON strings - they're already properly formatted
+                // Always escape strings for SQL safety, even JSON strings
                 $str = (string)($v ?? '');
-                if (json_decode($str) !== null) {
-                    return "'" . $str . "'";
-                } else {
-                    return "'" . addslashes($str) . "'";
-                }
+                return "'" . addslashes($str) . "'";
             }
         }, $vals);
         $sql = "INSERT INTO {$table} (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . ")";

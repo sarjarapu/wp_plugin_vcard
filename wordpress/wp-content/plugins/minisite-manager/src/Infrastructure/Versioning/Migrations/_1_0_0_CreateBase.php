@@ -303,7 +303,7 @@ class _1_0_0_CreateBase implements Migration
                 $minisiteData['default_locale'],
                 $minisiteData['schema_version'],
                 $minisiteData['site_version'],
-                $minisiteData['site_json'],
+                wp_json_encode($minisiteData['site_json']),
                 $minisiteData['search_terms'],
                 $minisiteData['status'],
                 $minisiteData['publish_status'],
@@ -316,12 +316,12 @@ class _1_0_0_CreateBase implements Migration
             ]
         );
 
-        // Debug: Check if minisite was inserted correctly
-        $debugResult = db::get_row(
-            "SELECT id, business_slug, location_slug, status, _minisite_current_version_id 
-             FROM {$minisitesT} WHERE id = %s",
-            [$minisiteData['id']]
-        );
+        // // Debug: Check if minisite was inserted correctly
+        // $debugResult = db::get_row(
+        //     "SELECT id, business_slug, location_slug, status, _minisite_current_version_id 
+        //      FROM {$minisitesT} WHERE id = %s",
+        //     [$minisiteData['id']]
+        // );
         // error_log("{$name} INSERT DEBUG: " . print_r($debugResult, true));
 
         return $minisiteData['id'];
@@ -409,45 +409,32 @@ class _1_0_0_CreateBase implements Migration
             return;
         }
 
-        // Insert first profile: ACME Dental (Dallas, US)
-        $acmeId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
-        $acme   = $this->loadMinisiteFromJson(
-            'acme-dental.json',
-            array(
-                'id' => $acmeId,
-            )
+        // Insert minisite profiles
+        $minisiteIds = array();
+        $minisiteConfigs = array(
+            'acme-dental.json' => 'ACME',
+            'lotus-textiles.json' => 'LOTUS',
+            'green-bites.json' => 'GREEN',
+            'swift-transit.json' => 'SWIFT'
         );
-        $acmeId = $this->insertMinisite($acme, 'ACME');
 
-        // Insert second profile: Lotus Textiles (Mumbai, IN)
-        $lotusId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
-        $lotus   = $this->loadMinisiteFromJson(
-            'lotus-textiles.json',
-            array(
-                'id' => $lotusId,
-            )
-        );
-        $lotusId = $this->insertMinisite($lotus, 'LOTUS');
+        foreach ($minisiteConfigs as $filename => $prefix) {
+            $id = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
+            $minisite = $this->loadMinisiteFromJson(
+                $filename,
+                array(
+                    'id' => $id,
+                )
+            );
+            // error_log("SEEDING DATA for $prefix: " . print_r($minisite, true));
+            $minisiteIds[$prefix] = $this->insertMinisite($minisite, $prefix);
+        }
 
-        // Insert third profile: Green Bites (London, GB)
-        $greenId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
-        $green   = $this->loadMinisiteFromJson(
-            'green-bites.json',
-            array(
-                'id' => $greenId,
-            )
-        );
-        $greenId = $this->insertMinisite($green, 'GREEN');
-
-        // Insert fourth profile: Swift Transit (Sydney, AU)
-        $swiftId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
-        $swift   = $this->loadMinisiteFromJson(
-            'swift-transit.json',
-            array(
-                'id' => $swiftId,
-            )
-        );
-        $swiftId = $this->insertMinisite($swift, 'SWIFT');
+        // Extract individual IDs for backward compatibility
+        $acmeId = $minisiteIds['ACME'];
+        $lotusId = $minisiteIds['LOTUS'];
+        $greenId = $minisiteIds['GREEN'];
+        $swiftId = $minisiteIds['SWIFT'];
 
         // ——— Versions for each profile (version 1 as published) ———
         $versionsT = $wpdb->prefix . 'minisite_versions';

@@ -69,11 +69,40 @@ class TestDatabaseUtils
             'wp_test_table'
         ];
 
+        // First, drop foreign key constraints to avoid dependency issues
+        $this->dropForeignKeyConstraints();
+
+        // Then drop all tables
         foreach ($tables as $table) {
             try {
                 $this->pdo->exec("DROP TABLE IF EXISTS {$table}");
             } catch (\Exception $e) {
                 // Ignore errors during cleanup
+            }
+        }
+    }
+
+    /**
+     * Drop foreign key constraints to allow table cleanup
+     */
+    private function dropForeignKeyConstraints(): void
+    {
+        $constraints = [
+            'wp_minisite_versions' => ['fk_versions_minisite_id'],
+            'wp_minisite_reviews' => ['fk_reviews_minisite_id'],
+            'wp_minisite_bookmarks' => ['fk_bookmarks_minisite_id'],
+            'wp_minisite_payments' => ['fk_payments_minisite_id', 'fk_payments_user_id'],
+            'wp_minisite_payment_history' => ['fk_payment_history_minisite_id', 'fk_payment_history_payment_id', 'fk_payment_history_new_owner_user_id'],
+            'wp_minisite_reservations' => ['fk_reservations_user_id', 'fk_reservations_minisite_id'],
+        ];
+
+        foreach ($constraints as $table => $constraintNames) {
+            foreach ($constraintNames as $constraintName) {
+                try {
+                    $this->pdo->exec("ALTER TABLE {$table} DROP FOREIGN KEY IF EXISTS {$constraintName}");
+                } catch (\Exception $e) {
+                    // Ignore errors - constraint might not exist
+                }
             }
         }
     }
