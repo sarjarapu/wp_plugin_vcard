@@ -243,53 +243,11 @@ final class SitesController
                         $savedVersion = $versionRepo->save($version);
                         $latestDraft  = $savedVersion;
 
-                        // Update profile coordinates if provided (coordinates are stored on profile, not in versions)
-                        if ($lat !== null && $lng !== null) {
-                            // Only update coordinates, not site_json
-                            $minisiteRepo->updateCoordinates($siteId, $lat, $lng, (int) $currentUser->ID);
-                        }
 
-                        // Update profile title if provided
-                        $newTitle = sanitize_text_field(wp_unslash($_POST['seo_title'] ?? ''));
-                        if (! empty($newTitle) && $newTitle !== $minisite->title) {
-                            $minisiteRepo->updateTitle($siteId, $newTitle);
-                        }
-
-                        // Update other business info fields in main table
-                        $businessInfoFields = array(
-                            'name'           => sanitize_text_field(
-                                wp_unslash($_POST['business_name'] ?? $minisite->name)
-                            ),
-                            'city'           => sanitize_text_field(
-                                wp_unslash($_POST['business_city'] ?? $minisite->city)
-                            ),
-                            'region'         => sanitize_text_field(
-                                wp_unslash($_POST['business_region'] ?? $minisite->region)
-                            ),
-                            'country_code'   => sanitize_text_field(
-                                wp_unslash($_POST['business_country'] ?? $minisite->countryCode)
-                            ),
-                            'postal_code'    => sanitize_text_field(
-                                wp_unslash($_POST['business_postal'] ?? $minisite->postalCode)
-                            ),
-                            'site_template'  => sanitize_text_field(
-                                wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)
-                            ),
-                            'palette'        => sanitize_text_field(
-                                wp_unslash($_POST['brand_palette'] ?? $minisite->palette)
-                            ),
-                            'industry'       => sanitize_text_field(
-                                wp_unslash($_POST['brand_industry'] ?? $minisite->industry)
-                            ),
-                            'default_locale' => sanitize_text_field(
-                                wp_unslash($_POST['default_locale'] ?? $minisite->defaultLocale)
-                            ),
-                            'search_terms'   => sanitize_text_field(
-                                wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms)
-                            ),
-                        );
-
-                        $minisiteRepo->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
+                        // NOTE: We do NOT update the main wp_minisites table with draft data.
+                        // The main table should only contain published data for performance.
+                        // Draft data is stored in wp_minisite_versions table only.
+                        // The main table will be updated when the version is published via publishMinisite().
 
                         db::query('COMMIT');
 
@@ -390,6 +348,7 @@ final class SitesController
         // Handle version-specific preview
         $versionRepo = new VersionRepository($wpdb);
         $siteJson    = null;
+        $version     = null;
 
         if ($versionId === 'current' || ! $versionId) {
             // Show current published version (from profile.siteJson)
@@ -406,6 +365,21 @@ final class SitesController
 
         // Update profile with version-specific data for rendering
         $minisite->siteJson = $siteJson;
+        
+        // If showing a specific version, also update the profile fields from version data
+        if ($version) {
+            $minisite->title = $version->title;
+            $minisite->name = $version->name;
+            $minisite->city = $version->city;
+            $minisite->region = $version->region;
+            $minisite->countryCode = $version->countryCode;
+            $minisite->postalCode = $version->postalCode;
+            $minisite->siteTemplate = $version->siteTemplate;
+            $minisite->palette = $version->palette;
+            $minisite->industry = $version->industry;
+            $minisite->defaultLocale = $version->defaultLocale;
+            $minisite->searchTerms = $version->searchTerms;
+        }
 
         // Use the existing TimberRenderer to render the profile
         if (class_exists('Timber\\Timber') && $this->renderer) {
