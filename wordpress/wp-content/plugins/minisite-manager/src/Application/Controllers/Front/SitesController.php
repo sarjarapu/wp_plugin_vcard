@@ -28,13 +28,31 @@ final class SitesController
         $currentUser = wp_get_current_user();
 
         global $wpdb;
-        $repo = new MinisiteRepository($wpdb);
+        $repo        = new MinisiteRepository($wpdb);
+        $versionRepo = new VersionRepository($wpdb);
 
         // TODO: add pagination and filters
         $sites = $repo->listByOwner((int) $currentUser->ID, 50, 0);
 
         $items = array_map(
-            function ($p) {
+            function ($p) use ($versionRepo) {
+                // For draft minisites, overlay latest draft version data
+                // This ensures the listing shows the most recent changes from wp_minisite_versions
+                // instead of stale data from wp_minisites table
+                if ($p->status === 'draft') {
+                    $latestDraft = $versionRepo->findLatestDraft($p->id);
+                    if ($latestDraft) {
+                        // Overlay draft version fields onto the minisite object
+                        $p->title       = $latestDraft->title ?? $p->title;
+                        $p->name        = $latestDraft->name ?? $p->name;
+                        $p->city        = $latestDraft->city ?? $p->city;
+                        $p->region      = $latestDraft->region ?? $p->region;
+                        $p->countryCode = $latestDraft->countryCode ?? $p->countryCode;
+                        $p->postalCode  = $latestDraft->postalCode ?? $p->postalCode;
+                        $p->updatedAt   = $latestDraft->createdAt ?? $p->updatedAt;
+                    }
+                }
+
                 // Derive presentational fields for v1
                 $route      = home_url(
                     '/b/' . rawurlencode($p->slugs->business) . '/' . rawurlencode($p->slugs->location)

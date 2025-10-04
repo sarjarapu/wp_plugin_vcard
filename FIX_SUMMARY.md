@@ -1,142 +1,136 @@
-# Fix Summary: Location Fields Not Saved on JSON Import
+# Fix Summary: Location Fields Not Displayed on My Sites Listing Page
 
-## Issue Description
-When creating a new minisite draft and importing existing JSON data, the location fields (city, state/region, country, postal code) were not being saved when the user clicked "Save Draft".
+## Issue Description (MIN-5)
+When creating a new minisite draft and importing existing JSON data, the location fields (city, state/region, country, postal code) were populated and saved correctly to the `wp_minisite_versions` table, but the "My Sites" listing page at `/account/sites` continued to show stale/empty location data.
 
 ## Root Cause Analysis
 
-The issue was in the JavaScript import function that populates form fields from imported JSON data. The original `populateBusinessInfoFields` function had several weaknesses:
+The issue was NOT in the import or save functionality - those were working correctly. The problem was in the **listing page query logic**:
 
-1. **Silent failures**: If a field wasn't found or had undefined/null values, it would silently skip without proper logging
-2. **Lack of validation**: No validation for SELECT fields to ensure the option exists before setting
-3. **No change event triggering**: Fields were populated but no change events were triggered, which could cause issues with form validation or other listeners
-4. **Insufficient debugging**: No verification that fields were actually populated after import
+1. **Draft data architecture**: When editing drafts, changes are saved only to `wp_minisite_versions` table (by design)
+2. **Main table intent**: The `wp_minisites` table should only contain published data for performance
+3. **Listing query bug**: The `handleList()` method in `SitesController.php` was fetching ALL minisites from `wp_minisites` table, regardless of status
+4. **Result**: For draft minisites, the listing showed stale data from `wp_minisites` instead of the latest draft data from `wp_minisite_versions`
 
-## Changes Made
+### The Design Pattern
+```
+┌─────────────────────────────────────────────────────┐
+│ wp_minisites (Main Table)                           │
+│ - Stores published minisite data for performance    │
+│ - Updated only when version is published            │
+│ - May contain stale data for draft minisites        │
+└─────────────────────────────────────────────────────┘
+                    │
+                    │ Uses for listing query
+                    ▼
+┌─────────────────────────────────────────────────────┐
+│ LISTING PAGE BUG: Always read from wp_minisites    │
+│ ❌ Shows stale data for draft minisites            │
+└─────────────────────────────────────────────────────┘
 
-### 1. Enhanced Import Function (`account-sites-edit.twig`)
-
-#### Improved `setFieldValue` Helper Function:
-- Added better error logging with `console.warn` for missing fields
-- Added SELECT field validation to check if option exists before setting value
-- Added `dispatchEvent` to trigger change events after setting field values
-- Improved null/undefined handling with clearer console logging
-- Added explicit return values to track success/failure
-
-#### Improved Field Population:
-- Added fallback empty strings for all location fields to ensure consistent behavior
-- Better handling of coordinates with explicit undefined/null checks
-- Added success message logging after completion
-
-#### Added Import Verification:
-- Added a verification step after import that checks and displays the imported location field values
-- Shows an alert with the actual field values imported for user verification
-- Logs field values to console for debugging
-
-### 2. Enhanced Form Submission Logging (`account-sites-edit.twig`)
-
-Added logging in the form submit handler to verify location fields are being submitted:
-```javascript
-const locationFields = {
-  business_name: document.querySelector('#business_name')?.value,
-  business_city: document.querySelector('#business_city')?.value,
-  business_region: document.querySelector('#business_region')?.value,
-  business_country: document.querySelector('#business_country')?.value,
-  business_postal: document.querySelector('#business_postal')?.value
-};
-console.log('Submitting form with location fields:', locationFields);
+┌─────────────────────────────────────────────────────┐
+│ wp_minisite_versions (Versions Table)               │
+│ - Stores ALL draft and published versions           │
+│ - Contains latest draft data                        │
+│ - Updated every time draft is saved                 │
+└─────────────────────────────────────────────────────┘
 ```
 
-### 3. Added Server-Side Logging (`SitesController.php`)
+## Solution
 
-Added error logging in the controller to verify POST data is received:
+Modified the listing query in `SitesController.php::handleList()` to:
+
+1. Check the status of each minisite
+2. For **draft** minisites: Fetch the latest draft version from `wp_minisite_versions` and overlay its data
+3. For **published** minisites: Continue using data from `wp_minisites` (no change needed)
+
+### Code Changes
+
 ```php
-error_log(
-    'EDIT DRAFT - Location fields from POST: ' . print_r(
-        array(
-            'business_name'    => $_POST['business_name'] ?? 'NOT SET',
-            'business_city'    => $_POST['business_city'] ?? 'NOT SET',
-            'business_region'  => $_POST['business_region'] ?? 'NOT SET',
-            'business_country' => $_POST['business_country'] ?? 'NOT SET',
-            'business_postal'  => $_POST['business_postal'] ?? 'NOT SET',
-        ),
-        true
-    )
+// Before: Always used data from wp_minisites
+$items = array_map(
+    function ($p) {
+        // Used $p->city, $p->region, etc. directly
+        // This showed stale data for drafts
+    },
+    $sites
+);
+
+// After: Overlay draft version data for draft minisites
+$items = array_map(
+    function ($p) use ($versionRepo) {
+        // For draft minisites, overlay latest draft version data
+        if ($p->status === 'draft') {
+            $latestDraft = $versionRepo->findLatestDraft($p->id);
+            if ($latestDraft) {
+                $p->title       = $latestDraft->title ?? $p->title;
+                $p->name        = $latestDraft->name ?? $p->name;
+                $p->city        = $latestDraft->city ?? $p->city;
+                $p->region      = $latestDraft->region ?? $p->region;
+                $p->countryCode = $latestDraft->countryCode ?? $p->countryCode;
+                $p->postalCode  = $latestDraft->postalCode ?? $p->postalCode;
+                $p->updatedAt   = $latestDraft->createdAt ?? $p->updatedAt;
+            }
+        }
+        // Now $p has fresh data from latest draft
+    },
+    $sites
 );
 ```
 
-## Field Mapping Verification
+## What This Fixes
 
-The following field mappings are now verified and working correctly:
+### ✅ Draft Minisites
+- Location fields imported from JSON are now visible on listing page
+- Any edits to draft data (title, city, region, etc.) are immediately reflected
+- Updated timestamp shows the latest draft save time
 
-| Export JSON Field    | Import Target Field | Form Field Name    | Controller POST Field |
-|---------------------|--------------------|--------------------|----------------------|
-| `minisite.city`     | `#business_city`   | `business_city`    | `$_POST['business_city']` |
-| `minisite.region`   | `#business_region` | `business_region`  | `$_POST['business_region']` |
-| `minisite.country_code` | `#business_country` | `business_country` | `$_POST['business_country']` |
-| `minisite.postal_code` | `#business_postal` | `business_postal` | `$_POST['business_postal']` |
+### ✅ Published Minisites
+- No change - continues to use performant query from `wp_minisites`
+- Published data is always in sync between both tables
 
 ## Testing Steps
 
-To verify the fix works correctly:
-
-1. **Create a new minisite draft**:
+1. **Create a new draft minisite**:
    - Navigate to `/account/sites/new/`
    - Click "Create Free Draft"
-   - You'll be redirected to the edit page
 
-2. **Import JSON data**:
-   - Click the "Import" button
-   - Select a valid minisite export JSON file
-   - **Verify**: An alert should show the imported location field values
-   - **Check**: Browser console should show "Populating business info fields with data"
+2. **Import JSON or manually edit**:
+   - Import JSON with location data, OR
+   - Manually edit and add city, region, country, postal code
+   - Click "Save Draft"
 
-3. **Verify form population**:
-   - Visually inspect that the Location & Business Info section has populated fields:
-     - Business Name
-     - City
-     - State/Region  
-     - Country
-     - Postal Code
-   - **Check**: Browser console should show "Business info fields populated successfully"
+3. **Verify listing page**:
+   - Navigate back to `/account/sites`
+   - **Expected**: Location column should show the imported/edited location
+   - **Before fix**: Location column showed empty or stale data
 
-4. **Save the draft**:
-   - Click "Save Draft" button
-   - **Check**: Browser console should show "Submitting form with location fields:" with values
-   - **Check**: Server error log should show "EDIT DRAFT - Location fields from POST:" with values
-   - The page should reload with a success message
+4. **Verify updated timestamp**:
+   - The "Updated At" column should show the draft save time
 
-5. **Verify persistence**:
-   - Refresh the page or navigate away and back
-   - Location fields should still contain the imported values
+## Performance Considerations
+
+- **Minimal impact**: The additional query (`findLatestDraft`) is only executed for draft minisites
+- **Published minisites**: No extra queries - maintains original performance
+- **Optimization opportunity**: If many drafts exist, consider adding caching or a single JOIN query
 
 ## Files Modified
 
-1. `wordpress/wp-content/plugins/minisite-manager/templates/timber/views/account-sites-edit.twig`
-   - Enhanced `populateBusinessInfoFields()` function
-   - Added import verification with user feedback
-   - Added form submission logging
+1. `wordpress/wp-content/plugins/minisite-manager/src/Application/Controllers/Front/SitesController.php`
+   - Modified `handleList()` method to overlay draft version data
 
-2. `wordpress/wp-content/plugins/minisite-manager/src/Application/Controllers/Front/SitesController.php`
-   - Added server-side logging for POST data verification
+## Related Architecture
 
-## Debugging
+This fix respects the existing versioning architecture where:
+- Draft changes are isolated in `wp_minisite_versions`
+- `wp_minisites` is updated only on publish via `publishMinisite()`
+- The listing page now correctly shows draft data for drafts and published data for published sites
 
-If issues persist, check the following:
+## Previous Issue Context
 
-1. **Browser Console**: Look for messages like:
-   - "Populating business info fields with data:"
-   - "Set #business_city to: ..."
-   - "Submitting form with location fields:"
-
-2. **Server Error Log**: Look for messages like:
-   - "EDIT DRAFT - Location fields from POST:"
-
-3. **Common Issues**:
-   - If field values show as "NOT SET" in server logs, the form isn't submitting the fields
-   - If field values show as empty strings in browser console, the JSON import may have null/empty values
-   - If console shows "Field not found", check that field IDs match
+Last night's fix prevented draft data from overriding published site data in `wp_minisites`. This fix addresses the opposite side - ensuring draft data IS shown on the listing page where appropriate.
 
 ## Related Issue
 
 - Linear Issue: MIN-5 "Bug: Location fields not saved when importing JSON data to new minisite draft"
+- The title was slightly misleading - fields WERE being saved, just not displayed on the listing page
