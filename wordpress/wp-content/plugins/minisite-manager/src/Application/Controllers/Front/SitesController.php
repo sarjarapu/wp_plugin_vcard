@@ -368,17 +368,19 @@ final class SitesController
         
         // If showing a specific version, also update the profile fields from version data
         if ($version) {
-            $minisite->title = $version->title;
-            $minisite->name = $version->name;
-            $minisite->city = $version->city;
-            $minisite->region = $version->region;
-            $minisite->countryCode = $version->countryCode;
-            $minisite->postalCode = $version->postalCode;
-            $minisite->siteTemplate = $version->siteTemplate;
-            $minisite->palette = $version->palette;
-            $minisite->industry = $version->industry;
-            $minisite->defaultLocale = $version->defaultLocale;
-            $minisite->searchTerms = $version->searchTerms;
+            // Use version data if available, otherwise fall back to existing minisite data
+            // This prevents null assignment errors when version data is incomplete
+            $minisite->title = $version->title ?? $minisite->title;
+            $minisite->name = $version->name ?? $minisite->name;
+            $minisite->city = $version->city ?? $minisite->city;
+            $minisite->region = $version->region ?? $minisite->region;
+            $minisite->countryCode = $version->countryCode ?? $minisite->countryCode;
+            $minisite->postalCode = $version->postalCode ?? $minisite->postalCode;
+            $minisite->siteTemplate = $version->siteTemplate ?? $minisite->siteTemplate;
+            $minisite->palette = $version->palette ?? $minisite->palette;
+            $minisite->industry = $version->industry ?? $minisite->industry;
+            $minisite->defaultLocale = $version->defaultLocale ?? $minisite->defaultLocale;
+            $minisite->searchTerms = $version->searchTerms ?? $minisite->searchTerms;
         }
 
         // Use the existing TimberRenderer to render the profile

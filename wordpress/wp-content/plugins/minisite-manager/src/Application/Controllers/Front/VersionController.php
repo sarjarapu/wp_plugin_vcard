@@ -382,7 +382,23 @@ class VersionController
             createdAt: null,
             publishedAt: null,
             sourceVersionId: $sourceVersionId,
-            siteJson: $sourceVersion->siteJson
+            siteJson: $sourceVersion->siteJson,
+            // Copy all profile fields from source version to ensure preview works correctly
+            slugs: $sourceVersion->slugs,
+            title: $sourceVersion->title,
+            name: $sourceVersion->name,
+            city: $sourceVersion->city,
+            region: $sourceVersion->region,
+            countryCode: $sourceVersion->countryCode,
+            postalCode: $sourceVersion->postalCode,
+            geo: $sourceVersion->geo,
+            siteTemplate: $sourceVersion->siteTemplate,
+            palette: $sourceVersion->palette,
+            industry: $sourceVersion->industry,
+            defaultLocale: $sourceVersion->defaultLocale,
+            schemaVersion: $sourceVersion->schemaVersion,
+            siteVersion: $sourceVersion->siteVersion,
+            searchTerms: $sourceVersion->searchTerms
         );
 
         return $this->versionRepository->save($rollbackVersion);
