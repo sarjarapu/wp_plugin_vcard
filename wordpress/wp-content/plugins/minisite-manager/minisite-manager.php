@@ -522,7 +522,7 @@ add_action('template_redirect', function () {
                         if (
                             isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST' &&
                             isset($_POST['minisite_nonce']) &&
-                            wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_nonce'])), 'minisite_nonce')
+                            wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['minisite_nonce'])), 'minisite_create')
                         ) {
                               $newMinisiteCtrl->handleCreateSimple();
                         } else {

@@ -86,13 +86,13 @@ final class NewMinisiteController
             // Use database transaction to prevent race conditions
             db::query('START TRANSACTION');
 
-            // Generate unique ID and temporary slug
+            // Generate unique ID and draft slugs
             $minisiteId = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
-            $tempSlug   = \Minisite\Domain\Services\MinisiteIdGenerator::generateTempSlug($minisiteId);
-
-            // Generate unique draft slugs to avoid constraint violations
             $draftBusinessSlug = 'biz-' . substr($minisiteId, 0, 8);
             $draftLocationSlug = 'loc-' . substr($minisiteId, 8, 8);
+
+            // Create SlugPair object and use its full() method for the slug
+            $slugs = new SlugPair($draftBusinessSlug, $draftLocationSlug);
 
             // Create empty site JSON structure
             $emptySiteJson = $this->getEmptySiteJson();
@@ -103,7 +103,8 @@ final class NewMinisiteController
             // Create new profile with unique draft slugs
             $minisite = new Minisite(
                 id: $minisiteId,
-                slugs: new SlugPair($draftBusinessSlug, $draftLocationSlug), // Unique draft slugs
+                slug: $slugs->full(), // Use SlugPair's full() method for formatted slug
+                slugs: $slugs, // Unique draft slugs
                 title: 'Untitled Minisite',
                 name: 'Untitled Minisite',
                 city: '',
@@ -120,8 +121,9 @@ final class NewMinisiteController
                 siteJson: $emptySiteJson,
                 searchTerms: null,
                 status: 'draft',
-                createdAt: null,
-                updatedAt: null,
+                publishStatus: 'draft',
+                createdAt: new \DateTimeImmutable(),
+                updatedAt: new \DateTimeImmutable(),
                 publishedAt: null,
                 createdBy: $currentUser->ID,
                 updatedBy: $currentUser->ID,
@@ -132,9 +134,6 @@ final class NewMinisiteController
 
             // Insert new minisite
             $savedMinisite = $this->minisiteRepository->insert($minisite);
-
-            // Update the minisite with the temporary slug
-            $this->minisiteRepository->updateSlug($savedMinisite->id, $tempSlug);
 
             // Create initial version
             $version = new Version(
@@ -149,7 +148,7 @@ final class NewMinisiteController
                 publishedAt: null,
                 sourceVersionId: null,
                 siteJson: $emptySiteJson,
-                slugs: null, // No slugs for draft versions
+                slugs: $slugs, // Use same draft slugs as the minisite
                 title: $savedMinisite->title,
                 name: $savedMinisite->name,
                 city: $savedMinisite->city,
