@@ -171,6 +171,20 @@ final class SitesController
                 $error_msg = 'Security check failed. Please try again.';
             } else {
                 try {
+                    // Debug logging for location fields
+                    error_log(
+                        'EDIT DRAFT - Location fields from POST: ' . print_r(
+                            array(
+                                'business_name'    => $_POST['business_name'] ?? 'NOT SET',
+                                'business_city'    => $_POST['business_city'] ?? 'NOT SET',
+                                'business_region'  => $_POST['business_region'] ?? 'NOT SET',
+                                'business_country' => $_POST['business_country'] ?? 'NOT SET',
+                                'business_postal'  => $_POST['business_postal'] ?? 'NOT SET',
+                            ),
+                            true
+                        )
+                    );
+
                     // Build siteJson from form data
                     $siteJson = $this->buildSiteJsonFromForm($_POST);
 
