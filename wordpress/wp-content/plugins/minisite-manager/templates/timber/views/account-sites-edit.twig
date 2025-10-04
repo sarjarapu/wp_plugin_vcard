@@ -682,6 +682,16 @@
           });
         }
 
+        // Log location field values before submission for debugging
+        const locationFields = {
+          business_name: document.querySelector('#business_name')?.value,
+          business_city: document.querySelector('#business_city')?.value,
+          business_region: document.querySelector('#business_region')?.value,
+          business_country: document.querySelector('#business_country')?.value,
+          business_postal: document.querySelector('#business_postal')?.value
+        };
+        console.log('Submitting form with location fields:', locationFields);
+
         // Set loading state
         isSubmitting = true;
         saveButton.disabled = true;
@@ -837,7 +847,25 @@
                 // Also populate business info fields from minisite data
                 populateBusinessInfoFields(parsedData.minisite);
                 
-                alert('Minisite imported successfully! Review and save your changes.');
+                // Verify location fields were populated
+                setTimeout(() => {
+                  const locationFields = {
+                    city: document.querySelector('#business_city')?.value,
+                    region: document.querySelector('#business_region')?.value,
+                    country: document.querySelector('#business_country')?.value,
+                    postal: document.querySelector('#business_postal')?.value
+                  };
+                  console.log('Location fields after import:', locationFields);
+                  
+                  // Show success message with field values for verification
+                  alert('Minisite imported successfully! Review and save your changes.\n\n' +
+                    'Location fields imported:\n' +
+                    `City: ${locationFields.city || '(empty)'}\n` +
+                    `Region: ${locationFields.region || '(empty)'}\n` +
+                    `Country: ${locationFields.country || '(empty)'}\n` +
+                    `Postal: ${locationFields.postal || '(empty)'}`
+                  );
+                }, 100);
                 
               } catch (jsonError) {
                 console.error('JSON parsing error:', jsonError);
@@ -1048,45 +1076,72 @@
       function populateBusinessInfoFields(minisiteData) {
         console.log('Populating business info fields with data:', minisiteData);
         
-        // Helper function to set field value
+        // Helper function to set field value - allows empty strings
         function setFieldValue(selector, value) {
           const field = document.querySelector(selector);
-          if (field && value !== undefined && value !== null) {
-            if (field.type === 'checkbox') {
-              field.checked = value;
-            } else {
+          if (!field) {
+            console.warn(`Field not found: ${selector}`);
+            return false;
+          }
+          
+          // Allow empty strings but not undefined/null
+          if (value === undefined || value === null) {
+            console.log(`Skipping ${selector} - value is undefined/null`);
+            return false;
+          }
+          
+          // Set the field value
+          if (field.type === 'checkbox') {
+            field.checked = !!value;
+          } else if (field.tagName === 'SELECT') {
+            // For select fields, ensure the option exists before setting
+            const optionExists = Array.from(field.options).some(opt => opt.value === value);
+            if (optionExists) {
               field.value = value;
+              console.log(`Set ${selector} to: "${value}"`);
+            } else {
+              console.warn(`Option "${value}" not found in select ${selector}`);
             }
-            console.log(`Set ${selector} to:`, value);
           } else {
-            console.log(`Field not found or no value: ${selector}`);
+            field.value = String(value);
+            console.log(`Set ${selector} to: "${value}"`);
+          }
+          
+          // Trigger change event to ensure any listeners are notified
+          field.dispatchEvent(new Event('change', { bubbles: true }));
+          return true;
+        }
+        
+        // Populate business info fields - use empty string as fallback for consistent behavior
+        setFieldValue('#business_name', minisiteData.name || '');
+        setFieldValue('#business_city', minisiteData.city || '');
+        setFieldValue('#business_region', minisiteData.region || '');
+        setFieldValue('#business_country', minisiteData.country_code || '');
+        setFieldValue('#business_postal', minisiteData.postal_code || '');
+        setFieldValue('#site_template', minisiteData.site_template || 'v2025');
+        setFieldValue('#default_locale', minisiteData.default_locale || 'en-US');
+        
+        // Populate SEO title (from minisite title)
+        setFieldValue('#seo_title', minisiteData.title || '');
+        
+        // Populate search terms
+        setFieldValue('#search_terms', minisiteData.search_terms || '');
+        
+        // Populate brand fields
+        setFieldValue('#brand_palette', minisiteData.palette || 'blue');
+        setFieldValue('#brand_industry', minisiteData.industry || '');
+        
+        // Populate coordinates if available
+        if (minisiteData.location) {
+          if (minisiteData.location.lat !== undefined && minisiteData.location.lat !== null) {
+            setFieldValue('#contact_lat', minisiteData.location.lat);
+          }
+          if (minisiteData.location.lng !== undefined && minisiteData.location.lng !== null) {
+            setFieldValue('#contact_lng', minisiteData.location.lng);
           }
         }
         
-        // Populate business info fields
-        setFieldValue('#business_name', minisiteData.name);
-        setFieldValue('#business_city', minisiteData.city);
-        setFieldValue('#business_region', minisiteData.region);
-        setFieldValue('#business_country', minisiteData.country_code);
-        setFieldValue('#business_postal', minisiteData.postal_code);
-        setFieldValue('#site_template', minisiteData.site_template);
-        setFieldValue('#default_locale', minisiteData.default_locale);
-        
-        // Populate SEO title (from minisite title)
-        setFieldValue('#seo_title', minisiteData.title);
-        
-        // Populate search terms
-        setFieldValue('#search_terms', minisiteData.search_terms);
-        
-        // Populate brand fields
-        setFieldValue('#brand_palette', minisiteData.palette);
-        setFieldValue('#brand_industry', minisiteData.industry);
-        
-        // Populate coordinates if available
-        if (minisiteData.location && minisiteData.location.lat && minisiteData.location.lng) {
-          setFieldValue('#contact_lat', minisiteData.location.lat);
-          setFieldValue('#contact_lng', minisiteData.location.lng);
-        }
+        console.log('Business info fields populated successfully');
       }
       
       // Helper function to populate dynamic sections
