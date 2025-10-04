@@ -243,11 +243,61 @@ final class SitesController
                         $savedVersion = $versionRepo->save($version);
                         $latestDraft  = $savedVersion;
 
+                        // CONDITIONAL UPDATE: Only update main table for minisites that have never been published
+                        // This fixes the JSON import issue for new minisites while preserving published data
+                        $hasBeenPublished = $versionRepo->findPublishedVersion($siteId) !== null;
+                        
+                        if (!$hasBeenPublished) {
+                            // For new minisites: Update main table so preview works with imported data
+                            $businessInfoFields = array(
+                                'name'           => sanitize_text_field(
+                                    wp_unslash($_POST['business_name'] ?? $minisite->name)
+                                ),
+                                'city'           => sanitize_text_field(
+                                    wp_unslash($_POST['business_city'] ?? $minisite->city)
+                                ),
+                                'region'         => sanitize_text_field(
+                                    wp_unslash($_POST['business_region'] ?? $minisite->region)
+                                ),
+                                'country_code'   => sanitize_text_field(
+                                    wp_unslash($_POST['business_country'] ?? $minisite->countryCode)
+                                ),
+                                'postal_code'    => sanitize_text_field(
+                                    wp_unslash($_POST['business_postal'] ?? $minisite->postalCode)
+                                ),
+                                'site_template'  => sanitize_text_field(
+                                    wp_unslash($_POST['site_template'] ?? $minisite->siteTemplate)
+                                ),
+                                'palette'        => sanitize_text_field(
+                                    wp_unslash($_POST['brand_palette'] ?? $minisite->palette)
+                                ),
+                                'industry'       => sanitize_text_field(
+                                    wp_unslash($_POST['brand_industry'] ?? $minisite->industry)
+                                ),
+                                'default_locale' => sanitize_text_field(
+                                    wp_unslash($_POST['default_locale'] ?? $minisite->defaultLocale)
+                                ),
+                                'search_terms'   => sanitize_text_field(
+                                    wp_unslash($_POST['search_terms'] ?? $minisite->searchTerms)
+                                ),
+                            );
 
-                        // NOTE: We do NOT update the main wp_minisites table with draft data.
-                        // The main table should only contain published data for performance.
-                        // Draft data is stored in wp_minisite_versions table only.
-                        // The main table will be updated when the version is published via publishMinisite().
+                            $minisiteRepo->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
+
+                            // Update coordinates if provided
+                            if ($lat !== null && $lng !== null) {
+                                $minisiteRepo->updateCoordinates($siteId, $lat, $lng, (int) $currentUser->ID);
+                            }
+
+                            // Update title if provided
+                            $newTitle = sanitize_text_field(wp_unslash($_POST['seo_title'] ?? ''));
+                            if (!empty($newTitle) && $newTitle !== $minisite->title) {
+                                $minisiteRepo->updateTitle($siteId, $newTitle);
+                            }
+                        } else {
+                            // For published minisites: Do NOT update main table (preserve published data)
+                            // This is the correct behavior to prevent draft data from overriding published data
+                        }
 
                         db::query('COMMIT');
 
@@ -280,11 +330,29 @@ final class SitesController
             // Use editing version data (should always be available now)
             $siteJson = $editingVersion ? $editingVersion->siteJson : $minisite->siteJson;
 
+            // Create a profile object that combines minisite data with version-specific data
+            // This ensures the form shows the correct data from the version being edited
+            $profileForForm = clone $minisite;
+            if ($editingVersion) {
+                // Override profile fields with version-specific data
+                $profileForForm->title = $editingVersion->title ?? $minisite->title;
+                $profileForForm->name = $editingVersion->name ?? $minisite->name;
+                $profileForForm->city = $editingVersion->city ?? $minisite->city;
+                $profileForForm->region = $editingVersion->region ?? $minisite->region;
+                $profileForForm->countryCode = $editingVersion->countryCode ?? $minisite->countryCode;
+                $profileForForm->postalCode = $editingVersion->postalCode ?? $minisite->postalCode;
+                $profileForForm->siteTemplate = $editingVersion->siteTemplate ?? $minisite->siteTemplate;
+                $profileForForm->palette = $editingVersion->palette ?? $minisite->palette;
+                $profileForForm->industry = $editingVersion->industry ?? $minisite->industry;
+                $profileForForm->defaultLocale = $editingVersion->defaultLocale ?? $minisite->defaultLocale;
+                $profileForForm->searchTerms = $editingVersion->searchTerms ?? $minisite->searchTerms;
+            }
+
             \Timber\Timber::render(
                 'account-sites-edit.twig',
                 array(
                     'page_title'      => 'Edit: ' . $minisite->title,
-                    'profile'         => $minisite,
+                    'profile'         => $profileForForm,
                     'site_json'       => $siteJson,
                     'latest_draft'    => $latestDraft,
                     'editing_version' => $editingVersion,
