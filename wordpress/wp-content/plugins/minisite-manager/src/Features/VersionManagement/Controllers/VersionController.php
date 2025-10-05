@@ -1,0 +1,173 @@
+<?php
+
+namespace Minisite\Features\VersionManagement\Controllers;
+
+use Minisite\Features\VersionManagement\Handlers\CreateDraftHandler;
+use Minisite\Features\VersionManagement\Handlers\ListVersionsHandler;
+use Minisite\Features\VersionManagement\Handlers\PublishVersionHandler;
+use Minisite\Features\VersionManagement\Handlers\RollbackVersionHandler;
+use Minisite\Features\VersionManagement\Http\VersionRequestHandler;
+use Minisite\Features\VersionManagement\Http\VersionResponseHandler;
+use Minisite\Features\VersionManagement\Rendering\VersionRenderer;
+
+/**
+ * Controller for version management operations
+ */
+class VersionController
+{
+    public function __construct(
+        private ListVersionsHandler $listVersionsHandler,
+        private CreateDraftHandler $createDraftHandler,
+        private PublishVersionHandler $publishVersionHandler,
+        private RollbackVersionHandler $rollbackVersionHandler,
+        private VersionRequestHandler $requestHandler,
+        private VersionResponseHandler $responseHandler,
+        private VersionRenderer $renderer
+    ) {
+    }
+
+    /**
+     * Handle listing versions
+     */
+    public function handleListVersions(): void
+    {
+        if (!is_user_logged_in()) {
+            $redirectUrl = isset($_SERVER['REQUEST_URI']) ?
+                sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+            $this->responseHandler->redirectToLogin($redirectUrl);
+            return;
+        }
+
+        $command = $this->requestHandler->parseListVersionsRequest();
+        if (!$command) {
+            $this->responseHandler->redirectToSites();
+            return;
+        }
+
+        try {
+            $versions = $this->listVersionsHandler->handle($command);
+            
+            // Get minisite for rendering
+            $minisite = $this->getMinisiteForRendering($command->siteId);
+            if (!$minisite) {
+                $this->responseHandler->redirectToSites();
+                return;
+            }
+
+            $this->renderer->renderVersionHistory([
+                'page_title' => 'Version History: ' . $minisite->title,
+                'profile' => $minisite,
+                'versions' => $versions,
+            ]);
+        } catch (\Exception $e) {
+            $this->responseHandler->redirectToSites();
+        }
+    }
+
+    /**
+     * Handle creating draft
+     */
+    public function handleCreateDraft(): void
+    {
+        if (!is_user_logged_in()) {
+            $this->responseHandler->sendJsonError('Not authenticated', 401);
+            return;
+        }
+
+        $command = $this->requestHandler->parseCreateDraftRequest();
+        if (!$command) {
+            $this->responseHandler->sendJsonError('Invalid request', 400);
+            return;
+        }
+
+        try {
+            $version = $this->createDraftHandler->handle($command);
+            
+            $this->responseHandler->sendJsonSuccess([
+                'id' => $version->id,
+                'version_number' => $version->versionNumber,
+                'status' => $version->status,
+                'message' => 'Draft created successfully',
+            ]);
+        } catch (\Exception $e) {
+            $this->responseHandler->sendJsonError('Failed to create draft: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Handle publishing version
+     */
+    public function handlePublishVersion(): void
+    {
+        if (!is_user_logged_in()) {
+            $this->responseHandler->sendJsonError('Not authenticated', 401);
+            return;
+        }
+
+        $command = $this->requestHandler->parsePublishVersionRequest();
+        if (!$command) {
+            $this->responseHandler->sendJsonError('Invalid request', 400);
+            return;
+        }
+
+        try {
+            $this->publishVersionHandler->handle($command);
+            
+            $this->responseHandler->sendJsonSuccess([
+                'message' => 'Version published successfully',
+                'published_version_id' => $command->versionId,
+            ]);
+        } catch (\Exception $e) {
+            $this->responseHandler->sendJsonError('Failed to publish version: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Handle rollback version
+     */
+    public function handleRollbackVersion(): void
+    {
+        if (!is_user_logged_in()) {
+            $this->responseHandler->sendJsonError('Not authenticated', 401);
+            return;
+        }
+
+        $command = $this->requestHandler->parseRollbackVersionRequest();
+        if (!$command) {
+            $this->responseHandler->sendJsonError('Invalid request', 400);
+            return;
+        }
+
+        try {
+            $version = $this->rollbackVersionHandler->handle($command);
+            
+            $this->responseHandler->sendJsonSuccess([
+                'id' => $version->id,
+                'version_number' => $version->versionNumber,
+                'status' => $version->status,
+                'message' => 'Rollback draft created',
+            ]);
+        } catch (\Exception $e) {
+            $this->responseHandler->sendJsonError('Failed to create rollback: ' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * Get minisite for rendering (helper method)
+     */
+    private function getMinisiteForRendering(string $siteId): ?object
+    {
+        // This would typically use a repository, but for now we'll use a simple approach
+        // In a real implementation, you'd inject the MinisiteRepository
+        global $wpdb;
+        
+        $result = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}minisites WHERE id = %s",
+                $siteId
+            )
+        );
+        
+        return $result;
+    }
+}

@@ -34,6 +34,7 @@ use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
 use Minisite\Infrastructure\Versioning\VersioningController;
 use Minisite\Features\Authentication\AuthenticationFeature;
 use Minisite\Features\MinisiteDisplay\MinisiteDisplayFeature;
+use Minisite\Features\VersionManagement\VersionManagementFeature;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -442,6 +443,7 @@ add_action('init', function () {
     // Initialize new features with higher priority
     AuthenticationFeature::initialize();
     MinisiteDisplayFeature::initialize();
+    VersionManagementFeature::initialize();
 }, 5);
 
 /**

@@ -135,5 +135,6 @@ Install these extensions:
 
 ## Additional Documentation
 
+- [Feature Development Guide](feature-development-guide.md) - **CRITICAL**: Standards and patterns for new features
 - [Coding Standards](coding-standards.md) - Detailed coding guidelines and standards
 - [Git Hooks](git-hooks.md) - Explanation of pre-commit vs pre-push hooks
