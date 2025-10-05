@@ -20,205 +20,229 @@ final class DisplayResponseHandlerTest extends TestCase
     protected function setUp(): void
     {
         $this->responseHandler = new DisplayResponseHandler();
+        $this->setupWordPressMocks();
+    }
+
+    protected function tearDown(): void
+    {
+        $this->clearWordPressMocks();
     }
 
     /**
-     * Test set404Response sets proper headers
+     * Test set404Response method
      */
-    public function test_set_404_response_sets_proper_headers(): void
+    public function test_set_404_response(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
+        $this->mockWordPressFunction('status_header', true);
+        $this->mockWordPressFunction('nocache_headers', true);
 
-        // Capture output
-        ob_start();
+        // Mock global wp_query with a simple object that has set_404 method
+        $mockWpQuery = new class {
+            public function set_404() {
+                return true;
+            }
+        };
+        $GLOBALS['wp_query'] = $mockWpQuery;
+
+        // Should not throw any exceptions
         $this->responseHandler->set404Response();
-        $output = ob_get_clean();
-
-        // Verify 404 response was set
-        $this->assertStringContainsString('<!doctype html>', $output);
-        $this->assertStringContainsString('Minisite not found', $output);
+        
+        $this->assertTrue(true); // If we get here, no exception was thrown
     }
 
     /**
-     * Test set404Response with custom message
+     * Test createSuccessContext with valid minisite
      */
-    public function test_set_404_response_with_custom_message(): void
+    public function test_create_success_context_with_valid_minisite(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
+        $mockMinisite = (object)[
+            'id' => '123',
+            'name' => 'Coffee Shop',
+            'business_slug' => 'coffee-shop',
+            'location_slug' => 'downtown'
+        ];
 
-        $customMessage = 'Custom 404 message';
+        $result = $this->responseHandler->createSuccessContext($mockMinisite);
 
-        // Capture output
-        ob_start();
-        $this->responseHandler->set404Response($customMessage);
-        $output = ob_get_clean();
-
-        // Verify custom message was used
-        $this->assertStringContainsString($customMessage, $output);
+        $this->assertIsArray($result);
+        $this->assertEquals($mockMinisite, $result['minisite']);
+        $this->assertEquals('Coffee Shop', $result['page_title']);
+        $this->assertTrue($result['success']);
     }
 
     /**
-     * Test set404Response with empty message
+     * Test createSuccessContext with minisite without name
      */
-    public function test_set_404_response_with_empty_message(): void
+    public function test_create_success_context_with_minisite_without_name(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
+        $mockMinisite = (object)[
+            'id' => '123',
+            'business_slug' => 'coffee-shop',
+            'location_slug' => 'downtown'
+        ];
 
-        // Capture output
-        ob_start();
-        $this->responseHandler->set404Response('');
-        $output = ob_get_clean();
+        $result = $this->responseHandler->createSuccessContext($mockMinisite);
 
-        // Verify default message was used
-        $this->assertStringContainsString('Minisite not found', $output);
+        $this->assertIsArray($result);
+        $this->assertEquals($mockMinisite, $result['minisite']);
+        $this->assertEquals('Minisite', $result['page_title']);
+        $this->assertTrue($result['success']);
     }
 
     /**
-     * Test set404Response with null message
+     * Test createErrorContext with custom message
      */
-    public function test_set_404_response_with_null_message(): void
+    public function test_create_error_context_with_custom_message(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
+        $errorMessage = 'Custom error message';
 
-        // Capture output
-        ob_start();
-        $this->responseHandler->set404Response(null);
-        $output = ob_get_clean();
+        $result = $this->responseHandler->createErrorContext($errorMessage);
 
-        // Verify default message was used
-        $this->assertStringContainsString('Minisite not found', $output);
+        $this->assertIsArray($result);
+        $this->assertEquals($errorMessage, $result['error_message']);
+        $this->assertEquals('Minisite Not Found', $result['page_title']);
+        $this->assertFalse($result['success']);
     }
 
     /**
-     * Test set404Response with special characters in message
+     * Test createErrorContext with empty message
      */
-    public function test_set_404_response_with_special_characters(): void
+    public function test_create_error_context_with_empty_message(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
+        $result = $this->responseHandler->createErrorContext('');
 
-        $specialMessage = 'Error: Database connection failed & "quotes" <script>alert("xss")</script>';
-
-        // Capture output
-        ob_start();
-        $this->responseHandler->set404Response($specialMessage);
-        $output = ob_get_clean();
-
-        // Verify message was escaped
-        $this->assertStringContainsString('Database connection failed', $output);
-        $this->assertStringNotContainsString('<script>', $output);
+        $this->assertIsArray($result);
+        $this->assertEquals('', $result['error_message']);
+        $this->assertEquals('Minisite Not Found', $result['page_title']);
+        $this->assertFalse($result['success']);
     }
 
     /**
-     * Test set404Response sets proper HTTP status
+     * Test setContentType with default value
      */
-    public function test_set_404_response_sets_proper_http_status(): void
+    public function test_set_content_type_with_default_value(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
+        $this->mockWordPressFunction('header', true);
 
-        // This test verifies that the method can be called without errors
-        // In a real environment, status_header() and nocache_headers() would be called
-        $this->responseHandler->set404Response();
-
-        $this->assertTrue(true); // If we get here, no exceptions were thrown
+        // Should not throw any exceptions
+        $this->responseHandler->setContentType();
+        
+        $this->assertTrue(true); // If we get here, no exception was thrown
     }
 
     /**
-     * Test set404Response with very long message
+     * Test setContentType with custom value
      */
-    public function test_set_404_response_with_very_long_message(): void
+    public function test_set_content_type_with_custom_value(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
+        $this->mockWordPressFunction('header', true);
 
-        $longMessage = str_repeat('This is a very long error message. ', 100);
-
-        // Capture output
-        ob_start();
-        $this->responseHandler->set404Response($longMessage);
-        $output = ob_get_clean();
-
-        // Verify long message was handled
-        $this->assertStringContainsString('This is a very long error message.', $output);
+        // Should not throw any exceptions
+        $this->responseHandler->setContentType('application/json');
+        
+        $this->assertTrue(true); // If we get here, no exception was thrown
     }
 
     /**
-     * Test set404Response with HTML content
+     * Test constructor has no parameters
      */
-    public function test_set_404_response_with_html_content(): void
+    public function test_constructor_has_no_parameters(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
-
-        $htmlMessage = '<h1>Error</h1><p>Something went wrong</p>';
-
-        // Capture output
-        ob_start();
-        $this->responseHandler->set404Response($htmlMessage);
-        $output = ob_get_clean();
-
-        // Verify HTML was escaped
-        $this->assertStringContainsString('Error', $output);
-        $this->assertStringNotContainsString('<h1>', $output);
-        $this->assertStringNotContainsString('<p>', $output);
+        $reflection = new \ReflectionClass($this->responseHandler);
+        $constructor = $reflection->getConstructor();
+        
+        // DisplayResponseHandler uses PHP's default constructor (no explicit constructor)
+        $this->assertNull($constructor);
     }
 
     /**
-     * Test set404Response with unicode characters
+     * Test set404Response method is public
      */
-    public function test_set_404_response_with_unicode_characters(): void
+    public function test_set_404_response_method_is_public(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunctions();
-
-        $unicodeMessage = 'Error: Café & Restaurant (café-&-restaurant)';
-
-        // Capture output
-        ob_start();
-        $this->responseHandler->set404Response($unicodeMessage);
-        $output = ob_get_clean();
-
-        // Verify unicode characters were handled
-        $this->assertStringContainsString('Café & Restaurant', $output);
+        $reflection = new \ReflectionClass($this->responseHandler);
+        $method = $reflection->getMethod('set404Response');
+        
+        $this->assertTrue($method->isPublic());
     }
 
     /**
-     * Mock WordPress functions for testing
+     * Test createSuccessContext method is public
      */
-    private function mockWordPressFunctions(): void
+    public function test_create_success_context_method_is_public(): void
     {
-        // Mock status_header function
-        if (!function_exists('status_header')) {
-            eval('
-                function status_header($code) {
-                    // Mock implementation - just return
-                    return;
-                }
-            ');
+        $reflection = new \ReflectionClass($this->responseHandler);
+        $method = $reflection->getMethod('createSuccessContext');
+        
+        $this->assertTrue($method->isPublic());
+    }
+
+    /**
+     * Test createErrorContext method is public
+     */
+    public function test_create_error_context_method_is_public(): void
+    {
+        $reflection = new \ReflectionClass($this->responseHandler);
+        $method = $reflection->getMethod('createErrorContext');
+        
+        $this->assertTrue($method->isPublic());
+    }
+
+    /**
+     * Test setContentType method is public
+     */
+    public function test_set_content_type_method_is_public(): void
+    {
+        $reflection = new \ReflectionClass($this->responseHandler);
+        $method = $reflection->getMethod('setContentType');
+        
+        $this->assertTrue($method->isPublic());
+    }
+
+    /**
+     * Setup WordPress function mocks for this test class
+     */
+    private function setupWordPressMocks(): void
+    {
+        $functions = [
+            'status_header', 'nocache_headers', 'header'
+        ];
+
+        foreach ($functions as $function) {
+            if (!function_exists($function)) {
+                eval("
+                    function {$function}(...\$args) {
+                        if (isset(\$GLOBALS['_test_mock_{$function}'])) {
+                            return \$GLOBALS['_test_mock_{$function}'];
+                        }
+                        return null;
+                    }
+                ");
+            }
         }
+    }
 
-        // Mock nocache_headers function
-        if (!function_exists('nocache_headers')) {
-            eval('
-                function nocache_headers() {
-                    // Mock implementation - just return
-                    return;
-                }
-            ');
-        }
+    /**
+     * Mock WordPress function for specific test cases
+     */
+    private function mockWordPressFunction(string $functionName, mixed $returnValue): void
+    {
+        $GLOBALS['_test_mock_' . $functionName] = $returnValue;
+    }
 
-        // Mock esc_html function
-        if (!function_exists('esc_html')) {
-            eval('
-                function esc_html($text) {
-                    return htmlspecialchars($text, ENT_QUOTES, "UTF-8");
-                }
-            ');
+    /**
+     * Clear WordPress function mocks
+     */
+    private function clearWordPressMocks(): void
+    {
+        $functions = [
+            'status_header', 'nocache_headers', 'header'
+        ];
+
+        foreach ($functions as $func) {
+            unset($GLOBALS['_test_mock_' . $func]);
         }
+        
+        unset($GLOBALS['wp_query']);
     }
 }

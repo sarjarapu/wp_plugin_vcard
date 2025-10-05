@@ -216,8 +216,8 @@ final class DisplayHooksFactoryTest extends TestCase
         $reflection = new \ReflectionClass($this->displayHooksFactory);
         $constructor = $reflection->getConstructor();
         
-        $this->assertNotNull($constructor);
-        $this->assertEquals(0, $constructor->getNumberOfParameters());
+        // DisplayHooksFactory uses PHP's default constructor (no explicit constructor)
+        $this->assertNull($constructor);
     }
 
     /**

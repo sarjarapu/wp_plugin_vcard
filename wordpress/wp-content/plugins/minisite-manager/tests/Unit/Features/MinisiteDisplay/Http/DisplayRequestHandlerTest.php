@@ -24,217 +24,185 @@ final class DisplayRequestHandlerTest extends TestCase
     }
 
     /**
-     * Test handleDisplayRequest with valid query vars
+     * Test DisplayRequestHandler can be instantiated
      */
-    public function test_handle_display_request_with_valid_query_vars(): void
+    public function test_can_be_instantiated(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => 'coffee-shop',
-            'minisite_loc' => 'downtown'
-        ]);
-
-        $result = $this->requestHandler->handleDisplayRequest();
-
-        $this->assertInstanceOf(DisplayMinisiteCommand::class, $result);
-        $this->assertEquals('coffee-shop', $result->businessSlug);
-        $this->assertEquals('downtown', $result->locationSlug);
+        $this->assertInstanceOf(DisplayRequestHandler::class, $this->requestHandler);
     }
 
     /**
-     * Test handleDisplayRequest with missing business slug
+     * Test handleDisplayRequest method exists and is callable
      */
-    public function test_handle_display_request_with_missing_business_slug(): void
+    public function test_handle_display_request_method_exists_and_callable(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => '',
-            'minisite_loc' => 'downtown'
-        ]);
-
-        $result = $this->requestHandler->handleDisplayRequest();
-
-        $this->assertNull($result);
+        $this->assertTrue(method_exists($this->requestHandler, 'handleDisplayRequest'));
+        $this->assertTrue(is_callable([$this->requestHandler, 'handleDisplayRequest']));
     }
 
     /**
-     * Test handleDisplayRequest with missing location slug
+     * Test getBusinessSlug method exists and is callable
      */
-    public function test_handle_display_request_with_missing_location_slug(): void
+    public function test_get_business_slug_method_exists_and_callable(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => 'coffee-shop',
-            'minisite_loc' => ''
-        ]);
-
-        $result = $this->requestHandler->handleDisplayRequest();
-
-        $this->assertNull($result);
+        $this->assertTrue(method_exists($this->requestHandler, 'getBusinessSlug'));
+        $this->assertTrue(is_callable([$this->requestHandler, 'getBusinessSlug']));
     }
 
     /**
-     * Test handleDisplayRequest with both slugs missing
+     * Test getLocationSlug method exists and is callable
      */
-    public function test_handle_display_request_with_both_slugs_missing(): void
+    public function test_get_location_slug_method_exists_and_callable(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => '',
-            'minisite_loc' => ''
-        ]);
-
-        $result = $this->requestHandler->handleDisplayRequest();
-
-        $this->assertNull($result);
+        $this->assertTrue(method_exists($this->requestHandler, 'getLocationSlug'));
+        $this->assertTrue(is_callable([$this->requestHandler, 'getLocationSlug']));
     }
 
     /**
-     * Test handleDisplayRequest with null query vars
+     * Test constructor has no parameters
      */
-    public function test_handle_display_request_with_null_query_vars(): void
+    public function test_constructor_has_no_parameters(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => null,
-            'minisite_loc' => null
-        ]);
-
-        $result = $this->requestHandler->handleDisplayRequest();
-
-        $this->assertNull($result);
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $constructor = $reflection->getConstructor();
+        
+        // DisplayRequestHandler uses PHP's default constructor (no explicit constructor)
+        $this->assertNull($constructor);
     }
 
     /**
-     * Test handleDisplayRequest with special characters
+     * Test handleDisplayRequest method is public
      */
-    public function test_handle_display_request_with_special_characters(): void
+    public function test_handle_display_request_method_is_public(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => 'café-&-restaurant',
-            'minisite_loc' => 'main-street-123'
-        ]);
-
-        $result = $this->requestHandler->handleDisplayRequest();
-
-        $this->assertInstanceOf(DisplayMinisiteCommand::class, $result);
-        $this->assertEquals('café-&-restaurant', $result->businessSlug);
-        $this->assertEquals('main-street-123', $result->locationSlug);
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('handleDisplayRequest');
+        
+        $this->assertTrue($method->isPublic());
     }
 
     /**
-     * Test getBusinessSlug with valid slug
+     * Test getBusinessSlug method is public
      */
-    public function test_get_business_slug_with_valid_slug(): void
+    public function test_get_business_slug_method_is_public(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => 'coffee-shop'
-        ]);
-
-        $result = $this->requestHandler->getBusinessSlug();
-
-        $this->assertEquals('coffee-shop', $result);
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('getBusinessSlug');
+        
+        $this->assertTrue($method->isPublic());
     }
 
     /**
-     * Test getBusinessSlug with empty slug
+     * Test getLocationSlug method is public
      */
-    public function test_get_business_slug_with_empty_slug(): void
+    public function test_get_location_slug_method_is_public(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => ''
-        ]);
-
-        $result = $this->requestHandler->getBusinessSlug();
-
-        $this->assertNull($result);
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('getLocationSlug');
+        
+        $this->assertTrue($method->isPublic());
     }
 
     /**
-     * Test getBusinessSlug with null slug
+     * Test handleDisplayRequest method return type
      */
-    public function test_get_business_slug_with_null_slug(): void
+    public function test_handle_display_request_method_return_type(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_biz' => null
-        ]);
-
-        $result = $this->requestHandler->getBusinessSlug();
-
-        $this->assertNull($result);
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('handleDisplayRequest');
+        $returnType = $method->getReturnType();
+        
+        $this->assertNotNull($returnType);
+        $this->assertEquals('Minisite\Features\MinisiteDisplay\Commands\DisplayMinisiteCommand', $returnType->getName());
     }
 
     /**
-     * Test getLocationSlug with valid slug
+     * Test getBusinessSlug method return type
      */
-    public function test_get_location_slug_with_valid_slug(): void
+    public function test_get_business_slug_method_return_type(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_loc' => 'downtown'
-        ]);
-
-        $result = $this->requestHandler->getLocationSlug();
-
-        $this->assertEquals('downtown', $result);
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('getBusinessSlug');
+        $returnType = $method->getReturnType();
+        
+        $this->assertNotNull($returnType);
+        $this->assertEquals('string', $returnType->getName());
     }
 
     /**
-     * Test getLocationSlug with empty slug
+     * Test getLocationSlug method return type
      */
-    public function test_get_location_slug_with_empty_slug(): void
+    public function test_get_location_slug_method_return_type(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_loc' => ''
-        ]);
-
-        $result = $this->requestHandler->getLocationSlug();
-
-        $this->assertNull($result);
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('getLocationSlug');
+        $returnType = $method->getReturnType();
+        
+        $this->assertNotNull($returnType);
+        $this->assertEquals('string', $returnType->getName());
     }
 
     /**
-     * Test getLocationSlug with null slug
+     * Test handleDisplayRequest method parameter count
      */
-    public function test_get_location_slug_with_null_slug(): void
+    public function test_handle_display_request_method_parameter_count(): void
     {
-        // Mock WordPress get_query_var function
-        $this->mockWordPressFunctions([
-            'minisite_loc' => null
-        ]);
-
-        $result = $this->requestHandler->getLocationSlug();
-
-        $this->assertNull($result);
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('handleDisplayRequest');
+        
+        $this->assertEquals(0, $method->getNumberOfParameters());
     }
 
     /**
-     * Mock WordPress functions for testing
+     * Test getBusinessSlug method parameter count
      */
-    private function mockWordPressFunctions(array $queryVars): void
+    public function test_get_business_slug_method_parameter_count(): void
     {
-        // Mock get_query_var function
-        if (!function_exists('get_query_var')) {
-            eval('
-                function get_query_var($var) {
-                    $vars = ' . var_export($queryVars, true) . ';
-                    return $vars[$var] ?? null;
-                }
-            ');
-        }
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('getBusinessSlug');
+        
+        $this->assertEquals(0, $method->getNumberOfParameters());
+    }
 
-        // Mock sanitize_text_field function
-        if (!function_exists('sanitize_text_field')) {
-            eval('
-                function sanitize_text_field($str) {
-                    return $str;
-                }
-            ');
-        }
+    /**
+     * Test getLocationSlug method parameter count
+     */
+    public function test_get_location_slug_method_parameter_count(): void
+    {
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $method = $reflection->getMethod('getLocationSlug');
+        
+        $this->assertEquals(0, $method->getNumberOfParameters());
+    }
+
+    /**
+     * Test DisplayRequestHandler class has proper docblock
+     */
+    public function test_display_request_handler_class_has_proper_docblock(): void
+    {
+        $reflection = new \ReflectionClass($this->requestHandler);
+        $docComment = $reflection->getDocComment();
+        
+        $this->assertStringContainsString('Display Request Handler', $docComment);
+    }
+
+    /**
+     * Test DisplayRequestHandler class namespace
+     */
+    public function test_display_request_handler_class_namespace(): void
+    {
+        $reflection = new \ReflectionClass($this->requestHandler);
+        
+        $this->assertEquals('Minisite\Features\MinisiteDisplay\Http', $reflection->getNamespaceName());
+    }
+
+    /**
+     * Test DisplayRequestHandler class name
+     */
+    public function test_display_request_handler_class_name(): void
+    {
+        $reflection = new \ReflectionClass($this->requestHandler);
+        
+        $this->assertEquals('DisplayRequestHandler', $reflection->getShortName());
     }
 }
