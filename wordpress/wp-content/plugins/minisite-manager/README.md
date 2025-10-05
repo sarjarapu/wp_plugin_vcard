@@ -258,3 +258,4 @@ GitHub Actions automatically:
 ---
 # Test comment
 # Test hook
+# Test hook from repo root
