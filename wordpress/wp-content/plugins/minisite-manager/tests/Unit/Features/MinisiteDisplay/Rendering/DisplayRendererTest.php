@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Features\MinisiteDisplay\Rendering;
 
+use Minisite\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteDisplay\Rendering\DisplayRenderer;
 use PHPUnit\Framework\TestCase;
 
@@ -36,7 +37,7 @@ final class DisplayRendererTest extends TestCase
     public function test_render_minisite_with_valid_minisite_and_timber_renderer(): void
     {
         // Create a proper Minisite entity mock
-        $mockMinisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $mockMinisite = $this->createMock(Minisite::class);
 
         $this->mockTimberRenderer
             ->expects($this->once())
@@ -272,7 +273,7 @@ final class DisplayRendererTest extends TestCase
     public function test_render_minisite_with_timber_renderer_exception(): void
     {
         // Create a proper Minisite entity mock
-        $mockMinisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $mockMinisite = $this->createMock(Minisite::class);
 
         $this->mockTimberRenderer
             ->expects($this->once())

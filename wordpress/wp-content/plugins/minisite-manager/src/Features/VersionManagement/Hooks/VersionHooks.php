@@ -20,7 +20,6 @@ class VersionHooks
     public function register(): void
     {
         // Register AJAX actions for version management
-        add_action('wp_ajax_minisite_list_versions', [$this, 'handleListVersions']);
         add_action('wp_ajax_minisite_create_draft', [$this, 'handleCreateDraft']);
         add_action('wp_ajax_minisite_publish_version', [$this, 'handlePublishVersion']);
         add_action('wp_ajax_minisite_rollback_version', [$this, 'handleRollbackVersion']);
@@ -34,7 +33,9 @@ class VersionHooks
      */
     public function handleVersionHistoryPage(): void
     {
-        if (is_page('account/sites/versions')) {
+        // Check if this is a version management route
+        if ((int) get_query_var('minisite_account') === 1 && 
+            get_query_var('minisite_account_action') === 'versions') {
             $this->versionController->handleListVersions();
             exit;
         }
