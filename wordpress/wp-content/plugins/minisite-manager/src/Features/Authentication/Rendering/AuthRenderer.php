@@ -4,7 +4,7 @@ namespace Minisite\Features\Authentication\Rendering;
 
 /**
  * Auth Renderer
- * 
+ *
  * SINGLE RESPONSIBILITY: Handle template rendering with Timber
  * - Manages Timber template rendering
  * - Handles template context

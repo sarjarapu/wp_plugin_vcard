@@ -11,7 +11,7 @@ use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 
 /**
  * AuthHooks Factory
- * 
+ *
  * SINGLE RESPONSIBILITY: Create and configure AuthHooks with all dependencies
  * - Handles dependency injection
  * - Creates all required services and handlers

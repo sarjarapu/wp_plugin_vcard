@@ -12,13 +12,13 @@ use Minisite\Features\Authentication\Rendering\AuthRenderer;
 
 /**
  * Refactored Auth Controller
- * 
+ *
  * SINGLE RESPONSIBILITY: Coordinate authentication flow
  * - Delegates HTTP handling to AuthRequestHandler
  * - Delegates business logic to Handlers
  * - Delegates responses to AuthResponseHandler
  * - Delegates rendering to AuthRenderer
- * 
+ *
  * This controller only orchestrates the flow - it doesn't do the work itself!
  */
 final class AuthController
@@ -31,7 +31,8 @@ final class AuthController
         private AuthRequestHandler $requestHandler,
         private AuthResponseHandler $responseHandler,
         private AuthRenderer $renderer
-    ) {}
+    ) {
+    }
 
     /**
      * Handle login page and form submission
@@ -40,7 +41,7 @@ final class AuthController
     {
         try {
             $command = $this->requestHandler->handleLoginRequest();
-            
+
             if ($command) {
                 $this->processLogin($command);
                 return;
@@ -60,7 +61,7 @@ final class AuthController
     {
         try {
             $command = $this->requestHandler->handleRegisterRequest();
-            
+
             if ($command) {
                 $this->processRegistration($command);
                 return;
@@ -80,7 +81,7 @@ final class AuthController
     {
         try {
             $command = $this->requestHandler->handleForgotPasswordRequest();
-            
+
             if ($command) {
                 $this->processForgotPassword($command);
                 return;
@@ -99,7 +100,7 @@ final class AuthController
     public function handleDashboard(): void
     {
         if (!$this->authService->isLoggedIn()) {
-            $redirectTo = isset($_SERVER['REQUEST_URI']) ? 
+            $redirectTo = isset($_SERVER['REQUEST_URI']) ?
                 sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
             $this->responseHandler->redirectToLogin($redirectTo);
             return;
@@ -163,7 +164,7 @@ final class AuthController
     private function processForgotPassword($command): void
     {
         $result = $this->forgotPasswordHandler->handle($command);
-        
+
         if ($result['success']) {
             $context = $this->responseHandler->createSuccessContext(
                 'Reset Password',

@@ -6,7 +6,7 @@ use Minisite\Features\Authentication\Controllers\AuthController;
 
 /**
  * Authentication Hooks
- * 
+ *
  * SINGLE RESPONSIBILITY: Register WordPress hooks for authentication routes
  * - Registers rewrite rules for authentication pages
  * - Hooks into WordPress template_redirect
@@ -16,7 +16,8 @@ final class AuthHooks
 {
     public function __construct(
         private AuthController $authController
-    ) {}
+    ) {
+    }
 
     /**
      * Register all authentication hooks
@@ -61,7 +62,7 @@ final class AuthHooks
         }
 
         $action = get_query_var('minisite_account_action');
-        
+
         // Only handle authentication routes, let the old system handle sites, new, etc.
         $authActions = ['login', 'logout', 'dashboard', 'register', 'forgot'];
         if (!in_array($action, $authActions)) {

@@ -6,7 +6,7 @@ namespace Minisite\Features\Authentication\WordPress;
 
 /**
  * WordPress User Manager
- * 
+ *
  * Wraps WordPress user-related functions for better testability and dependency injection.
  * This class provides a clean interface to WordPress user management functions,
  * allowing us to mock them easily in tests.
@@ -15,7 +15,7 @@ final class WordPressUserManager
 {
     /**
      * Authenticate a user with username/password
-     * 
+     *
      * @param array $credentials User credentials
      * @param bool $secure_cookie Whether to use secure cookie
      * @return \WP_User|\WP_Error User object on success, WP_Error on failure
@@ -27,7 +27,7 @@ final class WordPressUserManager
 
     /**
      * Create a new user
-     * 
+     *
      * @param string $username Username
      * @param string $password Password
      * @param string $email Email address
@@ -40,7 +40,7 @@ final class WordPressUserManager
 
     /**
      * Get user by field
-     * 
+     *
      * @param string $field Field to search by (id, slug, email, login)
      * @param string|int $value Value to search for
      * @return \WP_User|false User object on success, false on failure
@@ -52,7 +52,7 @@ final class WordPressUserManager
 
     /**
      * Get current user
-     * 
+     *
      * @return \WP_User Current user object
      */
     public function getCurrentUser()
@@ -62,7 +62,7 @@ final class WordPressUserManager
 
     /**
      * Set current user
-     * 
+     *
      * @param int $user_id User ID
      * @return \WP_User User object
      */
@@ -73,7 +73,7 @@ final class WordPressUserManager
 
     /**
      * Set authentication cookie
-     * 
+     *
      * @param int $user_id User ID
      * @param bool $remember Whether to remember the user
      * @param bool $secure Whether to use secure cookie
@@ -86,7 +86,7 @@ final class WordPressUserManager
 
     /**
      * Log out current user
-     * 
+     *
      * @return void
      */
     public function logout(): void
@@ -96,7 +96,7 @@ final class WordPressUserManager
 
     /**
      * Check if user is logged in
-     * 
+     *
      * @return bool True if user is logged in, false otherwise
      */
     public function isUserLoggedIn(): bool
@@ -106,7 +106,7 @@ final class WordPressUserManager
 
     /**
      * Check if value is WP_Error
-     * 
+     *
      * @param mixed $thing Value to check
      * @return bool True if WP_Error, false otherwise
      */
@@ -117,7 +117,7 @@ final class WordPressUserManager
 
     /**
      * Validate email address
-     * 
+     *
      * @param string $email Email to validate
      * @return bool True if valid email, false otherwise
      */
@@ -128,7 +128,7 @@ final class WordPressUserManager
 
     /**
      * Sanitize text field
-     * 
+     *
      * @param string $text Text to sanitize
      * @return string Sanitized text
      */
@@ -139,7 +139,7 @@ final class WordPressUserManager
 
     /**
      * Sanitize email
-     * 
+     *
      * @param string $email Email to sanitize
      * @return string Sanitized email
      */
@@ -150,7 +150,7 @@ final class WordPressUserManager
 
     /**
      * Sanitize URL
-     * 
+     *
      * @param string $url URL to sanitize
      * @return string Sanitized URL
      */
@@ -161,7 +161,7 @@ final class WordPressUserManager
 
     /**
      * Remove slashes from string
-     * 
+     *
      * @param string $string String to unslash
      * @return string Unslashed string
      */
@@ -172,7 +172,7 @@ final class WordPressUserManager
 
     /**
      * Verify nonce
-     * 
+     *
      * @param string $nonce Nonce to verify
      * @param string $action Action name
      * @return bool|int False on failure, 1 or 2 on success
@@ -184,7 +184,7 @@ final class WordPressUserManager
 
     /**
      * Redirect to URL
-     * 
+     *
      * @param string $location URL to redirect to
      * @param int $status HTTP status code
      * @return void
@@ -196,7 +196,7 @@ final class WordPressUserManager
 
     /**
      * Get home URL
-     * 
+     *
      * @param string $path Optional path to append
      * @return string Home URL
      */
@@ -207,7 +207,7 @@ final class WordPressUserManager
 
     /**
      * Get query variable
-     * 
+     *
      * @param string $var Variable name
      * @param mixed $default Default value
      * @return mixed Query variable value
@@ -219,7 +219,7 @@ final class WordPressUserManager
 
     /**
      * Set HTTP status header
-     * 
+     *
      * @param int $code HTTP status code
      * @return void
      */
@@ -230,7 +230,7 @@ final class WordPressUserManager
 
     /**
      * Load template part
-     * 
+     *
      * @param string $slug Template slug
      * @param string $name Template name
      * @return void
@@ -242,7 +242,7 @@ final class WordPressUserManager
 
     /**
      * Get global WP_Query object
-     * 
+     *
      * @return \WP_Query Global query object
      */
     public function getWpQuery()
@@ -253,7 +253,7 @@ final class WordPressUserManager
 
     /**
      * Retrieve password for user
-     * 
+     *
      * @param string $user_login User login
      * @return bool|\WP_Error True on success, WP_Error on failure
      */

@@ -6,7 +6,7 @@ use Minisite\Features\Authentication\Hooks\AuthHooksFactory;
 
 /**
  * Authentication Feature
- * 
+ *
  * SINGLE RESPONSIBILITY: Bootstrap the Authentication feature
  * - Initializes the authentication system
  * - Registers all authentication hooks

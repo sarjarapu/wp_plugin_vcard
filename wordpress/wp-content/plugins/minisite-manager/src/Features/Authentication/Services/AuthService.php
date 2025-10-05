@@ -9,7 +9,7 @@ use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 
 /**
  * Authentication Service
- * 
+ *
  * Handles all authentication business logic including login, registration,
  * password reset, and user session management.
  */
@@ -17,10 +17,11 @@ final class AuthService
 {
     public function __construct(
         private WordPressUserManager $wordPressManager
-    ) {}
+    ) {
+    }
     /**
      * Authenticate user with credentials
-     * 
+     *
      * @param LoginCommand $command
      * @return array{success: bool, error?: string, user?: \WP_User, redirect_to?: string}
      */
@@ -57,7 +58,7 @@ final class AuthService
 
     /**
      * Register a new user
-     * 
+     *
      * @param RegisterCommand $command
      * @return array{success: bool, error?: string, user?: \WP_User, redirect_to?: string}
      */
@@ -71,8 +72,12 @@ final class AuthService
             ];
         }
 
-        $user_id = $this->wordPressManager->createUser($command->userLogin, $command->userPassword, $command->userEmail);
-        
+        $user_id = $this->wordPressManager->createUser(
+            $command->userLogin,
+            $command->userPassword,
+            $command->userEmail
+        );
+
         if ($this->wordPressManager->isWpError($user_id)) {
             return [
                 'success' => false,
@@ -94,7 +99,7 @@ final class AuthService
 
     /**
      * Send password reset email
-     * 
+     *
      * @param ForgotPasswordCommand $command
      * @return array{success: bool, error?: string, message?: string}
      */
@@ -116,7 +121,7 @@ final class AuthService
         }
 
         $result = $this->wordPressManager->retrievePassword($user->user_login);
-        
+
         if ($this->wordPressManager->isWpError($result)) {
             return [
                 'success' => false,
@@ -165,7 +170,7 @@ final class AuthService
 
     /**
      * Validate registration data
-     * 
+     *
      * @return array{valid: bool, error?: string}
      */
     private function validateRegistrationData(RegisterCommand $command): array
