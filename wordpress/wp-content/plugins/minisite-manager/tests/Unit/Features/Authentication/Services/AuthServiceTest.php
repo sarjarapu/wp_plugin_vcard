@@ -19,10 +19,12 @@ use PHPUnit\Framework\TestCase;
 final class AuthServiceTest extends TestCase
 {
     private AuthService $authService;
+    private $wordPressManager;
 
     protected function setUp(): void
     {
-        $this->authService = new AuthService();
+        $this->wordPressManager = $this->createMock(\Minisite\Features\Authentication\WordPress\WordPressUserManager::class);
+        $this->authService = new AuthService($this->wordPressManager);
     }
 
     /**
@@ -32,11 +34,10 @@ final class AuthServiceTest extends TestCase
     {
         $command = new LoginCommand('testuser', 'testpass', false, '/dashboard');
         
-        // Mock WordPress functions
+        // Mock WordPressUserManager
         $mockUser = new \WP_User(1, 'testuser');
-        
-        // Mock wp_signon to return successful user
-        $this->mockWordPressFunction('wp_signon', $mockUser);
+        $this->wordPressManager->method('signon')->willReturn($mockUser);
+        $this->wordPressManager->method('isWpError')->willReturn(false);
         
         $result = $this->authService->login($command);
         
@@ -52,9 +53,10 @@ final class AuthServiceTest extends TestCase
     {
         $command = new LoginCommand('wronguser', 'wrongpass', false, '/dashboard');
         
-        // Mock wp_signon to return WP_Error
+        // Mock WordPressUserManager for failure case
         $wpError = new \WP_Error('invalid_credentials', 'Invalid username or password');
-        $this->mockWordPressFunction('wp_signon', $wpError);
+        $this->wordPressManager->method('signon')->willReturn($wpError);
+        $this->wordPressManager->method('isWpError')->willReturn(true);
         
         $result = $this->authService->login($command);
         
@@ -82,8 +84,10 @@ final class AuthServiceTest extends TestCase
     {
         $command = new LoginCommand('testuser', 'testpass', true, '/dashboard');
         
+        // Mock WordPressUserManager for remember me login
         $mockUser = new \WP_User(1, 'testuser');
-        $this->mockWordPressFunction('wp_signon', $mockUser);
+        $this->wordPressManager->method('signon')->willReturn($mockUser);
+        $this->wordPressManager->method('isWpError')->willReturn(false);
         
         $result = $this->authService->login($command);
         
@@ -98,16 +102,13 @@ final class AuthServiceTest extends TestCase
     {
         $command = new RegisterCommand('newuser', 'newuser@example.com', 'password123', '/dashboard');
         
-        // Mock wp_create_user to return user ID
-        $this->mockWordPressFunction('wp_create_user', 2);
-        
-        // Mock get_user_by to return user object
+        // Mock WordPressUserManager for valid registration
         $mockUser = new \WP_User(2, 'newuser');
-        $this->mockWordPressFunction('get_user_by', $mockUser);
-        
-        // Mock wp_set_current_user and wp_set_auth_cookie
-        $this->mockWordPressFunction('wp_set_current_user', null);
-        $this->mockWordPressFunction('wp_set_auth_cookie', null);
+        $this->wordPressManager->method('isEmail')->willReturn(true);
+        $this->wordPressManager->method('createUser')->willReturn(2);
+        $this->wordPressManager->method('getUserBy')->willReturn($mockUser);
+        $this->wordPressManager->method('setCurrentUser')->willReturn($mockUser);
+        $this->wordPressManager->method('setAuthCookie')->willReturnCallback(function() { return; });
         
         $result = $this->authService->register($command);
         
@@ -123,6 +124,9 @@ final class AuthServiceTest extends TestCase
     {
         $command = new RegisterCommand('newuser', 'invalid-email', 'password123', '/dashboard');
         
+        // Override default mock to return false for email validation
+        $this->wordPressManager->method('isEmail')->willReturn(false);
+        
         $result = $this->authService->register($command);
         
         $this->assertFalse($result['success']);
@@ -135,6 +139,9 @@ final class AuthServiceTest extends TestCase
     public function test_register_with_weak_password(): void
     {
         $command = new RegisterCommand('newuser', 'newuser@example.com', '123', '/dashboard');
+        
+        // Mock WordPressUserManager for weak password test
+        $this->wordPressManager->method('isEmail')->willReturn(true);
         
         $result = $this->authService->register($command);
         
@@ -162,9 +169,11 @@ final class AuthServiceTest extends TestCase
     {
         $command = new RegisterCommand('existinguser', 'existing@example.com', 'password123', '/dashboard');
         
-        // Mock wp_create_user to return WP_Error
+        // Mock WordPressUserManager for duplicate user case
         $wpError = new \WP_Error('existing_user_login', 'Username already exists');
-        $this->mockWordPressFunction('wp_create_user', $wpError);
+        $this->wordPressManager->method('isEmail')->willReturn(true);
+        $this->wordPressManager->method('createUser')->willReturn($wpError);
+        $this->wordPressManager->method('isWpError')->willReturn(true);
         
         $result = $this->authService->register($command);
         
@@ -179,12 +188,10 @@ final class AuthServiceTest extends TestCase
     {
         $command = new ForgotPasswordCommand('testuser');
         
-        // Mock get_user_by to return user
-        $mockUser = (object)['ID' => 1, 'user_login' => 'testuser'];
-        $this->mockWordPressFunction('get_user_by', $mockUser);
-        
-        // Mock retrieve_password to return success
-        $this->mockWordPressFunction('retrieve_password', true);
+        // Mock WordPressUserManager for valid user case
+        $mockUser = new \WP_User(1, 'testuser');
+        $this->wordPressManager->method('getUserBy')->willReturn($mockUser);
+        $this->wordPressManager->method('retrievePassword')->willReturn(true);
         
         $result = $this->authService->forgotPassword($command);
         
@@ -199,8 +206,8 @@ final class AuthServiceTest extends TestCase
     {
         $command = new ForgotPasswordCommand('nonexistent');
         
-        // Mock get_user_by to return false
-        $this->mockWordPressFunction('get_user_by', false);
+        // Mock WordPressUserManager for invalid user case
+        $this->wordPressManager->method('getUserBy')->willReturn(false);
         
         $result = $this->authService->forgotPassword($command);
         
@@ -228,12 +235,12 @@ final class AuthServiceTest extends TestCase
     {
         $command = new ForgotPasswordCommand('testuser');
         
-        $mockUser = (object)['ID' => 1, 'user_login' => 'testuser'];
-        $this->mockWordPressFunction('get_user_by', $mockUser);
-        
-        // Mock retrieve_password to return WP_Error
+        // Mock WordPressUserManager for email failure case
+        $mockUser = new \WP_User(1, 'testuser');
         $wpError = new \WP_Error('email_failed', 'Unable to send email');
-        $this->mockWordPressFunction('retrieve_password', $wpError);
+        $this->wordPressManager->method('getUserBy')->willReturn($mockUser);
+        $this->wordPressManager->method('retrievePassword')->willReturn($wpError);
+        $this->wordPressManager->method('isWpError')->willReturn(true);
         
         $result = $this->authService->forgotPassword($command);
         
@@ -246,8 +253,8 @@ final class AuthServiceTest extends TestCase
      */
     public function test_logout(): void
     {
-        // Mock wp_logout
-        $this->mockWordPressFunction('wp_logout', null);
+        // Mock WordPressUserManager for logout
+        $this->wordPressManager->method('logout')->willReturnCallback(function() { return; });
         
         // This should not throw any exceptions
         $this->authService->logout();
@@ -260,7 +267,8 @@ final class AuthServiceTest extends TestCase
      */
     public function test_is_logged_in_when_logged_in(): void
     {
-        $this->mockWordPressFunction('is_user_logged_in', true);
+        // Mock WordPressUserManager for logged in user
+        $this->wordPressManager->method('isUserLoggedIn')->willReturn(true);
         
         $result = $this->authService->isLoggedIn();
         
@@ -272,7 +280,8 @@ final class AuthServiceTest extends TestCase
      */
     public function test_is_logged_in_when_not_logged_in(): void
     {
-        $this->mockWordPressFunction('is_user_logged_in', false);
+        // Mock WordPressUserManager for not logged in user
+        $this->wordPressManager->method('isUserLoggedIn')->willReturn(false);
         
         $result = $this->authService->isLoggedIn();
         
@@ -284,8 +293,9 @@ final class AuthServiceTest extends TestCase
      */
     public function test_get_current_user_when_user_exists(): void
     {
+        // Mock WordPressUserManager for existing user
         $mockUser = new \WP_User(1, 'testuser');
-        $this->mockWordPressFunction('wp_get_current_user', $mockUser);
+        $this->wordPressManager->method('getCurrentUser')->willReturn($mockUser);
         
         $result = $this->authService->getCurrentUser();
         
@@ -297,21 +307,13 @@ final class AuthServiceTest extends TestCase
      */
     public function test_get_current_user_when_no_user(): void
     {
-        $mockUser = (object)['ID' => 0];
-        $this->mockWordPressFunction('wp_get_current_user', $mockUser);
+        // Mock WordPressUserManager for no user (ID = 0)
+        $mockUser = new \WP_User(0, '');
+        $this->wordPressManager->method('getCurrentUser')->willReturn($mockUser);
         
         $result = $this->authService->getCurrentUser();
         
         $this->assertNull($result);
     }
 
-    /**
-     * Mock WordPress function
-     */
-    private function mockWordPressFunction(string $functionName, mixed $returnValue): void
-    {
-        if (!function_exists($functionName)) {
-            eval("function {$functionName}(...\$args) { return " . var_export($returnValue, true) . "; }");
-        }
-    }
 }

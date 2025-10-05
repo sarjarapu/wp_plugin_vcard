@@ -7,6 +7,7 @@ use Minisite\Features\Authentication\Handlers\LoginHandler;
 use Minisite\Features\Authentication\Handlers\RegisterHandler;
 use Minisite\Features\Authentication\Handlers\ForgotPasswordHandler;
 use Minisite\Features\Authentication\Services\AuthService;
+use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 
 /**
  * AuthHooks Factory
@@ -24,7 +25,8 @@ final class AuthHooksFactory
     public static function create(): AuthHooks
     {
         // Create services
-        $authService = new AuthService();
+        $wordPressManager = new WordPressUserManager();
+        $authService = new AuthService($wordPressManager);
 
         // Create handlers
         $loginHandler = new LoginHandler($authService);

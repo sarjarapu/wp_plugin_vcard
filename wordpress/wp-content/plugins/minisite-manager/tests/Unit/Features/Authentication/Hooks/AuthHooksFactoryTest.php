@@ -60,11 +60,11 @@ final class AuthHooksFactoryTest extends TestCase
         $controller = $controllerProperty->getValue($authHooks);
         
         $this->assertNotNull($controller);
-        $this->assertObjectHasProperty('handleLogin', $controller);
-        $this->assertObjectHasProperty('handleRegister', $controller);
-        $this->assertObjectHasProperty('handleDashboard', $controller);
-        $this->assertObjectHasProperty('handleLogout', $controller);
-        $this->assertObjectHasProperty('handleForgotPassword', $controller);
+        $this->assertTrue(method_exists($controller, 'handleLogin'));
+        $this->assertTrue(method_exists($controller, 'handleRegister'));
+        $this->assertTrue(method_exists($controller, 'handleDashboard'));
+        $this->assertTrue(method_exists($controller, 'handleLogout'));
+        $this->assertTrue(method_exists($controller, 'handleForgotPassword'));
     }
 
     /**

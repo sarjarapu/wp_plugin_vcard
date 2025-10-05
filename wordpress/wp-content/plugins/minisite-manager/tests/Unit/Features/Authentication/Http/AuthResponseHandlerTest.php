@@ -27,13 +27,11 @@ final class AuthResponseHandlerTest extends TestCase
      */
     public function test_redirect(): void
     {
-        // Mock wp_redirect
-        $this->mockWordPressFunction('wp_redirect', null);
+        // Expect redirect exception
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Redirect to: /test/url (Status: 302)');
         
-        // This should not throw any exceptions
         $this->responseHandler->redirect('/test/url');
-        
-        $this->assertTrue(true); // If we get here, redirect didn't throw
     }
 
     /**
@@ -41,12 +39,11 @@ final class AuthResponseHandlerTest extends TestCase
      */
     public function test_redirect_to_login_without_redirect_to(): void
     {
-        $this->mockWordPressFunction('home_url', 'http://localhost/account/login');
-        $this->mockWordPressFunction('wp_redirect', null);
+        // Expect redirect exception
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Redirect to: http://example.com/account/login (Status: 302)');
         
         $this->responseHandler->redirectToLogin();
-        
-        $this->assertTrue(true); // If we get here, redirect didn't throw
     }
 
     /**
@@ -54,15 +51,11 @@ final class AuthResponseHandlerTest extends TestCase
      */
     public function test_redirect_to_login_with_redirect_to(): void
     {
-        $redirectTo = '/custom/redirect';
+        // Expect redirect exception
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Redirect to: http://example.com/account/login?redirect_to=%2Fcustom%2Fredirect (Status: 302)');
         
-        $this->mockWordPressFunction('home_url', 'http://localhost/account/login');
-        $this->mockWordPressFunction('urlencode', fn($val) => urlencode($val));
-        $this->mockWordPressFunction('wp_redirect', null);
-        
-        $this->responseHandler->redirectToLogin($redirectTo);
-        
-        $this->assertTrue(true); // If we get here, redirect didn't throw
+        $this->responseHandler->redirectToLogin('/custom/redirect');
     }
 
     /**
@@ -70,12 +63,11 @@ final class AuthResponseHandlerTest extends TestCase
      */
     public function test_redirect_to_dashboard(): void
     {
-        $this->mockWordPressFunction('home_url', 'http://localhost/account/dashboard');
-        $this->mockWordPressFunction('wp_redirect', null);
+        // Expect redirect exception
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Redirect to: http://example.com/account/dashboard (Status: 302)');
         
         $this->responseHandler->redirectToDashboard();
-        
-        $this->assertTrue(true); // If we get here, redirect didn't throw
     }
 
     /**

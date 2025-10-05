@@ -5,6 +5,7 @@ namespace Minisite\Features\Authentication\Services;
 use Minisite\Features\Authentication\Commands\LoginCommand;
 use Minisite\Features\Authentication\Commands\RegisterCommand;
 use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
+use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 
 /**
  * Authentication Service
@@ -14,6 +15,9 @@ use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
  */
 final class AuthService
 {
+    public function __construct(
+        private WordPressUserManager $wordPressManager
+    ) {}
     /**
      * Authenticate user with credentials
      * 
@@ -35,9 +39,9 @@ final class AuthService
             'remember' => $command->remember,
         ];
 
-        $user = wp_signon($creds, false);
-        
-        if (is_wp_error($user)) {
+        $user = $this->wordPressManager->signon($creds, false);
+
+        if ($this->wordPressManager->isWpError($user)) {
             return [
                 'success' => false,
                 'error' => $user->get_error_message()
@@ -67,9 +71,9 @@ final class AuthService
             ];
         }
 
-        $user_id = wp_create_user($command->userLogin, $command->userPassword, $command->userEmail);
+        $user_id = $this->wordPressManager->createUser($command->userLogin, $command->userPassword, $command->userEmail);
         
-        if (is_wp_error($user_id)) {
+        if ($this->wordPressManager->isWpError($user_id)) {
             return [
                 'success' => false,
                 'error' => $user_id->get_error_message()
@@ -77,9 +81,9 @@ final class AuthService
         }
 
         // Auto-login the new user
-        $user = get_user_by('id', $user_id);
-        wp_set_current_user($user_id);
-        wp_set_auth_cookie($user_id);
+        $user = $this->wordPressManager->getUserBy('id', $user_id);
+        $this->wordPressManager->setCurrentUser($user_id);
+        $this->wordPressManager->setAuthCookie($user_id);
 
         return [
             'success' => true,
@@ -111,9 +115,9 @@ final class AuthService
             ];
         }
 
-        $result = retrieve_password($user->user_login);
+        $result = $this->wordPressManager->retrievePassword($user->user_login);
         
-        if (is_wp_error($result)) {
+        if ($this->wordPressManager->isWpError($result)) {
             return [
                 'success' => false,
                 'error' => $result->get_error_message()
@@ -131,7 +135,7 @@ final class AuthService
      */
     public function logout(): void
     {
-        wp_logout();
+        $this->wordPressManager->logout();
     }
 
     /**
@@ -139,7 +143,7 @@ final class AuthService
      */
     public function isLoggedIn(): bool
     {
-        return is_user_logged_in();
+        return $this->wordPressManager->isUserLoggedIn();
     }
 
     /**
@@ -147,7 +151,7 @@ final class AuthService
      */
     public function getCurrentUser(): ?\WP_User
     {
-        $user = wp_get_current_user();
+        $user = $this->wordPressManager->getCurrentUser();
         return $user->ID ? $user : null;
     }
 
@@ -173,7 +177,7 @@ final class AuthService
             ];
         }
 
-        if (!is_email($command->userEmail)) {
+        if (!$this->wordPressManager->isEmail($command->userEmail)) {
             return [
                 'valid' => false,
                 'error' => 'Please enter a valid email address.'
@@ -195,9 +199,9 @@ final class AuthService
      */
     private function findUserByLoginOrEmail(string $login): ?\WP_User
     {
-        $user = get_user_by('login', $login);
+        $user = $this->wordPressManager->getUserBy('login', $login);
         if (!$user) {
-            $user = get_user_by('email', $login);
+            $user = $this->wordPressManager->getUserBy('email', $login);
         }
         return $user ?: null;
     }
