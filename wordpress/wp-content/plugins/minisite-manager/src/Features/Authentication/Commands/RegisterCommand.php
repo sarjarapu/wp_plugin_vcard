@@ -4,7 +4,7 @@ namespace Minisite\Features\Authentication\Commands;
 
 /**
  * Register Command
- * 
+ *
  * Represents a user registration request with all necessary data.
  */
 final class RegisterCommand
@@ -14,5 +14,6 @@ final class RegisterCommand
         public readonly string $userEmail,
         public readonly string $userPassword,
         public readonly string $redirectTo
-    ) {}
+    ) {
+    }
 }

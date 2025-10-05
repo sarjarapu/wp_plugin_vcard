@@ -7,10 +7,11 @@ use Minisite\Features\Authentication\Handlers\LoginHandler;
 use Minisite\Features\Authentication\Handlers\RegisterHandler;
 use Minisite\Features\Authentication\Handlers\ForgotPasswordHandler;
 use Minisite\Features\Authentication\Services\AuthService;
+use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 
 /**
  * AuthHooks Factory
- * 
+ *
  * SINGLE RESPONSIBILITY: Create and configure AuthHooks with all dependencies
  * - Handles dependency injection
  * - Creates all required services and handlers
@@ -24,19 +25,28 @@ final class AuthHooksFactory
     public static function create(): AuthHooks
     {
         // Create services
-        $authService = new AuthService();
+        $wordPressManager = new WordPressUserManager();
+        $authService = new AuthService($wordPressManager);
 
         // Create handlers
         $loginHandler = new LoginHandler($authService);
         $registerHandler = new RegisterHandler($authService);
         $forgotPasswordHandler = new ForgotPasswordHandler($authService);
 
+        // Create additional dependencies for refactored controller
+        $requestHandler = new \Minisite\Features\Authentication\Http\AuthRequestHandler();
+        $responseHandler = new \Minisite\Features\Authentication\Http\AuthResponseHandler();
+        $renderer = new \Minisite\Features\Authentication\Rendering\AuthRenderer();
+
         // Create controller
         $authController = new AuthController(
             $loginHandler,
             $registerHandler,
             $forgotPasswordHandler,
-            $authService
+            $authService,
+            $requestHandler,
+            $responseHandler,
+            $renderer
         );
 
         // Create and return hooks

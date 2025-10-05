@@ -256,3 +256,6 @@ GitHub Actions automatically:
 - Create releases when tags are pushed
 
 ---
+# Test comment
+# Test hook
+# Test hook from repo root

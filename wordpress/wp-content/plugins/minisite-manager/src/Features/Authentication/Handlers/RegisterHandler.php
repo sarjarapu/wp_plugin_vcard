@@ -7,18 +7,19 @@ use Minisite\Features\Authentication\Services\AuthService;
 
 /**
  * Register Handler
- * 
+ *
  * Handles registration command execution by delegating to AuthService.
  */
 final class RegisterHandler
 {
     public function __construct(
         private AuthService $authService
-    ) {}
+    ) {
+    }
 
     /**
      * Handle registration command
-     * 
+     *
      * @param RegisterCommand $command
      * @return array{success: bool, error?: string, user?: \WP_User, redirect_to?: string}
      */

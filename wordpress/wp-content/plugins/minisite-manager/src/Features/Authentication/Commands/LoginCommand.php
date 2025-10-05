@@ -4,7 +4,7 @@ namespace Minisite\Features\Authentication\Commands;
 
 /**
  * Login Command
- * 
+ *
  * Represents a user login request with all necessary data.
  */
 final class LoginCommand
@@ -14,5 +14,6 @@ final class LoginCommand
         public readonly string $userPassword,
         public readonly bool $remember,
         public readonly string $redirectTo
-    ) {}
+    ) {
+    }
 }

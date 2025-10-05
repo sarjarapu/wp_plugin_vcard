@@ -4,7 +4,7 @@ namespace Minisite\Features\Authentication\Http;
 
 /**
  * Auth Response Handler
- * 
+ *
  * SINGLE RESPONSIBILITY: Handle HTTP responses
  * - Manages redirects
  * - Handles error/success responses
@@ -55,8 +55,11 @@ final class AuthResponseHandler
     /**
      * Create success response context
      */
-    public function createSuccessContext(string $pageTitle, string $successMessage, array $additionalContext = []): array
-    {
+    public function createSuccessContext(
+        string $pageTitle,
+        string $successMessage,
+        array $additionalContext = []
+    ): array {
         return array_merge([
             'page_title' => $pageTitle,
             'success_msg' => $successMessage,
@@ -66,8 +69,12 @@ final class AuthResponseHandler
     /**
      * Create mixed response context (error + success)
      */
-    public function createMixedContext(string $pageTitle, ?string $errorMessage = null, ?string $successMessage = null, array $additionalContext = []): array
-    {
+    public function createMixedContext(
+        string $pageTitle,
+        ?string $errorMessage = null,
+        ?string $successMessage = null,
+        array $additionalContext = []
+    ): array {
         return array_merge([
             'page_title' => $pageTitle,
             'error_msg' => $errorMessage,
