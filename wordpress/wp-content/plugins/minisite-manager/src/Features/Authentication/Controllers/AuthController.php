@@ -2,19 +2,24 @@
 
 namespace Minisite\Features\Authentication\Controllers;
 
-use Minisite\Features\Authentication\Commands\LoginCommand;
-use Minisite\Features\Authentication\Commands\RegisterCommand;
-use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
 use Minisite\Features\Authentication\Handlers\LoginHandler;
 use Minisite\Features\Authentication\Handlers\RegisterHandler;
 use Minisite\Features\Authentication\Handlers\ForgotPasswordHandler;
 use Minisite\Features\Authentication\Services\AuthService;
+use Minisite\Features\Authentication\Http\AuthRequestHandler;
+use Minisite\Features\Authentication\Http\AuthResponseHandler;
+use Minisite\Features\Authentication\Rendering\AuthRenderer;
 
 /**
- * Authentication Controller
+ * Refactored Auth Controller
  * 
- * Thin controller that handles HTTP requests and delegates to appropriate handlers.
- * Follows the Command/Handler pattern for clean separation of concerns.
+ * SINGLE RESPONSIBILITY: Coordinate authentication flow
+ * - Delegates HTTP handling to AuthRequestHandler
+ * - Delegates business logic to Handlers
+ * - Delegates responses to AuthResponseHandler
+ * - Delegates rendering to AuthRenderer
+ * 
+ * This controller only orchestrates the flow - it doesn't do the work itself!
  */
 final class AuthController
 {
@@ -22,7 +27,10 @@ final class AuthController
         private LoginHandler $loginHandler,
         private RegisterHandler $registerHandler,
         private ForgotPasswordHandler $forgotPasswordHandler,
-        private AuthService $authService
+        private AuthService $authService,
+        private AuthRequestHandler $requestHandler,
+        private AuthResponseHandler $responseHandler,
+        private AuthRenderer $renderer
     ) {}
 
     /**
@@ -30,8 +38,15 @@ final class AuthController
      */
     public function handleLogin(): void
     {
-        if ($this->isPostRequest() && $this->isValidNonce('minisite_login')) {
-            $this->processLogin();
+        try {
+            $command = $this->requestHandler->handleLoginRequest();
+            
+            if ($command) {
+                $this->processLogin($command);
+                return;
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->renderLoginPage($e->getMessage());
             return;
         }
 
@@ -43,8 +58,15 @@ final class AuthController
      */
     public function handleRegister(): void
     {
-        if ($this->isPostRequest() && $this->isValidNonce('minisite_register')) {
-            $this->processRegistration();
+        try {
+            $command = $this->requestHandler->handleRegisterRequest();
+            
+            if ($command) {
+                $this->processRegistration($command);
+                return;
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->renderRegisterPage($e->getMessage());
             return;
         }
 
@@ -56,8 +78,15 @@ final class AuthController
      */
     public function handleForgotPassword(): void
     {
-        if ($this->isPostRequest() && $this->isValidNonce('minisite_forgot_password')) {
-            $this->processForgotPassword();
+        try {
+            $command = $this->requestHandler->handleForgotPasswordRequest();
+            
+            if ($command) {
+                $this->processForgotPassword($command);
+                return;
+            }
+        } catch (\InvalidArgumentException $e) {
+            $this->renderForgotPasswordPage($e->getMessage());
             return;
         }
 
@@ -69,23 +98,20 @@ final class AuthController
      */
     public function handleDashboard(): void
     {
-        // Check if user is logged in
         if (!$this->authService->isLoggedIn()) {
-            $redirect_url = home_url(
-                '/account/login?redirect_to=' . urlencode(
-                    isset($_SERVER['REQUEST_URI']) ?
-                    sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : ''
-                )
-            );
-            wp_redirect($redirect_url);
-            exit;
+            $redirectTo = isset($_SERVER['REQUEST_URI']) ? 
+                sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+            $this->responseHandler->redirectToLogin($redirectTo);
+            return;
         }
 
         $user = $this->authService->getCurrentUser();
-        $this->renderAuthPage('dashboard.twig', [
+        $context = [
             'page_title' => 'Dashboard',
             'user' => $user,
-        ]);
+        ];
+
+        $this->renderer->render('dashboard.twig', $context);
     }
 
     /**
@@ -94,44 +120,29 @@ final class AuthController
     public function handleLogout(): void
     {
         $this->authService->logout();
-        wp_redirect(home_url('/account/login'));
-        exit;
+        $this->responseHandler->redirectToLogin();
     }
 
     /**
-     * Process login form submission
+     * Process login command
      */
-    private function processLogin(): void
+    private function processLogin($command): void
     {
-        $command = new LoginCommand(
-            userLogin: $this->sanitizeInput($_POST['user_login'] ?? ''),
-            userPassword: $this->sanitizeInput($_POST['user_pass'] ?? ''),
-            remember: isset($_POST['remember']),
-            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? home_url('/account/dashboard'))
-        );
-
         $result = $this->loginHandler->handle($command);
 
         if ($result['success']) {
-            wp_redirect($result['redirect_to']);
-            exit;
+            $this->responseHandler->redirect($result['redirect_to']);
+            return;
         }
 
         $this->renderLoginPage($result['error']);
     }
 
     /**
-     * Process registration form submission
+     * Process registration command
      */
-    private function processRegistration(): void
+    private function processRegistration($command): void
     {
-        $command = new RegisterCommand(
-            userLogin: $this->sanitizeInput($_POST['user_login'] ?? ''),
-            userEmail: $this->sanitizeEmail($_POST['user_email'] ?? ''),
-            userPassword: $this->sanitizeInput($_POST['user_pass'] ?? ''),
-            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? home_url('/account/dashboard'))
-        );
-
         $result = $this->registerHandler->handle($command);
 
         if ($result['success']) {
@@ -139,29 +150,33 @@ final class AuthController
             if (defined('MINISITE_ROLE_USER')) {
                 $result['user']->set_role(MINISITE_ROLE_USER);
             }
-            wp_redirect($result['redirect_to']);
-            exit;
+            $this->responseHandler->redirect($result['redirect_to']);
+            return;
         }
 
         $this->renderRegisterPage($result['error']);
     }
 
     /**
-     * Process forgot password form submission
+     * Process forgot password command
      */
-    private function processForgotPassword(): void
+    private function processForgotPassword($command): void
     {
-        $command = new ForgotPasswordCommand(
-            userLogin: $this->sanitizeInput($_POST['user_login'] ?? '')
-        );
-
         $result = $this->forgotPasswordHandler->handle($command);
         
         if ($result['success']) {
-            $this->renderForgotPasswordPage(null, $result['message']);
+            $context = $this->responseHandler->createSuccessContext(
+                'Reset Password',
+                $result['message']
+            );
         } else {
-            $this->renderForgotPasswordPage($result['error']);
+            $context = $this->responseHandler->createErrorContext(
+                'Reset Password',
+                $result['error']
+            );
         }
+
+        $this->renderer->render('account-forgot.twig', $context);
     }
 
     /**
@@ -169,135 +184,39 @@ final class AuthController
      */
     private function renderLoginPage(?string $errorMessage = null): void
     {
-        $this->renderAuthPage('account-login.twig', [
-            'page_title' => 'Sign In',
-            'error_msg' => $errorMessage,
-            'redirect_to' => $this->getRedirectTo(),
-        ]);
+        $context = $this->responseHandler->createErrorContext(
+            'Sign In',
+            $errorMessage,
+            ['redirect_to' => $this->requestHandler->getRedirectTo()]
+        );
+
+        $this->renderer->render('account-login.twig', $context);
     }
 
     /**
      * Render registration page
      */
-    private function renderRegisterPage(?string $errorMessage = null, ?string $successMessage = null): void
+    private function renderRegisterPage(?string $errorMessage = null): void
     {
-        $this->renderAuthPage('account-register.twig', [
-            'page_title' => 'Create Account',
-            'error_msg' => $errorMessage,
-            'success_msg' => $successMessage,
-            'redirect_to' => $this->getRedirectTo(),
-        ]);
+        $context = $this->responseHandler->createErrorContext(
+            'Create Account',
+            $errorMessage,
+            ['redirect_to' => $this->requestHandler->getRedirectTo()]
+        );
+
+        $this->renderer->render('account-register.twig', $context);
     }
 
     /**
      * Render forgot password page
      */
-    private function renderForgotPasswordPage(?string $errorMessage = null, ?string $successMessage = null): void
+    private function renderForgotPasswordPage(?string $errorMessage = null): void
     {
-        $this->renderAuthPage('account-forgot.twig', [
-            'page_title' => 'Reset Password',
-            'error_msg' => $errorMessage,
-            'success_msg' => $successMessage,
-        ]);
-    }
+        $context = $this->responseHandler->createErrorContext(
+            'Reset Password',
+            $errorMessage
+        );
 
-    /**
-     * Render authentication page using Timber
-     */
-    private function renderAuthPage(string $template, array $context): void
-    {
-        if (class_exists('Timber\\Timber')) {
-            $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
-            \Timber\Timber::$locations = array_values(
-                array_unique(
-                    array_merge(
-                        \Timber\Timber::$locations ?? [],
-                        [$viewsBase]
-                    )
-                )
-            );
-
-            \Timber\Timber::render($template, $context);
-            return;
-        }
-
-        // Fallback for when Timber is not available
-        $this->renderFallback($context);
-    }
-
-    /**
-     * Fallback rendering when Timber is not available
-     */
-    private function renderFallback(array $context): void
-    {
-        header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8">';
-        echo '<h1>' . esc_html($context['page_title'] ?? 'Authentication') . '</h1>';
-        if (!empty($context['error_msg'])) {
-            echo '<p style="color: red;">' . esc_html($context['error_msg']) . '</p>';
-        }
-        if (!empty($context['success_msg'])) {
-            echo '<p style="color: green;">' . esc_html($context['success_msg']) . '</p>';
-        }
-        if (!empty($context['message'])) {
-            echo '<p>' . esc_html($context['message']) . '</p>';
-        }
-        echo '<p>Authentication form not available (Timber required).</p>';
-    }
-
-    /**
-     * Check if request is POST
-     */
-    private function isPostRequest(): bool
-    {
-        return isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST';
-    }
-
-    /**
-     * Validate nonce for security
-     */
-    private function isValidNonce(string $action): bool
-    {
-        $nonceField = match($action) {
-            'minisite_login' => 'minisite_login_nonce',
-            'minisite_register' => 'minisite_register_nonce',
-            'minisite_forgot_password' => 'minisite_forgot_password_nonce',
-            default => 'minisite_nonce'
-        };
-
-        return isset($_POST[$nonceField]) && 
-               wp_verify_nonce(sanitize_text_field(wp_unslash($_POST[$nonceField])), $action);
-    }
-
-    /**
-     * Get redirect URL from query parameter
-     */
-    private function getRedirectTo(): string
-    {
-        return sanitize_text_field(wp_unslash($_GET['redirect_to'] ?? home_url('/account/dashboard')));
-    }
-
-    /**
-     * Sanitize text input
-     */
-    private function sanitizeInput(string $input): string
-    {
-        return sanitize_text_field(wp_unslash($input));
-    }
-
-    /**
-     * Sanitize email input
-     */
-    private function sanitizeEmail(string $email): string
-    {
-        return sanitize_email(wp_unslash($email));
-    }
-
-    /**
-     * Sanitize URL input
-     */
-    private function sanitizeUrl(string $url): string
-    {
-        return sanitize_url(wp_unslash($url));
+        $this->renderer->render('account-forgot.twig', $context);
     }
 }

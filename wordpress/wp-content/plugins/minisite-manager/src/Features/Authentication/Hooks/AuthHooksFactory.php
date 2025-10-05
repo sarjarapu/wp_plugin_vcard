@@ -31,12 +31,20 @@ final class AuthHooksFactory
         $registerHandler = new RegisterHandler($authService);
         $forgotPasswordHandler = new ForgotPasswordHandler($authService);
 
+        // Create additional dependencies for refactored controller
+        $requestHandler = new \Minisite\Features\Authentication\Http\AuthRequestHandler();
+        $responseHandler = new \Minisite\Features\Authentication\Http\AuthResponseHandler();
+        $renderer = new \Minisite\Features\Authentication\Rendering\AuthRenderer();
+
         // Create controller
         $authController = new AuthController(
             $loginHandler,
             $registerHandler,
             $forgotPasswordHandler,
-            $authService
+            $authService,
+            $requestHandler,
+            $responseHandler,
+            $renderer
         );
 
         // Create and return hooks
