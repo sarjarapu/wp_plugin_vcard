@@ -35,6 +35,13 @@
   </testsuites>
 
 
+  <extensions>
+    <bootstrap class="DG\BypassFinals\PHPUnitExtension">
+      <parameter name="bypassFinal" value="true"/>
+      <parameter name="bypassReadOnly" value="false"/>
+    </bootstrap>
+  </extensions>
+
   <php>
     <env name="MYSQL_HOST" value="127.0.0.1"/>
     <env name="MYSQL_PORT" value="3307"/>
