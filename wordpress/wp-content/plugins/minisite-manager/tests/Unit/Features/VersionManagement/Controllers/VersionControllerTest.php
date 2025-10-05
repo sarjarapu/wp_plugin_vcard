@@ -25,6 +25,7 @@ class VersionControllerTest extends TestCase
     private MockObject $requestHandler;
     private MockObject $responseHandler;
     private MockObject $renderer;
+    private MockObject $versionService;
 
     protected function setUp(): void
     {
@@ -35,6 +36,7 @@ class VersionControllerTest extends TestCase
         $this->requestHandler = $this->createMock(VersionRequestHandler::class);
         $this->responseHandler = $this->createMock(VersionResponseHandler::class);
         $this->renderer = $this->createMock(VersionRenderer::class);
+        $this->versionService = $this->createMock(\Minisite\Features\VersionManagement\Services\VersionService::class);
 
         $this->controller = new VersionController(
             $this->listVersionsHandler,
@@ -43,7 +45,8 @@ class VersionControllerTest extends TestCase
             $this->rollbackVersionHandler,
             $this->requestHandler,
             $this->responseHandler,
-            $this->renderer
+            $this->renderer,
+            $this->versionService
         );
 
         $this->setupWordPressMocks();

@@ -233,4 +233,22 @@ class VersionService
 
         return $this->versionRepository->save($rollbackVersion);
     }
+
+    /**
+     * Get minisite for rendering (with access check)
+     */
+    public function getMinisiteForRendering(string $siteId): ?object
+    {
+        $minisite = $this->minisiteRepository->findById($siteId);
+        if (!$minisite) {
+            return null;
+        }
+
+        // Verify user has access to this minisite
+        if (!$this->hasUserAccess($minisite)) {
+            return null;
+        }
+
+        return $minisite;
+    }
 }

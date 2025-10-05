@@ -55,7 +55,8 @@ class VersionHooksFactory
             $rollbackVersionHandler,
             $requestHandler,
             $responseHandler,
-            $versionRenderer
+            $versionRenderer,
+            $versionService
         );
 
         // Create hooks

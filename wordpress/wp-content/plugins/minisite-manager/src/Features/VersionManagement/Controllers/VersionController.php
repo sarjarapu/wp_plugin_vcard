@@ -9,6 +9,7 @@ use Minisite\Features\VersionManagement\Handlers\RollbackVersionHandler;
 use Minisite\Features\VersionManagement\Http\VersionRequestHandler;
 use Minisite\Features\VersionManagement\Http\VersionResponseHandler;
 use Minisite\Features\VersionManagement\Rendering\VersionRenderer;
+use Minisite\Features\VersionManagement\Services\VersionService;
 
 /**
  * Controller for version management operations
@@ -22,7 +23,8 @@ class VersionController
         private RollbackVersionHandler $rollbackVersionHandler,
         private VersionRequestHandler $requestHandler,
         private VersionResponseHandler $responseHandler,
-        private VersionRenderer $renderer
+        private VersionRenderer $renderer,
+        private VersionService $versionService
     ) {
     }
 
@@ -50,16 +52,19 @@ class VersionController
             // Get minisite for rendering
             $minisite = $this->getMinisiteForRendering($command->siteId);
             if (!$minisite) {
+                error_log('VersionManagement: Minisite not found for ID: ' . $command->siteId);
                 $this->responseHandler->redirectToSites();
                 return;
             }
 
+            error_log('VersionManagement: Rendering version history for minisite: ' . $minisite->title);
             $this->renderer->renderVersionHistory([
                 'page_title' => 'Version History: ' . $minisite->title,
                 'profile' => $minisite,
                 'versions' => $versions,
             ]);
         } catch (\Exception $e) {
+            error_log('VersionManagement: Exception in handleListVersions: ' . $e->getMessage());
             $this->responseHandler->redirectToSites();
         }
     }
@@ -157,17 +162,6 @@ class VersionController
      */
     private function getMinisiteForRendering(string $siteId): ?object
     {
-        // This would typically use a repository, but for now we'll use a simple approach
-        // In a real implementation, you'd inject the MinisiteRepository
-        global $wpdb;
-        
-        $result = $wpdb->get_row(
-            $wpdb->prepare(
-                "SELECT * FROM {$wpdb->prefix}minisites WHERE id = %s",
-                $siteId
-            )
-        );
-        
-        return $result;
+        return $this->versionService->getMinisiteForRendering($siteId);
     }
 }

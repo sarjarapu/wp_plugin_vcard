@@ -36,6 +36,7 @@ class VersionHooks
         // Check if this is a version management route
         if ((int) get_query_var('minisite_account') === 1 && 
             get_query_var('minisite_account_action') === 'versions') {
+            error_log('VersionManagement: Route matched, handling version history page');
             $this->versionController->handleListVersions();
             exit;
         }
