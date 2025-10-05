@@ -318,7 +318,7 @@ class _1_0_0_CreateBase implements Migration
 
         // // Debug: Check if minisite was inserted correctly
         // $debugResult = db::get_row(
-        //     "SELECT id, business_slug, location_slug, status, _minisite_current_version_id 
+        //     "SELECT id, business_slug, location_slug, status, _minisite_current_version_id
         //      FROM {$minisitesT} WHERE id = %s",
         //     [$minisiteData['id']]
         // );

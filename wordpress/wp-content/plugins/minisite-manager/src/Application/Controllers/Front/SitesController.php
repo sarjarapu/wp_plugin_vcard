@@ -246,7 +246,7 @@ final class SitesController
                         // CONDITIONAL UPDATE: Only update main table for minisites that have never been published
                         // This fixes the JSON import issue for new minisites while preserving published data
                         $hasBeenPublished = $versionRepo->findPublishedVersion($siteId) !== null;
-                        
+
                         if (!$hasBeenPublished) {
                             // For new minisites: Update main table so preview works with imported data
                             $businessInfoFields = array(
@@ -433,7 +433,7 @@ final class SitesController
 
         // Update profile with version-specific data for rendering
         $minisite->siteJson = $siteJson;
-        
+
         // If showing a specific version, also update the profile fields from version data
         if ($version) {
             // Use version data if available, otherwise fall back to existing minisite data

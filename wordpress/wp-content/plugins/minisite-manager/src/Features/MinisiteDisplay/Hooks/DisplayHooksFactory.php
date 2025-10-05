@@ -32,13 +32,13 @@ final class DisplayHooksFactory
         // Create additional dependencies for refactored controller
         $requestHandler = new \Minisite\Features\MinisiteDisplay\Http\DisplayRequestHandler();
         $responseHandler = new \Minisite\Features\MinisiteDisplay\Http\DisplayResponseHandler();
-        
+
         // Create the Timber renderer (following the same pattern as main plugin)
         $timberRenderer = null;
         if (class_exists('Timber\Timber') && class_exists(\Minisite\Application\Rendering\TimberRenderer::class)) {
             $timberRenderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE ?? 'v2025');
         }
-        
+
         $renderer = new \Minisite\Features\MinisiteDisplay\Rendering\DisplayRenderer($timberRenderer);
 
         // Create controller
