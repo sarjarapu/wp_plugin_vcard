@@ -2,6 +2,8 @@
 
 namespace Minisite\Features\VersionManagement;
 
+use Minisite\Features\VersionManagement\Hooks\VersionHooksFactory;
+
 /**
  * VersionManagement Feature Bootstrap
  * 
