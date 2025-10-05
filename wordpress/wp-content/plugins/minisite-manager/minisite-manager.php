@@ -33,6 +33,7 @@ use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
 use Minisite\Infrastructure\Versioning\VersioningController;
 use Minisite\Features\Authentication\AuthenticationFeature;
+use Minisite\Features\MinisiteDisplay\MinisiteDisplayFeature;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -438,8 +439,9 @@ add_action('init', function () {
         delete_option('minisite_flush_rewrites');
     }
 
-    // Initialize new Authentication feature with higher priority
+    // Initialize new features with higher priority
     AuthenticationFeature::initialize();
+    MinisiteDisplayFeature::initialize();
 }, 5);
 
 /**
@@ -676,20 +678,27 @@ add_action('template_redirect', function () {
         $biz = get_query_var('minisite_biz');
         $loc = get_query_var('minisite_loc');
 
-      // Use Timber renderer (Timber is always available)
+        // Check if new MinisiteDisplay feature is available
+        if (class_exists(\Minisite\Features\MinisiteDisplay\MinisiteDisplayFeature::class)) {
+            // New feature-based system handles this via DisplayHooks
+            // The DisplayHooks will intercept this request and handle it
+            return;
+        }
+
+        // Fallback to old system if new feature is not available
         $renderer = null;
         if (class_exists('Timber\Timber') && minisite_class(TimberRenderer::class)) {
             $renderer = new TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
         }
 
-      // Controller to build the view model
+        // Controller to build the view model
         if ($ctrlClass = minisite_class(MinisitePageController::class)) {
             $ctrl = new $ctrlClass($renderer);
             $ctrl->handle($biz, $loc);
             exit;
         }
 
-      // Temporary fallback: simple 503 until controllers are added
+        // Temporary fallback: simple 503 until controllers are added
         status_header(503);
         nocache_headers();
         echo '<!doctype html><meta charset="utf-8"><title>Minisite</title>' .
