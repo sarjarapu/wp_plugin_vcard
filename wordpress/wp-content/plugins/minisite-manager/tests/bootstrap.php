@@ -189,6 +189,12 @@ if (!class_exists('WP_User')) {
             $this->allcaps = [];
             $this->filter = null;
         }
+        
+        public function set_role($role)
+        {
+            // Mock implementation - just return true
+            return true;
+        }
     }
 }
 

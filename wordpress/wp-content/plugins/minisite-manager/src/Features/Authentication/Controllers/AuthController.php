@@ -186,7 +186,7 @@ final class AuthController
     {
         $context = $this->responseHandler->createErrorContext(
             'Sign In',
-            $errorMessage,
+            $errorMessage ?? '',
             ['redirect_to' => $this->requestHandler->getRedirectTo()]
         );
 
@@ -200,7 +200,7 @@ final class AuthController
     {
         $context = $this->responseHandler->createErrorContext(
             'Create Account',
-            $errorMessage,
+            $errorMessage ?? '',
             ['redirect_to' => $this->requestHandler->getRedirectTo()]
         );
 
@@ -214,7 +214,7 @@ final class AuthController
     {
         $context = $this->responseHandler->createErrorContext(
             'Reset Password',
-            $errorMessage
+            $errorMessage ?? ''
         );
 
         $this->renderer->render('account-forgot.twig', $context);
