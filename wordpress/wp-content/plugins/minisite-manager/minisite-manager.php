@@ -32,6 +32,7 @@ use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
 use Minisite\Infrastructure\Versioning\VersioningController;
+use Minisite\Features\Authentication\AuthenticationFeature;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -436,6 +437,9 @@ add_action('init', function () {
         flush_rewrite_rules();
         delete_option('minisite_flush_rewrites');
     }
+
+    // Initialize new Authentication feature with higher priority
+    AuthenticationFeature::initialize();
 }, 5);
 
 /**
@@ -469,26 +473,24 @@ add_action('template_redirect', function () {
     if ((int) get_query_var('minisite_account') === 1) {
         $action = get_query_var('minisite_account_action');
 
+        // Skip old authentication handling for routes handled by new Authentication feature
+        $newAuthRoutes = ['login', 'register', 'dashboard', 'logout', 'forgot'];
+        if (in_array($action, $newAuthRoutes)) {
+            // Let the new Authentication feature handle these routes
+            return;
+        }
+
       // Resolve renderer: Timber if available
         $renderer = null;
         if (class_exists('Timber\Timber') && minisite_class(TimberRenderer::class)) {
             $renderer = new TimberRenderer(MINISITE_DEFAULT_TEMPLATE);
         }
 
-      // Handle authentication actions
+      // Handle remaining authentication actions (sites, new, etc.)
         if ($authCtrlClass = minisite_class(AuthController::class)) {
             $authCtrl = new $authCtrlClass($renderer);
 
             switch ($action) {
-                case 'login':
-                    $authCtrl->handleLogin();
-                    break;
-                case 'register':
-                    $authCtrl->handleRegister();
-                    break;
-                case 'dashboard':
-                    $authCtrl->handleDashboard();
-                    break;
                 case 'sites':
                   // Delegate to SitesController
                     if (
