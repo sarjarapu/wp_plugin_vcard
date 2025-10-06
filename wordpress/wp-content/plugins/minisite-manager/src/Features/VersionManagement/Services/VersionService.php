@@ -251,4 +251,17 @@ class VersionService
 
         return $minisite;
     }
+
+    /**
+     * Check if current user has access to the minisite
+     */
+    private function hasUserAccess(object $minisite): bool
+    {
+        if (!is_user_logged_in()) {
+            return false;
+        }
+
+        $currentUser = wp_get_current_user();
+        return $minisite->createdBy === (int) $currentUser->ID;
+    }
 }

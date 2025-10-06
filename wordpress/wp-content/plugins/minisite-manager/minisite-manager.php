@@ -635,15 +635,15 @@ add_action('template_redirect', function () {
                          '<h1>Preview unavailable</h1>';
                     exit;
                 case 'versions':
-                  // Version management is now handled by VersionManagementFeature
-                  // The feature's hooks will handle this route via template_redirect
-                    break;
+                    // Version management is now handled by VersionManagementFeature
+                    // Return early to let the new system handle it
+                    return;
                 case 'logout':
-                    $authCtrl->handleLogout();
-                    break;
+                    // Logout is now handled by Authentication feature
+                    return;
                 case 'forgot':
-                    $authCtrl->handleForgotPassword();
-                    break;
+                    // Forgot password is now handled by Authentication feature
+                    return;
                 default:
                     wp_redirect(home_url('/account/login'));
                     exit;

@@ -52,19 +52,16 @@ class VersionController
             // Get minisite for rendering
             $minisite = $this->getMinisiteForRendering($command->siteId);
             if (!$minisite) {
-                error_log('VersionManagement: Minisite not found for ID: ' . $command->siteId);
                 $this->responseHandler->redirectToSites();
                 return;
             }
 
-            error_log('VersionManagement: Rendering version history for minisite: ' . $minisite->title);
             $this->renderer->renderVersionHistory([
                 'page_title' => 'Version History: ' . $minisite->title,
                 'profile' => $minisite,
                 'versions' => $versions,
             ]);
         } catch (\Exception $e) {
-            error_log('VersionManagement: Exception in handleListVersions: ' . $e->getMessage());
             $this->responseHandler->redirectToSites();
         }
     }

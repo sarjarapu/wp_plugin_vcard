@@ -18,11 +18,13 @@ class VersionRequestHandler
     public function parseListVersionsRequest(): ?ListVersionsCommand
     {
         $siteId = get_query_var('minisite_site_id');
+        
         if (!$siteId) {
             return null;
         }
 
         $currentUser = wp_get_current_user();
+        
         if (!$currentUser || !$currentUser->ID) {
             return null;
         }

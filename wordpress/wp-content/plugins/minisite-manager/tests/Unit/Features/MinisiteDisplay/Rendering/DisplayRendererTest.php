@@ -282,6 +282,7 @@ final class DisplayRendererTest extends TestCase
             ->willThrowException(new \Exception('Template error'));
 
         // The exception should be caught and fallback rendering should be used
+        $output = '';
         try {
             ob_start();
             $this->displayRenderer->renderMinisite($mockMinisite);
@@ -292,6 +293,11 @@ final class DisplayRendererTest extends TestCase
         } catch (\Exception $e) {
             // If exception is not caught, that's also acceptable behavior
             $this->assertEquals('Template error', $e->getMessage());
+        } finally {
+            // Clean up any remaining output buffer
+            if (ob_get_level() > 0) {
+                ob_end_clean();
+            }
         }
     }
 
