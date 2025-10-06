@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Features\MinisiteDisplay\Rendering;
 
+use Minisite\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteDisplay\Rendering\DisplayRenderer;
 use PHPUnit\Framework\TestCase;
 
@@ -36,7 +37,7 @@ final class DisplayRendererTest extends TestCase
     public function test_render_minisite_with_valid_minisite_and_timber_renderer(): void
     {
         // Create a proper Minisite entity mock
-        $mockMinisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $mockMinisite = $this->createMock(Minisite::class);
 
         $this->mockTimberRenderer
             ->expects($this->once())
@@ -272,7 +273,7 @@ final class DisplayRendererTest extends TestCase
     public function test_render_minisite_with_timber_renderer_exception(): void
     {
         // Create a proper Minisite entity mock
-        $mockMinisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $mockMinisite = $this->createMock(Minisite::class);
 
         $this->mockTimberRenderer
             ->expects($this->once())
@@ -281,6 +282,7 @@ final class DisplayRendererTest extends TestCase
             ->willThrowException(new \Exception('Template error'));
 
         // The exception should be caught and fallback rendering should be used
+        $output = '';
         try {
             ob_start();
             $this->displayRenderer->renderMinisite($mockMinisite);
@@ -291,6 +293,11 @@ final class DisplayRendererTest extends TestCase
         } catch (\Exception $e) {
             // If exception is not caught, that's also acceptable behavior
             $this->assertEquals('Template error', $e->getMessage());
+        } finally {
+            // Clean up any remaining output buffer
+            if (ob_get_level() > 0) {
+                ob_end_clean();
+            }
         }
     }
 

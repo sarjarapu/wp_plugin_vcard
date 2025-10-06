@@ -34,6 +34,7 @@ use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
 use Minisite\Infrastructure\Versioning\VersioningController;
 use Minisite\Features\Authentication\AuthenticationFeature;
 use Minisite\Features\MinisiteDisplay\MinisiteDisplayFeature;
+use Minisite\Features\VersionManagement\VersionManagementFeature;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -442,6 +443,7 @@ add_action('init', function () {
     // Initialize new features with higher priority
     AuthenticationFeature::initialize();
     MinisiteDisplayFeature::initialize();
+    VersionManagementFeature::initialize();
 }, 5);
 
 /**
@@ -633,31 +635,15 @@ add_action('template_redirect', function () {
                          '<h1>Preview unavailable</h1>';
                     exit;
                 case 'versions':
-                  // Delegate to VersionController for version management
-                    if (
-                        $versionCtrlClass = minisite_class(
-                            VersionController::class
-                        )
-                    ) {
-                        global $wpdb;
-                        $minisiteRepo = new MinisiteRepository($wpdb);
-                        $versionRepo = new VersionRepository($wpdb);
-                        $versionCtrl = new $versionCtrlClass($minisiteRepo, $versionRepo);
-                        $versionCtrl->handleListVersions();
-                        break;
-                    }
-                  // Fallback if VersionController missing
-                    status_header(503);
-                    nocache_headers();
-                    echo '<!doctype html><meta charset="utf-8"><title>Account</title>' .
-                         '<h1>Version management unavailable</h1>';
-                    exit;
+                    // Version management is now handled by VersionManagementFeature
+                    // Return early to let the new system handle it
+                    return;
                 case 'logout':
-                    $authCtrl->handleLogout();
-                    break;
+                    // Logout is now handled by Authentication feature
+                    return;
                 case 'forgot':
-                    $authCtrl->handleForgotPassword();
-                    break;
+                    // Forgot password is now handled by Authentication feature
+                    return;
                 default:
                     wp_redirect(home_url('/account/login'));
                     exit;
