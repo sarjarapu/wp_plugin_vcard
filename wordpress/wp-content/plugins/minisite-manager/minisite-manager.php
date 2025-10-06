@@ -33,7 +33,8 @@ use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
 use Minisite\Infrastructure\Versioning\VersioningController;
 use Minisite\Features\Authentication\AuthenticationFeature;
-use Minisite\Features\MinisiteDisplay\MinisiteDisplayFeature;
+use Minisite\Features\MinisiteViewer\MinisiteViewerFeature;
+use Minisite\Features\MinisiteListing\MinisiteListingFeature;
 use Minisite\Features\VersionManagement\VersionManagementFeature;
 
 if (!defined('ABSPATH')) {
@@ -442,7 +443,8 @@ add_action('init', function () {
 
     // Initialize new features with higher priority
     AuthenticationFeature::initialize();
-    MinisiteDisplayFeature::initialize();
+    MinisiteViewerFeature::initialize();
+    MinisiteListingFeature::initialize();
     VersionManagementFeature::initialize();
 }, 5);
 
@@ -477,10 +479,10 @@ add_action('template_redirect', function () {
     if ((int) get_query_var('minisite_account') === 1) {
         $action = get_query_var('minisite_account_action');
 
-        // Skip old authentication handling for routes handled by new Authentication feature
-        $newAuthRoutes = ['login', 'register', 'dashboard', 'logout', 'forgot'];
-        if (in_array($action, $newAuthRoutes)) {
-            // Let the new Authentication feature handle these routes
+        // Skip old handling for routes handled by new features
+        $newFeatureRoutes = ['login', 'register', 'dashboard', 'logout', 'forgot', 'sites'];
+        if (in_array($action, $newFeatureRoutes)) {
+            // Let the new features handle these routes
             return;
         }
 
@@ -664,8 +666,8 @@ add_action('template_redirect', function () {
         $biz = get_query_var('minisite_biz');
         $loc = get_query_var('minisite_loc');
 
-        // Check if new MinisiteDisplay feature is available
-        if (class_exists(\Minisite\Features\MinisiteDisplay\MinisiteDisplayFeature::class)) {
+        // Check if new MinisiteViewer feature is available
+        if (class_exists(\Minisite\Features\MinisiteViewer\MinisiteViewerFeature::class)) {
             // New feature-based system handles this via DisplayHooks
             // The DisplayHooks will intercept this request and handle it
             return;

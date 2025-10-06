@@ -101,11 +101,11 @@ src/
 │   │       ├── Unit/
 │   │       └── Integration/
 │   │
-│   ├── MinisiteDisplay/
+│   ├── MinisiteViewer/
 │   │   ├── Controllers/
 │   │   │   └── MinisitePageController.php
 │   │   ├── Services/
-│   │   │   └── MinisiteDisplayService.php
+│   │   │   └── MinisiteViewerService.php
 │   │   ├── Hooks/
 │   │   │   └── DisplayHooks.php
 │   │   └── Tests/
@@ -153,19 +153,19 @@ src/
 - **Dependencies**: None - Self-contained
 - **Benefits**: Establishes pattern, low risk, quick win
 
-### 2. MinisiteDisplay
+### 2. MinisiteViewer
 - **Controller**: `MinisitePageController.php`
 - **Routes**: `/b/{business}/{location}`
 - **Complexity**: Medium - Template rendering, data fetching
-- **Dependencies**: MinisiteManagement (for data)
+- **Dependencies**: MinisiteEditor (for data)
 
 ### 3. VersionManagement
 - **Controller**: `VersionController.php`
 - **Routes**: `/account/sites/{id}/versions`, `/account/sites/{id}/preview/{version}`
 - **Complexity**: Medium - Version operations, copy, publish
-- **Dependencies**: MinisiteManagement
+- **Dependencies**: MinisiteEditor
 
-### 4. MinisiteManagement (MOST COMPLEX)
+### 4. MinisiteEditor (MOST COMPLEX)
 - **Controllers**: `SitesController.php`, `NewMinisiteController.php`
 - **Routes**: `/account/sites/new`, `/account/sites/{id}/edit`
 - **Complexity**: High - 277-line handleEdit method, multiple DB updates
@@ -183,7 +183,7 @@ src/
 ### Phase 1: Setup New Structure
 ```bash
 # Create feature directories
-mkdir -p src/Features/{Authentication,MinisiteManagement,VersionManagement,MinisiteDisplay,SubscriptionManagement}/{Controllers,Services,Repositories,Domain/{Entities,ValueObjects},Commands,Handlers,Hooks,Tests/{Unit,Integration}}
+mkdir -p src/Features/{Authentication,MinisiteEditor,VersionManagement,MinisiteViewer,SubscriptionManagement}/{Controllers,Services,Repositories,Domain/{Entities,ValueObjects},Commands,Handlers,Hooks,Tests/{Unit,Integration}}
 
 # Create shared directories
 mkdir -p src/Shared/{Infrastructure/{Database,WordPress,Utils},Domain/Services,Application/Rendering}
@@ -215,11 +215,11 @@ mkdir -p src/Bootstrap
 - Command/Handler pattern established
 - Template for other features
 
-#### 2.2 MinisiteDisplay Feature
+#### 2.2 MinisiteViewer Feature
 **Migration Steps:**
 1. Create feature structure
 2. Move `MinisitePageController.php`
-3. Extract display logic to `MinisiteDisplayService.php`
+3. Extract display logic to `MinisiteViewerService.php`
 4. Create hooks for route registration
 5. Update dependencies
 
@@ -232,7 +232,7 @@ mkdir -p src/Bootstrap
 5. Move `VersionRepository.php` and related files
 6. Create comprehensive tests
 
-#### 2.4 MinisiteManagement Feature (MOST CRITICAL)
+#### 2.4 MinisiteEditor Feature (MOST CRITICAL)
 **Current Problems to Fix:**
 - 277-line `handleEdit()` method
 - Multiple database update calls:
@@ -478,7 +478,7 @@ class AuthHooks
 - Day 3-4: Implement Service layer and Commands/Handlers
 - Day 5: Create tests and update integration
 
-### Week 2: MinisiteDisplay Feature
+### Week 2: MinisiteViewer Feature
 - Day 1-2: Migrate MinisitePageController
 - Day 3-4: Extract display logic to service
 - Day 5: Create tests and update integration
