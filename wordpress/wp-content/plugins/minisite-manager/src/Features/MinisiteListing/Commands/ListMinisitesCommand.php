@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Features\MinisiteEditor\Commands;
+namespace Minisite\Features\MinisiteListing\Commands;
 
 /**
  * List Minisites Command

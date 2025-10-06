@@ -34,7 +34,7 @@ use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
 use Minisite\Infrastructure\Versioning\VersioningController;
 use Minisite\Features\Authentication\AuthenticationFeature;
 use Minisite\Features\MinisiteViewer\MinisiteViewerFeature;
-use Minisite\Features\MinisiteEditor\MinisiteEditorFeature;
+use Minisite\Features\MinisiteListing\MinisiteListingFeature;
 use Minisite\Features\VersionManagement\VersionManagementFeature;
 
 if (!defined('ABSPATH')) {
@@ -444,7 +444,7 @@ add_action('init', function () {
     // Initialize new features with higher priority
     AuthenticationFeature::initialize();
     MinisiteViewerFeature::initialize();
-    MinisiteEditorFeature::initialize();
+    MinisiteListingFeature::initialize();
     VersionManagementFeature::initialize();
 }, 5);
 
@@ -480,7 +480,7 @@ add_action('template_redirect', function () {
         $action = get_query_var('minisite_account_action');
 
         // Skip old handling for routes handled by new features
-        $newFeatureRoutes = ['login', 'register', 'dashboard', 'logout', 'forgot', 'sites', 'new', 'edit', 'preview'];
+        $newFeatureRoutes = ['login', 'register', 'dashboard', 'logout', 'forgot', 'sites'];
         if (in_array($action, $newFeatureRoutes)) {
             // Let the new features handle these routes
             return;
