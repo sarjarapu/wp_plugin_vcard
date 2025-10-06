@@ -4,11 +4,12 @@ This guide outlines the standards, patterns, and practices for developing new fe
 
 ## 🎯 **CRITICAL: Pattern Adherence Requirement**
 
-> **⚠️ MANDATORY: All new features MUST strictly adhere to the patterns and practices established in the Authentication and MinisiteDisplay features.**
+> **⚠️ MANDATORY: All new features MUST strictly adhere to the patterns and practices established in the Authentication, MinisiteViewer, and MinisiteEditor features.**
 
 ### **Reference Features:**
 - **Authentication Feature**: `src/Features/Authentication/` and `tests/Unit/Features/Authentication/`
-- **MinisiteDisplay Feature**: `src/Features/MinisiteDisplay/` and `tests/Unit/Features/MinisiteDisplay/`
+- **MinisiteViewer Feature**: `src/Features/MinisiteViewer/` and `tests/Unit/Features/MinisiteViewer/`
+- **MinisiteEditor Feature**: `src/Features/MinisiteEditor/` and `tests/Unit/Features/MinisiteEditor/`
 
 ### **Why This Matters:**
 - **Consistency**: Ensures all features follow the same architectural patterns
