@@ -4,10 +4,11 @@ namespace Minisite\Features\MinisiteListing\Hooks;
 
 use Minisite\Features\MinisiteListing\Controllers\ListingController;
 use Minisite\Features\MinisiteListing\Handlers\ListMinisitesHandler;
+use Minisite\Features\MinisiteListing\Http\ListingRequestHandler;
+use Minisite\Features\MinisiteListing\Http\ListingResponseHandler;
+use Minisite\Features\MinisiteListing\Rendering\ListingRenderer;
 use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 
 /**
  * ListingHooks Factory
@@ -24,23 +25,17 @@ final class ListingHooksFactory
      */
     public static function create(): ListingHooks
     {
-        global $wpdb;
-
-        // Create repositories
-        $minisiteRepository = new MinisiteRepository($wpdb);
-        $versionRepository = new VersionRepository($wpdb);
-
         // Create services
-        $listingManager = new WordPressListingManager($minisiteRepository, $versionRepository);
+        $listingManager = new WordPressListingManager();
         $listingService = new MinisiteListingService($listingManager);
 
         // Create handlers
         $listMinisitesHandler = new ListMinisitesHandler($listingService);
 
         // Create additional dependencies for refactored controllers
-        $requestHandler = new \Minisite\Features\MinisiteListing\Http\ListingRequestHandler();
-        $responseHandler = new \Minisite\Features\MinisiteListing\Http\ListingResponseHandler();
-        $renderer = new \Minisite\Features\MinisiteListing\Rendering\ListingRenderer();
+        $requestHandler = new ListingRequestHandler($listingManager);
+        $responseHandler = new ListingResponseHandler();
+        $renderer = new ListingRenderer();
 
         // Create controllers
         $listingController = new ListingController(
@@ -48,7 +43,8 @@ final class ListingHooksFactory
             $listingService,
             $requestHandler,
             $responseHandler,
-            $renderer
+            $renderer,
+            $listingManager
         );
 
         // Create and return hooks

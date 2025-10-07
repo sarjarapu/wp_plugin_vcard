@@ -7,6 +7,7 @@ use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
 use Minisite\Features\MinisiteListing\Http\ListingRequestHandler;
 use Minisite\Features\MinisiteListing\Http\ListingResponseHandler;
 use Minisite\Features\MinisiteListing\Rendering\ListingRenderer;
+use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
 
 /**
  * Listing Controller
@@ -26,7 +27,8 @@ final class ListingController
         private MinisiteListingService $listingService,
         private ListingRequestHandler $requestHandler,
         private ListingResponseHandler $responseHandler,
-        private ListingRenderer $renderer
+        private ListingRenderer $renderer,
+        private WordPressListingManager $wordPressManager
     ) {
     }
 
@@ -35,7 +37,7 @@ final class ListingController
      */
     public function handleList(): void
     {
-        if (!is_user_logged_in()) {
+        if (!$this->wordPressManager->isUserLoggedIn()) {
             $redirectUrl = isset($_SERVER['REQUEST_URI']) ?
                 sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
             $this->responseHandler->redirectToLogin($redirectUrl);
@@ -65,13 +67,13 @@ final class ListingController
      */
     private function renderListPage(?string $error = null, array $minisites = []): void
     {
-        $currentUser = wp_get_current_user();
+        $currentUser = $this->wordPressManager->getCurrentUser();
         
         $data = [
             'page_title' => 'My Minisites',
             'sites' => $minisites,  // Template expects 'sites', not 'minisites'
             'error' => $error,
-            'can_create' => current_user_can('minisite_create'),
+            'can_create' => $this->wordPressManager->currentUserCan('minisite_create'),
             'user' => $currentUser,
         ];
 

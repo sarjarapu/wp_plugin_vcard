@@ -29,12 +29,18 @@
           <h1 class="text-3xl md:text-4xl font-extrabold text-[var(--on-surface)]">{{ page_title }}</h1>
           <p class="mt-2 text-[var(--on-surface-variant)]">View and manage minisites you own.</p>
         </div>
-        {% if can_create %}
-          <a href="{{ function('home_url','/account/sites/new') }}"
-             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
-            <i class="fa-solid fa-plus"></i> New Minisite
+        <div class="flex items-center gap-3">
+          <a href="{{ function('home_url','/account/dashboard') }}"
+             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--outline)] text-[var(--on-surface)] hover:bg-[var(--surface-1)] transition">
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
           </a>
-        {% endif %}
+          {% if can_create %}
+            <a href="{{ function('home_url','/account/sites/new') }}"
+               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+              <i class="fa-solid fa-plus"></i> New Minisite
+            </a>
+          {% endif %}
+        </div>
       </div>
 
       <div class="mt-6">
