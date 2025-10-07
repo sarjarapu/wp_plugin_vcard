@@ -1,41 +1,41 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\Http;
+namespace Tests\Unit\Features\MinisiteViewer\Http;
 
-use Minisite\Features\MinisiteViewer\Http\DisplayRequestHandler;
-use Minisite\Features\MinisiteViewer\Commands\DisplayMinisiteCommand;
+use Minisite\Features\MinisiteViewer\Http\ViewRequestHandler;
+use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test DisplayRequestHandler
+ * Test ViewRequestHandler
  * 
- * Tests the DisplayRequestHandler for proper HTTP request processing
+ * Tests the ViewRequestHandler for proper HTTP request processing
  * 
  */
-final class DisplayRequestHandlerTest extends TestCase
+final class ViewRequestHandlerTest extends TestCase
 {
-    private DisplayRequestHandler $requestHandler;
+    private ViewRequestHandler $requestHandler;
 
     protected function setUp(): void
     {
-        $this->requestHandler = new DisplayRequestHandler();
+        $this->requestHandler = new ViewRequestHandler();
     }
 
     /**
-     * Test DisplayRequestHandler can be instantiated
+     * Test ViewRequestHandler can be instantiated
      */
     public function test_can_be_instantiated(): void
     {
-        $this->assertInstanceOf(DisplayRequestHandler::class, $this->requestHandler);
+        $this->assertInstanceOf(ViewRequestHandler::class, $this->requestHandler);
     }
 
     /**
-     * Test handleDisplayRequest method exists and is callable
+     * Test handleViewRequest method exists and is callable
      */
     public function test_handle_display_request_method_exists_and_callable(): void
     {
-        $this->assertTrue(method_exists($this->requestHandler, 'handleDisplayRequest'));
-        $this->assertTrue(is_callable([$this->requestHandler, 'handleDisplayRequest']));
+        $this->assertTrue(method_exists($this->requestHandler, 'handleViewRequest'));
+        $this->assertTrue(is_callable([$this->requestHandler, 'handleViewRequest']));
     }
 
     /**
@@ -64,17 +64,17 @@ final class DisplayRequestHandlerTest extends TestCase
         $reflection = new \ReflectionClass($this->requestHandler);
         $constructor = $reflection->getConstructor();
         
-        // DisplayRequestHandler uses PHP's default constructor (no explicit constructor)
+        // ViewRequestHandler uses PHP's default constructor (no explicit constructor)
         $this->assertNull($constructor);
     }
 
     /**
-     * Test handleDisplayRequest method is public
+     * Test handleViewRequest method is public
      */
     public function test_handle_display_request_method_is_public(): void
     {
         $reflection = new \ReflectionClass($this->requestHandler);
-        $method = $reflection->getMethod('handleDisplayRequest');
+        $method = $reflection->getMethod('handleViewRequest');
         
         $this->assertTrue($method->isPublic());
     }
@@ -102,16 +102,16 @@ final class DisplayRequestHandlerTest extends TestCase
     }
 
     /**
-     * Test handleDisplayRequest method return type
+     * Test handleViewRequest method return type
      */
     public function test_handle_display_request_method_return_type(): void
     {
         $reflection = new \ReflectionClass($this->requestHandler);
-        $method = $reflection->getMethod('handleDisplayRequest');
+        $method = $reflection->getMethod('handleViewRequest');
         $returnType = $method->getReturnType();
         
         $this->assertNotNull($returnType);
-        $this->assertEquals('Minisite\Features\MinisiteViewer\Commands\DisplayMinisiteCommand', $returnType->getName());
+        $this->assertEquals('Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand', $returnType->getName());
     }
 
     /**
@@ -141,12 +141,12 @@ final class DisplayRequestHandlerTest extends TestCase
     }
 
     /**
-     * Test handleDisplayRequest method parameter count
+     * Test handleViewRequest method parameter count
      */
     public function test_handle_display_request_method_parameter_count(): void
     {
         $reflection = new \ReflectionClass($this->requestHandler);
-        $method = $reflection->getMethod('handleDisplayRequest');
+        $method = $reflection->getMethod('handleViewRequest');
         
         $this->assertEquals(0, $method->getNumberOfParameters());
     }
@@ -174,18 +174,18 @@ final class DisplayRequestHandlerTest extends TestCase
     }
 
     /**
-     * Test DisplayRequestHandler class has proper docblock
+     * Test ViewRequestHandler class has proper docblock
      */
-    public function test_display_request_handler_class_has_proper_docblock(): void
+    public function test_view_request_handler_class_has_proper_docblock(): void
     {
         $reflection = new \ReflectionClass($this->requestHandler);
         $docComment = $reflection->getDocComment();
         
-        $this->assertStringContainsString('Display Request Handler', $docComment);
+        $this->assertStringContainsString('View Request Handler', $docComment);
     }
 
     /**
-     * Test DisplayRequestHandler class namespace
+     * Test ViewRequestHandler class namespace
      */
     public function test_display_request_handler_class_namespace(): void
     {
@@ -195,12 +195,12 @@ final class DisplayRequestHandlerTest extends TestCase
     }
 
     /**
-     * Test DisplayRequestHandler class name
+     * Test ViewRequestHandler class name
      */
     public function test_display_request_handler_class_name(): void
     {
         $reflection = new \ReflectionClass($this->requestHandler);
         
-        $this->assertEquals('DisplayRequestHandler', $reflection->getShortName());
+        $this->assertEquals('ViewRequestHandler', $reflection->getShortName());
     }
 }

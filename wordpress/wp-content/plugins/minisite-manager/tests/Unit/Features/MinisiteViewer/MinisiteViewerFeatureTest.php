@@ -3,7 +3,7 @@
 namespace Tests\Unit\Features\MinisiteViewer;
 
 use Minisite\Features\MinisiteViewer\MinisiteViewerFeature;
-use Minisite\Features\MinisiteViewer\Hooks\DisplayHooksFactory;
+use Minisite\Features\MinisiteViewer\Hooks\ViewHooksFactory;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -66,7 +66,7 @@ final class MinisiteViewerFeatureTest extends TestCase
     public function test_initialize_can_be_called_without_errors(): void
     {
         // This test verifies that the initialize method can be called
-        // In a real environment, this would create and register the DisplayHooks
+        // In a real environment, this would create and register the ViewHooks
         $this->assertTrue(method_exists(MinisiteViewerFeature::class, 'initialize'));
         
         // We can't actually call initialize() in unit tests because it would

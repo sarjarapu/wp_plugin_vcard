@@ -3,14 +3,14 @@
 namespace Minisite\Features\MinisiteViewer\Http;
 
 /**
- * Display Response Handler
+ * View Response Handler
  *
- * SINGLE RESPONSIBILITY: Handle HTTP responses for minisite display
+ * SINGLE RESPONSIBILITY: Handle HTTP responses for minisite view
  * - Manages response headers and status codes
  * - Handles redirects and error responses
  * - Creates standardized response contexts
  */
-final class DisplayResponseHandler
+final class ViewResponseHandler
 {
     /**
      * Set 404 response

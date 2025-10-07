@@ -3,35 +3,35 @@
 namespace Minisite\Features\MinisiteViewer\Hooks;
 
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
-use Minisite\Features\MinisiteViewer\Handlers\DisplayHandler;
-use Minisite\Features\MinisiteViewer\Services\MinisiteDisplayService;
+use Minisite\Features\MinisiteViewer\Handlers\ViewHandler;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 
 /**
- * DisplayHooks Factory
+ * ViewHooks Factory
  *
- * SINGLE RESPONSIBILITY: Create and configure DisplayHooks with all dependencies
+ * SINGLE RESPONSIBILITY: Create and configure ViewHooks with all dependencies
  * - Handles dependency injection
  * - Creates all required services and handlers
- * - Configures the complete display system
+ * - Configures the complete view system
  */
-final class DisplayHooksFactory
+final class ViewHooksFactory
 {
     /**
-     * Create and configure DisplayHooks
+     * Create and configure ViewHooks
      */
-    public static function create(): DisplayHooks
+    public static function create(): ViewHooks
     {
         // Create services
         $wordPressManager = new WordPressMinisiteManager();
-        $displayService = new MinisiteDisplayService($wordPressManager);
+        $viewService = new MinisiteViewService($wordPressManager);
 
         // Create handlers
-        $displayHandler = new DisplayHandler($displayService);
+        $viewHandler = new ViewHandler($viewService);
 
         // Create additional dependencies for refactored controller
-        $requestHandler = new \Minisite\Features\MinisiteViewer\Http\DisplayRequestHandler();
-        $responseHandler = new \Minisite\Features\MinisiteViewer\Http\DisplayResponseHandler();
+        $requestHandler = new \Minisite\Features\MinisiteViewer\Http\ViewRequestHandler();
+        $responseHandler = new \Minisite\Features\MinisiteViewer\Http\ViewResponseHandler();
 
         // Create the Timber renderer (following the same pattern as main plugin)
         $timberRenderer = null;
@@ -39,18 +39,18 @@ final class DisplayHooksFactory
             $timberRenderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE ?? 'v2025');
         }
 
-        $renderer = new \Minisite\Features\MinisiteViewer\Rendering\DisplayRenderer($timberRenderer);
+        $renderer = new \Minisite\Features\MinisiteViewer\Rendering\ViewRenderer($timberRenderer);
 
         // Create controller
         $minisitePageController = new MinisitePageController(
-            $displayHandler,
-            $displayService,
+            $viewHandler,
+            $viewService,
             $requestHandler,
             $responseHandler,
             $renderer
         );
 
         // Create and return hooks
-        return new DisplayHooks($minisitePageController);
+        return new ViewHooks($minisitePageController);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\WordPress;
+namespace Tests\Unit\Features\MinisiteViewer\WordPress;
 
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 use PHPUnit\Framework\TestCase;

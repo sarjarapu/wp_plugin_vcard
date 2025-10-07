@@ -3,14 +3,14 @@
 namespace Minisite\Features\MinisiteViewer\Rendering;
 
 /**
- * Display Renderer
+ * View Renderer
  *
- * SINGLE RESPONSIBILITY: Handle template rendering for minisite display
+ * SINGLE RESPONSIBILITY: Handle template rendering for minisite view
  * - Manages template rendering logic
  * - Handles fallback rendering
- * - Provides clean interface for display output
+ * - Provides clean interface for view output
  */
-final class DisplayRenderer
+final class ViewRenderer
 {
     private object $renderer;
 

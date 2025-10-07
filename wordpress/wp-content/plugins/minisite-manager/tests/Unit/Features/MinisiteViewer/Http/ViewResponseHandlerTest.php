@@ -1,23 +1,23 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\Http;
+namespace Tests\Unit\Features\MinisiteViewer\Http;
 
-use Minisite\Features\MinisiteViewer\Http\DisplayResponseHandler;
+use Minisite\Features\MinisiteViewer\Http\ViewResponseHandler;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test DisplayResponseHandler
+ * Test ViewResponseHandler
  * 
- * Tests the DisplayResponseHandler for proper HTTP response handling
+ * Tests the ViewResponseHandler for proper HTTP response handling
  * 
  */
-final class DisplayResponseHandlerTest extends TestCase
+final class ViewResponseHandlerTest extends TestCase
 {
-    private DisplayResponseHandler $responseHandler;
+    private ViewResponseHandler $responseHandler;
 
     protected function setUp(): void
     {
-        $this->responseHandler = new DisplayResponseHandler();
+        $this->responseHandler = new ViewResponseHandler();
         $this->setupWordPressMocks();
     }
 
@@ -149,7 +149,7 @@ final class DisplayResponseHandlerTest extends TestCase
         $reflection = new \ReflectionClass($this->responseHandler);
         $constructor = $reflection->getConstructor();
         
-        // DisplayResponseHandler uses PHP's default constructor (no explicit constructor)
+        // ViewResponseHandler uses PHP's default constructor (no explicit constructor)
         $this->assertNull($constructor);
     }
 

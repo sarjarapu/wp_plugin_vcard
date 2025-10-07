@@ -1,26 +1,26 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\Hooks;
+namespace Tests\Unit\Features\MinisiteViewer\Hooks;
 
-use Minisite\Features\MinisiteViewer\Hooks\DisplayHooks;
+use Minisite\Features\MinisiteViewer\Hooks\ViewHooks;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test DisplayHooks
+ * Test ViewHooks
  * 
- * Tests the DisplayHooks for proper WordPress hook registration
+ * Tests the ViewHooks for proper WordPress hook registration
  * 
  */
-final class DisplayHooksTest extends TestCase
+final class ViewHooksTest extends TestCase
 {
-    private DisplayHooks $displayHooks;
+    private ViewHooks $viewHooks;
     private $minisitePageController;
 
     protected function setUp(): void
     {
         $this->minisitePageController = $this->createMock(MinisitePageController::class);
-        $this->displayHooks = new DisplayHooks($this->minisitePageController);
+        $this->viewHooks = new ViewHooks($this->minisitePageController);
     }
 
     /**
@@ -28,17 +28,17 @@ final class DisplayHooksTest extends TestCase
      */
     public function test_register_method_exists_and_callable(): void
     {
-        $this->assertTrue(method_exists($this->displayHooks, 'register'));
-        $this->assertTrue(is_callable([$this->displayHooks, 'register']));
+        $this->assertTrue(method_exists($this->viewHooks, 'register'));
+        $this->assertTrue(is_callable([$this->viewHooks, 'register']));
     }
 
     /**
-     * Test handleDisplayRoutes method exists and is callable
+     * Test handleViewRoutes method exists and is callable
      */
     public function test_handle_display_routes_method_exists_and_callable(): void
     {
-        $this->assertTrue(method_exists($this->displayHooks, 'handleDisplayRoutes'));
-        $this->assertTrue(is_callable([$this->displayHooks, 'handleDisplayRoutes']));
+        $this->assertTrue(method_exists($this->viewHooks, 'handleViewRoutes'));
+        $this->assertTrue(is_callable([$this->viewHooks, 'handleViewRoutes']));
     }
 
     /**
@@ -46,26 +46,26 @@ final class DisplayHooksTest extends TestCase
      */
     public function test_add_query_vars_method_exists_and_callable(): void
     {
-        $this->assertTrue(method_exists($this->displayHooks, 'addQueryVars'));
-        $this->assertTrue(is_callable([$this->displayHooks, 'addQueryVars']));
+        $this->assertTrue(method_exists($this->viewHooks, 'addQueryVars'));
+        $this->assertTrue(is_callable([$this->viewHooks, 'addQueryVars']));
     }
 
     /**
-     * Test handleDisplayRoutes with valid minisite route
+     * Test handleViewRoutes with valid minisite route
      */
     public function test_handle_display_routes_with_valid_minisite_route(): void
     {
         // This test verifies the method exists and can be called
         // In a real environment, WordPress functions would be available
-        $this->assertTrue(method_exists($this->displayHooks, 'handleDisplayRoutes'));
+        $this->assertTrue(method_exists($this->viewHooks, 'handleViewRoutes'));
         
         // We can't easily test the actual functionality without WordPress environment
         // but we can verify the method exists and is callable
-        $this->assertTrue(is_callable([$this->displayHooks, 'handleDisplayRoutes']));
+        $this->assertTrue(is_callable([$this->viewHooks, 'handleViewRoutes']));
     }
 
     /**
-     * Test handleDisplayRoutes with non-minisite route
+     * Test handleViewRoutes with non-minisite route
      */
     public function test_handle_display_routes_with_non_minisite_route(): void
     {
@@ -78,13 +78,13 @@ final class DisplayHooksTest extends TestCase
         // Controller should not be called
         $this->minisitePageController
             ->expects($this->never())
-            ->method('handleDisplay');
+            ->method('handleView');
 
-        $this->displayHooks->handleDisplayRoutes();
+        $this->viewHooks->handleViewRoutes();
     }
 
     /**
-     * Test handleDisplayRoutes with missing minisite parameter
+     * Test handleViewRoutes with missing minisite parameter
      */
     public function test_handle_display_routes_with_missing_minisite_parameter(): void
     {
@@ -97,13 +97,13 @@ final class DisplayHooksTest extends TestCase
         // Controller should not be called
         $this->minisitePageController
             ->expects($this->never())
-            ->method('handleDisplay');
+            ->method('handleView');
 
-        $this->displayHooks->handleDisplayRoutes();
+        $this->viewHooks->handleViewRoutes();
     }
 
     /**
-     * Test handleDisplayRoutes with empty business slug
+     * Test handleViewRoutes with empty business slug
      */
     public function test_handle_display_routes_with_empty_business_slug(): void
     {
@@ -116,13 +116,13 @@ final class DisplayHooksTest extends TestCase
         // Controller should not be called
         $this->minisitePageController
             ->expects($this->never())
-            ->method('handleDisplay');
+            ->method('handleView');
 
-        $this->displayHooks->handleDisplayRoutes();
+        $this->viewHooks->handleViewRoutes();
     }
 
     /**
-     * Test handleDisplayRoutes with empty location slug
+     * Test handleViewRoutes with empty location slug
      */
     public function test_handle_display_routes_with_empty_location_slug(): void
     {
@@ -135,23 +135,23 @@ final class DisplayHooksTest extends TestCase
         // Controller should not be called
         $this->minisitePageController
             ->expects($this->never())
-            ->method('handleDisplay');
+            ->method('handleView');
 
-        $this->displayHooks->handleDisplayRoutes();
+        $this->viewHooks->handleViewRoutes();
     }
 
     /**
-     * Test handleDisplayRoutes with special characters in slugs
+     * Test handleViewRoutes with special characters in slugs
      */
     public function test_handle_display_routes_with_special_characters_in_slugs(): void
     {
         // This test verifies the method exists and can be called
         // In a real environment, WordPress functions would be available
-        $this->assertTrue(method_exists($this->displayHooks, 'handleDisplayRoutes'));
+        $this->assertTrue(method_exists($this->viewHooks, 'handleViewRoutes'));
         
         // We can't easily test the actual functionality without WordPress environment
         // but we can verify the method exists and is callable
-        $this->assertTrue(is_callable([$this->displayHooks, 'handleDisplayRoutes']));
+        $this->assertTrue(is_callable([$this->viewHooks, 'handleViewRoutes']));
     }
 
     /**
@@ -160,7 +160,7 @@ final class DisplayHooksTest extends TestCase
     public function test_add_query_vars_returns_same_array(): void
     {
         $inputVars = ['existing_var' => 'value'];
-        $result = $this->displayHooks->addQueryVars($inputVars);
+        $result = $this->viewHooks->addQueryVars($inputVars);
         
         $this->assertEquals($inputVars, $result);
     }
@@ -171,7 +171,7 @@ final class DisplayHooksTest extends TestCase
     public function test_add_query_vars_with_empty_array(): void
     {
         $inputVars = [];
-        $result = $this->displayHooks->addQueryVars($inputVars);
+        $result = $this->viewHooks->addQueryVars($inputVars);
         
         $this->assertEquals($inputVars, $result);
     }
@@ -182,7 +182,7 @@ final class DisplayHooksTest extends TestCase
     public function test_add_query_vars_with_null_array(): void
     {
         $this->expectException(\TypeError::class);
-        $this->displayHooks->addQueryVars(null);
+        $this->viewHooks->addQueryVars(null);
     }
 
     /**
@@ -190,7 +190,7 @@ final class DisplayHooksTest extends TestCase
      */
     public function test_constructor_dependency_injection(): void
     {
-        $reflection = new \ReflectionClass($this->displayHooks);
+        $reflection = new \ReflectionClass($this->viewHooks);
         $constructor = $reflection->getConstructor();
         
         $this->assertNotNull($constructor);
@@ -201,17 +201,17 @@ final class DisplayHooksTest extends TestCase
     }
 
     /**
-     * Test handleDisplayRoutes with controller exception
+     * Test handleViewRoutes with controller exception
      */
     public function test_handle_display_routes_with_controller_exception(): void
     {
         // This test verifies the method exists and can be called
         // In a real environment, WordPress functions would be available
-        $this->assertTrue(method_exists($this->displayHooks, 'handleDisplayRoutes'));
+        $this->assertTrue(method_exists($this->viewHooks, 'handleViewRoutes'));
         
         // We can't easily test the actual functionality without WordPress environment
         // but we can verify the method exists and is callable
-        $this->assertTrue(is_callable([$this->displayHooks, 'handleDisplayRoutes']));
+        $this->assertTrue(is_callable([$this->viewHooks, 'handleViewRoutes']));
     }
 
     /**

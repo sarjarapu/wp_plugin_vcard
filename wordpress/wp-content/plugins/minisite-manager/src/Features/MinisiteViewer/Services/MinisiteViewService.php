@@ -2,18 +2,18 @@
 
 namespace Minisite\Features\MinisiteViewer\Services;
 
-use Minisite\Features\MinisiteViewer\Commands\DisplayMinisiteCommand;
+use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 
 /**
- * Minisite Display Service
+ * Minisite View Service
  *
- * SINGLE RESPONSIBILITY: Handle minisite display business logic
+ * SINGLE RESPONSIBILITY: Handle minisite view business logic
  * - Manages minisite data retrieval and validation
- * - Handles display logic and error conditions
- * - Provides clean interface for display operations
+ * - Handles view logic and error conditions
+ * - Provides clean interface for view operations
  */
-final class MinisiteDisplayService
+final class MinisiteViewService
 {
     public function __construct(
         private WordPressMinisiteManager $wordPressManager
@@ -21,12 +21,12 @@ final class MinisiteDisplayService
     }
 
     /**
-     * Get minisite for display
+     * Get minisite for view
      *
-     * @param DisplayMinisiteCommand $command
+     * @param ViewMinisiteCommand $command
      * @return array{success: bool, minisite?: object, error?: string}
      */
-    public function getMinisiteForDisplay(DisplayMinisiteCommand $command): array
+    public function getMinisiteForView(ViewMinisiteCommand $command): array
     {
         try {
             $minisite = $this->wordPressManager->findMinisiteBySlugs(
@@ -56,10 +56,10 @@ final class MinisiteDisplayService
     /**
      * Check if minisite exists
      *
-     * @param DisplayMinisiteCommand $command
+     * @param ViewMinisiteCommand $command
      * @return bool
      */
-    public function minisiteExists(DisplayMinisiteCommand $command): bool
+    public function minisiteExists(ViewMinisiteCommand $command): bool
     {
         return $this->wordPressManager->minisiteExists(
             $command->businessSlug,

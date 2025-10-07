@@ -1,35 +1,35 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\Handlers;
+namespace Tests\Unit\Features\MinisiteViewer\Handlers;
 
-use Minisite\Features\MinisiteViewer\Commands\DisplayMinisiteCommand;
-use Minisite\Features\MinisiteViewer\Handlers\DisplayHandler;
-use Minisite\Features\MinisiteViewer\Services\MinisiteDisplayService;
+use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
+use Minisite\Features\MinisiteViewer\Handlers\ViewHandler;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Test DisplayHandler
+ * Test ViewHandler
  * 
- * Tests the DisplayHandler to ensure proper delegation to MinisiteDisplayService
+ * Tests the ViewHandler to ensure proper delegation to MinisiteViewService
  */
-final class DisplayHandlerTest extends TestCase
+final class ViewHandlerTest extends TestCase
 {
-    private MinisiteDisplayService|MockObject $displayService;
-    private DisplayHandler $displayHandler;
+    private MinisiteViewService|MockObject $viewService;
+    private ViewHandler $viewHandler;
 
     protected function setUp(): void
     {
-        $this->displayService = $this->createMock(MinisiteDisplayService::class);
-        $this->displayHandler = new DisplayHandler($this->displayService);
+        $this->viewService = $this->createMock(MinisiteViewService::class);
+        $this->viewHandler = new ViewHandler($this->viewService);
     }
 
     /**
-     * Test handle method delegates to MinisiteDisplayService
+     * Test handle method delegates to MinisiteViewService
      */
     public function test_handle_delegates_to_display_service(): void
     {
-        $command = new DisplayMinisiteCommand('coffee-shop', 'downtown');
+        $command = new ViewMinisiteCommand('coffee-shop', 'downtown');
         $expectedResult = [
             'success' => true,
             'minisite' => (object)[
@@ -40,13 +40,13 @@ final class DisplayHandlerTest extends TestCase
             ]
         ];
 
-        $this->displayService
+        $this->viewService
             ->expects($this->once())
-            ->method('getMinisiteForDisplay')
+            ->method('getMinisiteForView')
             ->with($command)
             ->willReturn($expectedResult);
 
-        $result = $this->displayHandler->handle($command);
+        $result = $this->viewHandler->handle($command);
 
         $this->assertEquals($expectedResult, $result);
     }
@@ -56,19 +56,19 @@ final class DisplayHandlerTest extends TestCase
      */
     public function test_handle_with_minisite_not_found(): void
     {
-        $command = new DisplayMinisiteCommand('nonexistent', 'location');
+        $command = new ViewMinisiteCommand('nonexistent', 'location');
         $expectedResult = [
             'success' => false,
             'error' => 'Minisite not found'
         ];
 
-        $this->displayService
+        $this->viewService
             ->expects($this->once())
-            ->method('getMinisiteForDisplay')
+            ->method('getMinisiteForView')
             ->with($command)
             ->willReturn($expectedResult);
 
-        $result = $this->displayHandler->handle($command);
+        $result = $this->viewHandler->handle($command);
 
         $this->assertEquals($expectedResult, $result);
         $this->assertFalse($result['success']);
@@ -80,19 +80,19 @@ final class DisplayHandlerTest extends TestCase
      */
     public function test_handle_with_database_error(): void
     {
-        $command = new DisplayMinisiteCommand('business', 'location');
+        $command = new ViewMinisiteCommand('business', 'location');
         $expectedResult = [
             'success' => false,
             'error' => 'Error retrieving minisite: Database connection failed'
         ];
 
-        $this->displayService
+        $this->viewService
             ->expects($this->once())
-            ->method('getMinisiteForDisplay')
+            ->method('getMinisiteForView')
             ->with($command)
             ->willReturn($expectedResult);
 
-        $result = $this->displayHandler->handle($command);
+        $result = $this->viewHandler->handle($command);
 
         $this->assertEquals($expectedResult, $result);
         $this->assertFalse($result['success']);
@@ -104,19 +104,19 @@ final class DisplayHandlerTest extends TestCase
      */
     public function test_handle_with_empty_slugs(): void
     {
-        $command = new DisplayMinisiteCommand('', '');
+        $command = new ViewMinisiteCommand('', '');
         $expectedResult = [
             'success' => false,
             'error' => 'Minisite not found'
         ];
 
-        $this->displayService
+        $this->viewService
             ->expects($this->once())
-            ->method('getMinisiteForDisplay')
+            ->method('getMinisiteForView')
             ->with($command)
             ->willReturn($expectedResult);
 
-        $result = $this->displayHandler->handle($command);
+        $result = $this->viewHandler->handle($command);
 
         $this->assertEquals($expectedResult, $result);
     }
@@ -126,7 +126,7 @@ final class DisplayHandlerTest extends TestCase
      */
     public function test_handle_with_special_characters(): void
     {
-        $command = new DisplayMinisiteCommand('café-&-restaurant', 'main-street-123');
+        $command = new ViewMinisiteCommand('café-&-restaurant', 'main-street-123');
         $expectedResult = [
             'success' => true,
             'minisite' => (object)[
@@ -137,23 +137,23 @@ final class DisplayHandlerTest extends TestCase
             ]
         ];
 
-        $this->displayService
+        $this->viewService
             ->expects($this->once())
-            ->method('getMinisiteForDisplay')
+            ->method('getMinisiteForView')
             ->with($command)
             ->willReturn($expectedResult);
 
-        $result = $this->displayHandler->handle($command);
+        $result = $this->viewHandler->handle($command);
 
         $this->assertEquals($expectedResult, $result);
     }
 
     /**
-     * Test handle method returns exactly what MinisiteDisplayService returns
+     * Test handle method returns exactly what MinisiteViewService returns
      */
     public function test_handle_returns_service_result_unchanged(): void
     {
-        $command = new DisplayMinisiteCommand('business', 'location');
+        $command = new ViewMinisiteCommand('business', 'location');
         $expectedResult = [
             'success' => true,
             'minisite' => [
@@ -165,12 +165,12 @@ final class DisplayHandlerTest extends TestCase
             ]
         ];
 
-        $this->displayService
+        $this->viewService
             ->expects($this->once())
-            ->method('getMinisiteForDisplay')
+            ->method('getMinisiteForView')
             ->willReturn($expectedResult);
 
-        $result = $this->displayHandler->handle($command);
+        $result = $this->viewHandler->handle($command);
 
         $this->assertEquals($expectedResult, $result);
         $this->assertArrayHasKey('additional_data', $result['minisite']);
@@ -181,13 +181,13 @@ final class DisplayHandlerTest extends TestCase
      */
     public function test_constructor_dependency_injection(): void
     {
-        $reflection = new \ReflectionClass($this->displayHandler);
+        $reflection = new \ReflectionClass($this->viewHandler);
         $constructor = $reflection->getConstructor();
         
         $this->assertNotNull($constructor);
         $this->assertEquals(1, $constructor->getNumberOfParameters());
         
         $params = $constructor->getParameters();
-        $this->assertEquals(MinisiteDisplayService::class, $params[0]->getType()->getName());
+        $this->assertEquals(MinisiteViewService::class, $params[0]->getType()->getName());
     }
 }

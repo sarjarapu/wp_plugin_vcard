@@ -5,14 +5,14 @@ namespace Minisite\Features\MinisiteViewer\Hooks;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
 
 /**
- * Display Hooks
+ * View Hooks
  *
- * SINGLE RESPONSIBILITY: Register WordPress hooks for minisite display routes
+ * SINGLE RESPONSIBILITY: Register WordPress hooks for minisite view routes
  * - Registers rewrite rules for minisite pages
  * - Hooks into WordPress template_redirect
- * - Manages minisite display route handling
+ * - Manages minisite view route handling
  */
-final class DisplayHooks
+final class ViewHooks
 {
     public function __construct(
         private MinisitePageController $minisitePageController
@@ -20,13 +20,13 @@ final class DisplayHooks
     }
 
     /**
-     * Register all display hooks
+     * Register all view hooks
      */
     public function register(): void
     {
         add_action('init', [$this, 'addRewriteRules']);
         // Use priority 5 to run before the main plugin's template_redirect (which runs at priority 10)
-        add_action('template_redirect', [$this, 'handleDisplayRoutes'], 5);
+        add_action('template_redirect', [$this, 'handleViewRoutes'], 5);
     }
 
     /**
@@ -41,7 +41,7 @@ final class DisplayHooks
     }
 
     /**
-     * Add query variables for display routes
+     * Add query variables for view routes
      * Note: We use the existing minisite_biz and minisite_loc vars
      */
     public function addQueryVars(array $vars): array
@@ -51,12 +51,12 @@ final class DisplayHooks
     }
 
     /**
-     * Handle display routes
+     * Handle view routes
      * This hooks into the existing /b/{business}/{location} system
      */
-    public function handleDisplayRoutes(): void
+    public function handleViewRoutes(): void
     {
-        // Check if this is a minisite display route
+        // Check if this is a minisite view route
         $businessSlug = get_query_var('minisite_biz');
         $locationSlug = get_query_var('minisite_loc');
 
@@ -65,7 +65,7 @@ final class DisplayHooks
         }
 
         // Route to controller
-        $this->minisitePageController->handleDisplay();
+        $this->minisitePageController->handleView();
 
         // Exit to prevent the old system from handling this request
         exit;

@@ -2,24 +2,24 @@
 
 namespace Minisite\Features\MinisiteViewer\Http;
 
-use Minisite\Features\MinisiteViewer\Commands\DisplayMinisiteCommand;
+use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 
 /**
- * Display Request Handler
+ * View Request Handler
  *
- * SINGLE RESPONSIBILITY: Handle HTTP requests for minisite display
+ * SINGLE RESPONSIBILITY: Handle HTTP requests for minisite view
  * - Extracts and validates request data
  * - Creates command objects from HTTP requests
  * - Handles request validation and sanitization
  */
-final class DisplayRequestHandler
+final class ViewRequestHandler
 {
     /**
-     * Handle display request from URL parameters
+     * Handle view request from URL parameters
      *
-     * @return DisplayMinisiteCommand|null
+     * @return ViewMinisiteCommand|null
      */
-    public function handleDisplayRequest(): ?DisplayMinisiteCommand
+    public function handleViewRequest(): ?ViewMinisiteCommand
     {
         $businessSlug = get_query_var('minisite_biz');
         $locationSlug = get_query_var('minisite_loc');
@@ -28,7 +28,7 @@ final class DisplayRequestHandler
             return null;
         }
 
-        return new DisplayMinisiteCommand(
+        return new ViewMinisiteCommand(
             sanitize_text_field($businessSlug),
             sanitize_text_field($locationSlug)
         );

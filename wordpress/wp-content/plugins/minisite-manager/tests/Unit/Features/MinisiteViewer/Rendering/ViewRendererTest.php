@@ -1,13 +1,13 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\Rendering;
+namespace Tests\Unit\Features\MinisiteViewer\Rendering;
 
 use Minisite\Domain\Entities\Minisite;
-use Minisite\Features\MinisiteViewer\Rendering\DisplayRenderer;
+use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test DisplayRenderer
+ * Test ViewRenderer
  * 
  * NOTE: These are "coverage tests" that verify method existence and basic functionality.
  * They do not test actual template rendering or Timber integration.
@@ -18,26 +18,26 @@ use PHPUnit\Framework\TestCase;
  * - Does NOT test actual Timber rendering or template functionality
  * 
  * Limitations:
- * - DisplayRenderer directly calls Timber::render() which requires full WordPress environment
+ * - ViewRenderer directly calls Timber::render() which requires full WordPress environment
  * - Templates must exist and be properly configured
  * - Cannot test actual rendering output or template context
  * 
- * For true unit testing, DisplayRenderer would need:
+ * For true unit testing, ViewRenderer would need:
  * - Dependency injection for rendering engine
  * - Interface abstraction for template rendering
  * - Proper mocking of template dependencies
  * 
  * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
-final class DisplayRendererTest extends TestCase
+final class ViewRendererTest extends TestCase
 {
-    private DisplayRenderer $displayRenderer;
+    private ViewRenderer $displayRenderer;
     private $mockTimberRenderer;
 
     protected function setUp(): void
     {
         $this->mockTimberRenderer = $this->createMock(\Minisite\Application\Rendering\TimberRenderer::class);
-        $this->displayRenderer = new DisplayRenderer($this->mockTimberRenderer);
+        $this->displayRenderer = new ViewRenderer($this->mockTimberRenderer);
         $this->setupWordPressMocks();
     }
 
@@ -68,7 +68,7 @@ final class DisplayRendererTest extends TestCase
     public function test_render_minisite_with_object_no_render_method(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $displayRenderer = new DisplayRenderer($mockRenderer);
+        $displayRenderer = new ViewRenderer($mockRenderer);
         $mockMinisite = (object)[
             'id' => '123',
             'name' => 'Coffee Shop',
@@ -92,7 +92,7 @@ final class DisplayRendererTest extends TestCase
     public function test_render_minisite_with_empty_minisite_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $displayRenderer = new DisplayRenderer($mockRenderer);
+        $displayRenderer = new ViewRenderer($mockRenderer);
         $mockMinisite = (object)[
             'id' => '123',
             'name' => '',
@@ -116,7 +116,7 @@ final class DisplayRendererTest extends TestCase
     public function test_render_minisite_with_null_minisite_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $displayRenderer = new DisplayRenderer($mockRenderer);
+        $displayRenderer = new ViewRenderer($mockRenderer);
         $mockMinisite = (object)[
             'id' => '123',
             'name' => null,
@@ -140,7 +140,7 @@ final class DisplayRendererTest extends TestCase
     public function test_render_minisite_with_special_characters_in_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $displayRenderer = new DisplayRenderer($mockRenderer);
+        $displayRenderer = new ViewRenderer($mockRenderer);
         $mockMinisite = (object)[
             'id' => '123',
             'name' => 'Café & Restaurant <script>alert("xss")</script>',

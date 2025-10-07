@@ -1,14 +1,14 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\Controllers;
+namespace Tests\Unit\Features\MinisiteViewer\Controllers;
 
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
-use Minisite\Features\MinisiteViewer\Handlers\DisplayHandler;
-use Minisite\Features\MinisiteViewer\Services\MinisiteDisplayService;
-use Minisite\Features\MinisiteViewer\Http\DisplayRequestHandler;
-use Minisite\Features\MinisiteViewer\Http\DisplayResponseHandler;
-use Minisite\Features\MinisiteViewer\Rendering\DisplayRenderer;
-use Minisite\Features\MinisiteViewer\Commands\DisplayMinisiteCommand;
+use Minisite\Features\MinisiteViewer\Handlers\ViewHandler;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
+use Minisite\Features\MinisiteViewer\Http\ViewRequestHandler;
+use Minisite\Features\MinisiteViewer\Http\ViewResponseHandler;
+use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
+use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,8 +19,8 @@ use PHPUnit\Framework\TestCase;
 final class MinisitePageControllerTest extends TestCase
 {
     private MinisitePageController $minisitePageController;
-    private $displayHandler;
-    private $displayService;
+    private $viewHandler;
+    private $viewService;
     private $requestHandler;
     private $responseHandler;
     private $renderer;
@@ -28,16 +28,16 @@ final class MinisitePageControllerTest extends TestCase
     protected function setUp(): void
     {
         // Create mocks for all dependencies
-        $this->displayHandler = $this->createMock(DisplayHandler::class);
-        $this->displayService = $this->createMock(MinisiteDisplayService::class);
-        $this->requestHandler = $this->createMock(DisplayRequestHandler::class);
-        $this->responseHandler = $this->createMock(DisplayResponseHandler::class);
-        $this->renderer = $this->createMock(DisplayRenderer::class);
+        $this->viewHandler = $this->createMock(ViewHandler::class);
+        $this->viewService = $this->createMock(MinisiteViewService::class);
+        $this->requestHandler = $this->createMock(ViewRequestHandler::class);
+        $this->responseHandler = $this->createMock(ViewResponseHandler::class);
+        $this->renderer = $this->createMock(ViewRenderer::class);
 
         // Create MinisitePageController with mocked dependencies
         $this->minisitePageController = new MinisitePageController(
-            $this->displayHandler,
-            $this->displayService,
+            $this->viewHandler,
+            $this->viewService,
             $this->requestHandler,
             $this->responseHandler,
             $this->renderer
@@ -53,11 +53,11 @@ final class MinisitePageControllerTest extends TestCase
     }
 
     /**
-     * Test handleDisplay with successful minisite display
+     * Test handleView with successful minisite display
      */
     public function test_handle_display_with_successful_minisite_display(): void
     {
-        $command = new DisplayMinisiteCommand('coffee-shop', 'downtown');
+        $command = new ViewMinisiteCommand('coffee-shop', 'downtown');
         $mockMinisite = (object)[
             'id' => '123',
             'name' => 'Coffee Shop',
@@ -66,11 +66,11 @@ final class MinisitePageControllerTest extends TestCase
         ];
 
         // Mock request handler to return a display command
-        $this->requestHandler->method('handleDisplayRequest')
+        $this->requestHandler->method('handleViewRequest')
             ->willReturn($command);
 
         // Mock display handler to return success
-        $this->displayHandler->method('handle')
+        $this->viewHandler->method('handle')
             ->with($command)
             ->willReturn(['success' => true, 'minisite' => $mockMinisite]);
 
@@ -80,22 +80,22 @@ final class MinisitePageControllerTest extends TestCase
             ->with($mockMinisite);
 
         // Call the method
-        $this->minisitePageController->handleDisplay();
+        $this->minisitePageController->handleView();
     }
 
     /**
-     * Test handleDisplay with minisite not found
+     * Test handleView with minisite not found
      */
     public function test_handle_display_with_minisite_not_found(): void
     {
-        $command = new DisplayMinisiteCommand('nonexistent', 'location');
+        $command = new ViewMinisiteCommand('nonexistent', 'location');
 
         // Mock request handler to return a display command
-        $this->requestHandler->method('handleDisplayRequest')
+        $this->requestHandler->method('handleViewRequest')
             ->willReturn($command);
 
         // Mock display handler to return failure
-        $this->displayHandler->method('handle')
+        $this->viewHandler->method('handle')
             ->with($command)
             ->willReturn(['success' => false, 'error' => 'Minisite not found']);
 
@@ -109,16 +109,16 @@ final class MinisitePageControllerTest extends TestCase
             ->with('Minisite not found');
 
         // Call the method
-        $this->minisitePageController->handleDisplay();
+        $this->minisitePageController->handleView();
     }
 
     /**
-     * Test handleDisplay with invalid request (no command)
+     * Test handleView with invalid request (no command)
      */
     public function test_handle_display_with_invalid_request(): void
     {
         // Mock request handler to return null (invalid request)
-        $this->requestHandler->method('handleDisplayRequest')
+        $this->requestHandler->method('handleViewRequest')
             ->willReturn(null);
 
         // Mock response handler to set 404
@@ -131,22 +131,22 @@ final class MinisitePageControllerTest extends TestCase
             ->with('Invalid request - missing minisite parameters');
 
         // Call the method
-        $this->minisitePageController->handleDisplay();
+        $this->minisitePageController->handleView();
     }
 
     /**
-     * Test handleDisplay with exception
+     * Test handleView with exception
      */
     public function test_handle_display_with_exception(): void
     {
-        $command = new DisplayMinisiteCommand('business', 'location');
+        $command = new ViewMinisiteCommand('business', 'location');
 
         // Mock request handler to return a command
-        $this->requestHandler->method('handleDisplayRequest')
+        $this->requestHandler->method('handleViewRequest')
             ->willReturn($command);
 
         // Mock display handler to throw exception
-        $this->displayHandler->method('handle')
+        $this->viewHandler->method('handle')
             ->with($command)
             ->willThrowException(new \Exception('Database error'));
 
@@ -160,22 +160,22 @@ final class MinisitePageControllerTest extends TestCase
             ->with('Error: Database error');
 
         // Call the method
-        $this->minisitePageController->handleDisplay();
+        $this->minisitePageController->handleView();
     }
 
     /**
-     * Test handleDisplay with empty slugs
+     * Test handleView with empty slugs
      */
     public function test_handle_display_with_empty_slugs(): void
     {
-        $command = new DisplayMinisiteCommand('', '');
+        $command = new ViewMinisiteCommand('', '');
 
         // Mock request handler to return a command with empty slugs
-        $this->requestHandler->method('handleDisplayRequest')
+        $this->requestHandler->method('handleViewRequest')
             ->willReturn($command);
 
         // Mock display handler to return failure
-        $this->displayHandler->method('handle')
+        $this->viewHandler->method('handle')
             ->with($command)
             ->willReturn(['success' => false, 'error' => 'Minisite not found']);
 
@@ -189,15 +189,15 @@ final class MinisitePageControllerTest extends TestCase
             ->with('Minisite not found');
 
         // Call the method
-        $this->minisitePageController->handleDisplay();
+        $this->minisitePageController->handleView();
     }
 
     /**
-     * Test handleDisplay with special characters in slugs
+     * Test handleView with special characters in slugs
      */
     public function test_handle_display_with_special_characters(): void
     {
-        $command = new DisplayMinisiteCommand('café-&-restaurant', 'main-street-123');
+        $command = new ViewMinisiteCommand('café-&-restaurant', 'main-street-123');
         $mockMinisite = (object)[
             'id' => '456',
             'name' => 'Café & Restaurant',
@@ -206,11 +206,11 @@ final class MinisitePageControllerTest extends TestCase
         ];
 
         // Mock request handler to return a command
-        $this->requestHandler->method('handleDisplayRequest')
+        $this->requestHandler->method('handleViewRequest')
             ->willReturn($command);
 
         // Mock display handler to return success
-        $this->displayHandler->method('handle')
+        $this->viewHandler->method('handle')
             ->with($command)
             ->willReturn(['success' => true, 'minisite' => $mockMinisite]);
 
@@ -220,7 +220,7 @@ final class MinisitePageControllerTest extends TestCase
             ->with($mockMinisite);
 
         // Call the method
-        $this->minisitePageController->handleDisplay();
+        $this->minisitePageController->handleView();
     }
 
     /**
@@ -236,11 +236,11 @@ final class MinisitePageControllerTest extends TestCase
         
         $params = $constructor->getParameters();
         $expectedTypes = [
-            DisplayHandler::class,
-            MinisiteDisplayService::class,
-            DisplayRequestHandler::class,
-            DisplayResponseHandler::class,
-            DisplayRenderer::class
+            ViewHandler::class,
+            MinisiteViewService::class,
+            ViewRequestHandler::class,
+            ViewResponseHandler::class,
+            ViewRenderer::class
         ];
         
         foreach ($params as $index => $param) {
@@ -249,18 +249,18 @@ final class MinisitePageControllerTest extends TestCase
     }
 
     /**
-     * Test handleDisplay with database error
+     * Test handleView with database error
      */
     public function test_handle_display_with_database_error(): void
     {
-        $command = new DisplayMinisiteCommand('business', 'location');
+        $command = new ViewMinisiteCommand('business', 'location');
 
         // Mock request handler to return a command
-        $this->requestHandler->method('handleDisplayRequest')
+        $this->requestHandler->method('handleViewRequest')
             ->willReturn($command);
 
         // Mock display handler to return database error
-        $this->displayHandler->method('handle')
+        $this->viewHandler->method('handle')
             ->with($command)
             ->willReturn(['success' => false, 'error' => 'Error retrieving minisite: Database connection failed']);
 
@@ -274,6 +274,6 @@ final class MinisitePageControllerTest extends TestCase
             ->with('Error retrieving minisite: Database connection failed');
 
         // Call the method
-        $this->minisitePageController->handleDisplay();
+        $this->minisitePageController->handleView();
     }
 }
