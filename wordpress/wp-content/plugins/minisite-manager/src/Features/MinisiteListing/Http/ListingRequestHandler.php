@@ -3,6 +3,7 @@
 namespace Minisite\Features\MinisiteListing\Http;
 
 use Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand;
+use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
 
 /**
  * Listing Request Handler
@@ -15,6 +16,11 @@ use Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand;
  */
 final class ListingRequestHandler
 {
+    public function __construct(
+        private WordPressListingManager $wordPressManager
+    ) {
+    }
+
     /**
      * Parse list minisites request
      *
@@ -22,8 +28,8 @@ final class ListingRequestHandler
      */
     public function parseListMinisitesRequest(): ?ListMinisitesCommand
     {
-        $currentUser = wp_get_current_user();
-        if (!$currentUser || !$currentUser->ID) {
+        $currentUser = $this->wordPressManager->getCurrentUser();
+        if (!$currentUser || !$currentUser->ID || $currentUser->ID <= 0) {
             return null;
         }
 

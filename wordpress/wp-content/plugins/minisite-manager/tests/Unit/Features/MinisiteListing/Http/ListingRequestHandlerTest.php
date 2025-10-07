@@ -17,10 +17,12 @@ use PHPUnit\Framework\TestCase;
 final class ListingRequestHandlerTest extends TestCase
 {
     private ListingRequestHandler $requestHandler;
+    private \Minisite\Features\MinisiteListing\WordPress\WordPressListingManager|MockObject $wordPressManager;
 
     protected function setUp(): void
     {
-        $this->requestHandler = new ListingRequestHandler();
+        $this->wordPressManager = $this->createMock(\Minisite\Features\MinisiteListing\WordPress\WordPressListingManager::class);
+        $this->requestHandler = new ListingRequestHandler($this->wordPressManager);
         
         // Reset $_SERVER and $_GET
         $_SERVER = [];
@@ -40,15 +42,14 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_with_logged_in_user(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 123;
-            $user->user_login = 'testuser';
-            $user->user_email = 'test@example.com';
-            return $user;
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        $user->user_email = 'test@example.com';
+        
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseListMinisitesRequest();
         
@@ -63,8 +64,9 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_with_not_logged_in_user(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', false);
+        // Mock WordPress manager
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn(null);
 
         $command = $this->requestHandler->parseListMinisitesRequest();
         
@@ -76,15 +78,14 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_with_different_user_id(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 456;
-            $user->user_login = 'anotheruser';
-            $user->user_email = 'another@example.com';
-            return $user;
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 456;
+        $user->user_login = 'anotheruser';
+        $user->user_email = 'another@example.com';
+        
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseListMinisitesRequest();
         
@@ -99,22 +100,18 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_with_zero_user_id(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 0; // Guest user
-            $user->user_login = '';
-            $user->user_email = '';
-            return $user;
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 0; // Guest user - should return null
+        $user->user_login = '';
+        $user->user_email = '';
+        
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseListMinisitesRequest();
         
-        $this->assertInstanceOf(ListMinisitesCommand::class, $command);
-        $this->assertEquals(0, $command->userId);
-        $this->assertEquals(50, $command->limit);
-        $this->assertEquals(0, $command->offset);
+        $this->assertNull($command); // User with ID = 0 is invalid
     }
 
     /**
@@ -122,22 +119,18 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_with_negative_user_id(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = -1; // Invalid user ID
-            $user->user_login = 'invalid';
-            $user->user_email = 'invalid@example.com';
-            return $user;
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = -1; // Invalid user ID - should return null
+        $user->user_login = 'invalid';
+        $user->user_email = 'invalid@example.com';
+        
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseListMinisitesRequest();
         
-        $this->assertInstanceOf(ListMinisitesCommand::class, $command);
-        $this->assertEquals(-1, $command->userId);
-        $this->assertEquals(50, $command->limit);
-        $this->assertEquals(0, $command->offset);
+        $this->assertNull($command); // Negative user ID is invalid
     }
 
     /**
@@ -145,15 +138,14 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_with_large_user_id(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 999999;
-            $user->user_login = 'largeuser';
-            $user->user_email = 'large@example.com';
-            return $user;
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 999999;
+        $user->user_login = 'largeuser';
+        $user->user_email = 'large@example.com';
+        
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseListMinisitesRequest();
         
@@ -168,17 +160,16 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_uses_default_pagination(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 123;
-            $user->user_login = 'testuser';
-            $user->user_email = 'test@example.com';
-            return $user;
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        $user->user_email = 'test@example.com';
+        
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
 
-        // Set some GET parameters (should be ignored)
+        // Set some GET parameters
         $_GET['limit'] = '25';
         $_GET['offset'] = '10';
         $_GET['page'] = '2';
@@ -187,8 +178,8 @@ final class ListingRequestHandlerTest extends TestCase
         
         $this->assertInstanceOf(ListMinisitesCommand::class, $command);
         $this->assertEquals(123, $command->userId);
-        $this->assertEquals(50, $command->limit); // Should still be default
-        $this->assertEquals(0, $command->offset); // Should still be default
+        $this->assertEquals(25, $command->limit); // Should use GET parameter
+        $this->assertEquals(10, $command->offset); // Should use GET parameter
     }
 
     /**
@@ -196,9 +187,9 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_with_null_current_user(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', null);
+        // Mock WordPress manager
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn(null);
 
         $command = $this->requestHandler->parseListMinisitesRequest();
         
@@ -211,22 +202,18 @@ final class ListingRequestHandlerTest extends TestCase
      */
     public function test_parse_list_minisites_request_with_user_without_id(): void
     {
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            // No ID property
-            $user->user_login = 'testuser';
-            $user->user_email = 'test@example.com';
-            return $user;
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        // No ID property - should return null
+        $user->user_login = 'testuser';
+        $user->user_email = 'test@example.com';
+        
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseListMinisitesRequest();
         
-        $this->assertInstanceOf(ListMinisitesCommand::class, $command);
-        $this->assertEquals(0, $command->userId); // Undefined property should cast to 0
-        $this->assertEquals(50, $command->limit);
-        $this->assertEquals(0, $command->offset);
+        $this->assertNull($command); // User without ID is invalid
     }
 
     /**

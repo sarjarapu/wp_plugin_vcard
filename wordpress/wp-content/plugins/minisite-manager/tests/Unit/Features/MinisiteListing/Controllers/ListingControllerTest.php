@@ -25,6 +25,7 @@ final class ListingControllerTest extends TestCase
     private ListingRequestHandler|MockObject $requestHandler;
     private ListingResponseHandler|MockObject $responseHandler;
     private ListingRenderer|MockObject $renderer;
+    private \Minisite\Features\MinisiteListing\WordPress\WordPressListingManager|MockObject $wordPressManager;
 
     protected function setUp(): void
     {
@@ -34,6 +35,7 @@ final class ListingControllerTest extends TestCase
         $this->requestHandler = $this->createMock(ListingRequestHandler::class);
         $this->responseHandler = $this->createMock(ListingResponseHandler::class);
         $this->renderer = $this->createMock(ListingRenderer::class);
+        $this->wordPressManager = $this->createMock(\Minisite\Features\MinisiteListing\WordPress\WordPressListingManager::class);
 
         // Create ListingController with mocked dependencies
         $this->listingController = new ListingController(
@@ -41,7 +43,8 @@ final class ListingControllerTest extends TestCase
             $this->listingService,
             $this->requestHandler,
             $this->responseHandler,
-            $this->renderer
+            $this->renderer,
+            $this->wordPressManager
         );
         
         // Setup WordPress function mocks
@@ -84,18 +87,19 @@ final class ListingControllerTest extends TestCase
             ]
         ];
 
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 123;
-            $user->user_login = 'testuser';
-            $user->user_email = 'test@example.com';
-            return $user;
-        });
-        $this->mockWordPressFunction('current_user_can', function($capability) {
-            return $capability === 'minisite_create';
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        $user->user_email = 'test@example.com';
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(true);
 
         // Mock request handler to return a command
         $this->requestHandler->method('parseListMinisitesRequest')
@@ -126,18 +130,19 @@ final class ListingControllerTest extends TestCase
     {
         $command = new ListMinisitesCommand(123, 50, 0);
 
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 123;
-            $user->user_login = 'testuser';
-            $user->user_email = 'test@example.com';
-            return $user;
-        });
-        $this->mockWordPressFunction('current_user_can', function($capability) {
-            return $capability === 'minisite_create';
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        $user->user_email = 'test@example.com';
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(true);
 
         // Mock request handler to return a command
         $this->requestHandler->method('parseListMinisitesRequest')
@@ -184,18 +189,19 @@ final class ListingControllerTest extends TestCase
     {
         $command = new ListMinisitesCommand(123, 50, 0);
 
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 123;
-            $user->user_login = 'testuser';
-            $user->user_email = 'test@example.com';
-            return $user;
-        });
-        $this->mockWordPressFunction('current_user_can', function($capability) {
-            return $capability === 'minisite_create';
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        $user->user_email = 'test@example.com';
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(true);
 
         // Mock request handler to return a command
         $this->requestHandler->method('parseListMinisitesRequest')
@@ -241,18 +247,19 @@ final class ListingControllerTest extends TestCase
             ]
         ];
 
-        // Mock WordPress functions
-        $GLOBALS['wp_get_current_user'] = function() {
-            $user = new \stdClass();
-            $user->ID = 123;
-            $user->user_login = 'testuser';
-            $user->user_email = 'test@example.com';
-            return $user;
-        };
-
-        $this->mockWordPressFunction('current_user_can', function($capability) {
-            return false; // User cannot create minisites
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        $user->user_email = 'test@example.com';
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(false); // User cannot create minisites
 
         // Mock request handler to return a command
         $this->requestHandler->method('parseListMinisitesRequest')
@@ -283,18 +290,19 @@ final class ListingControllerTest extends TestCase
     {
         $command = new ListMinisitesCommand(123, 50, 0);
 
-        // Mock WordPress functions
-        $this->mockWordPressFunction('is_user_logged_in', true);
-        $this->mockWordPressFunction('wp_get_current_user', function() {
-            $user = new \stdClass();
-            $user->ID = 123;
-            $user->user_login = 'testuser';
-            $user->user_email = 'test@example.com';
-            return $user;
-        });
-        $this->mockWordPressFunction('current_user_can', function($capability) {
-            return $capability === 'minisite_create';
-        });
+        // Mock WordPress manager
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        $user->user_email = 'test@example.com';
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(true);
 
         // Mock request handler to return a command
         $this->requestHandler->method('parseListMinisitesRequest')
@@ -327,7 +335,7 @@ final class ListingControllerTest extends TestCase
         $constructor = $reflection->getConstructor();
         
         $this->assertNotNull($constructor);
-        $this->assertEquals(5, $constructor->getNumberOfParameters());
+        $this->assertEquals(6, $constructor->getNumberOfParameters());
         
         $params = $constructor->getParameters();
         $expectedTypes = [
@@ -335,7 +343,8 @@ final class ListingControllerTest extends TestCase
             MinisiteListingService::class,
             ListingRequestHandler::class,
             ListingResponseHandler::class,
-            ListingRenderer::class
+            ListingRenderer::class,
+            \Minisite\Features\MinisiteListing\WordPress\WordPressListingManager::class
         ];
         
         foreach ($params as $index => $param) {

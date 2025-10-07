@@ -17,10 +17,38 @@ use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
  */
 final class WordPressListingManager
 {
-    public function __construct(
-        private MinisiteRepository $minisiteRepository,
-        private VersionRepository $versionRepository
-    ) {
+    private MinisiteRepository $minisiteRepository;
+    private VersionRepository $versionRepository;
+
+    public function __construct()
+    {
+        global $wpdb;
+        $this->minisiteRepository = new MinisiteRepository($wpdb);
+        $this->versionRepository = new VersionRepository($wpdb);
+    }
+
+    /**
+     * Check if user is logged in
+     */
+    public function isUserLoggedIn(): bool
+    {
+        return is_user_logged_in();
+    }
+
+    /**
+     * Get current user
+     */
+    public function getCurrentUser()
+    {
+        return wp_get_current_user();
+    }
+
+    /**
+     * Check if current user has capability
+     */
+    public function currentUserCan(string $capability): bool
+    {
+        return current_user_can($capability);
     }
 
     /**
