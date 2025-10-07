@@ -9,6 +9,7 @@ use Minisite\Features\VersionManagement\Handlers\RollbackVersionHandler;
 use Minisite\Features\VersionManagement\Http\VersionRequestHandler;
 use Minisite\Features\VersionManagement\Http\VersionResponseHandler;
 use Minisite\Features\VersionManagement\Rendering\VersionRenderer;
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -26,6 +27,7 @@ class VersionControllerTest extends TestCase
     private MockObject $responseHandler;
     private MockObject $renderer;
     private MockObject $versionService;
+    private MockObject $wordPressManager;
 
     protected function setUp(): void
     {
@@ -37,6 +39,7 @@ class VersionControllerTest extends TestCase
         $this->responseHandler = $this->createMock(VersionResponseHandler::class);
         $this->renderer = $this->createMock(VersionRenderer::class);
         $this->versionService = $this->createMock(\Minisite\Features\VersionManagement\Services\VersionService::class);
+        $this->wordPressManager = $this->createMock(WordPressVersionManager::class);
 
         $this->controller = new VersionController(
             $this->listVersionsHandler,
@@ -46,7 +49,8 @@ class VersionControllerTest extends TestCase
             $this->requestHandler,
             $this->responseHandler,
             $this->renderer,
-            $this->versionService
+            $this->versionService,
+            $this->wordPressManager
         );
 
         $this->setupWordPressMocks();
@@ -59,7 +63,10 @@ class VersionControllerTest extends TestCase
 
     public function test_handle_list_versions_redirects_when_not_logged_in(): void
     {
-        $this->mockWordPressFunction('is_user_logged_in', false);
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(false);
 
         $this->responseHandler
             ->expects($this->once())
@@ -70,7 +77,10 @@ class VersionControllerTest extends TestCase
 
     public function test_handle_list_versions_redirects_when_no_command(): void
     {
-        $this->mockWordPressFunction('is_user_logged_in', true);
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(true);
 
         $this->requestHandler
             ->expects($this->once())
@@ -86,7 +96,10 @@ class VersionControllerTest extends TestCase
 
     public function test_handle_create_draft_returns_error_when_not_logged_in(): void
     {
-        $this->mockWordPressFunction('is_user_logged_in', false);
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(false);
 
         $this->responseHandler
             ->expects($this->once())
@@ -98,7 +111,10 @@ class VersionControllerTest extends TestCase
 
     public function test_handle_publish_version_returns_error_when_not_logged_in(): void
     {
-        $this->mockWordPressFunction('is_user_logged_in', false);
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(false);
 
         $this->responseHandler
             ->expects($this->once())
@@ -110,7 +126,10 @@ class VersionControllerTest extends TestCase
 
     public function test_handle_rollback_version_returns_error_when_not_logged_in(): void
     {
-        $this->mockWordPressFunction('is_user_logged_in', false);
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(false);
 
         $this->responseHandler
             ->expects($this->once())
@@ -122,7 +141,7 @@ class VersionControllerTest extends TestCase
 
     private function setupWordPressMocks(): void
     {
-        $functions = ['is_user_logged_in', 'sanitize_text_field', 'wp_unslash'];
+        $functions = ['sanitize_text_field', 'wp_unslash'];
 
         foreach ($functions as $function) {
             if (!function_exists($function)) {

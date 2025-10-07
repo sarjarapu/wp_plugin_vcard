@@ -70,4 +70,12 @@ class WordPressVersionManager
     {
         return home_url($path, $scheme);
     }
+
+    /**
+     * Remove slashes from string
+     */
+    public function unslash(string $string): string
+    {
+        return wp_unslash($string);
+    }
 }

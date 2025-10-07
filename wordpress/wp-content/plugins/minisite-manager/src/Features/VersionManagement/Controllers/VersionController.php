@@ -10,6 +10,7 @@ use Minisite\Features\VersionManagement\Http\VersionRequestHandler;
 use Minisite\Features\VersionManagement\Http\VersionResponseHandler;
 use Minisite\Features\VersionManagement\Rendering\VersionRenderer;
 use Minisite\Features\VersionManagement\Services\VersionService;
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 
 /**
  * Controller for version management operations
@@ -24,7 +25,8 @@ class VersionController
         private VersionRequestHandler $requestHandler,
         private VersionResponseHandler $responseHandler,
         private VersionRenderer $renderer,
-        private VersionService $versionService
+        private VersionService $versionService,
+        private WordPressVersionManager $wordPressManager
     ) {
     }
 
@@ -33,9 +35,9 @@ class VersionController
      */
     public function handleListVersions(): void
     {
-        if (!is_user_logged_in()) {
+        if (!$this->wordPressManager->isUserLoggedIn()) {
             $redirectUrl = isset($_SERVER['REQUEST_URI']) ?
-                sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
+                $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_SERVER['REQUEST_URI'])) : '';
             $this->responseHandler->redirectToLogin($redirectUrl);
             return;
         }
@@ -71,7 +73,7 @@ class VersionController
      */
     public function handleCreateDraft(): void
     {
-        if (!is_user_logged_in()) {
+        if (!$this->wordPressManager->isUserLoggedIn()) {
             $this->responseHandler->sendJsonError('Not authenticated', 401);
             return;
         }
@@ -101,7 +103,7 @@ class VersionController
      */
     public function handlePublishVersion(): void
     {
-        if (!is_user_logged_in()) {
+        if (!$this->wordPressManager->isUserLoggedIn()) {
             $this->responseHandler->sendJsonError('Not authenticated', 401);
             return;
         }
@@ -129,7 +131,7 @@ class VersionController
      */
     public function handleRollbackVersion(): void
     {
-        if (!is_user_logged_in()) {
+        if (!$this->wordPressManager->isUserLoggedIn()) {
             $this->responseHandler->sendJsonError('Not authenticated', 401);
             return;
         }
