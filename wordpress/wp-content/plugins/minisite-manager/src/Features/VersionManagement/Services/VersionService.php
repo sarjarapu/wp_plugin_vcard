@@ -6,6 +6,7 @@ use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;
 use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
@@ -17,7 +18,8 @@ class VersionService
 {
     public function __construct(
         private MinisiteRepository $minisiteRepository,
-        private VersionRepository $versionRepository
+        private VersionRepository $versionRepository,
+        private WordPressVersionManager $wordPressManager
     ) {
     }
 
@@ -156,7 +158,7 @@ class VersionService
                      search_terms = %s, _minisite_current_version_id = %d, updated_at = NOW() 
                  WHERE id = %s",
                 [
-                    wp_json_encode($version->siteJson),
+                    $this->wordPressManager->jsonEncode($version->siteJson),
                     $version->title,
                     $version->name,
                     $version->city,
@@ -257,11 +259,11 @@ class VersionService
      */
     private function hasUserAccess(object $minisite): bool
     {
-        if (!is_user_logged_in()) {
+        if (!$this->wordPressManager->isUserLoggedIn()) {
             return false;
         }
 
-        $currentUser = wp_get_current_user();
+        $currentUser = $this->wordPressManager->getCurrentUser();
         return $minisite->createdBy === (int) $currentUser->ID;
     }
 }

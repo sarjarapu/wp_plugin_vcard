@@ -9,10 +9,25 @@ use PHPUnit\Framework\TestCase;
 /**
  * Test ListingRequestHandler
  * 
- * Tests the ListingRequestHandler for proper request processing and validation
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They use mocked WordPress managers but do not test complex request processing flows.
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
+ * Current testing approach:
+ * - Mocks WordPressListingManager to return pre-set values
+ * - Verifies that request handlers exist and return expected command objects
+ * - Does NOT test actual HTTP request processing or WordPress integration
+ * 
+ * Limitations:
+ * - Request processing is simplified to basic input/output verification
+ * - No testing of complex form validation scenarios
+ * - No testing of security features (nonce verification, sanitization)
+ * 
+ * For true unit testing, ListingRequestHandler would need:
+ * - More comprehensive request processing testing
+ * - Testing of security features and validation
+ * - Proper error handling verification
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class ListingRequestHandlerTest extends TestCase
 {

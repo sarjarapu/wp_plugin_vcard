@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\WordPress;
+namespace Tests\Unit\Features\MinisiteViewer\WordPress;
 
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 use PHPUnit\Framework\TestCase;
@@ -10,8 +10,6 @@ use PHPUnit\Framework\TestCase;
  * 
  * Tests the WordPressMinisiteManager for proper WordPress integration
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 final class WordPressMinisiteManagerTest extends TestCase
 {

@@ -2,6 +2,8 @@
 
 namespace Minisite\Features\VersionManagement\Http;
 
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -10,10 +12,12 @@ use PHPUnit\Framework\TestCase;
 class VersionResponseHandlerTest extends TestCase
 {
     private VersionResponseHandler $responseHandler;
+    private MockObject $wordPressManager;
 
     protected function setUp(): void
     {
-        $this->responseHandler = new VersionResponseHandler();
+        $this->wordPressManager = $this->createMock(WordPressVersionManager::class);
+        $this->responseHandler = new VersionResponseHandler($this->wordPressManager);
         $this->setupWordPressMocks();
     }
 
@@ -22,56 +26,48 @@ class VersionResponseHandlerTest extends TestCase
         $this->clearWordPressMocks();
     }
 
-    public function test_send_json_success_calls_wp_send_json_success(): void
+    public function test_send_json_success_method_exists_and_callable(): void
     {
-        $data = ['test' => 'data'];
-        $statusCode = 200;
-
-        $this->mockWordPressFunction('wp_send_json_success', true);
-
-        // Since wp_send_json_success calls exit, we can't test the actual call
+        // Since sendJsonSuccess calls exit, we can't test the actual call
         // but we can verify the method exists and is callable
         $this->assertTrue(method_exists($this->responseHandler, 'sendJsonSuccess'));
+        $this->assertTrue(is_callable([$this->responseHandler, 'sendJsonSuccess']));
     }
 
-    public function test_send_json_error_calls_wp_send_json_error(): void
+    public function test_send_json_error_method_exists_and_callable(): void
     {
-        $message = 'Test error';
-        $statusCode = 400;
-
-        $this->mockWordPressFunction('wp_send_json_error', true);
-
-        // Since wp_send_json_error calls exit, we can't test the actual call
+        // Since sendJsonError calls exit, we can't test the actual call
         // but we can verify the method exists and is callable
         $this->assertTrue(method_exists($this->responseHandler, 'sendJsonError'));
+        $this->assertTrue(is_callable([$this->responseHandler, 'sendJsonError']));
     }
 
-    public function test_redirect_to_login_calls_wp_redirect(): void
+    public function test_redirect_to_login_method_exists_and_callable(): void
     {
-        $redirectTo = '/test/path';
-
-        $this->mockWordPressFunction('home_url', 'http://example.com');
-        $this->mockWordPressFunction('wp_redirect', true);
-
-        // Since wp_redirect calls exit, we can't test the actual call
+        // Since redirect calls exit, we can't test the actual call
         // but we can verify the method exists and is callable
         $this->assertTrue(method_exists($this->responseHandler, 'redirectToLogin'));
+        $this->assertTrue(is_callable([$this->responseHandler, 'redirectToLogin']));
     }
 
-    public function test_redirect_to_sites_calls_wp_redirect(): void
+    public function test_redirect_to_sites_method_exists_and_callable(): void
     {
-        $this->mockWordPressFunction('home_url', 'http://example.com');
-        $this->mockWordPressFunction('wp_redirect', true);
-
-        // Since wp_redirect calls exit, we can't test the actual call
+        // Since redirect calls exit, we can't test the actual call
         // but we can verify the method exists and is callable
         $this->assertTrue(method_exists($this->responseHandler, 'redirectToSites'));
+        $this->assertTrue(is_callable([$this->responseHandler, 'redirectToSites']));
     }
 
     public function test_set_404_response(): void
     {
-        $this->mockWordPressFunction('status_header', true);
-        $this->mockWordPressFunction('nocache_headers', true);
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('setStatusHeader')
+            ->with(404);
+        
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('setNoCacheHeaders');
 
         // Mock global wp_query with a simple object that has set_404 method
         $mockWpQuery = new class {

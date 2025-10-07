@@ -2,59 +2,59 @@
 
 namespace Minisite\Features\MinisiteViewer\Controllers;
 
-use Minisite\Features\MinisiteViewer\Handlers\DisplayHandler;
-use Minisite\Features\MinisiteViewer\Services\MinisiteDisplayService;
-use Minisite\Features\MinisiteViewer\Http\DisplayRequestHandler;
-use Minisite\Features\MinisiteViewer\Http\DisplayResponseHandler;
-use Minisite\Features\MinisiteViewer\Rendering\DisplayRenderer;
+use Minisite\Features\MinisiteViewer\Handlers\ViewHandler;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
+use Minisite\Features\MinisiteViewer\Http\ViewRequestHandler;
+use Minisite\Features\MinisiteViewer\Http\ViewResponseHandler;
+use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
 
 /**
  * Refactored Minisite Page Controller
  *
- * SINGLE RESPONSIBILITY: Coordinate minisite display flow
- * - Delegates HTTP handling to DisplayRequestHandler
- * - Delegates business logic to DisplayHandler
- * - Delegates responses to DisplayResponseHandler
- * - Delegates rendering to DisplayRenderer
+ * SINGLE RESPONSIBILITY: Coordinate minisite view flow
+ * - Delegates HTTP handling to ViewRequestHandler
+ * - Delegates business logic to ViewHandler
+ * - Delegates responses to ViewResponseHandler
+ * - Delegates rendering to ViewRenderer
  *
  * This controller only orchestrates the flow - it doesn't do the work itself!
  */
 final class MinisitePageController
 {
     public function __construct(
-        private DisplayHandler $displayHandler,
-        private MinisiteDisplayService $displayService,
-        private DisplayRequestHandler $requestHandler,
-        private DisplayResponseHandler $responseHandler,
-        private DisplayRenderer $renderer
+        private ViewHandler $viewHandler,
+        private MinisiteViewService $viewService,
+        private ViewRequestHandler $requestHandler,
+        private ViewResponseHandler $responseHandler,
+        private ViewRenderer $renderer
     ) {
     }
 
     /**
-     * Handle minisite page display
+     * Handle minisite page view
      */
-    public function handleDisplay(): void
+    public function handleView(): void
     {
         try {
-            $command = $this->requestHandler->handleDisplayRequest();
+            $command = $this->requestHandler->handleViewRequest();
 
             if (!$command) {
                 $this->handleInvalidRequest();
                 return;
             }
 
-            $this->processDisplay($command);
+            $this->processView($command);
         } catch (\Exception $e) {
             $this->handleError($e->getMessage());
         }
     }
 
     /**
-     * Process display command
+     * Process view command
      */
-    private function processDisplay($command): void
+    private function processView($command): void
     {
-        $result = $this->displayHandler->handle($command);
+        $result = $this->viewHandler->handle($command);
 
         if ($result['success']) {
             $this->renderMinisite($result['minisite']);

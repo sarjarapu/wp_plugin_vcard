@@ -53,4 +53,27 @@ final class WordPressMinisiteManager
     {
         return $this->findMinisiteBySlugs($businessSlug, $locationSlug) !== null;
     }
+
+    /**
+     * Get query variable
+     *
+     * @param string $var Variable name
+     * @param mixed $default Default value
+     * @return mixed Query variable value
+     */
+    public function getQueryVar(string $var, $default = '')
+    {
+        return get_query_var($var, $default);
+    }
+
+    /**
+     * Sanitize text field
+     *
+     * @param string $text Text to sanitize
+     * @return string Sanitized text
+     */
+    public function sanitizeTextField(string $text): string
+    {
+        return sanitize_text_field($text);
+    }
 }

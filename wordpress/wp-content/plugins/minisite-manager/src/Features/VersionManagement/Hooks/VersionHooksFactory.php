@@ -11,6 +11,7 @@ use Minisite\Features\VersionManagement\Http\VersionRequestHandler;
 use Minisite\Features\VersionManagement\Http\VersionResponseHandler;
 use Minisite\Features\VersionManagement\Rendering\VersionRenderer;
 use Minisite\Features\VersionManagement\Services\VersionService;
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Application\Rendering\TimberRenderer;
@@ -30,8 +31,11 @@ class VersionHooksFactory
         $minisiteRepository = new MinisiteRepository($wpdb);
         $versionRepository = new VersionRepository($wpdb);
 
+        // Create WordPress manager
+        $wordPressManager = new WordPressVersionManager();
+
         // Create service
-        $versionService = new VersionService($minisiteRepository, $versionRepository);
+        $versionService = new VersionService($minisiteRepository, $versionRepository, $wordPressManager);
 
         // Create handlers
         $listVersionsHandler = new ListVersionsHandler($versionService);
@@ -40,8 +44,8 @@ class VersionHooksFactory
         $rollbackVersionHandler = new RollbackVersionHandler($versionService);
 
         // Create HTTP components
-        $requestHandler = new VersionRequestHandler();
-        $responseHandler = new VersionResponseHandler();
+        $requestHandler = new VersionRequestHandler($wordPressManager);
+        $responseHandler = new VersionResponseHandler($wordPressManager);
 
         // Create renderer
         $timberRenderer = new TimberRenderer();
@@ -56,7 +60,8 @@ class VersionHooksFactory
             $requestHandler,
             $responseHandler,
             $versionRenderer,
-            $versionService
+            $versionService,
+            $wordPressManager
         );
 
         // Create hooks

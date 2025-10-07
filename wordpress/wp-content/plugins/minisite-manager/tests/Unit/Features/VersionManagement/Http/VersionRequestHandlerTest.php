@@ -6,6 +6,8 @@ use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;
 use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -14,10 +16,12 @@ use PHPUnit\Framework\TestCase;
 class VersionRequestHandlerTest extends TestCase
 {
     private VersionRequestHandler $requestHandler;
+    private MockObject $wordPressManager;
 
     protected function setUp(): void
     {
-        $this->requestHandler = new VersionRequestHandler();
+        $this->wordPressManager = $this->createMock(WordPressVersionManager::class);
+        $this->requestHandler = new VersionRequestHandler($this->wordPressManager);
         $this->setupWordPressMocks();
     }
 
@@ -35,7 +39,11 @@ class VersionRequestHandlerTest extends TestCase
 
     public function test_parse_list_versions_request_returns_null_when_no_site_id(): void
     {
-        $this->mockWordPressFunction('get_query_var', '', 'minisite_site_id');
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getQueryVar')
+            ->with('minisite_site_id')
+            ->willReturn('');
 
         $command = $this->requestHandler->parseListVersionsRequest();
 
@@ -53,11 +61,43 @@ class VersionRequestHandlerTest extends TestCase
             'seo_title' => 'SEO Title'
         ];
 
-        $this->mockWordPressFunction('wp_verify_nonce', true);
         $user = $this->createMock(\WP_User::class);
         $user->ID = 456;
-        $this->mockWordPressFunction('wp_get_current_user', $user);
-        $this->mockWordPressFunction('sanitize_textarea_field', 'Test comment');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+        
+        $this->wordPressManager
+            ->expects($this->exactly(3))
+            ->method('sanitizeTextField')
+            ->willReturnMap([
+                ['valid-nonce', 'valid-nonce'],
+                ['test-site-123', 'test-site-123'],
+                ['Test Version', 'Test Version']
+            ]);
+        
+        $this->wordPressManager
+            ->expects($this->exactly(4))
+            ->method('unslash')
+            ->willReturnMap([
+                ['valid-nonce', 'valid-nonce'],
+                ['test-site-123', 'test-site-123'],
+                ['Test Version', 'Test Version'],
+                ['Test comment', 'Test comment']
+            ]);
+        
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('sanitizeTextareaField')
+            ->with('Test comment')
+            ->willReturn('Test comment');
+        
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseCreateDraftRequest();
 
@@ -77,10 +117,36 @@ class VersionRequestHandlerTest extends TestCase
             'version_id' => '789'
         ];
 
-        $this->mockWordPressFunction('wp_verify_nonce', true);
         $user = $this->createMock(\WP_User::class);
         $user->ID = 456;
-        $this->mockWordPressFunction('wp_get_current_user', $user);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+        
+        $this->wordPressManager
+            ->expects($this->exactly(3))
+            ->method('sanitizeTextField')
+            ->willReturnMap([
+                ['valid-nonce', 'valid-nonce'],
+                ['test-site-123', 'test-site-123'],
+                ['789', '789']
+            ]);
+        
+        $this->wordPressManager
+            ->expects($this->exactly(3))
+            ->method('unslash')
+            ->willReturnMap([
+                ['valid-nonce', 'valid-nonce'],
+                ['test-site-123', 'test-site-123'],
+                ['789', '789']
+            ]);
+        
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parsePublishVersionRequest();
 
@@ -99,10 +165,36 @@ class VersionRequestHandlerTest extends TestCase
             'source_version_id' => '789'
         ];
 
-        $this->mockWordPressFunction('wp_verify_nonce', true);
         $user = $this->createMock(\WP_User::class);
         $user->ID = 456;
-        $this->mockWordPressFunction('wp_get_current_user', $user);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+        
+        $this->wordPressManager
+            ->expects($this->exactly(3))
+            ->method('sanitizeTextField')
+            ->willReturnMap([
+                ['valid-nonce', 'valid-nonce'],
+                ['test-site-123', 'test-site-123'],
+                ['789', '789']
+            ]);
+        
+        $this->wordPressManager
+            ->expects($this->exactly(3))
+            ->method('unslash')
+            ->willReturnMap([
+                ['valid-nonce', 'valid-nonce'],
+                ['test-site-123', 'test-site-123'],
+                ['789', '789']
+            ]);
+        
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseRollbackVersionRequest();
 

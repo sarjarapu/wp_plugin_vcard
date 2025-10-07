@@ -1,40 +1,40 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\Hooks;
+namespace Tests\Unit\Features\MinisiteViewer\Hooks;
 
-use Minisite\Features\MinisiteViewer\Hooks\DisplayHooksFactory;
-use Minisite\Features\MinisiteViewer\Hooks\DisplayHooks;
+use Minisite\Features\MinisiteViewer\Hooks\ViewHooksFactory;
+use Minisite\Features\MinisiteViewer\Hooks\ViewHooks;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
-use Minisite\Features\MinisiteViewer\Handlers\DisplayHandler;
-use Minisite\Features\MinisiteViewer\Services\MinisiteDisplayService;
-use Minisite\Features\MinisiteViewer\Http\DisplayRequestHandler;
-use Minisite\Features\MinisiteViewer\Http\DisplayResponseHandler;
-use Minisite\Features\MinisiteViewer\Rendering\DisplayRenderer;
+use Minisite\Features\MinisiteViewer\Handlers\ViewHandler;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
+use Minisite\Features\MinisiteViewer\Http\ViewRequestHandler;
+use Minisite\Features\MinisiteViewer\Http\ViewResponseHandler;
+use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test DisplayHooksFactory
+ * Test ViewHooksFactory
  * 
- * Tests the DisplayHooksFactory for proper dependency injection and object creation
+ * Tests the ViewHooksFactory for proper dependency injection and object creation
  */
-final class DisplayHooksFactoryTest extends TestCase
+final class ViewHooksFactoryTest extends TestCase
 {
-    private DisplayHooksFactory $displayHooksFactory;
+    private ViewHooksFactory $viewHooksFactory;
 
     protected function setUp(): void
     {
-        $this->displayHooksFactory = new DisplayHooksFactory();
+        $this->viewHooksFactory = new ViewHooksFactory();
     }
 
     /**
-     * Test create returns DisplayHooks instance
+     * Test create returns ViewHooks instance
      */
     public function test_create_returns_display_hooks_instance(): void
     {
-        $result = DisplayHooksFactory::create();
+        $result = ViewHooksFactory::create();
 
-        $this->assertInstanceOf(DisplayHooks::class, $result);
+        $this->assertInstanceOf(ViewHooks::class, $result);
     }
 
     /**
@@ -42,24 +42,24 @@ final class DisplayHooksFactoryTest extends TestCase
      */
     public function test_create_returns_new_instance_each_time(): void
     {
-        $result1 = DisplayHooksFactory::create();
-        $result2 = DisplayHooksFactory::create();
+        $result1 = ViewHooksFactory::create();
+        $result2 = ViewHooksFactory::create();
 
         $this->assertNotSame($result1, $result2);
     }
 
     /**
-     * Test create creates properly configured DisplayHooks
+     * Test create creates properly configured ViewHooks
      */
     public function test_create_creates_properly_configured_display_hooks(): void
     {
-        $displayHooks = DisplayHooksFactory::create();
+        $viewHooks = ViewHooksFactory::create();
 
-        // Verify the DisplayHooks has a MinisitePageController
-        $reflection = new \ReflectionClass($displayHooks);
+        // Verify the ViewHooks has a MinisitePageController
+        $reflection = new \ReflectionClass($viewHooks);
         $controllerProperty = $reflection->getProperty('minisitePageController');
         $controllerProperty->setAccessible(true);
-        $controller = $controllerProperty->getValue($displayHooks);
+        $controller = $controllerProperty->getValue($viewHooks);
 
         $this->assertInstanceOf(MinisitePageController::class, $controller);
     }
@@ -69,13 +69,13 @@ final class DisplayHooksFactoryTest extends TestCase
      */
     public function test_create_creates_minisite_page_controller_with_all_dependencies(): void
     {
-        $displayHooks = DisplayHooksFactory::create();
+        $viewHooks = ViewHooksFactory::create();
 
-        // Get the controller from DisplayHooks
-        $reflection = new \ReflectionClass($displayHooks);
+        // Get the controller from ViewHooks
+        $reflection = new \ReflectionClass($viewHooks);
         $controllerProperty = $reflection->getProperty('minisitePageController');
         $controllerProperty->setAccessible(true);
-        $controller = $controllerProperty->getValue($displayHooks);
+        $controller = $controllerProperty->getValue($viewHooks);
 
         // Verify controller has all required dependencies
         $controllerReflection = new \ReflectionClass($controller);
@@ -86,11 +86,11 @@ final class DisplayHooksFactoryTest extends TestCase
         
         $params = $constructor->getParameters();
         $expectedTypes = [
-            DisplayHandler::class,
-            MinisiteDisplayService::class,
-            DisplayRequestHandler::class,
-            DisplayResponseHandler::class,
-            DisplayRenderer::class
+            ViewHandler::class,
+            MinisiteViewService::class,
+            ViewRequestHandler::class,
+            ViewResponseHandler::class,
+            ViewRenderer::class
         ];
         
         foreach ($params as $index => $param) {
@@ -99,113 +99,113 @@ final class DisplayHooksFactoryTest extends TestCase
     }
 
     /**
-     * Test createDisplayHooks creates DisplayHandler with MinisiteDisplayService
+     * Test createViewHooks creates ViewHandler with MinisiteViewService
      */
     public function test_create_display_hooks_creates_display_handler_with_display_service(): void
     {
-        $displayHooks = DisplayHooksFactory::create();
+        $viewHooks = ViewHooksFactory::create();
 
-        // Get the controller from DisplayHooks
-        $reflection = new \ReflectionClass($displayHooks);
+        // Get the controller from ViewHooks
+        $reflection = new \ReflectionClass($viewHooks);
         $controllerProperty = $reflection->getProperty('minisitePageController');
         $controllerProperty->setAccessible(true);
-        $controller = $controllerProperty->getValue($displayHooks);
+        $controller = $controllerProperty->getValue($viewHooks);
 
-        // Get the DisplayHandler from controller
+        // Get the ViewHandler from controller
         $controllerReflection = new \ReflectionClass($controller);
-        $handlerProperty = $controllerReflection->getProperty('displayHandler');
+        $handlerProperty = $controllerReflection->getProperty('viewHandler');
         $handlerProperty->setAccessible(true);
         $handler = $handlerProperty->getValue($controller);
 
-        $this->assertInstanceOf(DisplayHandler::class, $handler);
+        $this->assertInstanceOf(ViewHandler::class, $handler);
     }
 
     /**
-     * Test createDisplayHooks creates MinisiteDisplayService with WordPressMinisiteManager
+     * Test createViewHooks creates MinisiteViewService with WordPressMinisiteManager
      */
     public function test_create_display_hooks_creates_display_service_with_wordpress_manager(): void
     {
-        $displayHooks = DisplayHooksFactory::create();
+        $viewHooks = ViewHooksFactory::create();
 
-        // Get the controller from DisplayHooks
-        $reflection = new \ReflectionClass($displayHooks);
+        // Get the controller from ViewHooks
+        $reflection = new \ReflectionClass($viewHooks);
         $controllerProperty = $reflection->getProperty('minisitePageController');
         $controllerProperty->setAccessible(true);
-        $controller = $controllerProperty->getValue($displayHooks);
+        $controller = $controllerProperty->getValue($viewHooks);
 
-        // Get the MinisiteDisplayService from controller
+        // Get the MinisiteViewService from controller
         $controllerReflection = new \ReflectionClass($controller);
-        $serviceProperty = $controllerReflection->getProperty('displayService');
+        $serviceProperty = $controllerReflection->getProperty('viewService');
         $serviceProperty->setAccessible(true);
         $service = $serviceProperty->getValue($controller);
 
-        $this->assertInstanceOf(MinisiteDisplayService::class, $service);
+        $this->assertInstanceOf(MinisiteViewService::class, $service);
     }
 
     /**
-     * Test createDisplayHooks creates DisplayRenderer with TimberRenderer
+     * Test createViewHooks creates ViewRenderer with TimberRenderer
      */
     public function test_create_display_hooks_creates_display_renderer_with_timber_renderer(): void
     {
-        $displayHooks = DisplayHooksFactory::create();
+        $viewHooks = ViewHooksFactory::create();
 
-        // Get the controller from DisplayHooks
-        $reflection = new \ReflectionClass($displayHooks);
+        // Get the controller from ViewHooks
+        $reflection = new \ReflectionClass($viewHooks);
         $controllerProperty = $reflection->getProperty('minisitePageController');
         $controllerProperty->setAccessible(true);
-        $controller = $controllerProperty->getValue($displayHooks);
+        $controller = $controllerProperty->getValue($viewHooks);
 
-        // Get the DisplayRenderer from controller
+        // Get the ViewRenderer from controller
         $controllerReflection = new \ReflectionClass($controller);
         $rendererProperty = $controllerReflection->getProperty('renderer');
         $rendererProperty->setAccessible(true);
         $renderer = $rendererProperty->getValue($controller);
 
-        $this->assertInstanceOf(DisplayRenderer::class, $renderer);
+        $this->assertInstanceOf(ViewRenderer::class, $renderer);
     }
 
     /**
-     * Test createDisplayHooks creates DisplayRequestHandler
+     * Test createViewHooks creates ViewRequestHandler
      */
     public function test_create_display_hooks_creates_display_request_handler(): void
     {
-        $displayHooks = DisplayHooksFactory::create();
+        $viewHooks = ViewHooksFactory::create();
 
-        // Get the controller from DisplayHooks
-        $reflection = new \ReflectionClass($displayHooks);
+        // Get the controller from ViewHooks
+        $reflection = new \ReflectionClass($viewHooks);
         $controllerProperty = $reflection->getProperty('minisitePageController');
         $controllerProperty->setAccessible(true);
-        $controller = $controllerProperty->getValue($displayHooks);
+        $controller = $controllerProperty->getValue($viewHooks);
 
-        // Get the DisplayRequestHandler from controller
+        // Get the ViewRequestHandler from controller
         $controllerReflection = new \ReflectionClass($controller);
         $requestHandlerProperty = $controllerReflection->getProperty('requestHandler');
         $requestHandlerProperty->setAccessible(true);
         $requestHandler = $requestHandlerProperty->getValue($controller);
 
-        $this->assertInstanceOf(DisplayRequestHandler::class, $requestHandler);
+        $this->assertInstanceOf(ViewRequestHandler::class, $requestHandler);
     }
 
     /**
-     * Test createDisplayHooks creates DisplayResponseHandler
+     * Test createViewHooks creates ViewResponseHandler
      */
     public function test_create_display_hooks_creates_display_response_handler(): void
     {
-        $displayHooks = DisplayHooksFactory::create();
+        $viewHooks = ViewHooksFactory::create();
 
-        // Get the controller from DisplayHooks
-        $reflection = new \ReflectionClass($displayHooks);
+        // Get the controller from ViewHooks
+        $reflection = new \ReflectionClass($viewHooks);
         $controllerProperty = $reflection->getProperty('minisitePageController');
         $controllerProperty->setAccessible(true);
-        $controller = $controllerProperty->getValue($displayHooks);
+        $controller = $controllerProperty->getValue($viewHooks);
 
-        // Get the DisplayResponseHandler from controller
+        // Get the ViewResponseHandler from controller
         $controllerReflection = new \ReflectionClass($controller);
         $responseHandlerProperty = $controllerReflection->getProperty('responseHandler');
         $responseHandlerProperty->setAccessible(true);
         $responseHandler = $responseHandlerProperty->getValue($controller);
 
-        $this->assertInstanceOf(DisplayResponseHandler::class, $responseHandler);
+        $this->assertInstanceOf(ViewResponseHandler::class, $responseHandler);
     }
 
     /**
@@ -213,10 +213,10 @@ final class DisplayHooksFactoryTest extends TestCase
      */
     public function test_constructor_has_no_parameters(): void
     {
-        $reflection = new \ReflectionClass($this->displayHooksFactory);
+        $reflection = new \ReflectionClass($this->viewHooksFactory);
         $constructor = $reflection->getConstructor();
         
-        // DisplayHooksFactory uses PHP's default constructor (no explicit constructor)
+        // ViewHooksFactory uses PHP's default constructor (no explicit constructor)
         $this->assertNull($constructor);
     }
 
@@ -225,7 +225,7 @@ final class DisplayHooksFactoryTest extends TestCase
      */
     public function test_create_method_is_public(): void
     {
-        $reflection = new \ReflectionClass($this->displayHooksFactory);
+        $reflection = new \ReflectionClass($this->viewHooksFactory);
         $method = $reflection->getMethod('create');
         
         $this->assertTrue($method->isPublic());
@@ -236,7 +236,7 @@ final class DisplayHooksFactoryTest extends TestCase
      */
     public function test_create_method_is_static(): void
     {
-        $reflection = new \ReflectionClass($this->displayHooksFactory);
+        $reflection = new \ReflectionClass($this->viewHooksFactory);
         $method = $reflection->getMethod('create');
         
         $this->assertTrue($method->isStatic());

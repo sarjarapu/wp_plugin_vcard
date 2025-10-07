@@ -1,38 +1,36 @@
 <?php
 
-namespace Tests\Unit\Features\MinisiteDisplay\Services;
+namespace Tests\Unit\Features\MinisiteViewer\Services;
 
-use Minisite\Features\MinisiteViewer\Commands\DisplayMinisiteCommand;
-use Minisite\Features\MinisiteViewer\Services\MinisiteDisplayService;
+use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Test MinisiteDisplayService
+ * Test MinisiteViewService
  * 
- * Tests the MinisiteDisplayService with mocked WordPress functions
+ * Tests the MinisiteViewService with mocked WordPress functions
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
-final class MinisiteDisplayServiceTest extends TestCase
+final class MinisiteViewServiceTest extends TestCase
 {
-    private MinisiteDisplayService $displayService;
+    private MinisiteViewService $viewService;
     private WordPressMinisiteManager|MockObject $wordPressManager;
 
     protected function setUp(): void
     {
         $this->wordPressManager = $this->createMock(WordPressMinisiteManager::class);
-        $this->displayService = new MinisiteDisplayService($this->wordPressManager);
+        $this->viewService = new MinisiteViewService($this->wordPressManager);
     }
 
     /**
-     * Test getMinisiteForDisplay with valid minisite
+     * Test getMinisiteForView with valid minisite
      */
     public function test_get_minisite_for_display_with_valid_minisite(): void
     {
-        $command = new DisplayMinisiteCommand('coffee-shop', 'downtown');
+        $command = new ViewMinisiteCommand('coffee-shop', 'downtown');
         $mockMinisite = (object)[
             'id' => '123',
             'name' => 'Coffee Shop',
@@ -46,7 +44,7 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('coffee-shop', 'downtown')
             ->willReturn($mockMinisite);
 
-        $result = $this->displayService->getMinisiteForDisplay($command);
+        $result = $this->viewService->getMinisiteForView($command);
 
         $this->assertTrue($result['success']);
         $this->assertEquals($mockMinisite, $result['minisite']);
@@ -54,11 +52,11 @@ final class MinisiteDisplayServiceTest extends TestCase
     }
 
     /**
-     * Test getMinisiteForDisplay with minisite not found
+     * Test getMinisiteForView with minisite not found
      */
     public function test_get_minisite_for_display_with_minisite_not_found(): void
     {
-        $command = new DisplayMinisiteCommand('nonexistent', 'location');
+        $command = new ViewMinisiteCommand('nonexistent', 'location');
 
         $this->wordPressManager
             ->expects($this->once())
@@ -66,7 +64,7 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('nonexistent', 'location')
             ->willReturn(null);
 
-        $result = $this->displayService->getMinisiteForDisplay($command);
+        $result = $this->viewService->getMinisiteForView($command);
 
         $this->assertFalse($result['success']);
         $this->assertEquals('Minisite not found', $result['error']);
@@ -74,11 +72,11 @@ final class MinisiteDisplayServiceTest extends TestCase
     }
 
     /**
-     * Test getMinisiteForDisplay with database exception
+     * Test getMinisiteForView with database exception
      */
     public function test_get_minisite_for_display_with_database_exception(): void
     {
-        $command = new DisplayMinisiteCommand('business', 'location');
+        $command = new ViewMinisiteCommand('business', 'location');
 
         $this->wordPressManager
             ->expects($this->once())
@@ -86,7 +84,7 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('business', 'location')
             ->willThrowException(new \Exception('Database connection failed'));
 
-        $result = $this->displayService->getMinisiteForDisplay($command);
+        $result = $this->viewService->getMinisiteForView($command);
 
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('Error retrieving minisite: Database connection failed', $result['error']);
@@ -94,11 +92,11 @@ final class MinisiteDisplayServiceTest extends TestCase
     }
 
     /**
-     * Test getMinisiteForDisplay with empty slugs
+     * Test getMinisiteForView with empty slugs
      */
     public function test_get_minisite_for_display_with_empty_slugs(): void
     {
-        $command = new DisplayMinisiteCommand('', '');
+        $command = new ViewMinisiteCommand('', '');
 
         $this->wordPressManager
             ->expects($this->once())
@@ -106,18 +104,18 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('', '')
             ->willReturn(null);
 
-        $result = $this->displayService->getMinisiteForDisplay($command);
+        $result = $this->viewService->getMinisiteForView($command);
 
         $this->assertFalse($result['success']);
         $this->assertEquals('Minisite not found', $result['error']);
     }
 
     /**
-     * Test getMinisiteForDisplay with special characters
+     * Test getMinisiteForView with special characters
      */
     public function test_get_minisite_for_display_with_special_characters(): void
     {
-        $command = new DisplayMinisiteCommand('café-&-restaurant', 'main-street-123');
+        $command = new ViewMinisiteCommand('café-&-restaurant', 'main-street-123');
         $mockMinisite = (object)[
             'id' => '456',
             'name' => 'Café & Restaurant',
@@ -131,7 +129,7 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('café-&-restaurant', 'main-street-123')
             ->willReturn($mockMinisite);
 
-        $result = $this->displayService->getMinisiteForDisplay($command);
+        $result = $this->viewService->getMinisiteForView($command);
 
         $this->assertTrue($result['success']);
         $this->assertEquals($mockMinisite, $result['minisite']);
@@ -142,7 +140,7 @@ final class MinisiteDisplayServiceTest extends TestCase
      */
     public function test_minisite_exists_with_existing_minisite(): void
     {
-        $command = new DisplayMinisiteCommand('coffee-shop', 'downtown');
+        $command = new ViewMinisiteCommand('coffee-shop', 'downtown');
 
         $this->wordPressManager
             ->expects($this->once())
@@ -150,7 +148,7 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('coffee-shop', 'downtown')
             ->willReturn(true);
 
-        $result = $this->displayService->minisiteExists($command);
+        $result = $this->viewService->minisiteExists($command);
 
         $this->assertTrue($result);
     }
@@ -160,7 +158,7 @@ final class MinisiteDisplayServiceTest extends TestCase
      */
     public function test_minisite_exists_with_non_existing_minisite(): void
     {
-        $command = new DisplayMinisiteCommand('nonexistent', 'location');
+        $command = new ViewMinisiteCommand('nonexistent', 'location');
 
         $this->wordPressManager
             ->expects($this->once())
@@ -168,7 +166,7 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('nonexistent', 'location')
             ->willReturn(false);
 
-        $result = $this->displayService->minisiteExists($command);
+        $result = $this->viewService->minisiteExists($command);
 
         $this->assertFalse($result);
     }
@@ -178,7 +176,7 @@ final class MinisiteDisplayServiceTest extends TestCase
      */
     public function test_minisite_exists_with_empty_slugs(): void
     {
-        $command = new DisplayMinisiteCommand('', '');
+        $command = new ViewMinisiteCommand('', '');
 
         $this->wordPressManager
             ->expects($this->once())
@@ -186,7 +184,7 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('', '')
             ->willReturn(false);
 
-        $result = $this->displayService->minisiteExists($command);
+        $result = $this->viewService->minisiteExists($command);
 
         $this->assertFalse($result);
     }
@@ -196,7 +194,7 @@ final class MinisiteDisplayServiceTest extends TestCase
      */
     public function test_constructor_dependency_injection(): void
     {
-        $reflection = new \ReflectionClass($this->displayService);
+        $reflection = new \ReflectionClass($this->viewService);
         $constructor = $reflection->getConstructor();
         
         $this->assertNotNull($constructor);
@@ -207,11 +205,11 @@ final class MinisiteDisplayServiceTest extends TestCase
     }
 
     /**
-     * Test getMinisiteForDisplay with null minisite object
+     * Test getMinisiteForView with null minisite object
      */
     public function test_get_minisite_for_display_with_null_minisite_object(): void
     {
-        $command = new DisplayMinisiteCommand('business', 'location');
+        $command = new ViewMinisiteCommand('business', 'location');
 
         $this->wordPressManager
             ->expects($this->once())
@@ -219,18 +217,18 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('business', 'location')
             ->willReturn(null);
 
-        $result = $this->displayService->getMinisiteForDisplay($command);
+        $result = $this->viewService->getMinisiteForView($command);
 
         $this->assertFalse($result['success']);
         $this->assertEquals('Minisite not found', $result['error']);
     }
 
     /**
-     * Test getMinisiteForDisplay with invalid minisite object
+     * Test getMinisiteForView with invalid minisite object
      */
     public function test_get_minisite_for_display_with_invalid_minisite_object(): void
     {
-        $command = new DisplayMinisiteCommand('business', 'location');
+        $command = new ViewMinisiteCommand('business', 'location');
 
         $this->wordPressManager
             ->expects($this->once())
@@ -238,7 +236,7 @@ final class MinisiteDisplayServiceTest extends TestCase
             ->with('business', 'location')
             ->willReturn(null);
 
-        $result = $this->displayService->getMinisiteForDisplay($command);
+        $result = $this->viewService->getMinisiteForView($command);
 
         $this->assertFalse($result['success']);
         $this->assertEquals('Minisite not found', $result['error']);

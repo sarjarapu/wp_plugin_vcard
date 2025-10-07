@@ -364,6 +364,241 @@ final class ListingControllerTest extends TestCase
     }
 
     /**
+     * Test handleList with user not logged in - redirects to login
+     */
+    public function test_handle_list_with_user_not_logged_in(): void
+    {
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(false);
+
+        $this->responseHandler->expects($this->once())
+            ->method('redirectToLogin')
+            ->with('');
+
+        $this->listingController->handleList();
+    }
+
+    /**
+     * Test handleList with user not logged in and REQUEST_URI set
+     */
+    public function test_handle_list_with_user_not_logged_in_with_redirect(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/account/sites';
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(false);
+
+        $this->responseHandler->expects($this->once())
+            ->method('redirectToLogin')
+            ->with('/account/sites');
+
+        $this->listingController->handleList();
+    }
+
+    /**
+     * Test handleList with no command from request handler
+     */
+    public function test_handle_list_with_no_command_from_handler(): void
+    {
+        $user = new \stdClass();
+        $user->ID = 123;
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->requestHandler->method('parseListMinisitesRequest')
+            ->willReturn(null);
+
+        $this->responseHandler->expects($this->once())
+            ->method('redirectToLogin');
+
+        $this->listingController->handleList();
+    }
+
+    /**
+     * Test handleList with successful listing but no minisites
+     */
+    public function test_handle_list_with_successful_listing_no_minisites(): void
+    {
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        
+        $command = new \Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand(123, 25, 0);
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(true);
+        
+        $this->requestHandler->method('parseListMinisitesRequest')
+            ->willReturn($command);
+        
+        $this->listMinisitesHandler->method('handle')
+            ->with($command)
+            ->willReturn(['success' => true, 'minisites' => []]);
+
+        $this->renderer->expects($this->once())
+            ->method('renderListPage')
+            ->with($this->callback(function($data) {
+                return $data['page_title'] === 'My Minisites' &&
+                       $data['sites'] === [] &&
+                       $data['error'] === null &&
+                       $data['can_create'] === true &&
+                       $data['user']->ID === 123;
+            }));
+
+        $this->listingController->handleList();
+    }
+
+    /**
+     * Test handleList with successful listing with minisites
+     */
+    public function test_handle_list_with_successful_listing_with_minisites(): void
+    {
+        $user = new \stdClass();
+        $user->ID = 123;
+        $user->user_login = 'testuser';
+        
+        $command = new \Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand(123, 25, 0);
+        $minisites = [
+            ['id' => '1', 'title' => 'Test Minisite 1'],
+            ['id' => '2', 'title' => 'Test Minisite 2']
+        ];
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(false);
+        
+        $this->requestHandler->method('parseListMinisitesRequest')
+            ->willReturn($command);
+        
+        $this->listMinisitesHandler->method('handle')
+            ->with($command)
+            ->willReturn(['success' => true, 'minisites' => $minisites]);
+
+        $this->renderer->expects($this->once())
+            ->method('renderListPage')
+            ->with($this->callback(function($data) use ($minisites) {
+                return $data['page_title'] === 'My Minisites' &&
+                       $data['sites'] === $minisites &&
+                       $data['error'] === null &&
+                       $data['can_create'] === false &&
+                       $data['user']->ID === 123;
+            }));
+
+        $this->listingController->handleList();
+    }
+
+    /**
+     * Test handleList with failed listing and error message
+     */
+    public function test_handle_list_with_failed_listing_with_error(): void
+    {
+        $user = new \stdClass();
+        $user->ID = 123;
+        
+        $command = new \Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand(123, 25, 0);
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(true);
+        
+        $this->requestHandler->method('parseListMinisitesRequest')
+            ->willReturn($command);
+        
+        $this->listMinisitesHandler->method('handle')
+            ->with($command)
+            ->willReturn(['success' => false, 'error' => 'Database error']);
+
+        $this->renderer->expects($this->once())
+            ->method('renderListPage')
+            ->with($this->callback(function($data) {
+                return $data['page_title'] === 'My Minisites' &&
+                       $data['sites'] === [] &&
+                       $data['error'] === 'Database error' &&
+                       $data['can_create'] === true &&
+                       $data['user']->ID === 123;
+            }));
+
+        $this->listingController->handleList();
+    }
+
+    /**
+     * Test handleList with failed listing and no error message
+     */
+    public function test_handle_list_with_failed_listing_no_error(): void
+    {
+        $user = new \stdClass();
+        $user->ID = 123;
+        
+        $command = new \Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand(123, 25, 0);
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->wordPressManager->method('getCurrentUser')
+            ->willReturn($user);
+        $this->wordPressManager->method('currentUserCan')
+            ->with('minisite_create')
+            ->willReturn(true);
+        
+        $this->requestHandler->method('parseListMinisitesRequest')
+            ->willReturn($command);
+        
+        $this->listMinisitesHandler->method('handle')
+            ->with($command)
+            ->willReturn(['success' => false]);
+
+        $this->renderer->expects($this->once())
+            ->method('renderListPage')
+            ->with($this->callback(function($data) {
+                return $data['page_title'] === 'My Minisites' &&
+                       $data['sites'] === [] &&
+                       $data['error'] === 'Failed to load minisites' &&
+                       $data['can_create'] === true &&
+                       $data['user']->ID === 123;
+            }));
+
+        $this->listingController->handleList();
+    }
+
+    /**
+     * Test handleList with exception during request parsing
+     */
+    public function test_handle_list_with_exception_during_parsing(): void
+    {
+        $user = new \stdClass();
+        $user->ID = 123;
+        
+        $this->wordPressManager->method('isUserLoggedIn')
+            ->willReturn(true);
+        $this->requestHandler->method('parseListMinisitesRequest')
+            ->willThrowException(new \Exception('Request parsing failed'));
+
+        $this->renderer->expects($this->once())
+            ->method('renderListPage')
+            ->with($this->callback(function($data) {
+                return $data['page_title'] === 'My Minisites' &&
+                       $data['sites'] === [] &&
+                       $data['error'] === 'An error occurred while loading minisites' &&
+                       $data['can_create'] === false &&
+                       $data['user'] === null;
+            }));
+
+        $this->listingController->handleList();
+    }
+
+    /**
      * Test handleList method is public
      */
     public function test_handle_list_method_is_public(): void

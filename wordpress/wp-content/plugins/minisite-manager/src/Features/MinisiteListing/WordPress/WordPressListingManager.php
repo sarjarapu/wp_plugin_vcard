@@ -52,6 +52,22 @@ final class WordPressListingManager
     }
 
     /**
+     * Get home URL
+     */
+    public function getHomeUrl(string $path = '', ?string $scheme = null): string
+    {
+        return home_url($path, $scheme);
+    }
+
+    /**
+     * Redirect to URL
+     */
+    public function redirect(string $location, int $status = 302): void
+    {
+        wp_redirect($location, $status);
+    }
+
+    /**
      * List minisites by owner
      *
      * @param int $userId User ID
@@ -64,7 +80,7 @@ final class WordPressListingManager
         $minisites = $this->minisiteRepository->listByOwner($userId, $limit, $offset);
         
         $result = array_map(function ($minisite) {
-            $route = home_url('/b/' . rawurlencode($minisite->slugs->business) . '/' . rawurlencode($minisite->slugs->location));
+            $route = $this->getHomeUrl('/b/' . rawurlencode($minisite->slugs->business) . '/' . rawurlencode($minisite->slugs->location));
             $statusChip = $minisite->status === 'published' ? 'Published' : 'Draft';
             
             return [

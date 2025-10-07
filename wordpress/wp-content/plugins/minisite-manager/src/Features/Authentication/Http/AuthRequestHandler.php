@@ -9,6 +9,7 @@ namespace Minisite\Features\Authentication\Http;
 use Minisite\Features\Authentication\Commands\LoginCommand;
 use Minisite\Features\Authentication\Commands\RegisterCommand;
 use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
+use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 
 /**
  * Auth Request Handler
@@ -21,6 +22,11 @@ use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
  */
 final class AuthRequestHandler
 {
+    public function __construct(
+        private WordPressUserManager $wordPressManager
+    ) {
+    }
+
     /**
      * Handle login request
      */
@@ -42,7 +48,7 @@ final class AuthRequestHandler
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce()
             remember: isset($_POST['remember']),
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeUrl()
-            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? home_url('/account/dashboard'))
+            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard'))
         );
     }
 
@@ -67,7 +73,7 @@ final class AuthRequestHandler
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeInput()
             userPassword: $this->sanitizeInput($_POST['user_pass'] ?? ''),
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeUrl()
-            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? home_url('/account/dashboard'))
+            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard'))
         );
     }
 
@@ -96,7 +102,7 @@ final class AuthRequestHandler
     public function getRedirectTo(): string
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for redirect URL doesn't require nonce verification
-        return sanitize_text_field(wp_unslash($_GET['redirect_to'] ?? home_url('/account/dashboard')));
+        return $this->wordPressManager->sanitizeText($this->wordPressManager->unslash($_GET['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard')));
     }
 
     private function isPostRequest(): bool
@@ -114,21 +120,21 @@ final class AuthRequestHandler
         };
 
         return isset($_POST[$nonceField]) &&
-               wp_verify_nonce(sanitize_text_field(wp_unslash($_POST[$nonceField])), $action);
+               $this->wordPressManager->verifyNonce($this->wordPressManager->sanitizeText($this->wordPressManager->unslash($_POST[$nonceField])), $action);
     }
 
     private function sanitizeInput(string $input): string
     {
-        return sanitize_text_field(wp_unslash($input));
+        return $this->wordPressManager->sanitizeText($this->wordPressManager->unslash($input));
     }
 
     private function sanitizeEmail(string $email): string
     {
-        return sanitize_email(wp_unslash($email));
+        return $this->wordPressManager->sanitizeEmail($this->wordPressManager->unslash($email));
     }
 
     private function sanitizeUrl(string $url): string
     {
-        return sanitize_url(wp_unslash($url));
+        return $this->wordPressManager->sanitizeUrl($this->wordPressManager->unslash($url));
     }
 }

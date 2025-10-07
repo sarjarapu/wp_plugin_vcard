@@ -2,17 +2,24 @@
 
 namespace Minisite\Features\VersionManagement\Http;
 
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
+
 /**
  * Handles HTTP responses for version management
  */
 class VersionResponseHandler
 {
+    public function __construct(
+        private WordPressVersionManager $wordPressManager
+    ) {
+    }
+
     /**
      * Send JSON success response
      */
     public function sendJsonSuccess(array $data = [], int $statusCode = 200): void
     {
-        wp_send_json_success($data, $statusCode);
+        $this->wordPressManager->sendJsonSuccess($data, $statusCode);
     }
 
     /**
@@ -20,7 +27,7 @@ class VersionResponseHandler
      */
     public function sendJsonError(string $message, int $statusCode = 400): void
     {
-        wp_send_json_error($message, $statusCode);
+        $this->wordPressManager->sendJsonError($message, $statusCode);
     }
 
     /**
@@ -28,11 +35,11 @@ class VersionResponseHandler
      */
     public function redirectToLogin(string $redirectTo = ''): void
     {
-        $redirectUrl = home_url('/account/login');
+        $redirectUrl = $this->wordPressManager->getHomeUrl('/account/login');
         if ($redirectTo) {
             $redirectUrl .= '?redirect_to=' . urlencode($redirectTo);
         }
-        wp_redirect($redirectUrl);
+        $this->wordPressManager->redirect($redirectUrl);
         exit;
     }
 
@@ -41,7 +48,7 @@ class VersionResponseHandler
      */
     public function redirectToSites(): void
     {
-        wp_redirect(home_url('/account/sites'));
+        $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
         exit;
     }
 
@@ -52,7 +59,7 @@ class VersionResponseHandler
     {
         global $wp_query;
         $wp_query->set_404();
-        status_header(404);
-        nocache_headers();
+        $this->wordPressManager->setStatusHeader(404);
+        $this->wordPressManager->setNoCacheHeaders();
     }
 }

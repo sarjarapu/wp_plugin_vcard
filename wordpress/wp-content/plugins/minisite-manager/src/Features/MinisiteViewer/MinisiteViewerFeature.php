@@ -2,7 +2,7 @@
 
 namespace Minisite\Features\MinisiteViewer;
 
-use Minisite\Features\MinisiteViewer\Hooks\DisplayHooksFactory;
+use Minisite\Features\MinisiteViewer\Hooks\ViewHooksFactory;
 
 /**
  * MinisiteViewer Feature
@@ -19,7 +19,7 @@ final class MinisiteViewerFeature
      */
     public static function initialize(): void
     {
-        $displayHooks = DisplayHooksFactory::create();
-        $displayHooks->register();
+        $viewHooks = ViewHooksFactory::create();
+        $viewHooks->register();
     }
 }

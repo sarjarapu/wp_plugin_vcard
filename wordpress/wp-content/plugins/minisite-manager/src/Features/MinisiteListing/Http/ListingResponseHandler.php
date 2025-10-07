@@ -2,6 +2,8 @@
 
 namespace Minisite\Features\MinisiteListing\Http;
 
+use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
+
 /**
  * Listing Response Handler
  *
@@ -12,17 +14,22 @@ namespace Minisite\Features\MinisiteListing\Http;
  */
 final class ListingResponseHandler
 {
+    public function __construct(
+        private WordPressListingManager $wordPressManager
+    ) {
+    }
+
     /**
      * Redirect to login page
      */
     public function redirectToLogin(?string $redirectTo = null): void
     {
-        $loginUrl = home_url('/account/login');
+        $loginUrl = $this->wordPressManager->getHomeUrl('/account/login');
         if ($redirectTo) {
             $loginUrl .= '?redirect_to=' . urlencode($redirectTo);
         }
         
-        wp_redirect($loginUrl);
+        $this->wordPressManager->redirect($loginUrl);
         exit;
     }
 
@@ -31,7 +38,7 @@ final class ListingResponseHandler
      */
     public function redirectToSites(): void
     {
-        wp_redirect(home_url('/account/sites'));
+        $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
         exit;
     }
 
@@ -40,7 +47,7 @@ final class ListingResponseHandler
      */
     public function redirect(string $url): void
     {
-        wp_redirect($url);
+        $this->wordPressManager->redirect($url);
         exit;
     }
 }

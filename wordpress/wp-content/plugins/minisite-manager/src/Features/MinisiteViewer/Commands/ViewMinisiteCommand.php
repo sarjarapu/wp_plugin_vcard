@@ -3,14 +3,14 @@
 namespace Minisite\Features\MinisiteViewer\Commands;
 
 /**
- * Display Minisite Command
+ * View Minisite Command
  *
- * SINGLE RESPONSIBILITY: Encapsulate data for displaying a minisite
+ * SINGLE RESPONSIBILITY: Encapsulate data for viewing a minisite
  * - Contains business slug and location slug
  * - Immutable data transfer object
- * - Used by handlers to process display requests
+ * - Used by handlers to process view requests
  */
-final class DisplayMinisiteCommand
+final class ViewMinisiteCommand
 {
     public function __construct(
         public readonly string $businessSlug,

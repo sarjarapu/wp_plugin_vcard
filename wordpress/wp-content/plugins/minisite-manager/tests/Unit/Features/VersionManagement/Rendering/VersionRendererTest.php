@@ -7,7 +7,27 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test for VersionRenderer
+ * Test VersionRenderer
+ * 
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They do not test actual template rendering or Timber integration.
+ * 
+ * Current testing approach:
+ * - Verifies that methods exist and accept correct parameters
+ * - Tests method signatures and basic callability
+ * - Does NOT test actual Timber rendering or template functionality
+ * 
+ * Limitations:
+ * - VersionRenderer directly calls Timber::render() which requires full WordPress environment
+ * - Templates must exist and be properly configured
+ * - Cannot test actual rendering output or template context
+ * 
+ * For true unit testing, VersionRenderer would need:
+ * - Dependency injection for rendering engine
+ * - Interface abstraction for template rendering
+ * - Proper mocking of template dependencies
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 class VersionRendererTest extends TestCase
 {
