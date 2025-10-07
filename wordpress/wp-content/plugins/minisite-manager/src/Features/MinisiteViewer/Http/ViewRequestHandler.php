@@ -3,6 +3,7 @@
 namespace Minisite\Features\MinisiteViewer\Http;
 
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
+use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 
 /**
  * View Request Handler
@@ -14,6 +15,11 @@ use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
  */
 final class ViewRequestHandler
 {
+    public function __construct(
+        private WordPressMinisiteManager $wordPressManager
+    ) {
+    }
+
     /**
      * Handle view request from URL parameters
      *
@@ -21,16 +27,16 @@ final class ViewRequestHandler
      */
     public function handleViewRequest(): ?ViewMinisiteCommand
     {
-        $businessSlug = get_query_var('minisite_biz');
-        $locationSlug = get_query_var('minisite_loc');
+        $businessSlug = $this->wordPressManager->getQueryVar('minisite_biz');
+        $locationSlug = $this->wordPressManager->getQueryVar('minisite_loc');
 
         if (!$businessSlug || !$locationSlug) {
             return null;
         }
 
         return new ViewMinisiteCommand(
-            sanitize_text_field($businessSlug),
-            sanitize_text_field($locationSlug)
+            $this->wordPressManager->sanitizeTextField($businessSlug),
+            $this->wordPressManager->sanitizeTextField($locationSlug)
         );
     }
 
@@ -41,8 +47,8 @@ final class ViewRequestHandler
      */
     public function getBusinessSlug(): ?string
     {
-        $slug = get_query_var('minisite_biz');
-        return $slug ? sanitize_text_field($slug) : null;
+        $slug = $this->wordPressManager->getQueryVar('minisite_biz');
+        return $slug ? $this->wordPressManager->sanitizeTextField($slug) : null;
     }
 
     /**
@@ -52,7 +58,7 @@ final class ViewRequestHandler
      */
     public function getLocationSlug(): ?string
     {
-        $slug = get_query_var('minisite_loc');
-        return $slug ? sanitize_text_field($slug) : null;
+        $slug = $this->wordPressManager->getQueryVar('minisite_loc');
+        return $slug ? $this->wordPressManager->sanitizeTextField($slug) : null;
     }
 }

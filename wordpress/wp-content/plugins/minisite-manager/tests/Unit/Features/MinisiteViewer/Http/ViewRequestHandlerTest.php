@@ -4,6 +4,8 @@ namespace Tests\Unit\Features\MinisiteViewer\Http;
 
 use Minisite\Features\MinisiteViewer\Http\ViewRequestHandler;
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
+use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,10 +17,12 @@ use PHPUnit\Framework\TestCase;
 final class ViewRequestHandlerTest extends TestCase
 {
     private ViewRequestHandler $requestHandler;
+    private MockObject $wordPressManager;
 
     protected function setUp(): void
     {
-        $this->requestHandler = new ViewRequestHandler();
+        $this->wordPressManager = $this->createMock(WordPressMinisiteManager::class);
+        $this->requestHandler = new ViewRequestHandler($this->wordPressManager);
     }
 
     /**
@@ -57,15 +61,18 @@ final class ViewRequestHandlerTest extends TestCase
     }
 
     /**
-     * Test constructor has no parameters
+     * Test constructor dependency injection
      */
-    public function test_constructor_has_no_parameters(): void
+    public function test_constructor_dependency_injection(): void
     {
         $reflection = new \ReflectionClass($this->requestHandler);
         $constructor = $reflection->getConstructor();
         
-        // ViewRequestHandler uses PHP's default constructor (no explicit constructor)
-        $this->assertNull($constructor);
+        $this->assertNotNull($constructor);
+        $this->assertEquals(1, $constructor->getNumberOfParameters());
+        
+        $params = $constructor->getParameters();
+        $this->assertEquals(WordPressMinisiteManager::class, $params[0]->getType()->getName());
     }
 
     /**

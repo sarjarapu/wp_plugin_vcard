@@ -3,6 +3,7 @@
 namespace Minisite\Features\MinisiteViewer\Hooks;
 
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
+use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 
 /**
  * View Hooks
@@ -15,7 +16,8 @@ use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
 final class ViewHooks
 {
     public function __construct(
-        private MinisitePageController $minisitePageController
+        private MinisitePageController $minisitePageController,
+        private WordPressMinisiteManager $wordPressManager
     ) {
     }
 
@@ -57,8 +59,8 @@ final class ViewHooks
     public function handleViewRoutes(): void
     {
         // Check if this is a minisite view route
-        $businessSlug = get_query_var('minisite_biz');
-        $locationSlug = get_query_var('minisite_loc');
+        $businessSlug = $this->wordPressManager->getQueryVar('minisite_biz');
+        $locationSlug = $this->wordPressManager->getQueryVar('minisite_loc');
 
         if (!$businessSlug || !$locationSlug) {
             return;

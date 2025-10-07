@@ -34,6 +34,9 @@ class VersionHooksFactory
         // Create service
         $versionService = new VersionService($minisiteRepository, $versionRepository);
 
+        // Create WordPress manager
+        $wordPressManager = new WordPressVersionManager();
+
         // Create handlers
         $listVersionsHandler = new ListVersionsHandler($versionService);
         $createDraftHandler = new CreateDraftHandler($versionService);
@@ -41,11 +44,8 @@ class VersionHooksFactory
         $rollbackVersionHandler = new RollbackVersionHandler($versionService);
 
         // Create HTTP components
-        $requestHandler = new VersionRequestHandler();
+        $requestHandler = new VersionRequestHandler($wordPressManager);
         $responseHandler = new VersionResponseHandler();
-
-        // Create WordPress manager
-        $wordPressManager = new WordPressVersionManager();
 
         // Create renderer
         $timberRenderer = new TimberRenderer();

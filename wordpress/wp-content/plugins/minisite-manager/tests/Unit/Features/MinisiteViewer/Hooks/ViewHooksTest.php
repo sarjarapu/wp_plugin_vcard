@@ -4,6 +4,8 @@ namespace Tests\Unit\Features\MinisiteViewer\Hooks;
 
 use Minisite\Features\MinisiteViewer\Hooks\ViewHooks;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
+use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -15,12 +17,14 @@ use PHPUnit\Framework\TestCase;
 final class ViewHooksTest extends TestCase
 {
     private ViewHooks $viewHooks;
-    private $minisitePageController;
+    private MockObject $minisitePageController;
+    private MockObject $wordPressManager;
 
     protected function setUp(): void
     {
         $this->minisitePageController = $this->createMock(MinisitePageController::class);
-        $this->viewHooks = new ViewHooks($this->minisitePageController);
+        $this->wordPressManager = $this->createMock(WordPressMinisiteManager::class);
+        $this->viewHooks = new ViewHooks($this->minisitePageController, $this->wordPressManager);
     }
 
     /**
@@ -194,10 +198,11 @@ final class ViewHooksTest extends TestCase
         $constructor = $reflection->getConstructor();
         
         $this->assertNotNull($constructor);
-        $this->assertEquals(1, $constructor->getNumberOfParameters());
+        $this->assertEquals(2, $constructor->getNumberOfParameters());
         
         $params = $constructor->getParameters();
         $this->assertEquals(MinisitePageController::class, $params[0]->getType()->getName());
+        $this->assertEquals(WordPressMinisiteManager::class, $params[1]->getType()->getName());
     }
 
     /**

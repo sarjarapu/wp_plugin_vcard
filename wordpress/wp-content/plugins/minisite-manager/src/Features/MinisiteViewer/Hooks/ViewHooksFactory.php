@@ -30,7 +30,7 @@ final class ViewHooksFactory
         $viewHandler = new ViewHandler($viewService);
 
         // Create additional dependencies for refactored controller
-        $requestHandler = new \Minisite\Features\MinisiteViewer\Http\ViewRequestHandler();
+        $requestHandler = new \Minisite\Features\MinisiteViewer\Http\ViewRequestHandler($wordPressManager);
         $responseHandler = new \Minisite\Features\MinisiteViewer\Http\ViewResponseHandler();
 
         // Create the Timber renderer (following the same pattern as main plugin)
@@ -51,6 +51,6 @@ final class ViewHooksFactory
         );
 
         // Create and return hooks
-        return new ViewHooks($minisitePageController);
+        return new ViewHooks($minisitePageController, $wordPressManager);
     }
 }

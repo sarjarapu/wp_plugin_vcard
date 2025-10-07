@@ -6,24 +6,30 @@ use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;
 use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 
 /**
  * Handles HTTP requests for version management
  */
 class VersionRequestHandler
 {
+    public function __construct(
+        private WordPressVersionManager $wordPressManager
+    ) {
+    }
+
     /**
      * Parse request for listing versions
      */
     public function parseListVersionsRequest(): ?ListVersionsCommand
     {
-        $siteId = get_query_var('minisite_site_id');
+        $siteId = $this->wordPressManager->getQueryVar('minisite_site_id');
         
         if (!$siteId) {
             return null;
         }
 
-        $currentUser = wp_get_current_user();
+        $currentUser = $this->wordPressManager->getCurrentUser();
         
         if (!$currentUser || !$currentUser->ID) {
             return null;
@@ -41,22 +47,22 @@ class VersionRequestHandler
             return null;
         }
 
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+        if (!$this->wordPressManager->verifyNonce($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
             return null;
         }
 
-        $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
+        $siteId = $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['site_id'] ?? ''));
         if (!$siteId) {
             return null;
         }
 
-        $currentUser = wp_get_current_user();
+        $currentUser = $this->wordPressManager->getCurrentUser();
         if (!$currentUser || !$currentUser->ID) {
             return null;
         }
 
-        $label = sanitize_text_field(wp_unslash($_POST['label'] ?? ''));
-        $comment = sanitize_textarea_field(wp_unslash($_POST['version_comment'] ?? ''));
+        $label = $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['label'] ?? ''));
+        $comment = $this->wordPressManager->sanitizeTextareaField($this->wordPressManager->unslash($_POST['version_comment'] ?? ''));
         $siteJson = $this->buildSiteJsonFromForm($_POST);
 
         return new CreateDraftCommand(
@@ -77,18 +83,18 @@ class VersionRequestHandler
             return null;
         }
 
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+        if (!$this->wordPressManager->verifyNonce($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
             return null;
         }
 
-        $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
-        $versionId = (int) (sanitize_text_field(wp_unslash($_POST['version_id'] ?? 0)));
+        $siteId = $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['site_id'] ?? ''));
+        $versionId = (int) ($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['version_id'] ?? 0)));
 
         if (!$siteId || !$versionId) {
             return null;
         }
 
-        $currentUser = wp_get_current_user();
+        $currentUser = $this->wordPressManager->getCurrentUser();
         if (!$currentUser || !$currentUser->ID) {
             return null;
         }
@@ -105,18 +111,18 @@ class VersionRequestHandler
             return null;
         }
 
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+        if (!$this->wordPressManager->verifyNonce($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
             return null;
         }
 
-        $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
-        $sourceVersionId = (int) (sanitize_text_field(wp_unslash($_POST['source_version_id'] ?? 0)));
+        $siteId = $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['site_id'] ?? ''));
+        $sourceVersionId = (int) ($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['source_version_id'] ?? 0)));
 
         if (!$siteId || !$sourceVersionId) {
             return null;
         }
 
-        $currentUser = wp_get_current_user();
+        $currentUser = $this->wordPressManager->getCurrentUser();
         if (!$currentUser || !$currentUser->ID) {
             return null;
         }
