@@ -6,6 +6,7 @@ use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;
 use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
+use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -19,15 +20,18 @@ class VersionServiceTest extends TestCase
     private VersionService $versionService;
     private MockObject $minisiteRepository;
     private MockObject $versionRepository;
+    private MockObject $wordPressManager;
 
     protected function setUp(): void
     {
         $this->minisiteRepository = $this->createMock(MinisiteRepository::class);
         $this->versionRepository = $this->createMock(VersionRepository::class);
+        $this->wordPressManager = $this->createMock(WordPressVersionManager::class);
         
         $this->versionService = new VersionService(
             $this->minisiteRepository,
-            $this->versionRepository
+            $this->versionRepository,
+            $this->wordPressManager
         );
     }
 

@@ -31,11 +31,11 @@ class VersionHooksFactory
         $minisiteRepository = new MinisiteRepository($wpdb);
         $versionRepository = new VersionRepository($wpdb);
 
-        // Create service
-        $versionService = new VersionService($minisiteRepository, $versionRepository);
-
         // Create WordPress manager
         $wordPressManager = new WordPressVersionManager();
+
+        // Create service
+        $versionService = new VersionService($minisiteRepository, $versionRepository, $wordPressManager);
 
         // Create handlers
         $listVersionsHandler = new ListVersionsHandler($versionService);
@@ -45,7 +45,7 @@ class VersionHooksFactory
 
         // Create HTTP components
         $requestHandler = new VersionRequestHandler($wordPressManager);
-        $responseHandler = new VersionResponseHandler();
+        $responseHandler = new VersionResponseHandler($wordPressManager);
 
         // Create renderer
         $timberRenderer = new TimberRenderer();

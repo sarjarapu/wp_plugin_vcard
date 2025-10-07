@@ -6,6 +6,8 @@ use Minisite\Features\Authentication\Commands\LoginCommand;
 use Minisite\Features\Authentication\Commands\RegisterCommand;
 use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
 use Minisite\Features\Authentication\Http\AuthRequestHandler;
+use Minisite\Features\Authentication\WordPress\WordPressUserManager;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -35,15 +37,51 @@ use PHPUnit\Framework\TestCase;
 final class AuthRequestHandlerTest extends TestCase
 {
     private AuthRequestHandler $requestHandler;
+    private MockObject $wordPressManager;
 
     protected function setUp(): void
     {
-        $this->requestHandler = new AuthRequestHandler();
+        $this->wordPressManager = $this->createMock(WordPressUserManager::class);
+        $this->requestHandler = new AuthRequestHandler($this->wordPressManager);
         
         // Reset $_SERVER and $_POST
         $_SERVER = [];
         $_POST = [];
         $_GET = [];
+        
+        // Set up WordPress manager mock for all tests
+        $this->setupSuccessfulWordPressManager();
+    }
+
+    /**
+     * Set up WordPress manager mock for successful operations
+     */
+    private function setupSuccessfulWordPressManager(): void
+    {
+        $this->wordPressManager
+            ->expects($this->any())
+            ->method('verifyNonce')
+            ->willReturn(true);
+        $this->wordPressManager
+            ->expects($this->any())
+            ->method('sanitizeText')
+            ->willReturnArgument(0);
+        $this->wordPressManager
+            ->expects($this->any())
+            ->method('unslash')
+            ->willReturnArgument(0);
+        $this->wordPressManager
+            ->expects($this->any())
+            ->method('sanitizeUrl')
+            ->willReturnArgument(0);
+        $this->wordPressManager
+            ->expects($this->any())
+            ->method('sanitizeEmail')
+            ->willReturnArgument(0);
+        $this->wordPressManager
+            ->expects($this->any())
+            ->method('getHomeUrl')
+            ->willReturn('/account/dashboard');
     }
 
     /**
@@ -57,13 +95,6 @@ final class AuthRequestHandlerTest extends TestCase
         $_POST['user_pass'] = 'testpass';
         $_POST['remember'] = '1';
         $_POST['redirect_to'] = '/dashboard';
-        
-        // Mock wp_verify_nonce
-        $this->mockWordPressFunction('wp_verify_nonce', true);
-        $this->mockWordPressFunction('sanitize_text_field', fn($val) => $val);
-        $this->mockWordPressFunction('wp_unslash', fn($val) => $val);
-        $this->mockWordPressFunction('sanitize_url', fn($val) => $val);
-        $this->mockWordPressFunction('home_url', '/account/dashboard');
         
         $command = $this->requestHandler->handleLoginRequest();
         
@@ -84,8 +115,6 @@ final class AuthRequestHandlerTest extends TestCase
         $_POST['user_login'] = 'testuser';
         $_POST['user_password'] = 'testpass';
         
-        // With our global mock, wp_verify_nonce always returns true
-        // So this test verifies that the method doesn't throw an exception
         $result = $this->requestHandler->handleLoginRequest();
         
         $this->assertInstanceOf(\Minisite\Features\Authentication\Commands\LoginCommand::class, $result);
@@ -234,7 +263,7 @@ final class AuthRequestHandlerTest extends TestCase
         
         $result = $this->requestHandler->getRedirectTo();
         
-        $this->assertEquals('http://example.com/account/dashboard', $result);
+        $this->assertEquals('/account/dashboard', $result);
     }
 
     /**

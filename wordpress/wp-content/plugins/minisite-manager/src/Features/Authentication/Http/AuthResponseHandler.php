@@ -2,6 +2,8 @@
 
 namespace Minisite\Features\Authentication\Http;
 
+use Minisite\Features\Authentication\WordPress\WordPressUserManager;
+
 /**
  * Auth Response Handler
  *
@@ -12,12 +14,17 @@ namespace Minisite\Features\Authentication\Http;
  */
 final class AuthResponseHandler
 {
+    public function __construct(
+        private WordPressUserManager $wordPressManager
+    ) {
+    }
+
     /**
      * Redirect to URL
      */
     public function redirect(string $url): void
     {
-        wp_redirect($url);
+        $this->wordPressManager->redirect($url);
         exit;
     }
 
@@ -26,7 +33,7 @@ final class AuthResponseHandler
      */
     public function redirectToLogin(?string $redirectTo = null): void
     {
-        $url = home_url('/account/login');
+        $url = $this->wordPressManager->getHomeUrl('/account/login');
         if ($redirectTo) {
             $url .= '?redirect_to=' . urlencode($redirectTo);
         }
@@ -38,7 +45,7 @@ final class AuthResponseHandler
      */
     public function redirectToDashboard(): void
     {
-        $this->redirect(home_url('/account/dashboard'));
+        $this->redirect($this->wordPressManager->getHomeUrl('/account/dashboard'));
     }
 
     /**

@@ -34,8 +34,8 @@ final class AuthHooksFactory
         $forgotPasswordHandler = new ForgotPasswordHandler($authService);
 
         // Create additional dependencies for refactored controller
-        $requestHandler = new \Minisite\Features\Authentication\Http\AuthRequestHandler();
-        $responseHandler = new \Minisite\Features\Authentication\Http\AuthResponseHandler();
+        $requestHandler = new \Minisite\Features\Authentication\Http\AuthRequestHandler($wordPressManager);
+        $responseHandler = new \Minisite\Features\Authentication\Http\AuthResponseHandler($wordPressManager);
         $renderer = new \Minisite\Features\Authentication\Rendering\AuthRenderer();
 
         // Create controller

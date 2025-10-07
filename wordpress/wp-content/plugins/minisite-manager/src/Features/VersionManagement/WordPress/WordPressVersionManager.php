@@ -78,4 +78,52 @@ class WordPressVersionManager
     {
         return wp_unslash($string);
     }
+
+    /**
+     * Send JSON success response
+     */
+    public function sendJsonSuccess(array $data = [], int $statusCode = 200): void
+    {
+        wp_send_json_success($data, $statusCode);
+    }
+
+    /**
+     * Send JSON error response
+     */
+    public function sendJsonError(string $message, int $statusCode = 400): void
+    {
+        wp_send_json_error($message, $statusCode);
+    }
+
+    /**
+     * Redirect to URL
+     */
+    public function redirect(string $location, int $status = 302): void
+    {
+        wp_redirect($location, $status);
+    }
+
+    /**
+     * Set HTTP status header
+     */
+    public function setStatusHeader(int $code): void
+    {
+        status_header($code);
+    }
+
+    /**
+     * Set no-cache headers
+     */
+    public function setNoCacheHeaders(): void
+    {
+        nocache_headers();
+    }
+
+    /**
+     * Encode data as JSON
+     */
+    public function jsonEncode(mixed $data, int $options = 0, int $depth = 512): string|false
+    {
+        return wp_json_encode($data, $options, $depth);
+    }
 }

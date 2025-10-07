@@ -34,7 +34,7 @@ final class ListingHooksFactory
 
         // Create additional dependencies for refactored controllers
         $requestHandler = new ListingRequestHandler($listingManager);
-        $responseHandler = new ListingResponseHandler();
+        $responseHandler = new ListingResponseHandler($listingManager);
         $renderer = new ListingRenderer();
 
         // Create controllers
