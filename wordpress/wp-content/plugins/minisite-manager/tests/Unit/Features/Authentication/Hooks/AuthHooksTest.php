@@ -12,8 +12,6 @@ use PHPUnit\Framework\MockObject\MockObject;
  * 
  * Tests the AuthHooks for proper WordPress integration and routing
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 final class AuthHooksTest extends TestCase
 {

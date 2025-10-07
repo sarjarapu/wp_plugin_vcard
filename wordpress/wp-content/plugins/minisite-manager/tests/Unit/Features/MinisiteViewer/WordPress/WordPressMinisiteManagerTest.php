@@ -10,8 +10,6 @@ use PHPUnit\Framework\TestCase;
  * 
  * Tests the WordPressMinisiteManager for proper WordPress integration
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 final class WordPressMinisiteManagerTest extends TestCase
 {

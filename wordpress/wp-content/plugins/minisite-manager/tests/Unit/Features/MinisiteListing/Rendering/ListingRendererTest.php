@@ -8,14 +8,25 @@ use PHPUnit\Framework\TestCase;
 /**
  * Test ListingRenderer
  * 
- * NOTE: These are integration tests that require Timber to be properly configured.
- * The ListingRenderer class directly calls Timber::render() which requires:
- * - Timber to be loaded
- * - Twig templates to exist
- * - Proper file system paths
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They do not test actual template rendering or Timber integration.
  * 
- * For true unit testing, ListingRenderer would need to be refactored to use
- * dependency injection for the rendering engine.
+ * Current testing approach:
+ * - Verifies that methods exist and accept correct parameters
+ * - Tests method signatures and basic callability
+ * - Does NOT test actual Timber rendering or template functionality
+ * 
+ * Limitations:
+ * - ListingRenderer directly calls Timber::render() which requires full WordPress environment
+ * - Templates must exist and be properly configured
+ * - Cannot test actual rendering output or template context
+ * 
+ * For true unit testing, ListingRenderer would need:
+ * - Dependency injection for rendering engine
+ * - Interface abstraction for template rendering
+ * - Proper mocking of template dependencies
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class ListingRendererTest extends TestCase
 {
@@ -267,6 +278,31 @@ final class ListingRendererTest extends TestCase
     }
 
     /**
+     * Test that renderListPage method exists and is callable
+     */
+    public function test_render_list_page_method_exists_and_callable(): void
+    {
+        $this->assertTrue(method_exists($this->renderer, 'renderListPage'));
+        $this->assertTrue(is_callable([$this->renderer, 'renderListPage']));
+    }
+
+    /**
+     * Test that registerTimberLocations method exists
+     */
+    public function test_register_timber_locations_method_exists(): void
+    {
+        $this->assertTrue(method_exists($this->renderer, 'registerTimberLocations'));
+    }
+
+    /**
+     * Test that renderFallback method exists
+     */
+    public function test_render_fallback_method_exists(): void
+    {
+        $this->assertTrue(method_exists($this->renderer, 'renderFallback'));
+    }
+
+    /**
      * Test that renderListPage method has correct parameter type
      */
     public function test_render_list_page_method_parameter_type(): void
@@ -300,5 +336,19 @@ final class ListingRendererTest extends TestCase
         
         $this->assertStringContainsString('Listing Renderer', $docComment);
         $this->assertStringContainsString('Handle template rendering with Timber', $docComment);
+    }
+
+    /**
+     * Mock WordPress function
+     */
+    private function mockWordPressFunction(string $functionName, mixed $returnValue): void
+    {
+        if (!function_exists($functionName)) {
+            if (is_callable($returnValue)) {
+                eval("function {$functionName}(...\$args) { return call_user_func_array(" . var_export($returnValue, true) . ", \$args); }");
+            } else {
+                eval("function {$functionName}(...\$args) { return " . var_export($returnValue, true) . "; }");
+            }
+        }
     }
 }

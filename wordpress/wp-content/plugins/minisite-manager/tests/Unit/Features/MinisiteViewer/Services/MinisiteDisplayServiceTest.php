@@ -13,8 +13,6 @@ use PHPUnit\Framework\MockObject\MockObject;
  * 
  * Tests the MinisiteDisplayService with mocked WordPress functions
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 final class MinisiteDisplayServiceTest extends TestCase
 {

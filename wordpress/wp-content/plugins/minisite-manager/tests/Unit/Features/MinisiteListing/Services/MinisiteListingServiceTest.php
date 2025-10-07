@@ -11,10 +11,25 @@ use PHPUnit\Framework\MockObject\MockObject;
 /**
  * Test MinisiteListingService
  * 
- * Tests the MinisiteListingService with mocked WordPress functions
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They use mocked WordPress managers but do not test complex business logic flows.
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
+ * Current testing approach:
+ * - Mocks WordPressListingManager to return pre-set values
+ * - Verifies that service methods exist and return expected data structures
+ * - Does NOT test actual business logic or WordPress integration
+ * 
+ * Limitations:
+ * - Business logic is simplified to basic input/output verification
+ * - No testing of complex listing scenarios
+ * - No testing of actual database operations or WordPress integration
+ * 
+ * For true unit testing, MinisiteListingService would need:
+ * - More comprehensive business logic testing
+ * - Testing of complex listing scenarios
+ * - Proper error handling verification
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class MinisiteListingServiceTest extends TestCase
 {

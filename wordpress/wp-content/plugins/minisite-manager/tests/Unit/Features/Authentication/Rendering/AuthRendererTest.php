@@ -8,14 +8,25 @@ use PHPUnit\Framework\TestCase;
 /**
  * Test AuthRenderer
  * 
- * NOTE: These are integration tests that require Timber to be properly configured.
- * The AuthRenderer class directly calls Timber::render() which requires:
- * - Timber to be loaded
- * - Twig templates to exist
- * - Proper file system paths
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They do not test actual template rendering or Timber integration.
  * 
- * For true unit testing, AuthRenderer would need to be refactored to use
- * dependency injection for the rendering engine.
+ * Current testing approach:
+ * - Verifies that methods exist and accept correct parameters
+ * - Tests method signatures and basic callability
+ * - Does NOT test actual Timber rendering or template functionality
+ * 
+ * Limitations:
+ * - AuthRenderer directly calls Timber::render() which requires full WordPress environment
+ * - Templates must exist and be properly configured
+ * - Cannot test actual rendering output or template context
+ * 
+ * For true unit testing, AuthRenderer would need:
+ * - Dependency injection for rendering engine
+ * - Interface abstraction for template rendering
+ * - Proper mocking of template dependencies
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class AuthRendererTest extends TestCase
 {

@@ -16,8 +16,25 @@ use Minisite\Domain\ValueObjects\GeoPoint;
 /**
  * Tests for WordPressListingManager
  * 
- * Tests the WordPressListingManager to ensure it properly delegates
- * to repositories and formats data correctly.
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They do not test complex business logic or WordPress integration.
+ * 
+ * Current testing approach:
+ * - All tests are skipped due to complex $wpdb mocking requirements
+ * - Would use eval() to create fake WordPress functions that return pre-set values
+ * - Does NOT test actual WordPress functionality or database operations
+ * 
+ * Limitations:
+ * - WordPressListingManager creates repositories internally using $GLOBALS['wpdb']
+ * - Complex database mocking is required for proper testing
+ * - Cannot test actual database queries or WordPress integration
+ * 
+ * For true unit testing, WordPressListingManager would need:
+ * - Dependency injection for database connections
+ * - Proper mocking of WordPress dependencies
+ * - Testing of actual database operations
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class WordPressListingManagerTest extends TestCase
 {

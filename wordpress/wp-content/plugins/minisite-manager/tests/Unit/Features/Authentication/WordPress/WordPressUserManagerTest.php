@@ -10,8 +10,20 @@ use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 /**
  * Tests for WordPressUserManager
  * 
- * Tests the WordPress function wrapper class to ensure it properly delegates
- * to WordPress functions and maintains the correct interface.
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They do not test complex business logic or WordPress integration.
+ * 
+ * Current testing approach:
+ * - Uses eval() to create fake WordPress functions that return pre-set values
+ * - Verifies that methods exist and return expected values
+ * - Does NOT test actual WordPress functionality or business logic
+ * 
+ * For true unit testing, this class would need:
+ * - Dependency injection for WordPress functions
+ * - Proper mocking of WordPress dependencies
+ * - Testing of actual business logic flows
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class WordPressUserManagerTest extends TestCase
 {

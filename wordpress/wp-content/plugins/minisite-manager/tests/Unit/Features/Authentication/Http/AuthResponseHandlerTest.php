@@ -8,10 +8,26 @@ use PHPUnit\Framework\TestCase;
 /**
  * Test AuthResponseHandler
  * 
- * Tests the AuthResponseHandler for proper response handling and context creation
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They use mocked WordPress functions but do not test complex response handling flows.
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
+ * Current testing approach:
+ * - Mocks WordPress functions to return pre-set values
+ * - Verifies that response handlers exist and return expected data structures
+ * - Does NOT test actual HTTP response handling or WordPress integration
+ * 
+ * Limitations:
+ * - Response handling is simplified to basic data structure verification
+ * - No testing of complex redirect scenarios
+ * - No testing of actual HTTP response generation
+ * 
+ * For true unit testing, AuthResponseHandler would need:
+ * - More comprehensive response handling testing
+ * - Testing of redirect functionality
+ * - Proper error handling verification
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
+ * 
  */
 final class AuthResponseHandlerTest extends TestCase
 {

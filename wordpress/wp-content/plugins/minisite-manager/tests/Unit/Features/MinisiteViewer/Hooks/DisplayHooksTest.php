@@ -11,8 +11,6 @@ use PHPUnit\Framework\TestCase;
  * 
  * Tests the DisplayHooks for proper WordPress hook registration
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 final class DisplayHooksTest extends TestCase
 {

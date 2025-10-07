@@ -11,8 +11,6 @@ use PHPUnit\Framework\TestCase;
  * 
  * Tests the DisplayRequestHandler for proper HTTP request processing
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 final class DisplayRequestHandlerTest extends TestCase
 {

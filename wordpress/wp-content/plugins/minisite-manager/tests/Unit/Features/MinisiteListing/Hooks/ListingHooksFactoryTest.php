@@ -16,7 +16,25 @@ use PHPUnit\Framework\MockObject\MockObject;
 /**
  * Test ListingHooksFactory
  * 
- * Tests the ListingHooksFactory for proper dependency injection and object creation
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They do not test complex dependency injection or WordPress integration.
+ * 
+ * Current testing approach:
+ * - Verifies that factory methods exist and return expected types
+ * - Tests basic dependency injection structure
+ * - Does NOT test actual WordPress integration or complex object creation
+ * 
+ * Limitations:
+ * - Factory creates repositories internally using $GLOBALS['wpdb']
+ * - Complex WordPress environment setup required for proper testing
+ * - Cannot test actual dependency resolution or WordPress integration
+ * 
+ * For true unit testing, ListingHooksFactory would need:
+ * - Dependency injection for all external dependencies
+ * - Proper mocking of WordPress environment
+ * - Testing of actual object creation and configuration
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class ListingHooksFactoryTest extends TestCase
 {

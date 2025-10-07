@@ -10,8 +10,6 @@ use PHPUnit\Framework\TestCase;
  * 
  * Tests the DisplayResponseHandler for proper HTTP response handling
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 final class DisplayResponseHandlerTest extends TestCase
 {

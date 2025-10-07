@@ -11,10 +11,26 @@ use PHPUnit\Framework\TestCase;
 /**
  * Test AuthService
  * 
- * Tests the AuthService with mocked WordPress functions
+ * NOTE: These are "coverage tests" that verify method existence and basic functionality.
+ * They use mocked WordPress managers but do not test complex business logic flows.
  * 
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
+ * Current testing approach:
+ * - Mocks WordPressUserManager to return pre-set values
+ * - Verifies that service methods exist and return expected structures
+ * - Does NOT test actual authentication flows or WordPress integration
+ * 
+ * Limitations:
+ * - Business logic is simplified to basic input/output verification
+ * - No testing of complex authentication scenarios
+ * - No testing of error handling with real WordPress errors
+ * 
+ * For true unit testing, AuthService would need:
+ * - More comprehensive business logic testing
+ * - Testing of complex authentication scenarios
+ * - Proper error handling verification
+ * 
+ * For integration testing, see: docs/testing/integration-testing-requirements.md
+ * 
  */
 final class AuthServiceTest extends TestCase
 {
