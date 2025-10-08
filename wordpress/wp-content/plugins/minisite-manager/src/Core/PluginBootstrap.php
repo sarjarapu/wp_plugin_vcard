@@ -41,7 +41,7 @@ final class PluginBootstrap
         RoleManager::initialize();
         
         // Initialize rewrite rules
-        RewriteManager::initialize();
+        RewriteCoordinator::initialize();
         
         // Initialize admin menu
         AdminMenuManager::initialize();

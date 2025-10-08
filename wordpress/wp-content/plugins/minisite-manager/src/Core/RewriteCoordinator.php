@@ -3,14 +3,14 @@
 namespace Minisite\Core;
 
 /**
- * Rewrite Manager
+ * Rewrite Coordinator
  * 
- * SINGLE RESPONSIBILITY: Manage WordPress rewrite rules
- * - Handles rewrite rule registration
- * - Manages query variables
- * - Coordinates with RewriteRegistrar
+ * SINGLE RESPONSIBILITY: Coordinate WordPress rewrite system lifecycle
+ * - Handles rewrite system initialization
+ * - Manages query variables registration
+ * - Coordinates with RewriteRegistrar for rule registration
  */
-final class RewriteManager
+final class RewriteCoordinator
 {
     public static function initialize(): void
     {

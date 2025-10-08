@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Application\Admin;
+namespace Minisite\Core;
 
 /**
  * Admin Menu Manager
@@ -16,6 +16,21 @@ final class AdminMenuManager
     private const MENU_TITLE = 'Minisite Manager';
     private const MENU_ICON = 'dashicons-admin-site-alt3';
     private const MENU_POSITION = 30;
+
+    /**
+     * Initialize the admin menu system
+     */
+    public static function initialize(): void
+    {
+        add_action('admin_menu', function () {
+            if ($adminMenuClass = minisite_class(AdminMenuManager::class)) {
+                $adminMenu = new $adminMenuClass();
+                $adminMenu->register();
+            } else {
+                error_log('Minisite: AdminMenuManager class not found');
+            }
+        });
+    }
 
     /**
      * Register the admin menu

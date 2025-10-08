@@ -2,13 +2,13 @@
 
 namespace Minisite\Tests\Unit\Core;
 
-use Minisite\Core\RewriteManager;
+use Minisite\Core\RewriteCoordinator;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Test class for RewriteManager
+ * Test class for RewriteCoordinator
  */
-class RewriteManagerTest extends TestCase
+class RewriteCoordinatorTest extends TestCase
 {
 
     /**
@@ -16,7 +16,7 @@ class RewriteManagerTest extends TestCase
      */
     public function test_initialize_is_static_method(): void
     {
-        $reflection = new \ReflectionClass(RewriteManager::class);
+        $reflection = new \ReflectionClass(RewriteCoordinator::class);
         $initializeMethod = $reflection->getMethod('initialize');
         
         $this->assertTrue($initializeMethod->isStatic());
@@ -28,7 +28,7 @@ class RewriteManagerTest extends TestCase
      */
     public function test_registerRewriteRules_is_static_method(): void
     {
-        $reflection = new \ReflectionClass(RewriteManager::class);
+        $reflection = new \ReflectionClass(RewriteCoordinator::class);
         $registerMethod = $reflection->getMethod('registerRewriteRules');
         
         $this->assertTrue($registerMethod->isStatic());
@@ -40,7 +40,7 @@ class RewriteManagerTest extends TestCase
      */
     public function test_addQueryVars_is_static_method(): void
     {
-        $reflection = new \ReflectionClass(RewriteManager::class);
+        $reflection = new \ReflectionClass(RewriteCoordinator::class);
         $addQueryVarsMethod = $reflection->getMethod('addQueryVars');
         
         $this->assertTrue($addQueryVarsMethod->isStatic());
@@ -64,7 +64,7 @@ class RewriteManagerTest extends TestCase
             'minisite_version_id'
         ];
         
-        $result = RewriteManager::addQueryVars($initialVars);
+        $result = RewriteCoordinator::addQueryVars($initialVars);
         
         $this->assertEquals($expectedVars, $result);
     }
@@ -85,7 +85,7 @@ class RewriteManagerTest extends TestCase
             'minisite_version_id'
         ];
         
-        $result = RewriteManager::addQueryVars($initialVars);
+        $result = RewriteCoordinator::addQueryVars($initialVars);
         
         $this->assertEquals($expectedVars, $result);
     }
@@ -96,7 +96,7 @@ class RewriteManagerTest extends TestCase
     public function test_addQueryVars_preserves_existing_vars(): void
     {
         $initialVars = ['custom_var', 'another_var'];
-        $result = RewriteManager::addQueryVars($initialVars);
+        $result = RewriteCoordinator::addQueryVars($initialVars);
         
         $this->assertContains('custom_var', $result);
         $this->assertContains('another_var', $result);
@@ -114,7 +114,7 @@ class RewriteManagerTest extends TestCase
      */
     public function test_addQueryVars_returns_array(): void
     {
-        $result = RewriteManager::addQueryVars(['test']);
+        $result = RewriteCoordinator::addQueryVars(['test']);
         
         $this->assertIsArray($result);
     }
@@ -124,7 +124,7 @@ class RewriteManagerTest extends TestCase
      */
     public function test_class_is_final(): void
     {
-        $reflection = new \ReflectionClass(RewriteManager::class);
+        $reflection = new \ReflectionClass(RewriteCoordinator::class);
         // Note: BypassFinals extension bypasses final keyword in tests
         // The class is actually final in production
         $this->assertTrue(true); // Always pass - class is final in production
@@ -135,7 +135,7 @@ class RewriteManagerTest extends TestCase
      */
     public function test_class_has_expected_methods(): void
     {
-        $reflection = new \ReflectionClass(RewriteManager::class);
+        $reflection = new \ReflectionClass(RewriteCoordinator::class);
         
         $this->assertTrue($reflection->hasMethod('initialize'));
         $this->assertTrue($reflection->hasMethod('registerRewriteRules'));
@@ -147,8 +147,8 @@ class RewriteManagerTest extends TestCase
      */
     public function test_methods_are_callable(): void
     {
-        $this->assertTrue(is_callable([RewriteManager::class, 'initialize']));
-        $this->assertTrue(is_callable([RewriteManager::class, 'registerRewriteRules']));
-        $this->assertTrue(is_callable([RewriteManager::class, 'addQueryVars']));
+        $this->assertTrue(is_callable([RewriteCoordinator::class, 'initialize']));
+        $this->assertTrue(is_callable([RewriteCoordinator::class, 'registerRewriteRules']));
+        $this->assertTrue(is_callable([RewriteCoordinator::class, 'addQueryVars']));
     }
 }
