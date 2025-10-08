@@ -17,13 +17,14 @@
  * @package MinisiteManager
  */
 
-use Minisite\Application\Controllers\Admin\SubscriptionController;
-use Minisite\Application\Controllers\Front\AuthController;
-use Minisite\Application\Controllers\Front\MinisitePageController;
-use Minisite\Application\Controllers\Front\NewMinisiteController;
-use Minisite\Application\Controllers\Front\SitesController;
+//use Minisite\Application\Controllers\Admin\SubscriptionController;
+//use Minisite\Application\Controllers\Front\AuthController;
+//use Minisite\Application\Controllers\Front\MinisitePageController;
+//use Minisite\Application\Controllers\Front\NewMinisiteController;
+//use Minisite\Application\Controllers\Front\SitesController;
+//use Minisite\Application\Controllers\Front\VersionController;
+
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
-use Minisite\Application\Controllers\Front\VersionController;
 use Minisite\Application\Http\RewriteRegistrar;
 use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Application\Admin\AdminMenuManager;
@@ -32,6 +33,7 @@ use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase;
+
 use Minisite\Infrastructure\Versioning\VersioningController;
 use Minisite\Features\Authentication\AuthenticationFeature;
 use Minisite\Features\MinisiteViewer\MinisiteViewerFeature;
@@ -798,561 +800,561 @@ add_action('wp_enqueue_scripts', function () {
   // Example: enqueue a tiny base CSS if needed
   // wp_enqueue_style('minisite-base', MINISITE_PLUGIN_URL . 'assets/css/base.css', [], '1.0.0');
 });
+//
+///**
+// * AJAX handlers for version management
+// */
+//add_action('wp_ajax_publish_version', function () {
+//    if (!is_user_logged_in()) {
+//        wp_send_json_error('Not authenticated', 401);
+//        return;
+//    }
+//
+//    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+//        wp_send_json_error('Security check failed', 403);
+//        return;
+//    }
+//
+//    $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
+//    $versionId = (int) (sanitize_text_field(wp_unslash($_POST['version_id'] ?? 0)));
+//
+//    if (!$siteId || !$versionId) {
+//        wp_send_json_error('Invalid parameters', 400);
+//        return;
+//    }
+//
+//    try {
+//        global $wpdb;
+//        $profileRepo = new MinisiteRepository($wpdb);
+//        $versionRepo = new VersionRepository($wpdb);
+//
+//        $profile = $profileRepo->findById($siteId);
+//        if (!$profile) {
+//            wp_send_json_error('Site not found', 404);
+//            return;
+//        }
+//
+//      // Check ownership
+//        if ($profile->createdBy !== get_current_user_id()) {
+//            wp_send_json_error('Access denied', 403);
+//            return;
+//        }
+//
+//        $version = $versionRepo->findById($versionId);
+//        if (!$version || $version->minisiteId !== $siteId) {
+//            wp_send_json_error('Version not found', 404);
+//            return;
+//        }
+//
+//        if ($version->status !== 'draft') {
+//            wp_send_json_error('Only draft versions can be published', 400);
+//            return;
+//        }
+//
+//      // Use the new publishMinisite method with proper versioning logic
+//        $profileRepo->publishMinisite($siteId);
+//
+//        wp_send_json_success([
+//        'message' => 'Version published successfully',
+//        'published_version_id' => $versionId
+//        ]);
+//    } catch (Exception $e) {
+//        wp_send_json_error('Failed to publish version: ' . $e->getMessage(), 500);
+//    }
+//});
+//
+//add_action('wp_ajax_rollback_version', function () {
+//    if (!is_user_logged_in()) {
+//        wp_send_json_error('Not authenticated', 401);
+//        return;
+//    }
+//
+//    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+//        wp_send_json_error('Security check failed', 403);
+//        return;
+//    }
+//
+//    $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
+//    $sourceVersionId = (int) (sanitize_text_field(wp_unslash($_POST['source_version_id'] ?? 0)));
+//
+//    if (!$siteId || !$sourceVersionId) {
+//        wp_send_json_error('Invalid parameters', 400);
+//        return;
+//    }
+//
+//    try {
+//        global $wpdb;
+//        $profileRepo = new MinisiteRepository($wpdb);
+//        $versionRepo = new VersionRepository($wpdb);
+//
+//        $profile = $profileRepo->findById($siteId);
+//        if (!$profile) {
+//            wp_send_json_error('Site not found', 404);
+//            return;
+//        }
+//
+//      // Check ownership
+//        if ($profile->createdBy !== get_current_user_id()) {
+//            wp_send_json_error('Access denied', 403);
+//            return;
+//        }
+//
+//        $sourceVersion = $versionRepo->findById($sourceVersionId);
+//        if (!$sourceVersion || $sourceVersion->minisiteId !== $siteId) {
+//            wp_send_json_error('Source version not found', 404);
+//            return;
+//        }
+//
+//      // Create rollback version
+//        $nextVersion = $versionRepo->getNextVersionNumber($siteId);
+//
+//        $rollbackVersion = new Version(
+//            id: null,
+//            minisiteId: $siteId,
+//            versionNumber: $nextVersion,
+//            status: 'draft',
+//            label: "Copy to v{$sourceVersion->versionNumber}",
+//            comment: "Copy of version {$sourceVersion->versionNumber}",
+//            siteJson: $sourceVersion->siteJson,
+//            createdBy: get_current_user_id(),
+//            createdAt: null,
+//            publishedAt: null,
+//            sourceVersionId: $sourceVersionId
+//        );
+//
+//        $savedVersion = $versionRepo->save($rollbackVersion);
+//
+//        wp_send_json_success([
+//        'id' => $savedVersion->id,
+//        'version_number' => $savedVersion->versionNumber,
+//        'status' => $savedVersion->status,
+//        'message' => 'Copy of version created'
+//        ]);
+//    } catch (Exception $e) {
+//        wp_send_json_error('Failed to create copy: ' . $e->getMessage(), 500);
+//    }
+//});
 
 /**
- * AJAX handlers for version management
+ * AJAX handlers for bookmark management
  */
-add_action('wp_ajax_publish_version', function () {
+add_action('wp_ajax_add_bookmark', function () {
     if (!is_user_logged_in()) {
         wp_send_json_error('Not authenticated', 401);
         return;
     }
 
-    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_bookmark')) {
         wp_send_json_error('Security check failed', 403);
         return;
     }
 
-    $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
-    $versionId = (int) (sanitize_text_field(wp_unslash($_POST['version_id'] ?? 0)));
+    $minisiteId = sanitize_text_field(wp_unslash($_POST['profile_id'] ?? ''));
+    $userId = get_current_user_id();
 
-    if (!$siteId || !$versionId) {
-        wp_send_json_error('Invalid parameters', 400);
+    if (!$minisiteId) {
+        wp_send_json_error('Invalid minisite ID', 400);
         return;
     }
 
     try {
         global $wpdb;
+
+      // Check if profile exists
         $profileRepo = new MinisiteRepository($wpdb);
-        $versionRepo = new VersionRepository($wpdb);
-
-        $profile = $profileRepo->findById($siteId);
+        $profile = $profileRepo->findById($minisiteId);
         if (!$profile) {
-            wp_send_json_error('Site not found', 404);
+            wp_send_json_error('Minisite not found', 404);
             return;
         }
 
-      // Check ownership
-        if ($profile->createdBy !== get_current_user_id()) {
-            wp_send_json_error('Access denied', 403);
+      // Check if already bookmarked
+        $existing = db::get_var(
+            "SELECT id FROM {$wpdb->prefix}minisite_bookmarks WHERE user_id = %d AND minisite_id = %s",
+            [$userId, $minisiteId]
+        );
+
+        if ($existing) {
+            wp_send_json_error('Already bookmarked', 400);
             return;
         }
 
-        $version = $versionRepo->findById($versionId);
-        if (!$version || $version->minisiteId !== $siteId) {
-            wp_send_json_error('Version not found', 404);
+      // Add bookmark
+        $result = db::insert(
+            $wpdb->prefix . 'minisite_bookmarks',
+            [
+            'user_id' => $userId,
+            'minisite_id' => $minisiteId,
+            'created_at' => current_time('mysql')
+            ],
+            ['%d', '%d', '%s']
+        );
+
+        if ($result === false) {
+            wp_send_json_error('Failed to add bookmark', 500);
             return;
         }
-
-        if ($version->status !== 'draft') {
-            wp_send_json_error('Only draft versions can be published', 400);
-            return;
-        }
-
-      // Use the new publishMinisite method with proper versioning logic
-        $profileRepo->publishMinisite($siteId);
 
         wp_send_json_success([
-        'message' => 'Version published successfully',
-        'published_version_id' => $versionId
+        'message' => 'Bookmark added successfully',
+        'bookmark_id' => $wpdb->insert_id
         ]);
     } catch (Exception $e) {
-        wp_send_json_error('Failed to publish version: ' . $e->getMessage(), 500);
+        wp_send_json_error('Failed to add bookmark: ' . $e->getMessage(), 500);
     }
 });
 
-    add_action('wp_ajax_rollback_version', function () {
-        if (!is_user_logged_in()) {
-            wp_send_json_error('Not authenticated', 401);
+add_action('wp_ajax_remove_bookmark', function () {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authenticated', 401);
+        return;
+    }
+
+    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_bookmark')) {
+        wp_send_json_error('Security check failed', 403);
+        return;
+    }
+
+    $minisiteId = sanitize_text_field(wp_unslash($_POST['profile_id'] ?? ''));
+    $userId = get_current_user_id();
+
+    if (!$minisiteId) {
+        wp_send_json_error('Invalid minisite ID', 400);
+        return;
+    }
+
+    try {
+        global $wpdb;
+
+      // Remove bookmark
+        $result = db::delete(
+            $wpdb->prefix . 'minisite_bookmarks',
+            [
+            'user_id' => $userId,
+            'minisite_id' => $minisiteId
+            ],
+            ['%d', '%s']
+        );
+
+        if ($result === false) {
+            wp_send_json_error('Failed to remove bookmark', 500);
             return;
         }
 
-        if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
-            wp_send_json_error('Security check failed', 403);
+        if ($result === 0) {
+            wp_send_json_error('Bookmark not found', 404);
             return;
         }
 
-        $siteId = sanitize_text_field(wp_unslash($_POST['site_id'] ?? ''));
-        $sourceVersionId = (int) (sanitize_text_field(wp_unslash($_POST['source_version_id'] ?? 0)));
+        wp_send_json_success([
+        'message' => 'Bookmark removed successfully'
+        ]);
+    } catch (Exception $e) {
+        wp_send_json_error('Failed to remove bookmark: ' . $e->getMessage(), 500);
+    }
+});
 
-        if (!$siteId || !$sourceVersionId) {
-            wp_send_json_error('Invalid parameters', 400);
-            return;
-        }
-
-        try {
-            global $wpdb;
-            $profileRepo = new MinisiteRepository($wpdb);
-            $versionRepo = new VersionRepository($wpdb);
-
-            $profile = $profileRepo->findById($siteId);
-            if (!$profile) {
-                wp_send_json_error('Site not found', 404);
-                return;
-            }
-
-          // Check ownership
-            if ($profile->createdBy !== get_current_user_id()) {
-                wp_send_json_error('Access denied', 403);
-                return;
-            }
-
-            $sourceVersion = $versionRepo->findById($sourceVersionId);
-            if (!$sourceVersion || $sourceVersion->minisiteId !== $siteId) {
-                wp_send_json_error('Source version not found', 404);
-                return;
-            }
-
-          // Create rollback version
-            $nextVersion = $versionRepo->getNextVersionNumber($siteId);
-
-            $rollbackVersion = new Version(
-                id: null,
-                minisiteId: $siteId,
-                versionNumber: $nextVersion,
-                status: 'draft',
-                label: "Copy to v{$sourceVersion->versionNumber}",
-                comment: "Copy of version {$sourceVersion->versionNumber}",
-                siteJson: $sourceVersion->siteJson,
-                createdBy: get_current_user_id(),
-                createdAt: null,
-                publishedAt: null,
-                sourceVersionId: $sourceVersionId
-            );
-
-            $savedVersion = $versionRepo->save($rollbackVersion);
-
-            wp_send_json_success([
-            'id' => $savedVersion->id,
-            'version_number' => $savedVersion->versionNumber,
-            'status' => $savedVersion->status,
-            'message' => 'Copy of version created'
-            ]);
-        } catch (Exception $e) {
-            wp_send_json_error('Failed to create copy: ' . $e->getMessage(), 500);
-        }
-    });
-
-/**
- * AJAX handlers for bookmark management
- */
-        add_action('wp_ajax_add_bookmark', function () {
-            if (!is_user_logged_in()) {
-                wp_send_json_error('Not authenticated', 401);
-                return;
-            }
-
-            if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_bookmark')) {
-                wp_send_json_error('Security check failed', 403);
-                return;
-            }
-
-            $minisiteId = sanitize_text_field(wp_unslash($_POST['profile_id'] ?? ''));
-            $userId = get_current_user_id();
-
-            if (!$minisiteId) {
-                wp_send_json_error('Invalid minisite ID', 400);
-                return;
-            }
-
-            try {
-                global $wpdb;
-
-              // Check if profile exists
-                $profileRepo = new MinisiteRepository($wpdb);
-                $profile = $profileRepo->findById($minisiteId);
-                if (!$profile) {
-                    wp_send_json_error('Minisite not found', 404);
-                    return;
-                }
-
-              // Check if already bookmarked
-                $existing = db::get_var(
-                    "SELECT id FROM {$wpdb->prefix}minisite_bookmarks WHERE user_id = %d AND minisite_id = %s",
-                    [$userId, $minisiteId]
-                );
-
-                if ($existing) {
-                    wp_send_json_error('Already bookmarked', 400);
-                    return;
-                }
-
-              // Add bookmark
-                $result = db::insert(
-                    $wpdb->prefix . 'minisite_bookmarks',
-                    [
-                    'user_id' => $userId,
-                    'minisite_id' => $minisiteId,
-                    'created_at' => current_time('mysql')
-                    ],
-                    ['%d', '%d', '%s']
-                );
-
-                if ($result === false) {
-                    wp_send_json_error('Failed to add bookmark', 500);
-                    return;
-                }
-
-                wp_send_json_success([
-                'message' => 'Bookmark added successfully',
-                'bookmark_id' => $wpdb->insert_id
-                ]);
-            } catch (Exception $e) {
-                wp_send_json_error('Failed to add bookmark: ' . $e->getMessage(), 500);
-            }
-        });
-
-            add_action('wp_ajax_remove_bookmark', function () {
-                if (!is_user_logged_in()) {
-                    wp_send_json_error('Not authenticated', 401);
-                    return;
-                }
-
-                if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_bookmark')) {
-                    wp_send_json_error('Security check failed', 403);
-                    return;
-                }
-
-                $minisiteId = sanitize_text_field(wp_unslash($_POST['profile_id'] ?? ''));
-                $userId = get_current_user_id();
-
-                if (!$minisiteId) {
-                    wp_send_json_error('Invalid minisite ID', 400);
-                    return;
-                }
-
-                try {
-                    global $wpdb;
-
-                  // Remove bookmark
-                    $result = db::delete(
-                        $wpdb->prefix . 'minisite_bookmarks',
-                        [
-                        'user_id' => $userId,
-                        'minisite_id' => $minisiteId
-                        ],
-                        ['%d', '%s']
-                    );
-
-                    if ($result === false) {
-                        wp_send_json_error('Failed to remove bookmark', 500);
-                        return;
-                    }
-
-                    if ($result === 0) {
-                        wp_send_json_error('Bookmark not found', 404);
-                        return;
-                    }
-
-                    wp_send_json_success([
-                    'message' => 'Bookmark removed successfully'
-                    ]);
-                } catch (Exception $e) {
-                    wp_send_json_error('Failed to remove bookmark: ' . $e->getMessage(), 500);
-                }
-            });
-
-/**
- * AJAX handler for creating new minisites
- */
-                add_action('wp_ajax_create_minisite', function () {
-                    if (!is_user_logged_in()) {
-                        wp_send_json_error('Not authenticated', 401);
-                        return;
-                    }
-
-                    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_new')) {
-                        wp_send_json_error('Security check failed', 403);
-                        return;
-                    }
-
-                    try {
-                        global $wpdb;
-                        $profileRepo = new MinisiteRepository($wpdb);
-                        $versionRepo = new VersionRepository($wpdb);
-                        $newMinisiteCtrl = new NewMinisiteController(
-                            $profileRepo,
-                            $versionRepo
-                        );
-
-                        $newMinisiteCtrl->handleCreate();
-                    } catch (Exception $e) {
-                        wp_send_json_error('Failed to create minisite: ' . $e->getMessage(), 500);
-                    }
-                });
+///**
+// * AJAX handler for creating new minisites
+// */
+//add_action('wp_ajax_create_minisite', function () {
+//    if (!is_user_logged_in()) {
+//        wp_send_json_error('Not authenticated', 401);
+//        return;
+//    }
+//
+//    if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'] ?? '')), 'minisite_new')) {
+//        wp_send_json_error('Security check failed', 403);
+//        return;
+//    }
+//
+//    try {
+//        global $wpdb;
+//        $profileRepo = new MinisiteRepository($wpdb);
+//        $versionRepo = new VersionRepository($wpdb);
+//        $newMinisiteCtrl = new NewMinisiteController(
+//            $profileRepo,
+//            $versionRepo
+//        );
+//
+//        $newMinisiteCtrl->handleCreate();
+//    } catch (Exception $e) {
+//        wp_send_json_error('Failed to create minisite: ' . $e->getMessage(), 500);
+//    }
+//});
 
 /**
  * AJAX handler for checking slug availability
  */
-                    add_action('wp_ajax_check_slug_availability', function () {
-                        if (!is_user_logged_in()) {
-                            wp_send_json_error('Not authenticated', 401);
-                            return;
-                        }
+add_action('wp_ajax_check_slug_availability', function () {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authenticated', 401);
+        return;
+    }
 
-                        try {
-                            global $wpdb;
-                            $profileRepo = new MinisiteRepository(
-                                $wpdb
-                            );
-                            $versionRepo = new VersionRepository(
-                                $wpdb
-                            );
-                            $newMinisiteCtrl = new NewMinisiteController(
-                                $profileRepo,
-                                $versionRepo
-                            );
+    try {
+        global $wpdb;
+        $profileRepo = new MinisiteRepository(
+            $wpdb
+        );
+        $versionRepo = new VersionRepository(
+            $wpdb
+        );
+        $newMinisiteCtrl = new NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
-                            $newMinisiteCtrl->handleCheckSlugAvailability();
-                        } catch (Exception $e) {
-                            wp_send_json_error('Failed to check slug availability: ' . $e->getMessage(), 500);
-                        }
-                    });
+        $newMinisiteCtrl->handleCheckSlugAvailability();
+    } catch (Exception $e) {
+        wp_send_json_error('Failed to check slug availability: ' . $e->getMessage(), 500);
+    }
+});
 
 /**
  * AJAX handler for reserving slugs
  */
-                    add_action('wp_ajax_reserve_slug', function () {
-                        if (!is_user_logged_in()) {
-                            wp_send_json_error('Not authenticated', 401);
-                            return;
-                        }
+add_action('wp_ajax_reserve_slug', function () {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authenticated', 401);
+        return;
+    }
 
-                        try {
-                            global $wpdb;
-                            $profileRepo = new MinisiteRepository(
-                                $wpdb
-                            );
-                            $versionRepo = new VersionRepository(
-                                $wpdb
-                            );
-                            $newMinisiteCtrl = new NewMinisiteController(
-                                $profileRepo,
-                                $versionRepo
-                            );
+    try {
+        global $wpdb;
+        $profileRepo = new MinisiteRepository(
+            $wpdb
+        );
+        $versionRepo = new VersionRepository(
+            $wpdb
+        );
+        $newMinisiteCtrl = new NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
-                            $newMinisiteCtrl->handleReserveSlug();
-                        } catch (Exception $e) {
-                            wp_send_json_error('Failed to reserve slug: ' . $e->getMessage(), 500);
-                        }
-                    });
-
-/**
- * AJAX handler for publishing minisites
- */
-                    add_action('wp_ajax_publish_minisite', function () {
-                        if (!is_user_logged_in()) {
-                            wp_send_json_error('Not authenticated', 401);
-                            return;
-                        }
-
-                        try {
-                            global $wpdb;
-                            $profileRepo = new MinisiteRepository(
-                                $wpdb
-                            );
-                            $versionRepo = new VersionRepository(
-                                $wpdb
-                            );
-                            $newMinisiteCtrl = new NewMinisiteController(
-                                $profileRepo,
-                                $versionRepo
-                            );
-
-                            $newMinisiteCtrl->handlePublish();
-                        } catch (Exception $e) {
-                            wp_send_json_error('Failed to publish minisite: ' . $e->getMessage(), 500);
-                        }
-                    });
-
-// Export minisite AJAX handler
-                    add_action('wp_ajax_export_minisite', function () {
-                        if (!is_user_logged_in()) {
-                            wp_send_json_error('Not authenticated', 401);
-                            return;
-                        }
-
-                        try {
-                            global $wpdb;
-                            $profileRepo = new MinisiteRepository(
-                                $wpdb
-                            );
-                            $versionRepo = new VersionRepository(
-                                $wpdb
-                            );
-                            $sitesCtrl = new SitesController();
-
-                            $sitesCtrl->handleExport();
-                        } catch (Exception $e) {
-                            wp_send_json_error('Failed to export minisite: ' . $e->getMessage(), 500);
-                        }
-                    });
-
-// Import minisite AJAX handler
-                    add_action('wp_ajax_import_minisite', function () {
-                        if (!is_user_logged_in()) {
-                            wp_send_json_error('Not authenticated', 401);
-                            return;
-                        }
-
-                        try {
-                            global $wpdb;
-                            $profileRepo = new MinisiteRepository(
-                                $wpdb
-                            );
-                            $versionRepo = new VersionRepository(
-                                $wpdb
-                            );
-                            $sitesCtrl = new SitesController();
-
-                            $sitesCtrl->handleImport();
-                        } catch (Exception $e) {
-                            wp_send_json_error('Failed to import minisite: ' . $e->getMessage(), 500);
-                        }
-                    });
-
-// Create WooCommerce order for minisite subscription AJAX handler
-                    add_action('wp_ajax_create_minisite_order', function () {
-                        if (!is_user_logged_in()) {
-                            wp_send_json_error('Not authenticated', 401);
-                            return;
-                        }
-
-                        try {
-                            global $wpdb;
-                            $profileRepo = new MinisiteRepository(
-                                $wpdb
-                            );
-                            $versionRepo = new VersionRepository(
-                                $wpdb
-                            );
-                            $newMinisiteCtrl = new NewMinisiteController(
-                                $profileRepo,
-                                $versionRepo
-                            );
-
-                            $newMinisiteCtrl->handleCreateWooCommerceOrder();
-                        } catch (Exception $e) {
-                            wp_send_json_error('Failed to create order: ' . $e->getMessage(), 500);
-                        }
-                    });
+        $newMinisiteCtrl->handleReserveSlug();
+    } catch (Exception $e) {
+        wp_send_json_error('Failed to reserve slug: ' . $e->getMessage(), 500);
+    }
+});
+//
+///**
+// * AJAX handler for publishing minisites
+// */
+//add_action('wp_ajax_publish_minisite', function () {
+//    if (!is_user_logged_in()) {
+//        wp_send_json_error('Not authenticated', 401);
+//        return;
+//    }
+//
+//    try {
+//        global $wpdb;
+//        $profileRepo = new MinisiteRepository(
+//            $wpdb
+//        );
+//        $versionRepo = new VersionRepository(
+//            $wpdb
+//        );
+//        $newMinisiteCtrl = new NewMinisiteController(
+//            $profileRepo,
+//            $versionRepo
+//        );
+//
+//        $newMinisiteCtrl->handlePublish();
+//    } catch (Exception $e) {
+//        wp_send_json_error('Failed to publish minisite: ' . $e->getMessage(), 500);
+//    }
+//});
+//
+//// Export minisite AJAX handler
+//add_action('wp_ajax_export_minisite', function () {
+//    if (!is_user_logged_in()) {
+//        wp_send_json_error('Not authenticated', 401);
+//        return;
+//    }
+//
+//    try {
+//        global $wpdb;
+//        $profileRepo = new MinisiteRepository(
+//            $wpdb
+//        );
+//        $versionRepo = new VersionRepository(
+//            $wpdb
+//        );
+//        $sitesCtrl = new SitesController();
+//
+//        $sitesCtrl->handleExport();
+//    } catch (Exception $e) {
+//        wp_send_json_error('Failed to export minisite: ' . $e->getMessage(), 500);
+//    }
+//});
+//
+//// Import minisite AJAX handler
+//add_action('wp_ajax_import_minisite', function () {
+//if (!is_user_logged_in()) {
+//    wp_send_json_error('Not authenticated', 401);
+//    return;
+//}
+//
+//try {
+//    global $wpdb;
+//    $profileRepo = new MinisiteRepository(
+//        $wpdb
+//    );
+//    $versionRepo = new VersionRepository(
+//        $wpdb
+//    );
+//    $sitesCtrl = new SitesController();
+//
+//    $sitesCtrl->handleImport();
+//} catch (Exception $e) {
+//    wp_send_json_error('Failed to import minisite: ' . $e->getMessage(), 500);
+//}
+//});
+//
+//// Create WooCommerce order for minisite subscription AJAX handler
+//add_action('wp_ajax_create_minisite_order', function () {
+//    if (!is_user_logged_in()) {
+//        wp_send_json_error('Not authenticated', 401);
+//        return;
+//    }
+//
+//    try {
+//        global $wpdb;
+//        $profileRepo = new MinisiteRepository(
+//            $wpdb
+//        );
+//        $versionRepo = new VersionRepository(
+//            $wpdb
+//        );
+//        $newMinisiteCtrl = new NewMinisiteController(
+//            $profileRepo,
+//            $versionRepo
+//        );
+//
+//        $newMinisiteCtrl->handleCreateWooCommerceOrder();
+//    } catch (Exception $e) {
+//        wp_send_json_error('Failed to create order: ' . $e->getMessage(), 500);
+//    }
+//});
 
 // Activate minisite subscription AJAX handler
-                    add_action('wp_ajax_activate_minisite_subscription', function () {
-                        if (!is_user_logged_in()) {
-                            wp_send_json_error('Not authenticated', 401);
-                            return;
-                        }
+add_action('wp_ajax_activate_minisite_subscription', function () {
+    if (!is_user_logged_in()) {
+        wp_send_json_error('Not authenticated', 401);
+        return;
+    }
 
-                        try {
-                            global $wpdb;
-                            $profileRepo = new MinisiteRepository(
-                                $wpdb
-                            );
-                            $versionRepo = new VersionRepository(
-                                $wpdb
-                            );
-                            $newMinisiteCtrl = new NewMinisiteController(
-                                $profileRepo,
-                                $versionRepo
-                            );
+    try {
+        global $wpdb;
+        $profileRepo = new MinisiteRepository(
+            $wpdb
+        );
+        $versionRepo = new VersionRepository(
+            $wpdb
+        );
+        $newMinisiteCtrl = new NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
-                            $newMinisiteCtrl->handleActivateSubscription();
-                        } catch (Exception $e) {
-                            wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
-                        }
-                    });
+        $newMinisiteCtrl->handleActivateSubscription();
+    } catch (Exception $e) {
+        wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
+    }
+});
 
 // Transfer minisite data from cart to order metadata
-                    add_action('woocommerce_checkout_create_order', function ($order, $data) {
-                      // Check if there's minisite data in the session
-                        if (WC()->session && WC()->session->get('minisite_cart_data')) {
-                            $cartData = WC()->session->get('minisite_cart_data');
+add_action('woocommerce_checkout_create_order', function ($order, $data) {
+  // Check if there's minisite data in the session
+    if (WC()->session && WC()->session->get('minisite_cart_data')) {
+        $cartData = WC()->session->get('minisite_cart_data');
 
-                          // Transfer minisite data to order metadata
-                            $order->update_meta_data('_minisite_id', $cartData['minisite_id'] ?? '');
-                            $order->update_meta_data('_slug', $cartData['minisite_slug'] ?? '');
-                            $order->update_meta_data('_reservation_id', $cartData['minisite_reservation_id'] ?? '');
-                        }
-                    }, 10, 2);
+      // Transfer minisite data to order metadata
+        $order->update_meta_data('_minisite_id', $cartData['minisite_id'] ?? '');
+        $order->update_meta_data('_slug', $cartData['minisite_slug'] ?? '');
+        $order->update_meta_data('_reservation_id', $cartData['minisite_reservation_id'] ?? '');
+    }
+}, 10, 2);
 
 // Transfer cart item metadata to order item metadata
-                    add_action(
-                        'woocommerce_checkout_create_order_line_item',
-                        function ($item, $cart_item_key, $values, $order) {
-                        // Check if this cart item has minisite data
-                            if (isset($values['minisite_id'])) {
-                                $item->add_meta_data('_minisite_id', $values['minisite_id']);
-                                $item->add_meta_data('_minisite_slug', $values['minisite_slug'] ?? '');
-                                $item->add_meta_data(
-                                    '_minisite_reservation_id',
-                                    $values['minisite_reservation_id'] ?? ''
-                                );
+add_action(
+    'woocommerce_checkout_create_order_line_item',
+    function ($item, $cart_item_key, $values, $order) {
+    // Check if this cart item has minisite data
+        if (isset($values['minisite_id'])) {
+            $item->add_meta_data('_minisite_id', $values['minisite_id']);
+            $item->add_meta_data('_minisite_slug', $values['minisite_slug'] ?? '');
+            $item->add_meta_data(
+                '_minisite_reservation_id',
+                $values['minisite_reservation_id'] ?? ''
+            );
 
-                              // Also transfer to order metadata for easier access
-                                $order->update_meta_data('_minisite_id', $values['minisite_id']);
-                                $order->update_meta_data('_slug', $values['minisite_slug'] ?? '');
-                                $order->update_meta_data('_reservation_id', $values['minisite_reservation_id'] ?? '');
-                            }
-                        },
-                        10,
-                        4
-                    );
+          // Also transfer to order metadata for easier access
+            $order->update_meta_data('_minisite_id', $values['minisite_id']);
+            $order->update_meta_data('_slug', $values['minisite_slug'] ?? '');
+            $order->update_meta_data('_reservation_id', $values['minisite_reservation_id'] ?? '');
+        }
+    },
+    10,
+    4
+);
 
 // WooCommerce webhook: Auto-activate minisite subscription when order is completed
-                    add_action('woocommerce_order_status_completed', function ($order_id) {
-                        try {
-                            global $wpdb;
-                            $profileRepo = new MinisiteRepository(
-                                $wpdb
-                            );
-                            $versionRepo = new VersionRepository(
-                                $wpdb
-                            );
-                            $newMinisiteCtrl = new NewMinisiteController(
-                                $profileRepo,
-                                $versionRepo
-                            );
+add_action('woocommerce_order_status_completed', function ($order_id) {
+    try {
+        global $wpdb;
+        $profileRepo = new MinisiteRepository(
+            $wpdb
+        );
+        $versionRepo = new VersionRepository(
+            $wpdb
+        );
+        $newMinisiteCtrl = new NewMinisiteController(
+            $profileRepo,
+            $versionRepo
+        );
 
-                            $newMinisiteCtrl->activateMinisiteSubscription($order_id);
-                        } catch (Exception $e) {
-                          // Log error but don't break the order completion process
-                            error_log(
-                                'Failed to activate minisite subscription for order ' . $order_id . ': ' .
-                                $e->getMessage()
-                            );
-                        }
-                    });
+        $newMinisiteCtrl->activateMinisiteSubscription($order_id);
+    } catch (Exception $e) {
+      // Log error but don't break the order completion process
+        error_log(
+            'Failed to activate minisite subscription for order ' . $order_id . ': ' .
+            $e->getMessage()
+        );
+    }
+});
 
 // Admin AJAX handler for manual subscription activation
-                    add_action('wp_ajax_activate_minisite_subscription_admin', function () {
-                        if (!current_user_can('manage_options')) {
-                            wp_send_json_error('Insufficient permissions', 403);
-                            return;
-                        }
+add_action('wp_ajax_activate_minisite_subscription_admin', function () {
+    if (!current_user_can('manage_options')) {
+        wp_send_json_error('Insufficient permissions', 403);
+        return;
+    }
 
-                        try {
-                            $subscriptionCtrl = new SubscriptionController();
-                            $subscriptionCtrl->handleActivateSubscription();
-                        } catch (Exception $e) {
-                            wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
-                        }
-                    });
+    try {
+        $subscriptionCtrl = new SubscriptionController();
+        $subscriptionCtrl->handleActivateSubscription();
+    } catch (Exception $e) {
+        wp_send_json_error('Failed to activate subscription: ' . $e->getMessage(), 500);
+    }
+});
 
 // Add admin menu for subscription management
-                    add_action('admin_menu', function () {
-                        add_submenu_page(
-                            'tools.php',
-                            'Minisite Subscriptions',
-                            'Minisite Subscriptions',
-                            'manage_options',
-                            'minisite-subscriptions',
-                            function () {
-                                $subscriptionCtrl = new SubscriptionController();
-                                $subscriptionCtrl->handleList();
-                            }
-                        );
-                    });
+add_action('admin_menu', function () {
+    add_submenu_page(
+        'tools.php',
+        'Minisite Subscriptions',
+        'Minisite Subscriptions',
+        'manage_options',
+        'minisite-subscriptions',
+        function () {
+            $subscriptionCtrl = new SubscriptionController();
+            $subscriptionCtrl->handleList();
+        }
+    );
+});
 
 
 
