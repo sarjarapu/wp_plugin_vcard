@@ -11,9 +11,10 @@
  */
 
 // Enable BypassFinals to allow mocking of final classes
-if (class_exists('DG\BypassFinals')) {
-    DG\BypassFinals::enable();
-}
+// Temporarily disabled for Core class tests
+// if (class_exists('DG\BypassFinals')) {
+//     DG\BypassFinals::enable();
+// }
 
 // Define WordPress constants needed for testing
 if (!defined('ABSPATH')) {

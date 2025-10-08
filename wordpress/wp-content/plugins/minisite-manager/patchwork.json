@@ -1,0 +1,7 @@
+{
+    "redefinable-internals": [
+        "class_exists",
+        "method_exists",
+        "function_exists"
+    ]
+}
