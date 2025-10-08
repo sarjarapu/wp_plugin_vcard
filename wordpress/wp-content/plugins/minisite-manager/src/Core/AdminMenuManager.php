@@ -23,12 +23,8 @@ final class AdminMenuManager
     public static function initialize(): void
     {
         add_action('admin_menu', function () {
-            if ($adminMenuClass = minisite_class(AdminMenuManager::class)) {
-                $adminMenu = new $adminMenuClass();
-                $adminMenu->register();
-            } else {
-                error_log('Minisite: AdminMenuManager class not found');
-            }
+            $adminMenu = new AdminMenuManager();
+            $adminMenu->register();
         });
     }
 
