@@ -26,6 +26,7 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Minisite\Application\Controllers\Front\VersionController;
 use Minisite\Application\Http\RewriteRegistrar;
 use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Application\Admin\AdminMenuManager;
 use Minisite\Domain\Entities\Version;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
@@ -166,6 +167,19 @@ add_action('admin_init', function () {
   // Keep caps synchronized for existing roles (safe, idempotent)
     if (function_exists('minisite_sync_roles_and_caps')) {
         minisite_sync_roles_and_caps();
+    }
+});
+
+/**
+ * Initialize admin menu
+ */
+add_action('admin_menu', function () {
+    if ($adminMenuClass = minisite_class(AdminMenuManager::class)) {
+        $adminMenu = new $adminMenuClass();
+        $adminMenu->register();
+    } else {
+        // Debug: Log if class is not found
+        error_log('Minisite: AdminMenuManager class not found');
     }
 });
 
