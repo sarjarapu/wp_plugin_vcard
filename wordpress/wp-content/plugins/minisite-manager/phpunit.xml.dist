@@ -28,10 +28,19 @@
 
   <testsuites>
     <testsuite name="Unit">
-      <directory>tests/Unit</directory>
-    </testsuite>
-    <testsuite name="Integration">
-      <directory>tests/Integration</directory>
+      <directory>tests/Unit/Core</directory>
+      <directory>tests/Unit/Domain</directory>
+      <directory>tests/Unit/Features/Authentication</directory>
+      <directory>tests/Unit/Features/MinisiteListing</directory>
+      <directory>tests/Unit/Features/MinisiteViewer</directory>
+      <directory>tests/Unit/Features/VersionManagement</directory>
+      <directory>tests/Unit/Features/MinisiteEdit/Controllers</directory>
+      <directory>tests/Unit/Features/MinisiteEdit/Hooks</directory>
+      <directory>tests/Unit/Features/MinisiteEdit/Rendering</directory>
+      <directory>tests/Unit/Features/MinisiteEdit/Services</directory>
+      <directory>tests/Unit/Features/MinisiteEdit/WordPress</directory>
+      <file>tests/Unit/Features/MinisiteEdit/MinisiteEditFeatureIntegrationTest.php</file>
+      <file>tests/Unit/Features/MinisiteEdit/MinisiteEditFeatureTest.php</file>
     </testsuite>
   </testsuites>
 
