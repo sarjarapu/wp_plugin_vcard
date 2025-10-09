@@ -1,0 +1,49 @@
+<?php
+
+namespace Minisite\Features\MinisiteEdit\Hooks;
+
+use Minisite\Features\MinisiteEdit\Controllers\EditController;
+use Minisite\Features\MinisiteEdit\Services\EditService;
+use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
+use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Application\Rendering\TimberRenderer;
+
+/**
+ * EditHooks Factory
+ *
+ * SINGLE RESPONSIBILITY: Create and configure EditHooks with all dependencies
+ * - Handles dependency injection
+ * - Creates all required services and handlers
+ * - Configures the complete edit system
+ */
+class EditHooksFactory
+{
+    /**
+     * Create and configure EditHooks
+     */
+    public static function create(): EditHooks
+    {
+        // Create WordPress manager
+        $wordPressManager = new WordPressEditManager();
+
+        // Create service
+        $editService = new EditService($wordPressManager);
+
+        // Create renderer
+        $timberRenderer = null;
+        if (class_exists('Timber\Timber') && class_exists(TimberRenderer::class)) {
+            $timberRenderer = new TimberRenderer(MINISITE_DEFAULT_TEMPLATE ?? 'v2025');
+        }
+        $editRenderer = new EditRenderer($timberRenderer);
+
+        // Create controller
+        $editController = new EditController(
+            $editService,
+            $editRenderer,
+            $wordPressManager
+        );
+
+        // Create and return hooks
+        return new EditHooks($editController, $wordPressManager);
+    }
+}
