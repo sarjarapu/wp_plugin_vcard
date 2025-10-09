@@ -178,10 +178,10 @@ class VersionService
             );
 
             // Update location_point if geo data exists
-            if ($version->geo && $version->geo->lat && $version->geo->lng) {
+            if ($version->geo && $version->geo->getLat() && $version->geo->getLng()) {
                 db::query(
                     "UPDATE {$wpdb->prefix}minisites SET location_point = POINT(%f, %f) WHERE id = %s",
-                    [$version->geo->lng, $version->geo->lat, $minisiteId]
+                    [$version->geo->getLng(), $version->geo->getLat(), $minisiteId]
                 );
             }
 

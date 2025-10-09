@@ -85,8 +85,8 @@ class VersionRepository implements VersionRepositoryInterface
                 $result = $this->db->query(
                     $this->db->prepare(
                         "UPDATE {$this->table()} SET location_point = POINT(%f, %f) WHERE id = %d",
-                        $version->geo->lng,
-                        $version->geo->lat,
+                        $version->geo->getLng(),
+                        $version->geo->getLat(),
                         $version->id
                     )
                 );
@@ -110,8 +110,8 @@ class VersionRepository implements VersionRepositoryInterface
                 $this->db->query(
                     $this->db->prepare(
                         "UPDATE {$this->table()} SET location_point = POINT(%f, %f) WHERE id = %d",
-                        $version->geo->lng,
-                        $version->geo->lat,
+                        $version->geo->getLng(),
+                        $version->geo->getLat(),
                         $version->id
                     )
                 );

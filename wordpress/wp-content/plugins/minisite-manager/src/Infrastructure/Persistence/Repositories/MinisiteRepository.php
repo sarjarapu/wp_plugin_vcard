@@ -272,14 +272,14 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             );
 
             // Update spatial data if coordinates exist
-            if ($versionToPublish->geo && $versionToPublish->geo->lat && $versionToPublish->geo->lng) {
+            if ($versionToPublish->geo && $versionToPublish->geo->getLat() && $versionToPublish->geo->getLng()) {
                 $this->db->query(
                     $this->db->prepare(
                         "UPDATE {$this->table()} 
                      SET location_point = POINT(%f, %f) 
                      WHERE id = %s",
-                        $versionToPublish->geo->lng,
-                        $versionToPublish->geo->lat,
+                        $versionToPublish->geo->getLng(),
+                        $versionToPublish->geo->getLat(),
                         $id
                     )
                 );
@@ -368,8 +368,8 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             $this->db->query(
                 $this->db->prepare(
                     "UPDATE {$this->table()} SET location_point = POINT(%f,%f) WHERE id = %s",
-                    $site->geo->lng,
-                    $site->geo->lat,
+                    $site->geo->getLng(),
+                    $site->geo->getLat(),
                     $site->id
                 )
             );
@@ -443,8 +443,8 @@ class MinisiteRepository implements MinisiteRepositoryInterface
                 $this->db->prepare(
                     "UPDATE {$this->table()} SET location_point = POINT(%f,%f)
                  WHERE business_slug=%s AND location_slug=%s",
-                    $m->geo->lng,
-                    $m->geo->lat,
+                    $m->geo->getLng(),
+                    $m->geo->getLat(),
                     $m->slugs->business,
                     $m->slugs->location
                 )

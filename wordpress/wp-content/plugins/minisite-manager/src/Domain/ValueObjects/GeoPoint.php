@@ -4,30 +4,44 @@ namespace Minisite\Domain\ValueObjects;
 
 final class GeoPoint
 {
-    public function __construct(
-        public readonly ?float $lat,
-        public readonly ?float $lng
-    ) {
-        if ($this->lat !== null) {
-            if (! is_finite($this->lat) || $this->lat < -90.0 || $this->lat > 90.0) {
+    private readonly ?float $lat;
+    private readonly ?float $lng;
+
+    public function __construct(?float $lat, ?float $lng)
+    {
+        if ($lat !== null) {
+            if (! is_finite($lat) || $lat < -90.0 || $lat > 90.0) {
                 throw new \InvalidArgumentException(
                     sprintf(
                         'Invalid latitude %s: must be a finite number between -90 and 90.',
-                        esc_html((string) $this->lat)
+                        htmlspecialchars((string) $lat, ENT_QUOTES, 'UTF-8')
                     )
                 );
             }
         }
-        if ($this->lng !== null) {
-            if (! is_finite($this->lng) || $this->lng < -180.0 || $this->lng > 180.0) {
+        if ($lng !== null) {
+            if (! is_finite($lng) || $lng < -180.0 || $lng > 180.0) {
                 throw new \InvalidArgumentException(
                     sprintf(
                         'Invalid longitude %s: must be a finite number between -180 and 180.',
-                        esc_html((string) $this->lng)
+                        htmlspecialchars((string) $lng, ENT_QUOTES, 'UTF-8')
                     )
                 );
             }
         }
+        
+        $this->lat = $lat;
+        $this->lng = $lng;
+    }
+
+    public function getLat(): ?float
+    {
+        return $this->lat;
+    }
+
+    public function getLng(): ?float
+    {
+        return $this->lng;
     }
 
     public function isSet(): bool

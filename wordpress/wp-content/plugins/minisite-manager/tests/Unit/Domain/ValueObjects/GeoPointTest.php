@@ -13,8 +13,8 @@ final class GeoPointTest extends TestCase
     public function testConstructAndAccessors_IsSet(): void
     {
         $g = new GeoPoint(12.345, -98.765);
-        $this->assertSame(12.345, $g->lat);
-        $this->assertSame(-98.765, $g->lng);
+        $this->assertSame(12.345, $g->getLat());
+        $this->assertSame(-98.765, $g->getLng());
         $this->assertTrue($g->isSet());
     }
 

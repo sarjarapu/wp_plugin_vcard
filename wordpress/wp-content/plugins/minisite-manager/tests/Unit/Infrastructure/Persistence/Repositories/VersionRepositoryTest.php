@@ -871,8 +871,8 @@ final class VersionRepositoryTest extends TestCase
 
         $this->assertInstanceOf(Version::class, $result);
         $this->assertInstanceOf(GeoPoint::class, $result->geo);
-        $this->assertSame(45.7, $result->geo->lat);
-        $this->assertSame(120.1, $result->geo->lng);
+        $this->assertSame(45.7, $result->geo->getLat());
+        $this->assertSame(120.1, $result->geo->getLng());
     }
 
     public function testMapRowHandlesSlugPairCorrectly(): void
