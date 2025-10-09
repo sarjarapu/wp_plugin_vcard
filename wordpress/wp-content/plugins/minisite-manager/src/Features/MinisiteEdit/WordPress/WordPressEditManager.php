@@ -33,7 +33,7 @@ class WordPressEditManager
     /**
      * Get version repository instance
      */
-    private function getVersionRepository(): VersionRepository
+    public function getVersionRepository(): VersionRepository
     {
         if ($this->versionRepository === null) {
             $this->versionRepository = new VersionRepository(db::getWpdb());
@@ -119,9 +119,9 @@ class WordPressEditManager
      */
     public function getLoginRedirectUrl(): string
     {
-        $currentUrl = isset($_SERVER['REQUEST_URI']) ? 
+        $currentUrl = isset($_SERVER['REQUEST_URI']) ?
             sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
-        
+
         return $this->getHomeUrl('/account/login?redirect_to=' . urlencode($currentUrl));
     }
 

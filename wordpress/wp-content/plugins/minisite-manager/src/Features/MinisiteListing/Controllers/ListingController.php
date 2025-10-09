@@ -51,7 +51,7 @@ final class ListingController
                 return;
             }
             $result = $this->listMinisitesHandler->handle($command);
-            
+
             if (!$result['success']) {
                 $this->renderListPage($result['error'] ?? 'Failed to load minisites');
                 return;
@@ -68,7 +68,7 @@ final class ListingController
     private function renderListPage(?string $error = null, array $minisites = []): void
     {
         $currentUser = $this->wordPressManager->getCurrentUser();
-        
+
         $data = [
             'page_title' => 'My Minisites',
             'sites' => $minisites,  // Template expects 'sites', not 'minisites'

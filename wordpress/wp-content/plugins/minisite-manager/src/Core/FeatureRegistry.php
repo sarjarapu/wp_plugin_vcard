@@ -4,7 +4,7 @@ namespace Minisite\Core;
 
 /**
  * Feature Registry
- * 
+ *
  * SINGLE RESPONSIBILITY: Manage feature registration and initialization
  * - Maintains list of available features
  * - Handles feature initialization
@@ -23,7 +23,7 @@ final class FeatureRegistry
         // \Minisite\Features\Commerce\CommerceFeature::class,
         // \Minisite\Features\Subscription\SubscriptionFeature::class,
     ];
-    
+
     public static function initializeAll(): void
     {
         foreach (self::$features as $featureClass) {
@@ -32,14 +32,14 @@ final class FeatureRegistry
             }
         }
     }
-    
+
     public static function registerFeature(string $featureClass): void
     {
         if (!in_array($featureClass, self::$features)) {
             self::$features[] = $featureClass;
         }
     }
-    
+
     public static function getFeatures(): array
     {
         return self::$features;

@@ -78,11 +78,11 @@ final class WordPressListingManager
     public function listMinisitesByOwner(int $userId, int $limit = 50, int $offset = 0): array
     {
         $minisites = $this->minisiteRepository->listByOwner($userId, $limit, $offset);
-        
+
         $result = array_map(function ($minisite) {
             $route = $this->getHomeUrl('/b/' . rawurlencode($minisite->slugs->business) . '/' . rawurlencode($minisite->slugs->location));
             $statusChip = $minisite->status === 'published' ? 'Published' : 'Draft';
-            
+
             return [
                 'id' => $minisite->id,
                 'title' => $minisite->title ?: $minisite->name,
@@ -106,7 +106,7 @@ final class WordPressListingManager
                 'online' => 'Unknown',
             ];
         }, $minisites);
-        
+
         return $result;
     }
 }

@@ -14,7 +14,7 @@ final class GeoPoint
                 throw new \InvalidArgumentException(
                     sprintf(
                         'Invalid latitude %s: must be a finite number between -90 and 90.',
-                        htmlspecialchars((string) $lat, ENT_QUOTES, 'UTF-8')
+                        esc_html((string) $lat)
                     )
                 );
             }
@@ -24,12 +24,12 @@ final class GeoPoint
                 throw new \InvalidArgumentException(
                     sprintf(
                         'Invalid longitude %s: must be a finite number between -180 and 180.',
-                        htmlspecialchars((string) $lng, ENT_QUOTES, 'UTF-8')
+                        esc_html((string) $lng)
                     )
                 );
             }
         }
-        
+
         $this->lat = $lat;
         $this->lng = $lng;
     }

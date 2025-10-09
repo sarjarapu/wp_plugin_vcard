@@ -56,6 +56,62 @@ class EditService
     }
 
     /**
+     * Get minisite for preview
+     */
+    public function getMinisiteForPreview(string $siteId, ?string $versionId): object
+    {
+        // Get minisite and verify access
+        $minisite = $this->wordPressManager->findMinisiteById($siteId);
+        if (!$minisite) {
+            throw new \RuntimeException('Minisite not found');
+        }
+
+        $currentUser = $this->wordPressManager->getCurrentUser();
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
+            throw new \RuntimeException('Access denied');
+        }
+
+        // Handle version-specific preview
+        $versionRepo = $this->wordPressManager->getVersionRepository();
+        $siteJson = null;
+        $version = null;
+
+        if ($versionId === 'current' || !$versionId) {
+            // Show current published version (from profile.siteJson)
+            $siteJson = $minisite->siteJson;
+        } else {
+            // Show specific version
+            $version = $versionRepo->findById((int) $versionId);
+            if (!$version) {
+                throw new \RuntimeException('Version not found');
+            }
+            if ($version->minisiteId !== $siteId) {
+                throw new \RuntimeException('Version not found');
+            }
+            $siteJson = $version->siteJson;
+        }
+
+        // Update profile with version-specific data for rendering
+        $minisite->siteJson = $siteJson;
+
+        // If showing a specific version, also update the profile fields from version data
+        if ($version) {
+            // Use version data if available, otherwise fall back to existing minisite data
+            $minisite->name = $version->name ?? $minisite->name;
+            $minisite->city = $version->city ?? $minisite->city;
+            $minisite->title = $version->title ?? $minisite->title;
+            // Add other fields as needed
+        }
+
+        return (object) [
+            'minisite' => $minisite,
+            'version' => $version,
+            'siteJson' => $siteJson,
+            'versionId' => $versionId
+        ];
+    }
+
+    /**
      * Save draft version
      */
     public function saveDraft(string $siteId, array $formData): object
@@ -68,10 +124,12 @@ class EditService
             }
 
             // Verify nonce
-            if (!$this->wordPressManager->verifyNonce(
-                $this->wordPressManager->sanitizeTextField($formData['minisite_edit_nonce']),
-                'minisite_edit'
-            )) {
+            if (
+                !$this->wordPressManager->verifyNonce(
+                    $this->wordPressManager->sanitizeTextField($formData['minisite_edit_nonce']),
+                    'minisite_edit'
+                )
+            ) {
                 return (object) ['success' => false, 'errors' => ['Security check failed. Please try again.']];
             }
 
@@ -140,12 +198,10 @@ class EditService
                     'success' => true,
                     'redirectUrl' => $this->wordPressManager->getHomeUrl("/account/sites/{$siteId}/edit?draft_saved=1")
                 ];
-
             } catch (\Exception $e) {
                 $this->wordPressManager->rollbackTransaction();
                 throw $e;
             }
-
         } catch (\Exception $e) {
             return (object) [
                 'success' => false,
@@ -177,7 +233,7 @@ class EditService
     private function createProfileForForm(object $minisite, ?object $editingVersion): object
     {
         $profileForForm = clone $minisite;
-        
+
         if ($editingVersion) {
             $profileForForm->title = $editingVersion->title ?? $minisite->title;
             $profileForForm->name = $editingVersion->name ?? $minisite->name;
@@ -212,12 +268,12 @@ class EditService
     private function validateFormData(array $data): array
     {
         $errors = [];
-        
+
         // Add validation rules as needed
         if (empty($data['business_name'])) {
             $errors[] = 'Business name is required';
         }
-        
+
         if (empty($data['business_city'])) {
             $errors[] = 'Business city is required';
         }

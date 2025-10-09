@@ -50,7 +50,7 @@ class VersionController
 
         try {
             $versions = $this->listVersionsHandler->handle($command);
-            
+
             // Get minisite for rendering
             $minisite = $this->getMinisiteForRendering($command->siteId);
             if (!$minisite) {
@@ -86,7 +86,7 @@ class VersionController
 
         try {
             $version = $this->createDraftHandler->handle($command);
-            
+
             $this->responseHandler->sendJsonSuccess([
                 'id' => $version->id,
                 'version_number' => $version->versionNumber,
@@ -116,7 +116,7 @@ class VersionController
 
         try {
             $this->publishVersionHandler->handle($command);
-            
+
             $this->responseHandler->sendJsonSuccess([
                 'message' => 'Version published successfully',
                 'published_version_id' => $command->versionId,
@@ -144,7 +144,7 @@ class VersionController
 
         try {
             $version = $this->rollbackVersionHandler->handle($command);
-            
+
             $this->responseHandler->sendJsonSuccess([
                 'id' => $version->id,
                 'version_number' => $version->versionNumber,

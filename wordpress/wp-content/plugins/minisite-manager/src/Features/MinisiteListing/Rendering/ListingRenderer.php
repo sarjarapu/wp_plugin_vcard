@@ -50,11 +50,11 @@ final class ListingRenderer
         echo '<!doctype html><meta charset="utf-8">';
         echo '<title>' . esc_html($data['page_title'] ?? 'My Minisites') . '</title>';
         echo '<h1>' . esc_html($data['page_title'] ?? 'My Minisites') . '</h1>';
-        
+
         if (!empty($data['error'])) {
             echo '<p style="color: red;">Error: ' . esc_html($data['error']) . '</p>';
         }
-        
+
         if (!empty($data['sites'])) {
             echo '<ul>';
             foreach ($data['sites'] as $site) {

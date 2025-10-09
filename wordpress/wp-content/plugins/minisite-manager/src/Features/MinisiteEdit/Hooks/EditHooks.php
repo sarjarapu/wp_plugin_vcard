@@ -30,7 +30,7 @@ class EditHooks
     }
 
     /**
-     * Handle edit routes
+     * Handle edit and preview routes
      * This hooks into the existing minisite_account system
      */
     public function handleEditRoutes(): void
@@ -42,15 +42,15 @@ class EditHooks
 
         $action = $this->wordPressManager->getQueryVar('minisite_account_action');
 
-        // Only handle edit routes
-        if ($action !== 'edit') {
-            return;
+        // Handle edit and preview routes
+        if ($action === 'edit') {
+            // Route to edit controller
+            $this->editController->handleEdit();
+            exit;
+        } elseif ($action === 'preview') {
+            // Route to preview controller
+            $this->editController->handlePreview();
+            exit;
         }
-
-        // Route to edit controller
-        $this->editController->handleEdit();
-
-        // Exit to prevent the old system from handling this request
-        exit;
     }
 }

@@ -43,7 +43,7 @@ final class AdminMenuManager
     public function addMainMenu(): void
     {
         error_log('Minisite: Adding main menu with capability: ' . $this->getMainMenuCapability());
-        
+
         // Main menu page
         add_menu_page(
             self::MENU_TITLE,

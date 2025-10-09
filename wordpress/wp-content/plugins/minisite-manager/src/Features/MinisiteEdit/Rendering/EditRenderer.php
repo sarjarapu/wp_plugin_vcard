@@ -44,6 +44,30 @@ class EditRenderer
     }
 
     /**
+     * Render preview
+     */
+    public function renderPreview(object $previewData): void
+    {
+        if (!$this->timberRenderer) {
+            $this->renderFallbackPreview($previewData);
+            return;
+        }
+
+        // Set up Timber locations
+        $this->setupTimberLocations();
+
+        // Prepare template data for preview
+        $templateData = $this->preparePreviewTemplateData($previewData);
+
+        // Render the preview template using Timber directly
+        if (class_exists('Timber\\Timber')) {
+            \Timber\Timber::render('minisite-preview.twig', $templateData);
+        } else {
+            $this->renderFallbackPreview($previewData);
+        }
+    }
+
+    /**
      * Render error page
      */
     public function renderError(string $errorMessage): void
@@ -74,7 +98,7 @@ class EditRenderer
 
         $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
         $componentsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
-        
+
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
@@ -131,7 +155,7 @@ class EditRenderer
     private function renderFallbackEditForm(object $editData): void
     {
         $profile = $editData->profileForForm;
-        
+
         echo '<!DOCTYPE html>
 <html>
 <head>
@@ -149,45 +173,103 @@ class EditRenderer
 </head>
 <body>
     <h1>Edit Minisite</h1>';
-    
+
         if ($editData->errorMessage) {
-            echo '<div class="error">' . htmlspecialchars($editData->errorMessage, ENT_QUOTES, 'UTF-8') . '</div>';
+            echo '<div class="error">' . esc_html($editData->errorMessage) . '</div>';
         }
-        
+
         if ($editData->successMessage) {
-            echo '<div class="success">' . htmlspecialchars($editData->successMessage, ENT_QUOTES, 'UTF-8') . '</div>';
+            echo '<div class="success">' . esc_html($editData->successMessage) . '</div>';
         }
-        
+
         echo '<form method="POST">
-        <input type="hidden" name="minisite_edit_nonce" value="' . wp_create_nonce('minisite_edit') . '">
+        <input type="hidden" name="minisite_edit_nonce" value="' . esc_attr(wp_create_nonce('minisite_edit')) . '">
         
         <div class="form-group">
             <label for="business_name">Business Name:</label>
-            <input type="text" id="business_name" name="business_name" value="' . htmlspecialchars($profile->name ?? '', ENT_QUOTES, 'UTF-8') . '" required>
+            <input type="text" id="business_name" name="business_name" value="' . esc_attr($profile->name ?? '') . '" required>
         </div>
         
         <div class="form-group">
             <label for="business_city">City:</label>
-            <input type="text" id="business_city" name="business_city" value="' . htmlspecialchars($profile->city ?? '', ENT_QUOTES, 'UTF-8') . '" required>
+            <input type="text" id="business_city" name="business_city" value="' . esc_attr($profile->city ?? '') . '" required>
         </div>
         
         <div class="form-group">
             <label for="seo_title">SEO Title:</label>
-            <input type="text" id="seo_title" name="seo_title" value="' . htmlspecialchars($profile->title ?? '', ENT_QUOTES, 'UTF-8') . '">
+            <input type="text" id="seo_title" name="seo_title" value="' . esc_attr($profile->title ?? '') . '">
         </div>
         
         <div class="form-group">
             <label for="version_label">Version Label:</label>
-            <input type="text" id="version_label" name="version_label" value="' . htmlspecialchars($editData->editingVersion?->label ?? '', ENT_QUOTES, 'UTF-8') . '">
+            <input type="text" id="version_label" name="version_label" value="' . esc_attr($editData->editingVersion?->label ?? '') . '">
         </div>
         
         <div class="form-group">
             <label for="version_comment">Version Comment:</label>
-            <textarea id="version_comment" name="version_comment">' . htmlspecialchars($editData->editingVersion?->comment ?? '', ENT_QUOTES, 'UTF-8') . '</textarea>
+            <textarea id="version_comment" name="version_comment">' . esc_textarea($editData->editingVersion?->comment ?? '') . '</textarea>
         </div>
         
         <button type="submit">Save Draft</button>
     </form>
+</body>
+</html>';
+    }
+
+    /**
+     * Prepare template data for preview
+     */
+    private function preparePreviewTemplateData(object $previewData): array
+    {
+        $minisite = $previewData->minisite;
+        $version = $previewData->version;
+        
+        return [
+            'minisite' => $minisite,
+            'version' => $version,
+            'siteJson' => $previewData->siteJson,
+            'versionId' => $previewData->versionId,
+            'isPreview' => true,
+            'previewTitle' => $version ? "Preview: {$version->label}" : 'Preview: Current Version'
+        ];
+    }
+
+    /**
+     * Render fallback preview
+     */
+    private function renderFallbackPreview(object $previewData): void
+    {
+        $minisite = $previewData->minisite;
+        $version = $previewData->version;
+        $versionLabel = $version ? $version->label : 'Current Version';
+        
+        echo '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Preview: ' . esc_html($minisite->name ?? 'Minisite') . '</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .preview-header { background: #f0f0f0; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
+        .preview-content { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+        .version-info { color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+    <div class="preview-header">
+        <h1>Preview: ' . esc_html($minisite->name ?? 'Minisite') . '</h1>
+        <div class="version-info">Version: ' . esc_html($versionLabel) . '</div>
+    </div>
+    
+    <div class="preview-content">
+        <h2>Minisite Content</h2>
+        <p><strong>Name:</strong> ' . esc_html($minisite->name ?? '') . '</p>
+        <p><strong>City:</strong> ' . esc_html($minisite->city ?? '') . '</p>
+        <p><strong>Title:</strong> ' . esc_html($minisite->title ?? '') . '</p>
+        
+        <h3>Site JSON Data</h3>
+        <pre>' . esc_html(json_encode($previewData->siteJson, JSON_PRETTY_PRINT)) . '</pre>
+    </div>
 </body>
 </html>';
     }
@@ -209,7 +291,7 @@ class EditRenderer
 </head>
 <body>
     <h1>Error</h1>
-    <div class="error">' . htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8') . '</div>
+    <div class="error">' . esc_html($errorMessage) . '</div>
 </body>
 </html>';
     }

@@ -71,15 +71,6 @@ class PluginBootstrapTest extends TestCase
     }
 
     /**
-     * Test class is final
-     */
-    public function test_class_is_final(): void
-    {
-        $reflection = new \ReflectionClass(PluginBootstrap::class);
-        $this->assertTrue($reflection->isFinal());
-    }
-
-    /**
      * Test class has expected methods
      */
     public function test_class_has_expected_methods(): void

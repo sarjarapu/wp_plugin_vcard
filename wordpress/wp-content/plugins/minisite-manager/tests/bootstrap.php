@@ -1,5 +1,10 @@
 <?php
 
+// Enable BypassFinals FIRST before any other code
+if (class_exists('DG\BypassFinals')) {
+    DG\BypassFinals::enable();
+}
+
 /**
  * PHPUnit Bootstrap File
  *
@@ -9,12 +14,6 @@
  * Note: WordPress function mocks are now handled by individual test classes
  * for better isolation and maintainability.
  */
-
-// Enable BypassFinals to allow mocking of final classes
-// Temporarily disabled for Core class tests
-// if (class_exists('DG\BypassFinals')) {
-//     DG\BypassFinals::enable();
-// }
 
 // Define WordPress constants needed for testing
 if (!defined('ABSPATH')) {

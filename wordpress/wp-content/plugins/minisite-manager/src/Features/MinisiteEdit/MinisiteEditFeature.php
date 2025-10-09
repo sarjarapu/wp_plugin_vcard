@@ -6,7 +6,7 @@ use Minisite\Features\MinisiteEdit\Hooks\EditHooksFactory;
 
 /**
  * MinisiteEdit Feature Bootstrap
- * 
+ *
  * SINGLE RESPONSIBILITY: Bootstrap the MinisiteEdit feature
  * - Initializes the minisite editing system
  * - Registers all editing hooks
@@ -21,7 +21,7 @@ final class MinisiteEditFeature
     {
         $editHooks = EditHooksFactory::create();
         $editHooks->register();
-        
+
         // Register template_redirect handler with priority 5 to intercept before old system
         add_action('template_redirect', [$editHooks, 'handleEditRoutes'], 5);
     }

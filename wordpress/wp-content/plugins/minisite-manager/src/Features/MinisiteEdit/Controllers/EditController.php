@@ -41,7 +41,7 @@ class EditController
         $versionId = $this->wordPressManager->getQueryVar('minisite_version_id');
 
         // Handle form submission
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $this->handleFormSubmission($siteId);
             return;
         }
@@ -55,13 +55,48 @@ class EditController
      */
     private function handleFormSubmission(string $siteId): void
     {
+        // Nonce verification is handled in EditService::saveDraft()
         $result = $this->editService->saveDraft($siteId, $_POST);
-        
+
         if ($result->success) {
             $this->wordPressManager->redirect($result->redirectUrl);
         } else {
             // Display form with errors
             $this->displayEditForm($siteId, null, $result->errors ?? []);
+        }
+    }
+
+    /**
+     * Handle preview request
+     */
+    public function handlePreview(): void
+    {
+        // Check authentication
+        if (!$this->wordPressManager->isUserLoggedIn()) {
+            $this->wordPressManager->redirect($this->wordPressManager->getLoginRedirectUrl());
+        }
+
+        $siteId = $this->wordPressManager->getQueryVar('minisite_site_id');
+        if (!$siteId) {
+            $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
+        }
+
+        $versionId = $this->wordPressManager->getQueryVar('minisite_version_id');
+
+        try {
+            // Get minisite for preview (similar to editing but for display)
+            $previewData = $this->editService->getMinisiteForPreview($siteId, $versionId);
+            $this->editRenderer->renderPreview($previewData);
+        } catch (\RuntimeException $e) {
+            // Handle access denied or not found
+            if (strpos($e->getMessage(), 'Access denied') !== false) {
+                $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
+            } elseif (strpos($e->getMessage(), 'not found') !== false) {
+                $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
+            } else {
+                // Display error page
+                $this->editRenderer->renderError($e->getMessage());
+            }
         }
     }
 
@@ -73,7 +108,7 @@ class EditController
         try {
             $editData = $this->editService->getMinisiteForEditing($siteId, $versionId);
             $editData->errorMessage = !empty($errors) ? implode(', ', $errors) : '';
-            
+
             $this->editRenderer->renderEditForm($editData);
         } catch (\RuntimeException $e) {
             // Handle access denied or not found

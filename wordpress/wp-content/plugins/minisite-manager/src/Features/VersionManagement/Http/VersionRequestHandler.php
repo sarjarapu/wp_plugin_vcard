@@ -24,13 +24,13 @@ class VersionRequestHandler
     public function parseListVersionsRequest(): ?ListVersionsCommand
     {
         $siteId = $this->wordPressManager->getQueryVar('minisite_site_id');
-        
+
         if (!$siteId) {
             return null;
         }
 
         $currentUser = $this->wordPressManager->getCurrentUser();
-        
+
         if (!$currentUser || !$currentUser->ID) {
             return null;
         }

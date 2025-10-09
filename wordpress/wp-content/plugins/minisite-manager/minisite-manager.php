@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Minisite Manager
  * Description: Internal plugin powering business mini-sites with revisions, templates,

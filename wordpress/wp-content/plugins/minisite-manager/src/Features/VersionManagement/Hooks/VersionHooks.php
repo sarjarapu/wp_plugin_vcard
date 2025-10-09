@@ -33,8 +33,10 @@ class VersionHooks
     public function handleVersionHistoryPage(): void
     {
         // Check if this is a version management route
-        if ((int) get_query_var('minisite_account') === 1 && 
-            get_query_var('minisite_account_action') === 'versions') {
+        if (
+            (int) get_query_var('minisite_account') === 1 &&
+            get_query_var('minisite_account_action') === 'versions'
+        ) {
             $this->versionController->handleListVersions();
             exit;
         }

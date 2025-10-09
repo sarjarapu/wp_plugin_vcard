@@ -28,7 +28,7 @@ final class ListingResponseHandler
         if ($redirectTo) {
             $loginUrl .= '?redirect_to=' . urlencode($redirectTo);
         }
-        
+
         $this->wordPressManager->redirect($loginUrl);
         exit;
     }

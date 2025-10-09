@@ -57,7 +57,7 @@ final class ListingHooks
         // Check if this is a listing route
         if ((int) get_query_var('minisite_account') === 1) {
             $action = get_query_var('minisite_account_action');
-            
+
             switch ($action) {
                 case 'sites':
                     $this->listingController->handleList();

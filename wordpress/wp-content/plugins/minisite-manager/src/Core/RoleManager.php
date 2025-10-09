@@ -4,7 +4,7 @@ namespace Minisite\Core;
 
 /**
  * Role Manager
- * 
+ *
  * SINGLE RESPONSIBILITY: Manage WordPress roles and capabilities
  * - Defines minisite-specific roles and capabilities
  * - Handles role registration and updates
@@ -16,24 +16,24 @@ final class RoleManager
     {
         add_action('init', [self::class, 'syncRolesAndCapabilities'], 20);
     }
-    
+
     public static function syncRolesAndCapabilities(): void
     {
         // Define capabilities
         $capabilities = self::getCapabilities();
-        
+
         // Define roles
         $roles = self::getRoles();
-        
+
         // Register roles
         foreach ($roles as $roleSlug => $roleData) {
             self::addOrUpdateRole($roleSlug, $roleData['name'], $roleData['capabilities']);
         }
-        
+
         // Ensure WordPress Administrator has all minisite capabilities
         self::grantAdminCapabilities($capabilities);
     }
-    
+
     private static function getCapabilities(): array
     {
         return [
@@ -58,7 +58,7 @@ final class RoleManager
             'minisite_manage_plugin',
         ];
     }
-    
+
     private static function getRoles(): array
     {
         return [
@@ -147,7 +147,7 @@ final class RoleManager
             ],
         ];
     }
-    
+
     private static function addOrUpdateRole(string $slug, string $name, array $caps): void
     {
         $role = get_role($slug);
@@ -163,7 +163,7 @@ final class RoleManager
             }
         }
     }
-    
+
     private static function grantAdminCapabilities(array $capabilities): void
     {
         if ($wpAdmin = get_role('administrator')) {

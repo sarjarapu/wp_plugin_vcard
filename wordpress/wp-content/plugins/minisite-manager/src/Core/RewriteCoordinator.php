@@ -4,7 +4,7 @@ namespace Minisite\Core;
 
 /**
  * Rewrite Coordinator
- * 
+ *
  * SINGLE RESPONSIBILITY: Coordinate WordPress rewrite system lifecycle
  * - Handles rewrite system initialization
  * - Manages query variables registration
@@ -17,14 +17,14 @@ final class RewriteCoordinator
         // Register rewrite rules immediately
         self::registerRewriteRules();
         add_filter('query_vars', [self::class, 'addQueryVars']);
-        
+
         // One-time flush after activation
         if (get_option('minisite_flush_rewrites')) {
             flush_rewrite_rules();
             delete_option('minisite_flush_rewrites');
         }
     }
-    
+
     public static function registerRewriteRules(): void
     {
         if (class_exists(\Minisite\Application\Http\RewriteRegistrar::class)) {
@@ -32,7 +32,7 @@ final class RewriteCoordinator
             $rewriteRegistrar->register();
         }
     }
-    
+
     public static function addQueryVars(array $vars): array
     {
         $vars[] = 'minisite';

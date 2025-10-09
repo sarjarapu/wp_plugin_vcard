@@ -4,7 +4,7 @@ namespace Minisite\Core;
 
 /**
  * Activation Handler
- * 
+ *
  * SINGLE RESPONSIBILITY: Handle plugin activation
  * - Database migrations
  * - Role and capability setup
@@ -16,14 +16,14 @@ final class ActivationHandler
     {
         // Set flag to flush rewrite rules after init
         update_option('minisite_flush_rewrites', 1, false);
-        
+
         // Run database migrations
         self::runMigrations();
-        
+
         // Sync roles and capabilities
         RoleManager::syncRolesAndCapabilities();
     }
-    
+
     private static function runMigrations(): void
     {
         if (class_exists(\Minisite\Infrastructure\Versioning\VersioningController::class)) {
