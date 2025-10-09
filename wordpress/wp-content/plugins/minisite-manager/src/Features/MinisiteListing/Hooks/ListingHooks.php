@@ -25,8 +25,7 @@ final class ListingHooks
     public function register(): void
     {
         add_action('init', [$this, 'addRewriteRules']);
-        // Use priority 5 to run before the main plugin's template_redirect (which runs at priority 10)
-        add_action('template_redirect', [$this, 'handleListingRoutes'], 5);
+        // Note: template_redirect is registered by MinisiteListingFeature
     }
 
     /**

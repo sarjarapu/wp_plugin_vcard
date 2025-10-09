@@ -17,16 +17,10 @@ class VersionManagementFeature
      */
     public static function initialize(): void
     {
-        // Register WordPress hooks
-        add_action('init', [self::class, 'registerHooks'], 10);
-    }
-
-    /**
-     * Register WordPress hooks for the VersionManagement feature
-     */
-    public static function registerHooks(): void
-    {
         $hooks = VersionHooksFactory::create();
         $hooks->register();
+        
+        // Register template_redirect handler immediately
+        add_action('template_redirect', [$hooks, 'handleVersionHistoryPage'], 5);
     }
 }

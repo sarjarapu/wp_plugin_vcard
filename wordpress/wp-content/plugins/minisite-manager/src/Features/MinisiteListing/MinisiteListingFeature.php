@@ -21,5 +21,8 @@ final class MinisiteListingFeature
     {
         $listingHooks = ListingHooksFactory::create();
         $listingHooks->register();
+        
+        // Register template_redirect handler immediately
+        add_action('template_redirect', [$listingHooks, 'handleListingRoutes'], 5);
     }
 }

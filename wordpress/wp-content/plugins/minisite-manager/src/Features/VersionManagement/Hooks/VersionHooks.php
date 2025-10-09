@@ -24,8 +24,7 @@ class VersionHooks
         add_action('wp_ajax_minisite_publish_version', [$this, 'handlePublishVersion']);
         add_action('wp_ajax_minisite_rollback_version', [$this, 'handleRollbackVersion']);
 
-        // Register template redirect for version history page
-        add_action('template_redirect', [$this, 'handleVersionHistoryPage']);
+        // Note: template_redirect is registered by VersionManagementFeature
     }
 
     /**

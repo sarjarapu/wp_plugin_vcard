@@ -21,5 +21,8 @@ final class AuthenticationFeature
     {
         $authHooks = AuthHooksFactory::create();
         $authHooks->register();
+        
+        // Register template_redirect handler immediately
+        add_action('template_redirect', [$authHooks, 'handleAuthRoutes'], 5);
     }
 }
