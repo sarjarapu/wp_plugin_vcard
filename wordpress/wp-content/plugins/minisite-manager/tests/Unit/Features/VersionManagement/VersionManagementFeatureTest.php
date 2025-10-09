@@ -15,10 +15,14 @@ class VersionManagementFeatureTest extends TestCase
         $this->assertTrue($reflection->isStatic());
     }
 
-    public function test_register_hooks_is_static_method(): void
+    public function test_initialize_method_exists(): void
     {
-        $reflection = new \ReflectionMethod(VersionManagementFeature::class, 'registerHooks');
-        $this->assertTrue($reflection->isStatic());
+        $reflection = new \ReflectionClass(VersionManagementFeature::class);
+        $this->assertTrue($reflection->hasMethod('initialize'));
+        
+        $method = $reflection->getMethod('initialize');
+        $this->assertTrue($method->isStatic());
+        $this->assertTrue($method->isPublic());
     }
 
     public function test_constructor_has_no_parameters(): void
