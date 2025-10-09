@@ -14,7 +14,8 @@ final class RewriteCoordinator
 {
     public static function initialize(): void
     {
-        add_action('init', [self::class, 'registerRewriteRules'], 5);
+        // Register rewrite rules immediately
+        self::registerRewriteRules();
         add_filter('query_vars', [self::class, 'addQueryVars']);
         
         // One-time flush after activation
