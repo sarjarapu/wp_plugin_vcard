@@ -228,7 +228,7 @@ class EditRendererTest extends TestCase
     private function setupWordPressMocks(): void
     {
         $functions = [
-            'wp_create_nonce', 'esc_html'
+            'wp_create_nonce', 'esc_html', 'esc_attr', 'esc_textarea'
         ];
 
         foreach ($functions as $function) {
@@ -259,7 +259,7 @@ class EditRendererTest extends TestCase
     private function clearWordPressMocks(): void
     {
         $functions = [
-            'wp_create_nonce', 'esc_html'
+            'wp_create_nonce', 'esc_html', 'esc_attr', 'esc_textarea'
         ];
 
         foreach ($functions as $func) {
