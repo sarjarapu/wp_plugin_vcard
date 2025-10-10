@@ -35,22 +35,34 @@ class EditHooks
      */
     public function handleEditRoutes(): void
     {
+        // TEMPORARY: Always output something to test if hook is called
+        echo '<!-- EditHooks::handleEditRoutes() called -->';
+        
         // Check if this is an account route handled by our new system
-        if ((int) $this->wordPressManager->getQueryVar('minisite_account') !== 1) {
+        $minisiteAccount = (int) $this->wordPressManager->getQueryVar('minisite_account');
+        echo '<!-- minisite_account = ' . $minisiteAccount . ' -->';
+        
+        if ($minisiteAccount !== 1) {
+            echo '<!-- Not a minisite_account route, returning -->';
             return;
         }
 
         $action = $this->wordPressManager->getQueryVar('minisite_account_action');
+        echo '<!-- action = ' . $action . ' -->';
 
         // Handle edit and preview routes
         if ($action === 'edit') {
+            echo '<!-- Routing to edit controller -->';
             // Route to edit controller
             $this->editController->handleEdit();
             exit;
         } elseif ($action === 'preview') {
+            echo '<!-- Routing to preview controller -->';
             // Route to preview controller
             $this->editController->handlePreview();
             exit;
+        } else {
+            echo '<!-- Unknown action: ' . $action . ' -->';
         }
     }
 }

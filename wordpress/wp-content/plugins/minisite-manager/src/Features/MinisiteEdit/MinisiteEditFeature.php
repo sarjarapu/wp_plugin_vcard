@@ -19,10 +19,14 @@ final class MinisiteEditFeature
      */
     public static function initialize(): void
     {
+        // Debug: Log initialization
+        error_log('MinisiteEditFeature initialized');
+        
         $editHooks = EditHooksFactory::create();
         $editHooks->register();
 
-        // Register template_redirect handler with priority 5 to intercept before old system
-        add_action('template_redirect', [$editHooks, 'handleEditRoutes'], 5);
+        // Register template_redirect handler with priority 3 to run before VersionManagementFeature (priority 5)
+        add_action('template_redirect', [$editHooks, 'handleEditRoutes'], 3);
+        error_log('MinisiteEditFeature: template_redirect hook registered with priority 3');
     }
 }

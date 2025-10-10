@@ -48,6 +48,92 @@ class EditRenderer
      */
     public function renderPreview(object $previewData): void
     {
+        // TEMPORARY: Show database data in HTML format
+        $currentDateTime = date('Y-m-d H:i:s');
+        $minisite = $previewData->minisite;
+        $version = $previewData->version;
+        $siteJson = $previewData->siteJson;
+        
+        echo '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Minisite Preview - Database Data</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 40px; 
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { 
+            color: #333; 
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+        .info {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .data-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #007cba;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        pre {
+            background: #f1f1f1;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>' . esc_html($currentDateTime) . '</h1>
+        <div class="info">
+            <p class="success">✅ Preview route is working with database data!</p>
+            <p><strong>Current Date & Time:</strong> ' . esc_html($currentDateTime) . '</p>
+        </div>
+        
+        <div class="data-section">
+            <h2>Minisite Data from Database:</h2>
+            <pre>' . esc_html(print_r($minisite, true)) . '</pre>
+        </div>
+        
+        <div class="data-section">
+            <h2>Version Data from Database:</h2>
+            <pre>' . esc_html(print_r($version, true)) . '</pre>
+        </div>
+        
+        <div class="data-section">
+            <h2>Site JSON Data:</h2>
+            <pre>' . esc_html($siteJson) . '</pre>
+        </div>
+        
+        <p>This shows the actual data fetched from the database for minisite ID: ' . esc_html($minisite->id ?? 'N/A') . '</p>
+    </div>
+</body>
+</html>';
+        return;
+        
         if (!$this->timberRenderer) {
             $this->renderFallbackPreview($previewData);
             return;
@@ -295,4 +381,5 @@ class EditRenderer
 </body>
 </html>';
     }
+
 }
