@@ -66,6 +66,7 @@ class EditService
             throw new \RuntimeException('Minisite not found');
         }
 
+        // Check access permissions
         $currentUser = $this->wordPressManager->getCurrentUser();
         if ($minisite->createdBy !== (int) $currentUser->ID) {
             throw new \RuntimeException('Access denied');

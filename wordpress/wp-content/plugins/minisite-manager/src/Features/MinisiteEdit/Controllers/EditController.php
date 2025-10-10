@@ -87,14 +87,13 @@ class EditController
             // Get minisite for preview (similar to editing but for display)
             $previewData = $this->editService->getMinisiteForPreview($siteId, $versionId);
             $this->editRenderer->renderPreview($previewData);
-        } catch (\RuntimeException $e) {
+        } catch (\Exception $e) {
             // Handle access denied or not found
             if (strpos($e->getMessage(), 'Access denied') !== false) {
                 $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
             } elseif (strpos($e->getMessage(), 'not found') !== false) {
                 $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
             } else {
-                // Display error page
                 $this->editRenderer->renderError($e->getMessage());
             }
         }

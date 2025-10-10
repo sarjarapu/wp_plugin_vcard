@@ -15,6 +15,11 @@ use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
  */
 class EditHooks
 {
+    /**
+     * Flag value set by rewrite rules to indicate account management routes
+     */
+    private const ACCOUNT_ROUTE_FLAG = '1';
+
     public function __construct(
         private EditController $editController,
         private WordPressEditManager $wordPressManager
@@ -35,20 +40,20 @@ class EditHooks
      */
     public function handleEditRoutes(): void
     {
-        // Check if this is an account route handled by our new system
-        if ((int) $this->wordPressManager->getQueryVar('minisite_account') !== 1) {
-            return;
+        // Only handle account management routes (edit, preview, versions, etc.)
+        // The rewrite rules set minisite_account=1 for account routes
+        $isAccountRoute = $this->wordPressManager->getQueryVar('minisite_account') === self::ACCOUNT_ROUTE_FLAG;
+        if (!$isAccountRoute) {
+            return; // Not an account route, let other handlers process it
         }
 
         $action = $this->wordPressManager->getQueryVar('minisite_account_action');
 
         // Handle edit and preview routes
         if ($action === 'edit') {
-            // Route to edit controller
             $this->editController->handleEdit();
             exit;
         } elseif ($action === 'preview') {
-            // Route to preview controller
             $this->editController->handlePreview();
             exit;
         }

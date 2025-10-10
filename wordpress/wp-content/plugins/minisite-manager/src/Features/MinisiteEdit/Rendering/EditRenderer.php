@@ -58,10 +58,15 @@ class EditRenderer
 
         // Prepare template data for preview
         $templateData = $this->preparePreviewTemplateData($previewData);
-
+        
         // Render the preview template using Timber directly
         if (class_exists('Timber\\Timber')) {
-            \Timber\Timber::render('minisite-preview.twig', $templateData);
+            try {
+                \Timber\Timber::render('v2025/minisite.twig', $templateData);
+            } catch (\Exception $e) {
+                error_log('Template rendering error: ' . $e->getMessage());
+                $this->renderFallbackPreview($previewData);
+            }
         } else {
             $this->renderFallbackPreview($previewData);
         }
@@ -96,6 +101,7 @@ class EditRenderer
             return;
         }
 
+        $timberBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber';
         $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
         $componentsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/components';
 
@@ -103,7 +109,7 @@ class EditRenderer
             array_unique(
                 array_merge(
                     \Timber\Timber::$locations ?? [],
-                    [$viewsBase, $componentsBase]
+                    [$timberBase, $viewsBase, $componentsBase]
                 )
             )
         );
@@ -224,10 +230,12 @@ class EditRenderer
         $minisite = $previewData->minisite;
         $version = $previewData->version;
         
+        // Use the same data structure as MinisiteViewer
         return [
             'minisite' => $minisite,
+            'reviews' => [], // Empty reviews array for preview
+            // Additional preview-specific data
             'version' => $version,
-            'siteJson' => $previewData->siteJson,
             'versionId' => $previewData->versionId,
             'isPreview' => true,
             'previewTitle' => $version ? "Preview: {$version->label}" : 'Preview: Current Version'
@@ -295,4 +303,5 @@ class EditRenderer
 </body>
 </html>';
     }
+
 }
