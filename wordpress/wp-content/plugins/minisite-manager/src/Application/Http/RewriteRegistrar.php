@@ -57,9 +57,8 @@ final class RewriteRegistrar
             'index.php?minisite_account=1&minisite_account_action=edit&minisite_site_id=$matches[1]',
             'top'
         );
-        // TEMPORARY: More permissive rewrite rule for testing
         add_rewrite_rule(
-            '^account/sites/([^/]+)/preview/([^/]+)/?$',
+            '^account/sites/([a-f0-9]{24,32})/preview/([0-9]+|current)/?$',
             'index.php?minisite_account=1&minisite_account_action=preview&minisite_site_id=$matches[1]' .
             '&minisite_version_id=$matches[2]',
             'top'

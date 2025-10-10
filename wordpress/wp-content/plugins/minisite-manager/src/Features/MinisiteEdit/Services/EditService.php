@@ -60,23 +60,17 @@ class EditService
      */
     public function getMinisiteForPreview(string $siteId, ?string $versionId): object
     {
-        // TEMPORARY: Debug output to show what's being fetched from DB
-        error_log('EditService::getMinisiteForPreview called with siteId: ' . $siteId . ', versionId: ' . $versionId);
-        
         // Get minisite and verify access
         $minisite = $this->wordPressManager->findMinisiteById($siteId);
-        error_log('Minisite found: ' . ($minisite ? 'yes' : 'no'));
-        
         if (!$minisite) {
-            error_log('Throwing Minisite not found exception');
             throw new \RuntimeException('Minisite not found');
         }
 
-        // TEMPORARY: Disable access check for testing
-        // $currentUser = $this->wordPressManager->getCurrentUser();
-        // if ($minisite->createdBy !== (int) $currentUser->ID) {
-        //     throw new \RuntimeException('Access denied');
-        // }
+        // Check access permissions
+        $currentUser = $this->wordPressManager->getCurrentUser();
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
+            throw new \RuntimeException('Access denied');
+        }
 
         // Handle version-specific preview
         $versionRepo = $this->wordPressManager->getVersionRepository();

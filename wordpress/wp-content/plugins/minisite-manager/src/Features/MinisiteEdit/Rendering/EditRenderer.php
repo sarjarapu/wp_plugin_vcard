@@ -48,11 +48,7 @@ class EditRenderer
      */
     public function renderPreview(object $previewData): void
     {
-        // TEMPORARY: Debug renderer state
-        echo '<!-- Timber renderer available: ' . ($this->timberRenderer ? 'yes' : 'no') . ' -->';
-        
         if (!$this->timberRenderer) {
-            echo '<!-- Using fallback preview -->';
             $this->renderFallbackPreview($previewData);
             return;
         }
@@ -65,20 +61,13 @@ class EditRenderer
         
         // Render the preview template using Timber directly
         if (class_exists('Timber\\Timber')) {
-            // TEMPORARY: Debug template data
-            error_log('Template data: ' . print_r($templateData, true));
-            echo '<!-- About to render v2025/minisite.twig (same as MinisiteViewer) -->';
-            
             try {
                 \Timber\Timber::render('v2025/minisite.twig', $templateData);
-                echo '<!-- Successfully rendered v2025/minisite.twig -->';
             } catch (\Exception $e) {
-                echo '<!-- Error rendering template: ' . $e->getMessage() . ' -->';
                 error_log('Template rendering error: ' . $e->getMessage());
                 $this->renderFallbackPreview($previewData);
             }
         } else {
-            error_log('Timber not available, using fallback');
             $this->renderFallbackPreview($previewData);
         }
     }

@@ -71,48 +71,29 @@ class EditController
      */
     public function handlePreview(): void
     {
-        // TEMPORARY: Output debug info
-        echo '<!-- EditController::handlePreview() called -->';
-        
-        // TEMPORARY: Disable authentication for testing
         // Check authentication
-        // if (!$this->wordPressManager->isUserLoggedIn()) {
-        //     $this->wordPressManager->redirect($this->wordPressManager->getLoginRedirectUrl());
-        // }
+        if (!$this->wordPressManager->isUserLoggedIn()) {
+            $this->wordPressManager->redirect($this->wordPressManager->getLoginRedirectUrl());
+        }
 
         $siteId = $this->wordPressManager->getQueryVar('minisite_site_id');
-        echo '<!-- siteId = ' . $siteId . ' -->';
-        
         if (!$siteId) {
-            echo '<!-- No siteId, redirecting -->';
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
         }
-        
-        echo '<!-- SiteId check passed, getting versionId -->';
 
         $versionId = $this->wordPressManager->getQueryVar('minisite_version_id');
-        echo '<!-- versionId = ' . $versionId . ' -->';
 
         try {
-            echo '<!-- Calling getMinisiteForPreview -->';
             // Get minisite for preview (similar to editing but for display)
             $previewData = $this->editService->getMinisiteForPreview($siteId, $versionId);
-            echo '<!-- Got preview data, calling renderPreview -->';
             $this->editRenderer->renderPreview($previewData);
-            echo '<!-- renderPreview completed -->';
         } catch (\Exception $e) {
-            echo '<!-- Exception caught: ' . $e->getMessage() . ' -->';
-            echo '<!-- Exception type: ' . get_class($e) . ' -->';
             // Handle access denied or not found
             if (strpos($e->getMessage(), 'Access denied') !== false) {
-                echo '<!-- Access denied, redirecting -->';
                 $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
             } elseif (strpos($e->getMessage(), 'not found') !== false) {
-                echo '<!-- Not found, redirecting -->';
                 $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
             } else {
-                echo '<!-- Other error, rendering error page -->';
-                // Display error page
                 $this->editRenderer->renderError($e->getMessage());
             }
         }
