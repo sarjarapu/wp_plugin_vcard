@@ -132,8 +132,7 @@ class VersionService
         string $minisiteId,
         int $versionId,
         \Minisite\Domain\Entities\Version $version
-    ): void
-    {
+    ): void {
         global $wpdb;
 
         db::query('START TRANSACTION');

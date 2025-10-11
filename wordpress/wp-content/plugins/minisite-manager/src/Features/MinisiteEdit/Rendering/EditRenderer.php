@@ -187,7 +187,8 @@ class EditRenderer
         
         <div class="form-group">
             <label for="business_city">City:</label>
-            <input type="text" id="business_city" name="business_city" value="' . esc_attr($profile->city ?? '') . '" required>
+            <input type="text" id="business_city" name="business_city" 
+                value="' . esc_attr($profile->city ?? '') . '" required>
         </div>
         
         <div class="form-group">

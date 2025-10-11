@@ -304,9 +304,9 @@ class EditService
         // Update contact coordinates if provided
         if (isset($formData['contact_lat']) || isset($formData['contact_lng'])) {
             $siteJson['contact'] = array_merge($siteJson['contact'] ?? [], [
-                'lat' => !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : 
+                'lat' => !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] :
                     ($siteJson['contact']['lat'] ?? null),
-                'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : 
+                'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] :
                     ($siteJson['contact']['lng'] ?? null),
             ]);
         }
@@ -328,7 +328,12 @@ class EditService
         if (isset($formData['seo_title']) || isset($formData['search_terms'])) {
             $siteJson['seo'] = array_merge($siteJson['seo'] ?? [], [
                 'title' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_title', 'title'),
-                'search_terms' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'search_terms', 'search_terms'),
+                'search_terms' => $this->getFormValue(
+                    $formData,
+                    $siteJson['seo'] ?? [],
+                    'search_terms',
+                    'search_terms'
+                ),
             ]);
         }
 
@@ -357,8 +362,14 @@ class EditService
     /**
      * Update main table if needed
      */
-    private function updateMainTableIfNeeded(string $siteId, array $formData, object $minisite, object $currentUser, ?float $lat, ?float $lng): void
-    {
+    private function updateMainTableIfNeeded(
+        string $siteId,
+        array $formData,
+        object $minisite,
+        object $currentUser,
+        ?float $lat,
+        ?float $lng
+    ): void {
         $hasBeenPublished = $this->wordPressManager->hasBeenPublished($siteId);
 
         if (!$hasBeenPublished) {
@@ -367,12 +378,22 @@ class EditService
                 'name' => $this->getFormValueFromObject($formData, $minisite, 'business_name', 'name'),
                 'city' => $this->getFormValueFromObject($formData, $minisite, 'business_city', 'city'),
                 'region' => $this->getFormValueFromObject($formData, $minisite, 'business_region', 'region'),
-                'country_code' => $this->getFormValueFromObject($formData, $minisite, 'business_country', 'countryCode'),
+                'country_code' => $this->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_country',
+                    'countryCode'
+                ),
                 'postal_code' => $this->getFormValueFromObject($formData, $minisite, 'business_postal', 'postalCode'),
                 'site_template' => $this->getFormValueFromObject($formData, $minisite, 'site_template', 'siteTemplate'),
                 'palette' => $this->getFormValueFromObject($formData, $minisite, 'brand_palette', 'palette'),
                 'industry' => $this->getFormValueFromObject($formData, $minisite, 'brand_industry', 'industry'),
-                'default_locale' => $this->getFormValueFromObject($formData, $minisite, 'default_locale', 'defaultLocale'),
+                'default_locale' => $this->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'default_locale',
+                    'defaultLocale'
+                ),
                 'search_terms' => $this->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms'),
             ];
 
