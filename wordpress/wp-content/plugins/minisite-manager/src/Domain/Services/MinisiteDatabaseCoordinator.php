@@ -63,9 +63,94 @@ class MinisiteDatabaseCoordinator
      */
     private function createNewDraft(string $minisiteId, array $formData, ?object $currentUser): object
     {
-        // This will be implemented when we create the NewMinisite feature
-        // For now, throw an exception to indicate it's not implemented yet
-        throw new \RuntimeException('New draft creation not implemented yet - will be handled by NewMinisite feature');
+        if (!$currentUser) {
+            throw new \InvalidArgumentException('Current user is required for new minisite creation');
+        }
+
+        // Build site JSON from form data
+        $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
+        $siteJson = $formProcessor->buildSiteJsonFromForm($formData, $minisiteId);
+
+        // Handle coordinate fields
+        $lat = !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : null;
+        $lng = !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : null;
+
+        // Start transaction
+        $this->wordPressManager->startTransaction();
+
+        try {
+            // Create initial draft version
+            $nextVersion = 1; // First version for new minisite
+            $slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+                business: $formProcessor->getFormValue($formData, 'business_name', ''),
+                location: $formProcessor->getFormValue($formData, 'business_city', '')
+            );
+
+            // Create GeoPoint from form data
+            $geo = null;
+            if ($lat !== null && $lng !== null) {
+                $geo = new \Minisite\Domain\ValueObjects\GeoPoint(lat: $lat, lng: $lng);
+            }
+
+            $version = new \Minisite\Domain\Entities\Version(
+                id: null,
+                minisiteId: $minisiteId,
+                versionNumber: $nextVersion,
+                status: 'draft',
+                label: $this->wordPressManager->sanitizeTextField(
+                    $formData['version_label'] ?? 'Initial Draft'
+                ),
+                comment: $this->wordPressManager->sanitizeTextareaField(
+                    $formData['version_comment'] ?? 'First draft of the new minisite'
+                ),
+                createdBy: (int) $currentUser->ID,
+                createdAt: null,
+                publishedAt: null,
+                sourceVersionId: null,
+                siteJson: $siteJson,
+                // Profile fields from form data
+                slugs: $slugs,
+                title: $formProcessor->getFormValue($formData, 'seo_title', ''),
+                name: $formProcessor->getFormValue($formData, 'business_name', ''),
+                city: $formProcessor->getFormValue($formData, 'business_city', ''),
+                region: $formProcessor->getFormValue($formData, 'business_region', ''),
+                countryCode: $formProcessor->getFormValue($formData, 'business_country', ''),
+                postalCode: $formProcessor->getFormValue($formData, 'business_postal', ''),
+                geo: $geo,
+                siteTemplate: $formProcessor->getFormValue($formData, 'site_template', ''),
+                palette: $formProcessor->getFormValue($formData, 'brand_palette', ''),
+                industry: $formProcessor->getFormValue($formData, 'brand_industry', ''),
+                defaultLocale: $formProcessor->getFormValue($formData, 'default_locale', 'en'),
+                schemaVersion: 1,
+                siteVersion: 1,
+                searchTerms: $formProcessor->getFormValue($formData, 'search_terms', '')
+            );
+
+            $savedVersion = $this->wordPressManager->saveVersion($version);
+
+            // Create main minisite record
+            $this->createMainMinisiteRecord(
+                $minisiteId,
+                $formData,
+                $currentUser,
+                $lat,
+                $lng,
+                $formProcessor,
+                $savedVersion->id
+            );
+
+            $this->wordPressManager->commitTransaction();
+
+            return (object) [
+                'success' => true,
+                'redirectUrl' => $this->wordPressManager->getHomeUrl(
+                    "/account/sites/{$minisiteId}/edit?draft_created=1"
+                )
+            ];
+        } catch (\Exception $e) {
+            $this->wordPressManager->rollbackTransaction();
+            throw $e;
+        }
     }
 
     /**
@@ -336,5 +421,48 @@ class MinisiteDatabaseCoordinator
                 $this->wordPressManager->updateTitle($siteId, $newTitle);
             }
         }
+    }
+
+    /**
+     * Create main minisite record for new minisite
+     */
+    private function createMainMinisiteRecord(
+        string $minisiteId,
+        array $formData,
+        object $currentUser,
+        ?float $lat,
+        ?float $lng,
+        MinisiteFormProcessor $formProcessor,
+        int $currentVersionId
+    ): void {
+        // Create GeoPoint from form data
+        $geo = null;
+        if ($lat !== null && $lng !== null) {
+            $geo = new \Minisite\Domain\ValueObjects\GeoPoint(lat: $lat, lng: $lng);
+        }
+
+        // Create SlugPair from form data
+        $slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+            business: $formProcessor->getFormValue($formData, 'business_name', ''),
+            location: $formProcessor->getFormValue($formData, 'business_city', '')
+        );
+
+        // Create main minisite entity
+        $minisite = new \Minisite\Domain\Entities\Minisite(
+            id: $minisiteId,
+            ownerId: (int) $currentUser->ID,
+            currentVersionId: $currentVersionId,
+            status: 'draft',
+            slugs: $slugs,
+            schemaVersion: 1,
+            siteVersion: 1,
+            siteJson: $formProcessor->buildSiteJsonFromForm($formData, $minisiteId),
+            geo: $geo,
+            createdAt: null,
+            updatedAt: null
+        );
+
+        // Save to database using repository
+        $this->wordPressManager->getMinisiteRepository()->save($minisite);
     }
 }
