@@ -70,7 +70,7 @@ class WordPressEditManager
      */
     public function sanitizeTextField(string $text): string
     {
-        return sanitize_text_field($text);
+        return sanitize_text_field(wp_unslash($text));
     }
 
     /**
@@ -78,7 +78,7 @@ class WordPressEditManager
      */
     public function sanitizeTextareaField(string $text): string
     {
-        return sanitize_textarea_field($text);
+        return sanitize_textarea_field(wp_unslash($text));
     }
 
     /**

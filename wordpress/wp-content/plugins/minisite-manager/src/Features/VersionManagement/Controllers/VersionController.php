@@ -36,8 +36,10 @@ class VersionController
     public function handleListVersions(): void
     {
         if (!$this->wordPressManager->isUserLoggedIn()) {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Data is properly unslashed and sanitized
             $redirectUrl = isset($_SERVER['REQUEST_URI']) ?
-                $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_SERVER['REQUEST_URI'])) : '';
+                // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Data is properly unslashed and sanitized
+                $this->wordPressManager->sanitizeTextField(wp_unslash($_SERVER['REQUEST_URI'])) : '';
             $this->responseHandler->redirectToLogin($redirectUrl);
             return;
         }

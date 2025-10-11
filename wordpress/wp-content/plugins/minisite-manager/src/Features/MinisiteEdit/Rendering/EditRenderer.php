@@ -225,5 +225,4 @@ class EditRenderer
 </body>
 </html>';
     }
-
 }

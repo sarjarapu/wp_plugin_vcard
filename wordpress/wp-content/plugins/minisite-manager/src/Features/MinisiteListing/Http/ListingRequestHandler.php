@@ -34,7 +34,9 @@ final class ListingRequestHandler
         }
 
         // Get pagination parameters
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameters for pagination don't require nonce verification
         $limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 50;
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameters for pagination don't require nonce verification
         $offset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
 
         // Validate limits

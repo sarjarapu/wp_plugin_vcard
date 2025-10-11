@@ -59,12 +59,12 @@ class EditService
     /**
      * Save draft version
      */
-public function saveDraft(string $siteId, array $formData): object
+    public function saveDraft(string $siteId, array $formData): object
     {
         try {
             // Log incoming form data for debugging
             error_log('MINISITE_EDIT_DEBUG: Form data received: ' . json_encode($formData, JSON_PRETTY_PRINT));
-            
+
             // Validate form data
             $errors = $this->validateFormData($formData);
             if (!empty($errors)) {
@@ -89,7 +89,7 @@ public function saveDraft(string $siteId, array $formData): object
 
             // Build site JSON from form data
             $siteJson = $this->buildSiteJsonFromForm($formData, $siteId);
-            
+
             // Log built siteJson for debugging
             error_log('MINISITE_EDIT_DEBUG: Built siteJson: ' . json_encode($siteJson, JSON_PRETTY_PRINT));
 
@@ -158,8 +158,8 @@ public function saveDraft(string $siteId, array $formData): object
             }
         } catch (\Exception $e) {
             return (object) [
-                'success' => false,
-                'errors' => ['Failed to save draft: ' . $e->getMessage()]
+            'success' => false,
+            'errors' => ['Failed to save draft: ' . $e->getMessage()]
             ];
         }
     }
@@ -210,6 +210,7 @@ public function saveDraft(string $siteId, array $formData): object
      */
     private function getSuccessMessage(): string
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for success message doesn't require nonce verification
         if (isset($_GET['draft_saved']) && $_GET['draft_saved'] === '1') {
             return 'Draft saved successfully!';
         }
@@ -244,21 +245,22 @@ public function saveDraft(string $siteId, array $formData): object
         // Get existing siteJson to preserve all data
         $minisite = $this->wordPressManager->findMinisiteById($siteId);
         $existingSiteJson = $minisite && $minisite->siteJson ? $minisite->siteJson : [];
-        
+
         // Log existing siteJson structure for debugging
         error_log('MINISITE_EDIT_DEBUG: Existing siteJson structure: ' . json_encode(array_keys($existingSiteJson), JSON_PRETTY_PRINT));
-        
+
         // Start with existing siteJson to preserve all data
         $siteJson = $existingSiteJson;
-        
+
         // Only update fields that are actually submitted in the form
         // This ensures we don't lose any existing data like hero, about, services, gallery, social, etc.
-        
+
         // Update business information if provided
-        if (isset($formData['business_name']) || isset($formData['business_city']) || 
-            isset($formData['business_region']) || isset($formData['business_country']) || 
-            isset($formData['business_postal'])) {
-            
+        if (
+            isset($formData['business_name']) || isset($formData['business_city']) ||
+            isset($formData['business_region']) || isset($formData['business_country']) ||
+            isset($formData['business_postal'])
+        ) {
             $siteJson['business'] = array_merge($siteJson['business'] ?? [], [
                 'name' => $this->wordPressManager->sanitizeTextField($formData['business_name'] ?? $siteJson['business']['name'] ?? ''),
                 'city' => $this->wordPressManager->sanitizeTextField($formData['business_city'] ?? $siteJson['business']['city'] ?? ''),
@@ -267,7 +269,7 @@ public function saveDraft(string $siteId, array $formData): object
                 'postal' => $this->wordPressManager->sanitizeTextField($formData['business_postal'] ?? $siteJson['business']['postal'] ?? ''),
             ]);
         }
-        
+
         // Update contact coordinates if provided
         if (isset($formData['contact_lat']) || isset($formData['contact_lng'])) {
             $siteJson['contact'] = array_merge($siteJson['contact'] ?? [], [
@@ -275,7 +277,7 @@ public function saveDraft(string $siteId, array $formData): object
                 'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : ($siteJson['contact']['lng'] ?? null),
             ]);
         }
-        
+
         // Update brand information if provided
         if (isset($formData['brand_palette']) || isset($formData['brand_industry'])) {
             $siteJson['brand'] = array_merge($siteJson['brand'] ?? [], [
@@ -283,7 +285,7 @@ public function saveDraft(string $siteId, array $formData): object
                 'industry' => $this->wordPressManager->sanitizeTextField($formData['brand_industry'] ?? $siteJson['brand']['industry'] ?? ''),
             ]);
         }
-        
+
         // Update SEO information if provided
         if (isset($formData['seo_title']) || isset($formData['search_terms'])) {
             $siteJson['seo'] = array_merge($siteJson['seo'] ?? [], [
@@ -291,7 +293,7 @@ public function saveDraft(string $siteId, array $formData): object
                 'search_terms' => $this->wordPressManager->sanitizeTextField($formData['search_terms'] ?? $siteJson['seo']['search_terms'] ?? ''),
             ]);
         }
-        
+
         // Update settings if provided
         if (isset($formData['site_template']) || isset($formData['default_locale'])) {
             $siteJson['settings'] = array_merge($siteJson['settings'] ?? [], [
@@ -299,11 +301,11 @@ public function saveDraft(string $siteId, array $formData): object
                 'locale' => $this->wordPressManager->sanitizeTextField($formData['default_locale'] ?? $siteJson['settings']['locale'] ?? ''),
             ]);
         }
-        
+
         // Log final siteJson structure for debugging
         error_log('MINISITE_EDIT_DEBUG: Final siteJson structure: ' . json_encode(array_keys($siteJson), JSON_PRETTY_PRINT));
         error_log('MINISITE_EDIT_DEBUG: Final siteJson size: ' . strlen(json_encode($siteJson)) . ' characters');
-        
+
         return $siteJson;
     }
 

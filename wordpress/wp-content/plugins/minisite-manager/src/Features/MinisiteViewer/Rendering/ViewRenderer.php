@@ -111,7 +111,7 @@ final class ViewRenderer
 
         // Prepare template data for version-specific preview
         $templateData = $this->prepareVersionSpecificPreviewTemplateData($previewData);
-        
+
         // Render the preview template using Timber directly
         if (class_exists('Timber\\Timber')) {
             try {
@@ -135,10 +135,10 @@ final class ViewRenderer
     {
         $minisite = $previewData->minisite;
         $version = $previewData->version;
-        
+
         // Fetch reviews for the minisite (same as regular minisite view)
         $reviews = $this->fetchReviews($minisite->id);
-        
+
         // Use the same data structure as public minisite view
         return [
             'minisite' => $minisite,
@@ -162,7 +162,7 @@ final class ViewRenderer
         $minisite = $previewData->minisite;
         $version = $previewData->version;
         $versionLabel = $version ? $version->label : 'Current Version';
-        
+
         echo '<!DOCTYPE html>
 <html>
 <head>
