@@ -26,19 +26,19 @@ jobs:
     - name: Cache Composer packages
       uses: actions/cache@v3
       with:
-        path: vendor
-        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('**/composer.lock') }}
+        path: wordpress/wp-content/plugins/minisite-manager/vendor
+        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('wordpress/wp-content/plugins/minisite-manager/composer.lock') }}
         restore-keys: |
           ${{ runner.os }}-php-8.2-composer-
     
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer install --prefer-dist --no-progress
     
     - name: Check for security vulnerabilities
-      run: composer audit
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer audit
     
     - name: Check for outdated dependencies
-      run: composer outdated --direct
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer outdated --direct
 
   # Test job
   test:
@@ -59,16 +59,16 @@ jobs:
     - name: Cache Composer packages
       uses: actions/cache@v3
       with:
-        path: vendor
-        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('**/composer.lock') }}
+        path: wordpress/wp-content/plugins/minisite-manager/vendor
+        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('wordpress/wp-content/plugins/minisite-manager/composer.lock') }}
         restore-keys: |
           ${{ runner.os }}-php-8.2-composer-
     
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer install --prefer-dist --no-progress
     
     - name: Run tests
-      run: composer test
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer test
 
   # Code quality job
   quality:
@@ -88,19 +88,19 @@ jobs:
     - name: Cache Composer packages
       uses: actions/cache@v3
       with:
-        path: vendor
-        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('**/composer.lock') }}
+        path: wordpress/wp-content/plugins/minisite-manager/vendor
+        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('wordpress/wp-content/plugins/minisite-manager/composer.lock') }}
         restore-keys: |
           ${{ runner.os }}-php-8.2-composer-
     
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer install --prefer-dist --no-progress
     
     - name: Run static analysis
-      run: composer analyze
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer analyze
     
     - name: Check code style
-      run: composer lint
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer lint
 
   # Build verification job
   build:
@@ -120,13 +120,13 @@ jobs:
     - name: Cache Composer packages
       uses: actions/cache@v3
       with:
-        path: vendor
-        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('**/composer.lock') }}
+        path: wordpress/wp-content/plugins/minisite-manager/vendor
+        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('wordpress/wp-content/plugins/minisite-manager/composer.lock') }}
         restore-keys: |
           ${{ runner.os }}-php-8.2-composer-
     
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer install --prefer-dist --no-progress
     
     - name: Verify plugin structure
       run: |
