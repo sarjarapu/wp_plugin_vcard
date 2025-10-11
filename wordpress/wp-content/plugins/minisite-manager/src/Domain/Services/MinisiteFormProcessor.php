@@ -3,6 +3,8 @@
 namespace Minisite\Domain\Services;
 
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Minisite Form Processor
@@ -15,9 +17,12 @@ use Minisite\Domain\Interfaces\WordPressManagerInterface;
  */
 class MinisiteFormProcessor
 {
+    private LoggerInterface $logger;
+    
     public function __construct(
         private WordPressManagerInterface $wordPressManager
     ) {
+        $this->logger = LoggingServiceProvider::getFeatureLogger('form-processor');
     }
 
     /**
@@ -25,6 +30,11 @@ class MinisiteFormProcessor
      */
     public function validateFormData(array $data): array
     {
+        $this->logger->info('MinisiteFormProcessor::validateFormData() called', [
+            'data_count' => count($data),
+            'data_keys' => array_keys($data)
+        ]);
+        
         $errors = [];
 
         // Add validation rules as needed
@@ -76,11 +86,27 @@ class MinisiteFormProcessor
      */
     public function buildSiteJsonFromForm(array $formData, string $siteId, ?object $minisite = null): array
     {
+        $this->logger->info('MinisiteFormProcessor::buildSiteJsonFromForm() called', [
+            'site_id' => $siteId,
+            'form_data_count' => count($formData),
+            'has_existing_minisite' => $minisite !== null,
+            'minisite_id' => $minisite?->id ?? 'new'
+        ]);
+        
         // Get existing siteJson to preserve all data
         if (!$minisite) {
+            $this->logger->debug('No existing minisite provided, fetching from database', [
+                'site_id' => $siteId
+            ]);
             $minisite = $this->wordPressManager->findMinisiteById($siteId);
         }
         $existingSiteJson = $minisite && $minisite->siteJson ? $minisite->siteJson : [];
+
+        $this->logger->debug('Starting site JSON build', [
+            'site_id' => $siteId,
+            'has_existing_site_json' => !empty($existingSiteJson),
+            'existing_site_json_size' => strlen(json_encode($existingSiteJson))
+        ]);
 
         // Start with existing siteJson to preserve all data
         $siteJson = $existingSiteJson;
@@ -97,6 +123,12 @@ class MinisiteFormProcessor
         $siteJson = $this->buildServicesSection($formData, $siteJson);
         $siteJson = $this->buildGallerySection($formData, $siteJson);
         $siteJson = $this->buildSocialSection($formData, $siteJson);
+
+        $this->logger->info('Site JSON build completed', [
+            'site_id' => $siteId,
+            'final_site_json_size' => strlen(json_encode($siteJson)),
+            'sections_built' => array_keys($siteJson)
+        ]);
 
         return $siteJson;
     }

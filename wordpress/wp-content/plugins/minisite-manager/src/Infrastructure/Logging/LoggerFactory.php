@@ -39,7 +39,7 @@ class LoggerFactory
         
         // Add file handler with rotation (daily)
         $fileHandler = new RotatingFileHandler(
-            WP_CONTENT_DIR . '/uploads/minisite-logs/minisite.log',
+            WP_CONTENT_DIR . '/minisite-logs/minisite.log',
             30, // Keep 30 days of logs
             Logger::DEBUG
         );

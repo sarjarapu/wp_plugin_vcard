@@ -32,9 +32,13 @@ class NewMinisiteService
      */
     public function createNewMinisite(array $formData): object
     {
-        $this->logger->info('Starting new minisite creation', [
+        $this->logger->info('NewMinisiteService::createNewMinisite() called', [
+            'feature' => 'NewMinisite',
             'user_id' => $this->wordPressManager->getCurrentUser()?->ID,
-            'form_fields_count' => count($formData)
+            'form_fields_count' => count($formData),
+            'form_data_keys' => array_keys($formData),
+            'has_nonce' => isset($formData['minisite_edit_nonce']),
+            'nonce_value' => $formData['minisite_edit_nonce'] ?? 'missing'
         ]);
         
         try {

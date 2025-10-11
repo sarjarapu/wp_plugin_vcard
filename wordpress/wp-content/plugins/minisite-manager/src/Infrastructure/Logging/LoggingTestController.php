@@ -37,7 +37,7 @@ class LoggingTestController
             $results[] = '✓ All log levels working';
             
             // Test 3: Check log files
-            $logDir = WP_CONTENT_DIR . '/uploads/minisite-logs';
+            $logDir = WP_CONTENT_DIR . '/minisite-logs';
             if (is_dir($logDir)) {
                 $results[] = '✓ Log directory exists: ' . $logDir;
                 
@@ -121,10 +121,10 @@ class LoggingTestController
         echo '</ul>';
         
         echo '<h2>Log Files Location:</h2>';
-        echo '<p><code>' . WP_CONTENT_DIR . '/uploads/minisite-logs/</code></p>';
+        echo '<p><code>' . WP_CONTENT_DIR . '/minisite-logs/</code></p>';
         
         echo '<h2>Recent Log Entries:</h2>';
-        $logDir = WP_CONTENT_DIR . '/uploads/minisite-logs';
+        $logDir = WP_CONTENT_DIR . '/minisite-logs';
         $logFiles = glob($logDir . '/*.log*');
         if (!empty($logFiles)) {
             $latestFile = max($logFiles);
