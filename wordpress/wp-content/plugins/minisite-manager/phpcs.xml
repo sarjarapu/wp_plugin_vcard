@@ -27,6 +27,11 @@
     <exclude-pattern>*/Domain/*</exclude-pattern>
   </rule>
   
+  <!-- WordPress plugin main file can have mixed symbols and side effects -->
+  <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+    <exclude-pattern>minisite-manager.php</exclude-pattern>
+  </rule>
+  
   <!-- Arguments -->
   <arg name="colors"/>
   <arg name="parallel" value="80"/>
