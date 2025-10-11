@@ -113,12 +113,66 @@ curl -X POST \
 3. **"Field labels is not defined by type IssueCreateInput"**
    - Solution: Use `labelIds` instead of `labels` if you need to add labels
 
+4. **"Syntax Error: Unterminated string"**
+   - **Root Cause**: This is the most common error when creating Linear issues. It occurs when JSON strings contain unescaped newlines or quotes.
+   - **Error Message**: `GraphQL request:1:190 | Syntax Error: Unterminated string.`
+   - **Solution**: Always escape newlines as `\\n` and quotes as `\"` in JSON strings
+   - **Prevention**: Use the templates in this guide or test your JSON with a validator first
+
 ### JSON Escaping
 
+**CRITICAL**: Always properly escape JSON strings to avoid "Unterminated string" errors.
+
 When including special characters in descriptions:
-- Use `\n` for line breaks
+- Use `\n` for line breaks (NOT actual newlines)
 - Use `\"` for quotes
 - Use `\\` for backslashes
+- Use `\\n` for literal `\n` in text
+
+#### Common JSON Escaping Mistakes
+
+❌ **WRONG** - Causes "Unterminated string" error:
+```bash
+-d '{"query": "mutation { issueCreate(input: { title: \"Bug: Version-specific preview not rendering all sections after refactoring\", description: \"## Summary
+Version-specific preview pages are not rendering all content sections properly after refactoring the functionality from MinisiteEdit to MinisiteViewer feature. The page loads and shows basic information (title, hero section) but content sections like About, Services, Gallery, etc. appear blank.
+
+## Steps to Reproduce
+1. Navigate to a version-specific preview URL: /account/sites/{siteId}/preview/{versionId}
+2. Observe that the page loads with correct title and hero section
+3. Notice that content sections (About, Services, Gallery, etc.) are empty or blank
+4. Compare with the same minisite when viewed through the published version (which works correctly)
+
+## Expected Behavior
+All content sections should render with the version-specific data from the wp_minisite_versions table, similar to how the published version displays content from wp_minisites table.
+
+## Actual Behavior
+Only basic information (title, hero section) renders correctly. Content sections appear blank with empty <p></p> tags.
+
+## Root Cause Analysis
+This issue started occurring after refactoring the version-specific preview functionality from the MinisiteEdit feature to the MinisiteViewer feature. The refactoring involved moving preview methods between features and updating the rendering flow.
+
+## Technical Details
+- Working: Published minisite view (uses wp_minisites table)
+- Broken: Version-specific preview (uses wp_minisite_versions table)
+- Template: Both use the same v2025/minisite.twig template
+- Data Source: Version preview should use version.siteJson instead of minisite.siteJson
+
+## Workaround
+Use the published version of the minisite for viewing complete content until this issue is resolved.\", priority: 2 }) { success issue { id identifier title url } } }"}'
+```
+
+✅ **CORRECT** - Properly escaped:
+```bash
+-d '{"query": "mutation { issueCreate(input: { title: \"Bug: Version-specific preview not rendering all sections after refactoring\", description: \"## Summary\\nVersion-specific preview pages are not rendering all content sections properly after refactoring the functionality from MinisiteEdit to MinisiteViewer feature. The page loads and shows basic information (title, hero section) but content sections like About, Services, Gallery, etc. appear blank.\\n\\n## Steps to Reproduce\\n1. Navigate to a version-specific preview URL: /account/sites/{siteId}/preview/{versionId}\\n2. Observe that the page loads with correct title and hero section\\n3. Notice that content sections (About, Services, Gallery, etc.) are empty or blank\\n4. Compare with the same minisite when viewed through the published version (which works correctly)\\n\\n## Expected Behavior\\nAll content sections should render with the version-specific data from the wp_minisite_versions table, similar to how the published version displays content from wp_minisites table.\\n\\n## Actual Behavior\\nOnly basic information (title, hero section) renders correctly. Content sections appear blank with empty <p></p> tags.\\n\\n## Root Cause Analysis\\nThis issue started occurring after refactoring the version-specific preview functionality from the MinisiteEdit feature to the MinisiteViewer feature. The refactoring involved moving preview methods between features and updating the rendering flow.\\n\\n## Technical Details\\n- Working: Published minisite view (uses wp_minisites table)\\n- Broken: Version-specific preview (uses wp_minisite_versions table)\\n- Template: Both use the same v2025/minisite.twig template\\n- Data Source: Version preview should use version.siteJson instead of minisite.siteJson\\n\\n## Workaround\\nUse the published version of the minisite for viewing complete content until this issue is resolved.\", priority: 2 }) { success issue { id identifier title url } } }"}'
+```
+
+#### Pro Tips for JSON Escaping
+
+1. **Always use `\\n` instead of actual newlines** in JSON strings
+2. **Test your JSON** with a JSON validator before running the command
+3. **Use a text editor** that shows escape characters to verify proper escaping
+4. **Break long descriptions** into smaller chunks if escaping becomes too complex
+5. **Use the templates** provided in this guide as they are already properly escaped
 
 ## Response Format
 
