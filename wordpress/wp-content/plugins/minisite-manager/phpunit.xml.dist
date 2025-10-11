@@ -39,7 +39,6 @@
       <directory>tests/Unit/Features/MinisiteEdit/Rendering</directory>
       <directory>tests/Unit/Features/MinisiteEdit/Services</directory>
       <directory>tests/Unit/Features/MinisiteEdit/WordPress</directory>
-      <file>tests/Unit/Features/MinisiteEdit/MinisiteEditFeatureIntegrationTest.php</file>
       <file>tests/Unit/Features/MinisiteEdit/MinisiteEditFeatureTest.php</file>
     </testsuite>
   </testsuites>

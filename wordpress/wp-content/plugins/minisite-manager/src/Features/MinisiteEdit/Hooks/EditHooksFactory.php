@@ -7,6 +7,7 @@ use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Features\MinisiteViewer\Hooks\ViewHooksFactory;
 
 /**
  * EditHooks Factory
@@ -43,7 +44,11 @@ class EditHooksFactory
             $wordPressManager
         );
 
+        // Get MinisiteViewer controller for preview delegation
+        $viewHooks = ViewHooksFactory::create();
+        $minisiteViewerController = $viewHooks->getController();
+
         // Create and return hooks
-        return new EditHooks($editController, $wordPressManager);
+        return new EditHooks($editController, $wordPressManager, $minisiteViewerController);
     }
 }

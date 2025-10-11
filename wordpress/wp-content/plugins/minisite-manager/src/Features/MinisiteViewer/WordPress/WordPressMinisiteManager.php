@@ -3,6 +3,7 @@
 namespace Minisite\Features\MinisiteViewer\WordPress;
 
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
@@ -17,6 +18,7 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 final class WordPressMinisiteManager
 {
     private ?MinisiteRepository $repository = null;
+    private ?VersionRepository $versionRepository = null;
 
     /**
      * Get minisite repository instance
@@ -27,6 +29,17 @@ final class WordPressMinisiteManager
             $this->repository = new MinisiteRepository(db::getWpdb());
         }
         return $this->repository;
+    }
+
+    /**
+     * Get version repository instance
+     */
+    private function getVersionRepositoryInstance(): VersionRepository
+    {
+        if ($this->versionRepository === null) {
+            $this->versionRepository = new VersionRepository(db::getWpdb());
+        }
+        return $this->versionRepository;
     }
 
     /**
@@ -75,5 +88,83 @@ final class WordPressMinisiteManager
     public function sanitizeTextField(string $text): string
     {
         return sanitize_text_field($text);
+    }
+
+    // ===== AUTHENTICATION METHODS =====
+
+    /**
+     * Check if user is logged in
+     *
+     * @return bool
+     */
+    public function isUserLoggedIn(): bool
+    {
+        return is_user_logged_in();
+    }
+
+    /**
+     * Get current user
+     *
+     * @return object|null
+     */
+    public function getCurrentUser(): ?object
+    {
+        return wp_get_current_user();
+    }
+
+    /**
+     * Redirect to URL
+     *
+     * @param string $url
+     * @return void
+     */
+    public function redirect(string $url): void
+    {
+        wp_redirect($url);
+        exit;
+    }
+
+    /**
+     * Get home URL
+     *
+     * @param string $path
+     * @return string
+     */
+    public function getHomeUrl(string $path = ''): string
+    {
+        return home_url($path);
+    }
+
+    /**
+     * Get login redirect URL
+     *
+     * @return string
+     */
+    public function getLoginRedirectUrl(): string
+    {
+        return wp_login_url();
+    }
+
+    // ===== VERSION-SPECIFIC METHODS =====
+
+    /**
+     * Find minisite by ID
+     *
+     * @param string $siteId
+     * @return object|null
+     */
+    public function findMinisiteById(string $siteId): ?object
+    {
+        return $this->getRepository()->findById($siteId);
+    }
+
+    /**
+     * Get version repository (public access)
+     *
+     * @return VersionRepository
+     */
+    public function getVersionRepository(): VersionRepository
+    {
+        return $this->getVersionRepositoryInstance();
     }
 }

@@ -66,4 +66,66 @@ final class MinisiteViewService
             $command->locationSlug
         );
     }
+
+    /**
+     * Get minisite for version-specific preview (authenticated)
+     *
+     * @param string $siteId
+     * @param string|null $versionId
+     * @return object
+     * @throws \RuntimeException
+     */
+    public function getMinisiteForVersionSpecificPreview(string $siteId, ?string $versionId): object
+    {
+        // Get minisite and verify access
+        $minisite = $this->wordPressManager->findMinisiteById($siteId);
+        if (!$minisite) {
+            throw new \RuntimeException('Minisite not found');
+        }
+
+        // Check access permissions (authentication required for version-specific preview)
+        $currentUser = $this->wordPressManager->getCurrentUser();
+        if ($minisite->createdBy !== (int) $currentUser->ID) {
+            throw new \RuntimeException('Access denied');
+        }
+
+        // Handle version-specific preview
+        $versionRepo = $this->wordPressManager->getVersionRepository();
+        $siteJson = null;
+        $version = null;
+
+        if ($versionId === 'current' || !$versionId) {
+            // Show current published version (from profile.siteJson)
+            $siteJson = $minisite->siteJson;
+        } else {
+            // Show specific version
+            $version = $versionRepo->findById((int) $versionId);
+            if (!$version) {
+                throw new \RuntimeException('Version not found');
+            }
+            if ($version->minisiteId !== $siteId) {
+                throw new \RuntimeException('Version not found');
+            }
+            $siteJson = $version->siteJson;
+        }
+
+        // Update profile with version-specific data for rendering
+        $minisite->siteJson = $siteJson;
+
+        // If showing a specific version, also update the profile fields from version data
+        if ($version) {
+            // Use version data if available, otherwise fall back to existing minisite data
+            $minisite->name = $version->name ?? $minisite->name;
+            $minisite->city = $version->city ?? $minisite->city;
+            $minisite->title = $version->title ?? $minisite->title;
+            // Add other fields as needed
+        }
+
+        return (object) [
+            'minisite' => $minisite,
+            'version' => $version,
+            'siteJson' => $siteJson,
+            'versionId' => $versionId
+        ];
+    }
 }

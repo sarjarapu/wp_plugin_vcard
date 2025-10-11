@@ -4,6 +4,7 @@ namespace Minisite\Features\MinisiteEdit\Hooks;
 
 use Minisite\Features\MinisiteEdit\Controllers\EditController;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
 
 /**
  * Edit Hooks
@@ -22,7 +23,8 @@ class EditHooks
 
     public function __construct(
         private EditController $editController,
-        private WordPressEditManager $wordPressManager
+        private WordPressEditManager $wordPressManager,
+        private MinisitePageController $minisiteViewerController
     ) {
     }
 
@@ -54,7 +56,8 @@ class EditHooks
             $this->editController->handleEdit();
             exit;
         } elseif ($action === 'preview') {
-            $this->editController->handlePreview();
+            // Delegate version-specific preview to MinisiteViewer
+            $this->minisiteViewerController->handleVersionSpecificPreview();
             exit;
         }
     }

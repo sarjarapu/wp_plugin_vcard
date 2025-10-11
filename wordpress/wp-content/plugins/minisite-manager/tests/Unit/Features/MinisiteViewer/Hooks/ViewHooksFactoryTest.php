@@ -82,7 +82,7 @@ final class ViewHooksFactoryTest extends TestCase
         $constructor = $controllerReflection->getConstructor();
         
         $this->assertNotNull($constructor);
-        $this->assertEquals(5, $constructor->getNumberOfParameters());
+        $this->assertEquals(6, $constructor->getNumberOfParameters());
         
         $params = $constructor->getParameters();
         $expectedTypes = [
@@ -90,7 +90,8 @@ final class ViewHooksFactoryTest extends TestCase
             MinisiteViewService::class,
             ViewRequestHandler::class,
             ViewResponseHandler::class,
-            ViewRenderer::class
+            ViewRenderer::class,
+            \Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager::class
         ];
         
         foreach ($params as $index => $param) {

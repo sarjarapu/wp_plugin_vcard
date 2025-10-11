@@ -47,7 +47,8 @@ final class ViewHooksFactory
             $viewService,
             $requestHandler,
             $responseHandler,
-            $renderer
+            $renderer,
+            $wordPressManager
         );
 
         // Create and return hooks
