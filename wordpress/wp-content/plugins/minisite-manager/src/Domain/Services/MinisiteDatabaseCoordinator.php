@@ -140,16 +140,16 @@ class MinisiteDatabaseCoordinator
                 currentVersionId: null // Will be set after version creation
             );
 
-            // Save main minisite record to wp_minisites table
-            $this->logger->debug('Saving minisite entity to database', [
+            // Insert new minisite record to wp_minisites table (use insert for new minisites)
+            $this->logger->debug('Inserting new minisite entity to database', [
                 'minisite_id' => $minisiteId,
                 'title' => $minisite->title,
                 'status' => $minisite->status
             ]);
             
-            $savedMinisite = $this->wordPressManager->getMinisiteRepository()->save($minisite, 0);
+            $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
             
-            $this->logger->debug('Minisite entity saved successfully', [
+            $this->logger->debug('New minisite entity inserted successfully', [
                 'minisite_id' => $minisiteId,
                 'saved_id' => $savedMinisite->id ?? 'unknown'
             ]);
@@ -210,7 +210,9 @@ class MinisiteDatabaseCoordinator
             $this->logger->info('New draft created successfully', [
                 'minisite_id' => $minisiteId,
                 'version_id' => $savedVersion->id,
-                'user_id' => $currentUser->ID
+                'user_id' => $currentUser->ID,
+                'minisite_saved_id' => $savedMinisite->id ?? 'unknown',
+                'operation_type' => 'new_draft'
             ]);
 
             return (object) [

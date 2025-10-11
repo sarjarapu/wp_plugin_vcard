@@ -33,10 +33,26 @@ try {
     $wordPressManager = new WordPressNewMinisiteManager();
     $newMinisiteService = new NewMinisiteService($wordPressManager);
     
-    // Test with empty form data
+    // Test with complete form data to avoid validation errors
     $testFormData = [
         'business_name' => 'Test Business',
         'business_city' => 'Test City',
+        'business_region' => 'Test Region',
+        'business_country' => 'US',
+        'business_postal' => '12345',
+        'contact_email' => 'test@example.com',
+        'contact_phone' => '555-1234',
+        'contact_website' => 'https://test.com',
+        'contact_address' => '123 Test St',
+        'contact_lat' => '40.7128',
+        'contact_lng' => '-74.0060',
+        'seo_title' => 'Test SEO Title',
+        'seo_description' => 'Test SEO Description',
+        'brand_industry' => 'Technology',
+        'brand_palette' => 'blue',
+        'site_template' => 'v2025',
+        'default_locale' => 'en-US',
+        'search_terms' => 'test, business, technology',
         'minisite_edit_nonce' => wp_create_nonce('minisite_edit')
     ];
     
