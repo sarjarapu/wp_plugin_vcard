@@ -3,6 +3,7 @@
 namespace Minisite\Core;
 
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\ErrorHandling\ErrorHandlingServiceProvider;
 
 /**
  * Plugin Bootstrap
@@ -41,6 +42,9 @@ final class PluginBootstrap
     {
         // Initialize logging system first
         LoggingServiceProvider::register();
+
+        // Initialize error handling system
+        ErrorHandlingServiceProvider::register();
 
         // Initialize roles and capabilities
         RoleManager::initialize();
