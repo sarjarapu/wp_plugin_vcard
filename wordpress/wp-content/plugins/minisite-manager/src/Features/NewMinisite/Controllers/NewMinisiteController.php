@@ -97,15 +97,34 @@ class NewMinisiteController
 
         // Nonce verification is handled in NewMinisiteService::createNewMinisite()
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in NewMinisiteService::createNewMinisite()
-        $result = $this->newMinisiteService->createNewMinisite($_POST);
+        try {
+            $result = $this->newMinisiteService->createNewMinisite($_POST);
 
-        $this->logger->info('NewMinisiteService::createNewMinisite() completed', [
-            'feature' => 'NewMinisite',
-            'success' => $result->success ?? false,
-            'has_errors' => !empty($result->errors ?? []),
-            'error_count' => count($result->errors ?? []),
-            'has_redirect_url' => !empty($result->redirectUrl ?? '')
-        ]);
+            $this->logger->info('NewMinisiteService::createNewMinisite() completed', [
+                'feature' => 'NewMinisite',
+                'success' => $result->success ?? false,
+                'has_errors' => !empty($result->errors ?? []),
+                'error_count' => count($result->errors ?? []),
+                'has_redirect_url' => !empty($result->redirectUrl ?? '')
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('NewMinisiteService::createNewMinisite() threw exception', [
+                'feature' => 'NewMinisite',
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'error_trace' => $e->getTraceAsString(),
+                'post_data_keys' => array_keys($_POST),
+                'post_data_count' => count($_POST)
+            ]);
+            
+            // Create error result to maintain consistent flow
+            $result = (object) [
+                'success' => false,
+                'errors' => ['An unexpected error occurred: ' . $e->getMessage()]
+            ];
+        }
 
         if ($result->success) {
             $this->logger->info('NewMinisite creation successful, redirecting', [

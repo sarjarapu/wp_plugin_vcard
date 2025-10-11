@@ -144,15 +144,52 @@ class MinisiteDatabaseCoordinator
             $this->logger->debug('Inserting new minisite entity to database', [
                 'minisite_id' => $minisiteId,
                 'title' => $minisite->title,
-                'status' => $minisite->status
+                'status' => $minisite->status,
+                'minisite_data' => [
+                    'id' => $minisite->id,
+                    'slug' => $minisite->slug,
+                    'title' => $minisite->title,
+                    'name' => $minisite->name,
+                    'city' => $minisite->city,
+                    'countryCode' => $minisite->countryCode,
+                    'createdBy' => $minisite->createdBy,
+                    'updatedBy' => $minisite->updatedBy
+                ]
             ]);
             
-            $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
-            
-            $this->logger->debug('New minisite entity inserted successfully', [
-                'minisite_id' => $minisiteId,
-                'saved_id' => $savedMinisite->id ?? 'unknown'
-            ]);
+            try {
+                $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
+                
+                $this->logger->debug('New minisite entity inserted successfully', [
+                    'minisite_id' => $minisiteId,
+                    'saved_id' => $savedMinisite->id ?? 'unknown',
+                    'saved_minisite_data' => [
+                        'id' => $savedMinisite->id ?? 'unknown',
+                        'title' => $savedMinisite->title ?? 'unknown',
+                        'status' => $savedMinisite->status ?? 'unknown'
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to insert new minisite entity', [
+                    'minisite_id' => $minisiteId,
+                    'error_message' => $e->getMessage(),
+                    'error_code' => $e->getCode(),
+                    'error_file' => $e->getFile(),
+                    'error_line' => $e->getLine(),
+                    'error_trace' => $e->getTraceAsString(),
+                    'minisite_data' => [
+                        'id' => $minisite->id,
+                        'slug' => $minisite->slug,
+                        'title' => $minisite->title,
+                        'name' => $minisite->name,
+                        'city' => $minisite->city,
+                        'countryCode' => $minisite->countryCode,
+                        'createdBy' => $minisite->createdBy,
+                        'updatedBy' => $minisite->updatedBy
+                    ]
+                ]);
+                throw $e; // Re-throw to maintain error handling flow
+            }
 
             // Create initial draft version
             $nextVersion = 1; // First version for new minisite
@@ -192,15 +229,47 @@ class MinisiteDatabaseCoordinator
 
             $this->logger->debug('Saving version entity', [
                 'minisite_id' => $minisiteId,
-                'version_number' => $nextVersion
+                'version_number' => $nextVersion,
+                'version_data' => [
+                    'minisiteId' => $version->minisiteId,
+                    'versionNumber' => $version->versionNumber,
+                    'status' => $version->status,
+                    'label' => $version->label,
+                    'createdBy' => $version->createdBy
+                ]
             ]);
             
-            $savedVersion = $this->wordPressManager->saveVersion($version);
-            
-            $this->logger->debug('Version entity saved successfully', [
-                'minisite_id' => $minisiteId,
-                'version_id' => $savedVersion->id ?? 'unknown'
-            ]);
+            try {
+                $savedVersion = $this->wordPressManager->saveVersion($version);
+                
+                $this->logger->debug('Version entity saved successfully', [
+                    'minisite_id' => $minisiteId,
+                    'version_id' => $savedVersion->id ?? 'unknown',
+                    'saved_version_data' => [
+                        'id' => $savedVersion->id ?? 'unknown',
+                        'minisiteId' => $savedVersion->minisiteId ?? 'unknown',
+                        'versionNumber' => $savedVersion->versionNumber ?? 'unknown'
+                    ]
+                ]);
+            } catch (\Exception $e) {
+                $this->logger->error('Failed to save version entity', [
+                    'minisite_id' => $minisiteId,
+                    'version_number' => $nextVersion,
+                    'error_message' => $e->getMessage(),
+                    'error_code' => $e->getCode(),
+                    'error_file' => $e->getFile(),
+                    'error_line' => $e->getLine(),
+                    'error_trace' => $e->getTraceAsString(),
+                    'version_data' => [
+                        'minisiteId' => $version->minisiteId,
+                        'versionNumber' => $version->versionNumber,
+                        'status' => $version->status,
+                        'label' => $version->label,
+                        'createdBy' => $version->createdBy
+                    ]
+                ]);
+                throw $e; // Re-throw to maintain error handling flow
+            }
 
             // Update main minisite with current version ID
             $this->wordPressManager->getMinisiteRepository()->updateCurrentVersionId($minisiteId, $savedVersion->id);
@@ -222,10 +291,17 @@ class MinisiteDatabaseCoordinator
                 )
             ];
         } catch (\Exception $e) {
-            $this->logger->error('Failed to create new draft', [
+            $this->logger->error('Failed to create new draft - Exception caught', [
                 'minisite_id' => $minisiteId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'user_id' => $currentUser?->ID ?? 'unknown',
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'error_trace' => $e->getTraceAsString(),
+                'form_data_keys' => array_keys($formData),
+                'form_data_count' => count($formData),
+                'operation_type' => 'new_draft_creation'
             ]);
             
             $this->wordPressManager->rollbackTransaction();
