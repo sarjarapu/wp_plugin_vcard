@@ -35,8 +35,8 @@ final class ViewRequestHandler
         }
 
         return new ViewMinisiteCommand(
-            $this->wordPressManager->sanitizeTextField($businessSlug),
-            $this->wordPressManager->sanitizeTextField($locationSlug)
+            $this->sanitizeSlug($businessSlug),
+            $this->sanitizeSlug($locationSlug)
         );
     }
 
@@ -48,7 +48,7 @@ final class ViewRequestHandler
     public function getBusinessSlug(): ?string
     {
         $slug = $this->wordPressManager->getQueryVar('minisite_biz');
-        return $slug ? $this->wordPressManager->sanitizeTextField($slug) : null;
+        return $this->sanitizeSlug($slug);
     }
 
     /**
@@ -59,6 +59,17 @@ final class ViewRequestHandler
     public function getLocationSlug(): ?string
     {
         $slug = $this->wordPressManager->getQueryVar('minisite_loc');
+        return $this->sanitizeSlug($slug);
+    }
+
+    /**
+     * Helper function to sanitize slug values
+     *
+     * @param string|null $slug
+     * @return string|null
+     */
+    private function sanitizeSlug(?string $slug): ?string
+    {
         return $slug ? $this->wordPressManager->sanitizeTextField($slug) : null;
     }
 }

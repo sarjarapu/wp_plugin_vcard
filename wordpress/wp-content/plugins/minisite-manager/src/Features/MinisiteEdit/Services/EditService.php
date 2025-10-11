@@ -109,8 +109,12 @@ class EditService
                     minisiteId: $siteId,
                     versionNumber: $nextVersion,
                     status: 'draft',
-                    label: $this->wordPressManager->sanitizeTextField($formData['version_label'] ?? "Version {$nextVersion}"),
-                    comment: $this->wordPressManager->sanitizeTextareaField($formData['version_comment'] ?? ''),
+                    label: $this->wordPressManager->sanitizeTextField(
+                        $formData['version_label'] ?? "Version {$nextVersion}"
+                    ),
+                    comment: $this->wordPressManager->sanitizeTextareaField(
+                        $formData['version_comment'] ?? ''
+                    ),
                     createdBy: (int) $currentUser->ID,
                     createdAt: null,
                     publishedAt: null,
@@ -118,20 +122,25 @@ class EditService
                     siteJson: $siteJson,
                     // Profile fields from form data
                     slugs: $slugs,
-                    title: $this->wordPressManager->sanitizeTextField($formData['seo_title'] ?? $minisite->title),
-                    name: $this->wordPressManager->sanitizeTextField($formData['business_name'] ?? $minisite->name),
-                    city: $this->wordPressManager->sanitizeTextField($formData['business_city'] ?? $minisite->city),
-                    region: $this->wordPressManager->sanitizeTextField($formData['business_region'] ?? $minisite->region),
-                    countryCode: $this->wordPressManager->sanitizeTextField($formData['business_country'] ?? $minisite->countryCode),
-                    postalCode: $this->wordPressManager->sanitizeTextField($formData['business_postal'] ?? $minisite->postalCode),
+                    title: $this->getFormValueFromObject($formData, $minisite, 'seo_title', 'title'),
+                    name: $this->getFormValueFromObject($formData, $minisite, 'business_name', 'name'),
+                    city: $this->getFormValueFromObject($formData, $minisite, 'business_city', 'city'),
+                    region: $this->getFormValueFromObject($formData, $minisite, 'business_region', 'region'),
+                    countryCode: $this->getFormValueFromObject($formData, $minisite, 'business_country', 'countryCode'),
+                    postalCode: $this->getFormValueFromObject($formData, $minisite, 'business_postal', 'postalCode'),
                     geo: $geo,
-                    siteTemplate: $this->wordPressManager->sanitizeTextField($formData['site_template'] ?? $minisite->siteTemplate),
-                    palette: $this->wordPressManager->sanitizeTextField($formData['brand_palette'] ?? $minisite->palette),
-                    industry: $this->wordPressManager->sanitizeTextField($formData['brand_industry'] ?? $minisite->industry),
-                    defaultLocale: $this->wordPressManager->sanitizeTextField($formData['default_locale'] ?? $minisite->defaultLocale),
+                    siteTemplate: $this->getFormValueFromObject($formData, $minisite, 'site_template', 'siteTemplate'),
+                    palette: $this->getFormValueFromObject($formData, $minisite, 'brand_palette', 'palette'),
+                    industry: $this->getFormValueFromObject($formData, $minisite, 'brand_industry', 'industry'),
+                    defaultLocale: $this->getFormValueFromObject(
+                        $formData,
+                        $minisite,
+                        'default_locale',
+                        'defaultLocale'
+                    ),
                     schemaVersion: $minisite->schemaVersion,
                     siteVersion: $minisite->siteVersion,
-                    searchTerms: $this->wordPressManager->sanitizeTextField($formData['search_terms'] ?? $minisite->searchTerms)
+                    searchTerms: $this->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms')
                 );
 
                 $savedVersion = $this->wordPressManager->saveVersion($version);
@@ -232,8 +241,13 @@ class EditService
     /**
      * Helper function to get sanitized form data with fallback to existing value
      */
-    private function getFormValue(array $formData, array $existingData, string $formKey, ?string $existingKey = null, string $default = ''): string
-    {
+    private function getFormValue(
+        array $formData,
+        array $existingData,
+        string $formKey,
+        ?string $existingKey = null,
+        string $default = ''
+    ): string {
         $existingKey = $existingKey ?? $formKey;
         return $this->wordPressManager->sanitizeTextField(
             $formData[$formKey] ?? $existingData[$existingKey] ?? $default
@@ -243,8 +257,13 @@ class EditService
     /**
      * Helper function to get sanitized form data with fallback to object property
      */
-    private function getFormValueFromObject(array $formData, object $existingObject, string $formKey, string $propertyName, string $default = ''): string
-    {
+    private function getFormValueFromObject(
+        array $formData,
+        object $existingObject,
+        string $formKey,
+        string $propertyName,
+        string $default = ''
+    ): string {
         return $this->wordPressManager->sanitizeTextField(
             $formData[$formKey] ?? ($existingObject->$propertyName ?? $default)
         );
@@ -285,8 +304,10 @@ class EditService
         // Update contact coordinates if provided
         if (isset($formData['contact_lat']) || isset($formData['contact_lng'])) {
             $siteJson['contact'] = array_merge($siteJson['contact'] ?? [], [
-                'lat' => !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : ($siteJson['contact']['lat'] ?? null),
-                'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : ($siteJson['contact']['lng'] ?? null),
+                'lat' => !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : 
+                    ($siteJson['contact']['lat'] ?? null),
+                'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : 
+                    ($siteJson['contact']['lng'] ?? null),
             ]);
         }
 
@@ -294,7 +315,12 @@ class EditService
         if (isset($formData['brand_palette']) || isset($formData['brand_industry'])) {
             $siteJson['brand'] = array_merge($siteJson['brand'] ?? [], [
                 'palette' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_palette', 'palette'),
-                'industry' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_industry', 'industry'),
+                'industry' => $this->getFormValue(
+                    $formData,
+                    $siteJson['brand'] ?? [],
+                    'brand_industry',
+                    'industry'
+                ),
             ]);
         }
 
@@ -309,8 +335,18 @@ class EditService
         // Update settings if provided
         if (isset($formData['site_template']) || isset($formData['default_locale'])) {
             $siteJson['settings'] = array_merge($siteJson['settings'] ?? [], [
-                'template' => $this->getFormValue($formData, $siteJson['settings'] ?? [], 'site_template', 'template'),
-                'locale' => $this->getFormValue($formData, $siteJson['settings'] ?? [], 'default_locale', 'locale'),
+                'template' => $this->getFormValue(
+                    $formData,
+                    $siteJson['settings'] ?? [],
+                    'site_template',
+                    'template'
+                ),
+                'locale' => $this->getFormValue(
+                    $formData,
+                    $siteJson['settings'] ?? [],
+                    'default_locale',
+                    'locale'
+                ),
             ]);
         }
 
@@ -348,7 +384,7 @@ class EditService
             }
 
             // Update title if provided
-            $newTitle = $this->wordPressManager->sanitizeTextField($formData['seo_title'] ?? '');
+            $newTitle = $this->getFormValue($formData, [], 'seo_title', 'seo_title', '');
             if (!empty($newTitle) && $newTitle !== $minisite->title) {
                 $this->wordPressManager->updateTitle($siteId, $newTitle);
             }

@@ -128,7 +128,11 @@ class VersionService
     /**
      * Perform the actual version publishing (atomic operation)
      */
-    private function performPublishVersion(string $minisiteId, int $versionId, \Minisite\Domain\Entities\Version $version): void
+    private function performPublishVersion(
+        string $minisiteId,
+        int $versionId,
+        \Minisite\Domain\Entities\Version $version
+    ): void
     {
         global $wpdb;
 

@@ -80,7 +80,9 @@ final class WordPressListingManager
         $minisites = $this->minisiteRepository->listByOwner($userId, $limit, $offset);
 
         $result = array_map(function ($minisite) {
-            $route = $this->getHomeUrl('/b/' . rawurlencode($minisite->slugs->business) . '/' . rawurlencode($minisite->slugs->location));
+            $route = $this->getHomeUrl(
+                '/b/' . rawurlencode($minisite->slugs->business) . '/' . rawurlencode($minisite->slugs->location)
+            );
             $statusChip = $minisite->status === 'published' ? 'Published' : 'Draft';
 
             return [

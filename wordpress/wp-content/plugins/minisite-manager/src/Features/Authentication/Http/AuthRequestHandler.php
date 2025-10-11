@@ -48,7 +48,9 @@ final class AuthRequestHandler
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce()
             remember: isset($_POST['remember']),
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeUrl()
-            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard'))
+            redirectTo: $this->sanitizeUrl(
+                $_POST['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard')
+            )
         );
     }
 
@@ -73,7 +75,9 @@ final class AuthRequestHandler
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeInput()
             userPassword: $this->sanitizeInput($_POST['user_pass'] ?? ''),
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeUrl()
-            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard'))
+            redirectTo: $this->sanitizeUrl(
+                $_POST['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard')
+            )
         );
     }
 
