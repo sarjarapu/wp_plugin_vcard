@@ -229,11 +229,9 @@ final class ViewRenderer
         // This avoids direct wpdb access and follows the established pattern
         try {
             $reviews = $this->wordPressManager->getReviewsForMinisite($minisiteId);
-            error_log('MINISITE_VIEWER_DEBUG: Fetched ' . count($reviews) . ' reviews for minisite ' . $minisiteId);
             return $reviews;
         } catch (\Exception $e) {
             // If method doesn't exist or fails, return empty array
-            error_log('MINISITE_VIEWER_DEBUG: Failed to fetch reviews: ' . $e->getMessage());
             return [];
         }
     }

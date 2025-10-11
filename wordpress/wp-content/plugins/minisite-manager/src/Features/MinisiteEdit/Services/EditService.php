@@ -62,8 +62,6 @@ class EditService
     public function saveDraft(string $siteId, array $formData): object
     {
         try {
-            // Log incoming form data for debugging
-            error_log('MINISITE_EDIT_DEBUG: Form data received: ' . json_encode($formData, JSON_PRETTY_PRINT));
 
             // Validate form data
             $errors = $this->validateFormData($formData);
@@ -84,14 +82,10 @@ class EditService
             $minisite = $this->wordPressManager->findMinisiteById($siteId);
             $currentUser = $this->wordPressManager->getCurrentUser();
 
-            // Log existing siteJson for comparison
-            error_log('MINISITE_EDIT_DEBUG: Existing siteJson: ' . json_encode($minisite->siteJson, JSON_PRETTY_PRINT));
 
             // Build site JSON from form data
             $siteJson = $this->buildSiteJsonFromForm($formData, $siteId);
 
-            // Log built siteJson for debugging
-            error_log('MINISITE_EDIT_DEBUG: Built siteJson: ' . json_encode($siteJson, JSON_PRETTY_PRINT));
 
             // Handle coordinate fields
             $lat = !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : null;
@@ -246,8 +240,6 @@ class EditService
         $minisite = $this->wordPressManager->findMinisiteById($siteId);
         $existingSiteJson = $minisite && $minisite->siteJson ? $minisite->siteJson : [];
 
-        // Log existing siteJson structure for debugging
-        error_log('MINISITE_EDIT_DEBUG: Existing siteJson structure: ' . json_encode(array_keys($existingSiteJson), JSON_PRETTY_PRINT));
 
         // Start with existing siteJson to preserve all data
         $siteJson = $existingSiteJson;
@@ -302,9 +294,6 @@ class EditService
             ]);
         }
 
-        // Log final siteJson structure for debugging
-        error_log('MINISITE_EDIT_DEBUG: Final siteJson structure: ' . json_encode(array_keys($siteJson), JSON_PRETTY_PRINT));
-        error_log('MINISITE_EDIT_DEBUG: Final siteJson size: ' . strlen(json_encode($siteJson)) . ' characters');
 
         return $siteJson;
     }
