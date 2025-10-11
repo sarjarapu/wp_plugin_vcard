@@ -5,6 +5,7 @@
     "license": "proprietary",
     "require": {
         "php": ">=8.0",
+        "monolog/monolog": "^3.9",
         "timber/timber": "^2.0"
     },
     "require-dev": {

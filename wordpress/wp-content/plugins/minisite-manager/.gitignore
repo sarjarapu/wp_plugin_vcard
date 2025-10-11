@@ -16,6 +16,8 @@ coverage/
 # Logs
 *.log
 logs/
+wordpress/wp-content/minisite-logs/
+../../minisite-logs/
 
 # Temporary files
 *.tmp

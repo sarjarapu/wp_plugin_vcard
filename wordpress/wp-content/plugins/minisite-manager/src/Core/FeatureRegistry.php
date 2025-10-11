@@ -18,6 +18,7 @@ final class FeatureRegistry
         \Minisite\Features\MinisiteListing\MinisiteListingFeature::class,
         \Minisite\Features\VersionManagement\VersionManagementFeature::class,
         \Minisite\Features\MinisiteEdit\MinisiteEditFeature::class,
+        \Minisite\Features\NewMinisite\NewMinisiteFeature::class,
         // Future features
         // \Minisite\Features\Settings\SettingsFeature::class,
         // \Minisite\Features\Commerce\CommerceFeature::class,

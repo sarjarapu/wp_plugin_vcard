@@ -69,6 +69,18 @@ class MinisiteRepository implements MinisiteRepositoryInterface
     }
 
     /**
+     * Count minisites by owner
+     */
+    public function countByOwner(int $userId): int
+    {
+        $sql = $this->db->prepare(
+            "SELECT COUNT(*) FROM {$this->table()} WHERE created_by=%d",
+            $userId
+        );
+        return (int) $this->db->get_var($sql);
+    }
+
+    /**
      * Find minisite by ID
      */
     public function findById(string $id): ?Minisite

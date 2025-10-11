@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Features\MinisiteEdit\WordPress;
+namespace Minisite\Features\NewMinisite\WordPress;
 
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
@@ -8,14 +8,14 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 
 /**
- * WordPress Edit Manager
+ * WordPress New Minisite Manager
  *
- * SINGLE RESPONSIBILITY: Handle WordPress-specific edit operations
- * - Manages WordPress database interactions for editing
+ * SINGLE RESPONSIBILITY: Handle WordPress-specific new minisite operations
+ * - Manages WordPress database interactions for new minisite creation
  * - Provides clean interface for WordPress functions
  * - Handles user authentication and authorization
  */
-class WordPressEditManager implements WordPressManagerInterface
+class WordPressNewMinisiteManager implements WordPressManagerInterface
 {
     private ?MinisiteRepository $minisiteRepository = null;
     private ?VersionRepository $versionRepository = null;
@@ -23,7 +23,7 @@ class WordPressEditManager implements WordPressManagerInterface
     /**
      * Get minisite repository instance
      */
-    private function getMinisiteRepository(): MinisiteRepository
+    public function getMinisiteRepository(): MinisiteRepository
     {
         if ($this->minisiteRepository === null) {
             $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
@@ -148,50 +148,33 @@ class WordPressEditManager implements WordPressManagerInterface
      */
     public function getLoginRedirectUrl(): string
     {
-        $currentUrl = isset($_SERVER['REQUEST_URI']) ?
-            sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
-
-        return $this->getHomeUrl('/account/login?redirect_to=' . urlencode($currentUrl));
+        return wp_login_url($this->getHomeUrl('/account/sites/new'));
     }
 
     /**
-     * Find minisite by ID
+     * Check if user can create new minisites
      */
-    public function findMinisiteById(string $siteId): ?object
+    public function userCanCreateMinisite(int $userId): bool
     {
-        return $this->getMinisiteRepository()->findById($siteId);
+        // For now, allow all logged-in users to create minisites
+        // This can be extended with subscription checks, limits, etc.
+        return user_can($userId, 'read');
     }
 
     /**
-     * Find version by ID
+     * Get user's minisite count
      */
-    public function findVersionById(int $versionId): ?object
+    public function getUserMinisiteCount(int $userId): int
     {
-        return $this->getVersionRepository()->findById($versionId);
+        return $this->getMinisiteRepository()->countByOwner($userId);
     }
 
     /**
-     * Get latest draft for editing
+     * Get next version number for new minisite
      */
-    public function getLatestDraftForEditing(string $siteId): ?object
+    public function getNextVersionNumber(string $minisiteId): int
     {
-        return $this->getVersionRepository()->getLatestDraftForEditing($siteId);
-    }
-
-    /**
-     * Find latest draft
-     */
-    public function findLatestDraft(string $siteId): ?object
-    {
-        return $this->getVersionRepository()->findLatestDraft($siteId);
-    }
-
-    /**
-     * Get next version number
-     */
-    public function getNextVersionNumber(string $siteId): int
-    {
-        return $this->getVersionRepository()->getNextVersionNumber($siteId);
+        return $this->getVersionRepository()->getNextVersionNumber($minisiteId);
     }
 
     /**
@@ -227,19 +210,11 @@ class WordPressEditManager implements WordPressManagerInterface
     }
 
     /**
-     * Find published version
-     */
-    public function findPublishedVersion(string $siteId): ?object
-    {
-        return $this->getVersionRepository()->findPublishedVersion($siteId);
-    }
-
-    /**
      * Start database transaction
      */
     public function startTransaction(): void
     {
-        db::query('START TRANSACTION');
+        db::getWpdb()->query('START TRANSACTION');
     }
 
     /**
@@ -247,7 +222,7 @@ class WordPressEditManager implements WordPressManagerInterface
      */
     public function commitTransaction(): void
     {
-        db::query('COMMIT');
+        db::getWpdb()->query('COMMIT');
     }
 
     /**
@@ -255,22 +230,23 @@ class WordPressEditManager implements WordPressManagerInterface
      */
     public function rollbackTransaction(): void
     {
-        db::query('ROLLBACK');
+        db::getWpdb()->query('ROLLBACK');
     }
 
     /**
-     * Check if minisite has been published
+     * Find minisite by ID
+     */
+    public function findMinisiteById(string $siteId): ?object
+    {
+        return $this->getMinisiteRepository()->findById($siteId);
+    }
+
+    /**
+     * Check if minisite has been published (always false for new minisites)
      */
     public function hasBeenPublished(string $siteId): bool
     {
-        return $this->findPublishedVersion($siteId) !== null;
-    }
-
-    /**
-     * Check if user owns minisite
-     */
-    public function userOwnsMinisite(object $minisite, int $userId): bool
-    {
-        return $minisite->createdBy === $userId;
+        // New minisites have never been published
+        return false;
     }
 }
