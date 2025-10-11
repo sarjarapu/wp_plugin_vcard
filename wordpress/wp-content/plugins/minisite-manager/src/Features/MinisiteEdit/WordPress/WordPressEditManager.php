@@ -82,6 +82,22 @@ class WordPressEditManager
     }
 
     /**
+     * Sanitize URL field
+     */
+    public function sanitizeUrl(string $url): string
+    {
+        return esc_url_raw(wp_unslash($url));
+    }
+
+    /**
+     * Sanitize email field
+     */
+    public function sanitizeEmail(string $email): string
+    {
+        return sanitize_email(wp_unslash($email));
+    }
+
+    /**
      * Verify nonce
      */
     public function verifyNonce(string $nonce, string $action): bool
