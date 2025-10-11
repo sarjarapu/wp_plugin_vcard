@@ -53,7 +53,8 @@ class EditServiceTest extends TestCase
             'searchTerms' => 'test search',
             'schemaVersion' => 1,
             'siteVersion' => 1,
-            'slugs' => new \Minisite\Domain\ValueObjects\SlugPair('test', 'city')
+            'slugs' => new \Minisite\Domain\ValueObjects\SlugPair('test', 'city'),
+            'siteJson' => null
         ];
         $editingVersion = (object) [
             'siteJson' => ['test' => 'data'],
@@ -173,7 +174,8 @@ class EditServiceTest extends TestCase
             'searchTerms' => 'original search',
             'schemaVersion' => 1,
             'siteVersion' => 1,
-            'slugs' => new \Minisite\Domain\ValueObjects\SlugPair('test', 'city')
+            'slugs' => new \Minisite\Domain\ValueObjects\SlugPair('test', 'city'),
+            'siteJson' => null
         ];
         $savedVersion = (object) ['id' => 1, 'versionNumber' => 1];
 
@@ -182,7 +184,7 @@ class EditServiceTest extends TestCase
             ->with($this->anything(), 'minisite_edit')
             ->willReturn(true);
 
-        $this->mockWordPressManager->expects($this->once())
+        $this->mockWordPressManager->expects($this->exactly(2))
             ->method('findMinisiteById')
             ->with($siteId)
             ->willReturn($minisite);
@@ -190,6 +192,9 @@ class EditServiceTest extends TestCase
         $this->mockWordPressManager->expects($this->once())
             ->method('getCurrentUser')
             ->willReturn($currentUser);
+
+        $this->mockWordPressManager->expects($this->once())
+            ->method('startTransaction');
 
         $this->mockWordPressManager->expects($this->once())
             ->method('getNextVersionNumber')
@@ -210,6 +215,11 @@ class EditServiceTest extends TestCase
 
         $this->mockWordPressManager->expects($this->once())
             ->method('updateCoordinates');
+
+        $this->mockWordPressManager->expects($this->once())
+            ->method('commitTransaction');
+
+        $this->mockWordPressManager->method('rollbackTransaction');
 
         $this->mockWordPressManager->expects($this->once())
             ->method('updateTitle');
@@ -294,7 +304,8 @@ class EditServiceTest extends TestCase
             'searchTerms' => 'original search',
             'schemaVersion' => 1,
             'siteVersion' => 1,
-            'slugs' => new \Minisite\Domain\ValueObjects\SlugPair('test', 'city')
+            'slugs' => new \Minisite\Domain\ValueObjects\SlugPair('test', 'city'),
+            'siteJson' => null
         ];
         $savedVersion = (object) ['id' => 1, 'versionNumber' => 1];
 
@@ -303,7 +314,7 @@ class EditServiceTest extends TestCase
             ->with($this->anything(), 'minisite_edit')
             ->willReturn(true);
 
-        $this->mockWordPressManager->expects($this->once())
+        $this->mockWordPressManager->expects($this->exactly(2))
             ->method('findMinisiteById')
             ->with($siteId)
             ->willReturn($minisite);
@@ -311,6 +322,9 @@ class EditServiceTest extends TestCase
         $this->mockWordPressManager->expects($this->once())
             ->method('getCurrentUser')
             ->willReturn($currentUser);
+
+        $this->mockWordPressManager->expects($this->once())
+            ->method('startTransaction');
 
         $this->mockWordPressManager->expects($this->once())
             ->method('getNextVersionNumber')

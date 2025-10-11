@@ -39,7 +39,7 @@ final class ViewHooksFactory
             $timberRenderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE ?? 'v2025');
         }
 
-        $renderer = new \Minisite\Features\MinisiteViewer\Rendering\ViewRenderer($timberRenderer);
+        $renderer = new \Minisite\Features\MinisiteViewer\Rendering\ViewRenderer($timberRenderer, $wordPressManager);
 
         // Create controller
         $minisitePageController = new MinisitePageController(

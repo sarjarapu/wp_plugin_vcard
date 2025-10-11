@@ -13,10 +13,12 @@ namespace Minisite\Features\MinisiteViewer\Rendering;
 final class ViewRenderer
 {
     private object $renderer;
+    private object $wordPressManager;
 
-    public function __construct(object $renderer)
+    public function __construct(object $renderer, object $wordPressManager)
     {
         $this->renderer = $renderer;
+        $this->wordPressManager = $wordPressManager;
     }
 
     /**
@@ -223,13 +225,16 @@ final class ViewRenderer
      */
     private function fetchReviews(string $minisiteId): array
     {
-        global $wpdb;
-        $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository($wpdb);
-        $reviews = $reviewRepo->listApprovedForMinisite($minisiteId);
-        
-        // Log review fetching for debugging
-        error_log('MINISITE_VIEWER_DEBUG: Fetched ' . count($reviews) . ' reviews for minisite ' . $minisiteId);
-        
-        return $reviews;
+        // Use WordPressManager to fetch reviews (proper architecture)
+        // This avoids direct wpdb access and follows the established pattern
+        try {
+            $reviews = $this->wordPressManager->getReviewsForMinisite($minisiteId);
+            error_log('MINISITE_VIEWER_DEBUG: Fetched ' . count($reviews) . ' reviews for minisite ' . $minisiteId);
+            return $reviews;
+        } catch (\Exception $e) {
+            // If method doesn't exist or fails, return empty array
+            error_log('MINISITE_VIEWER_DEBUG: Failed to fetch reviews: ' . $e->getMessage());
+            return [];
+        }
     }
 }

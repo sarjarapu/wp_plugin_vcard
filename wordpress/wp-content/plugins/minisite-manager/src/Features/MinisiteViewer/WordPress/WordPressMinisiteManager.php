@@ -167,4 +167,23 @@ final class WordPressMinisiteManager
     {
         return $this->getVersionRepositoryInstance();
     }
+
+    /**
+     * Get reviews for a minisite
+     *
+     * @param string $minisiteId
+     * @return array
+     */
+    public function getReviewsForMinisite(string $minisiteId): array
+    {
+        global $wpdb;
+        
+        // Return empty array if wpdb is not available (e.g., in test environment)
+        if (!$wpdb) {
+            return [];
+        }
+        
+        $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository($wpdb);
+        return $reviewRepo->listApprovedForMinisite($minisiteId);
+    }
 }

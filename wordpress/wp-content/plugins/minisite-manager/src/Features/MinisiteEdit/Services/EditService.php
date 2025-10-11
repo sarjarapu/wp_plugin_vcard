@@ -243,7 +243,7 @@ public function saveDraft(string $siteId, array $formData): object
     {
         // Get existing siteJson to preserve all data
         $minisite = $this->wordPressManager->findMinisiteById($siteId);
-        $existingSiteJson = $minisite ? $minisite->siteJson : [];
+        $existingSiteJson = $minisite && $minisite->siteJson ? $minisite->siteJson : [];
         
         // Log existing siteJson structure for debugging
         error_log('MINISITE_EDIT_DEBUG: Existing siteJson structure: ' . json_encode(array_keys($existingSiteJson), JSON_PRETTY_PRINT));
