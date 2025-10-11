@@ -44,7 +44,13 @@ class MinisiteDatabaseCoordinator
             case 'edit_draft':
                 return $this->updateDraftVersion($minisiteId, $formData, $minisite, $currentUser, $hasBeenPublished);
             case 'edit_published':
-                return $this->updatePublishedMinisite($minisiteId, $formData, $minisite, $currentUser, $hasBeenPublished);
+                return $this->updatePublishedMinisite(
+                    $minisiteId,
+                    $formData,
+                    $minisite,
+                    $currentUser,
+                    $hasBeenPublished
+                );
             case 'publish_draft':
                 return $this->publishDraftMinisite($minisiteId, $formData, $minisite, $currentUser);
             default:
@@ -116,16 +122,61 @@ class MinisiteDatabaseCoordinator
                 siteJson: $siteJson,
                 // Profile fields from form data
                 slugs: $slugs,
-                title: $formProcessor->getFormValueFromObject($formData, $minisite, 'seo_title', 'title'),
-                name: $formProcessor->getFormValueFromObject($formData, $minisite, 'business_name', 'name'),
-                city: $formProcessor->getFormValueFromObject($formData, $minisite, 'business_city', 'city'),
-                region: $formProcessor->getFormValueFromObject($formData, $minisite, 'business_region', 'region'),
-                countryCode: $formProcessor->getFormValueFromObject($formData, $minisite, 'business_country', 'countryCode'),
-                postalCode: $formProcessor->getFormValueFromObject($formData, $minisite, 'business_postal', 'postalCode'),
+                title: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'seo_title',
+                    'title'
+                ),
+                name: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_name',
+                    'name'
+                ),
+                city: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_city',
+                    'city'
+                ),
+                region: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_region',
+                    'region'
+                ),
+                countryCode: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_country',
+                    'countryCode'
+                ),
+                postalCode: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_postal',
+                    'postalCode'
+                ),
                 geo: $geo,
-                siteTemplate: $formProcessor->getFormValueFromObject($formData, $minisite, 'site_template', 'siteTemplate'),
-                palette: $formProcessor->getFormValueFromObject($formData, $minisite, 'brand_palette', 'palette'),
-                industry: $formProcessor->getFormValueFromObject($formData, $minisite, 'brand_industry', 'industry'),
+                siteTemplate: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'site_template',
+                    'siteTemplate'
+                ),
+                palette: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'brand_palette',
+                    'palette'
+                ),
+                industry: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'brand_industry',
+                    'industry'
+                ),
                 defaultLocale: $formProcessor->getFormValueFromObject(
                     $formData,
                     $minisite,
@@ -140,7 +191,16 @@ class MinisiteDatabaseCoordinator
             $savedVersion = $this->wordPressManager->saveVersion($version);
 
             // Update main table for unpublished minisites
-            $this->updateMainTableIfNeeded($minisiteId, $formData, $minisite, $currentUser, $lat, $lng, $formProcessor, $hasBeenPublished);
+            $this->updateMainTableIfNeeded(
+                $minisiteId,
+                $formData,
+                $minisite,
+                $currentUser,
+                $lat,
+                $lng,
+                $formProcessor,
+                $hasBeenPublished
+            );
 
             $this->wordPressManager->commitTransaction();
 
@@ -180,7 +240,9 @@ class MinisiteDatabaseCoordinator
     ): object {
         // This will be implemented when we handle publishing functionality
         // For now, throw an exception to indicate it's not implemented yet
-        throw new \RuntimeException('Publish draft functionality not implemented yet - will be handled by publishing feature');
+        throw new \RuntimeException(
+            'Publish draft functionality not implemented yet - will be handled by publishing feature'
+        );
     }
 
     /**
@@ -199,26 +261,66 @@ class MinisiteDatabaseCoordinator
         if (!$hasBeenPublished) {
             // For new minisites: Update main table so preview works with imported data
             $businessInfoFields = [
-                'name' => $formProcessor->getFormValueFromObject($formData, $minisite, 'business_name', 'name'),
-                'city' => $formProcessor->getFormValueFromObject($formData, $minisite, 'business_city', 'city'),
-                'region' => $formProcessor->getFormValueFromObject($formData, $minisite, 'business_region', 'region'),
+                'name' => $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_name',
+                    'name'
+                ),
+                'city' => $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_city',
+                    'city'
+                ),
+                'region' => $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_region',
+                    'region'
+                ),
                 'country_code' => $formProcessor->getFormValueFromObject(
                     $formData,
                     $minisite,
                     'business_country',
                     'countryCode'
                 ),
-                'postal_code' => $formProcessor->getFormValueFromObject($formData, $minisite, 'business_postal', 'postalCode'),
-                'site_template' => $formProcessor->getFormValueFromObject($formData, $minisite, 'site_template', 'siteTemplate'),
-                'palette' => $formProcessor->getFormValueFromObject($formData, $minisite, 'brand_palette', 'palette'),
-                'industry' => $formProcessor->getFormValueFromObject($formData, $minisite, 'brand_industry', 'industry'),
+                'postal_code' => $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_postal',
+                    'postalCode'
+                ),
+                'site_template' => $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'site_template',
+                    'siteTemplate'
+                ),
+                'palette' => $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'brand_palette',
+                    'palette'
+                ),
+                'industry' => $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'brand_industry',
+                    'industry'
+                ),
                 'default_locale' => $formProcessor->getFormValueFromObject(
                     $formData,
                     $minisite,
                     'default_locale',
                     'defaultLocale'
                 ),
-                'search_terms' => $formProcessor->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms'),
+                'search_terms' => $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'search_terms',
+                    'searchTerms'
+                ),
             ];
 
             $this->wordPressManager->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
