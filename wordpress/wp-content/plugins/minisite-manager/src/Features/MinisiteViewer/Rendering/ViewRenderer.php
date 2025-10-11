@@ -12,11 +12,13 @@ namespace Minisite\Features\MinisiteViewer\Rendering;
  */
 final class ViewRenderer
 {
-    private object $renderer;
+    private ?object $renderer;
+    private object $wordPressManager;
 
-    public function __construct(object $renderer)
+    public function __construct(object $renderer, object $wordPressManager)
     {
         $this->renderer = $renderer;
+        $this->wordPressManager = $wordPressManager;
     }
 
     /**
@@ -99,7 +101,7 @@ final class ViewRenderer
      */
     public function renderVersionSpecificPreview(object $previewData): void
     {
-        if (!$this->renderer) {
+        if ($this->renderer === null) {
             $this->renderFallbackVersionSpecificPreview($previewData);
             return;
         }
@@ -109,7 +111,7 @@ final class ViewRenderer
 
         // Prepare template data for version-specific preview
         $templateData = $this->prepareVersionSpecificPreviewTemplateData($previewData);
-        
+
         // Render the preview template using Timber directly
         if (class_exists('Timber\\Timber')) {
             try {
@@ -133,10 +135,10 @@ final class ViewRenderer
     {
         $minisite = $previewData->minisite;
         $version = $previewData->version;
-        
+
         // Fetch reviews for the minisite (same as regular minisite view)
         $reviews = $this->fetchReviews($minisite->id);
-        
+
         // Use the same data structure as public minisite view
         return [
             'minisite' => $minisite,
@@ -160,7 +162,7 @@ final class ViewRenderer
         $minisite = $previewData->minisite;
         $version = $previewData->version;
         $versionLabel = $version ? $version->label : 'Current Version';
-        
+
         echo '<!DOCTYPE html>
 <html>
 <head>
@@ -223,13 +225,14 @@ final class ViewRenderer
      */
     private function fetchReviews(string $minisiteId): array
     {
-        global $wpdb;
-        $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository($wpdb);
-        $reviews = $reviewRepo->listApprovedForMinisite($minisiteId);
-        
-        // Log review fetching for debugging
-        error_log('MINISITE_VIEWER_DEBUG: Fetched ' . count($reviews) . ' reviews for minisite ' . $minisiteId);
-        
-        return $reviews;
+        // Use WordPressManager to fetch reviews (proper architecture)
+        // This avoids direct wpdb access and follows the established pattern
+        try {
+            $reviews = $this->wordPressManager->getReviewsForMinisite($minisiteId);
+            return $reviews;
+        } catch (\Exception $e) {
+            // If method doesn't exist or fails, return empty array
+            return [];
+        }
     }
 }

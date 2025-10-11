@@ -323,7 +323,7 @@ class EditControllerTest extends TestCase
 
         foreach ($functions as $function) {
             if (!function_exists($function)) {
-                eval("
+                $code = "
                     function {$function}(...\$args) {
                         if (isset(\$GLOBALS['_test_mock_{$function}'])) {
                             return \$GLOBALS['_test_mock_{$function}'];
@@ -333,7 +333,8 @@ class EditControllerTest extends TestCase
                         }
                         return null;
                     }
-                ");
+                ";
+                eval($code);
             }
         }
     }

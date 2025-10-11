@@ -33,11 +33,20 @@ final class ViewRendererTest extends TestCase
 {
     private ViewRenderer $displayRenderer;
     private $mockTimberRenderer;
+    private $mockWordPressManager;
 
     protected function setUp(): void
     {
         $this->mockTimberRenderer = $this->createMock(\Minisite\Application\Rendering\TimberRenderer::class);
-        $this->displayRenderer = new ViewRenderer($this->mockTimberRenderer);
+        $this->mockWordPressManager = $this->getMockBuilder(\stdClass::class)
+            ->addMethods(['getReviewsForMinisite'])
+            ->getMock();
+        
+        // Mock the getReviewsForMinisite method
+        $this->mockWordPressManager->method('getReviewsForMinisite')
+            ->willReturn([]);
+            
+        $this->displayRenderer = new ViewRenderer($this->mockTimberRenderer, $this->mockWordPressManager);
         $this->setupWordPressMocks();
     }
 
@@ -68,7 +77,11 @@ final class ViewRendererTest extends TestCase
     public function test_render_minisite_with_object_no_render_method(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $displayRenderer = new ViewRenderer($mockRenderer);
+        $mockWordPressManager = $this->getMockBuilder(\stdClass::class)
+            ->addMethods(['getReviewsForMinisite'])
+            ->getMock();
+        $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
         $mockMinisite = (object)[
             'id' => '123',
             'name' => 'Coffee Shop',
@@ -92,7 +105,11 @@ final class ViewRendererTest extends TestCase
     public function test_render_minisite_with_empty_minisite_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $displayRenderer = new ViewRenderer($mockRenderer);
+        $mockWordPressManager = $this->getMockBuilder(\stdClass::class)
+            ->addMethods(['getReviewsForMinisite'])
+            ->getMock();
+        $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
         $mockMinisite = (object)[
             'id' => '123',
             'name' => '',
@@ -116,7 +133,11 @@ final class ViewRendererTest extends TestCase
     public function test_render_minisite_with_null_minisite_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $displayRenderer = new ViewRenderer($mockRenderer);
+        $mockWordPressManager = $this->getMockBuilder(\stdClass::class)
+            ->addMethods(['getReviewsForMinisite'])
+            ->getMock();
+        $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
         $mockMinisite = (object)[
             'id' => '123',
             'name' => null,
@@ -140,7 +161,11 @@ final class ViewRendererTest extends TestCase
     public function test_render_minisite_with_special_characters_in_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $displayRenderer = new ViewRenderer($mockRenderer);
+        $mockWordPressManager = $this->getMockBuilder(\stdClass::class)
+            ->addMethods(['getReviewsForMinisite'])
+            ->getMock();
+        $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
         $mockMinisite = (object)[
             'id' => '123',
             'name' => 'Café & Restaurant <script>alert("xss")</script>',
@@ -276,10 +301,11 @@ final class ViewRendererTest extends TestCase
         $constructor = $reflection->getConstructor();
         
         $this->assertNotNull($constructor);
-        $this->assertEquals(1, $constructor->getNumberOfParameters());
+        $this->assertEquals(2, $constructor->getNumberOfParameters());
         
         $params = $constructor->getParameters();
         $this->assertEquals('object', $params[0]->getType()->getName());
+        $this->assertEquals('object', $params[1]->getType()->getName());
     }
 
     /**

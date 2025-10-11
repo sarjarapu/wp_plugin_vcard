@@ -39,6 +39,32 @@ class VersionRequestHandler
     }
 
     /**
+     * Safely get and sanitize POST data
+     */
+    private function getPostData(string $key, string $default = ''): string
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified before calling this method
+        return $this->wordPressManager->sanitizeTextField(wp_unslash($_POST[$key] ?? $default));
+    }
+
+    /**
+     * Safely get and sanitize POST data as integer
+     */
+    private function getPostDataInt(string $key, int $default = 0): int
+    {
+        return (int) $this->getPostData($key, (string) $default);
+    }
+
+    /**
+     * Verify nonce for form submissions
+     */
+    private function verifyNonce(): bool
+    {
+        $nonce = $this->getPostData('nonce');
+        return $this->wordPressManager->verifyNonce($nonce, 'minisite_version');
+    }
+
+    /**
      * Parse request for creating draft
      */
     public function parseCreateDraftRequest(): ?CreateDraftCommand
@@ -47,11 +73,12 @@ class VersionRequestHandler
             return null;
         }
 
-        if (!$this->wordPressManager->verifyNonce($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+        // Verify nonce first before processing any form data
+        if (!$this->verifyNonce()) {
             return null;
         }
 
-        $siteId = $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['site_id'] ?? ''));
+        $siteId = $this->getPostData('site_id');
         if (!$siteId) {
             return null;
         }
@@ -61,8 +88,9 @@ class VersionRequestHandler
             return null;
         }
 
-        $label = $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['label'] ?? ''));
-        $comment = $this->wordPressManager->sanitizeTextareaField($this->wordPressManager->unslash($_POST['version_comment'] ?? ''));
+        $label = $this->getPostData('label');
+        $comment = $this->getPostData('version_comment');
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
         $siteJson = $this->buildSiteJsonFromForm($_POST);
 
         return new CreateDraftCommand(
@@ -83,12 +111,13 @@ class VersionRequestHandler
             return null;
         }
 
-        if (!$this->wordPressManager->verifyNonce($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+        // Verify nonce first before processing any form data
+        if (!$this->verifyNonce()) {
             return null;
         }
 
-        $siteId = $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['site_id'] ?? ''));
-        $versionId = (int) ($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['version_id'] ?? 0)));
+        $siteId = $this->getPostData('site_id');
+        $versionId = $this->getPostDataInt('version_id');
 
         if (!$siteId || !$versionId) {
             return null;
@@ -111,12 +140,13 @@ class VersionRequestHandler
             return null;
         }
 
-        if (!$this->wordPressManager->verifyNonce($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['nonce'] ?? '')), 'minisite_version')) {
+        // Verify nonce first before processing any form data
+        if (!$this->verifyNonce()) {
             return null;
         }
 
-        $siteId = $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['site_id'] ?? ''));
-        $sourceVersionId = (int) ($this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($_POST['source_version_id'] ?? 0)));
+        $siteId = $this->getPostData('site_id');
+        $sourceVersionId = $this->getPostDataInt('source_version_id');
 
         if (!$siteId || !$sourceVersionId) {
             return null;
@@ -131,26 +161,53 @@ class VersionRequestHandler
     }
 
     /**
+     * Safely get form data with default value
+     */
+    private function getFormData(array $formData, string $key, string $default = ''): string
+    {
+        $value = sanitize_text_field(wp_unslash($formData[$key] ?? $default));
+        return $value ?? $default;
+    }
+
+    /**
+     * Safely get form data as URL
+     */
+    private function getFormDataUrl(array $formData, string $key, string $default = ''): string
+    {
+        $value = esc_url_raw(wp_unslash($formData[$key] ?? $default));
+        return $value ?? $default;
+    }
+
+    /**
+     * Safely get form data as textarea
+     */
+    private function getFormDataTextarea(array $formData, string $key, string $default = ''): string
+    {
+        $value = sanitize_textarea_field(wp_unslash($formData[$key] ?? $default));
+        return $value ?? $default;
+    }
+
+    /**
      * Build site JSON from form data
      */
     private function buildSiteJsonFromForm(array $formData): array
     {
         return array(
             'seo' => array(
-                'title' => sanitize_text_field($formData['seo_title'] ?? ''),
-                'description' => sanitize_textarea_field($formData['seo_description'] ?? ''),
-                'keywords' => sanitize_text_field($formData['seo_keywords'] ?? ''),
+                'title' => $this->getFormData($formData, 'seo_title'),
+                'description' => $this->getFormDataTextarea($formData, 'seo_description'),
+                'keywords' => $this->getFormData($formData, 'seo_keywords'),
             ),
             'brand' => array(
-                'name' => sanitize_text_field($formData['brand_name'] ?? ''),
-                'logo' => esc_url_raw($formData['brand_logo'] ?? ''),
-                'palette' => sanitize_text_field($formData['brand_palette'] ?? 'blue'),
-                'industry' => sanitize_text_field($formData['brand_industry'] ?? 'services'),
+                'name' => $this->getFormData($formData, 'brand_name'),
+                'logo' => $this->getFormDataUrl($formData, 'brand_logo'),
+                'palette' => $this->getFormData($formData, 'brand_palette', 'blue'),
+                'industry' => $this->getFormData($formData, 'brand_industry', 'services'),
             ),
             'hero' => array(
-                'heading' => sanitize_text_field($formData['hero_heading'] ?? ''),
-                'subheading' => sanitize_textarea_field($formData['hero_subheading'] ?? ''),
-                'image' => esc_url_raw($formData['hero_image'] ?? ''),
+                'heading' => $this->getFormData($formData, 'hero_heading'),
+                'subheading' => $this->getFormDataTextarea($formData, 'hero_subheading'),
+                'image' => $this->getFormDataUrl($formData, 'hero_image'),
             ),
         );
     }

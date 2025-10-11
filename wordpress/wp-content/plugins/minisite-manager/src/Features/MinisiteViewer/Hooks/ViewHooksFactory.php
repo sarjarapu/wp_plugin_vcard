@@ -36,10 +36,11 @@ final class ViewHooksFactory
         // Create the Timber renderer (following the same pattern as main plugin)
         $timberRenderer = null;
         if (class_exists('Timber\Timber') && class_exists(\Minisite\Application\Rendering\TimberRenderer::class)) {
-            $timberRenderer = new \Minisite\Application\Rendering\TimberRenderer(MINISITE_DEFAULT_TEMPLATE ?? 'v2025');
+            $template = defined('MINISITE_DEFAULT_TEMPLATE') ? MINISITE_DEFAULT_TEMPLATE : 'v2025';
+            $timberRenderer = new \Minisite\Application\Rendering\TimberRenderer($template);
         }
 
-        $renderer = new \Minisite\Features\MinisiteViewer\Rendering\ViewRenderer($timberRenderer);
+        $renderer = new \Minisite\Features\MinisiteViewer\Rendering\ViewRenderer($timberRenderer, $wordPressManager);
 
         // Create controller
         $minisitePageController = new MinisitePageController(

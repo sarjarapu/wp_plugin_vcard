@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  dependencies:
+    name: Dependencies
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json, mbstring, pdo
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: wordpress/wp-content/plugins/minisite-manager/vendor
+        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('wordpress/wp-content/plugins/minisite-manager/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-8.2-composer-
+    
+    - name: Install dependencies
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer install --prefer-dist --no-progress
+    
+    - name: Security audit
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer audit
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json, mbstring, pdo
+        coverage: xdebug
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: wordpress/wp-content/plugins/minisite-manager/vendor
+        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('wordpress/wp-content/plugins/minisite-manager/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-8.2-composer-
+    
+    - name: Install dependencies
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer install --prefer-dist --no-progress
+    
+    - name: Run tests
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer test
+
+  quality:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.2'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json, mbstring, pdo
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: wordpress/wp-content/plugins/minisite-manager/vendor
+        key: ${{ runner.os }}-php-8.2-composer-${{ hashFiles('wordpress/wp-content/plugins/minisite-manager/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-8.2-composer-
+    
+    - name: Install dependencies
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer install --prefer-dist --no-progress
+    
+    - name: Static analysis
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer analyze
+    
+    - name: Code style
+      run: cd wordpress/wp-content/plugins/minisite-manager && composer lint

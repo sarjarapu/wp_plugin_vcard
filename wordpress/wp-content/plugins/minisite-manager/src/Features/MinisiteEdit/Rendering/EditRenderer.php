@@ -154,7 +154,14 @@ class EditRenderer
         input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         .error { color: red; margin-bottom: 20px; }
         .success { color: green; margin-bottom: 20px; }
-        button { background: #0073aa; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button { 
+            background: #0073aa; 
+            color: white; 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+        }
     </style>
 </head>
 <body>
@@ -169,16 +176,19 @@ class EditRenderer
         }
 
         echo '<form method="POST">
-        <input type="hidden" name="minisite_edit_nonce" value="' . esc_attr(wp_create_nonce('minisite_edit')) . '">
+        <input type="hidden" name="minisite_edit_nonce" 
+            value="' . esc_attr(wp_create_nonce('minisite_edit')) . '">
         
         <div class="form-group">
             <label for="business_name">Business Name:</label>
-            <input type="text" id="business_name" name="business_name" value="' . esc_attr($profile->name ?? '') . '" required>
+            <input type="text" id="business_name" name="business_name" 
+                value="' . esc_attr($profile->name ?? '') . '" required>
         </div>
         
         <div class="form-group">
             <label for="business_city">City:</label>
-            <input type="text" id="business_city" name="business_city" value="' . esc_attr($profile->city ?? '') . '" required>
+            <input type="text" id="business_city" name="business_city" 
+                value="' . esc_attr($profile->city ?? '') . '" required>
         </div>
         
         <div class="form-group">
@@ -188,12 +198,14 @@ class EditRenderer
         
         <div class="form-group">
             <label for="version_label">Version Label:</label>
-            <input type="text" id="version_label" name="version_label" value="' . esc_attr($editData->editingVersion?->label ?? '') . '">
+            <input type="text" id="version_label" name="version_label" 
+                   value="' . esc_attr($editData->editingVersion?->label ?? '') . '">
         </div>
         
         <div class="form-group">
             <label for="version_comment">Version Comment:</label>
-            <textarea id="version_comment" name="version_comment">' . esc_textarea($editData->editingVersion?->comment ?? '') . '</textarea>
+            <textarea id="version_comment" name="version_comment">' .
+                esc_textarea($editData->editingVersion?->comment ?? '') . '</textarea>
         </div>
         
         <button type="submit">Save Draft</button>
@@ -225,5 +237,4 @@ class EditRenderer
 </body>
 </html>';
     }
-
 }

@@ -70,17 +70,8 @@ class VersionRequestHandlerTest extends TestCase
             ->willReturn(true);
         
         $this->wordPressManager
-            ->expects($this->exactly(3))
+            ->expects($this->atLeast(3))
             ->method('sanitizeTextField')
-            ->willReturnMap([
-                ['valid-nonce', 'valid-nonce'],
-                ['test-site-123', 'test-site-123'],
-                ['Test Version', 'Test Version']
-            ]);
-        
-        $this->wordPressManager
-            ->expects($this->exactly(4))
-            ->method('unslash')
             ->willReturnMap([
                 ['valid-nonce', 'valid-nonce'],
                 ['test-site-123', 'test-site-123'],
@@ -88,11 +79,9 @@ class VersionRequestHandlerTest extends TestCase
                 ['Test comment', 'Test comment']
             ]);
         
-        $this->wordPressManager
-            ->expects($this->once())
-            ->method('sanitizeTextareaField')
-            ->with('Test comment')
-            ->willReturn('Test comment');
+        // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
+        
+        // Note: sanitizeTextareaField is now handled by helper functions, not directly called
         
         $this->wordPressManager
             ->expects($this->once())
@@ -126,7 +115,7 @@ class VersionRequestHandlerTest extends TestCase
             ->willReturn(true);
         
         $this->wordPressManager
-            ->expects($this->exactly(3))
+            ->expects($this->atLeast(3))
             ->method('sanitizeTextField')
             ->willReturnMap([
                 ['valid-nonce', 'valid-nonce'],
@@ -134,14 +123,7 @@ class VersionRequestHandlerTest extends TestCase
                 ['789', '789']
             ]);
         
-        $this->wordPressManager
-            ->expects($this->exactly(3))
-            ->method('unslash')
-            ->willReturnMap([
-                ['valid-nonce', 'valid-nonce'],
-                ['test-site-123', 'test-site-123'],
-                ['789', '789']
-            ]);
+        // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
         
         $this->wordPressManager
             ->expects($this->once())
@@ -174,7 +156,7 @@ class VersionRequestHandlerTest extends TestCase
             ->willReturn(true);
         
         $this->wordPressManager
-            ->expects($this->exactly(3))
+            ->expects($this->atLeast(3))
             ->method('sanitizeTextField')
             ->willReturnMap([
                 ['valid-nonce', 'valid-nonce'],
@@ -182,14 +164,7 @@ class VersionRequestHandlerTest extends TestCase
                 ['789', '789']
             ]);
         
-        $this->wordPressManager
-            ->expects($this->exactly(3))
-            ->method('unslash')
-            ->willReturnMap([
-                ['valid-nonce', 'valid-nonce'],
-                ['test-site-123', 'test-site-123'],
-                ['789', '789']
-            ]);
+        // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
         
         $this->wordPressManager
             ->expects($this->once())

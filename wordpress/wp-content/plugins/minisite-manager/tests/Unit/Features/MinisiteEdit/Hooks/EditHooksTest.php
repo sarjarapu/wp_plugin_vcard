@@ -97,10 +97,11 @@ class EditHooksTest extends TestCase
         // Since the hooks calls exit, we need to expect it
         $this->expectException(\Exception::class);
         
-        // Mock exit to throw exception for testing
-        Functions\when('exit')->justReturn(function () {
-            throw new \Exception('Exit called');
-        });
+        // Mock the redirect method to throw an exception instead of calling exit
+        $this->mockWordPressManager->method('redirect')
+            ->willReturnCallback(function($url) {
+                throw new \Exception('Redirect called with URL: ' . $url);
+            });
         
         $this->mockEditController->expects($this->once())
             ->method('handleEdit');
@@ -148,9 +149,11 @@ class EditHooksTest extends TestCase
 
         $this->expectException(\Exception::class);
         
-        Functions\when('exit')->justReturn(function () {
-            throw new \Exception('Exit called');
-        });
+        // Mock the redirect method to throw an exception instead of calling exit
+        $this->mockWordPressManager->method('redirect')
+            ->willReturnCallback(function($url) {
+                throw new \Exception('Redirect called with URL: ' . $url);
+            });
         
         $this->mockEditController->expects($this->once())
             ->method('handleEdit');

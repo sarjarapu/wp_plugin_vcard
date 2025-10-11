@@ -59,12 +59,9 @@ class EditService
     /**
      * Save draft version
      */
-public function saveDraft(string $siteId, array $formData): object
+    public function saveDraft(string $siteId, array $formData): object
     {
         try {
-            // Log incoming form data for debugging
-            error_log('MINISITE_EDIT_DEBUG: Form data received: ' . json_encode($formData, JSON_PRETTY_PRINT));
-            
             // Validate form data
             $errors = $this->validateFormData($formData);
             if (!empty($errors)) {
@@ -84,14 +81,10 @@ public function saveDraft(string $siteId, array $formData): object
             $minisite = $this->wordPressManager->findMinisiteById($siteId);
             $currentUser = $this->wordPressManager->getCurrentUser();
 
-            // Log existing siteJson for comparison
-            error_log('MINISITE_EDIT_DEBUG: Existing siteJson: ' . json_encode($minisite->siteJson, JSON_PRETTY_PRINT));
 
             // Build site JSON from form data
             $siteJson = $this->buildSiteJsonFromForm($formData, $siteId);
-            
-            // Log built siteJson for debugging
-            error_log('MINISITE_EDIT_DEBUG: Built siteJson: ' . json_encode($siteJson, JSON_PRETTY_PRINT));
+
 
             // Handle coordinate fields
             $lat = !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : null;
@@ -116,8 +109,12 @@ public function saveDraft(string $siteId, array $formData): object
                     minisiteId: $siteId,
                     versionNumber: $nextVersion,
                     status: 'draft',
-                    label: $this->wordPressManager->sanitizeTextField($formData['version_label'] ?? "Version {$nextVersion}"),
-                    comment: $this->wordPressManager->sanitizeTextareaField($formData['version_comment'] ?? ''),
+                    label: $this->wordPressManager->sanitizeTextField(
+                        $formData['version_label'] ?? "Version {$nextVersion}"
+                    ),
+                    comment: $this->wordPressManager->sanitizeTextareaField(
+                        $formData['version_comment'] ?? ''
+                    ),
                     createdBy: (int) $currentUser->ID,
                     createdAt: null,
                     publishedAt: null,
@@ -125,20 +122,25 @@ public function saveDraft(string $siteId, array $formData): object
                     siteJson: $siteJson,
                     // Profile fields from form data
                     slugs: $slugs,
-                    title: $this->wordPressManager->sanitizeTextField($formData['seo_title'] ?? $minisite->title),
-                    name: $this->wordPressManager->sanitizeTextField($formData['business_name'] ?? $minisite->name),
-                    city: $this->wordPressManager->sanitizeTextField($formData['business_city'] ?? $minisite->city),
-                    region: $this->wordPressManager->sanitizeTextField($formData['business_region'] ?? $minisite->region),
-                    countryCode: $this->wordPressManager->sanitizeTextField($formData['business_country'] ?? $minisite->countryCode),
-                    postalCode: $this->wordPressManager->sanitizeTextField($formData['business_postal'] ?? $minisite->postalCode),
+                    title: $this->getFormValueFromObject($formData, $minisite, 'seo_title', 'title'),
+                    name: $this->getFormValueFromObject($formData, $minisite, 'business_name', 'name'),
+                    city: $this->getFormValueFromObject($formData, $minisite, 'business_city', 'city'),
+                    region: $this->getFormValueFromObject($formData, $minisite, 'business_region', 'region'),
+                    countryCode: $this->getFormValueFromObject($formData, $minisite, 'business_country', 'countryCode'),
+                    postalCode: $this->getFormValueFromObject($formData, $minisite, 'business_postal', 'postalCode'),
                     geo: $geo,
-                    siteTemplate: $this->wordPressManager->sanitizeTextField($formData['site_template'] ?? $minisite->siteTemplate),
-                    palette: $this->wordPressManager->sanitizeTextField($formData['brand_palette'] ?? $minisite->palette),
-                    industry: $this->wordPressManager->sanitizeTextField($formData['brand_industry'] ?? $minisite->industry),
-                    defaultLocale: $this->wordPressManager->sanitizeTextField($formData['default_locale'] ?? $minisite->defaultLocale),
+                    siteTemplate: $this->getFormValueFromObject($formData, $minisite, 'site_template', 'siteTemplate'),
+                    palette: $this->getFormValueFromObject($formData, $minisite, 'brand_palette', 'palette'),
+                    industry: $this->getFormValueFromObject($formData, $minisite, 'brand_industry', 'industry'),
+                    defaultLocale: $this->getFormValueFromObject(
+                        $formData,
+                        $minisite,
+                        'default_locale',
+                        'defaultLocale'
+                    ),
                     schemaVersion: $minisite->schemaVersion,
                     siteVersion: $minisite->siteVersion,
-                    searchTerms: $this->wordPressManager->sanitizeTextField($formData['search_terms'] ?? $minisite->searchTerms)
+                    searchTerms: $this->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms')
                 );
 
                 $savedVersion = $this->wordPressManager->saveVersion($version);
@@ -158,8 +160,8 @@ public function saveDraft(string $siteId, array $formData): object
             }
         } catch (\Exception $e) {
             return (object) [
-                'success' => false,
-                'errors' => ['Failed to save draft: ' . $e->getMessage()]
+            'success' => false,
+            'errors' => ['Failed to save draft: ' . $e->getMessage()]
             ];
         }
     }
@@ -210,6 +212,7 @@ public function saveDraft(string $siteId, array $formData): object
      */
     private function getSuccessMessage(): string
     {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for success message doesn't require nonce verification
         if (isset($_GET['draft_saved']) && $_GET['draft_saved'] === '1') {
             return 'Draft saved successfully!';
         }
@@ -236,6 +239,37 @@ public function saveDraft(string $siteId, array $formData): object
     }
 
     /**
+     * Helper function to get sanitized form data with fallback to existing value
+     */
+    private function getFormValue(
+        array $formData,
+        array $existingData,
+        string $formKey,
+        ?string $existingKey = null,
+        string $default = ''
+    ): string {
+        $existingKey = $existingKey ?? $formKey;
+        return $this->wordPressManager->sanitizeTextField(
+            $formData[$formKey] ?? $existingData[$existingKey] ?? $default
+        );
+    }
+
+    /**
+     * Helper function to get sanitized form data with fallback to object property
+     */
+    private function getFormValueFromObject(
+        array $formData,
+        object $existingObject,
+        string $formKey,
+        string $propertyName,
+        string $default = ''
+    ): string {
+        return $this->wordPressManager->sanitizeTextField(
+            $formData[$formKey] ?? ($existingObject->$propertyName ?? $default)
+        );
+    }
+
+    /**
      * Build site JSON from form data
      * CRITICAL: This method must preserve ALL existing siteJson data and only update submitted fields
      */
@@ -243,90 +277,124 @@ public function saveDraft(string $siteId, array $formData): object
     {
         // Get existing siteJson to preserve all data
         $minisite = $this->wordPressManager->findMinisiteById($siteId);
-        $existingSiteJson = $minisite ? $minisite->siteJson : [];
-        
-        // Log existing siteJson structure for debugging
-        error_log('MINISITE_EDIT_DEBUG: Existing siteJson structure: ' . json_encode(array_keys($existingSiteJson), JSON_PRETTY_PRINT));
-        
+        $existingSiteJson = $minisite && $minisite->siteJson ? $minisite->siteJson : [];
+
+
         // Start with existing siteJson to preserve all data
         $siteJson = $existingSiteJson;
-        
+
         // Only update fields that are actually submitted in the form
         // This ensures we don't lose any existing data like hero, about, services, gallery, social, etc.
-        
+
         // Update business information if provided
-        if (isset($formData['business_name']) || isset($formData['business_city']) || 
-            isset($formData['business_region']) || isset($formData['business_country']) || 
-            isset($formData['business_postal'])) {
-            
+        if (
+            isset($formData['business_name']) || isset($formData['business_city']) ||
+            isset($formData['business_region']) || isset($formData['business_country']) ||
+            isset($formData['business_postal'])
+        ) {
             $siteJson['business'] = array_merge($siteJson['business'] ?? [], [
-                'name' => $this->wordPressManager->sanitizeTextField($formData['business_name'] ?? $siteJson['business']['name'] ?? ''),
-                'city' => $this->wordPressManager->sanitizeTextField($formData['business_city'] ?? $siteJson['business']['city'] ?? ''),
-                'region' => $this->wordPressManager->sanitizeTextField($formData['business_region'] ?? $siteJson['business']['region'] ?? ''),
-                'country' => $this->wordPressManager->sanitizeTextField($formData['business_country'] ?? $siteJson['business']['country'] ?? ''),
-                'postal' => $this->wordPressManager->sanitizeTextField($formData['business_postal'] ?? $siteJson['business']['postal'] ?? ''),
+                'name' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_name', 'name'),
+                'city' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_city', 'city'),
+                'region' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_region', 'region'),
+                'country' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_country', 'country'),
+                'postal' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_postal', 'postal'),
             ]);
         }
-        
+
         // Update contact coordinates if provided
         if (isset($formData['contact_lat']) || isset($formData['contact_lng'])) {
             $siteJson['contact'] = array_merge($siteJson['contact'] ?? [], [
-                'lat' => !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : ($siteJson['contact']['lat'] ?? null),
-                'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : ($siteJson['contact']['lng'] ?? null),
+                'lat' => !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] :
+                    ($siteJson['contact']['lat'] ?? null),
+                'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] :
+                    ($siteJson['contact']['lng'] ?? null),
             ]);
         }
-        
+
         // Update brand information if provided
         if (isset($formData['brand_palette']) || isset($formData['brand_industry'])) {
             $siteJson['brand'] = array_merge($siteJson['brand'] ?? [], [
-                'palette' => $this->wordPressManager->sanitizeTextField($formData['brand_palette'] ?? $siteJson['brand']['palette'] ?? ''),
-                'industry' => $this->wordPressManager->sanitizeTextField($formData['brand_industry'] ?? $siteJson['brand']['industry'] ?? ''),
+                'palette' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_palette', 'palette'),
+                'industry' => $this->getFormValue(
+                    $formData,
+                    $siteJson['brand'] ?? [],
+                    'brand_industry',
+                    'industry'
+                ),
             ]);
         }
-        
+
         // Update SEO information if provided
         if (isset($formData['seo_title']) || isset($formData['search_terms'])) {
             $siteJson['seo'] = array_merge($siteJson['seo'] ?? [], [
-                'title' => $this->wordPressManager->sanitizeTextField($formData['seo_title'] ?? $siteJson['seo']['title'] ?? ''),
-                'search_terms' => $this->wordPressManager->sanitizeTextField($formData['search_terms'] ?? $siteJson['seo']['search_terms'] ?? ''),
+                'title' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_title', 'title'),
+                'search_terms' => $this->getFormValue(
+                    $formData,
+                    $siteJson['seo'] ?? [],
+                    'search_terms',
+                    'search_terms'
+                ),
             ]);
         }
-        
+
         // Update settings if provided
         if (isset($formData['site_template']) || isset($formData['default_locale'])) {
             $siteJson['settings'] = array_merge($siteJson['settings'] ?? [], [
-                'template' => $this->wordPressManager->sanitizeTextField($formData['site_template'] ?? $siteJson['settings']['template'] ?? ''),
-                'locale' => $this->wordPressManager->sanitizeTextField($formData['default_locale'] ?? $siteJson['settings']['locale'] ?? ''),
+                'template' => $this->getFormValue(
+                    $formData,
+                    $siteJson['settings'] ?? [],
+                    'site_template',
+                    'template'
+                ),
+                'locale' => $this->getFormValue(
+                    $formData,
+                    $siteJson['settings'] ?? [],
+                    'default_locale',
+                    'locale'
+                ),
             ]);
         }
-        
-        // Log final siteJson structure for debugging
-        error_log('MINISITE_EDIT_DEBUG: Final siteJson structure: ' . json_encode(array_keys($siteJson), JSON_PRETTY_PRINT));
-        error_log('MINISITE_EDIT_DEBUG: Final siteJson size: ' . strlen(json_encode($siteJson)) . ' characters');
-        
+
+
         return $siteJson;
     }
 
     /**
      * Update main table if needed
      */
-    private function updateMainTableIfNeeded(string $siteId, array $formData, object $minisite, object $currentUser, ?float $lat, ?float $lng): void
-    {
+    private function updateMainTableIfNeeded(
+        string $siteId,
+        array $formData,
+        object $minisite,
+        object $currentUser,
+        ?float $lat,
+        ?float $lng
+    ): void {
         $hasBeenPublished = $this->wordPressManager->hasBeenPublished($siteId);
 
         if (!$hasBeenPublished) {
             // For new minisites: Update main table so preview works with imported data
             $businessInfoFields = [
-                'name' => $this->wordPressManager->sanitizeTextField($formData['business_name'] ?? $minisite->name),
-                'city' => $this->wordPressManager->sanitizeTextField($formData['business_city'] ?? $minisite->city),
-                'region' => $this->wordPressManager->sanitizeTextField($formData['business_region'] ?? $minisite->region),
-                'country_code' => $this->wordPressManager->sanitizeTextField($formData['business_country'] ?? $minisite->countryCode),
-                'postal_code' => $this->wordPressManager->sanitizeTextField($formData['business_postal'] ?? $minisite->postalCode),
-                'site_template' => $this->wordPressManager->sanitizeTextField($formData['site_template'] ?? $minisite->siteTemplate),
-                'palette' => $this->wordPressManager->sanitizeTextField($formData['brand_palette'] ?? $minisite->palette),
-                'industry' => $this->wordPressManager->sanitizeTextField($formData['brand_industry'] ?? $minisite->industry),
-                'default_locale' => $this->wordPressManager->sanitizeTextField($formData['default_locale'] ?? $minisite->defaultLocale),
-                'search_terms' => $this->wordPressManager->sanitizeTextField($formData['search_terms'] ?? $minisite->searchTerms),
+                'name' => $this->getFormValueFromObject($formData, $minisite, 'business_name', 'name'),
+                'city' => $this->getFormValueFromObject($formData, $minisite, 'business_city', 'city'),
+                'region' => $this->getFormValueFromObject($formData, $minisite, 'business_region', 'region'),
+                'country_code' => $this->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_country',
+                    'countryCode'
+                ),
+                'postal_code' => $this->getFormValueFromObject($formData, $minisite, 'business_postal', 'postalCode'),
+                'site_template' => $this->getFormValueFromObject($formData, $minisite, 'site_template', 'siteTemplate'),
+                'palette' => $this->getFormValueFromObject($formData, $minisite, 'brand_palette', 'palette'),
+                'industry' => $this->getFormValueFromObject($formData, $minisite, 'brand_industry', 'industry'),
+                'default_locale' => $this->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'default_locale',
+                    'defaultLocale'
+                ),
+                'search_terms' => $this->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms'),
             ];
 
             $this->wordPressManager->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
@@ -337,7 +405,7 @@ public function saveDraft(string $siteId, array $formData): object
             }
 
             // Update title if provided
-            $newTitle = $this->wordPressManager->sanitizeTextField($formData['seo_title'] ?? '');
+            $newTitle = $this->getFormValue($formData, [], 'seo_title', 'seo_title', '');
             if (!empty($newTitle) && $newTitle !== $minisite->title) {
                 $this->wordPressManager->updateTitle($siteId, $newTitle);
             }

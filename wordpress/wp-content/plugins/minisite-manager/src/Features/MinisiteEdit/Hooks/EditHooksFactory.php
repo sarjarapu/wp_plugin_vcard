@@ -33,7 +33,8 @@ class EditHooksFactory
         // Create renderer
         $timberRenderer = null;
         if (class_exists('Timber\Timber') && class_exists(TimberRenderer::class)) {
-            $timberRenderer = new TimberRenderer(MINISITE_DEFAULT_TEMPLATE ?? 'v2025');
+            $template = defined('MINISITE_DEFAULT_TEMPLATE') ? MINISITE_DEFAULT_TEMPLATE : 'v2025';
+            $timberRenderer = new TimberRenderer($template);
         }
         $editRenderer = new EditRenderer($timberRenderer);
 

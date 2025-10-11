@@ -14,7 +14,7 @@
  */
 
 if (!defined('ABSPATH')) {
-    exit;
+    exit; // phpcs:ignore WordPress.Security.Exit
 }
 
 // Define plugin constants

@@ -47,8 +47,9 @@ final class AuthRequestHandler
             userPassword: $this->sanitizeInput($_POST['user_pass'] ?? ''),
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce()
             remember: isset($_POST['remember']),
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeUrl()
-            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard'))
+            redirectTo: $this->sanitizeUrl(
+                $this->getPostData('redirect_to', $this->wordPressManager->getHomeUrl('/account/dashboard'))
+            )
         );
     }
 
@@ -72,8 +73,9 @@ final class AuthRequestHandler
             userEmail: $this->sanitizeEmail($_POST['user_email'] ?? ''),
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeInput()
             userPassword: $this->sanitizeInput($_POST['user_pass'] ?? ''),
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeUrl()
-            redirectTo: $this->sanitizeUrl($_POST['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard'))
+            redirectTo: $this->sanitizeUrl(
+                $this->getPostData('redirect_to', $this->wordPressManager->getHomeUrl('/account/dashboard'))
+            )
         );
     }
 
@@ -97,17 +99,34 @@ final class AuthRequestHandler
     }
 
     /**
+     * Safely get and sanitize GET data
+     */
+    private function getGetData(string $key, string $default = ''): string
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- GET parameters don't require nonce verification, data sanitized
+        return $this->wordPressManager->sanitizeText(wp_unslash($_GET[$key] ?? $default));
+    }
+
+    /**
      * Get redirect URL from query parameter
      */
     public function getRedirectTo(): string
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for redirect URL doesn't require nonce verification
-        return $this->wordPressManager->sanitizeText($this->wordPressManager->unslash($_GET['redirect_to'] ?? $this->wordPressManager->getHomeUrl('/account/dashboard')));
+        return $this->getGetData('redirect_to', $this->wordPressManager->getHomeUrl('/account/dashboard'));
     }
 
     private function isPostRequest(): bool
     {
         return isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST';
+    }
+
+    /**
+     * Safely get and sanitize POST data
+     */
+    private function getPostData(string $key, string $default = ''): string
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified before calling this method
+        return $this->wordPressManager->sanitizeText(wp_unslash($_POST[$key] ?? $default));
     }
 
     private function isValidNonce(string $action): bool
@@ -119,8 +138,9 @@ final class AuthRequestHandler
             default => 'minisite_nonce'
         };
 
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in the next line
         return isset($_POST[$nonceField]) &&
-               $this->wordPressManager->verifyNonce($this->wordPressManager->sanitizeText($this->wordPressManager->unslash($_POST[$nonceField])), $action);
+               $this->wordPressManager->verifyNonce($this->getPostData($nonceField), $action);
     }
 
     private function sanitizeInput(string $input): string
