@@ -92,7 +92,14 @@ class EditService
             $operationType = $hasBeenPublished ? 'edit_published' : 'edit_draft';
 
             // Use shared database coordinator
-            return $dbCoordinator->saveMinisiteData($siteId, $formData, $operationType, $minisite, $currentUser, $hasBeenPublished);
+            return $dbCoordinator->saveMinisiteData(
+                $siteId,
+                $formData,
+                $operationType,
+                $minisite,
+                $currentUser,
+                $hasBeenPublished
+            );
         } catch (\Exception $e) {
             return (object) [
                 'success' => false,
@@ -153,6 +160,4 @@ class EditService
         }
         return '';
     }
-
-
 }
