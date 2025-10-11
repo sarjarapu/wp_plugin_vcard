@@ -188,12 +188,14 @@ class EditRenderer
         
         <div class="form-group">
             <label for="version_label">Version Label:</label>
-            <input type="text" id="version_label" name="version_label" value="' . esc_attr($editData->editingVersion?->label ?? '') . '">
+            <input type="text" id="version_label" name="version_label" 
+                   value="' . esc_attr($editData->editingVersion?->label ?? '') . '">
         </div>
         
         <div class="form-group">
             <label for="version_comment">Version Comment:</label>
-            <textarea id="version_comment" name="version_comment">' . esc_textarea($editData->editingVersion?->comment ?? '') . '</textarea>
+            <textarea id="version_comment" name="version_comment">' .
+                esc_textarea($editData->editingVersion?->comment ?? '') . '</textarea>
         </div>
         
         <button type="submit">Save Draft</button>

@@ -165,7 +165,8 @@ class VersionRequestHandler
      */
     private function getFormData(array $formData, string $key, string $default = ''): string
     {
-        return sanitize_text_field(wp_unslash($formData[$key] ?? $default));
+        $value = sanitize_text_field(wp_unslash($formData[$key] ?? $default));
+        return $value ?? $default;
     }
 
     /**
@@ -173,7 +174,8 @@ class VersionRequestHandler
      */
     private function getFormDataUrl(array $formData, string $key, string $default = ''): string
     {
-        return esc_url_raw(wp_unslash($formData[$key] ?? $default));
+        $value = esc_url_raw(wp_unslash($formData[$key] ?? $default));
+        return $value ?? $default;
     }
 
     /**
@@ -181,7 +183,8 @@ class VersionRequestHandler
      */
     private function getFormDataTextarea(array $formData, string $key, string $default = ''): string
     {
-        return sanitize_textarea_field(wp_unslash($formData[$key] ?? $default));
+        $value = sanitize_textarea_field(wp_unslash($formData[$key] ?? $default));
+        return $value ?? $default;
     }
 
     /**
