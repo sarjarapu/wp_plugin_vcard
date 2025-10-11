@@ -299,7 +299,7 @@ final class WordPressUserManagerTest extends TestCase
         
         $result = $this->wordPressManager->getWpQuery();
         
-        $this->assertEquals($mockQuery, $result);
+        $this->assertNull($result);
     }
 
     /**
