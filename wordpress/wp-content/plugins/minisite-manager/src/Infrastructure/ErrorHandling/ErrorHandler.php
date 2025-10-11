@@ -52,13 +52,13 @@ class ErrorHandler
 
         $this->logger->error('PHP Error caught', [
             'severity' => $this->getSeverityName($severity),
-            'message' => $message,
-            'file' => $file,
+            'message' => sanitize_text_field($message),
+            'file' => sanitize_text_field($file),
             'line' => $line,
             'context' => [
-                'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-                'request_method' => $_SERVER['REQUEST_METHOD'] ?? 'unknown'
+                'request_uri' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'] ?? 'unknown')),
+                'user_agent' => sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')),
+                'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown'))
             ]
         ]);
 
@@ -83,9 +83,9 @@ class ErrorHandler
             'line' => $exception->getLine(),
             'trace' => $exception->getTraceAsString(),
             'context' => [
-                'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-                'request_method' => $_SERVER['REQUEST_METHOD'] ?? 'unknown'
+                'request_uri' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'] ?? 'unknown')),
+                'user_agent' => sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')),
+                'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown'))
             ]
         ]);
 
@@ -114,7 +114,7 @@ class ErrorHandler
     public function handleShutdown(): void
     {
         $error = error_get_last();
-        
+
         if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
             $this->logger->error('Fatal Error detected on shutdown', [
                 'type' => $this->getSeverityName($error['type']),

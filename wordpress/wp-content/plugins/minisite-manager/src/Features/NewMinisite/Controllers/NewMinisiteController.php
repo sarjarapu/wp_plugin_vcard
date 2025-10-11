@@ -19,7 +19,7 @@ use Psr\Log\LoggerInterface;
 class NewMinisiteController
 {
     private LoggerInterface $logger;
-    
+
     public function __construct(
         private NewMinisiteService $newMinisiteService,
         private NewMinisiteRenderer $newMinisiteRenderer,
@@ -34,12 +34,12 @@ class NewMinisiteController
     public function handleNewMinisite(): void
     {
         $this->logger->info('NewMinisiteController::handleNewMinisite() called', [
-            'request_method' => $_SERVER['REQUEST_METHOD'] ?? 'unknown',
-            'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
+            'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown')),
+            'request_uri' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'] ?? 'unknown')),
+            'user_agent' => sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')),
             'feature' => 'NewMinisite' // ← This confirms we're in NewMinisite feature
         ]);
-        
+
         // Check authentication
         if (!$this->wordPressManager->isUserLoggedIn()) {
             $this->logger->warning('User not logged in, redirecting to login', [
@@ -93,8 +93,6 @@ class NewMinisiteController
             'post_data_sample' => array_slice($_POST, 0, 5, true) // First 5 fields for debugging
         ]);
 
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in NewMinisiteService::createNewMinisite()
-
         // Nonce verification is handled in NewMinisiteService::createNewMinisite()
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in NewMinisiteService::createNewMinisite()
         try {
@@ -115,10 +113,12 @@ class NewMinisiteController
                 'error_file' => $e->getFile(),
                 'error_line' => $e->getLine(),
                 'error_trace' => $e->getTraceAsString(),
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Exception logging only
                 'post_data_keys' => array_keys($_POST),
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Exception logging only
                 'post_data_count' => count($_POST)
             ]);
-            
+
             // Create error result to maintain consistent flow
             $result = (object) [
                 'success' => false,

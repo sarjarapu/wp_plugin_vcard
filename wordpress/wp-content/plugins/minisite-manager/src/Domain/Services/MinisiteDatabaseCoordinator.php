@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
 class MinisiteDatabaseCoordinator
 {
     private LoggerInterface $logger;
-    
+
     public function __construct(
         private WordPressManagerInterface $wordPressManager
     ) {
@@ -73,7 +73,7 @@ class MinisiteDatabaseCoordinator
             'user_id' => $currentUser?->ID,
             'form_fields_count' => count($formData)
         ]);
-        
+
         if (!$currentUser) {
             $this->logger->error('Current user is required for new minisite creation');
             throw new \InvalidArgumentException('Current user is required for new minisite creation');
@@ -82,7 +82,7 @@ class MinisiteDatabaseCoordinator
         // Build site JSON from form data
         $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
         $siteJson = $formProcessor->buildSiteJsonFromForm($formData, $minisiteId);
-        
+
         $this->logger->debug('Site JSON built successfully', [
             'minisite_id' => $minisiteId,
             'site_json_size' => strlen(json_encode($siteJson))
@@ -115,17 +115,21 @@ class MinisiteDatabaseCoordinator
                 id: $minisiteId,
                 slug: $slugs->full(), // Use SlugPair's full() method for formatted slug
                 slugs: $slugs,
-                title: $formProcessor->getFormValue($formData, [], 'seo_title', 'seo_title', '') ?: 'Untitled Minisite',
-                name: $formProcessor->getFormValue($formData, [], 'business_name', 'business_name', '') ?: 'Untitled Minisite',
+                title: $formProcessor->getFormValue($formData, [], 'seo_title', 'seo_title', '')
+                    ?: 'Untitled Minisite',
+                name: $formProcessor->getFormValue($formData, [], 'business_name', 'business_name', '')
+                    ?: 'Untitled Minisite',
                 city: $formProcessor->getFormValue($formData, [], 'business_city', 'business_city', ''),
                 region: $formProcessor->getFormValue($formData, [], 'business_region', 'business_region', ''),
                 countryCode: $formProcessor->getFormValue($formData, [], 'business_country', 'business_country', ''),
                 postalCode: $formProcessor->getFormValue($formData, [], 'business_postal', 'business_postal', ''),
                 geo: $geo,
-                siteTemplate: $formProcessor->getFormValue($formData, [], 'site_template', 'site_template', '') ?: 'v2025',
+                siteTemplate: $formProcessor->getFormValue($formData, [], 'site_template', 'site_template', '')
+                    ?: 'v2025',
                 palette: $formProcessor->getFormValue($formData, [], 'brand_palette', 'brand_palette', '') ?: 'blue',
                 industry: $formProcessor->getFormValue($formData, [], 'brand_industry', 'brand_industry', ''),
-                defaultLocale: $formProcessor->getFormValue($formData, [], 'default_locale', 'default_locale', '') ?: 'en-US',
+                defaultLocale: $formProcessor->getFormValue($formData, [], 'default_locale', 'default_locale', '')
+                    ?: 'en-US',
                 schemaVersion: 1,
                 siteVersion: 1,
                 siteJson: $siteJson,
@@ -156,10 +160,10 @@ class MinisiteDatabaseCoordinator
                     'updatedBy' => $minisite->updatedBy
                 ]
             ]);
-            
+
             try {
                 $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
-                
+
                 $this->logger->debug('New minisite entity inserted successfully', [
                     'minisite_id' => $minisiteId,
                     'saved_id' => $savedMinisite->id ?? 'unknown',
@@ -238,10 +242,10 @@ class MinisiteDatabaseCoordinator
                     'createdBy' => $version->createdBy
                 ]
             ]);
-            
+
             try {
                 $savedVersion = $this->wordPressManager->saveVersion($version);
-                
+
                 $this->logger->debug('Version entity saved successfully', [
                     'minisite_id' => $minisiteId,
                     'version_id' => $savedVersion->id ?? 'unknown',
@@ -275,7 +279,7 @@ class MinisiteDatabaseCoordinator
             $this->wordPressManager->getMinisiteRepository()->updateCurrentVersionId($minisiteId, $savedVersion->id);
 
             $this->wordPressManager->commitTransaction();
-            
+
             $this->logger->info('New draft created successfully', [
                 'minisite_id' => $minisiteId,
                 'version_id' => $savedVersion->id,
@@ -303,7 +307,7 @@ class MinisiteDatabaseCoordinator
                 'form_data_count' => count($formData),
                 'operation_type' => 'new_draft_creation'
             ]);
-            
+
             $this->wordPressManager->rollbackTransaction();
             throw $e;
         }
@@ -578,5 +582,4 @@ class MinisiteDatabaseCoordinator
             }
         }
     }
-
 }

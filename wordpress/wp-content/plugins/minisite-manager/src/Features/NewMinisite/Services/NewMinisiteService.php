@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
 class NewMinisiteService
 {
     private LoggerInterface $logger;
-    
+
     public function __construct(
         private WordPressNewMinisiteManager $wordPressManager
     ) {
@@ -40,7 +40,7 @@ class NewMinisiteService
             'has_nonce' => isset($formData['minisite_edit_nonce']),
             'nonce_value' => $formData['minisite_edit_nonce'] ?? 'missing'
         ]);
-        
+
         try {
             // Create shared components
             $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
@@ -85,7 +85,7 @@ class NewMinisiteService
                 $currentUser,
                 false // Has never been published
             );
-            
+
             if ($result->success) {
                 $this->logger->info('New minisite created successfully', [
                     'minisite_id' => $minisiteId,
@@ -97,16 +97,15 @@ class NewMinisiteService
                     'errors' => $result->errors ?? []
                 ]);
             }
-            
+
             return $result;
-            
         } catch (\Exception $e) {
             $this->logger->error('Exception during minisite creation', [
                 'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'form_data' => $formData
             ]);
-            
+
             return (object) [
                 'success' => false,
                 'errors' => ['Failed to create new minisite: ' . $e->getMessage()]

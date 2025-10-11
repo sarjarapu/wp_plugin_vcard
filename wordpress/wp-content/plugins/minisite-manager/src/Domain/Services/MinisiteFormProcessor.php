@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 class MinisiteFormProcessor
 {
     private LoggerInterface $logger;
-    
+
     public function __construct(
         private WordPressManagerInterface $wordPressManager
     ) {
@@ -34,7 +34,7 @@ class MinisiteFormProcessor
             'data_count' => count($data),
             'data_keys' => array_keys($data)
         ]);
-        
+
         $errors = [];
 
         // Add validation rules as needed
@@ -92,7 +92,7 @@ class MinisiteFormProcessor
             'has_existing_minisite' => $minisite !== null,
             'minisite_id' => $minisite?->id ?? 'new'
         ]);
-        
+
         // Get existing siteJson to preserve all data
         if (!$minisite) {
             $this->logger->debug('No existing minisite provided, fetching from database', [
