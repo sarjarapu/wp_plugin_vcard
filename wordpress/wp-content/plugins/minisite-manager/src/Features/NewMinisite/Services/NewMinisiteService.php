@@ -6,6 +6,8 @@ use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
 use Minisite\Domain\Services\MinisiteIdGenerator;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * New Minisite Service
@@ -17,9 +19,12 @@ use Minisite\Domain\Services\MinisiteIdGenerator;
  */
 class NewMinisiteService
 {
+    private LoggerInterface $logger;
+    
     public function __construct(
         private WordPressNewMinisiteManager $wordPressManager
     ) {
+        $this->logger = LoggingServiceProvider::getFeatureLogger('new-minisite');
     }
 
     /**
@@ -27,6 +32,11 @@ class NewMinisiteService
      */
     public function createNewMinisite(array $formData): object
     {
+        $this->logger->info('Starting new minisite creation', [
+            'user_id' => $this->wordPressManager->getCurrentUser()?->ID,
+            'form_fields_count' => count($formData)
+        ]);
+        
         try {
             // Create shared components
             $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
@@ -35,16 +45,24 @@ class NewMinisiteService
             // Validate form data
             $errors = $formProcessor->validateFormData($formData);
             if (!empty($errors)) {
+                $this->logger->warning('Form validation failed', [
+                    'errors' => $errors,
+                    'form_data' => $formData
+                ]);
                 return (object) ['success' => false, 'errors' => $errors];
             }
 
             // Verify nonce
             if (
                 !$this->wordPressManager->verifyNonce(
-                    $this->wordPressManager->sanitizeTextField($formData['minisite_new_nonce']),
-                    'minisite_new'
+                    $this->wordPressManager->sanitizeTextField($formData['minisite_edit_nonce']),
+                    'minisite_edit'
                 )
             ) {
+                $this->logger->error('Nonce verification failed', [
+                    'nonce' => $formData['minisite_edit_nonce'] ?? 'missing',
+                    'action' => 'minisite_edit'
+                ]);
                 return (object) ['success' => false, 'errors' => ['Security check failed. Please try again.']];
             }
 
@@ -52,9 +70,10 @@ class NewMinisiteService
 
             // Generate new minisite ID
             $minisiteId = MinisiteIdGenerator::generate();
+            $this->logger->debug('Generated minisite ID', ['minisite_id' => $minisiteId]);
 
             // Use shared database coordinator for new draft creation
-            return $dbCoordinator->saveMinisiteData(
+            $result = $dbCoordinator->saveMinisiteData(
                 $minisiteId,
                 $formData,
                 'new_draft',
@@ -62,7 +81,28 @@ class NewMinisiteService
                 $currentUser,
                 false // Has never been published
             );
+            
+            if ($result->success) {
+                $this->logger->info('New minisite created successfully', [
+                    'minisite_id' => $minisiteId,
+                    'user_id' => $currentUser->ID
+                ]);
+            } else {
+                $this->logger->error('Failed to create new minisite', [
+                    'minisite_id' => $minisiteId,
+                    'errors' => $result->errors ?? []
+                ]);
+            }
+            
+            return $result;
+            
         } catch (\Exception $e) {
+            $this->logger->error('Exception during minisite creation', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'form_data' => $formData
+            ]);
+            
             return (object) [
                 'success' => false,
                 'errors' => ['Failed to create new minisite: ' . $e->getMessage()]

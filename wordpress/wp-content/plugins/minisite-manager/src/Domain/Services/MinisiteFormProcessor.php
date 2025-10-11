@@ -2,7 +2,7 @@
 
 namespace Minisite\Domain\Services;
 
-use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
 
 /**
  * Minisite Form Processor
@@ -16,7 +16,7 @@ use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 class MinisiteFormProcessor
 {
     public function __construct(
-        private WordPressEditManager $wordPressManager
+        private WordPressManagerInterface $wordPressManager
     ) {
     }
 

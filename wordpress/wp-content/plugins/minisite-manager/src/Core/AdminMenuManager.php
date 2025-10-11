@@ -2,6 +2,8 @@
 
 namespace Minisite\Core;
 
+use Minisite\Infrastructure\Logging\LoggingTestController;
+
 /**
  * Admin Menu Manager
  *
@@ -74,6 +76,11 @@ final class AdminMenuManager
             'minisite-my-sites',
             [$this, 'renderMySitesPage']
         );
+
+        // Logging Test submenu (only in development)
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            LoggingTestController::addAdminMenu();
+        }
     }
 
     /**

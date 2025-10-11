@@ -5,6 +5,7 @@ namespace Minisite\Features\NewMinisite\WordPress;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
 
 /**
  * WordPress New Minisite Manager
@@ -14,7 +15,7 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
  * - Provides clean interface for WordPress functions
  * - Handles user authentication and authorization
  */
-class WordPressNewMinisiteManager
+class WordPressNewMinisiteManager implements WordPressManagerInterface
 {
     private ?MinisiteRepository $minisiteRepository = null;
     private ?VersionRepository $versionRepository = null;
@@ -68,32 +69,44 @@ class WordPressNewMinisiteManager
     /**
      * Sanitize text field
      */
-    public function sanitizeTextField(string $text): string
+    public function sanitizeTextField(?string $text): string
     {
+        if ($text === null) {
+            return '';
+        }
         return sanitize_text_field(wp_unslash($text));
     }
 
     /**
      * Sanitize textarea field
      */
-    public function sanitizeTextareaField(string $text): string
+    public function sanitizeTextareaField(?string $text): string
     {
+        if ($text === null) {
+            return '';
+        }
         return sanitize_textarea_field(wp_unslash($text));
     }
 
     /**
      * Sanitize URL field
      */
-    public function sanitizeUrl(string $url): string
+    public function sanitizeUrl(?string $url): string
     {
+        if ($url === null) {
+            return '';
+        }
         return esc_url_raw(wp_unslash($url));
     }
 
     /**
      * Sanitize email field
      */
-    public function sanitizeEmail(string $email): string
+    public function sanitizeEmail(?string $email): string
     {
+        if ($email === null) {
+            return '';
+        }
         return sanitize_email(wp_unslash($email));
     }
 
@@ -218,6 +231,14 @@ class WordPressNewMinisiteManager
     public function rollbackTransaction(): void
     {
         db::getWpdb()->query('ROLLBACK');
+    }
+
+    /**
+     * Find minisite by ID
+     */
+    public function findMinisiteById(string $siteId): ?object
+    {
+        return $this->getMinisiteRepository()->findById($siteId);
     }
 
     /**

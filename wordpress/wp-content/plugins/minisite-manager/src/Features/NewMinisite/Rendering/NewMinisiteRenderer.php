@@ -32,12 +32,13 @@ class NewMinisiteRenderer
         // Set up Timber locations
         $this->setupTimberLocations();
 
-        // Prepare template data
+        // Prepare template data (reuse same structure as EditRenderer)
         $templateData = $this->prepareTemplateData($newMinisiteData);
 
-        // Render the new minisite form template using Timber directly
+        // Render using the SAME template as edit form (account-sites-edit.twig)
+        // This ensures UI consistency and reuses existing templates
         if (class_exists('Timber\\Timber')) {
-            \Timber\Timber::render('account-sites-new.twig', $templateData);
+            \Timber\Timber::render('account-sites-edit.twig', $templateData);
         } else {
             $this->renderFallbackNewMinisiteForm($newMinisiteData);
         }
@@ -87,42 +88,88 @@ class NewMinisiteRenderer
     }
 
     /**
-     * Prepare template data
+     * Prepare template data (reuse same structure as EditRenderer)
      */
     private function prepareTemplateData(object $newMinisiteData): array
     {
         $formData = $newMinisiteData->formData;
 
+        // Create mock objects to match EditRenderer's expected structure
+        $mockMinisite = (object) [
+            'id' => 'new',
+            'status' => 'draft'
+        ];
+
+        $mockProfile = (object) [
+            'name' => $formData['business']['name'] ?? '',
+            'city' => $formData['business']['city'] ?? '',
+            'region' => $formData['business']['region'] ?? '',
+            'countryCode' => $formData['business']['country'] ?? '',
+            'postalCode' => $formData['business']['postal'] ?? '',
+            'title' => $formData['seo']['title'] ?? '',
+            'siteTemplate' => $formData['settings']['template'] ?? '',
+            'palette' => $formData['brand']['palette'] ?? '',
+            'industry' => $formData['brand']['industry'] ?? '',
+            'defaultLocale' => $formData['settings']['locale'] ?? '',
+            'searchTerms' => $formData['seo']['searchTerms'] ?? '',
+            'geo' => null
+        ];
+
+        // Add geo data if available
+        if (!empty($formData['contact']['lat']) && !empty($formData['contact']['lng'])) {
+            $mockProfile->geo = (object) [
+                'getLat' => fn() => $formData['contact']['lat'],
+                'getLng' => fn() => $formData['contact']['lng']
+            ];
+        }
+
+        $mockEditingVersion = (object) [
+            'label' => 'Initial Draft',
+            'comment' => 'First draft of the new minisite'
+        ];
+
+        // Return same structure as EditRenderer for template compatibility
         return [
             'page_title' => 'Create New Minisite',
             'page_subtitle' => 'Create a new minisite for your business',
-            'user_minisite_count' => $newMinisiteData->userMinisiteCount,
+            'minisite' => $mockMinisite,
+            'editing_version' => $mockEditingVersion,
+            'latest_draft' => null, // No existing draft for new minisite
+            'profile' => $mockProfile,
+            'site_json' => [], // Empty site JSON for new minisite
             'success_message' => $newMinisiteData->successMessage,
             'error_message' => $newMinisiteData->errorMessage,
-            'form_nonce' => wp_create_nonce('minisite_new'),
+            'form_nonce' => wp_create_nonce('minisite_edit'),
             'form_action' => '',
             'form_method' => 'POST',
-            // Form field values (empty for new minisite)
-            'business_name' => $formData['business']['name'] ?? '',
-            'business_city' => $formData['business']['city'] ?? '',
-            'business_region' => $formData['business']['region'] ?? '',
-            'business_country' => $formData['business']['country'] ?? '',
-            'business_postal' => $formData['business']['postal'] ?? '',
-            'seo_title' => $formData['seo']['title'] ?? '',
-            'site_template' => $formData['settings']['template'] ?? '',
-            'brand_palette' => $formData['brand']['palette'] ?? '',
-            'brand_industry' => $formData['brand']['industry'] ?? '',
-            'default_locale' => $formData['settings']['locale'] ?? '',
-            'search_terms' => $formData['seo']['searchTerms'] ?? '',
-            'contact_lat' => $formData['contact']['lat'] ?? '',
-            'contact_lng' => $formData['contact']['lng'] ?? '',
-            'version_label' => 'Initial Draft',
-            'version_comment' => 'First draft of the new minisite',
+            // Preview and navigation URLs (disabled for new minisite)
+            'preview_url' => null, // No preview available for new minisite
+            'versions_url' => null, // No versions available for new minisite
+            'edit_latest_url' => null, // No edit available for new minisite
+            'minisite_id' => 'new',
+            'minisite_status' => 'draft',
+            // Form field values (same as EditRenderer structure)
+            'business_name' => $mockProfile->name,
+            'business_city' => $mockProfile->city,
+            'business_region' => $mockProfile->region,
+            'business_country' => $mockProfile->countryCode,
+            'business_postal' => $mockProfile->postalCode,
+            'seo_title' => $mockProfile->title,
+            'site_template' => $mockProfile->siteTemplate,
+            'brand_palette' => $mockProfile->palette,
+            'brand_industry' => $mockProfile->industry,
+            'default_locale' => $mockProfile->defaultLocale,
+            'search_terms' => $mockProfile->searchTerms,
+            'contact_lat' => $mockProfile->geo && method_exists($mockProfile->geo, 'getLat') ? $mockProfile->geo->getLat() : '',
+            'contact_lng' => $mockProfile->geo && method_exists($mockProfile->geo, 'getLng') ? $mockProfile->geo->getLng() : '',
+            'version_label' => $mockEditingVersion->label,
+            'version_comment' => $mockEditingVersion->comment,
         ];
     }
 
     /**
      * Render fallback new minisite form (when Timber is not available)
+     * Reuse same structure as EditRenderer's fallback form
      */
     private function renderFallbackNewMinisiteForm(object $newMinisiteData): void
     {
@@ -140,7 +187,6 @@ class NewMinisiteRenderer
         input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
         .error { color: red; margin-bottom: 20px; }
         .success { color: green; margin-bottom: 20px; }
-        .info { color: blue; margin-bottom: 20px; }
         button { 
             background: #0073aa; 
             color: white; 
@@ -152,8 +198,7 @@ class NewMinisiteRenderer
     </style>
 </head>
 <body>
-    <h1>Create New Minisite</h1>
-    <div class="info">You currently have ' . esc_html($newMinisiteData->userMinisiteCount) . ' minisite(s).</div>';
+    <h1>Create New Minisite</h1>';
 
         if ($newMinisiteData->errorMessage) {
             echo '<div class="error">' . esc_html($newMinisiteData->errorMessage) . '</div>';

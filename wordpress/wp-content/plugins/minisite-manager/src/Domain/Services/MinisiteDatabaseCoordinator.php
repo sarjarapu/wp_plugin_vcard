@@ -2,9 +2,11 @@
 
 namespace Minisite\Domain\Services;
 
-use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\Entities\Version;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Minisite Database Coordinator
@@ -17,9 +19,12 @@ use Minisite\Domain\Entities\Version;
  */
 class MinisiteDatabaseCoordinator
 {
+    private LoggerInterface $logger;
+    
     public function __construct(
-        private WordPressEditManager $wordPressManager
+        private WordPressManagerInterface $wordPressManager
     ) {
+        $this->logger = LoggingServiceProvider::getFeatureLogger('database-coordinator');
     }
 
     /**
@@ -63,35 +68,94 @@ class MinisiteDatabaseCoordinator
      */
     private function createNewDraft(string $minisiteId, array $formData, ?object $currentUser): object
     {
+        $this->logger->info('Starting new draft creation', [
+            'minisite_id' => $minisiteId,
+            'user_id' => $currentUser?->ID,
+            'form_fields_count' => count($formData)
+        ]);
+        
         if (!$currentUser) {
+            $this->logger->error('Current user is required for new minisite creation');
             throw new \InvalidArgumentException('Current user is required for new minisite creation');
         }
 
         // Build site JSON from form data
         $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
         $siteJson = $formProcessor->buildSiteJsonFromForm($formData, $minisiteId);
+        
+        $this->logger->debug('Site JSON built successfully', [
+            'minisite_id' => $minisiteId,
+            'site_json_size' => strlen(json_encode($siteJson))
+        ]);
 
         // Handle coordinate fields
         $lat = !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : null;
         $lng = !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : null;
 
+        // Generate draft slugs (like the old implementation)
+        $draftBusinessSlug = 'biz-' . substr($minisiteId, 0, 8);
+        $draftLocationSlug = 'loc-' . substr($minisiteId, 8, 8);
+        $slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+            business: $draftBusinessSlug,
+            location: $draftLocationSlug
+        );
+
+        // Create GeoPoint from form data
+        $geo = null;
+        if ($lat !== null && $lng !== null) {
+            $geo = new \Minisite\Domain\ValueObjects\GeoPoint(lat: $lat, lng: $lng);
+        }
+
         // Start transaction
         $this->wordPressManager->startTransaction();
 
         try {
-            // Create initial draft version
-            $nextVersion = 1; // First version for new minisite
-            $slugs = new \Minisite\Domain\ValueObjects\SlugPair(
-                business: $formProcessor->getFormValue($formData, 'business_name', ''),
-                location: $formProcessor->getFormValue($formData, 'business_city', '')
+            // Create main minisite entity first (like the old implementation)
+            $minisite = new \Minisite\Domain\Entities\Minisite(
+                id: $minisiteId,
+                slug: $slugs->full(), // Use SlugPair's full() method for formatted slug
+                slugs: $slugs,
+                title: $formProcessor->getFormValue($formData, [], 'seo_title', 'seo_title', '') ?: 'Untitled Minisite',
+                name: $formProcessor->getFormValue($formData, [], 'business_name', 'business_name', '') ?: 'Untitled Minisite',
+                city: $formProcessor->getFormValue($formData, [], 'business_city', 'business_city', ''),
+                region: $formProcessor->getFormValue($formData, [], 'business_region', 'business_region', ''),
+                countryCode: $formProcessor->getFormValue($formData, [], 'business_country', 'business_country', ''),
+                postalCode: $formProcessor->getFormValue($formData, [], 'business_postal', 'business_postal', ''),
+                geo: $geo,
+                siteTemplate: $formProcessor->getFormValue($formData, [], 'site_template', 'site_template', '') ?: 'v2025',
+                palette: $formProcessor->getFormValue($formData, [], 'brand_palette', 'brand_palette', '') ?: 'blue',
+                industry: $formProcessor->getFormValue($formData, [], 'brand_industry', 'brand_industry', ''),
+                defaultLocale: $formProcessor->getFormValue($formData, [], 'default_locale', 'default_locale', '') ?: 'en-US',
+                schemaVersion: 1,
+                siteVersion: 1,
+                siteJson: $siteJson,
+                searchTerms: $formProcessor->getFormValue($formData, [], 'search_terms', 'search_terms', ''),
+                status: 'draft',
+                publishStatus: 'draft',
+                createdAt: null,
+                updatedAt: null,
+                publishedAt: null,
+                createdBy: (int) $currentUser->ID,
+                updatedBy: (int) $currentUser->ID,
+                currentVersionId: null // Will be set after version creation
             );
 
-            // Create GeoPoint from form data
-            $geo = null;
-            if ($lat !== null && $lng !== null) {
-                $geo = new \Minisite\Domain\ValueObjects\GeoPoint(lat: $lat, lng: $lng);
-            }
+            // Save main minisite record to wp_minisites table
+            $this->logger->debug('Saving minisite entity to database', [
+                'minisite_id' => $minisiteId,
+                'title' => $minisite->title,
+                'status' => $minisite->status
+            ]);
+            
+            $savedMinisite = $this->wordPressManager->getMinisiteRepository()->save($minisite, 0);
+            
+            $this->logger->debug('Minisite entity saved successfully', [
+                'minisite_id' => $minisiteId,
+                'saved_id' => $savedMinisite->id ?? 'unknown'
+            ]);
 
+            // Create initial draft version
+            $nextVersion = 1; // First version for new minisite
             $version = new \Minisite\Domain\Entities\Version(
                 id: null,
                 minisiteId: $minisiteId,
@@ -110,36 +174,44 @@ class MinisiteDatabaseCoordinator
                 siteJson: $siteJson,
                 // Profile fields from form data
                 slugs: $slugs,
-                title: $formProcessor->getFormValue($formData, 'seo_title', ''),
-                name: $formProcessor->getFormValue($formData, 'business_name', ''),
-                city: $formProcessor->getFormValue($formData, 'business_city', ''),
-                region: $formProcessor->getFormValue($formData, 'business_region', ''),
-                countryCode: $formProcessor->getFormValue($formData, 'business_country', ''),
-                postalCode: $formProcessor->getFormValue($formData, 'business_postal', ''),
+                title: $formProcessor->getFormValue($formData, [], 'seo_title', 'seo_title', ''),
+                name: $formProcessor->getFormValue($formData, [], 'business_name', 'business_name', ''),
+                city: $formProcessor->getFormValue($formData, [], 'business_city', 'business_city', ''),
+                region: $formProcessor->getFormValue($formData, [], 'business_region', 'business_region', ''),
+                countryCode: $formProcessor->getFormValue($formData, [], 'business_country', 'business_country', ''),
+                postalCode: $formProcessor->getFormValue($formData, [], 'business_postal', 'business_postal', ''),
                 geo: $geo,
-                siteTemplate: $formProcessor->getFormValue($formData, 'site_template', ''),
-                palette: $formProcessor->getFormValue($formData, 'brand_palette', ''),
-                industry: $formProcessor->getFormValue($formData, 'brand_industry', ''),
-                defaultLocale: $formProcessor->getFormValue($formData, 'default_locale', 'en'),
+                siteTemplate: $formProcessor->getFormValue($formData, [], 'site_template', 'site_template', ''),
+                palette: $formProcessor->getFormValue($formData, [], 'brand_palette', 'brand_palette', ''),
+                industry: $formProcessor->getFormValue($formData, [], 'brand_industry', 'brand_industry', ''),
+                defaultLocale: $formProcessor->getFormValue($formData, [], 'default_locale', 'default_locale', 'en'),
                 schemaVersion: 1,
                 siteVersion: 1,
-                searchTerms: $formProcessor->getFormValue($formData, 'search_terms', '')
+                searchTerms: $formProcessor->getFormValue($formData, [], 'search_terms', 'search_terms', '')
             );
 
+            $this->logger->debug('Saving version entity', [
+                'minisite_id' => $minisiteId,
+                'version_number' => $nextVersion
+            ]);
+            
             $savedVersion = $this->wordPressManager->saveVersion($version);
+            
+            $this->logger->debug('Version entity saved successfully', [
+                'minisite_id' => $minisiteId,
+                'version_id' => $savedVersion->id ?? 'unknown'
+            ]);
 
-            // Create main minisite record
-            $this->createMainMinisiteRecord(
-                $minisiteId,
-                $formData,
-                $currentUser,
-                $lat,
-                $lng,
-                $formProcessor,
-                $savedVersion->id
-            );
+            // Update main minisite with current version ID
+            $this->wordPressManager->getMinisiteRepository()->updateCurrentVersionId($minisiteId, $savedVersion->id);
 
             $this->wordPressManager->commitTransaction();
+            
+            $this->logger->info('New draft created successfully', [
+                'minisite_id' => $minisiteId,
+                'version_id' => $savedVersion->id,
+                'user_id' => $currentUser->ID
+            ]);
 
             return (object) [
                 'success' => true,
@@ -148,6 +220,12 @@ class MinisiteDatabaseCoordinator
                 )
             ];
         } catch (\Exception $e) {
+            $this->logger->error('Failed to create new draft', [
+                'minisite_id' => $minisiteId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             $this->wordPressManager->rollbackTransaction();
             throw $e;
         }
@@ -423,46 +501,4 @@ class MinisiteDatabaseCoordinator
         }
     }
 
-    /**
-     * Create main minisite record for new minisite
-     */
-    private function createMainMinisiteRecord(
-        string $minisiteId,
-        array $formData,
-        object $currentUser,
-        ?float $lat,
-        ?float $lng,
-        MinisiteFormProcessor $formProcessor,
-        int $currentVersionId
-    ): void {
-        // Create GeoPoint from form data
-        $geo = null;
-        if ($lat !== null && $lng !== null) {
-            $geo = new \Minisite\Domain\ValueObjects\GeoPoint(lat: $lat, lng: $lng);
-        }
-
-        // Create SlugPair from form data
-        $slugs = new \Minisite\Domain\ValueObjects\SlugPair(
-            business: $formProcessor->getFormValue($formData, 'business_name', ''),
-            location: $formProcessor->getFormValue($formData, 'business_city', '')
-        );
-
-        // Create main minisite entity
-        $minisite = new \Minisite\Domain\Entities\Minisite(
-            id: $minisiteId,
-            ownerId: (int) $currentUser->ID,
-            currentVersionId: $currentVersionId,
-            status: 'draft',
-            slugs: $slugs,
-            schemaVersion: 1,
-            siteVersion: 1,
-            siteJson: $formProcessor->buildSiteJsonFromForm($formData, $minisiteId),
-            geo: $geo,
-            createdAt: null,
-            updatedAt: null
-        );
-
-        // Save to database using repository
-        $this->wordPressManager->getMinisiteRepository()->save($minisite);
-    }
 }

@@ -2,6 +2,8 @@
 
 namespace Minisite\Core;
 
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+
 /**
  * Plugin Bootstrap
  *
@@ -37,6 +39,9 @@ final class PluginBootstrap
 
     public static function initializeCore(): void
     {
+        // Initialize logging system first
+        LoggingServiceProvider::register();
+
         // Initialize roles and capabilities
         RoleManager::initialize();
 
