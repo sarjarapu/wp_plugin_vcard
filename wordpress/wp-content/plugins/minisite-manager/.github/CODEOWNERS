@@ -1,0 +1,26 @@
+# Global code owners
+* @sarjarapu
+
+# PHP source files
+src/ @sarjarapu
+
+# Test files
+tests/ @sarjarapu
+
+# Configuration files
+composer.json @sarjarapu
+composer.lock @sarjarapu
+phpunit.xml.dist @sarjarapu
+phpstan.neon @sarjarapu
+phpcs.xml @sarjarapu
+
+# Main plugin file
+minisite-manager.php @sarjarapu
+
+# Documentation
+docs/ @sarjarapu
+README.md @sarjarapu
+CHANGELOG.md @sarjarapu
+
+# GitHub workflows
+.github/ @sarjarapu
