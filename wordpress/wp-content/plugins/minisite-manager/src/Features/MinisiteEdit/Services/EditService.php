@@ -160,8 +160,8 @@ class EditService
             }
         } catch (\Exception $e) {
             return (object) [
-            'success' => false,
-            'errors' => ['Failed to save draft: ' . $e->getMessage()]
+                'success' => false,
+                'errors' => ['Failed to save draft: ' . $e->getMessage()]
             ];
         }
     }
@@ -325,12 +325,97 @@ class EditService
      */
     private function buildContactSection(array $formData, array $siteJson): array
     {
-        if (isset($formData['contact_lat']) || isset($formData['contact_lng'])) {
+        if (
+            isset($formData['contact_phone_text']) || isset($formData['contact_phone_link']) ||
+            isset($formData['contact_whatsapp_text']) || isset($formData['contact_whatsapp_link']) ||
+            isset($formData['contact_email']) || isset($formData['contact_website_text']) ||
+            isset($formData['contact_website_link']) || isset($formData['contact_address1']) ||
+            isset($formData['contact_address2']) || isset($formData['contact_address3']) ||
+            isset($formData['contact_address4']) || isset($formData['contact_pluscode']) ||
+            isset($formData['contact_pluscode_url']) || isset($formData['contact_lat']) ||
+            isset($formData['contact_lng']) || $this->hasHoursData($formData)
+        ) {
             $siteJson['contact'] = array_merge($siteJson['contact'] ?? [], [
+                'phone' => [
+                    'text' => $this->getFormValue(
+                        $formData,
+                        $siteJson['contact']['phone'] ?? [],
+                        'contact_phone_text',
+                        'text'
+                    ),
+                    'link' => $this->getFormValue(
+                        $formData,
+                        $siteJson['contact']['phone'] ?? [],
+                        'contact_phone_link',
+                        'link'
+                    ),
+                ],
+                'whatsapp' => [
+                    'text' => $this->getFormValue(
+                        $formData,
+                        $siteJson['contact']['whatsapp'] ?? [],
+                        'contact_whatsapp_text',
+                        'text'
+                    ),
+                    'link' => $this->getFormValue(
+                        $formData,
+                        $siteJson['contact']['whatsapp'] ?? [],
+                        'contact_whatsapp_link',
+                        'link'
+                    ),
+                ],
+                'email' => $this->wordPressManager->sanitizeEmail(
+                    $formData['contact_email'] ?? ($siteJson['contact']['email'] ?? '')
+                ),
+                'website' => [
+                    'text' => $this->getFormValue(
+                        $formData,
+                        $siteJson['contact']['website'] ?? [],
+                        'contact_website_text',
+                        'text'
+                    ),
+                    'link' => $this->wordPressManager->sanitizeUrl(
+                        $formData['contact_website_link'] ?? ($siteJson['contact']['website']['link'] ?? '')
+                    ),
+                ],
+                'address_line1' => $this->getFormValue(
+                    $formData,
+                    $siteJson['contact'] ?? [],
+                    'contact_address1',
+                    'address_line1'
+                ),
+                'address_line2' => $this->getFormValue(
+                    $formData,
+                    $siteJson['contact'] ?? [],
+                    'contact_address2',
+                    'address_line2'
+                ),
+                'address_line3' => $this->getFormValue(
+                    $formData,
+                    $siteJson['contact'] ?? [],
+                    'contact_address3',
+                    'address_line3'
+                ),
+                'address_line4' => $this->getFormValue(
+                    $formData,
+                    $siteJson['contact'] ?? [],
+                    'contact_address4',
+                    'address_line4'
+                ),
+                'plusCode' => $this->getFormValue(
+                    $formData,
+                    $siteJson['contact'] ?? [],
+                    'contact_pluscode',
+                    'plusCode'
+                ),
+                'plusCodeUrl' => $this->wordPressManager->sanitizeUrl(
+                    $formData['contact_pluscode_url'] ?? ($siteJson['contact']['plusCodeUrl'] ?? '')
+                ),
                 'lat' => !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] :
                     ($siteJson['contact']['lat'] ?? null),
                 'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] :
                     ($siteJson['contact']['lng'] ?? null),
+                'hours' => $this->buildHoursFromForm($formData, $siteJson['contact']['hours'] ?? []),
             ]);
         }
 
@@ -666,6 +751,60 @@ class EditService
         }
 
         return $social;
+    }
+
+    /**
+     * Build hours section from form data
+     */
+    private function buildHoursFromForm(array $formData, array $existingHours = []): array
+    {
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        $hours = $existingHours; // Start with existing data
+
+        foreach ($days as $day) {
+            $isClosed = !empty($formData["hours_{$day}_closed"]);
+            $openTime = $this->wordPressManager->sanitizeTextField($formData["hours_{$day}_open"] ?? '');
+            $closeTime = $this->wordPressManager->sanitizeTextField($formData["hours_{$day}_close"] ?? '');
+
+            $dayName = ucfirst($day);
+
+            if ($isClosed) {
+                $hours[$dayName] = [
+                    'closed' => true,
+                ];
+            } elseif (!empty($openTime) && !empty($closeTime)) {
+                // Store times in 24-hour format for HTML time inputs
+                $hours[$dayName] = [
+                    'open' => $openTime,
+                    'close' => $closeTime,
+                ];
+            } elseif (isset($formData["hours_{$day}_open"]) || isset($formData["hours_{$day}_close"])) {
+                // If fields are explicitly set but empty, remove the day
+                unset($hours[$dayName]);
+            }
+        }
+
+        return $hours;
+    }
+
+    /**
+     * Check if form data contains hours information
+     */
+    private function hasHoursData(array $formData): bool
+    {
+        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+        foreach ($days as $day) {
+            if (
+                isset($formData["hours_{$day}_closed"]) ||
+                isset($formData["hours_{$day}_open"]) ||
+                isset($formData["hours_{$day}_close"])
+            ) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

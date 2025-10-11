@@ -90,6 +90,14 @@ class WordPressEditManager
     }
 
     /**
+     * Sanitize email field
+     */
+    public function sanitizeEmail(string $email): string
+    {
+        return sanitize_email(wp_unslash($email));
+    }
+
+    /**
      * Verify nonce
      */
     public function verifyNonce(string $nonce, string $action): bool
