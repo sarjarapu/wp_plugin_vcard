@@ -8,6 +8,7 @@ use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use Minisite\Features\MinisiteViewer\Http\ViewRequestHandler;
 use Minisite\Features\MinisiteViewer\Http\ViewResponseHandler;
 use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
+use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use PHPUnit\Framework\TestCase;
 
@@ -24,6 +25,7 @@ final class MinisitePageControllerTest extends TestCase
     private $requestHandler;
     private $responseHandler;
     private $renderer;
+    private $wordPressManager;
 
     protected function setUp(): void
     {
@@ -33,6 +35,7 @@ final class MinisitePageControllerTest extends TestCase
         $this->requestHandler = $this->createMock(ViewRequestHandler::class);
         $this->responseHandler = $this->createMock(ViewResponseHandler::class);
         $this->renderer = $this->createMock(ViewRenderer::class);
+        $this->wordPressManager = $this->createMock(WordPressMinisiteManager::class);
 
         // Create MinisitePageController with mocked dependencies
         $this->minisitePageController = new MinisitePageController(
@@ -40,7 +43,8 @@ final class MinisitePageControllerTest extends TestCase
             $this->viewService,
             $this->requestHandler,
             $this->responseHandler,
-            $this->renderer
+            $this->renderer,
+            $this->wordPressManager
         );
     }
 
@@ -232,7 +236,7 @@ final class MinisitePageControllerTest extends TestCase
         $constructor = $reflection->getConstructor();
         
         $this->assertNotNull($constructor);
-        $this->assertEquals(5, $constructor->getNumberOfParameters());
+        $this->assertEquals(6, $constructor->getNumberOfParameters());
         
         $params = $constructor->getParameters();
         $expectedTypes = [
@@ -240,7 +244,8 @@ final class MinisitePageControllerTest extends TestCase
             MinisiteViewService::class,
             ViewRequestHandler::class,
             ViewResponseHandler::class,
-            ViewRenderer::class
+            ViewRenderer::class,
+            WordPressMinisiteManager::class
         ];
         
         foreach ($params as $index => $param) {
@@ -275,5 +280,311 @@ final class MinisitePageControllerTest extends TestCase
 
         // Call the method
         $this->minisitePageController->handleView();
+    }
+
+    // ===== VERSION-SPECIFIC PREVIEW TESTS =====
+
+    /**
+     * Test handleVersionSpecificPreview with successful preview
+     */
+    public function test_handle_version_specific_preview_with_successful_preview(): void
+    {
+        $siteId = '123';
+        $versionId = '5';
+        $previewData = (object)[
+            'minisite' => (object)[
+                'id' => $siteId,
+                'name' => 'Test Minisite',
+                'siteJson' => ['test' => 'data']
+            ],
+            'version' => (object)[
+                'id' => 5,
+                'label' => 'Version 5',
+                'siteJson' => ['test' => 'version data']
+            ],
+            'siteJson' => ['test' => 'version data'],
+            'versionId' => $versionId
+        ];
+
+        // Mock authentication check
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(true);
+
+        // Mock query var retrieval
+        $this->wordPressManager
+            ->expects($this->exactly(2))
+            ->method('getQueryVar')
+            ->willReturnMap([
+                ['minisite_site_id', '', $siteId],
+                ['minisite_version_id', '', $versionId]
+            ]);
+
+        // Mock service call
+        $this->viewService
+            ->expects($this->once())
+            ->method('getMinisiteForVersionSpecificPreview')
+            ->with($siteId, $versionId)
+            ->willReturn($previewData);
+
+        // Mock renderer call
+        $this->renderer
+            ->expects($this->once())
+            ->method('renderVersionSpecificPreview')
+            ->with($previewData);
+
+        // Call the method
+        $this->minisitePageController->handleVersionSpecificPreview();
+    }
+
+    /**
+     * Test handleVersionSpecificPreview with user not logged in
+     */
+    public function test_handle_version_specific_preview_with_user_not_logged_in(): void
+    {
+        $siteId = '123';
+        $versionId = '5';
+
+        // Mock authentication check
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(false);
+
+        // Mock redirect calls
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getLoginRedirectUrl')
+            ->willReturn('/login');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with('/login')
+            ->willThrowException(new \Exception('Redirected')); // Simulate exit behavior
+
+        // Call the method
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Redirected');
+        $this->minisitePageController->handleVersionSpecificPreview();
+    }
+
+    /**
+     * Test handleVersionSpecificPreview with missing site ID
+     */
+    public function test_handle_version_specific_preview_with_missing_site_id(): void
+    {
+        // Mock authentication check
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(true);
+
+        // Mock query var retrieval - no site ID
+        $this->wordPressManager
+            ->expects($this->exactly(2))
+            ->method('getQueryVar')
+            ->willReturnMap([
+                ['minisite_site_id', '', ''],
+                ['minisite_version_id', '', '5']
+            ]);
+
+        // Mock redirect calls
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/sites')
+            ->willReturn('/account/sites');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with('/account/sites');
+
+        // Call the method
+        $this->minisitePageController->handleVersionSpecificPreview();
+    }
+
+    /**
+     * Test handleVersionSpecificPreview with access denied
+     */
+    public function test_handle_version_specific_preview_with_access_denied(): void
+    {
+        $siteId = '123';
+        $versionId = '5';
+
+        // Mock authentication check
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(true);
+
+        // Mock query var retrieval
+        $this->wordPressManager
+            ->expects($this->exactly(2))
+            ->method('getQueryVar')
+            ->willReturnMap([
+                ['minisite_site_id', '', $siteId],
+                ['minisite_version_id', '', $versionId]
+            ]);
+
+        // Mock service call to throw access denied exception
+        $this->viewService
+            ->expects($this->once())
+            ->method('getMinisiteForVersionSpecificPreview')
+            ->with($siteId, $versionId)
+            ->willThrowException(new \RuntimeException('Access denied'));
+
+        // Mock redirect calls
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/sites')
+            ->willReturn('/account/sites');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with('/account/sites');
+
+        // Call the method
+        $this->minisitePageController->handleVersionSpecificPreview();
+    }
+
+    /**
+     * Test handleVersionSpecificPreview with minisite not found
+     */
+    public function test_handle_version_specific_preview_with_minisite_not_found(): void
+    {
+        $siteId = 'nonexistent';
+        $versionId = '5';
+
+        // Mock authentication check
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(true);
+
+        // Mock query var retrieval
+        $this->wordPressManager
+            ->expects($this->exactly(2))
+            ->method('getQueryVar')
+            ->willReturnMap([
+                ['minisite_site_id', '', $siteId],
+                ['minisite_version_id', '', $versionId]
+            ]);
+
+        // Mock service call to throw not found exception
+        $this->viewService
+            ->expects($this->once())
+            ->method('getMinisiteForVersionSpecificPreview')
+            ->with($siteId, $versionId)
+            ->willThrowException(new \RuntimeException('Minisite not found'));
+
+        // Mock redirect calls
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/sites')
+            ->willReturn('/account/sites');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with('/account/sites');
+
+        // Call the method
+        $this->minisitePageController->handleVersionSpecificPreview();
+    }
+
+    /**
+     * Test handleVersionSpecificPreview with general exception
+     */
+    public function test_handle_version_specific_preview_with_general_exception(): void
+    {
+        $siteId = '123';
+        $versionId = '5';
+
+        // Mock authentication check
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(true);
+
+        // Mock query var retrieval
+        $this->wordPressManager
+            ->expects($this->exactly(2))
+            ->method('getQueryVar')
+            ->willReturnMap([
+                ['minisite_site_id', '', $siteId],
+                ['minisite_version_id', '', $versionId]
+            ]);
+
+        // Mock service call to throw general exception
+        $this->viewService
+            ->expects($this->once())
+            ->method('getMinisiteForVersionSpecificPreview')
+            ->with($siteId, $versionId)
+            ->willThrowException(new \RuntimeException('Database error'));
+
+        // Mock renderer to render 404
+        $this->renderer
+            ->expects($this->once())
+            ->method('render404')
+            ->with('Database error');
+
+        // Call the method
+        $this->minisitePageController->handleVersionSpecificPreview();
+    }
+
+    /**
+     * Test handleVersionSpecificPreview with current version
+     */
+    public function test_handle_version_specific_preview_with_current_version(): void
+    {
+        $siteId = '123';
+        $versionId = 'current';
+        $previewData = (object)[
+            'minisite' => (object)[
+                'id' => $siteId,
+                'name' => 'Test Minisite',
+                'siteJson' => ['test' => 'current data']
+            ],
+            'version' => null, // Current version
+            'siteJson' => ['test' => 'current data'],
+            'versionId' => $versionId
+        ];
+
+        // Mock authentication check
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('isUserLoggedIn')
+            ->willReturn(true);
+
+        // Mock query var retrieval
+        $this->wordPressManager
+            ->expects($this->exactly(2))
+            ->method('getQueryVar')
+            ->willReturnMap([
+                ['minisite_site_id', '', $siteId],
+                ['minisite_version_id', '', $versionId]
+            ]);
+
+        // Mock service call
+        $this->viewService
+            ->expects($this->once())
+            ->method('getMinisiteForVersionSpecificPreview')
+            ->with($siteId, $versionId)
+            ->willReturn($previewData);
+
+        // Mock renderer call
+        $this->renderer
+            ->expects($this->once())
+            ->method('renderVersionSpecificPreview')
+            ->with($previewData);
+
+        // Call the method
+        $this->minisitePageController->handleVersionSpecificPreview();
     }
 }

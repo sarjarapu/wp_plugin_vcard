@@ -66,38 +66,6 @@ class EditController
         }
     }
 
-    /**
-     * Handle preview request
-     */
-    public function handlePreview(): void
-    {
-        // Check authentication
-        if (!$this->wordPressManager->isUserLoggedIn()) {
-            $this->wordPressManager->redirect($this->wordPressManager->getLoginRedirectUrl());
-        }
-
-        $siteId = $this->wordPressManager->getQueryVar('minisite_site_id');
-        if (!$siteId) {
-            $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
-        }
-
-        $versionId = $this->wordPressManager->getQueryVar('minisite_version_id');
-
-        try {
-            // Get minisite for preview (similar to editing but for display)
-            $previewData = $this->editService->getMinisiteForPreview($siteId, $versionId);
-            $this->editRenderer->renderPreview($previewData);
-        } catch (\Exception $e) {
-            // Handle access denied or not found
-            if (strpos($e->getMessage(), 'Access denied') !== false) {
-                $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
-            } elseif (strpos($e->getMessage(), 'not found') !== false) {
-                $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
-            } else {
-                $this->editRenderer->renderError($e->getMessage());
-            }
-        }
-    }
 
     /**
      * Display edit form

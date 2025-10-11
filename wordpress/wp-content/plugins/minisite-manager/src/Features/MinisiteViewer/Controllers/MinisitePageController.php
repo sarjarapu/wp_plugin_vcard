@@ -7,6 +7,7 @@ use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use Minisite\Features\MinisiteViewer\Http\ViewRequestHandler;
 use Minisite\Features\MinisiteViewer\Http\ViewResponseHandler;
 use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
+use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 
 /**
  * Refactored Minisite Page Controller
@@ -26,7 +27,8 @@ final class MinisitePageController
         private MinisiteViewService $viewService,
         private ViewRequestHandler $requestHandler,
         private ViewResponseHandler $responseHandler,
-        private ViewRenderer $renderer
+        private ViewRenderer $renderer,
+        private WordPressMinisiteManager $wordPressManager
     ) {
     }
 
@@ -98,5 +100,38 @@ final class MinisitePageController
     {
         $this->responseHandler->set404Response();
         $this->renderer->render404('Error: ' . $errorMessage);
+    }
+
+    /**
+     * Handle version-specific preview request (authenticated)
+     */
+    public function handleVersionSpecificPreview(): void
+    {
+        // Check authentication
+        if (!$this->wordPressManager->isUserLoggedIn()) {
+            $this->wordPressManager->redirect($this->wordPressManager->getLoginRedirectUrl());
+        }
+
+        $siteId = $this->wordPressManager->getQueryVar('minisite_site_id');
+        if (!$siteId) {
+            $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
+        }
+
+        $versionId = $this->wordPressManager->getQueryVar('minisite_version_id');
+
+        try {
+            // Get minisite for version-specific preview
+            $previewData = $this->viewService->getMinisiteForVersionSpecificPreview($siteId, $versionId);
+            $this->renderer->renderVersionSpecificPreview($previewData);
+        } catch (\Exception $e) {
+            // Handle access denied or not found
+            if (strpos($e->getMessage(), 'Access denied') !== false) {
+                $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
+            } elseif (strpos($e->getMessage(), 'not found') !== false) {
+                $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
+            } else {
+                $this->renderer->render404($e->getMessage());
+            }
+        }
     }
 }

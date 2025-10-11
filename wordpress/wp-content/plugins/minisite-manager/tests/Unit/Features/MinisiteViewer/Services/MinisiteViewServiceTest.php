@@ -241,4 +241,275 @@ final class MinisiteViewServiceTest extends TestCase
         $this->assertFalse($result['success']);
         $this->assertEquals('Minisite not found', $result['error']);
     }
+
+    // ===== VERSION-SPECIFIC PREVIEW TESTS =====
+
+    /**
+     * Test getMinisiteForVersionSpecificPreview with valid minisite and current version
+     */
+    public function test_get_minisite_for_version_specific_preview_with_current_version(): void
+    {
+        $siteId = '123';
+        $versionId = 'current';
+        $mockMinisite = (object)[
+            'id' => $siteId,
+            'name' => 'Test Minisite',
+            'createdBy' => 1,
+            'siteJson' => ['test' => 'current data']
+        ];
+        $mockUser = (object)['ID' => 1];
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('findMinisiteById')
+            ->with($siteId)
+            ->willReturn($mockMinisite);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($mockUser);
+
+        $result = $this->viewService->getMinisiteForVersionSpecificPreview($siteId, $versionId);
+
+        $this->assertIsObject($result);
+        $this->assertEquals($mockMinisite, $result->minisite);
+        $this->assertNull($result->version);
+        $this->assertEquals(['test' => 'current data'], $result->siteJson);
+        $this->assertEquals('current', $result->versionId);
+    }
+
+    /**
+     * Test getMinisiteForVersionSpecificPreview with specific version
+     */
+    public function test_get_minisite_for_version_specific_preview_with_specific_version(): void
+    {
+        $siteId = '123';
+        $versionId = '5';
+        $mockMinisite = (object)[
+            'id' => $siteId,
+            'name' => 'Test Minisite',
+            'createdBy' => 1,
+            'siteJson' => ['test' => 'current data']
+        ];
+        $mockVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $mockVersion->id = 5;
+        $mockVersion->minisiteId = $siteId;
+        $mockVersion->name = 'Version 5';
+        $mockVersion->city = 'Version City';
+        $mockVersion->title = 'Version Title';
+        $mockVersion->label = 'Version 5';
+        $mockVersion->siteJson = ['test' => 'version data'];
+        $mockUser = (object)['ID' => 1];
+        $mockVersionRepo = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepository::class);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('findMinisiteById')
+            ->with($siteId)
+            ->willReturn($mockMinisite);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($mockUser);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getVersionRepository')
+            ->willReturn($mockVersionRepo);
+
+        $mockVersionRepo
+            ->expects($this->once())
+            ->method('findById')
+            ->with(5)
+            ->willReturn($mockVersion);
+
+        $result = $this->viewService->getMinisiteForVersionSpecificPreview($siteId, $versionId);
+
+        $this->assertIsObject($result);
+        $this->assertEquals($mockMinisite, $result->minisite);
+        $this->assertEquals($mockVersion, $result->version);
+        $this->assertEquals(['test' => 'version data'], $result->siteJson);
+        $this->assertEquals('5', $result->versionId);
+    }
+
+    /**
+     * Test getMinisiteForVersionSpecificPreview with minisite not found
+     */
+    public function test_get_minisite_for_version_specific_preview_with_minisite_not_found(): void
+    {
+        $siteId = 'nonexistent';
+        $versionId = 'current';
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('findMinisiteById')
+            ->with($siteId)
+            ->willReturn(null);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Minisite not found');
+
+        $this->viewService->getMinisiteForVersionSpecificPreview($siteId, $versionId);
+    }
+
+    /**
+     * Test getMinisiteForVersionSpecificPreview with access denied
+     */
+    public function test_get_minisite_for_version_specific_preview_with_access_denied(): void
+    {
+        $siteId = '123';
+        $versionId = 'current';
+        $mockMinisite = (object)[
+            'id' => $siteId,
+            'name' => 'Test Minisite',
+            'createdBy' => 1 // Different user
+        ];
+        $mockUser = (object)['ID' => 2]; // Different user
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('findMinisiteById')
+            ->with($siteId)
+            ->willReturn($mockMinisite);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($mockUser);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Access denied');
+
+        $this->viewService->getMinisiteForVersionSpecificPreview($siteId, $versionId);
+    }
+
+    /**
+     * Test getMinisiteForVersionSpecificPreview with version not found
+     */
+    public function test_get_minisite_for_version_specific_preview_with_version_not_found(): void
+    {
+        $siteId = '123';
+        $versionId = '999';
+        $mockMinisite = (object)[
+            'id' => $siteId,
+            'name' => 'Test Minisite',
+            'createdBy' => 1,
+            'siteJson' => ['test' => 'current data']
+        ];
+        $mockUser = (object)['ID' => 1];
+        $mockVersionRepo = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepository::class);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('findMinisiteById')
+            ->with($siteId)
+            ->willReturn($mockMinisite);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($mockUser);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getVersionRepository')
+            ->willReturn($mockVersionRepo);
+
+        $mockVersionRepo
+            ->expects($this->once())
+            ->method('findById')
+            ->with(999)
+            ->willReturn(null);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Version not found');
+
+        $this->viewService->getMinisiteForVersionSpecificPreview($siteId, $versionId);
+    }
+
+    /**
+     * Test getMinisiteForVersionSpecificPreview with version from different minisite
+     */
+    public function test_get_minisite_for_version_specific_preview_with_wrong_minisite_version(): void
+    {
+        $siteId = '123';
+        $versionId = '5';
+        $mockMinisite = (object)[
+            'id' => $siteId,
+            'name' => 'Test Minisite',
+            'createdBy' => 1,
+            'siteJson' => ['test' => 'current data']
+        ];
+        $mockVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $mockVersion->id = 5;
+        $mockVersion->minisiteId = 'different-site-id'; // Different minisite
+        $mockVersion->name = 'Version 5';
+        $mockVersion->siteJson = ['test' => 'version data'];
+        $mockUser = (object)['ID' => 1];
+        $mockVersionRepo = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepository::class);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('findMinisiteById')
+            ->with($siteId)
+            ->willReturn($mockMinisite);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($mockUser);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getVersionRepository')
+            ->willReturn($mockVersionRepo);
+
+        $mockVersionRepo
+            ->expects($this->once())
+            ->method('findById')
+            ->with(5)
+            ->willReturn($mockVersion);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Version not found');
+
+        $this->viewService->getMinisiteForVersionSpecificPreview($siteId, $versionId);
+    }
+
+    /**
+     * Test getMinisiteForVersionSpecificPreview with null version ID (should use current)
+     */
+    public function test_get_minisite_for_version_specific_preview_with_null_version_id(): void
+    {
+        $siteId = '123';
+        $versionId = null;
+        $mockMinisite = (object)[
+            'id' => $siteId,
+            'name' => 'Test Minisite',
+            'createdBy' => 1,
+            'siteJson' => ['test' => 'current data']
+        ];
+        $mockUser = (object)['ID' => 1];
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('findMinisiteById')
+            ->with($siteId)
+            ->willReturn($mockMinisite);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($mockUser);
+
+        $result = $this->viewService->getMinisiteForVersionSpecificPreview($siteId, $versionId);
+
+        $this->assertIsObject($result);
+        $this->assertEquals($mockMinisite, $result->minisite);
+        $this->assertNull($result->version);
+        $this->assertEquals(['test' => 'current data'], $result->siteJson);
+        $this->assertNull($result->versionId);
+    }
 }

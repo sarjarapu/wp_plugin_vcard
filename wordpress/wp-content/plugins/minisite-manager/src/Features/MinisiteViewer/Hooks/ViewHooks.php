@@ -72,4 +72,13 @@ final class ViewHooks
         // Exit to prevent the old system from handling this request
         exit;
     }
+
+    /**
+     * Get the minisite page controller
+     * This allows other features to access the controller for delegation
+     */
+    public function getController(): MinisitePageController
+    {
+        return $this->minisitePageController;
+    }
 }

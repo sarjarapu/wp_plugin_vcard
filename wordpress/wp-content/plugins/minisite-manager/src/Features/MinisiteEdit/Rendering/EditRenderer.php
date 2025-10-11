@@ -43,34 +43,6 @@ class EditRenderer
         }
     }
 
-    /**
-     * Render preview
-     */
-    public function renderPreview(object $previewData): void
-    {
-        if (!$this->timberRenderer) {
-            $this->renderFallbackPreview($previewData);
-            return;
-        }
-
-        // Set up Timber locations
-        $this->setupTimberLocations();
-
-        // Prepare template data for preview
-        $templateData = $this->preparePreviewTemplateData($previewData);
-        
-        // Render the preview template using Timber directly
-        if (class_exists('Timber\\Timber')) {
-            try {
-                \Timber\Timber::render('v2025/minisite.twig', $templateData);
-            } catch (\Exception $e) {
-                error_log('Template rendering error: ' . $e->getMessage());
-                $this->renderFallbackPreview($previewData);
-            }
-        } else {
-            $this->renderFallbackPreview($previewData);
-        }
-    }
 
     /**
      * Render error page
@@ -222,65 +194,7 @@ class EditRenderer
 </html>';
     }
 
-    /**
-     * Prepare template data for preview
-     */
-    private function preparePreviewTemplateData(object $previewData): array
-    {
-        $minisite = $previewData->minisite;
-        $version = $previewData->version;
-        
-        // Use the same data structure as MinisiteViewer
-        return [
-            'minisite' => $minisite,
-            'reviews' => [], // Empty reviews array for preview
-            // Additional preview-specific data
-            'version' => $version,
-            'versionId' => $previewData->versionId,
-            'isPreview' => true,
-            'previewTitle' => $version ? "Preview: {$version->label}" : 'Preview: Current Version'
-        ];
-    }
 
-    /**
-     * Render fallback preview
-     */
-    private function renderFallbackPreview(object $previewData): void
-    {
-        $minisite = $previewData->minisite;
-        $version = $previewData->version;
-        $versionLabel = $version ? $version->label : 'Current Version';
-        
-        echo '<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Preview: ' . esc_html($minisite->name ?? 'Minisite') . '</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .preview-header { background: #f0f0f0; padding: 20px; margin-bottom: 20px; border-radius: 5px; }
-        .preview-content { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
-        .version-info { color: #666; font-size: 14px; }
-    </style>
-</head>
-<body>
-    <div class="preview-header">
-        <h1>Preview: ' . esc_html($minisite->name ?? 'Minisite') . '</h1>
-        <div class="version-info">Version: ' . esc_html($versionLabel) . '</div>
-    </div>
-    
-    <div class="preview-content">
-        <h2>Minisite Content</h2>
-        <p><strong>Name:</strong> ' . esc_html($minisite->name ?? '') . '</p>
-        <p><strong>City:</strong> ' . esc_html($minisite->city ?? '') . '</p>
-        <p><strong>Title:</strong> ' . esc_html($minisite->title ?? '') . '</p>
-        
-        <h3>Site JSON Data</h3>
-        <pre>' . esc_html(json_encode($previewData->siteJson, JSON_PRETTY_PRINT)) . '</pre>
-    </div>
-</body>
-</html>';
-    }
 
     /**
      * Render fallback error page
