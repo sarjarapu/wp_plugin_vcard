@@ -243,9 +243,9 @@ final class WordPressUserManager
     /**
      * Get global WP_Query object
      *
-     * @return \WP_Query Global query object
+     * @return \WP_Query|null Global query object
      */
-    public function getWpQuery()
+    public function getWpQuery(): ?\WP_Query
     {
         global $wp_query;
         return $wp_query;

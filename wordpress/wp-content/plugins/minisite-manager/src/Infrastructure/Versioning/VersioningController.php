@@ -26,7 +26,7 @@ class VersioningController
 
         // Safety (dev only): if our tables are missing but option says up-to-date, force a migration run
         if (
-            ( defined('MINISITE_LIVE_PRODUCTION') ? ! MINISITE_LIVE_PRODUCTION : true ) &&
+            ( !defined('MINISITE_LIVE_PRODUCTION') || ! MINISITE_LIVE_PRODUCTION ) &&
             $this->tablesMissing($wpdb)
         ) {
             // Reset stored version so runner applies base migration

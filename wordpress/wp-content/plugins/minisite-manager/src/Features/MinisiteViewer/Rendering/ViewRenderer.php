@@ -12,7 +12,7 @@ namespace Minisite\Features\MinisiteViewer\Rendering;
  */
 final class ViewRenderer
 {
-    private object $renderer;
+    private ?object $renderer;
     private object $wordPressManager;
 
     public function __construct(object $renderer, object $wordPressManager)
@@ -101,7 +101,7 @@ final class ViewRenderer
      */
     public function renderVersionSpecificPreview(object $previewData): void
     {
-        if (!$this->renderer) {
+        if ($this->renderer === null) {
             $this->renderFallbackVersionSpecificPreview($previewData);
             return;
         }

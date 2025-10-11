@@ -232,7 +232,7 @@ class EditService
     /**
      * Helper function to get sanitized form data with fallback to existing value
      */
-    private function getFormValue(array $formData, array $existingData, string $formKey, string $existingKey = null, string $default = ''): string
+    private function getFormValue(array $formData, array $existingData, string $formKey, ?string $existingKey = null, string $default = ''): string
     {
         $existingKey = $existingKey ?? $formKey;
         return $this->wordPressManager->sanitizeTextField(

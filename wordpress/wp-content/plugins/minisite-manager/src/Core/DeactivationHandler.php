@@ -18,7 +18,7 @@ final class DeactivationHandler
         flush_rewrite_rules();
 
         // Cleanup in non-production
-        if (!MINISITE_LIVE_PRODUCTION) {
+        if (!defined('MINISITE_LIVE_PRODUCTION') || !MINISITE_LIVE_PRODUCTION) {
             self::cleanupNonProduction();
         }
     }
