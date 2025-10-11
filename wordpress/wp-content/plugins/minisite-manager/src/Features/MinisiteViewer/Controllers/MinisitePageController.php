@@ -20,7 +20,7 @@ use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
  *
  * This controller only orchestrates the flow - it doesn't do the work itself!
  */
-final class MinisitePageController
+class MinisitePageController
 {
     public function __construct(
         private ViewHandler $viewHandler,

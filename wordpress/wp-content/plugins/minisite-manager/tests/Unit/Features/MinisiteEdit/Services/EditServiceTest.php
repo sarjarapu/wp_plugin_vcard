@@ -184,7 +184,7 @@ class EditServiceTest extends TestCase
             ->with($this->anything(), 'minisite_edit')
             ->willReturn(true);
 
-        $this->mockWordPressManager->expects($this->exactly(2))
+        $this->mockWordPressManager->expects($this->once())
             ->method('findMinisiteById')
             ->with($siteId)
             ->willReturn($minisite);
@@ -314,7 +314,7 @@ class EditServiceTest extends TestCase
             ->with($this->anything(), 'minisite_edit')
             ->willReturn(true);
 
-        $this->mockWordPressManager->expects($this->exactly(2))
+        $this->mockWordPressManager->expects($this->once())
             ->method('findMinisiteById')
             ->with($siteId)
             ->willReturn($minisite);

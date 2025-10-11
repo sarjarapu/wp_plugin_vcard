@@ -248,7 +248,7 @@ final class WordPressUserManager
     public function getWpQuery(): ?\WP_Query
     {
         global $wp_query;
-        return $wp_query;
+        return $wp_query instanceof \WP_Query ? $wp_query : null;
     }
 
     /**
