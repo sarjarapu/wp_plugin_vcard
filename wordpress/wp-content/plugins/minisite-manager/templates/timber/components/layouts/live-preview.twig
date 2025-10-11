@@ -2,10 +2,15 @@
 <div class="rounded-2xl ring-1 ring-[var(--outline-variant)] bg-[var(--surface-0)] p-6">
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-xl font-semibold text-[var(--on-surface)]">Preview saved changes</h2>
-    <a href="{{ preview_url }}" target="_blank" 
-      class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--surface-1)] text-[var(--on-surface)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] text-sm">
-      <i class="fa-solid fa-external-link-alt"></i> Open
-    </a>
+    <div class="flex items-center gap-3">
+      <a href="{{ preview_url }}" target="_blank" 
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--primary)] text-[var(--on-primary)] shadow hover:brightness-95">
+        <i class="fa-solid fa-external-link-alt"></i> Open
+      </a>
+      <a href="#" class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[var(--surface-1)] text-[var(--primary)] ring-1 ring-[var(--outline-variant)] hover:bg-[var(--surface)] transition" title="Back to top">
+        <i class="fa-solid fa-arrow-up text-sm"></i>
+      </a>
+    </div>
   </div>
   <div class="border border-[var(--outline-variant)] rounded-lg overflow-hidden">
     <iframe src="{{ preview_url }}" 

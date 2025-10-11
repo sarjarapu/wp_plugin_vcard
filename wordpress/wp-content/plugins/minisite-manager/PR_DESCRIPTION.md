@@ -1,53 +1,109 @@
-# Fix: Resolve Minisite Preview Blank Page Issue
+# Fix: Version Preview and UI Consistency Issues
 
-## 🐛 Problem
-The minisite preview functionality at `/account/sites/{id}/preview/{version}` was returning a blank page despite:
-- 200 HTTP response (successful)
-- Route being properly matched and handled
-- All debugging showing the system was working
+## 🐛 Issues Fixed
 
-## 🔍 Root Cause
-**Missing Timber base directory in `setupTimberLocations()`**
+### Critical Data Loss Issue
+- **Problem**: JSON import/save functionality was only storing partial siteJson data, causing version-specific previews to show blank content sections
+- **Impact**: Critical data integrity issue breaking core versioning functionality
+- **Root Cause**: `buildSiteJsonFromForm` method was overwriting existing data instead of preserving it
 
-The `EditRenderer::setupTimberLocations()` method was only adding:
-- `templates/timber/views/`
-- `templates/timber/components/`
+### Preview Functionality Issues
+- **Problem**: Version-specific previews were missing reviews and edit screen preview was broken
+- **Impact**: Incomplete preview experience and broken navigation
+- **Root Cause**: Missing review fetching and preview URLs in template data
 
-But **NOT** the base directory `templates/timber/` where the `v2025/` subdirectory exists.
+### UI Consistency Issues
+- **Problem**: Button order was inconsistent across form sections
+- **Impact**: Poor user experience and inconsistent interface
+- **Root Cause**: Different sections had different button layouts
 
-When trying to render `v2025/minisite.twig`, Timber couldn't find it because:
-- Template path: `templates/timber/v2025/minisite.twig`
-- Timber locations: `templates/timber/views/`, `templates/timber/components/`
-- Result: Template not found, no content rendered (577 bytes vs 83,409 bytes)
+## 🔧 Changes Made
 
-## ✅ Solution
-1. **Fixed Timber Locations**: Added `templates/timber/` to `\Timber\Timber::$locations`
-2. **Used Correct Template**: Changed from `minisite-preview.twig` to `v2025/minisite.twig` (same as MinisiteViewer)
-3. **Aligned Data Structure**: Added `reviews: []` to match MinisiteViewer expectations
-4. **Added Error Handling**: Wrapped template rendering in try/catch
-5. **Restored Security**: Re-enabled authentication and access control
+### 1. Data Preservation Fix
+- **File**: `src/Features/MinisiteEdit/Services/EditService.php`
+- **Changes**:
+  - Completely rewrote `buildSiteJsonFromForm` method to preserve existing siteJson data
+  - Only updates fields that are actually submitted in the form
+  - Added comprehensive error logging for debugging
+  - Ensures complete data structure preservation (hero, about, services, gallery, social, etc.)
 
-## 📁 Files Changed
-- `src/Features/MinisiteEdit/Rendering/EditRenderer.php` - **Main fix**
-- `src/Features/MinisiteEdit/Controllers/EditController.php` - Auth re-enabled
-- `src/Features/MinisiteEdit/Services/EditService.php` - Access control re-enabled
-- `docs/issues/preview-blank-page-issue.md` - Updated with solution
-- `docs/debugging-approaches.md` - New debugging methodology
+### 2. Preview Functionality Fixes
+- **Files**: 
+  - `src/Features/MinisiteViewer/Rendering/ViewRenderer.php`
+  - `src/Features/MinisiteEdit/Rendering/EditRenderer.php`
+- **Changes**:
+  - Added review fetching to version-specific previews using `ReviewRepository`
+  - Added preview URLs (`preview_url`, `versions_url`, `edit_latest_url`) to edit screen template data
+  - Added debug logging for review fetching
+  - Fixed broken edit screen preview functionality
+
+### 3. UI Consistency Fixes
+- **Files**:
+  - `templates/timber/components/forms/gallery-section.twig`
+  - `templates/timber/components/forms/products-section.twig`
+  - `templates/timber/components/layouts/live-preview.twig`
+- **Changes**:
+  - Standardized button order across all sections: **Primary Action → Scroll to Top**
+  - Converted Preview "Open" button to primary style for consistency
+  - Added scroll to top buttons where missing
+  - Improved visual hierarchy and user experience
+
+## 📊 Impact
+
+### Before
+- ❌ Version previews showed blank sections (missing hero, about, services, gallery, social)
+- ❌ Reviews were not displayed in version-specific previews
+- ❌ Edit screen preview was broken (missing preview URLs)
+- ❌ Inconsistent button order across sections
+- ❌ Data loss during save operations
+
+### After
+- ✅ Complete siteJson data preserved during save operations
+- ✅ Reviews display correctly in all previews
+- ✅ Edit screen preview works with proper navigation
+- ✅ Consistent button order: Primary Action → Scroll to Top
+- ✅ Professional, consistent UI across all sections
 
 ## 🧪 Testing
-- ✅ Preview route works: `http://localhost:8000/account/sites/{id}/preview/{version}`
-- ✅ Template renders correctly with database data (83,409 bytes)
-- ✅ Both `current` and specific version IDs work
-- ✅ Authentication and access control enforced
-- ✅ No debug code left in production
 
-## 📚 Documentation
-- Updated issue documentation with root cause analysis
-- Created comprehensive debugging approaches guide
-- Documented the "H1 tag with current date/time" debugging methodology
+- [x] Save functionality preserves complete siteJson data
+- [x] Version-specific previews show reviews
+- [x] Edit screen preview works correctly
+- [x] Button order is consistent across all sections
+- [x] Error logging provides debugging information
+- [x] No linting errors introduced
 
-## 🔧 Code Quality
-- Removed all temporary debug statements
-- Added proper error handling
-- Maintained security with authentication checks
-- Clean, production-ready code
+## 📝 Technical Details
+
+### Data Preservation Strategy
+- Start with existing siteJson data to preserve all content
+- Only update fields that are actually submitted in the form
+- Use `array_merge()` to preserve existing data while updating new values
+- Maintain all sections: hero, about, whyUs, services, contact, gallery, social, etc.
+
+### Review Fetching Implementation
+- Uses same `ReviewRepository::listApprovedForMinisite()` as regular minisite views
+- Added to `ViewRenderer::fetchReviews()` method
+- Includes debug logging for troubleshooting
+
+### UI Consistency Pattern
+```html
+<div class="flex items-center justify-between mb-4">
+  <h2>Section Title</h2>
+  <div class="flex items-center gap-3">
+    <button class="primary-button">Primary Action</button>
+    <a class="scroll-to-top">↑</a>
+  </div>
+</div>
+```
+
+## 🚀 Deployment Notes
+
+- No database migrations required
+- No breaking changes
+- Backward compatible
+- Improves existing functionality without affecting current data
+
+---
+
+**Fixes**: MIN-18 - Bug: JSON import/save functionality only storing partial siteJson data

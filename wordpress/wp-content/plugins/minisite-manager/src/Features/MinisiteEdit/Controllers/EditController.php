@@ -55,6 +55,10 @@ class EditController
      */
     private function handleFormSubmission(string $siteId): void
     {
+        // Log $_POST data for debugging
+        error_log('MINISITE_EDIT_CONTROLLER_DEBUG: $_POST data received: ' . json_encode($_POST, JSON_PRETTY_PRINT));
+        error_log('MINISITE_EDIT_CONTROLLER_DEBUG: Site ID: ' . $siteId);
+        
         // Nonce verification is handled in EditService::saveDraft()
         $result = $this->editService->saveDraft($siteId, $_POST);
 
