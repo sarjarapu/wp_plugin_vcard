@@ -5,11 +5,16 @@ namespace Minisite\Infrastructure\Persistence\Repositories;
 use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 class MinisiteRepository implements MinisiteRepositoryInterface
 {
+    private LoggerInterface $logger;
+
     public function __construct(private \wpdb $db)
     {
+        $this->logger = LoggingServiceProvider::getFeatureLogger('minisite-repository');
     }
 
     private function table(): string
@@ -116,35 +121,138 @@ class MinisiteRepository implements MinisiteRepositoryInterface
      */
     public function updateCoordinates(string $id, ?float $lat, ?float $lng, int $updatedBy): void
     {
+        $this->logger->debug('MinisiteRepository::updateCoordinates() - Input', [
+            'minisite_id' => $id,
+            'lat' => $lat,
+            'lng' => $lng,
+            'updated_by' => $updatedBy,
+            'operation_type' => 'input'
+        ]);
+        
+        if ($lat === null || $lng === null) {
+            $this->logger->debug('MinisiteRepository::updateCoordinates() - No coordinates provided, skipping', [
+                'minisite_id' => $id,
+                'operation_type' => 'skipped'
+            ]);
+            return;
+        }
+        
         $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET updated_by = %d, updated_at = NOW() WHERE id = %s",
+            "UPDATE {$this->table()} SET updated_by = %d, updated_at = NOW(), location_point = POINT(%f, %f) WHERE id = %s",
             $updatedBy,
+            $lng,
+            $lat,
             $id
         );
-        $this->db->query($sql);
+        
+        $this->logger->debug('MinisiteRepository::updateCoordinates() - Executing SQL', [
+            'minisite_id' => $id,
+            'sql_query' => $sql,
+            'operation_type' => 'sql_execution'
+        ]);
+        
+        $rows_affected = $this->db->query($sql);
+        
+        $this->logger->debug('MinisiteRepository::updateCoordinates() - Output', [
+            'minisite_id' => $id,
+            'rows_affected' => $rows_affected,
+            'last_error' => $this->db->last_error,
+            'operation_type' => 'output'
+        ]);
 
-        if ($this->db->rows_affected === 0) {
+        if ($rows_affected === 0) {
+            $this->logger->error('MinisiteRepository::updateCoordinates() - Error', [
+                'minisite_id' => $id,
+                'error_message' => 'Minisite not found or update failed',
+                'operation_type' => 'error'
+            ]);
             throw new \RuntimeException('Minisite not found or update failed.');
         }
+    }
 
-        // Update POINT column if coordinates are set
-        if ($lat !== null && $lng !== null) {
-            $this->db->query(
-                $this->db->prepare(
-                    "UPDATE {$this->table()} SET location_point = POINT(%f, %f) WHERE id = %s",
-                    $lng,
-                    $lat,
-                    $id
-                )
-            );
+    /**
+     * Update multiple minisite fields in a single operation
+     */
+    public function updateMinisiteFields(string $minisiteId, array $fields, int $updatedBy): void
+    {
+        $this->logger->debug('MinisiteRepository::updateMinisiteFields() - Input', [
+            'minisite_id' => $minisiteId,
+            'fields_count' => count($fields),
+            'updated_by' => $updatedBy,
+            'operation_type' => 'input'
+        ]);
+
+        $updateFields = array(
+            'updated_by' => $updatedBy,
+            'updated_at' => current_time('mysql'),
+        );
+
+        $formatFields = array( '%d', '%s' );
+
+        // Add the provided fields
+        foreach ($fields as $field => $value) {
+            if ($field === 'location_point' && strpos($value, 'POINT(') === 0) {
+                // Handle POINT field specially - don't escape it
+                $updateFields[$field] = $value;
+                $formatFields[] = '%s'; // This will be ignored for raw SQL
+            } else {
+                $updateFields[$field] = $value;
+                $formatFields[] = '%s';
+            }
+        }
+
+        // Check if we have raw SQL fields (like POINT)
+        $hasRawSql = false;
+        foreach ($fields as $field => $value) {
+            if ($field === 'location_point' && strpos($value, 'POINT(') === 0) {
+                $hasRawSql = true;
+                break;
+            }
+        }
+
+        if ($hasRawSql) {
+            // Build custom SQL for raw fields
+            $setParts = [];
+            foreach ($updateFields as $field => $value) {
+                if ($field === 'location_point' && strpos($value, 'POINT(') === 0) {
+                    $setParts[] = "`$field` = $value";
+                } else {
+                    $setParts[] = "`$field` = %s";
+                }
+            }
+            
+            $sql = "UPDATE {$this->table()} SET " . implode(', ', $setParts) . " WHERE id = %s";
+            $values = array_values(array_filter($updateFields, function($value, $field) {
+                return !($field === 'location_point' && strpos($value, 'POINT(') === 0);
+            }, ARRAY_FILTER_USE_BOTH));
+            $values[] = $minisiteId;
+            
+            $preparedSql = $this->db->prepare($sql, ...$values);
+            $result = $this->db->query($preparedSql);
         } else {
-            // Clear location_point if no coordinates
-            $this->db->query(
-                $this->db->prepare(
-                    "UPDATE {$this->table()} SET location_point = NULL WHERE id = %s",
-                    $id
-                )
+            $result = $this->db->update(
+                $this->table(),
+                $updateFields,
+                array( 'id' => $minisiteId ),
+                $formatFields,
+                array( '%s' )
             );
+        }
+
+        $this->logger->debug('MinisiteRepository::updateMinisiteFields() - Output', [
+            'minisite_id' => $minisiteId,
+            'result' => $result,
+            'last_error' => $this->db->last_error,
+            'operation_type' => 'output'
+        ]);
+
+        if ($result === false) {
+            $this->logger->error('MinisiteRepository::updateMinisiteFields() - Error', [
+                'minisite_id' => $minisiteId,
+                'error_message' => 'Failed to update minisite fields',
+                'operation_type' => 'error'
+            ]);
+            throw new \RuntimeException('Failed to update minisite fields.');
         }
     }
 

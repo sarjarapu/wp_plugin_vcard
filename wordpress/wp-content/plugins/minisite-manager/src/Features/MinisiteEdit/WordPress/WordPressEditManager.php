@@ -227,6 +227,14 @@ class WordPressEditManager implements WordPressManagerInterface
     }
 
     /**
+     * Update multiple minisite fields in a single operation
+     */
+    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
+    {
+        $this->getMinisiteRepository()->updateMinisiteFields($siteId, $fields, $userId);
+    }
+
+    /**
      * Find published version
      */
     public function findPublishedVersion(string $siteId): ?object

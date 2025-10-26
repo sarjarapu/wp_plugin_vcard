@@ -93,6 +93,22 @@ class MinisiteFormProcessor
             'minisite_id' => $minisite?->id ?? 'new'
         ]);
 
+        // DEBUG: Log actual form data values for key fields
+        $this->logger->debug('Form data values for key fields', [
+            'site_id' => $siteId,
+            'seo_title' => $formData['seo_title'] ?? 'NOT_SET',
+            'seo_description' => $formData['seo_description'] ?? 'NOT_SET',
+            'brand_name' => $formData['brand_name'] ?? 'NOT_SET',
+            'brand_logo' => $formData['brand_logo'] ?? 'NOT_SET',
+            'brand_industry' => $formData['brand_industry'] ?? 'NOT_SET',
+            'brand_palette' => $formData['brand_palette'] ?? 'NOT_SET',
+            'hero_heading' => $formData['hero_heading'] ?? 'NOT_SET',
+            'hero_subheading' => $formData['hero_subheading'] ?? 'NOT_SET',
+            'about_html' => $formData['about_html'] ?? 'NOT_SET',
+            'business_name' => $formData['business_name'] ?? 'NOT_SET',
+            'business_city' => $formData['business_city'] ?? 'NOT_SET'
+        ]);
+
         // Get existing siteJson to preserve all data
         if (!$minisite) {
             $this->logger->debug('No existing minisite provided, fetching from database', [
@@ -100,16 +116,23 @@ class MinisiteFormProcessor
             ]);
             $minisite = $this->wordPressManager->findMinisiteById($siteId);
         }
-        $existingSiteJson = $minisite && $minisite->siteJson ? $minisite->siteJson : [];
 
-        $this->logger->debug('Starting site JSON build', [
-            'site_id' => $siteId,
-            'has_existing_site_json' => !empty($existingSiteJson),
-            'existing_site_json_size' => strlen(json_encode($existingSiteJson))
-        ]);
-
-        // Start with existing siteJson to preserve all data
-        $siteJson = $existingSiteJson;
+        // For new minisites (no existing data), start with empty structure
+        // For existing minisites, preserve existing data
+        if (!$minisite || !$minisite->siteJson) {
+            $this->logger->debug('No existing minisite or siteJson found, starting with empty structure', [
+                'site_id' => $siteId,
+                'has_minisite' => $minisite !== null,
+                'has_site_json' => $minisite && $minisite->siteJson ? true : false
+            ]);
+            $siteJson = $this->buildEmptySiteJson();
+        } else {
+            $this->logger->debug('Using existing siteJson as base', [
+                'site_id' => $siteId,
+                'existing_site_json_size' => strlen(json_encode($minisite->siteJson))
+            ]);
+            $siteJson = $minisite->siteJson;
+        }
 
         // Update each section if form data is provided
         $siteJson = $this->buildBusinessSection($formData, $siteJson);
@@ -128,6 +151,15 @@ class MinisiteFormProcessor
             'site_id' => $siteId,
             'final_site_json_size' => strlen(json_encode($siteJson)),
             'sections_built' => array_keys($siteJson)
+        ]);
+
+        // DEBUG: Log the actual siteJson content for key sections
+        $this->logger->debug('Final siteJson content for key sections', [
+            'site_id' => $siteId,
+            'seo_section' => $siteJson['seo'] ?? 'NOT_SET',
+            'brand_section' => $siteJson['brand'] ?? 'NOT_SET',
+            'hero_section' => $siteJson['hero'] ?? 'NOT_SET',
+            'about_section' => $siteJson['about'] ?? 'NOT_SET'
         ]);
 
         return $siteJson;
@@ -216,19 +248,14 @@ class MinisiteFormProcessor
      */
     private function buildBusinessSection(array $formData, array $siteJson): array
     {
-        if (
-            isset($formData['business_name']) || isset($formData['business_city']) ||
-            isset($formData['business_region']) || isset($formData['business_country']) ||
-            isset($formData['business_postal'])
-        ) {
-            $siteJson['business'] = array_merge($siteJson['business'] ?? [], [
-                'name' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_name', 'name'),
-                'city' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_city', 'city'),
-                'region' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_region', 'region'),
-                'country' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_country', 'country'),
-                'postal' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_postal', 'postal'),
-            ]);
-        }
+        // Always build the business section structure
+        $siteJson['business'] = array_merge($siteJson['business'] ?? [], [
+            'name' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_name', 'name'),
+            'city' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_city', 'city'),
+            'region' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_region', 'region'),
+            'country' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_country', 'country'),
+            'postal' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_postal', 'postal'),
+        ]);
 
         return $siteJson;
     }
@@ -340,17 +367,13 @@ class MinisiteFormProcessor
      */
     private function buildBrandSection(array $formData, array $siteJson): array
     {
-        if (isset($formData['brand_palette']) || isset($formData['brand_industry'])) {
-            $siteJson['brand'] = array_merge($siteJson['brand'] ?? [], [
-                'palette' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_palette', 'palette'),
-                'industry' => $this->getFormValue(
-                    $formData,
-                    $siteJson['brand'] ?? [],
-                    'brand_industry',
-                    'industry'
-                ),
-            ]);
-        }
+        // Always build the brand section structure
+        $siteJson['brand'] = array_merge($siteJson['brand'] ?? [], [
+            'name' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_name', 'name'),
+            'logo' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_logo', 'logo'),
+            'palette' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_palette', 'palette', 'blue'),
+            'industry' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_industry', 'industry'),
+        ]);
 
         return $siteJson;
     }
@@ -360,17 +383,14 @@ class MinisiteFormProcessor
      */
     private function buildSeoSection(array $formData, array $siteJson): array
     {
-        if (isset($formData['seo_title']) || isset($formData['search_terms'])) {
-            $siteJson['seo'] = array_merge($siteJson['seo'] ?? [], [
-                'title' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_title', 'title'),
-                'search_terms' => $this->getFormValue(
-                    $formData,
-                    $siteJson['seo'] ?? [],
-                    'search_terms',
-                    'search_terms'
-                ),
-            ]);
-        }
+        // Always build the SEO section structure
+        $siteJson['seo'] = array_merge($siteJson['seo'] ?? [], [
+            'title' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_title', 'title'),
+            'description' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_description', 'description'),
+            'keywords' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_keywords', 'keywords'),
+            'favicon' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_favicon', 'favicon'),
+            'search_terms' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'search_terms', 'search_terms'),
+        ]);
 
         return $siteJson;
     }
@@ -380,22 +400,21 @@ class MinisiteFormProcessor
      */
     private function buildSettingsSection(array $formData, array $siteJson): array
     {
-        if (isset($formData['site_template']) || isset($formData['default_locale'])) {
-            $siteJson['settings'] = array_merge($siteJson['settings'] ?? [], [
-                'template' => $this->getFormValue(
-                    $formData,
-                    $siteJson['settings'] ?? [],
-                    'site_template',
-                    'template'
-                ),
-                'locale' => $this->getFormValue(
-                    $formData,
-                    $siteJson['settings'] ?? [],
-                    'default_locale',
-                    'locale'
-                ),
-            ]);
-        }
+        // Always build the settings section structure
+        $siteJson['settings'] = array_merge($siteJson['settings'] ?? [], [
+            'template' => $this->getFormValue(
+                $formData,
+                $siteJson['settings'] ?? [],
+                'site_template',
+                'template'
+            ),
+            'locale' => $this->getFormValue(
+                $formData,
+                $siteJson['settings'] ?? [],
+                'default_locale',
+                'locale'
+            ),
+        ]);
 
         return $siteJson;
     }
@@ -405,64 +424,56 @@ class MinisiteFormProcessor
      */
     private function buildHeroSection(array $formData, array $siteJson): array
     {
-        if (
-            isset($formData['hero_badge']) || isset($formData['hero_heading']) ||
-            isset($formData['hero_subheading']) || isset($formData['hero_image']) ||
-            isset($formData['hero_image_alt']) || isset($formData['hero_cta1_text']) ||
-            isset($formData['hero_cta1_url']) || isset($formData['hero_cta2_text']) ||
-            isset($formData['hero_cta2_url']) || isset($formData['hero_rating_value']) ||
-            isset($formData['hero_rating_count'])
-        ) {
-            $siteJson['hero'] = array_merge($siteJson['hero'] ?? [], [
-                'badge' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_badge', 'badge'),
-                'heading' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_heading', 'heading'),
-                'subheading' => $this->sanitizeRichTextContent(
-                    $formData['hero_subheading'] ?? ($siteJson['hero']['subheading'] ?? '')
-                ),
-                'image' => $this->wordPressManager->sanitizeUrl(
-                    $formData['hero_image'] ?? ($siteJson['hero']['image'] ?? '')
-                ),
-                'imageAlt' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_image_alt', 'imageAlt'),
-                'ctas' => [
-                    [
-                        'text' => $this->getFormValue(
-                            $formData,
-                            $siteJson['hero']['ctas'][0] ?? [],
-                            'hero_cta1_text',
-                            'text'
-                        ),
-                        'url' => $this->wordPressManager->sanitizeUrl(
-                            $formData['hero_cta1_url'] ?? ($siteJson['hero']['ctas'][0]['url'] ?? '')
-                        ),
-                    ],
-                    [
-                        'text' => $this->getFormValue(
-                            $formData,
-                            $siteJson['hero']['ctas'][1] ?? [],
-                            'hero_cta2_text',
-                            'text'
-                        ),
-                        'url' => $this->wordPressManager->sanitizeUrl(
-                            $formData['hero_cta2_url'] ?? ($siteJson['hero']['ctas'][1]['url'] ?? '')
-                        ),
-                    ],
-                ],
-                'rating' => [
-                    'value' => $this->getFormValue(
+        // Always build the hero section structure
+        $siteJson['hero'] = array_merge($siteJson['hero'] ?? [], [
+            'badge' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_badge', 'badge'),
+            'heading' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_heading', 'heading'),
+            'subheading' => $this->sanitizeRichTextContent(
+                $formData['hero_subheading'] ?? ($siteJson['hero']['subheading'] ?? '')
+            ),
+            'image' => $this->wordPressManager->sanitizeUrl(
+                $formData['hero_image'] ?? ($siteJson['hero']['image'] ?? '')
+            ),
+            'imageAlt' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_image_alt', 'imageAlt'),
+            'ctas' => [
+                [
+                    'text' => $this->getFormValue(
                         $formData,
-                        $siteJson['hero']['rating'] ?? [],
-                        'hero_rating_value',
-                        'value'
+                        $siteJson['hero']['ctas'][0] ?? [],
+                        'hero_cta1_text',
+                        'text'
                     ),
-                    'count' => $this->getFormValue(
-                        $formData,
-                        $siteJson['hero']['rating'] ?? [],
-                        'hero_rating_count',
-                        'count'
+                    'url' => $this->wordPressManager->sanitizeUrl(
+                        $formData['hero_cta1_url'] ?? ($siteJson['hero']['ctas'][0]['url'] ?? '')
                     ),
                 ],
-            ]);
-        }
+                [
+                    'text' => $this->getFormValue(
+                        $formData,
+                        $siteJson['hero']['ctas'][1] ?? [],
+                        'hero_cta2_text',
+                        'text'
+                    ),
+                    'url' => $this->wordPressManager->sanitizeUrl(
+                        $formData['hero_cta2_url'] ?? ($siteJson['hero']['ctas'][1]['url'] ?? '')
+                    ),
+                ],
+            ],
+            'rating' => [
+                'value' => $this->getFormValue(
+                    $formData,
+                    $siteJson['hero']['rating'] ?? [],
+                    'hero_rating_value',
+                    'value'
+                ),
+                'count' => $this->getFormValue(
+                    $formData,
+                    $siteJson['hero']['rating'] ?? [],
+                    'hero_rating_count',
+                    'count'
+                ),
+            ],
+        ]);
 
         return $siteJson;
     }
@@ -472,11 +483,12 @@ class MinisiteFormProcessor
      */
     private function buildAboutSection(array $formData, array $siteJson): array
     {
-        if (isset($formData['about_html'])) {
-            $siteJson['about'] = array_merge($siteJson['about'] ?? [], [
-                'html' => $this->sanitizeRichTextContent($formData['about_html']),
-            ]);
-        }
+        // Always build the about section structure
+        $siteJson['about'] = array_merge($siteJson['about'] ?? [], [
+            'html' => $this->sanitizeRichTextContent(
+                $formData['about_html'] ?? ($siteJson['about']['html'] ?? '')
+            ),
+        ]);
 
         return $siteJson;
     }
@@ -486,17 +498,16 @@ class MinisiteFormProcessor
      */
     private function buildWhyUsSection(array $formData, array $siteJson): array
     {
-        if (isset($formData['whyus_title']) || isset($formData['whyus_html']) || isset($formData['whyus_image'])) {
-            $siteJson['whyUs'] = array_merge($siteJson['whyUs'] ?? [], [
-                'title' => $this->getFormValue($formData, $siteJson['whyUs'] ?? [], 'whyus_title', 'title'),
-                'html' => $this->sanitizeRichTextContent(
-                    $formData['whyus_html'] ?? ($siteJson['whyUs']['html'] ?? '')
-                ),
-                'image' => $this->wordPressManager->sanitizeUrl(
-                    $formData['whyus_image'] ?? ($siteJson['whyUs']['image'] ?? '')
-                ),
-            ]);
-        }
+        // Always build the whyUs section structure
+        $siteJson['whyUs'] = array_merge($siteJson['whyUs'] ?? [], [
+            'title' => $this->getFormValue($formData, $siteJson['whyUs'] ?? [], 'whyus_title', 'title'),
+            'html' => $this->sanitizeRichTextContent(
+                $formData['whyus_html'] ?? ($siteJson['whyUs']['html'] ?? '')
+            ),
+            'image' => $this->wordPressManager->sanitizeUrl(
+                $formData['whyus_image'] ?? ($siteJson['whyUs']['image'] ?? '')
+            ),
+        ]);
 
         return $siteJson;
     }
@@ -506,9 +517,8 @@ class MinisiteFormProcessor
      */
     private function buildServicesSection(array $formData, array $siteJson): array
     {
-        if (isset($formData['product_count']) || isset($formData['products_section_title'])) {
-            $siteJson['services'] = $this->buildServicesFromForm($formData, $siteJson['services'] ?? []);
-        }
+        // Always build the services section structure
+        $siteJson['services'] = $this->buildServicesFromForm($formData, $siteJson['services'] ?? []);
 
         return $siteJson;
     }
@@ -518,9 +528,8 @@ class MinisiteFormProcessor
      */
     private function buildGallerySection(array $formData, array $siteJson): array
     {
-        if (isset($formData['gallery_count'])) {
-            $siteJson['gallery'] = $this->buildGalleryFromForm($formData);
-        }
+        // Always build the gallery section structure
+        $siteJson['gallery'] = $this->buildGalleryFromForm($formData);
 
         return $siteJson;
     }
@@ -530,13 +539,8 @@ class MinisiteFormProcessor
      */
     private function buildSocialSection(array $formData, array $siteJson): array
     {
-        if (
-            isset($formData['social_facebook']) || isset($formData['social_instagram']) ||
-            isset($formData['social_x']) || isset($formData['social_youtube']) ||
-            isset($formData['social_linkedin']) || isset($formData['social_tiktok'])
-        ) {
-            $siteJson['social'] = $this->buildSocialFromForm($formData, $siteJson['social'] ?? []);
-        }
+        // Always build the social section structure
+        $siteJson['social'] = $this->buildSocialFromForm($formData, $siteJson['social'] ?? []);
 
         return $siteJson;
     }

@@ -93,6 +93,25 @@ class NewMinisiteController
             'post_data_sample' => array_slice($_POST, 0, 5, true) // First 5 fields for debugging
         ]);
 
+        // Log key form fields with actual values for debugging
+        $this->logger->debug('Form submission data - key fields', [
+            'feature' => 'NewMinisite',
+            'business_name' => $_POST['business_name'] ?? 'NOT_SET',
+            'seo_title' => $_POST['seo_title'] ?? 'NOT_SET',
+            'seo_description' => $_POST['seo_description'] ?? 'NOT_SET',
+            'brand_name' => $_POST['brand_name'] ?? 'NOT_SET',
+            'brand_logo' => $_POST['brand_logo'] ?? 'NOT_SET',
+            'brand_industry' => $_POST['brand_industry'] ?? 'NOT_SET',
+            'brand_palette' => $_POST['brand_palette'] ?? 'NOT_SET',
+            'hero_heading' => $_POST['hero_heading'] ?? 'NOT_SET',
+            'hero_subheading' => $_POST['hero_subheading'] ?? 'NOT_SET',
+            'about_html' => $_POST['about_html'] ?? 'NOT_SET',
+            'contact_email' => $_POST['contact_email'] ?? 'NOT_SET',
+            'contact_phone_text' => $_POST['contact_phone_text'] ?? 'NOT_SET',
+            'has_nonce' => isset($_POST['minisite_edit_nonce']),
+            'nonce_value' => $_POST['minisite_edit_nonce'] ?? 'MISSING'
+        ]);
+
         // Nonce verification is handled in NewMinisiteService::createNewMinisite()
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in NewMinisiteService::createNewMinisite()
         try {

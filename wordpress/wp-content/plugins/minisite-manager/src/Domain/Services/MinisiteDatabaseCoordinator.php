@@ -74,6 +74,28 @@ class MinisiteDatabaseCoordinator
             'form_fields_count' => count($formData)
         ]);
 
+        // Log key form data values for debugging
+        $this->logger->debug('Database coordinator - form data values', [
+            'minisite_id' => $minisiteId,
+            'user_id' => $currentUser?->ID,
+            'business_name' => $formData['business_name'] ?? 'NOT_SET',
+            'business_city' => $formData['business_city'] ?? 'NOT_SET',
+            'seo_title' => $formData['seo_title'] ?? 'NOT_SET',
+            'seo_description' => $formData['seo_description'] ?? 'NOT_SET',
+            'brand_name' => $formData['brand_name'] ?? 'NOT_SET',
+            'brand_logo' => $formData['brand_logo'] ?? 'NOT_SET',
+            'brand_industry' => $formData['brand_industry'] ?? 'NOT_SET',
+            'brand_palette' => $formData['brand_palette'] ?? 'NOT_SET',
+            'hero_heading' => $formData['hero_heading'] ?? 'NOT_SET',
+            'hero_subheading' => $formData['hero_subheading'] ?? 'NOT_SET',
+            'about_html' => $formData['about_html'] ?? 'NOT_SET',
+            'contact_email' => $formData['contact_email'] ?? 'NOT_SET',
+            'contact_phone_text' => $formData['contact_phone_text'] ?? 'NOT_SET',
+            'site_template' => $formData['site_template'] ?? 'NOT_SET',
+            'default_locale' => $formData['default_locale'] ?? 'NOT_SET',
+            'search_terms' => $formData['search_terms'] ?? 'NOT_SET'
+        ]);
+
         if (!$currentUser) {
             $this->logger->error('Current user is required for new minisite creation');
             throw new \InvalidArgumentException('Current user is required for new minisite creation');
@@ -86,6 +108,14 @@ class MinisiteDatabaseCoordinator
         $this->logger->debug('Site JSON built successfully', [
             'minisite_id' => $minisiteId,
             'site_json_size' => strlen(json_encode($siteJson))
+        ]);
+
+        // DEBUG: Log the actual siteJson content being saved
+        $this->logger->debug('SiteJson content being saved to database', [
+            'minisite_id' => $minisiteId,
+            'seo_section' => $siteJson['seo'] ?? 'NOT_SET',
+            'brand_section' => $siteJson['brand'] ?? 'NOT_SET',
+            'hero_section' => $siteJson['hero'] ?? 'NOT_SET'
         ]);
 
         // Handle coordinate fields
@@ -107,6 +137,12 @@ class MinisiteDatabaseCoordinator
         }
 
         // Start transaction
+        $this->logger->info('Starting database transaction for new draft creation', [
+            'minisite_id' => $minisiteId,
+            'user_id' => $currentUser->ID,
+            'operation_type' => 'start_transaction'
+        ]);
+
         $this->wordPressManager->startTransaction();
 
         try {
@@ -161,17 +197,24 @@ class MinisiteDatabaseCoordinator
                 ]
             ]);
 
-            try {
-                $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
+        try {
+            $this->logger->info('Starting minisite database insert operation', [
+                'minisite_id' => $minisiteId,
+                'minisite_title' => $minisite->title,
+                'minisite_name' => $minisite->name,
+                'minisite_status' => $minisite->status,
+                'operation_type' => 'insert_minisite'
+            ]);
+            
+            $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
 
-                $this->logger->debug('New minisite entity inserted successfully', [
+                $this->logger->info('Minisite database insert completed successfully', [
                     'minisite_id' => $minisiteId,
                     'saved_id' => $savedMinisite->id ?? 'unknown',
-                    'saved_minisite_data' => [
-                        'id' => $savedMinisite->id ?? 'unknown',
-                        'title' => $savedMinisite->title ?? 'unknown',
-                        'status' => $savedMinisite->status ?? 'unknown'
-                    ]
+                    'saved_title' => $savedMinisite->title ?? 'unknown',
+                    'saved_name' => $savedMinisite->name ?? 'unknown',
+                    'saved_status' => $savedMinisite->status ?? 'unknown',
+                    'operation_type' => 'insert_minisite_success'
                 ]);
             } catch (\Exception $e) {
                 $this->logger->error('Failed to insert new minisite entity', [
@@ -244,16 +287,25 @@ class MinisiteDatabaseCoordinator
             ]);
 
             try {
+                $this->logger->info('Starting version database save operation', [
+                    'minisite_id' => $minisiteId,
+                    'version_number' => $nextVersion,
+                    'version_status' => $version->status,
+                    'version_label' => $version->label,
+                    'site_json_size' => strlen(json_encode($version->siteJson ?? [])),
+                    'operation_type' => 'save_version'
+                ]);
+                
                 $savedVersion = $this->wordPressManager->saveVersion($version);
 
-                $this->logger->debug('Version entity saved successfully', [
+                $this->logger->info('Version database save completed successfully', [
                     'minisite_id' => $minisiteId,
                     'version_id' => $savedVersion->id ?? 'unknown',
-                    'saved_version_data' => [
-                        'id' => $savedVersion->id ?? 'unknown',
-                        'minisiteId' => $savedVersion->minisiteId ?? 'unknown',
-                        'versionNumber' => $savedVersion->versionNumber ?? 'unknown'
-                    ]
+                    'version_number' => $nextVersion,
+                    'version_status' => $savedVersion->status ?? 'unknown',
+                    'version_label' => $savedVersion->label ?? 'unknown',
+                    'saved_site_json_size' => strlen(json_encode($savedVersion->siteJson ?? [])),
+                    'operation_type' => 'save_version_success'
                 ]);
             } catch (\Exception $e) {
                 $this->logger->error('Failed to save version entity', [
@@ -276,7 +328,18 @@ class MinisiteDatabaseCoordinator
             }
 
             // Update main minisite with current version ID
+            $this->logger->info('Updating main minisite with current version ID', [
+                'minisite_id' => $minisiteId,
+                'version_id' => $savedVersion->id,
+                'operation_type' => 'update_current_version'
+            ]);
+
             $this->wordPressManager->getMinisiteRepository()->updateCurrentVersionId($minisiteId, $savedVersion->id);
+
+            $this->logger->info('Committing database transaction', [
+                'minisite_id' => $minisiteId,
+                'operation_type' => 'commit_transaction'
+            ]);
 
             $this->wordPressManager->commitTransaction();
 
@@ -288,6 +351,21 @@ class MinisiteDatabaseCoordinator
                 'operation_type' => 'new_draft'
             ]);
 
+            // Log final saved data for verification
+            $this->logger->debug('Final saved minisite data verification', [
+                'minisite_id' => $minisiteId,
+                'saved_minisite_title' => $savedMinisite->title ?? 'UNKNOWN',
+                'saved_minisite_name' => $savedMinisite->name ?? 'UNKNOWN',
+                'saved_minisite_status' => $savedMinisite->status ?? 'UNKNOWN',
+                'saved_version_id' => $savedVersion->id ?? 'UNKNOWN',
+                'saved_version_status' => $savedVersion->status ?? 'UNKNOWN',
+                'saved_version_label' => $savedVersion->label ?? 'UNKNOWN',
+                'site_json_size' => strlen(json_encode($savedVersion->siteJson ?? [])),
+                'seo_title_in_version' => $savedVersion->siteJson['seo']['title'] ?? 'NOT_SET',
+                'brand_name_in_version' => $savedVersion->siteJson['brand']['name'] ?? 'NOT_SET',
+                'hero_heading_in_version' => $savedVersion->siteJson['hero']['heading'] ?? 'NOT_SET'
+            ]);
+
             return (object) [
                 'success' => true,
                 'redirectUrl' => $this->wordPressManager->getHomeUrl(
@@ -295,7 +373,7 @@ class MinisiteDatabaseCoordinator
                 )
             ];
         } catch (\Exception $e) {
-            $this->logger->error('Failed to create new draft - Exception caught', [
+            $this->logger->error('Database transaction failed, rolling back', [
                 'minisite_id' => $minisiteId,
                 'user_id' => $currentUser?->ID ?? 'unknown',
                 'error_message' => $e->getMessage(),
@@ -305,7 +383,7 @@ class MinisiteDatabaseCoordinator
                 'error_trace' => $e->getTraceAsString(),
                 'form_data_keys' => array_keys($formData),
                 'form_data_count' => count($formData),
-                'operation_type' => 'new_draft_creation'
+                'operation_type' => 'rollback_transaction'
             ]);
 
             $this->wordPressManager->rollbackTransaction();
@@ -568,18 +646,21 @@ class MinisiteDatabaseCoordinator
                 ),
             ];
 
-            $this->wordPressManager->updateBusinessInfo($siteId, $businessInfoFields, (int) $currentUser->ID);
-
-            // Update coordinates if provided
+            // Consolidated update - all fields in one UPDATE statement
+            $allUpdateFields = $businessInfoFields;
+            
+            // Add coordinates if provided
             if ($lat !== null && $lng !== null) {
-                $this->wordPressManager->updateCoordinates($siteId, $lat, $lng, (int) $currentUser->ID);
+                $allUpdateFields['location_point'] = "POINT($lng, $lat)";
             }
-
-            // Update title if provided
+            
+            // Add title if provided
             $newTitle = $formProcessor->getFormValue($formData, [], 'seo_title', 'seo_title', '');
             if (!empty($newTitle) && $newTitle !== $minisite->title) {
-                $this->wordPressManager->updateTitle($siteId, $newTitle);
+                $allUpdateFields['title'] = $newTitle;
             }
+            
+            $this->wordPressManager->updateMinisiteFields($siteId, $allUpdateFields, (int) $currentUser->ID);
         }
     }
 }
