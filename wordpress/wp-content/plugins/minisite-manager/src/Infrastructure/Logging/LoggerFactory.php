@@ -146,7 +146,8 @@ class LoggerFactory
         // Add feature-specific context
         $logger->pushProcessor(function ($record) use ($feature) {
             $record['extra']['feature'] = $feature;
-            $record['extra']['plugin_version'] = defined('MINISITE_MANAGER_VERSION') ? MINISITE_MANAGER_VERSION : 'unknown';
+            $record['extra']['plugin_version'] = defined('MINISITE_MANAGER_VERSION')
+                ? MINISITE_MANAGER_VERSION : 'unknown';
             return $record;
         });
 

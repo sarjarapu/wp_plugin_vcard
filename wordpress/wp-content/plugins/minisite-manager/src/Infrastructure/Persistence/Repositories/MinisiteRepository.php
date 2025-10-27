@@ -128,7 +128,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             'updated_by' => $updatedBy,
             'operation_type' => 'input'
         ]);
-        
+
         if ($lat === null || $lng === null) {
             $this->logger->debug('MinisiteRepository::updateCoordinates() - No coordinates provided, skipping', [
                 'minisite_id' => $id,
@@ -136,23 +136,24 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             ]);
             return;
         }
-        
+
         $sql = $this->db->prepare(
-            "UPDATE {$this->table()} SET updated_by = %d, updated_at = NOW(), location_point = POINT(%f, %f) WHERE id = %s",
+            "UPDATE {$this->table()} SET updated_by = %d, updated_at = NOW(), " .
+            "location_point = POINT(%f, %f) WHERE id = %s",
             $updatedBy,
             $lng,
             $lat,
             $id
         );
-        
+
         $this->logger->debug('MinisiteRepository::updateCoordinates() - Executing SQL', [
             'minisite_id' => $id,
             'sql_query' => $sql,
             'operation_type' => 'sql_execution'
         ]);
-        
+
         $rows_affected = $this->db->query($sql);
-        
+
         $this->logger->debug('MinisiteRepository::updateCoordinates() - Output', [
             'minisite_id' => $id,
             'rows_affected' => $rows_affected,
@@ -220,13 +221,13 @@ class MinisiteRepository implements MinisiteRepositoryInterface
                     $setParts[] = "`$field` = %s";
                 }
             }
-            
+
             $sql = "UPDATE {$this->table()} SET " . implode(', ', $setParts) . " WHERE id = %s";
-            $values = array_values(array_filter($updateFields, function($value, $field) {
+            $values = array_values(array_filter($updateFields, function ($value, $field) {
                 return !($field === 'location_point' && strpos($value, 'POINT(') === 0);
             }, ARRAY_FILTER_USE_BOTH));
             $values[] = $minisiteId;
-            
+
             $preparedSql = $this->db->prepare($sql, ...$values);
             $result = $this->db->query($preparedSql);
         } else {

@@ -6,6 +6,7 @@ use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,7 +24,8 @@ class EditController
     public function __construct(
         private EditService $editService,
         private EditRenderer $editRenderer,
-        private WordPressEditManager $wordPressManager
+        private WordPressEditManager $wordPressManager,
+        private FormSecurityHelper $formSecurityHelper
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('minisite-edit-controller');
     }
@@ -46,7 +48,7 @@ class EditController
         $versionId = $this->wordPressManager->getQueryVar('minisite_version_id');
 
         // Handle form submission
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($this->formSecurityHelper->isPostRequest()) {
             $this->handleFormSubmission($siteId);
             return;
         }
@@ -60,29 +62,38 @@ class EditController
      */
     private function handleFormSubmission(string $siteId): void
     {
+        // Verify nonce first
+        if (!$this->formSecurityHelper->verifyNonce('minisite_edit', 'minisite_edit_nonce')) {
+            $this->logger->warning('EditController::handleFormSubmission() - Invalid nonce', [
+                'site_id' => $siteId,
+                'nonce_value' => $this->formSecurityHelper->getPostData('minisite_edit_nonce', 'MISSING')
+            ]);
+            $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
+            return;
+        }
+
         // Log form submission details for debugging
         $this->logger->debug('EditController::handleFormSubmission() called', [
             'site_id' => $siteId,
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
             'post_data_count' => count($_POST),
-            'business_name' => $_POST['business_name'] ?? 'NOT_SET',
-            'seo_title' => $_POST['seo_title'] ?? 'NOT_SET',
-            'seo_description' => $_POST['seo_description'] ?? 'NOT_SET',
-            'brand_name' => $_POST['brand_name'] ?? 'NOT_SET',
-            'brand_logo' => $_POST['brand_logo'] ?? 'NOT_SET',
-            'brand_industry' => $_POST['brand_industry'] ?? 'NOT_SET',
-            'brand_palette' => $_POST['brand_palette'] ?? 'NOT_SET',
-            'hero_heading' => $_POST['hero_heading'] ?? 'NOT_SET',
-            'hero_subheading' => $_POST['hero_subheading'] ?? 'NOT_SET',
-            'about_html' => $_POST['about_html'] ?? 'NOT_SET',
-            'contact_email' => $_POST['contact_email'] ?? 'NOT_SET',
-            'has_nonce' => isset($_POST['minisite_edit_nonce']),
-            'nonce_value' => $_POST['minisite_edit_nonce'] ?? 'MISSING'
+            'business_name' => $this->formSecurityHelper->getPostData('business_name', 'NOT_SET'),
+            'seo_title' => $this->formSecurityHelper->getPostData('seo_title', 'NOT_SET'),
+            'seo_description' => $this->formSecurityHelper->getPostData('seo_description', 'NOT_SET'),
+            'brand_name' => $this->formSecurityHelper->getPostData('brand_name', 'NOT_SET'),
+            'brand_logo' => $this->formSecurityHelper->getPostData('brand_logo', 'NOT_SET'),
+            'brand_industry' => $this->formSecurityHelper->getPostData('brand_industry', 'NOT_SET'),
+            'brand_palette' => $this->formSecurityHelper->getPostData('brand_palette', 'NOT_SET'),
+            'hero_heading' => $this->formSecurityHelper->getPostData('hero_heading', 'NOT_SET'),
+            'hero_subheading' => $this->formSecurityHelper->getPostData('hero_subheading', 'NOT_SET'),
+            'about_html' => $this->formSecurityHelper->getPostDataTextarea('about_html', 'NOT_SET'),
+            'contact_email' => $this->formSecurityHelper->getPostDataEmail('contact_email', 'NOT_SET'),
+            'has_nonce' => !empty($this->formSecurityHelper->getPostData('minisite_edit_nonce')),
+            'nonce_value' => $this->formSecurityHelper->getPostData('minisite_edit_nonce', 'MISSING')
         ]);
 
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in EditService::saveDraft()
-
-        // Nonce verification is handled in EditService::saveDraft()
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in EditService::saveDraft()
+        // Pass sanitized POST data to service
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
         $result = $this->editService->saveDraft($siteId, $_POST);
 
         if ($result->success) {

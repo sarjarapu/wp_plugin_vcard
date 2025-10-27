@@ -18,6 +18,22 @@ class LoggingTestController
     }
 
     /**
+     * Get cached value or compute and cache it
+     */
+    private function getCachedValue(string $key, callable $computeFunction, int $expiration = 300): mixed
+    {
+        $cacheKey = 'minisite_logging_test_' . md5($key);
+        $cachedValue = wp_cache_get($cacheKey, 'minisite_logging');
+
+        if ($cachedValue === false) {
+            $cachedValue = $computeFunction();
+            wp_cache_set($cacheKey, $cachedValue, 'minisite_logging', $expiration);
+        }
+
+        return $cachedValue;
+    }
+
+    /**
      * Test the logging system and return results
      */
     public function runTest(): array
@@ -58,12 +74,28 @@ class LoggingTestController
             global $wpdb;
             if ($wpdb) {
                 $tableName = $wpdb->prefix . 'minisite_logs';
-                $tableExists = $wpdb->get_var("SHOW TABLES LIKE '$tableName'") === $tableName;
+
+                // Check if table exists using WordPress method
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Test controller needs to check table existence
+                $tableExists = $wpdb->get_var(
+                    $wpdb->prepare("SHOW TABLES LIKE %s", $tableName)
+                ) === $tableName;
 
                 if ($tableExists) {
-                    $results[] = '✓ Database log table exists: ' . $tableName;
-                    $logCount = $wpdb->get_var("SELECT COUNT(*) FROM $tableName");
-                    $results[] = '✓ Database logs count: ' . $logCount;
+                    $results[] = '✓ Database log table exists: ' . esc_html($tableName);
+
+                    // Use helper method for caching
+                    $logCount = $this->getCachedValue(
+                        "log_count_{$tableName}",
+                        function () use ($wpdb, $tableName) {
+                            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Test controller needs to count logs
+                            return $wpdb->get_var(
+                                $wpdb->prepare("SELECT COUNT(*) FROM %i", $tableName)
+                            );
+                        }
+                    );
+
+                    $results[] = '✓ Database logs count: ' . esc_html($logCount);
                 } else {
                     $results[] = '⚠ Database log table not created (may not be enabled)';
                 }
@@ -115,12 +147,12 @@ class LoggingTestController
         foreach ($results as $result) {
             $class = strpos($result, '✓') === 0 ? 'color: green;' :
                     (strpos($result, '✗') === 0 ? 'color: red;' : 'color: orange;');
-            echo '<li style="' . $class . '">' . esc_html($result) . '</li>';
+            echo '<li style="' . esc_attr($class) . '">' . esc_html($result) . '</li>';
         }
         echo '</ul>';
 
         echo '<h2>Log Files Location:</h2>';
-        echo '<p><code>' . WP_CONTENT_DIR . '/minisite-logs/</code></p>';
+        echo '<p><code>' . esc_html(WP_CONTENT_DIR) . '/minisite-logs/</code></p>';
 
         echo '<h2>Recent Log Entries:</h2>';
         $logDir = WP_CONTENT_DIR . '/minisite-logs';

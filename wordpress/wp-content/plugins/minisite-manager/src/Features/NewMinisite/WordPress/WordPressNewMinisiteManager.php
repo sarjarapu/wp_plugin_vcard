@@ -210,11 +210,19 @@ class WordPressNewMinisiteManager implements WordPressManagerInterface
     }
 
     /**
+     * Update multiple minisite fields in a single operation
+     */
+    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
+    {
+        $this->getMinisiteRepository()->updateMinisiteFields($siteId, $fields, $userId);
+    }
+
+    /**
      * Start database transaction
      */
     public function startTransaction(): void
     {
-        db::getWpdb()->query('START TRANSACTION');
+        $this->db->query('START TRANSACTION');
     }
 
     /**
@@ -222,7 +230,7 @@ class WordPressNewMinisiteManager implements WordPressManagerInterface
      */
     public function commitTransaction(): void
     {
-        db::getWpdb()->query('COMMIT');
+        $this->db->query('COMMIT');
     }
 
     /**
@@ -230,7 +238,7 @@ class WordPressNewMinisiteManager implements WordPressManagerInterface
      */
     public function rollbackTransaction(): void
     {
-        db::getWpdb()->query('ROLLBACK');
+        $this->db->query('ROLLBACK');
     }
 
     /**

@@ -160,8 +160,10 @@ class NewMinisiteRenderer
             'brand_industry' => $mockProfile->industry,
             'default_locale' => $mockProfile->defaultLocale,
             'search_terms' => $mockProfile->searchTerms,
-            'contact_lat' => $mockProfile->geo && method_exists($mockProfile->geo, 'getLat') ? $mockProfile->geo->getLat() : '',
-            'contact_lng' => $mockProfile->geo && method_exists($mockProfile->geo, 'getLng') ? $mockProfile->geo->getLng() : '',
+            'contact_lat' => $mockProfile->geo && method_exists($mockProfile->geo, 'getLat')
+                ? $mockProfile->geo->getLat() : '',
+            'contact_lng' => $mockProfile->geo && method_exists($mockProfile->geo, 'getLng')
+                ? $mockProfile->geo->getLng() : '',
             'version_label' => $mockEditingVersion->label,
             'version_comment' => $mockEditingVersion->comment,
         ];

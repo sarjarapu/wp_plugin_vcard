@@ -23,7 +23,7 @@ class WordPressEditManager implements WordPressManagerInterface
     /**
      * Get minisite repository instance
      */
-    private function getMinisiteRepository(): MinisiteRepository
+    public function getMinisiteRepository(): MinisiteRepository
     {
         if ($this->minisiteRepository === null) {
             $this->minisiteRepository = new MinisiteRepository(db::getWpdb());

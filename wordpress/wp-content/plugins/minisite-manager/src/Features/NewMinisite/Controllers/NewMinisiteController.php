@@ -6,6 +6,7 @@ use Minisite\Features\NewMinisite\Services\NewMinisiteService;
 use Minisite\Features\NewMinisite\Rendering\NewMinisiteRenderer;
 use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -23,7 +24,8 @@ class NewMinisiteController
     public function __construct(
         private NewMinisiteService $newMinisiteService,
         private NewMinisiteRenderer $newMinisiteRenderer,
-        private WordPressNewMinisiteManager $wordPressManager
+        private WordPressNewMinisiteManager $wordPressManager,
+        private FormSecurityHelper $formSecurityHelper
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('new-minisite-controller');
     }
@@ -66,9 +68,10 @@ class NewMinisiteController
         }
 
         // Handle form submission
-        if (isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        if ($this->formSecurityHelper->isPostRequest()) {
             $this->logger->info('POST request detected, handling form submission', [
                 'feature' => 'NewMinisite',
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce will be verified in handleFormSubmission
                 'post_data_keys' => array_keys($_POST)
             ]);
             $this->handleFormSubmission();
@@ -87,34 +90,47 @@ class NewMinisiteController
      */
     private function handleFormSubmission(): void
     {
+        // Verify nonce first
+        if (!$this->formSecurityHelper->verifyNonce('minisite_edit', 'minisite_edit_nonce')) {
+            $this->logger->warning('NewMinisiteController::handleFormSubmission() - Invalid nonce', [
+                'feature' => 'NewMinisite',
+                'nonce_value' => $this->formSecurityHelper->getPostData('minisite_edit_nonce', 'MISSING')
+            ]);
+            $this->newMinisiteRenderer->renderError('Security check failed. Please try again.');
+            return;
+        }
+
         $this->logger->info('NewMinisiteController::handleFormSubmission() called', [
             'feature' => 'NewMinisite',
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
             'post_data_count' => count($_POST),
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
             'post_data_sample' => array_slice($_POST, 0, 5, true) // First 5 fields for debugging
         ]);
 
         // Log key form fields with actual values for debugging
         $this->logger->debug('Form submission data - key fields', [
             'feature' => 'NewMinisite',
-            'business_name' => $_POST['business_name'] ?? 'NOT_SET',
-            'seo_title' => $_POST['seo_title'] ?? 'NOT_SET',
-            'seo_description' => $_POST['seo_description'] ?? 'NOT_SET',
-            'brand_name' => $_POST['brand_name'] ?? 'NOT_SET',
-            'brand_logo' => $_POST['brand_logo'] ?? 'NOT_SET',
-            'brand_industry' => $_POST['brand_industry'] ?? 'NOT_SET',
-            'brand_palette' => $_POST['brand_palette'] ?? 'NOT_SET',
-            'hero_heading' => $_POST['hero_heading'] ?? 'NOT_SET',
-            'hero_subheading' => $_POST['hero_subheading'] ?? 'NOT_SET',
-            'about_html' => $_POST['about_html'] ?? 'NOT_SET',
-            'contact_email' => $_POST['contact_email'] ?? 'NOT_SET',
-            'contact_phone_text' => $_POST['contact_phone_text'] ?? 'NOT_SET',
-            'has_nonce' => isset($_POST['minisite_edit_nonce']),
-            'nonce_value' => $_POST['minisite_edit_nonce'] ?? 'MISSING'
+            'business_name' => $this->formSecurityHelper->getPostData('business_name', 'NOT_SET'),
+            'seo_title' => $this->formSecurityHelper->getPostData('seo_title', 'NOT_SET'),
+            'seo_description' => $this->formSecurityHelper->getPostData('seo_description', 'NOT_SET'),
+            'brand_name' => $this->formSecurityHelper->getPostData('brand_name', 'NOT_SET'),
+            'brand_logo' => $this->formSecurityHelper->getPostData('brand_logo', 'NOT_SET'),
+            'brand_industry' => $this->formSecurityHelper->getPostData('brand_industry', 'NOT_SET'),
+            'brand_palette' => $this->formSecurityHelper->getPostData('brand_palette', 'NOT_SET'),
+            'hero_heading' => $this->formSecurityHelper->getPostData('hero_heading', 'NOT_SET'),
+            'hero_subheading' => $this->formSecurityHelper->getPostData('hero_subheading', 'NOT_SET'),
+            'about_html' => $this->formSecurityHelper->getPostDataTextarea('about_html', 'NOT_SET'),
+            'contact_email' => $this->formSecurityHelper->getPostDataEmail('contact_email', 'NOT_SET'),
+            'contact_phone_text' => $this->formSecurityHelper->getPostData('contact_phone_text', 'NOT_SET'),
+            'has_nonce' => !empty($this->formSecurityHelper->getPostData('minisite_edit_nonce')),
+            'nonce_value' => $this->formSecurityHelper->getPostData('minisite_edit_nonce', 'MISSING')
         ]);
 
-        // Nonce verification is handled in NewMinisiteService::createNewMinisite()
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in NewMinisiteService::createNewMinisite()
+        // Pass sanitized POST data to service
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
         try {
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
             $result = $this->newMinisiteService->createNewMinisite($_POST);
 
             $this->logger->info('NewMinisiteService::createNewMinisite() completed', [

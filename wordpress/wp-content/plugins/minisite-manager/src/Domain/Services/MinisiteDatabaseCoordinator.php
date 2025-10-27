@@ -197,43 +197,43 @@ class MinisiteDatabaseCoordinator
                 ]
             ]);
 
-        try {
-            $this->logger->info('Starting minisite database insert operation', [
+            try {
+                $this->logger->info('Starting minisite database insert operation', [
                 'minisite_id' => $minisiteId,
                 'minisite_title' => $minisite->title,
                 'minisite_name' => $minisite->name,
                 'minisite_status' => $minisite->status,
                 'operation_type' => 'insert_minisite'
-            ]);
-            
-            $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
+                ]);
 
-                $this->logger->info('Minisite database insert completed successfully', [
+                $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
+
+                    $this->logger->info('Minisite database insert completed successfully', [
                     'minisite_id' => $minisiteId,
                     'saved_id' => $savedMinisite->id ?? 'unknown',
                     'saved_title' => $savedMinisite->title ?? 'unknown',
                     'saved_name' => $savedMinisite->name ?? 'unknown',
                     'saved_status' => $savedMinisite->status ?? 'unknown',
                     'operation_type' => 'insert_minisite_success'
-                ]);
+                    ]);
             } catch (\Exception $e) {
                 $this->logger->error('Failed to insert new minisite entity', [
-                    'minisite_id' => $minisiteId,
-                    'error_message' => $e->getMessage(),
-                    'error_code' => $e->getCode(),
-                    'error_file' => $e->getFile(),
-                    'error_line' => $e->getLine(),
-                    'error_trace' => $e->getTraceAsString(),
-                    'minisite_data' => [
-                        'id' => $minisite->id,
-                        'slug' => $minisite->slug,
-                        'title' => $minisite->title,
-                        'name' => $minisite->name,
-                        'city' => $minisite->city,
-                        'countryCode' => $minisite->countryCode,
-                        'createdBy' => $minisite->createdBy,
-                        'updatedBy' => $minisite->updatedBy
-                    ]
+                'minisite_id' => $minisiteId,
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'error_trace' => $e->getTraceAsString(),
+                'minisite_data' => [
+                    'id' => $minisite->id,
+                    'slug' => $minisite->slug,
+                    'title' => $minisite->title,
+                    'name' => $minisite->name,
+                    'city' => $minisite->city,
+                    'countryCode' => $minisite->countryCode,
+                    'createdBy' => $minisite->createdBy,
+                    'updatedBy' => $minisite->updatedBy
+                ]
                 ]);
                 throw $e; // Re-throw to maintain error handling flow
             }
@@ -295,7 +295,7 @@ class MinisiteDatabaseCoordinator
                     'site_json_size' => strlen(json_encode($version->siteJson ?? [])),
                     'operation_type' => 'save_version'
                 ]);
-                
+
                 $savedVersion = $this->wordPressManager->saveVersion($version);
 
                 $this->logger->info('Version database save completed successfully', [
@@ -648,18 +648,18 @@ class MinisiteDatabaseCoordinator
 
             // Consolidated update - all fields in one UPDATE statement
             $allUpdateFields = $businessInfoFields;
-            
+
             // Add coordinates if provided
             if ($lat !== null && $lng !== null) {
                 $allUpdateFields['location_point'] = "POINT($lng, $lat)";
             }
-            
+
             // Add title if provided
             $newTitle = $formProcessor->getFormValue($formData, [], 'seo_title', 'seo_title', '');
             if (!empty($newTitle) && $newTitle !== $minisite->title) {
                 $allUpdateFields['title'] = $newTitle;
             }
-            
+
             $this->wordPressManager->updateMinisiteFields($siteId, $allUpdateFields, (int) $currentUser->ID);
         }
     }
