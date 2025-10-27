@@ -10,6 +10,7 @@ use Minisite\Features\Authentication\Commands\LoginCommand;
 use Minisite\Features\Authentication\Commands\RegisterCommand;
 use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
 use Minisite\Features\Authentication\WordPress\WordPressUserManager;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
  * Auth Request Handler
@@ -23,7 +24,8 @@ use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 final class AuthRequestHandler
 {
     public function __construct(
-        private WordPressUserManager $wordPressManager
+        private WordPressUserManager $wordPressManager,
+        private FormSecurityHelper $formSecurityHelper
     ) {
     }
 
@@ -41,14 +43,12 @@ final class AuthRequestHandler
         }
 
         return new LoginCommand(
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeInput()
-            userLogin: $this->sanitizeInput($_POST['user_login'] ?? ''),
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeInput()
-            userPassword: $this->sanitizeInput($_POST['user_pass'] ?? ''),
-            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce()
-            remember: isset($_POST['remember']),
-            redirectTo: $this->sanitizeUrl(
-                $this->getPostData('redirect_to', $this->wordPressManager->getHomeUrl('/account/dashboard'))
+            userLogin: $this->formSecurityHelper->getPostData('user_login', ''),
+            userPassword: $this->formSecurityHelper->getPostData('user_pass', ''),
+            remember: !empty($this->formSecurityHelper->getPostData('remember')),
+            redirectTo: $this->formSecurityHelper->getPostDataUrl(
+                'redirect_to',
+                $this->wordPressManager->getHomeUrl('/account/dashboard')
             )
         );
     }
@@ -67,14 +67,12 @@ final class AuthRequestHandler
         }
 
         return new RegisterCommand(
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeInput()
-            userLogin: $this->sanitizeInput($_POST['user_login'] ?? ''),
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeEmail()
-            userEmail: $this->sanitizeEmail($_POST['user_email'] ?? ''),
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeInput()
-            userPassword: $this->sanitizeInput($_POST['user_pass'] ?? ''),
-            redirectTo: $this->sanitizeUrl(
-                $this->getPostData('redirect_to', $this->wordPressManager->getHomeUrl('/account/dashboard'))
+            userLogin: $this->formSecurityHelper->getPostData('user_login', ''),
+            userEmail: $this->formSecurityHelper->getPostDataEmail('user_email', ''),
+            userPassword: $this->formSecurityHelper->getPostData('user_pass', ''),
+            redirectTo: $this->formSecurityHelper->getPostDataUrl(
+                'redirect_to',
+                $this->wordPressManager->getHomeUrl('/account/dashboard')
             )
         );
     }
@@ -93,8 +91,7 @@ final class AuthRequestHandler
         }
 
         return new ForgotPasswordCommand(
-            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated,WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing -- Security handled in isValidNonce() and sanitizeInput()
-            userLogin: $this->sanitizeInput($_POST['user_login'] ?? '')
+            userLogin: $this->formSecurityHelper->getPostData('user_login', '')
         );
     }
 
@@ -117,7 +114,7 @@ final class AuthRequestHandler
 
     private function isPostRequest(): bool
     {
-        return isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST';
+        return $this->formSecurityHelper->isPostRequest();
     }
 
     /**
@@ -125,8 +122,7 @@ final class AuthRequestHandler
      */
     private function getPostData(string $key, string $default = ''): string
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified before calling this method
-        return $this->wordPressManager->sanitizeText(wp_unslash($_POST[$key] ?? $default));
+        return $this->formSecurityHelper->getPostData($key, $default);
     }
 
     private function isValidNonce(string $action): bool
@@ -138,9 +134,7 @@ final class AuthRequestHandler
             default => 'minisite_nonce'
         };
 
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in the next line
-        return isset($_POST[$nonceField]) &&
-               $this->wordPressManager->verifyNonce($this->getPostData($nonceField), $action);
+        return $this->formSecurityHelper->verifyNonce($action, $nonceField);
     }
 
     private function sanitizeInput(string $input): string

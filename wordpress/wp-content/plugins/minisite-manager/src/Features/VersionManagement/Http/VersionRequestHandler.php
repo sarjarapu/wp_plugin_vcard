@@ -7,6 +7,7 @@ use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
  * Handles HTTP requests for version management
@@ -14,7 +15,8 @@ use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 class VersionRequestHandler
 {
     public function __construct(
-        private WordPressVersionManager $wordPressManager
+        private WordPressVersionManager $wordPressManager,
+        private FormSecurityHelper $formSecurityHelper
     ) {
     }
 
@@ -43,8 +45,7 @@ class VersionRequestHandler
      */
     private function getPostData(string $key, string $default = ''): string
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified before calling this method
-        return $this->wordPressManager->sanitizeTextField(wp_unslash($_POST[$key] ?? $default));
+        return $this->formSecurityHelper->getPostData($key, $default);
     }
 
     /**
@@ -52,7 +53,7 @@ class VersionRequestHandler
      */
     private function getPostDataInt(string $key, int $default = 0): int
     {
-        return (int) $this->getPostData($key, (string) $default);
+        return $this->formSecurityHelper->getPostDataInt($key, $default);
     }
 
     /**
@@ -60,8 +61,7 @@ class VersionRequestHandler
      */
     private function verifyNonce(): bool
     {
-        $nonce = $this->getPostData('nonce');
-        return $this->wordPressManager->verifyNonce($nonce, 'minisite_version');
+        return $this->formSecurityHelper->verifyNonce('minisite_version', 'nonce');
     }
 
     /**

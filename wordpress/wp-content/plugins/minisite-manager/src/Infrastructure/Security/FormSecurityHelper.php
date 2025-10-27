@@ -38,7 +38,7 @@ class FormSecurityHelper
      */
     public function getPostData(string $key, string $default = ''): string
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified before calling this method
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, unslashing handled by WordPressManager
         $value = $_POST[$key] ?? $default;
         return $this->wordPressManager->sanitizeTextField($value);
     }
@@ -56,7 +56,7 @@ class FormSecurityHelper
      */
     public function getPostDataUrl(string $key, string $default = ''): string
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified before calling this method
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, unslashing handled by WordPressManager
         $value = $_POST[$key] ?? $default;
         return $this->wordPressManager->sanitizeUrl($value);
     }
@@ -66,7 +66,7 @@ class FormSecurityHelper
      */
     public function getPostDataEmail(string $key, string $default = ''): string
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified before calling this method
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, unslashing handled by WordPressManager
         $value = $_POST[$key] ?? $default;
         return $this->wordPressManager->sanitizeEmail($value);
     }
@@ -76,7 +76,7 @@ class FormSecurityHelper
      */
     public function getPostDataTextarea(string $key, string $default = ''): string
     {
-        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified before calling this method
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, unslashing handled by WordPressManager
         $value = $_POST[$key] ?? $default;
         return $this->wordPressManager->sanitizeTextareaField($value);
     }
