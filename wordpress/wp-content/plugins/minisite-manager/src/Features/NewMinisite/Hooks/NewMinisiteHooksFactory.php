@@ -7,6 +7,7 @@ use Minisite\Features\NewMinisite\Services\NewMinisiteService;
 use Minisite\Features\NewMinisite\Rendering\NewMinisiteRenderer;
 use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
  * NewMinisiteHooks Factory
@@ -37,11 +38,15 @@ class NewMinisiteHooksFactory
         }
         $newMinisiteRenderer = new NewMinisiteRenderer($timberRenderer);
 
+        // Create form security helper
+        $formSecurityHelper = new FormSecurityHelper($wordPressManager);
+
         // Create controller
         $newMinisiteController = new NewMinisiteController(
             $newMinisiteService,
             $newMinisiteRenderer,
-            $wordPressManager
+            $wordPressManager,
+            $formSecurityHelper
         );
 
         // Create and return hooks
