@@ -20,6 +20,19 @@ if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/../');
 }
 
+// Define WordPress database constants
+if (!defined('ARRAY_A')) {
+    define('ARRAY_A', 'ARRAY_A');
+}
+
+if (!defined('ARRAY_N')) {
+    define('ARRAY_N', 'ARRAY_N');
+}
+
+if (!defined('OBJECT')) {
+    define('OBJECT', 'OBJECT');
+}
+
 if (!defined('WP_DEBUG')) {
     define('WP_DEBUG', false);
 }
@@ -112,6 +125,11 @@ if (!class_exists('wpdb')) {
         public function delete($table, $where, $where_format = null)
         {
             return false;
+        }
+        
+        public function get_charset_collate()
+        {
+            return 'DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
         }
     }
 }
@@ -538,6 +556,81 @@ function wp_unslash($value)
     {
         // In tests, throw an exception instead of actually redirecting
         throw new Exception("Redirect to: $location (Status: $status)");
+    }
+    
+    function wp_json_encode($data, $options = 0, $depth = 512)
+    {
+        return json_encode($data, $options, $depth);
+    }
+    
+    function current_time($type = 'mysql', $gmt = 0)
+    {
+        return date('Y-m-d H:i:s');
+    }
+    
+    function esc_html($text)
+    {
+        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    }
+    
+    function esc_attr($text)
+    {
+        return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    }
+    
+    function esc_url($url)
+    {
+        return filter_var($url, FILTER_SANITIZE_URL);
+    }
+    
+    function esc_url_raw($url)
+    {
+        return filter_var($url, FILTER_SANITIZE_URL);
+    }
+    
+    function sanitize_textarea_field($str)
+    {
+        return sanitize_text_field($str);
+    }
+    
+    function wp_kses($string, $allowed_html, $allowed_protocols = array())
+    {
+        // Simple mock implementation for testing
+        return $string;
+    }
+    
+    function get_current_user_id()
+    {
+        return 1;
+    }
+    
+    function delete_option($option)
+    {
+        // Simple in-memory storage for testing
+        if (!isset($GLOBALS['_test_options'])) {
+            $GLOBALS['_test_options'] = [];
+        }
+        unset($GLOBALS['_test_options'][$option]);
+        return true;
+    }
+    
+    function get_option($option, $default = false)
+    {
+        // Simple in-memory storage for testing
+        if (!isset($GLOBALS['_test_options'])) {
+            $GLOBALS['_test_options'] = [];
+        }
+        return $GLOBALS['_test_options'][$option] ?? $default;
+    }
+    
+    function update_option($option, $value, $autoload = null)
+    {
+        // Simple in-memory storage for testing
+        if (!isset($GLOBALS['_test_options'])) {
+            $GLOBALS['_test_options'] = [];
+        }
+        $GLOBALS['_test_options'][$option] = $value;
+        return true;
     }
     
     // Mock global $wp_query

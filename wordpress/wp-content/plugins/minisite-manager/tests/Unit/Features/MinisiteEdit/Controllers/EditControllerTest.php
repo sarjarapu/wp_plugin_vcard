@@ -6,6 +6,7 @@ use Minisite\Features\MinisiteEdit\Controllers\EditController;
 use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
 
@@ -18,6 +19,7 @@ class EditControllerTest extends TestCase
     private $mockEditService;
     private $mockEditRenderer;
     private $mockWordPressManager;
+    private $mockFormSecurityHelper;
 
     protected function setUp(): void
     {
@@ -29,11 +31,13 @@ class EditControllerTest extends TestCase
         $this->mockEditService = $this->createMock(EditService::class);
         $this->mockEditRenderer = $this->createMock(EditRenderer::class);
         $this->mockWordPressManager = $this->createMock(WordPressEditManager::class);
+        $this->mockFormSecurityHelper = $this->createMock(FormSecurityHelper::class);
 
         $this->controller = new EditController(
             $this->mockEditService,
             $this->mockEditRenderer,
-            $this->mockWordPressManager
+            $this->mockWordPressManager,
+            $this->mockFormSecurityHelper
         );
     }
 
@@ -106,6 +110,29 @@ class EditControllerTest extends TestCase
         $_POST = ['test' => 'data'];
         $siteId = '123';
 
+        // Mock FormSecurityHelper to allow form submission
+        $this->mockFormSecurityHelper->expects($this->once())
+            ->method('verifyNonce')
+            ->with('minisite_edit', 'minisite_edit_nonce')
+            ->willReturn(true);
+
+        // Mock getPostData calls for logging
+        $this->mockFormSecurityHelper->expects($this->any())
+            ->method('getPostData')
+            ->willReturn('test_value');
+
+        $this->mockFormSecurityHelper->expects($this->any())
+            ->method('getPostDataTextarea')
+            ->willReturn('test_textarea');
+
+        $this->mockFormSecurityHelper->expects($this->any())
+            ->method('getPostDataEmail')
+            ->willReturn('test@example.com');
+
+        $this->mockFormSecurityHelper->expects($this->any())
+            ->method('isPostRequest')
+            ->willReturn(true);
+
         $this->mockWordPressManager->expects($this->once())
             ->method('isUserLoggedIn')
             ->willReturn(true);
@@ -135,6 +162,29 @@ class EditControllerTest extends TestCase
         $_POST = ['test' => 'data'];
         $siteId = '123';
         $errors = ['Error 1', 'Error 2'];
+
+        // Mock FormSecurityHelper to allow form submission
+        $this->mockFormSecurityHelper->expects($this->once())
+            ->method('verifyNonce')
+            ->with('minisite_edit', 'minisite_edit_nonce')
+            ->willReturn(true);
+
+        // Mock getPostData calls for logging
+        $this->mockFormSecurityHelper->expects($this->any())
+            ->method('getPostData')
+            ->willReturn('test_value');
+
+        $this->mockFormSecurityHelper->expects($this->any())
+            ->method('getPostDataTextarea')
+            ->willReturn('test_textarea');
+
+        $this->mockFormSecurityHelper->expects($this->any())
+            ->method('getPostDataEmail')
+            ->willReturn('test@example.com');
+
+        $this->mockFormSecurityHelper->expects($this->any())
+            ->method('isPostRequest')
+            ->willReturn(true);
 
         $this->mockWordPressManager->expects($this->once())
             ->method('isUserLoggedIn')

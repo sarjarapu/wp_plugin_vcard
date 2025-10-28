@@ -49,14 +49,16 @@ class LoggerFactory
         $fileHandler->setFormatter($jsonFormatter);
         $logger->pushHandler($fileHandler);
 
-        // Add error log handler for critical issues
-        $errorHandler = new StreamHandler('php://stderr', Logger::ERROR);
-        $lineFormatter = new LineFormatter(
-            "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
-            'Y-m-d H:i:s'
-        );
-        $errorHandler->setFormatter($lineFormatter);
-        $logger->pushHandler($errorHandler);
+        // Add error log handler for critical issues (skip during tests)
+        if (!self::isRunningInTests()) {
+            $errorHandler = new StreamHandler('php://stderr', Logger::ERROR);
+            $lineFormatter = new LineFormatter(
+                "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
+                'Y-m-d H:i:s'
+            );
+            $errorHandler->setFormatter($lineFormatter);
+            $logger->pushHandler($errorHandler);
+        }
 
         // Add database handler for WordPress integration (optional)
         if (self::shouldUseDatabaseLogging()) {
@@ -160,5 +162,31 @@ class LoggerFactory
     public static function reset(): void
     {
         self::$instance = null;
+    }
+
+    /**
+     * Check if we're running in a test environment
+     */
+    private static function isRunningInTests(): bool
+    {
+        // Check for PHPUnit environment
+        if (defined('PHPUNIT_RUNNING') && PHPUNIT_RUNNING) {
+            return true;
+        }
+
+        // Check for PHPUnit in the call stack
+        $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 10);
+        foreach ($trace as $frame) {
+            if (isset($frame['class']) && strpos($frame['class'], 'PHPUnit') === 0) {
+                return true;
+            }
+        }
+
+        // Check for test-related constants or environment variables
+        if (defined('WP_TESTS_DOMAIN') || getenv('WP_TESTS_DOMAIN')) {
+            return true;
+        }
+
+        return false;
     }
 }

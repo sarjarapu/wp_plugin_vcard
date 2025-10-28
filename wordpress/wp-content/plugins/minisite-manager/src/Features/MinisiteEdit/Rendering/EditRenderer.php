@@ -110,12 +110,13 @@ class EditRenderer
             'form_method' => 'POST',
             // Preview and navigation URLs (same as old implementation)
             'preview_url' => $editData->editingVersion ?
-                home_url('/account/sites/' . $editData->minisite->id . '/preview/' . $editData->editingVersion->id) :
-                home_url('/account/sites/' . $editData->minisite->id . '/preview/current'),
-            'versions_url' => home_url('/account/sites/' . $editData->minisite->id . '/versions'),
-            'edit_latest_url' => home_url('/account/sites/' . $editData->minisite->id . '/edit/latest'),
-            'minisite_id' => $editData->minisite->id,
-            'minisite_status' => $editData->minisite->status,
+                home_url('/account/sites/' . ($editData->minisite->id ?? '') . '/preview/' .
+                    ($editData->editingVersion->id ?? '')) :
+                home_url('/account/sites/' . ($editData->minisite->id ?? '') . '/preview/current'),
+            'versions_url' => home_url('/account/sites/' . ($editData->minisite->id ?? '') . '/versions'),
+            'edit_latest_url' => home_url('/account/sites/' . ($editData->minisite->id ?? '') . '/edit/latest'),
+            'minisite_id' => $editData->minisite->id ?? '',
+            'minisite_status' => $editData->minisite->status ?? '',
             // Form field values
             'business_name' => $profile->name ?? '',
             'business_city' => $profile->city ?? '',

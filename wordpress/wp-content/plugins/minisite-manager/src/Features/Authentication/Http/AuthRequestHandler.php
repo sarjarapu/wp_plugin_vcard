@@ -101,7 +101,7 @@ final class AuthRequestHandler
     private function getGetData(string $key, string $default = ''): string
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- GET parameters don't require nonce verification, data sanitized
-        return $this->wordPressManager->sanitizeText(wp_unslash($_GET[$key] ?? $default));
+        return $this->wordPressManager->sanitizeTextField(wp_unslash($_GET[$key] ?? $default));
     }
 
     /**

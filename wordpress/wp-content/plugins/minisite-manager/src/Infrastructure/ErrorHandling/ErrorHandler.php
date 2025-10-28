@@ -64,7 +64,13 @@ class ErrorHandler
 
         // For fatal errors, convert to exception so it can be caught
         if (in_array($severity, [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR])) {
-            throw new \ErrorException($message, 0, $severity, $file, $line);
+            throw new \ErrorException(
+                esc_html($message),
+                0,
+                (int) $severity,
+                esc_html($file),
+                (int) $line
+            );
         }
 
         return true; // Don't execute PHP's internal error handler
@@ -122,9 +128,9 @@ class ErrorHandler
                 'file' => $error['file'],
                 'line' => $error['line'],
                 'context' => [
-                    'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown',
-                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-                    'request_method' => $_SERVER['REQUEST_METHOD'] ?? 'unknown'
+                    'request_uri' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'] ?? 'unknown')),
+                    'user_agent' => sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')),
+                    'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown'))
                 ]
             ]);
         }

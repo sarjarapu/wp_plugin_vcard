@@ -2,10 +2,12 @@
 
 namespace Minisite\Features\VersionManagement\WordPress;
 
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
+
 /**
  * WordPress-specific utilities for version management
  */
-class WordPressVersionManager
+class WordPressVersionManager implements WordPressManagerInterface
 {
     /**
      * Check if user is logged in
@@ -13,22 +15,6 @@ class WordPressVersionManager
     public function isUserLoggedIn(): bool
     {
         return is_user_logged_in();
-    }
-
-    /**
-     * Get current user
-     */
-    public function getCurrentUser(): ?\WP_User
-    {
-        return wp_get_current_user();
-    }
-
-    /**
-     * Verify nonce
-     */
-    public function verifyNonce(string $nonce, string $action): bool
-    {
-        return wp_verify_nonce($nonce, $action);
     }
 
     /**
@@ -41,18 +27,30 @@ class WordPressVersionManager
 
     /**
      * Sanitize text field
+     *
+     * @param string|null $text Text to sanitize
+     * @return string Sanitized text
      */
-    public function sanitizeTextField(string $str): string
+    public function sanitizeTextField(?string $text): string
     {
-        return sanitize_text_field($str);
+        if ($text === null) {
+            return '';
+        }
+        return sanitize_text_field($text);
     }
 
     /**
      * Sanitize textarea field
+     *
+     * @param string|null $text Text to sanitize
+     * @return string Sanitized text
      */
-    public function sanitizeTextareaField(string $str): string
+    public function sanitizeTextareaField(?string $text): string
     {
-        return sanitize_textarea_field($str);
+        if ($text === null) {
+            return '';
+        }
+        return sanitize_textarea_field($text);
     }
 
     /**
@@ -125,5 +123,209 @@ class WordPressVersionManager
     public function jsonEncode(mixed $data, int $options = 0, int $depth = 512): string|false
     {
         return wp_json_encode($data, $options, $depth);
+    }
+
+    /**
+     * Sanitize email
+     *
+     * @param string|null $email Email to sanitize
+     * @return string Sanitized email
+     */
+    public function sanitizeEmail(?string $email): string
+    {
+        if ($email === null) {
+            return '';
+        }
+        return sanitize_email($email);
+    }
+
+    /**
+     * Sanitize URL
+     *
+     * @param string|null $url URL to sanitize
+     * @return string Sanitized URL
+     */
+    public function sanitizeUrl(?string $url): string
+    {
+        if ($url === null) {
+            return '';
+        }
+        return esc_url_raw($url);
+    }
+
+    /**
+     * Verify nonce
+     *
+     * @param string $nonce Nonce to verify
+     * @param string $action Action name
+     * @return bool True if valid, false otherwise
+     */
+    public function verifyNonce(string $nonce, string $action): bool
+    {
+        return wp_verify_nonce($nonce, $action) !== false;
+    }
+
+    /**
+     * Create nonce
+     *
+     * @param string $action Action name
+     * @return string Nonce value
+     */
+    public function createNonce(string $action): string
+    {
+        return wp_create_nonce($action);
+    }
+
+    /**
+     * Get current user
+     *
+     * @return object|null Current user object or null
+     */
+    public function getCurrentUser(): ?object
+    {
+        $user = wp_get_current_user();
+        return $user && $user->ID > 0 ? $user : null;
+    }
+
+    /**
+     * Start database transaction
+     */
+    public function startTransaction(): void
+    {
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Transaction management requires direct queries
+        $wpdb->query('START TRANSACTION');
+    }
+
+    /**
+     * Commit database transaction
+     */
+    public function commitTransaction(): void
+    {
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Transaction management requires direct queries
+        $wpdb->query('COMMIT');
+    }
+
+    /**
+     * Rollback database transaction
+     */
+    public function rollbackTransaction(): void
+    {
+        global $wpdb;
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Transaction management requires direct queries
+        $wpdb->query('ROLLBACK');
+    }
+
+    /**
+     * Get minisite repository
+     *
+     * @return object Minisite repository
+     */
+    public function getMinisiteRepository(): object
+    {
+        global $wpdb;
+        return new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+    }
+
+    /**
+     * Find minisite by ID
+     *
+     * @param string $id Minisite ID
+     * @return object|null Minisite object or null
+     */
+    public function findMinisiteById(string $id): ?object
+    {
+        $repo = $this->getMinisiteRepository();
+        return $repo->findById($id);
+    }
+
+    /**
+     * Check if minisite has been published
+     *
+     * @param string $id Minisite ID
+     * @return bool True if published, false otherwise
+     */
+    public function hasBeenPublished(string $id): bool
+    {
+        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+        return $versionRepo->findPublishedVersion($id) !== null;
+    }
+
+    /**
+     * Get next version number
+     *
+     * @param string $id Minisite ID
+     * @return int Next version number
+     */
+    public function getNextVersionNumber(string $id): int
+    {
+        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+        return $versionRepo->getNextVersionNumber($id);
+    }
+
+    /**
+     * Save version
+     *
+     * @param object $version Version object
+     * @return bool Success status
+     */
+    public function saveVersion(object $version): object
+    {
+        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+        $versionRepo->save($version);
+        return $version;
+    }
+
+    /**
+     * Update business info
+     *
+     * @param string $siteId Site ID
+     * @param array $fields Fields to update
+     * @param int $userId User ID
+     */
+    public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
+    {
+        $repo = $this->getMinisiteRepository();
+        $repo->updateBusinessInfo($siteId, $fields, $userId);
+    }
+
+    /**
+     * Update coordinates
+     *
+     * @param string $siteId Site ID
+     * @param float $lat Latitude
+     * @param float $lng Longitude
+     * @param int $userId User ID
+     */
+    public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
+    {
+        $repo = $this->getMinisiteRepository();
+        $repo->updateCoordinates($siteId, $lat, $lng, $userId);
+    }
+
+    /**
+     * Update title
+     *
+     * @param string $siteId Site ID
+     * @param string $title Title
+     */
+    public function updateTitle(string $siteId, string $title): void
+    {
+        $repo = $this->getMinisiteRepository();
+        $repo->updateTitle($siteId, $title);
+    }
+
+    /**
+     * Update multiple minisite fields
+     *
+     * @param string $siteId Site ID
+     * @param array $fields Fields to update
+     * @param int $userId User ID
+     */
+    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
+    {
+        $repo = $this->getMinisiteRepository();
+        $repo->updateMinisiteFields($siteId, $fields, $userId);
     }
 }

@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Minisite\Features\Authentication\WordPress;
 
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
+
 /**
  * WordPress User Manager
  *
  * Wraps WordPress user-related functions for better testability and dependency injection.
  * This class provides a clean interface to WordPress user management functions,
  * allowing us to mock them easily in tests.
+ * Implements WordPressManagerInterface for compatibility with FormSecurityHelper.
  */
-final class WordPressUserManager
+final class WordPressUserManager implements WordPressManagerInterface
 {
     /**
      * Authenticate a user with username/password
@@ -53,11 +56,12 @@ final class WordPressUserManager
     /**
      * Get current user
      *
-     * @return \WP_User Current user object
+     * @return object|null Current user object or null if not logged in
      */
-    public function getCurrentUser()
+    public function getCurrentUser(): ?object
     {
-        return wp_get_current_user();
+        $user = wp_get_current_user();
+        return $user && $user->ID > 0 ? $user : null;
     }
 
     /**
@@ -140,22 +144,28 @@ final class WordPressUserManager
     /**
      * Sanitize email
      *
-     * @param string $email Email to sanitize
+     * @param string|null $email Email to sanitize
      * @return string Sanitized email
      */
-    public function sanitizeEmail(string $email): string
+    public function sanitizeEmail(?string $email): string
     {
+        if ($email === null) {
+            return '';
+        }
         return sanitize_email($email);
     }
 
     /**
      * Sanitize URL
      *
-     * @param string $url URL to sanitize
+     * @param string|null $url URL to sanitize
      * @return string Sanitized URL
      */
-    public function sanitizeUrl(string $url): string
+    public function sanitizeUrl(?string $url): string
     {
+        if ($url === null) {
+            return '';
+        }
         return sanitize_url($url);
     }
 
@@ -175,11 +185,11 @@ final class WordPressUserManager
      *
      * @param string $nonce Nonce to verify
      * @param string $action Action name
-     * @return bool|int False on failure, 1 or 2 on success
+     * @return bool True if valid, false otherwise
      */
-    public function verifyNonce(string $nonce, string $action = '-1')
+    public function verifyNonce(string $nonce, string $action): bool
     {
-        return wp_verify_nonce($nonce, $action);
+        return wp_verify_nonce($nonce, $action) !== false;
     }
 
     /**
@@ -260,5 +270,135 @@ final class WordPressUserManager
     public function retrievePassword(string $user_login)
     {
         return retrieve_password($user_login);
+    }
+
+    // WordPressManagerInterface methods - Authentication-specific implementations
+
+    /**
+     * Sanitize text field (required by WordPressManagerInterface)
+     */
+    public function sanitizeTextField(?string $text): string
+    {
+        if ($text === null) {
+            return '';
+        }
+        return sanitize_text_field(wp_unslash($text));
+    }
+
+    /**
+     * Sanitize textarea field (required by WordPressManagerInterface)
+     */
+    public function sanitizeTextareaField(?string $text): string
+    {
+        if ($text === null) {
+            return '';
+        }
+        return sanitize_textarea_field(wp_unslash($text));
+    }
+
+    /**
+     * Create nonce (required by WordPressManagerInterface)
+     */
+    public function createNonce(string $action): string
+    {
+        return wp_create_nonce($action);
+    }
+
+    // WordPressManagerInterface methods - Not applicable for Authentication, return defaults
+
+    /**
+     * Find minisite by ID (not applicable for Authentication)
+     */
+    public function findMinisiteById(string $siteId): ?object
+    {
+        return null;
+    }
+
+    /**
+     * Get next version number (not applicable for Authentication)
+     */
+    public function getNextVersionNumber(string $minisiteId): int
+    {
+        return 1;
+    }
+
+    /**
+     * Save version (not applicable for Authentication)
+     */
+    public function saveVersion(object $version): object
+    {
+        return $version;
+    }
+
+    /**
+     * Check if minisite has been published (not applicable for Authentication)
+     */
+    public function hasBeenPublished(string $siteId): bool
+    {
+        return false;
+    }
+
+    /**
+     * Update business info (not applicable for Authentication)
+     */
+    public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
+    {
+        // No-op for Authentication
+    }
+
+    /**
+     * Update coordinates (not applicable for Authentication)
+     */
+    public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
+    {
+        // No-op for Authentication
+    }
+
+    /**
+     * Update title (not applicable for Authentication)
+     */
+    public function updateTitle(string $siteId, string $title): void
+    {
+        // No-op for Authentication
+    }
+
+    /**
+     * Update minisite fields (not applicable for Authentication)
+     */
+    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
+    {
+        // No-op for Authentication
+    }
+
+    /**
+     * Start transaction (not applicable for Authentication)
+     */
+    public function startTransaction(): void
+    {
+        // No-op for Authentication
+    }
+
+    /**
+     * Commit transaction (not applicable for Authentication)
+     */
+    public function commitTransaction(): void
+    {
+        // No-op for Authentication
+    }
+
+    /**
+     * Rollback transaction (not applicable for Authentication)
+     */
+    public function rollbackTransaction(): void
+    {
+        // No-op for Authentication
+    }
+
+    /**
+     * Get minisite repository (not applicable for Authentication)
+     */
+    public function getMinisiteRepository(): object
+    {
+        return new \stdClass();
     }
 }
