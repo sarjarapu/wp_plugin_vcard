@@ -8,6 +8,7 @@ use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Features\MinisiteViewer\Hooks\ViewHooksFactory;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
  * EditHooks Factory
@@ -38,11 +39,15 @@ class EditHooksFactory
         }
         $editRenderer = new EditRenderer($timberRenderer);
 
+        // Create form security helper
+        $formSecurityHelper = new FormSecurityHelper($wordPressManager);
+
         // Create controller
         $editController = new EditController(
             $editService,
             $editRenderer,
-            $wordPressManager
+            $wordPressManager,
+            $formSecurityHelper
         );
 
         // Get MinisiteViewer controller for preview delegation

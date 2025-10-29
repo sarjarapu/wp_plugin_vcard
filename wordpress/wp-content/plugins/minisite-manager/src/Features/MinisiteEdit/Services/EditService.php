@@ -7,6 +7,8 @@ use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\Entities\Version;
 use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Edit Service
@@ -18,9 +20,12 @@ use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
  */
 class EditService
 {
+    private LoggerInterface $logger;
+
     public function __construct(
         private WordPressEditManager $wordPressManager
     ) {
+        $this->logger = LoggingServiceProvider::getFeatureLogger('minisite-edit-service');
     }
 
     /**
@@ -63,6 +68,42 @@ class EditService
      */
     public function saveDraft(string $siteId, array $formData): object
     {
+        // Log detailed form data for debugging
+        $this->logger->debug('EditService::saveDraft() called', [
+            'site_id' => $siteId,
+            'form_data_count' => count($formData),
+            'business_name' => $formData['business_name'] ?? 'NOT_SET',
+            'business_city' => $formData['business_city'] ?? 'NOT_SET',
+            'business_region' => $formData['business_region'] ?? 'NOT_SET',
+            'business_country' => $formData['business_country'] ?? 'NOT_SET',
+            'seo_title' => $formData['seo_title'] ?? 'NOT_SET',
+            'seo_description' => $formData['seo_description'] ?? 'NOT_SET',
+            'seo_keywords' => $formData['seo_keywords'] ?? 'NOT_SET',
+            'seo_favicon' => $formData['seo_favicon'] ?? 'NOT_SET',
+            'brand_name' => $formData['brand_name'] ?? 'NOT_SET',
+            'brand_logo' => $formData['brand_logo'] ?? 'NOT_SET',
+            'brand_industry' => $formData['brand_industry'] ?? 'NOT_SET',
+            'brand_palette' => $formData['brand_palette'] ?? 'NOT_SET',
+            'hero_heading' => $formData['hero_heading'] ?? 'NOT_SET',
+            'hero_subheading' => $formData['hero_subheading'] ?? 'NOT_SET',
+            'hero_image' => $formData['hero_image'] ?? 'NOT_SET',
+            'about_html' => $formData['about_html'] ?? 'NOT_SET',
+            'whyus_title' => $formData['whyus_title'] ?? 'NOT_SET',
+            'whyus_html' => $formData['whyus_html'] ?? 'NOT_SET',
+            'contact_email' => $formData['contact_email'] ?? 'NOT_SET',
+            'contact_phone_text' => $formData['contact_phone_text'] ?? 'NOT_SET',
+            'contact_phone_link' => $formData['contact_phone_link'] ?? 'NOT_SET',
+            'contact_lat' => $formData['contact_lat'] ?? 'NOT_SET',
+            'contact_lng' => $formData['contact_lng'] ?? 'NOT_SET',
+            'site_template' => $formData['site_template'] ?? 'NOT_SET',
+            'default_locale' => $formData['default_locale'] ?? 'NOT_SET',
+            'search_terms' => $formData['search_terms'] ?? 'NOT_SET',
+            'version_label' => $formData['version_label'] ?? 'NOT_SET',
+            'version_comment' => $formData['version_comment'] ?? 'NOT_SET',
+            'has_nonce' => isset($formData['minisite_edit_nonce']),
+            'nonce_value' => $formData['minisite_edit_nonce'] ?? 'MISSING'
+        ]);
+
         try {
             // Create shared components
             $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
@@ -92,7 +133,16 @@ class EditService
             $operationType = $hasBeenPublished ? 'edit_published' : 'edit_draft';
 
             // Use shared database coordinator
-            return $dbCoordinator->saveMinisiteData(
+            $this->logger->info('Calling MinisiteDatabaseCoordinator::saveMinisiteData', [
+                'site_id' => $siteId,
+                'form_data_count' => count($formData),
+                'operation_type' => $operationType,
+                'has_been_published' => $hasBeenPublished,
+                'minisite_status' => $minisite->status ?? 'unknown',
+                'call_type' => 'call_database_coordinator'
+            ]);
+
+            $result = $dbCoordinator->saveMinisiteData(
                 $siteId,
                 $formData,
                 $operationType,
@@ -100,7 +150,29 @@ class EditService
                 $currentUser,
                 $hasBeenPublished
             );
+
+            $this->logger->info('MinisiteDatabaseCoordinator::saveMinisiteData completed', [
+                'site_id' => $siteId,
+                'success' => $result->success ?? false,
+                'has_errors' => !empty($result->errors ?? []),
+                'error_count' => count($result->errors ?? []),
+                'has_redirect_url' => !empty($result->redirectUrl ?? ''),
+                'operation_type' => 'database_coordinator_result'
+            ]);
+
+            return $result;
         } catch (\Exception $e) {
+            $this->logger->error('EditService::saveDraft() - Exception caught', [
+                'site_id' => $siteId,
+                'form_data_count' => count($formData),
+                'error_message' => $e->getMessage(),
+                'error_code' => $e->getCode(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'error_trace' => $e->getTraceAsString(),
+                'operation_type' => 'edit_service_exception'
+            ]);
+
             return (object) [
                 'success' => false,
                 'errors' => ['Failed to save draft: ' . $e->getMessage()]

@@ -8,6 +8,7 @@ use Minisite\Features\Authentication\Handlers\RegisterHandler;
 use Minisite\Features\Authentication\Handlers\ForgotPasswordHandler;
 use Minisite\Features\Authentication\Services\AuthService;
 use Minisite\Features\Authentication\WordPress\WordPressUserManager;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
  * AuthHooks Factory
@@ -34,7 +35,11 @@ final class AuthHooksFactory
         $forgotPasswordHandler = new ForgotPasswordHandler($authService);
 
         // Create additional dependencies for refactored controller
-        $requestHandler = new \Minisite\Features\Authentication\Http\AuthRequestHandler($wordPressManager);
+        $formSecurityHelper = new FormSecurityHelper($wordPressManager);
+        $requestHandler = new \Minisite\Features\Authentication\Http\AuthRequestHandler(
+            $wordPressManager,
+            $formSecurityHelper
+        );
         $responseHandler = new \Minisite\Features\Authentication\Http\AuthResponseHandler($wordPressManager);
         $renderer = new \Minisite\Features\Authentication\Rendering\AuthRenderer();
 

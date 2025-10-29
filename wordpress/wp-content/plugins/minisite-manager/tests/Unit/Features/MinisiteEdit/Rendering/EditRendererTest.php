@@ -210,7 +210,7 @@ class EditRendererTest extends TestCase
 
         // Mock Timber class
         $mockTimber = $this->createMock(\stdClass::class);
-        $mockTimber->$locations = [];
+        $mockTimber->locations = [];
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($this->renderer);

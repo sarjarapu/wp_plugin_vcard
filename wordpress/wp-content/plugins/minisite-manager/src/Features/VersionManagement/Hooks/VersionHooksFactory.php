@@ -15,6 +15,7 @@ use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
  * Factory for creating VersionHooks with all dependencies
@@ -44,7 +45,8 @@ class VersionHooksFactory
         $rollbackVersionHandler = new RollbackVersionHandler($versionService);
 
         // Create HTTP components
-        $requestHandler = new VersionRequestHandler($wordPressManager);
+        $formSecurityHelper = new FormSecurityHelper($wordPressManager);
+        $requestHandler = new VersionRequestHandler($wordPressManager, $formSecurityHelper);
         $responseHandler = new VersionResponseHandler($wordPressManager);
 
         // Create renderer

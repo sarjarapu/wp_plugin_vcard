@@ -211,18 +211,12 @@ class EditServiceTest extends TestCase
             ->willReturn(false);
 
         $this->mockWordPressManager->expects($this->once())
-            ->method('updateBusinessInfo');
-
-        $this->mockWordPressManager->expects($this->once())
-            ->method('updateCoordinates');
+            ->method('updateMinisiteFields');
 
         $this->mockWordPressManager->expects($this->once())
             ->method('commitTransaction');
 
         $this->mockWordPressManager->method('rollbackTransaction');
-
-        $this->mockWordPressManager->expects($this->once())
-            ->method('updateTitle');
 
         $this->mockWordPressManager->expects($this->once())
             ->method('getHomeUrl')

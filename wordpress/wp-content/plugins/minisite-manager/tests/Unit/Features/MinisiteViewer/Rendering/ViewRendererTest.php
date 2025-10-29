@@ -7,6 +7,14 @@ use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
 use PHPUnit\Framework\TestCase;
 
 /**
+ * Interface for WordPress manager mock
+ */
+interface WordPressManagerInterface
+{
+    public function getReviewsForMinisite(): array;
+}
+
+/**
  * Test ViewRenderer
  * 
  * NOTE: These are "coverage tests" that verify method existence and basic functionality.
@@ -38,9 +46,7 @@ final class ViewRendererTest extends TestCase
     protected function setUp(): void
     {
         $this->mockTimberRenderer = $this->createMock(\Minisite\Application\Rendering\TimberRenderer::class);
-        $this->mockWordPressManager = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['getReviewsForMinisite'])
-            ->getMock();
+        $this->mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         
         // Mock the getReviewsForMinisite method
         $this->mockWordPressManager->method('getReviewsForMinisite')
@@ -77,9 +83,7 @@ final class ViewRendererTest extends TestCase
     public function test_render_minisite_with_object_no_render_method(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $mockWordPressManager = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['getReviewsForMinisite'])
-            ->getMock();
+        $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
         $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
         $mockMinisite = (object)[
@@ -105,9 +109,7 @@ final class ViewRendererTest extends TestCase
     public function test_render_minisite_with_empty_minisite_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $mockWordPressManager = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['getReviewsForMinisite'])
-            ->getMock();
+        $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
         $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
         $mockMinisite = (object)[
@@ -133,9 +135,7 @@ final class ViewRendererTest extends TestCase
     public function test_render_minisite_with_null_minisite_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $mockWordPressManager = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['getReviewsForMinisite'])
-            ->getMock();
+        $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
         $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
         $mockMinisite = (object)[
@@ -161,9 +161,7 @@ final class ViewRendererTest extends TestCase
     public function test_render_minisite_with_special_characters_in_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
-        $mockWordPressManager = $this->getMockBuilder(\stdClass::class)
-            ->addMethods(['getReviewsForMinisite'])
-            ->getMock();
+        $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
         $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
         $mockMinisite = (object)[
@@ -366,7 +364,7 @@ final class ViewRendererTest extends TestCase
 
         // Mock Timber class
         $mockTimber = $this->createMock(\stdClass::class);
-        $mockTimber->$locations = [];
+        $mockTimber->locations = [];
 
         // This will fail with Timber integration issues, but we can test the method signature
         try {

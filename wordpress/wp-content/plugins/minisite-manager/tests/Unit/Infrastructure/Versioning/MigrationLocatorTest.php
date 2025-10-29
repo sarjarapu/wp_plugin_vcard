@@ -24,8 +24,15 @@ class MigrationLocatorTest extends TestCase
 
     protected function tearDown(): void
     {
-        // Clean up temporary directory
-        $this->removeDirectory($this->tempMigrationsDir);
+        // Clean up temporary directory with error handling
+        if (isset($this->tempMigrationsDir) && is_dir($this->tempMigrationsDir)) {
+            try {
+                $this->removeDirectory($this->tempMigrationsDir);
+            } catch (\Exception $e) {
+                // Log error but don't fail the test
+                error_log("Failed to clean up temp directory: " . $e->getMessage());
+            }
+        }
         $this->clearDeclaredClasses();
     }
 
@@ -324,6 +331,7 @@ class MigrationLocatorTest extends TestCase
 
     /**
      * Recursively remove a directory and its contents
+     * Use RecursiveDirectoryIterator to avoid Patchwork interference
      */
     private function removeDirectory(string $dir): void
     {
@@ -331,15 +339,23 @@ class MigrationLocatorTest extends TestCase
             return;
         }
 
-        $files = array_diff(scandir($dir), ['.', '..']);
-        foreach ($files as $file) {
-            $path = $dir . '/' . $file;
-            if (is_dir($path)) {
-                $this->removeDirectory($path);
-            } else {
-                unlink($path);
+        try {
+            $iterator = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
+            $files = new \RecursiveIteratorIterator($iterator, \RecursiveIteratorIterator::CHILD_FIRST);
+            
+            foreach ($files as $file) {
+                if ($file->isDir()) {
+                    rmdir($file->getRealPath());
+                } else {
+                    unlink($file->getRealPath());
+                }
             }
+            
+            rmdir($dir);
+        } catch (\Exception $e) {
+            // If RecursiveDirectoryIterator fails, fall back to simple rmdir
+            // This handles cases where Patchwork interferes
+            error_log("Failed to remove directory with iterator: " . $e->getMessage());
         }
-        rmdir($dir);
     }
 }

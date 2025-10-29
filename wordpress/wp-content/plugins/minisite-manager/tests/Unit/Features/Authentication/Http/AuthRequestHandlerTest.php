@@ -7,6 +7,7 @@ use Minisite\Features\Authentication\Commands\RegisterCommand;
 use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
 use Minisite\Features\Authentication\Http\AuthRequestHandler;
 use Minisite\Features\Authentication\WordPress\WordPressUserManager;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -38,19 +39,57 @@ final class AuthRequestHandlerTest extends TestCase
 {
     private AuthRequestHandler $requestHandler;
     private MockObject $wordPressManager;
+    private MockObject $formSecurityHelper;
 
     protected function setUp(): void
     {
         $this->wordPressManager = $this->createMock(WordPressUserManager::class);
-        $this->requestHandler = new AuthRequestHandler($this->wordPressManager);
+        $this->formSecurityHelper = $this->createMock(FormSecurityHelper::class);
+        $this->requestHandler = new AuthRequestHandler($this->wordPressManager, $this->formSecurityHelper);
         
         // Reset $_SERVER and $_POST
         $_SERVER = [];
         $_POST = [];
         $_GET = [];
         
-        // Set up WordPress manager mock for all tests
+        // Set up mocks for all tests
+        $this->setupSuccessfulFormSecurityHelper();
         $this->setupSuccessfulWordPressManager();
+    }
+
+    /**
+     * Set up FormSecurityHelper mock for successful operations
+     */
+    private function setupSuccessfulFormSecurityHelper(): void
+    {
+        $this->formSecurityHelper
+            ->expects($this->any())
+            ->method('verifyNonce')
+            ->willReturn(true);
+        $this->formSecurityHelper
+            ->expects($this->any())
+            ->method('getPostData')
+            ->willReturnCallback(function($key, $default = '') {
+                return $_POST[$key] ?? $default;
+            });
+        $this->formSecurityHelper
+            ->expects($this->any())
+            ->method('getPostDataUrl')
+            ->willReturnCallback(function($key, $default = '') {
+                return $_POST[$key] ?? $default;
+            });
+        $this->formSecurityHelper
+            ->expects($this->any())
+            ->method('getPostDataEmail')
+            ->willReturnCallback(function($key, $default = '') {
+                return $_POST[$key] ?? $default;
+            });
+        $this->formSecurityHelper
+            ->expects($this->any())
+            ->method('isPostRequest')
+            ->willReturnCallback(function() {
+                return isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] === 'POST';
+            });
     }
 
     /**
@@ -60,23 +99,7 @@ final class AuthRequestHandlerTest extends TestCase
     {
         $this->wordPressManager
             ->expects($this->any())
-            ->method('verifyNonce')
-            ->willReturn(true);
-        $this->wordPressManager
-            ->expects($this->any())
-            ->method('sanitizeText')
-            ->willReturnArgument(0);
-        $this->wordPressManager
-            ->expects($this->any())
-            ->method('unslash')
-            ->willReturnArgument(0);
-        $this->wordPressManager
-            ->expects($this->any())
-            ->method('sanitizeUrl')
-            ->willReturnArgument(0);
-        $this->wordPressManager
-            ->expects($this->any())
-            ->method('sanitizeEmail')
+            ->method('sanitizeTextField')
             ->willReturnArgument(0);
         $this->wordPressManager
             ->expects($this->any())

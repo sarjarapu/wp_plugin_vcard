@@ -249,11 +249,11 @@ final class MinisiteRepositoryTest extends TestCase
 
     public function testUpdateCoordinatesSuccess(): void
     {
-        $this->mockDb->expects($this->exactly(2))
+        $this->mockDb->expects($this->exactly(1))
             ->method('prepare')
             ->willReturn('prepared query');
 
-        $this->mockDb->expects($this->exactly(2))
+        $this->mockDb->expects($this->exactly(1))
             ->method('query')
             ->with('prepared query');
 
@@ -267,15 +267,12 @@ final class MinisiteRepositoryTest extends TestCase
 
     public function testUpdateCoordinatesWithNullValues(): void
     {
-        $this->mockDb->expects($this->exactly(2))
-            ->method('prepare')
-            ->willReturn('prepared query');
+        // When coordinates are null, the method should return early without calling prepare/query
+        $this->mockDb->expects($this->never())
+            ->method('prepare');
 
-        $this->mockDb->expects($this->exactly(2))
-            ->method('query')
-            ->with('prepared query');
-
-        $this->mockDb->rows_affected = 1;
+        $this->mockDb->expects($this->never())
+            ->method('query');
 
         $this->repository->updateCoordinates('test-123', null, null, 123);
 

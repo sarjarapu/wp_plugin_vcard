@@ -8,13 +8,12 @@ use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
+use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Test EditHooks
  */
-/**
- * @group skip
- */
+#[Group('skip')]
 class EditHooksTest extends TestCase
 {
     private EditHooks $hooks;
@@ -97,11 +96,10 @@ class EditHooksTest extends TestCase
         // Since the hooks calls exit, we need to expect it
         $this->expectException(\Exception::class);
         
-        // Mock the redirect method to throw an exception instead of calling exit
-        $this->mockWordPressManager->method('redirect')
-            ->willReturnCallback(function($url) {
-                throw new \Exception('Redirect called with URL: ' . $url);
-            });
+        // Mock the exit function to throw an exception instead of terminating
+        Functions\when('exit')->justReturn(function () {
+            throw new \Exception('Exit called');
+        });
         
         $this->mockEditController->expects($this->once())
             ->method('handleEdit');
@@ -149,11 +147,10 @@ class EditHooksTest extends TestCase
 
         $this->expectException(\Exception::class);
         
-        // Mock the redirect method to throw an exception instead of calling exit
-        $this->mockWordPressManager->method('redirect')
-            ->willReturnCallback(function($url) {
-                throw new \Exception('Redirect called with URL: ' . $url);
-            });
+        // Mock the exit function to throw an exception instead of terminating
+        Functions\when('exit')->justReturn(function () {
+            throw new \Exception('Exit called');
+        });
         
         $this->mockEditController->expects($this->once())
             ->method('handleEdit');

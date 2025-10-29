@@ -7,6 +7,7 @@ use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
+use Minisite\Infrastructure\Security\FormSecurityHelper;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -17,12 +18,15 @@ class VersionRequestHandlerTest extends TestCase
 {
     private VersionRequestHandler $requestHandler;
     private MockObject $wordPressManager;
+    private MockObject $formSecurityHelper;
 
     protected function setUp(): void
     {
         $this->wordPressManager = $this->createMock(WordPressVersionManager::class);
-        $this->requestHandler = new VersionRequestHandler($this->wordPressManager);
+        $this->formSecurityHelper = $this->createMock(FormSecurityHelper::class);
+        $this->requestHandler = new VersionRequestHandler($this->wordPressManager, $this->formSecurityHelper);
         $this->setupWordPressMocks();
+        $this->setupFormSecurityHelperMocks();
     }
 
     protected function tearDown(): void
@@ -64,19 +68,19 @@ class VersionRequestHandlerTest extends TestCase
         $user = $this->createMock(\WP_User::class);
         $user->ID = 456;
 
-        $this->wordPressManager
+        $this->formSecurityHelper
             ->expects($this->once())
             ->method('verifyNonce')
             ->willReturn(true);
         
-        $this->wordPressManager
+        $this->formSecurityHelper
             ->expects($this->atLeast(3))
-            ->method('sanitizeTextField')
+            ->method('getPostData')
             ->willReturnMap([
-                ['valid-nonce', 'valid-nonce'],
-                ['test-site-123', 'test-site-123'],
-                ['Test Version', 'Test Version'],
-                ['Test comment', 'Test comment']
+                ['nonce', '', 'valid-nonce'],
+                ['site_id', '', 'test-site-123'],
+                ['label', '', 'Test Version'],
+                ['version_comment', '', 'Test comment']
             ]);
         
         // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
@@ -109,19 +113,22 @@ class VersionRequestHandlerTest extends TestCase
         $user = $this->createMock(\WP_User::class);
         $user->ID = 456;
 
-        $this->wordPressManager
+        $this->formSecurityHelper
             ->expects($this->once())
             ->method('verifyNonce')
             ->willReturn(true);
         
-        $this->wordPressManager
-            ->expects($this->atLeast(3))
-            ->method('sanitizeTextField')
-            ->willReturnMap([
-                ['valid-nonce', 'valid-nonce'],
-                ['test-site-123', 'test-site-123'],
-                ['789', '789']
-            ]);
+        $this->formSecurityHelper
+            ->expects($this->exactly(1))
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('test-site-123');
+        
+        $this->formSecurityHelper
+            ->expects($this->exactly(1))
+            ->method('getPostDataInt')
+            ->with('version_id', 0)
+            ->willReturn(789);
         
         // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
         
@@ -150,19 +157,22 @@ class VersionRequestHandlerTest extends TestCase
         $user = $this->createMock(\WP_User::class);
         $user->ID = 456;
 
-        $this->wordPressManager
+        $this->formSecurityHelper
             ->expects($this->once())
             ->method('verifyNonce')
             ->willReturn(true);
         
-        $this->wordPressManager
-            ->expects($this->atLeast(3))
-            ->method('sanitizeTextField')
-            ->willReturnMap([
-                ['valid-nonce', 'valid-nonce'],
-                ['test-site-123', 'test-site-123'],
-                ['789', '789']
-            ]);
+        $this->formSecurityHelper
+            ->expects($this->exactly(1))
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('test-site-123');
+        
+        $this->formSecurityHelper
+            ->expects($this->exactly(1))
+            ->method('getPostDataInt')
+            ->with('source_version_id', 0)
+            ->willReturn(789);
         
         // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
         
@@ -202,6 +212,26 @@ class VersionRequestHandlerTest extends TestCase
                 ");
             }
         }
+    }
+
+    private function setupFormSecurityHelperMocks(): void
+    {
+        $this->formSecurityHelper
+            ->expects($this->any())
+            ->method('verifyNonce')
+            ->willReturn(true);
+        $this->formSecurityHelper
+            ->expects($this->any())
+            ->method('getPostData')
+            ->willReturnCallback(function($key, $default = '') {
+                return $_POST[$key] ?? $default;
+            });
+        $this->formSecurityHelper
+            ->expects($this->any())
+            ->method('getPostDataInt')
+            ->willReturnCallback(function($key, $default = 0) {
+                return (int) ($_POST[$key] ?? $default);
+            });
     }
 
     private function mockWordPressFunction(string $functionName, mixed $returnValue, ?string $param = null): void
