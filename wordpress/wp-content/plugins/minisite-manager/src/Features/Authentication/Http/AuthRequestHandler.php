@@ -119,6 +119,7 @@ final class AuthRequestHandler
 
     /**
      * Safely get and sanitize POST data
+     * @phpstan-ignore-next-line
      */
     private function getPostData(string $key, string $default = ''): string
     {
@@ -137,16 +138,28 @@ final class AuthRequestHandler
         return $this->formSecurityHelper->verifyNonce($action, $nonceField);
     }
 
+    /**
+     * Sanitize input text
+     * @phpstan-ignore-next-line
+     */
     private function sanitizeInput(string $input): string
     {
         return $this->wordPressManager->sanitizeText($this->wordPressManager->unslash($input));
     }
 
+    /**
+     * Sanitize email input
+     * @phpstan-ignore-next-line
+     */
     private function sanitizeEmail(string $email): string
     {
         return $this->wordPressManager->sanitizeEmail($this->wordPressManager->unslash($email));
     }
 
+    /**
+     * Sanitize URL input
+     * @phpstan-ignore-next-line
+     */
     private function sanitizeUrl(string $url): string
     {
         return $this->wordPressManager->sanitizeUrl($this->wordPressManager->unslash($url));

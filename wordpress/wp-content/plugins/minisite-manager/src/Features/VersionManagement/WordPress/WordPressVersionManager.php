@@ -268,7 +268,7 @@ class WordPressVersionManager implements WordPressManagerInterface
      * Save version
      *
      * @param object $version Version object
-     * @return bool Success status
+     * @return object Saved version object
      */
     public function saveVersion(object $version): object
     {

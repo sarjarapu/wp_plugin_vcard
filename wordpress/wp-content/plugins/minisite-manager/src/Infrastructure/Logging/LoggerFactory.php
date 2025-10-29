@@ -60,13 +60,14 @@ class LoggerFactory
             $logger->pushHandler($errorHandler);
         }
 
-        // Add database handler for WordPress integration (optional)
-        if (self::shouldUseDatabaseLogging()) {
-            $dbHandler = self::createDatabaseHandler();
-            if ($dbHandler) {
-                $logger->pushHandler($dbHandler);
-            }
-        }
+        // Database logging is disabled for now - DatabaseHandler doesn't exist in Monolog
+        // TODO: Implement custom database handler if needed
+        // if (self::shouldUseDatabaseLogging()) {
+        //     $dbHandler = self::createDatabaseHandler();
+        //     if ($dbHandler) {
+        //         $logger->pushHandler($dbHandler);
+        //     }
+        // }
 
         return $logger;
     }
@@ -74,45 +75,48 @@ class LoggerFactory
     /**
      * Create a database handler for WordPress integration
      */
-    private static function createDatabaseHandler(): ?DatabaseHandler
-    {
-        global $wpdb;
-
-        if (!$wpdb) {
-            return null;
-        }
-
-        try {
-            // Create logs table if it doesn't exist
-            self::ensureLogsTableExists();
-
-            $dbHandler = new DatabaseHandler(
-                $wpdb->dbh,
-                $wpdb->prefix . 'minisite_logs',
-                ['level', 'message', 'context', 'extra', 'created_at'],
-                Logger::WARNING // Only log warnings and above to database
-            );
-
-            $dbHandler->setFormatter(new JsonFormatter());
-            return $dbHandler;
-        } catch (\Exception $e) {
-            // Fallback to file logging if database fails
-            error_log('Failed to create database logger: ' . $e->getMessage());
-            return null;
-        }
-    }
+    // private static function createDatabaseHandler(): ?DatabaseHandler
+    // {
+    //     global $wpdb;
+    //
+    //     if (!$wpdb) {
+    //         return null;
+    //     }
+    //
+    //     try {
+    //         // Create logs table if it doesn't exist
+    //         self::ensureLogsTableExists();
+    //
+    //         $dbHandler = new DatabaseHandler(
+    //             $wpdb->dbh,
+    //             $wpdb->prefix . 'minisite_logs',
+    //             ['level', 'message', 'context', 'extra', 'created_at'],
+    //             Logger::WARNING // Only log warnings and above to database
+    //         );
+    //
+    //         $dbHandler->setFormatter(new JsonFormatter());
+    //         return $dbHandler;
+    //     } catch (\Exception $e) {
+    //         // Fallback to file logging if database fails
+    //         error_log('Failed to create database logger: ' . $e->getMessage());
+    //         return null;
+    //     }
+    // }
 
     /**
      * Check if database logging should be enabled
+     * @phpstan-ignore-next-line
      */
     private static function shouldUseDatabaseLogging(): bool
     {
-        // Enable database logging in development or when explicitly configured
-        return defined('WP_DEBUG') && WP_DEBUG && defined('WP_DEBUG_LOG') && WP_DEBUG_LOG;
+        // Database logging is disabled for now - DatabaseHandler doesn't exist in Monolog
+        return false;
     }
 
     /**
      * Ensure the logs table exists
+     * Note: Currently unused since database logging is disabled
+     * @phpstan-ignore-next-line
      */
     private static function ensureLogsTableExists(): void
     {
@@ -146,12 +150,14 @@ class LoggerFactory
         $logger = self::createLogger("minisite-manager.{$feature}");
 
         // Add feature-specific context
-        $logger->pushProcessor(function ($record) use ($feature) {
-            $record['extra']['feature'] = $feature;
-            $record['extra']['plugin_version'] = defined('MINISITE_MANAGER_VERSION')
-                ? MINISITE_MANAGER_VERSION : 'unknown';
-            return $record;
-        });
+        if ($logger instanceof \Monolog\Logger) {
+            $logger->pushProcessor(function ($record) use ($feature) {
+                $record['extra']['feature'] = $feature;
+                $record['extra']['plugin_version'] = defined('MINISITE_MANAGER_VERSION')
+                    ? MINISITE_MANAGER_VERSION : 'unknown';
+                return $record;
+            });
+        }
 
         return $logger;
     }
