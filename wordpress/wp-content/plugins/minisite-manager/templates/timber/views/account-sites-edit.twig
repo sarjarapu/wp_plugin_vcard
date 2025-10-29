@@ -728,7 +728,7 @@
 
         const form = document.getElementById('minisite-edit-form');
         const formData = new FormData(form);
-        formData.append('action', 'publish_version');
+        formData.append('action', 'minisite_publish_version');
         formData.append('nonce', '{{ function("wp_create_nonce", "minisite_version") }}');
         formData.append('site_id', '{{ profile.id }}');
         formData.append('version_id', '{{ editing_version.id|default("") }}');

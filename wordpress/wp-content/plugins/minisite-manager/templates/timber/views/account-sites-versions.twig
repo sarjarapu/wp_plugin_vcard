@@ -142,7 +142,7 @@
         this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Publishing...';
 
         const formData = new FormData();
-        formData.append('action', 'publish_version');
+        formData.append('action', 'minisite_publish_version');
         formData.append('nonce', '{{ function("wp_create_nonce", "minisite_version") }}');
         formData.append('site_id', siteId);
         formData.append('version_id', versionId);
@@ -186,7 +186,7 @@
         this.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Creating...';
 
         const formData = new FormData();
-        formData.append('action', 'rollback_version');
+        formData.append('action', 'minisite_rollback_version');
         formData.append('nonce', '{{ function("wp_create_nonce", "minisite_version") }}');
         formData.append('site_id', siteId);
         formData.append('source_version_id', versionId);

@@ -222,7 +222,7 @@ class WordPressNewMinisiteManager implements WordPressManagerInterface
      */
     public function startTransaction(): void
     {
-        $this->db->query('START TRANSACTION');
+        db::query('START TRANSACTION');
     }
 
     /**
@@ -230,7 +230,7 @@ class WordPressNewMinisiteManager implements WordPressManagerInterface
      */
     public function commitTransaction(): void
     {
-        $this->db->query('COMMIT');
+        db::query('COMMIT');
     }
 
     /**
@@ -238,7 +238,7 @@ class WordPressNewMinisiteManager implements WordPressManagerInterface
      */
     public function rollbackTransaction(): void
     {
-        $this->db->query('ROLLBACK');
+        db::query('ROLLBACK');
     }
 
     /**
