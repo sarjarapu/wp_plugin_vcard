@@ -97,7 +97,7 @@
                 </a>
                 {% if s.status == 'draft' %}
                   <span class="text-[var(--outline)]">•</span>
-                  <a href="{{ function('home_url','/account/sites/publish?minisite_id=' ~ s.id) }}" class="inline-flex items-center gap-1 text-green-600 hover:underline text-sm font-medium">
+                  <a href="{{ function('home_url','/account/sites/' ~ s.id ~ '/publish') }}" class="inline-flex items-center gap-1 text-green-600 hover:underline text-sm font-medium">
                     <i class="fa-solid fa-rocket text-xs"></i> Publish
                   </a>
                 {% endif %}

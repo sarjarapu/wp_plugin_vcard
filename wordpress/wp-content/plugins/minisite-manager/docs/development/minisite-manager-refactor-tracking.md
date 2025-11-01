@@ -112,6 +112,91 @@ The `minisite-manager.php` file requires major refactoring to complete the migra
   - [ ] Remove commented export/import handlers (lines 1089-1149)
   - [ ] Remove commented WooCommerce order creation (lines 1151-1171)
 
+## 🔧 Related Refactoring: WordPressManager Classes
+
+### WordPressManager Interface & Implementation Refactoring
+
+**Status**: TODO - Tracked for future refactoring  
+**Priority**: Medium  
+**Created**: November 2025
+
+#### Current Issues
+- [ ] **Code Duplication**: Significant duplication across WordPress manager implementations
+  - `WordPressEditManager`, `WordPressNewMinisiteManager`, `WordPressPublishManager` all implement `WordPressManagerInterface`
+  - Methods like `updateBusinessInfo()`, `updateCoordinates()`, `updateTitle()` are duplicated
+  - Many methods are not relevant to all features (e.g., `PublishMinisite` doesn't need version-related methods)
+
+- [ ] **Interface Bloat**: `WordPressManagerInterface` requires all managers to implement methods they don't need
+  - Methods like `getNextVersionNumber()`, `saveVersion()` are irrelevant to publish feature
+  - Methods like `updateBusinessInfo()` might not be needed in all features
+  - Forces implementation of stub methods that do nothing or return default values
+
+- [ ] **Maintenance Burden**: 
+  - Adding new methods to interface requires updating all implementations
+  - Risk of forgetting to update one of the managers
+  - Difficult to understand which methods are actually used per feature
+
+#### Proposed Solution
+- [ ] **Create Base WordPress Manager Class**:
+  - Common WordPress operations (sanitization, nonces, URLs, etc.)
+  - Shared repository access patterns
+  - Transaction management
+
+- [ ] **Split Interface into Smaller, Focused Interfaces**:
+  - `WordPressManagerInterface` - Core WordPress operations (sanitize, nonce, URLs)
+  - `WordPressRepositoryInterface` - Repository access patterns
+  - `WordPressVersionManagerInterface` - Version-specific operations (optional)
+  - `WordPressBusinessInfoInterface` - Business info updates (optional)
+
+- [ ] **Use Composition Instead of Inheritance**:
+  - Managers can compose only the interfaces they need
+  - No forced implementation of irrelevant methods
+  - Better separation of concerns
+
+- [ ] **Example Structure**:
+  ```php
+  // Base class with common operations
+  abstract class BaseWordPressManager implements WordPressManagerInterface
+  
+  // Edit manager uses version operations
+  class WordPressEditManager extends BaseWordPressManager 
+    implements WordPressVersionManagerInterface
+  
+  // Publish manager doesn't need version operations
+  class WordPressPublishManager extends BaseWordPressManager
+    // Only implements what it needs
+  ```
+
+#### Files Affected
+- `src/Domain/Interfaces/WordPressManagerInterface.php`
+- `src/Features/MinisiteEdit/WordPress/WordPressEditManager.php`
+- `src/Features/NewMinisite/WordPress/WordPressNewMinisiteManager.php`
+- `src/Features/PublishMinisite/WordPress/WordPressPublishManager.php`
+- Potentially all other feature WordPress managers
+
+#### Benefits
+- ✅ Reduced code duplication
+- ✅ Clearer intent - each manager only implements what it needs
+- ✅ Easier maintenance - changes to one manager don't affect others unnecessarily
+- ✅ Better type safety - interfaces describe actual capabilities
+- ✅ Easier to understand which operations are available per feature
+
+#### Risks
+- ⚠️ Breaking changes to existing code
+- ⚠️ Need to update all feature implementations
+- ⚠️ Migration effort across all features
+- ⚠️ Need thorough testing to ensure nothing breaks
+
+#### Estimated Effort
+- **Planning & Design**: 1-2 days
+- **Implementation**: 3-5 days
+- **Testing & Migration**: 2-3 days
+- **Total**: ~1-2 weeks
+
+**Note**: This is tracked for future refactoring. Not urgent but should be addressed before adding more WordPress managers.
+
+---
+
 ## 🔧 Related Refactoring: CreateBase.php
 
 ### CreateBase.php Refactoring Needs

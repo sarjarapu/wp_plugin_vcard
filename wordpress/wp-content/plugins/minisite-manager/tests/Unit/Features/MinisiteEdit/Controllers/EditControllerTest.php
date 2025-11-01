@@ -84,11 +84,11 @@ class EditControllerTest extends TestCase
         $this->mockWordPressManager->expects($this->atMost(2))
             ->method('getQueryVar')
             ->with($this->logicalOr(
-                $this->equalTo('minisite_site_id'),
+                $this->equalTo('minisite_id'),
                 $this->equalTo('minisite_version_id')
             ))
             ->willReturnMap([
-                ['minisite_site_id', '', ''],
+                ['minisite_id', '', ''],
                 ['minisite_version_id', '', '']
             ]);
 
@@ -140,7 +140,7 @@ class EditControllerTest extends TestCase
         $this->mockWordPressManager->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', null]
             ]);
 
@@ -193,7 +193,7 @@ class EditControllerTest extends TestCase
         $this->mockWordPressManager->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', 'latest']
             ]);
 
@@ -239,7 +239,7 @@ class EditControllerTest extends TestCase
         $this->mockWordPressManager->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', $versionId]
             ]);
 
@@ -277,7 +277,7 @@ class EditControllerTest extends TestCase
         $this->mockWordPressManager->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', null]
             ]);
 
@@ -310,7 +310,7 @@ class EditControllerTest extends TestCase
         $this->mockWordPressManager->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', null]
             ]);
 
@@ -344,7 +344,7 @@ class EditControllerTest extends TestCase
         $this->mockWordPressManager->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', null]
             ]);
 

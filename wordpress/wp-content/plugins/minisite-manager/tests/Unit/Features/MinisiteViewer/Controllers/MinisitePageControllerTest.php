@@ -317,7 +317,7 @@ final class MinisitePageControllerTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', $versionId]
             ]);
 
@@ -386,7 +386,7 @@ final class MinisitePageControllerTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', ''],
+                ['minisite_id', '', ''],
                 ['minisite_version_id', '', '5']
             ]);
 
@@ -425,7 +425,7 @@ final class MinisitePageControllerTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', $versionId]
             ]);
 
@@ -471,7 +471,7 @@ final class MinisitePageControllerTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', $versionId]
             ]);
 
@@ -517,7 +517,7 @@ final class MinisitePageControllerTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', $versionId]
             ]);
 
@@ -567,7 +567,7 @@ final class MinisitePageControllerTest extends TestCase
             ->expects($this->exactly(2))
             ->method('getQueryVar')
             ->willReturnMap([
-                ['minisite_site_id', '', $siteId],
+                ['minisite_id', '', $siteId],
                 ['minisite_version_id', '', $versionId]
             ]);
 

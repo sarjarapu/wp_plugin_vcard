@@ -112,7 +112,7 @@ class MinisitePageController
             $this->wordPressManager->redirect($this->wordPressManager->getLoginRedirectUrl());
         }
 
-        $siteId = $this->wordPressManager->getQueryVar('minisite_site_id');
+        $siteId = $this->wordPressManager->getQueryVar('minisite_id');
         if (!$siteId) {
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
         }

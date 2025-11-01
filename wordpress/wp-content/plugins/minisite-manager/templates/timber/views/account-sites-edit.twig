@@ -178,7 +178,7 @@
             <i class="fa-solid fa-eye"></i> Preview
           </a>
           {% if minisite_status == 'draft' %}
-            <a href="{{ function('home_url','/account/sites/publish?minisite_id=' ~ minisite_id) }}" 
+            <a href="{{ function('home_url','/account/sites/' ~ minisite_id ~ '/publish') }}" 
                class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-600 text-white shadow hover:bg-green-700 font-medium">
               <i class="fa-solid fa-rocket"></i> Publish Minisite
             </a>
