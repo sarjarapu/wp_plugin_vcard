@@ -286,6 +286,23 @@ add_rewrite_rule(
 - No need to charge again
 - Seamless experience
 
+### 10. Subscription Duration and Grace Period
+**Decision**: 
+- Subscription duration: 1 year (12 months)
+- Grace period: 1 week (7 days)
+
+**Rationale**:
+- 1-year membership provides clear value proposition
+- 1-week grace period adds urgency to renewals
+- Prevents slug squatting while giving fair renewal window
+- URL ownership is duration-based, not permanent
+
+**Implementation**:
+- Use `PaymentConstants::SUBSCRIPTION_DURATION_MONTHS` (12)
+- Use `PaymentConstants::GRACE_PERIOD_DAYS` (7)
+- Calculate: `expires_at = paid_at + 12 months`
+- Calculate: `grace_period_ends_at = expires_at + 7 days`
+
 ### 6. Error Handling
 **Decision**: Transaction rollback on failures
 **Rationale**:

@@ -143,19 +143,23 @@
               <div class="space-y-3 text-sm text-[var(--on-surface-variant)]">
                 <div class="flex items-center gap-3">
                   <i class="fa-solid fa-check text-green-500"></i>
-                  <p>Permanent ownership of your chosen URL</p>
+                  <p>Exclusive ownership of the URL shown above for 1 year</p>
                 </div>
                 <div class="flex items-center gap-3">
                   <i class="fa-solid fa-check text-green-500"></i>
-                  <p>1 year of public access to your minisite</p>
+                  <p>Visitors can connect with your sales team, browse products, and view reviews</p>
                 </div>
                 <div class="flex items-center gap-3">
                   <i class="fa-solid fa-check text-green-500"></i>
-                  <p>Full editing and customization rights</p>
+                  <p>Public website accessible worldwide</p>
                 </div>
                 <div class="flex items-center gap-3">
                   <i class="fa-solid fa-check text-green-500"></i>
-                  <p>1-month grace period for renewals</p>
+                  <p>Full control - edit content and customize design anytime</p>
+                </div>
+                <div class="flex items-center gap-3">
+                  <i class="fa-solid fa-check text-green-500"></i>
+                  <p>1-week grace period to renew without losing your URL</p>
                 </div>
               </div>
             </div>
@@ -349,22 +353,22 @@
       showSuccess('Reservation cancelled. You can try again.');
     }
 
-    // Show error message
+    // Show error message (displays for 30 seconds)
     function showError(message) {
       const errorDiv = document.getElementById('error-message');
       const errorText = document.getElementById('error-text');
       errorText.textContent = message;
       errorDiv.classList.remove('hidden');
-      setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+      setTimeout(() => errorDiv.classList.add('hidden'), 30000);
     }
 
-    // Show success message
+    // Show success message (displays for 30 seconds)
     function showSuccess(message) {
       const successDiv = document.getElementById('success-message');
       const successText = document.getElementById('success-text');
       successText.textContent = message;
       successDiv.classList.remove('hidden');
-      setTimeout(() => successDiv.classList.add('hidden'), 5000);
+      setTimeout(() => successDiv.classList.add('hidden'), 30000);
     }
 
     // Reset publish button to original state

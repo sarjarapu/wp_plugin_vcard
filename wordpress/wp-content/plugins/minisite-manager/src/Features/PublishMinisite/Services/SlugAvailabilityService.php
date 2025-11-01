@@ -5,6 +5,7 @@ namespace Minisite\Features\PublishMinisite\Services;
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Utils\ReservationCleanup;
+use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -57,14 +58,65 @@ class SlugAvailabilityService
             ];
         }
 
-        // TODO: Implement actual availability checking
-        // Check if combination exists in minisites table
-        // Check if combination is currently reserved
-        
-        return (object) [
-            'available' => true,
-            'message' => 'This slug combination is available',
-        ];
+        try {
+            // Check if combination already exists in minisites table
+            $minisiteRepository = $this->wordPressManager->getMinisiteRepository();
+            $existingMinisite = $minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
+
+            if ($existingMinisite) {
+                return (object) [
+                    'available' => false,
+                    'message' => 'This slug combination is already taken by an existing minisite',
+                ];
+            }
+
+            // Check if combination is currently reserved
+            // Handle empty location slug (NULL in database)
+            global $wpdb;
+            $reservationsTable = $wpdb->prefix . 'minisite_reservations';
+            $locationSlugForQuery = empty($locationSlug) ? null : $locationSlug;
+            
+            // Use proper NULL handling for location_slug
+            if ($locationSlugForQuery === null) {
+                $reservation = db::get_row(
+                    "SELECT * FROM {$reservationsTable} 
+                     WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '') AND expires_at > NOW()",
+                    [$businessSlug]
+                );
+            } else {
+                $reservation = db::get_row(
+                    "SELECT * FROM {$reservationsTable} 
+                     WHERE business_slug = %s AND location_slug = %s AND expires_at > NOW()",
+                    [$businessSlug, $locationSlug]
+                );
+            }
+
+            if ($reservation) {
+                // DatabaseHelper::get_row returns array (ARRAY_A)
+                $expiresAt = $reservation['expires_at'] ?? $reservation->expires_at ?? null;
+                $expiresIn = $expiresAt ? (strtotime($expiresAt) - time()) : 0;
+                $minutesLeft = max(0, ceil($expiresIn / 60));
+
+                return (object) [
+                    'available' => false,
+                    'message' => "This slug combination is currently reserved " .
+                                "(expires in {$minutesLeft} minutes)",
+                ];
+            }
+
+            // Slug combination is available
+            return (object) [
+                'available' => true,
+                'message' => 'This slug combination is available',
+            ];
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to check slug availability', [
+                'business_slug' => $businessSlug,
+                'location_slug' => $locationSlug,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \RuntimeException('Failed to check slug availability: ' . $e->getMessage());
+        }
     }
 }
 

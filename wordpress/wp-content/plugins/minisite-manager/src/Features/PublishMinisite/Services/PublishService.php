@@ -28,6 +28,14 @@ class PublishService
     }
 
     /**
+     * Get slug availability service (for controller access)
+     */
+    public function getSlugAvailabilityService(): SlugAvailabilityService
+    {
+        return $this->slugAvailabilityService;
+    }
+
+    /**
      * Get minisite data for publishing
      */
     public function getMinisiteForPublishing(string $siteId): object

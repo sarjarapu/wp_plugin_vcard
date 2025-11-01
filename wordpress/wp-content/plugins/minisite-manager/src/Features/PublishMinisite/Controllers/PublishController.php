@@ -87,8 +87,24 @@ class PublishController
             $this->wordPressManager->getPostData('location_slug')
         );
 
-        // TODO: Implement availability checking via SlugAvailabilityService
-        $this->wordPressManager->sendJsonError('Not implemented yet', 501);
+        try {
+            $result = $this->publishService->getSlugAvailabilityService()->checkAvailability(
+                $businessSlug,
+                $locationSlug
+            );
+
+            $this->wordPressManager->sendJsonSuccess([
+                'available' => $result->available,
+                'message' => $result->message,
+            ]);
+        } catch (\Exception $e) {
+            $this->logger->error('Failed to check slug availability', [
+                'business_slug' => $businessSlug,
+                'location_slug' => $locationSlug,
+                'error' => $e->getMessage(),
+            ]);
+            $this->wordPressManager->sendJsonError('Failed to check slug availability: ' . $e->getMessage(), 500);
+        }
     }
 
     /**
