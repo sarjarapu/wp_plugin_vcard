@@ -6,6 +6,8 @@ use Minisite\Features\PublishMinisite\Controllers\PublishController;
 use Minisite\Features\PublishMinisite\Services\PublishService;
 use Minisite\Features\PublishMinisite\Services\SlugAvailabilityService;
 use Minisite\Features\PublishMinisite\Services\ReservationService;
+use Minisite\Features\PublishMinisite\Services\SubscriptionActivationService;
+use Minisite\Features\PublishMinisite\Services\WooCommerceIntegration;
 use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Application\Rendering\TimberRenderer;
@@ -32,6 +34,8 @@ class PublishHooksFactory
         // Create services
         $slugAvailabilityService = new SlugAvailabilityService($wordPressManager);
         $reservationService = new ReservationService($wordPressManager);
+        $subscriptionActivationService = new SubscriptionActivationService($wordPressManager);
+        $wooCommerceIntegration = new WooCommerceIntegration($wordPressManager, $subscriptionActivationService);
         $publishService = new PublishService(
             $wordPressManager,
             $slugAvailabilityService,
@@ -54,11 +58,13 @@ class PublishHooksFactory
             $publishService,
             $publishRenderer,
             $wordPressManager,
-            $formSecurityHelper
+            $formSecurityHelper,
+            $subscriptionActivationService,
+            $reservationService
         );
 
         // Create and return hooks
-        return new PublishHooks($publishController, $wordPressManager);
+        return new PublishHooks($publishController, $wordPressManager, $wooCommerceIntegration);
     }
 }
 

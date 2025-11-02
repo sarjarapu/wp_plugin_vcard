@@ -3,6 +3,7 @@
 namespace Minisite\Features\PublishMinisite\Hooks;
 
 use Minisite\Features\PublishMinisite\Controllers\PublishController;
+use Minisite\Features\PublishMinisite\Services\WooCommerceIntegration;
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 
 /**
@@ -22,7 +23,8 @@ class PublishHooks
 
     public function __construct(
         private PublishController $publishController,
-        private WordPressPublishManager $wordPressManager
+        private WordPressPublishManager $wordPressManager,
+        private WooCommerceIntegration $wooCommerceIntegration
     ) {
     }
 
@@ -36,6 +38,28 @@ class PublishHooks
         add_action('wp_ajax_reserve_slug', [$this->publishController, 'handleReserveSlug']);
         add_action('wp_ajax_cancel_reservation', [$this->publishController, 'handleCancelReservation']);
         add_action('wp_ajax_create_minisite_order', [$this->publishController, 'handleCreateWooCommerceOrder']);
+
+        // WooCommerce integration hooks
+        if (class_exists('WooCommerce')) {
+            add_action(
+                'woocommerce_checkout_create_order',
+                [$this->wooCommerceIntegration, 'transferCartDataToOrder'],
+                10,
+                2
+            );
+            add_action(
+                'woocommerce_checkout_create_order_line_item',
+                [$this->wooCommerceIntegration, 'transferCartItemToOrderItem'],
+                10,
+                4
+            );
+            add_action(
+                'woocommerce_order_status_completed',
+                [$this->wooCommerceIntegration, 'activateSubscriptionOnOrderCompletion'],
+                10,
+                1
+            );
+        }
 
         // Note: template_redirect is registered by PublishMinisiteFeature
     }

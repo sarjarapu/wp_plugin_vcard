@@ -173,7 +173,7 @@
                 disabled
               >
                 <i class="fa-solid fa-credit-card" id="publish-icon"></i>
-                <span id="publish-text">Publish Minisite</span>
+                <span id="publish-text">Purchase Minisite</span>
                 <div id="publish-loading" class="hidden">
                   <i class="fa-solid fa-spinner fa-spin"></i>
                 </div>
@@ -390,11 +390,19 @@
     document.getElementById('check-availability-btn').addEventListener('click', checkAvailability);
     document.getElementById('cancel-reservation-btn').addEventListener('click', cancelReservation);
     
-    document.getElementById('publish-button').addEventListener('click', function() {
+    document.getElementById('publish-button').addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      
       const button = document.getElementById('publish-button');
       const icon = document.getElementById('publish-icon');
       const text = document.getElementById('publish-text');
       const loading = document.getElementById('publish-loading');
+      
+      // Don't proceed if button is disabled
+      if (button.disabled) {
+        return;
+      }
       
       const businessSlug = document.getElementById('business_slug').value.trim();
       const locationSlug = document.getElementById('location_slug').value.trim();
