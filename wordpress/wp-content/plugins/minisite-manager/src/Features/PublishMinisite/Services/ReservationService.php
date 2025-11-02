@@ -57,8 +57,24 @@ class ReservationService
             // Check if combination already exists in minisites
             $existingMinisite = $minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
             if ($existingMinisite) {
-                db::query('ROLLBACK');
-                throw new \RuntimeException('This slug combination is no longer available');
+                // Check if this minisite has an active subscription or is in grace period
+                // A slug is protected if: expires_at > NOW() (active) OR grace_period_ends_at > NOW() (grace period)
+                $paymentsTable = $wpdb->prefix . 'minisite_payments';
+                $activePayment = db::get_row(
+                    "SELECT * FROM {$paymentsTable} 
+                     WHERE minisite_id = %s 
+                     AND (expires_at > NOW() OR grace_period_ends_at > NOW()) 
+                     LIMIT 1",
+                    [$existingMinisite->id]
+                );
+
+                if ($activePayment) {
+                    // Minisite has active subscription or is in grace period - slug is protected
+                    db::query('ROLLBACK');
+                    throw new \RuntimeException('This slug combination is already taken by an existing minisite with an active subscription');
+                }
+                // If no active payment found, minisite exists but subscription has fully expired (beyond grace period)
+                // Allow reservation to proceed - the slug can be reassigned
             }
 
             // Check if combination is currently reserved by another user
