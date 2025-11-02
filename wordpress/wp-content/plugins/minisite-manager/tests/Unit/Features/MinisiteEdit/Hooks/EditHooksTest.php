@@ -237,7 +237,7 @@ class EditHooksTest extends TestCase
     private function setupWordPressMocks(): void
     {
         $functions = [
-            'get_query_var', 'add_action', 'add_filter', 'exit'
+            'get_query_var', 'add_action', 'add_filter'
         ];
 
         foreach ($functions as $function) {
@@ -252,6 +252,9 @@ class EditHooksTest extends TestCase
                 ");
             }
         }
+        
+        // Handle 'exit' separately since it's a language construct, not a function
+        // Brain Monkey handles exit() calls in tests
     }
 
     /**
@@ -268,7 +271,7 @@ class EditHooksTest extends TestCase
     private function clearWordPressMocks(): void
     {
         $functions = [
-            'get_query_var', 'add_action', 'add_filter', 'exit'
+            'get_query_var', 'add_action', 'add_filter'
         ];
 
         foreach ($functions as $func) {

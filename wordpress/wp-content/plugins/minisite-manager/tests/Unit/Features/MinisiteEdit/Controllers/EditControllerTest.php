@@ -366,7 +366,7 @@ class EditControllerTest extends TestCase
     private function setupWordPressMocks(): void
     {
         $functions = [
-            'wp_redirect', 'exit', 'is_user_logged_in', 'wp_get_current_user',
+            'wp_redirect', 'is_user_logged_in', 'wp_get_current_user',
             'get_query_var', 'home_url', 'wp_verify_nonce', 'wp_create_nonce',
             'sanitize_text_field', 'sanitize_textarea_field'
         ];
@@ -378,15 +378,15 @@ class EditControllerTest extends TestCase
                         if (isset(\$GLOBALS['_test_mock_{$function}'])) {
                             return \$GLOBALS['_test_mock_{$function}'];
                         }
-                        if ('{$function}' === 'exit') {
-                            throw new \Exception('exit() called with status: ' . (\$args[0] ?? 0));
-                        }
                         return null;
                     }
                 ";
                 eval($code);
             }
         }
+        
+        // Handle 'exit' separately since it's a language construct, not a function
+        // In tests, we catch exceptions from redirect() instead
     }
 
     /**
@@ -403,7 +403,7 @@ class EditControllerTest extends TestCase
     private function clearWordPressMocks(): void
     {
         $functions = [
-            'wp_redirect', 'exit', 'is_user_logged_in', 'wp_get_current_user',
+            'wp_redirect', 'is_user_logged_in', 'wp_get_current_user',
             'get_query_var', 'home_url', 'wp_verify_nonce', 'wp_create_nonce',
             'sanitize_text_field', 'sanitize_textarea_field'
         ];

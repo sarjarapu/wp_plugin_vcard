@@ -244,6 +244,11 @@ final class ListingResponseHandlerTest extends TestCase
      */
     private function mockWordPressFunction(string $functionName, mixed $returnValue): void
     {
+        // Skip 'exit' as it's a language construct, not a function
+        if ($functionName === 'exit') {
+            return;
+        }
+        
         if (!function_exists($functionName)) {
             if (is_callable($returnValue)) {
                 eval("function {$functionName}(...\$args) { return call_user_func_array(" . var_export($returnValue, true) . ", \$args); }");

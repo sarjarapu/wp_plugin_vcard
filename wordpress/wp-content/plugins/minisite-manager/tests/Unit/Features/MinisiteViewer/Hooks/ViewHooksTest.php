@@ -235,7 +235,7 @@ final class ViewHooksTest extends TestCase
     private function setupWordPressMocks(): void
     {
         $functions = [
-            'get_query_var', 'exit'
+            'get_query_var'
         ];
 
         foreach ($functions as $function) {
@@ -245,14 +245,14 @@ final class ViewHooksTest extends TestCase
                         if (isset(\$GLOBALS['_test_mock_{$function}'])) {
                             return \$GLOBALS['_test_mock_{$function}'];
                         }
-                        if ('{$function}' === 'exit') {
-                            throw new \Exception('exit() called with status: ' . (\$args[0] ?? 0));
-                        }
                         return null;
                     }
                 ");
             }
         }
+        
+        // Handle 'exit' separately since it's a language construct, not a function
+        // In tests, we catch exceptions from redirect() instead
     }
 
     /**
@@ -270,7 +270,7 @@ final class ViewHooksTest extends TestCase
     private function clearWordPressMocks(): void
     {
         $functions = [
-            'get_query_var', 'exit'
+            'get_query_var'
         ];
 
         foreach ($functions as $func) {
