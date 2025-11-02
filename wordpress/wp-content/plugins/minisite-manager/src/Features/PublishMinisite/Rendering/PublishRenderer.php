@@ -96,7 +96,7 @@ class PublishRenderer
     private function renderFallbackPublishPage(object $publishData): void
     {
         $minisite = $publishData->minisite;
-        
+
         echo '<!DOCTYPE html>
 <html>
 <head>
@@ -125,4 +125,3 @@ class PublishRenderer
 </html>';
     }
 }
-

@@ -40,4 +40,3 @@ final class PaymentConstants
         return date('Y-m-d H:i:s', strtotime($base . ' +' . self::SUBSCRIPTION_DURATION_MONTHS . ' months'));
     }
 }
-

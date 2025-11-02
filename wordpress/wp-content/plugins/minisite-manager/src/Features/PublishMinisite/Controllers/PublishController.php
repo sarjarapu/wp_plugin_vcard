@@ -51,7 +51,8 @@ class PublishController
 
         if (!$siteId) {
             $this->logger->warning('Publish page accessed without site_id', [
-                'query_vars' => $_GET ?? [],
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Logging only, not processing form data
+                'query_vars' => $_GET,
             ]);
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
         }
@@ -136,12 +137,18 @@ class PublishController
 
         // Validate slug format
         if (empty($businessSlug) || !preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
-            $this->wordPressManager->sendJsonError('Business slug is required and can only contain lowercase letters, numbers, and hyphens', 400);
+            $this->wordPressManager->sendJsonError(
+                'Business slug is required and can only contain lowercase letters, numbers, and hyphens',
+                400
+            );
             return;
         }
 
         if (!empty($locationSlug) && !preg_match('/^[a-z0-9-]+$/', $locationSlug)) {
-            $this->wordPressManager->sendJsonError('Location slug can only contain lowercase letters, numbers, and hyphens', 400);
+            $this->wordPressManager->sendJsonError(
+                'Location slug can only contain lowercase letters, numbers, and hyphens',
+                400
+            );
             return;
         }
 
@@ -309,11 +316,10 @@ class PublishController
             ]);
         } catch (\Exception $e) {
             $this->logger->error('Failed to create WooCommerce order', [
-                'minisite_id' => $minisiteId ?? null,
+                'minisite_id' => $minisiteId,
                 'error' => $e->getMessage(),
             ]);
             $this->wordPressManager->sendJsonError('Failed to create order: ' . $e->getMessage(), 500);
         }
     }
 }
-

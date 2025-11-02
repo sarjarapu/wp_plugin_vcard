@@ -26,4 +26,3 @@ final class PublishMinisiteFeature
         add_action('template_redirect', [$publishHooks, 'handlePublishRoutes'], 4);
     }
 }
-

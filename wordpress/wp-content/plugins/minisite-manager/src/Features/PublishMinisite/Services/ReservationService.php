@@ -71,7 +71,9 @@ class ReservationService
                 if ($activePayment) {
                     // Minisite has active subscription or is in grace period - slug is protected
                     db::query('ROLLBACK');
-                    throw new \RuntimeException('This slug combination is already taken by an existing minisite with an active subscription');
+                    throw new \RuntimeException(
+                        'This slug combination is already taken by an existing minisite with an active subscription'
+                    );
                 }
                 // If no active payment found, minisite exists but subscription has fully expired (beyond grace period)
                 // Allow reservation to proceed - the slug can be reassigned
@@ -224,4 +226,3 @@ class ReservationService
         return null;
     }
 }
-

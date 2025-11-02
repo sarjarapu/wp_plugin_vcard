@@ -264,11 +264,16 @@ class WordPressPublishManager implements WordPressManagerInterface
     }
 
     /**
-     * Get POST data
+     * Get POST data (unslashed, caller should sanitize)
      */
     public function getPostData(string $key, $default = null)
     {
-        return $_POST[$key] ?? $default;
+        // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Caller is responsible for nonce verification and sanitization
+        if (!isset($_POST[$key])) {
+            return $default;
+        }
+        return wp_unslash($_POST[$key]);
+        // phpcs:enable
     }
 
     /**
@@ -287,4 +292,3 @@ class WordPressPublishManager implements WordPressManagerInterface
         return defined('DOING_AJAX') && DOING_AJAX;
     }
 }
-

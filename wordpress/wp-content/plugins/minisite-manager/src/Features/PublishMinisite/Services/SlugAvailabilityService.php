@@ -75,7 +75,7 @@ class SlugAvailabilityService
             global $wpdb;
             $reservationsTable = $wpdb->prefix . 'minisite_reservations';
             $locationSlugForQuery = empty($locationSlug) ? null : $locationSlug;
-            
+
             // Use proper NULL handling for location_slug
             if ($locationSlugForQuery === null) {
                 $reservation = db::get_row(
@@ -115,8 +115,7 @@ class SlugAvailabilityService
                 'location_slug' => $locationSlug,
                 'error' => $e->getMessage(),
             ]);
-            throw new \RuntimeException('Failed to check slug availability: ' . $e->getMessage());
+            throw new \RuntimeException('Failed to check slug availability: ' . esc_html($e->getMessage()));
         }
     }
 }
-

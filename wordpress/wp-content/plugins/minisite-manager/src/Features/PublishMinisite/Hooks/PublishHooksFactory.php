@@ -67,4 +67,3 @@ class PublishHooksFactory
         return new PublishHooks($publishController, $wordPressManager, $wooCommerceIntegration);
     }
 }
-
