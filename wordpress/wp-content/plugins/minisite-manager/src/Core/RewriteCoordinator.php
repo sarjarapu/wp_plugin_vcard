@@ -40,7 +40,7 @@ final class RewriteCoordinator
         $vars[] = 'minisite_loc';
         $vars[] = 'minisite_account';
         $vars[] = 'minisite_account_action';
-        $vars[] = 'minisite_site_id';
+        $vars[] = 'minisite_id';
         $vars[] = 'minisite_version_id';
         return $vars;
     }

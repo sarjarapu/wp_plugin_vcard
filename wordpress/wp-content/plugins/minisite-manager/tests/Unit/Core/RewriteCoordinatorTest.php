@@ -60,7 +60,7 @@ class RewriteCoordinatorTest extends TestCase
             'minisite_loc',
             'minisite_account',
             'minisite_account_action',
-            'minisite_site_id',
+            'minisite_id',
             'minisite_version_id'
         ];
         
@@ -81,7 +81,7 @@ class RewriteCoordinatorTest extends TestCase
             'minisite_loc',
             'minisite_account',
             'minisite_account_action',
-            'minisite_site_id',
+            'minisite_id',
             'minisite_version_id'
         ];
         
@@ -105,7 +105,7 @@ class RewriteCoordinatorTest extends TestCase
         $this->assertContains('minisite_loc', $result);
         $this->assertContains('minisite_account', $result);
         $this->assertContains('minisite_account_action', $result);
-        $this->assertContains('minisite_site_id', $result);
+        $this->assertContains('minisite_id', $result);
         $this->assertContains('minisite_version_id', $result);
     }
 

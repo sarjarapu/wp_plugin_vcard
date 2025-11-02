@@ -25,7 +25,7 @@ class VersionRequestHandler
      */
     public function parseListVersionsRequest(): ?ListVersionsCommand
     {
-        $siteId = $this->wordPressManager->getQueryVar('minisite_site_id');
+        $siteId = $this->wordPressManager->getQueryVar('minisite_id');
 
         if (!$siteId) {
             return null;

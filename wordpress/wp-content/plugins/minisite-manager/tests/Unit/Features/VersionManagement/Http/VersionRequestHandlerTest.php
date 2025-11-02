@@ -46,7 +46,7 @@ class VersionRequestHandlerTest extends TestCase
         $this->wordPressManager
             ->expects($this->once())
             ->method('getQueryVar')
-            ->with('minisite_site_id')
+            ->with('minisite_id')
             ->willReturn('');
 
         $command = $this->requestHandler->parseListVersionsRequest();
