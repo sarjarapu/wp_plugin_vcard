@@ -59,6 +59,7 @@
             "@quality",
             "@test:unit"
         ],
+        "pr-check": "bash scripts/pre-pr-check.sh",
         "setup:hooks": "bash scripts/setup-git-hooks.sh",
         "test:all": "bash scripts/run-tests.sh",
         "changelog": "php scripts/generate-changelog.php",

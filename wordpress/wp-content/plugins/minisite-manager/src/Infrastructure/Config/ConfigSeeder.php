@@ -55,7 +55,7 @@ class ConfigSeeder
                         $key,
                         $config['value'],
                         $config['type'],
-                        $config['description']
+                        $config['description'] // description is always present in defaults array
                     );
                     $created++;
                 }

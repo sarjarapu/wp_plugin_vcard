@@ -65,7 +65,8 @@ class ConfigEncryption
         }
 
         $decodedKey = base64_decode(constant('MINISITE_ENCRYPTION_KEY'), true);
-        if ($decodedKey === false) {
+        // phpstan-ignore-next-line -- base64_decode can return false or string, we check both
+        if ($decodedKey === false || !is_string($decodedKey)) {
             throw new \RuntimeException('Invalid MINISITE_ENCRYPTION_KEY - must be valid base64 encoded key');
         }
 

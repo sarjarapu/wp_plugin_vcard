@@ -5,6 +5,7 @@ namespace Minisite\Infrastructure\Migrations\Doctrine;
 use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
 use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
+use Doctrine\Migrations\Metadata\AvailableMigrationsSet;
 use Doctrine\Migrations\MigratorConfiguration;
 use Doctrine\Migrations\Version\Version;
 use Doctrine\ORM\EntityManager;
@@ -164,7 +165,11 @@ class DoctrineMigrationRunner
         $availableMigrations = $statusCalculator->getNewMigrations();
 
         if (count($availableMigrations) > 0) {
-            $this->runMigrations($dependencyFactory, $availableMigrations);
+            // Convert AvailableMigrationsList to AvailableMigrationsSet
+            // getItems() returns array of AvailableMigration objects
+            $migrationItems = $availableMigrations->getItems();
+            $migrationSet = new \Doctrine\Migrations\Metadata\AvailableMigrationsSet($migrationItems);
+            $this->runMigrations($dependencyFactory, $migrationSet);
         } else {
             $this->logger->info("migrate() exit - no pending migrations");
         }
@@ -174,10 +179,10 @@ class DoctrineMigrationRunner
      * Run migrations
      *
      * @param DependencyFactory $dependencyFactory
-     * @param \Doctrine\Migrations\Metadata\AvailableMigrationsList $availableMigrations
+     * @param \Doctrine\Migrations\Metadata\AvailableMigrationsSet $availableMigrations
      * @return void
      */
-    private function runMigrations(DependencyFactory $dependencyFactory, $availableMigrations): void
+    private function runMigrations(DependencyFactory $dependencyFactory, \Doctrine\Migrations\Metadata\AvailableMigrationsSet $availableMigrations): void
     {
         $this->logger->info("migrate() executing migrations", [
             'count' => count($availableMigrations),
