@@ -42,121 +42,216 @@ class DoctrineMigrationRunner
         $this->logger->info("migrate() entry");
         
         try {
-            // Check if Doctrine is available
-            if (!class_exists(\Doctrine\Migrations\DependencyFactory::class)) {
-                $this->logger->warning("Doctrine Migrations not available - skipping");
+            if (!$this->isDoctrineAvailable()) {
                 return;
             }
             
-            // Use injected EntityManager or create new one
-            $em = $this->entityManager ?? DoctrineFactory::createEntityManager();
+            $em = $this->getEntityManager();
             $connection = $em->getConnection();
             
-            // Create migrations configuration
-            // ConfigurationArray accepts table name via array config
-            // Note: Doctrine Migrations uses GlobFinder which expects files matching "Version*.php"
-            // Our migration file: Version20251103000000.php matches this pattern
-            $migrationPath = __DIR__;
-            $migrationNamespace = 'Minisite\\Infrastructure\\Migrations\\Doctrine';
+            $config = $this->createMigrationConfiguration();
+            $dependencyFactory = $this->createDependencyFactory($config, $connection);
             
-            $config = new ConfigurationArray([
-                'migrations_paths' => [
-                    $migrationNamespace => $migrationPath,
-                ],
-                'all_or_nothing' => true,
-                'check_database_platform' => true,
-                'organize_migrations' => 'none',
-                // Configure metadata storage table with WordPress prefix
-                'table_storage' => [
-                    'table_name' => $this->getTablePrefix() . 'doctrine_migration_versions',
-                ],
-            ]);
+            $this->ensureMetadataStorageInitialized($dependencyFactory);
             
-            // Create dependency factory
-            $dependencyFactory = DependencyFactory::fromConnection(
-                $config,
-                new ExistingConnection($connection)
-            );
-            
-            // Ensure metadata storage table exists before running migrations
-            // This will create the tracking table if it doesn't exist
-            try {
-                $metadataStorage = $dependencyFactory->getMetadataStorage();
-                $metadataStorage->ensureInitialized();
-            } catch (\Exception $e) {
-                // If metadata storage fails to initialize, log and continue
-                // The migration executor will try to initialize it anyway
-                $this->logger->warning("migrate() metadata storage initialization failed", [
-                    'error' => $e->getMessage(),
-                ]);
-            }
-            
-            // Run migrations
-            $migrator = $dependencyFactory->getMigrator();
-            $statusCalculator = $dependencyFactory->getMigrationStatusCalculator();
-            $planCalculator = $dependencyFactory->getMigrationPlanCalculator();
-            
-            // Get new migrations to execute
-            $availableMigrations = $statusCalculator->getNewMigrations();
-            
-            if (count($availableMigrations) > 0) {
-                $this->logger->info("migrate() executing migrations", [
-                    'count' => count($availableMigrations),
-                ]);
-                
-                // Get all available migrations to find latest version
-                $migrationRepository = $dependencyFactory->getMigrationRepository();
-                $allMigrations = $migrationRepository->getMigrations();
-                
-                // Find the latest version from all migrations
-                // Note: getMigrations() returns AvailableMigrationsSet, we need ->getItems()
-                $migrationItems = $allMigrations->getItems();
-                
-                $latestVersion = null;
-                foreach ($migrationItems as $migration) {
-                    $latestVersion = $migration->getVersion();
-                }
-                
-                if ($latestVersion === null) {
-                    // Log detailed error for debugging
-                    $this->logger->error("migrate() no migrations found", [
-                        'migration_path' => $migrationPath,
-                        'namespace' => $migrationNamespace,
-                        'path_exists' => is_dir($migrationPath),
-                        'glob_files' => glob($migrationPath . '/Version*.php'),
-                        'class_exists' => class_exists($migrationNamespace . '\\Version20251103000000'),
-                    ]);
-                    throw new \RuntimeException(
-                        'No migrations found in repository. ' .
-                        'Path: ' . $migrationPath . ', ' .
-                        'Namespace: ' . $migrationNamespace . ', ' .
-                        'Files found: ' . (is_dir($migrationPath) ? implode(', ', glob($migrationPath . '/Version*.php') ?: []) : 'path does not exist')
-                    );
-                }
-                
-                // Create migration plan: migrate from current state to latest version
-                $plan = $planCalculator->getPlanUntilVersion($latestVersion);
-                
-                // Create migrator configuration (not dry-run, execute migrations)
-                $migratorConfig = new MigratorConfiguration();
-                
-                // Execute migrations
-                $migrator->migrate($plan, $migratorConfig);
-                
-                $this->logger->info("migrate() exit - migrations completed", [
-                    'count' => count($availableMigrations),
-                ]);
-            } else {
-                $this->logger->info("migrate() exit - no pending migrations");
-            }
+            $this->executePendingMigrations($dependencyFactory);
         } catch (\Exception $e) {
-            $this->logger->error("migrate() failed", [
-                'error' => $e->getMessage(),
-                'exception' => get_class($e),
-                'trace' => $e->getTraceAsString(),
-            ]);
+            $this->handleMigrationError($e);
             throw $e;
         }
+    }
+    
+    /**
+     * Check if Doctrine Migrations is available
+     * 
+     * @return bool True if available, false otherwise
+     */
+    private function isDoctrineAvailable(): bool
+    {
+        if (!class_exists(\Doctrine\Migrations\DependencyFactory::class)) {
+            $this->logger->warning("Doctrine Migrations not available - skipping");
+            return false;
+        }
+        return true;
+    }
+    
+    /**
+     * Get EntityManager (injected or create via factory)
+     * 
+     * @return EntityManager
+     */
+    private function getEntityManager(): EntityManager
+    {
+        return $this->entityManager ?? DoctrineFactory::createEntityManager();
+    }
+    
+    /**
+     * Create migration configuration
+     * 
+     * @return ConfigurationArray
+     */
+    private function createMigrationConfiguration(): ConfigurationArray
+    {
+        $migrationPath = __DIR__;
+        $migrationNamespace = 'Minisite\\Infrastructure\\Migrations\\Doctrine';
+        
+        return new ConfigurationArray([
+            'migrations_paths' => [
+                $migrationNamespace => $migrationPath,
+            ],
+            'all_or_nothing' => true,
+            'check_database_platform' => true,
+            'organize_migrations' => 'none',
+            'table_storage' => [
+                'table_name' => $this->getTablePrefix() . 'doctrine_migration_versions',
+            ],
+        ]);
+    }
+    
+    /**
+     * Create Doctrine Migrations dependency factory
+     * 
+     * @param ConfigurationArray $config
+     * @param \Doctrine\DBAL\Connection $connection
+     * @return DependencyFactory
+     */
+    private function createDependencyFactory(ConfigurationArray $config, \Doctrine\DBAL\Connection $connection): DependencyFactory
+    {
+        return DependencyFactory::fromConnection(
+            $config,
+            new ExistingConnection($connection)
+        );
+    }
+    
+    /**
+     * Ensure metadata storage table is initialized
+     * 
+     * @param DependencyFactory $dependencyFactory
+     * @return void
+     */
+    private function ensureMetadataStorageInitialized(DependencyFactory $dependencyFactory): void
+    {
+        try {
+            $metadataStorage = $dependencyFactory->getMetadataStorage();
+            $metadataStorage->ensureInitialized();
+        } catch (\Exception $e) {
+            // If metadata storage fails to initialize, log and continue
+            // The migration executor will try to initialize it anyway
+            $this->logger->warning("migrate() metadata storage initialization failed", [
+                'error' => $e->getMessage(),
+            ]);
+        }
+    }
+    
+    /**
+     * Execute pending migrations
+     * 
+     * @param DependencyFactory $dependencyFactory
+     * @return void
+     */
+    private function executePendingMigrations(DependencyFactory $dependencyFactory): void
+    {
+        $statusCalculator = $dependencyFactory->getMigrationStatusCalculator();
+        $availableMigrations = $statusCalculator->getNewMigrations();
+        
+        if (count($availableMigrations) > 0) {
+            $this->runMigrations($dependencyFactory, $availableMigrations);
+        } else {
+            $this->logger->info("migrate() exit - no pending migrations");
+        }
+    }
+    
+    /**
+     * Run migrations
+     * 
+     * @param DependencyFactory $dependencyFactory
+     * @param \Doctrine\Migrations\Metadata\AvailableMigrationsSet $availableMigrations
+     * @return void
+     */
+    private function runMigrations(DependencyFactory $dependencyFactory, $availableMigrations): void
+    {
+        $this->logger->info("migrate() executing migrations", [
+            'count' => count($availableMigrations),
+        ]);
+        
+        $latestVersion = $this->findLatestMigrationVersion($dependencyFactory);
+        
+        if ($latestVersion === null) {
+            $this->handleNoMigrationsFound();
+        }
+        
+        $planCalculator = $dependencyFactory->getMigrationPlanCalculator();
+        $plan = $planCalculator->getPlanUntilVersion($latestVersion);
+        
+        $migrator = $dependencyFactory->getMigrator();
+        $migratorConfig = new MigratorConfiguration();
+        $migrator->migrate($plan, $migratorConfig);
+        
+        $this->logger->info("migrate() exit - migrations completed", [
+            'count' => count($availableMigrations),
+        ]);
+    }
+    
+    /**
+     * Find the latest migration version
+     * 
+     * @param DependencyFactory $dependencyFactory
+     * @return Version|null
+     */
+    private function findLatestMigrationVersion(DependencyFactory $dependencyFactory): ?Version
+    {
+        $migrationRepository = $dependencyFactory->getMigrationRepository();
+        $allMigrations = $migrationRepository->getMigrations();
+        $migrationItems = $allMigrations->getItems();
+        
+        $latestVersion = null;
+        foreach ($migrationItems as $migration) {
+            $latestVersion = $migration->getVersion();
+        }
+        
+        return $latestVersion;
+    }
+    
+    /**
+     * Handle case where no migrations are found
+     * 
+     * @throws \RuntimeException
+     * @return void
+     */
+    private function handleNoMigrationsFound(): void
+    {
+        $migrationPath = __DIR__;
+        $migrationNamespace = 'Minisite\\Infrastructure\\Migrations\\Doctrine';
+        
+        $this->logger->error("migrate() no migrations found", [
+            'migration_path' => $migrationPath,
+            'namespace' => $migrationNamespace,
+            'path_exists' => is_dir($migrationPath),
+            'glob_files' => glob($migrationPath . '/Version*.php'),
+            'class_exists' => class_exists($migrationNamespace . '\\Version20251103000000'),
+        ]);
+        
+        throw new \RuntimeException(
+            'No migrations found in repository. ' .
+            'Path: ' . $migrationPath . ', ' .
+            'Namespace: ' . $migrationNamespace . ', ' .
+            'Files found: ' . (is_dir($migrationPath) ? implode(', ', glob($migrationPath . '/Version*.php') ?: []) : 'path does not exist')
+        );
+    }
+    
+    /**
+     * Handle migration errors
+     * 
+     * @param \Exception $e
+     * @return void
+     */
+    private function handleMigrationError(\Exception $e): void
+    {
+        $this->logger->error("migrate() failed", [
+            'error' => $e->getMessage(),
+            'exception' => get_class($e),
+            'trace' => $e->getTraceAsString(),
+        ]);
     }
     
     /**

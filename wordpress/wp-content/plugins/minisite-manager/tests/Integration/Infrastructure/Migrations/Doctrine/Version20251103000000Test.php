@@ -147,5 +147,71 @@ final class Version20251103000000Test extends AbstractDoctrineMigrationTest
         $this->assertTableHasColumn('wp_doctrine_migration_versions', 'version');
         $this->assertTableHasColumn('wp_doctrine_migration_versions', 'executed_at');
     }
+    
+    /**
+     * Test that down() method drops the minisite_config table
+     */
+    public function test_down_drops_minisite_config_table(): void
+    {
+        // First run up() to create the table
+        $runner = new DoctrineMigrationRunner($this->em);
+        $runner->migrate();
+        $this->assertTableExists('wp_minisite_config', 'Table should exist after up()');
+        
+        // Get the migration instance and schema
+        // AbstractMigration requires Connection and LoggerInterface
+        $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('doctrine-migrations');
+        $migration = new \Minisite\Infrastructure\Migrations\Doctrine\Version20251103000000($this->connection, $logger);
+        $schemaManager = $this->connection->createSchemaManager();
+        
+        // Get current schema from database
+        $currentSchema = $schemaManager->introspectSchema();
+        
+        // Create a new schema and apply down() to it
+        $targetSchema = clone $currentSchema;
+        $migration->down($targetSchema);
+        
+        // Calculate the diff and apply it
+        $comparator = new \Doctrine\DBAL\Schema\Comparator();
+        $schemaDiff = $comparator->compareSchemas($currentSchema, $targetSchema);
+        $schemaManager->alterSchema($schemaDiff);
+        
+        // Verify table is dropped
+        $this->assertTableNotExists('wp_minisite_config', 'Table should not exist after down()');
+    }
+    
+    /**
+     * Test that down() is idempotent (can be run multiple times safely)
+     */
+    public function test_down_is_idempotent(): void
+    {
+        // First run up() to create the table
+        $runner = new DoctrineMigrationRunner($this->em);
+        $runner->migrate();
+        $this->assertTableExists('wp_minisite_config');
+        
+        // Get the migration instance
+        // AbstractMigration requires Connection and LoggerInterface
+        $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('doctrine-migrations');
+        $migration = new \Minisite\Infrastructure\Migrations\Doctrine\Version20251103000000($this->connection, $logger);
+        $schemaManager = $this->connection->createSchemaManager();
+        $comparator = new \Doctrine\DBAL\Schema\Comparator();
+        
+        // Run down() first time - should drop table
+        $currentSchema1 = $schemaManager->introspectSchema();
+        $targetSchema1 = clone $currentSchema1;
+        $migration->down($targetSchema1);
+        $schemaDiff1 = $comparator->compareSchemas($currentSchema1, $targetSchema1);
+        $schemaManager->alterSchema($schemaDiff1);
+        $this->assertTableNotExists('wp_minisite_config');
+        
+        // Run down() second time - should not error (table doesn't exist check)
+        $currentSchema2 = $schemaManager->introspectSchema();
+        $targetSchema2 = clone $currentSchema2;
+        $migration->down($targetSchema2);
+        $schemaDiff2 = $comparator->compareSchemas($currentSchema2, $targetSchema2);
+        $schemaManager->alterSchema($schemaDiff2);
+        $this->assertTableNotExists('wp_minisite_config', 'Table should still not exist after second down()');
+    }
 }
 
