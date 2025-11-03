@@ -5,7 +5,11 @@
     "license": "proprietary",
     "require": {
         "php": ">=8.0",
+        "doctrine/dbal": "^4.3",
+        "doctrine/migrations": "^3.9",
+        "doctrine/orm": "^3.5",
         "monolog/monolog": "^3.9",
+        "symfony/cache": "^7.3",
         "timber/timber": "^2.0"
     },
     "require-dev": {
@@ -55,6 +59,7 @@
             "@quality",
             "@test:unit"
         ],
+        "pr-check": "bash scripts/pre-pr-check.sh",
         "setup:hooks": "bash scripts/setup-git-hooks.sh",
         "test:all": "bash scripts/run-tests.sh",
         "changelog": "php scripts/generate-changelog.php",

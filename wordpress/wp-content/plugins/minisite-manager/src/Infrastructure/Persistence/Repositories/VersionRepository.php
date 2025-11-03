@@ -92,7 +92,12 @@ class VersionRepository implements VersionRepositoryInterface
                 );
                 // Debug: Check if the update was successful
                 if ($result === false) {
-                    error_log("Failed to update location_point for version {$version->id}");
+                    $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger(
+                        'version-repository'
+                    );
+                    $logger->error('Failed to update location_point for version', [
+                        'version_id' => $version->id,
+                    ]);
                 }
             }
         } else {

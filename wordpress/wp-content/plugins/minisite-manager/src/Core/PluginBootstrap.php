@@ -54,6 +54,63 @@ final class PluginBootstrap
 
         // Initialize admin menu
         AdminMenuManager::initialize();
+
+        // Initialize Doctrine and Config Manager
+        self::initializeConfigSystem();
+    }
+
+    /**
+     * Initialize configuration management system
+     * Public so it can be called from ActivationHandler if needed
+     */
+    public static function initializeConfigSystem(): void
+    {
+        try {
+            // Check if Doctrine is available
+            if (!class_exists(\Doctrine\ORM\EntityManager::class)) {
+                // Doctrine not installed - skip initialization
+                $logger = LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
+                $logger->warning('Doctrine ORM not available - ConfigManager will not be initialized');
+                return;
+            }
+
+            // Initialize Doctrine EntityManager
+            if (!isset($GLOBALS['minisite_entity_manager'])) {
+                $GLOBALS['minisite_entity_manager'] =
+                    \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
+            }
+
+            // Initialize ConfigManager
+            /** @var \Doctrine\ORM\EntityManager $em */
+            $em = $GLOBALS['minisite_entity_manager'];
+
+            // Create ConfigRepository instance directly
+            // Note: We can't use $em->getRepository() because it returns default EntityRepository
+            // We need our custom ConfigRepository that implements ConfigRepositoryInterface
+            $configRepository = new \Minisite\Infrastructure\Persistence\Repositories\ConfigRepository(
+                $em,
+                $em->getClassMetadata(\Minisite\Domain\Entities\Config::class)
+            );
+
+            $configManager = new \Minisite\Domain\Services\ConfigManager($configRepository);
+
+            // Store in global for easy access
+            $GLOBALS['minisite_config_manager'] = $configManager;
+
+            // Register admin menu for config management
+            if (is_admin()) {
+                \Minisite\Features\AppConfig\WordPress\ConfigAdminMenu::register();
+            }
+        } catch (\Exception $e) {
+            // Log error but don't fail initialization
+            $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
+            $logger->error('Failed to initialize config system', [
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+        }
     }
 
     public static function initializeFeatures(): void

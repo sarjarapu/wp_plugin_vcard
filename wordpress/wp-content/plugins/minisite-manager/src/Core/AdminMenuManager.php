@@ -35,7 +35,8 @@ final class AdminMenuManager
      */
     public function register(): void
     {
-        error_log('Minisite: AdminMenuManager::register() called');
+        $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('admin-menu');
+        $logger->debug('AdminMenuManager::register() called');
         $this->addMainMenu();
     }
 
@@ -44,7 +45,8 @@ final class AdminMenuManager
      */
     public function addMainMenu(): void
     {
-        error_log('Minisite: Adding main menu with capability: ' . $this->getMainMenuCapability());
+        $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('admin-menu');
+        $logger->debug('Adding main menu', ['capability' => $this->getMainMenuCapability()]);
 
         // Main menu page
         add_menu_page(

@@ -36,6 +36,10 @@
       <directory>tests/Unit/Features/MinisiteEdit/Services</directory>
       <file>tests/Unit/Features/MinisiteEdit/MinisiteEditFeatureTest.php</file>
     </testsuite>
+    <testsuite name="Integration">
+      <directory>tests/Integration</directory>
+      <exclude>tests/Integration/Infrastructure/Migrations/Doctrine/AbstractDoctrineMigrationTest.php</exclude>
+    </testsuite>
   </testsuites>
 
 

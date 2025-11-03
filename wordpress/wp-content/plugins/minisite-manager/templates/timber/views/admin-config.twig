@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{{ page_title }}</title>
+  <style>
+    :root {
+      --primary: #2563EB; --on-primary: #fff;
+      --background: #F8FAFC; --on-background: #0F172A;
+      --surface: #FFFFFF; --on-surface: #0F172A;
+      --surface-1: #F1F5F9; --on-surface-variant: #475569;
+      --outline-variant: #E2E8F0;
+      --error: #DC2626; --success: #059669;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body class="antialiased bg-[var(--background)] text-[var(--on-background)]">
+  <div class="wrap">
+    <h1>{{ page_title }}</h1>
+    <p class="description">{{ page_description }}</p>
+    
+    {% if messages %}
+      {% for message in messages %}
+        <div class="notice notice-{{ message.type }} is-dismissible">
+          <p>{{ message.message }}</p>
+        </div>
+      {% endfor %}
+    {% endif %}
+    
+    <form method="post" action="">
+      {{ function('wp_nonce_field', 'minisite_config_save', 'minisite_config_nonce')|raw }}
+      <input type="hidden" name="action" value="save">
+      
+      <table class="form-table">
+        <tbody>
+          {% for config in configs %}
+              <tr>
+                <th scope="row" style="vertical-align: top; padding-top: 15px;">
+                  <label for="config_{{ config.key }}">{{ config.display_name }}</label>
+                </th>
+                <td style="vertical-align: top;">
+                  {% if config.type == 'boolean' %}
+                    <label>
+                      <input type="checkbox" 
+                             name="config[{{ config.key }}][value]" 
+                             value="1" 
+                             {{ config.value ? 'checked' : '' }}>
+                      Enabled
+                    </label>
+                  {% elseif config.type == 'json' %}
+                    <textarea name="config[{{ config.key }}][value]" 
+                              id="config_{{ config.key }}" 
+                              class="large-text code" 
+                              rows="5">{{ config.value|json_encode(constant('JSON_PRETTY_PRINT')) }}</textarea>
+                  {% elseif config.type == 'integer' %}
+                    <input type="number" 
+                           name="config[{{ config.key }}][value]" 
+                           id="config_{{ config.key }}" 
+                           value="{{ config.value }}" 
+                           class="regular-text">
+                  {% else %}
+                    <input type="{{ config.is_sensitive ? 'password' : 'text' }}" 
+                           name="config[{{ config.key }}][value]" 
+                           id="config_{{ config.key }}" 
+                           value="{{ config.display_value }}" 
+                           class="regular-text">
+                  {% endif %}
+                  
+                  {% if config.description %}
+                    <p class="description">{{ config.description }}</p>
+                  {% endif %}
+                  
+                  {% if config.is_sensitive %}
+                    <p class="description">
+                      <i class="fa-solid fa-lock" style="color: var(--error);"></i>
+                      Sensitive data - encrypted storage
+                    </p>
+                  {% endif %}
+                  
+                  <p class="description">
+                    <small>Type: <code>{{ config.type }}</code></small>
+                  </p>
+                  
+                  <input type="hidden" name="config[{{ config.key }}][type]" value="{{ config.type }}">
+                  {% if config.description %}
+                    <input type="hidden" name="config[{{ config.key }}][description]" value="{{ config.description }}">
+                  {% endif %}
+                </td>
+              </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      
+      {{ function('submit_button', 'Save Changes')|raw }}
+    </form>
+    
+  </div>
+</body>
+</html>
+
