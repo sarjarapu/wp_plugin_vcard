@@ -8,6 +8,9 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Handler\DatabaseHandler;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Processor\IntrospectionProcessor;
+use Monolog\Processor\MemoryUsageProcessor;
+use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Log\LoggerInterface;
 use wpdb;
 
@@ -36,6 +39,19 @@ class LoggerFactory
     public static function createLogger(string $name = 'minisite-manager'): LoggerInterface
     {
         $logger = new Logger($name);
+
+        // Add processors that automatically add metadata (class, method, file, line, etc.)
+        // These processors run BEFORE handlers, so all log entries get this info automatically
+        
+        // Adds class, function (method), file, line automatically
+        // Skip frames: LoggerFactory itself, and any intermediate logging wrappers
+        $logger->pushProcessor(new IntrospectionProcessor(Logger::DEBUG, ['Monolog\\', 'Minisite\\Infrastructure\\Logging\\']));
+        
+        // Adds memory_usage to context
+        $logger->pushProcessor(new MemoryUsageProcessor());
+        
+        // Processes PSR-3 style placeholders in messages (e.g., {user_id})
+        $logger->pushProcessor(new PsrLogMessageProcessor());
 
         // Add file handler with rotation (daily)
         $fileHandler = new RotatingFileHandler(

@@ -5,7 +5,11 @@
     "license": "proprietary",
     "require": {
         "php": ">=8.0",
+        "doctrine/dbal": "^3.8",
+        "doctrine/migrations": "^3.7",
+        "doctrine/orm": "^2.16",
         "monolog/monolog": "^3.9",
+        "symfony/cache": "^7.3",
         "timber/timber": "^2.0"
     },
     "require-dev": {
