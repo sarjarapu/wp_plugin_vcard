@@ -168,7 +168,9 @@ class DoctrineMigrationRunner
             // Convert AvailableMigrationsList to AvailableMigrationsSet
             // getItems() returns array of AvailableMigration objects
             $migrationItems = $availableMigrations->getItems();
-            $migrationSet = new \Doctrine\Migrations\Metadata\AvailableMigrationsSet($migrationItems);
+            $migrationSet = new \Doctrine\Migrations\Metadata\AvailableMigrationsSet(
+                $migrationItems
+            );
             $this->runMigrations($dependencyFactory, $migrationSet);
         } else {
             $this->logger->info("migrate() exit - no pending migrations");
@@ -179,11 +181,13 @@ class DoctrineMigrationRunner
      * Run migrations
      *
      * @param DependencyFactory $dependencyFactory
-     * @param \Doctrine\Migrations\Metadata\AvailableMigrationsSet $availableMigrations
+     * @param AvailableMigrationsSet $availableMigrations
      * @return void
      */
-    private function runMigrations(DependencyFactory $dependencyFactory, \Doctrine\Migrations\Metadata\AvailableMigrationsSet $availableMigrations): void
-    {
+    private function runMigrations(
+        DependencyFactory $dependencyFactory,
+        AvailableMigrationsSet $availableMigrations
+    ): void {
         $this->logger->info("migrate() executing migrations", [
             'count' => count($availableMigrations),
         ]);

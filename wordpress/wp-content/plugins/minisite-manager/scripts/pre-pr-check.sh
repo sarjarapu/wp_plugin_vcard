@@ -59,11 +59,16 @@ fi
 
 # 3. Code Style (PHPCS)
 echo -e "\n${YELLOW}[3/4] Running code style check (PHPCS)...${NC}"
-if composer lint; then
+LINT_OUTPUT=$(composer lint 2>&1)
+LINT_EXIT=$?
+
+if [ $LINT_EXIT -eq 0 ]; then
     echo -e "${GREEN}✓ Code style check passed${NC}"
 else
     echo -e "${RED}✗ Code style check failed${NC}"
+    echo "$LINT_OUTPUT"
     ERRORS=$((ERRORS + 1))
+    echo -e "${YELLOW}Tip: Run 'composer lint:fix' to auto-fix some issues${NC}"
 fi
 
 # 4. Unit Tests
