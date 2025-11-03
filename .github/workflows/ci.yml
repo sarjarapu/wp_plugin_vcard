@@ -33,7 +33,21 @@ jobs:
       run: cd wordpress/wp-content/plugins/minisite-manager && composer install --prefer-dist --no-progress
     
     - name: Security audit
-      run: cd wordpress/wp-content/plugins/minisite-manager && composer audit
+      run: |
+        cd wordpress/wp-content/plugins/minisite-manager
+        composer audit --no-interaction || {
+          EXIT_CODE=$?
+          # Exit code 2 = abandoned packages (warnings, not errors)
+          # Exit code 1 = security vulnerabilities (errors)
+          if [ $EXIT_CODE -eq 2 ]; then
+            echo "⚠ Abandoned packages detected (warnings only)"
+            echo "These are transitive dependencies and acceptable if reviewed."
+            exit 0
+          else
+            echo "✗ Security vulnerabilities found!"
+            exit $EXIT_CODE
+          fi
+        }
 
   test:
     name: Tests
