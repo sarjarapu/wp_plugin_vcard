@@ -14,20 +14,20 @@ class ConfigManager
      * Indexed by config key for fast lookup
      */
     private static ?array $cache = null;
-    
+
     /**
      * Flag to track if cache has been loaded
      */
     private static bool $loaded = false;
-    
+
     private LoggerInterface $logger;
-    
+
     public function __construct(
         private ConfigRepositoryInterface $repository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('config-manager');
     }
-    
+
     /**
      * Get configuration value (typed, from cache if available)
      */
@@ -38,10 +38,10 @@ class ConfigManager
             'has_default' => $default !== null,
             'default_type' => $default !== null ? gettype($default) : null,
         ]);
-        
+
         try {
             $this->ensureLoaded();
-            
+
             $config = self::$cache[$key] ?? null;
             if (!$config) {
                 $result = $default;
@@ -52,16 +52,16 @@ class ConfigManager
                 ]);
                 return $result;
             }
-            
+
             $result = $config->getTypedValue();
-            
+
             $this->logger->debug("get() returning value", [
                 'key' => $key,
                 'result' => $this->sanitizeForLogging($result),
                 'result_type' => gettype($result),
                 'is_sensitive' => $config->isSensitive,
             ]);
-            
+
             return $result;
         } catch (\Exception $e) {
             $this->logger->error("get() failed", [
@@ -72,10 +72,10 @@ class ConfigManager
             throw $e;
         }
     }
-    
+
     /**
      * Set configuration value (updates DB and clears cache)
-     * 
+     *
      * Note: Cache clearing is not atomic with database write. In high-concurrency
      * scenarios, consider adding database-level locking or using WordPress transients
      * for distributed cache coordination. For typical WordPress usage, this is sufficient.
@@ -87,10 +87,10 @@ class ConfigManager
             'type' => $type,
             'has_description' => $description !== null,
         ]);
-        
+
         try {
             $existing = $this->repository->findByKey($key);
-            
+
             if ($existing) {
                 // Update existing
                 $existing->setTypedValue($value);
@@ -110,12 +110,12 @@ class ConfigManager
                 $config->setTypedValue($value);
                 $this->repository->save($config);
             }
-            
+
             // Invalidate cache - next get() will reload from DB
             // Note: In a multi-process/multi-server setup, consider using WordPress
             // transients or cache flush hooks to coordinate cache invalidation
             $this->clearCache();
-            
+
             $this->logger->debug("set() exit", [
                 'key' => $key,
                 'type' => $type,
@@ -129,7 +129,7 @@ class ConfigManager
             throw $e;
         }
     }
-    
+
     /**
      * Check if config exists
      */
@@ -138,16 +138,16 @@ class ConfigManager
         $this->logger->debug("has() entry", [
             'key' => $key,
         ]);
-        
+
         try {
             $this->ensureLoaded();
             $result = isset(self::$cache[$key]);
-            
+
             $this->logger->debug("has() exit", [
                 'key' => $key,
                 'result' => $result,
             ]);
-            
+
             return $result;
         } catch (\Exception $e) {
             $this->logger->error("has() failed", [
@@ -158,7 +158,7 @@ class ConfigManager
             throw $e;
         }
     }
-    
+
     /**
      * Delete configuration
      */
@@ -167,11 +167,11 @@ class ConfigManager
         $this->logger->debug("delete() entry", [
             'key' => $key,
         ]);
-        
+
         try {
             $this->repository->delete($key);
             $this->clearCache(); // Invalidate cache
-            
+
             $this->logger->debug("delete() exit", [
                 'key' => $key,
             ]);
@@ -184,7 +184,7 @@ class ConfigManager
             throw $e;
         }
     }
-    
+
     /**
      * Get all configurations (from cache, filtered by sensitive if needed)
      */
@@ -193,21 +193,21 @@ class ConfigManager
         $this->logger->debug("all() entry", [
             'include_sensitive' => $includeSensitive,
         ]);
-        
+
         try {
             $this->ensureLoaded();
-            
+
             $all = array_values(self::$cache);
-            
+
             if (!$includeSensitive) {
                 $all = array_filter($all, fn($config) => !$config->isSensitive);
             }
-            
+
             $this->logger->debug("all() exit", [
                 'count' => count($all),
                 'include_sensitive' => $includeSensitive,
             ]);
-            
+
             return $all;
         } catch (\Exception $e) {
             $this->logger->error("all() failed", [
@@ -217,22 +217,22 @@ class ConfigManager
             throw $e;
         }
     }
-    
+
     /**
      * Get all configuration keys
      */
     public function keys(): array
     {
         $this->logger->debug("keys() entry");
-        
+
         try {
             $this->ensureLoaded();
             $result = array_keys(self::$cache);
-            
+
             $this->logger->debug("keys() exit", [
                 'count' => count($result),
             ]);
-            
+
             return $result;
         } catch (\Exception $e) {
             $this->logger->error("keys() failed", [
@@ -242,7 +242,7 @@ class ConfigManager
             throw $e;
         }
     }
-    
+
     /**
      * Get raw Config entity (for admin UI)
      */
@@ -251,16 +251,16 @@ class ConfigManager
         $this->logger->debug("find() entry", [
             'key' => $key,
         ]);
-        
+
         try {
             $this->ensureLoaded();
             $result = self::$cache[$key] ?? null;
-            
+
             $this->logger->debug("find() exit", [
                 'key' => $key,
                 'found' => $result !== null,
             ]);
-            
+
             return $result;
         } catch (\Exception $e) {
             $this->logger->error("find() failed", [
@@ -271,17 +271,17 @@ class ConfigManager
             throw $e;
         }
     }
-    
+
     /**
      * Force reload from database (clears cache)
      */
     public function reload(): void
     {
         $this->logger->debug("reload() entry");
-        
+
         try {
             $this->clearCache();
-            
+
             $this->logger->debug("reload() exit");
         } catch (\Exception $e) {
             $this->logger->error("reload() failed", [
@@ -291,7 +291,7 @@ class ConfigManager
             throw $e;
         }
     }
-    
+
     /**
      * Convenience methods for common types
      */
@@ -299,23 +299,23 @@ class ConfigManager
     {
         return (string) $this->get($key, $default);
     }
-    
+
     public function getInt(string $key, int $default = 0): int
     {
         return (int) $this->get($key, $default);
     }
-    
+
     public function getBool(string $key, bool $default = false): bool
     {
         return (bool) $this->get($key, $default);
     }
-    
+
     public function getJson(string $key, array $default = []): array
     {
         $value = $this->get($key, $default);
         return is_array($value) ? $value : $default;
     }
-    
+
     /**
      * Lazy load all configs from database into cache
      */
@@ -324,19 +324,19 @@ class ConfigManager
         if (self::$loaded && self::$cache !== null) {
             return; // Already loaded
         }
-        
+
         // Load all configs from repository (single DB query)
         $allConfigs = $this->repository->getAll();
-        
+
         // Index by key for fast O(1) lookup
         self::$cache = [];
         foreach ($allConfigs as $config) {
             self::$cache[$config->key] = $config;
         }
-        
+
         self::$loaded = true;
     }
-    
+
     /**
      * Clear cache (invalidates on write operations)
      */
@@ -345,7 +345,7 @@ class ConfigManager
         self::$cache = null;
         self::$loaded = false;
     }
-    
+
     /**
      * Check if type is sensitive
      */
@@ -353,7 +353,7 @@ class ConfigManager
     {
         return in_array($type, ['encrypted', 'secret'], true);
     }
-    
+
     /**
      * Sanitize values for logging (never log sensitive data)
      */
@@ -362,10 +362,9 @@ class ConfigManager
         if (is_string($value) && strlen($value) > 100) {
             return substr($value, 0, 20) . '... (truncated)';
         }
-        
+
         // For sensitive values, return placeholder
         // Note: This method should be called BEFORE logging sensitive values
         return $value;
     }
 }
-

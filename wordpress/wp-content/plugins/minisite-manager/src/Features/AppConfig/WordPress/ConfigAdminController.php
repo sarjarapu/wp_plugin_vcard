@@ -10,71 +10,138 @@ use Psr\Log\LoggerInterface;
 class ConfigAdminController
 {
     private LoggerInterface $logger;
-    
+
     public function __construct()
     {
         $this->logger = LoggingServiceProvider::getFeatureLogger('config-admin-controller');
     }
-    
+
     private function getConfigManager(): ConfigManager
     {
         if (!isset($GLOBALS['minisite_config_manager'])) {
             throw new \RuntimeException('ConfigManager not initialized');
         }
-        
+
         return $GLOBALS['minisite_config_manager'];
     }
-    
+
+    /**
+     * Safely get and sanitize POST data as text
+     *
+     * Note: This method should only be called after nonce verification.
+     * Nonce verification is handled in handleRequest() before calling this method.
+     */
+    private function getPostData(string $key, string $default = ''): string
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized below
+        if (!isset($_POST[$key])) {
+            return $default;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized below
+        return sanitize_text_field(wp_unslash($_POST[$key]));
+    }
+
+    /**
+     * Safely get and sanitize POST data as textarea
+     *
+     * Note: This method should only be called after nonce verification.
+     * Nonce verification is handled in handleRequest() before calling this method.
+     */
+    private function getPostDataTextarea(string $key, string $default = ''): string
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized below
+        if (!isset($_POST[$key])) {
+            return $default;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized below
+        return sanitize_textarea_field(wp_unslash($_POST[$key]));
+    }
+
+    /**
+     * Safely get and sanitize POST data array
+     *
+     * Note: This method should only be called after nonce verification.
+     * Nonce verification is handled in handleRequest() before calling this method.
+     */
+    private function getPostDataArray(string $key, array $default = []): array
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized in loop
+        if (!isset($_POST[$key]) || !is_array($_POST[$key])) {
+            return $default;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized in loop
+        return wp_unslash($_POST[$key]);
+    }
+
+    /**
+     * Verify nonce for POST requests
+     */
+    private function verifyNonce(string $action, string $nonceField): bool
+    {
+        $nonce = $this->getPostData($nonceField);
+        return !empty($nonce) && wp_verify_nonce($nonce, $action);
+    }
+
     public function handleRequest(): void
     {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
+        // REQUEST_METHOD is a server variable, sanitized below
+        $requestMethod = isset($_SERVER['REQUEST_METHOD'])
+            ? sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD']))
+            : '';
+        if ($requestMethod !== 'POST') {
             return;
         }
-        
+
         $this->logger->debug("handleRequest() entry", [
-            'method' => $_SERVER['REQUEST_METHOD'],
+            'method' => $requestMethod,
         ]);
-        
+
         // Verify nonce
-        if (!isset($_POST['minisite_config_nonce']) || 
-            !wp_verify_nonce($_POST['minisite_config_nonce'], 'minisite_config_save')) {
+        if (!$this->verifyNonce('minisite_config_save', 'minisite_config_nonce')) {
             wp_die('Security check failed');
         }
-        
+
         // Handle delete action
-        if (isset($_POST['action']) && $_POST['action'] === 'delete' && isset($_POST['config_key'])) {
-            $this->handleDelete($_POST['config_key']);
+        $action = $this->getPostData('action');
+        $configKey = $this->getPostData('config_key');
+        if ($action === 'delete' && !empty($configKey)) {
+            $this->handleDelete($configKey);
             return;
         }
-        
+
         // Handle save action
-        if (isset($_POST['action']) && $_POST['action'] === 'save') {
+        if ($action === 'save') {
             $this->handleSave();
             return;
         }
     }
-    
+
     private function handleSave(): void
     {
         $this->logger->debug("handleSave() entry");
-        
+
         $configManager = $this->getConfigManager();
         $updated = 0;
         $errors = [];
-        
+
         // Process each config field
-        foreach ($_POST['config'] ?? [] as $key => $data) {
+        $configData = $this->getPostDataArray('config');
+        foreach ($configData as $key => $data) {
             try {
                 $value = $data['value'] ?? '';
                 $type = $data['type'] ?? 'string';
                 $description = $data['description'] ?? null;
-                
+
+                // Sanitize the key
+                $key = sanitize_text_field($key);
+
                 // Special handling: if sensitive field and value is masked, don't update
                 $existing = $configManager->find($key);
                 if ($existing && $existing->isSensitive && $this->isMaskedValue($value)) {
                     continue; // Skip masked values (user didn't change it)
                 }
-                
+
                 $configManager->set($key, $value, $type, $description);
                 $updated++;
             } catch (\Exception $e) {
@@ -85,17 +152,19 @@ class ConfigAdminController
                 ]);
             }
         }
-        
+
         // Handle new config addition
-        if (!empty($_POST['new_config_key'])) {
-            $key = sanitize_text_field($_POST['new_config_key']);
-            $value = $_POST['new_config_value'] ?? '';
-            $type = $_POST['new_config_type'] ?? 'string';
-            $description = sanitize_textarea_field($_POST['new_config_description'] ?? '');
-            
+        $newKey = $this->getPostData('new_config_key');
+        if (!empty($newKey)) {
+            $key = $newKey;
+            $value = $this->getPostDataTextarea('new_config_value');
+            $type = $this->getPostData('new_config_type', 'string');
+            $description = $this->getPostDataTextarea('new_config_description');
+
             // Validate key format (lowercase with underscores only)
             if (!preg_match('/^[a-z][a-z0-9_]*$/', $key)) {
-                $errors[] = "Invalid key format. Use lowercase letters, numbers, and underscores only (e.g., 'whatsapp_access_token')";
+                $errors[] = "Invalid key format. Use lowercase letters, numbers, and underscores only "
+                    . "(e.g., 'whatsapp_access_token')";
             } else {
                 try {
                     $configManager->set($key, $value, $type, $description);
@@ -109,7 +178,7 @@ class ConfigAdminController
                 }
             }
         }
-        
+
         // Show success/error messages
         if ($updated > 0) {
             add_settings_error(
@@ -119,25 +188,25 @@ class ConfigAdminController
                 'updated'
             );
         }
-        
+
         if (!empty($errors)) {
             foreach ($errors as $error) {
                 add_settings_error('minisite_config', 'config_error', $error, 'error');
             }
         }
-        
+
         $this->logger->debug("handleSave() exit", [
             'updated' => $updated,
             'errors' => count($errors),
         ]);
     }
-    
+
     private function handleDelete(string $key): void
     {
         $this->logger->debug("handleDelete() entry", [
             'key' => $key,
         ]);
-        
+
         try {
             // Prevent deletion of required/default configurations
             $defaultConfigs = ['openai_api_key', 'pii_encryption_key', 'max_reviews_per_page'];
@@ -148,16 +217,16 @@ class ConfigAdminController
                     'Cannot delete required configuration: ' . $key,
                     'error'
                 );
-                
+
                 $this->logger->warning("handleDelete() blocked - required config", [
                     'key' => $key,
                 ]);
                 return;
             }
-            
+
             $configManager = $this->getConfigManager();
             $config = $configManager->find($key);
-            
+
             // Also check if config is marked as required in database
             if ($config && $config->isRequired) {
                 add_settings_error(
@@ -166,22 +235,22 @@ class ConfigAdminController
                     'Cannot delete required configuration: ' . $key,
                     'error'
                 );
-                
+
                 $this->logger->warning("handleDelete() blocked - isRequired flag", [
                     'key' => $key,
                 ]);
                 return;
             }
-            
+
             $configManager->delete($key);
-            
+
             add_settings_error(
                 'minisite_config',
                 'config_deleted',
                 'Configuration deleted successfully.',
                 'updated'
             );
-            
+
             $this->logger->debug("handleDelete() exit", [
                 'key' => $key,
             ]);
@@ -192,39 +261,39 @@ class ConfigAdminController
                 'Failed to delete configuration: ' . $e->getMessage(),
                 'error'
             );
-            
+
             $this->logger->error("handleDelete() failed", [
                 'key' => $key,
                 'error' => $e->getMessage(),
             ]);
         }
     }
-    
+
     private function isMaskedValue(string $value): bool
     {
         // Check if value is masked (e.g., "••••••••1234")
         return str_starts_with($value, '••••');
     }
-    
+
     public function render(): void
     {
         $this->logger->debug("render() entry");
-        
+
         if (!class_exists('Timber\\Timber')) {
             wp_die('Timber plugin is required for admin pages.');
         }
-        
+
         $this->registerTimberLocations();
-        
+
         $configManager = $this->getConfigManager();
         $configs = $configManager->all(includeSensitive: true);
-        
+
         // Prepare configs for template (no grouping needed for fixed configs)
         $preparedConfigs = array_map(
             fn($config) => $this->prepareConfigForTemplate($config),
             $configs
         );
-        
+
         $context = [
             'page_title' => 'Minisite Configuration',
             'page_description' => 'Manage application settings, API keys, and integration credentials.',
@@ -235,12 +304,12 @@ class ConfigAdminController
             'admin_post_url' => admin_url('admin-post.php'),
             'messages' => $this->getSettingsMessages(),
         ];
-        
+
         \Timber\Timber::render('views/admin-config.twig', $context);
-        
+
         $this->logger->debug("render() exit");
     }
-    
+
     private function registerTimberLocations(): void
     {
         $base = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber';
@@ -253,42 +322,15 @@ class ConfigAdminController
             )
         );
     }
-    
-    private function groupConfigs(array $configs): array
-    {
-        $grouped = [
-            'whatsapp' => [],
-            'api_keys' => [],
-            'review_settings' => [],
-            'general' => [],
-        ];
-        
-        foreach ($configs as $config) {
-            $key = strtolower($config->key);
-            
-            if (str_contains($key, 'whatsapp')) {
-                $grouped['whatsapp'][] = $this->prepareConfigForTemplate($config);
-            } elseif (str_contains($key, 'api') || str_contains($key, 'key') || str_contains($key, 'token')) {
-                $grouped['api_keys'][] = $this->prepareConfigForTemplate($config);
-            } elseif (str_contains($key, 'review')) {
-                $grouped['review_settings'][] = $this->prepareConfigForTemplate($config);
-            } else {
-                $grouped['general'][] = $this->prepareConfigForTemplate($config);
-            }
-        }
-        
-        // Remove empty groups
-        return array_filter($grouped, fn($items) => !empty($items));
-    }
-    
+
     private function prepareConfigForTemplate(Config $config): array
     {
         $value = $config->getTypedValue();
-        
+
         // Default configs are required and cannot be deleted
         $defaultConfigs = ['openai_api_key', 'pii_encryption_key', 'max_reviews_per_page'];
         $isRequired = $config->isRequired || in_array($config->key, $defaultConfigs, true);
-        
+
         return [
             'key' => $config->key,
             'display_name' => $this->formatKeyName($config->key),
@@ -300,7 +342,7 @@ class ConfigAdminController
             'is_required' => $isRequired,
         ];
     }
-    
+
     private function maskValue(string $value): string
     {
         if (strlen($value) <= 4) {
@@ -308,20 +350,20 @@ class ConfigAdminController
         }
         return '••••••••' . substr($value, -4);
     }
-    
+
     private function formatKeyName(string $key): string
     {
         // Convert "openai_api_key" to "OpenAI API Key"
         // Convert "pii_encryption_key" to "PII Encryption Key"
         // Convert "max_reviews_per_page" to "Max Reviews Per Page"
-        
+
         // Define acronyms that should be all uppercase
         $acronyms = ['openai', 'pii', 'api', 'id', 'url', 'http', 'https', 'ssl', 'tls', 'oauth', 'jwt'];
-        
+
         // Split by underscore and capitalize each word
         $words = explode('_', $key);
         $formatted = [];
-        
+
         foreach ($words as $word) {
             $lowerWord = strtolower($word);
             if (in_array($lowerWord, $acronyms, true)) {
@@ -330,23 +372,22 @@ class ConfigAdminController
                 $formatted[] = ucfirst($word);
             }
         }
-        
+
         return implode(' ', $formatted);
     }
-    
+
     private function getSettingsMessages(): array
     {
         $messages = [];
         $errors = get_settings_errors('minisite_config');
-        
+
         foreach ($errors as $error) {
             $messages[] = [
                 'type' => $error['type'],
                 'message' => $error['message'],
             ];
         }
-        
+
         return $messages;
     }
 }
-

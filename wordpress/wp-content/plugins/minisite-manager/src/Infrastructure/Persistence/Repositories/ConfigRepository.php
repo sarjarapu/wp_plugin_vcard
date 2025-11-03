@@ -11,7 +11,7 @@ use Psr\Log\LoggerInterface;
 
 /**
  * Config Repository using Doctrine ORM
- * 
+ *
  * Note: Naming is agnostic (not "DoctrineConfigRepository") since we have
  * only one implementation. If multiple implementations are needed in future
  * (e.g., for testing, caching, or alternative storage), rename to distinguish.
@@ -19,30 +19,30 @@ use Psr\Log\LoggerInterface;
 class ConfigRepository extends EntityRepository implements ConfigRepositoryInterface
 {
     private LoggerInterface $logger;
-    
+
     public function __construct(EntityManagerInterface $em, ClassMetadata $class)
     {
         parent::__construct($em, $class);
         $this->logger = LoggingServiceProvider::getFeatureLogger('config-repository');
     }
-    
+
     /**
      * Get all configurations (ordered by key)
      */
     public function getAll(): array
     {
         $this->logger->debug("getAll() entry");
-        
+
         try {
             $result = $this->createQueryBuilder('c')
                 ->orderBy('c.key', 'ASC')
                 ->getQuery()
                 ->getResult();
-            
+
             $this->logger->debug("getAll() exit", [
                 'count' => count($result),
             ]);
-            
+
             return $result;
         } catch (\Exception $e) {
             $this->logger->error("getAll() failed", [
@@ -52,10 +52,10 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
             throw $e;
         }
     }
-    
+
     /**
      * Find configuration by key
-     * 
+     *
      * Uses Doctrine's native findOneBy() method - this is just a convenience wrapper
      * that adds logging and maintains the interface contract.
      */
@@ -64,17 +64,17 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
         $this->logger->debug("findByKey() entry", [
             'key' => $key,
         ]);
-        
+
         try {
             // Use Doctrine's native findOneBy() - no custom implementation needed
             $result = $this->findOneBy(['key' => $key]);
-            
+
             $this->logger->debug("findByKey() exit", [
                 'key' => $key,
                 'found' => $result !== null,
                 'result_id' => $result?->id,
             ]);
-            
+
             return $result;
         } catch (\Exception $e) {
             $this->logger->error("findByKey() failed", [
@@ -85,7 +85,7 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
             throw $e;
         }
     }
-    
+
     /**
      * Save configuration (insert or update)
      */
@@ -96,16 +96,16 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
             'type' => $config->type,
             'has_id' => $config->id !== null,
         ]);
-        
+
         try {
             $this->getEntityManager()->persist($config);
             $this->getEntityManager()->flush();
-            
+
             $this->logger->debug("save() exit", [
                 'key' => $config->key,
                 'id' => $config->id,
             ]);
-            
+
             return $config;
         } catch (\Exception $e) {
             $this->logger->error("save() failed", [
@@ -116,7 +116,7 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
             throw $e;
         }
     }
-    
+
     /**
      * Delete configuration by key
      */
@@ -125,13 +125,13 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
         $this->logger->debug("delete() entry", [
             'key' => $key,
         ]);
-        
+
         try {
             $config = $this->findByKey($key);
             if ($config) {
                 $this->getEntityManager()->remove($config);
                 $this->getEntityManager()->flush();
-                
+
                 $this->logger->debug("delete() exit", [
                     'key' => $key,
                     'deleted' => true,
@@ -153,4 +153,3 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
         }
     }
 }
-

@@ -54,11 +54,11 @@ final class PluginBootstrap
 
         // Initialize admin menu
         AdminMenuManager::initialize();
-        
+
         // Initialize Doctrine and Config Manager
         self::initializeConfigSystem();
     }
-    
+
     /**
      * Initialize configuration management system
      * Public so it can be called from ActivationHandler if needed
@@ -73,16 +73,17 @@ final class PluginBootstrap
                 $logger->warning('Doctrine ORM not available - ConfigManager will not be initialized');
                 return;
             }
-            
+
             // Initialize Doctrine EntityManager
             if (!isset($GLOBALS['minisite_entity_manager'])) {
-                $GLOBALS['minisite_entity_manager'] = \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
+                $GLOBALS['minisite_entity_manager'] =
+                    \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
             }
-            
+
             // Initialize ConfigManager
             /** @var \Doctrine\ORM\EntityManager $em */
             $em = $GLOBALS['minisite_entity_manager'];
-            
+
             // Create ConfigRepository instance directly
             // Note: We can't use $em->getRepository() because it returns default EntityRepository
             // We need our custom ConfigRepository that implements ConfigRepositoryInterface
@@ -90,12 +91,12 @@ final class PluginBootstrap
                 $em,
                 $em->getClassMetadata(\Minisite\Domain\Entities\Config::class)
             );
-            
+
             $configManager = new \Minisite\Domain\Services\ConfigManager($configRepository);
-            
+
             // Store in global for easy access
             $GLOBALS['minisite_config_manager'] = $configManager;
-            
+
             // Register admin menu for config management
             if (is_admin()) {
                 \Minisite\Features\AppConfig\WordPress\ConfigAdminMenu::register();

@@ -22,7 +22,7 @@ final class ActivationHandler
 
         // Sync roles and capabilities
         RoleManager::syncRolesAndCapabilities();
-        
+
         // Seed default configurations (after migrations, before init)
         // Note: ConfigManager will be initialized in initializeCore()
         // So we delay seeding until init hook
@@ -39,7 +39,7 @@ final class ActivationHandler
                 $logger->warning('Doctrine ORM not available - skipping migrations. Run: composer install');
                 return;
             }
-            
+
             $doctrineRunner = new \Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner();
             $doctrineRunner->migrate();
         } catch (\Exception $e) {
@@ -53,7 +53,7 @@ final class ActivationHandler
                 'trace' => $e->getTraceAsString(),
             ]);
         }
-        
+
         // Run custom migrations (for existing tables - to be migrated to Doctrine later)
         if (class_exists(\Minisite\Infrastructure\Versioning\VersioningController::class)) {
             $versioningController = new \Minisite\Infrastructure\Versioning\VersioningController(
@@ -63,7 +63,7 @@ final class ActivationHandler
             $versioningController->activate();
         }
     }
-    
+
     /**
      * Seed default configurations
      * Called on 'init' hook after ConfigManager is initialized
@@ -76,7 +76,7 @@ final class ActivationHandler
             if (class_exists(\Doctrine\ORM\EntityManager::class)) {
                 \Minisite\Core\PluginBootstrap::initializeConfigSystem();
             }
-            
+
             // If still not available, retry on next init hook
             if (!isset($GLOBALS['minisite_config_manager'])) {
                 // Prevent infinite loop - only retry once
@@ -88,7 +88,7 @@ final class ActivationHandler
                 return;
             }
         }
-        
+
         try {
             $seeder = new \Minisite\Infrastructure\Config\ConfigSeeder();
             $seeder->seedDefaults($GLOBALS['minisite_config_manager']);

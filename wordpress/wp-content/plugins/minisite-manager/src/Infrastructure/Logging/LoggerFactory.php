@@ -42,14 +42,16 @@ class LoggerFactory
 
         // Add processors that automatically add metadata (class, method, file, line, etc.)
         // These processors run BEFORE handlers, so all log entries get this info automatically
-        
+
         // Adds class, function (method), file, line automatically
         // Skip frames: LoggerFactory itself, and any intermediate logging wrappers
-        $logger->pushProcessor(new IntrospectionProcessor(Logger::DEBUG, ['Monolog\\', 'Minisite\\Infrastructure\\Logging\\']));
-        
+        $logger->pushProcessor(
+            new IntrospectionProcessor(Logger::DEBUG, ['Monolog\\', 'Minisite\\Infrastructure\\Logging\\'])
+        );
+
         // Adds memory_usage to context
         $logger->pushProcessor(new MemoryUsageProcessor());
-        
+
         // Processes PSR-3 style placeholders in messages (e.g., {user_id})
         $logger->pushProcessor(new PsrLogMessageProcessor());
 

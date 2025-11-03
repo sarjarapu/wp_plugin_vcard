@@ -7,6 +7,22 @@ namespace Minisite\Features\AppConfig\WordPress;
  */
 class ConfigAdminMenu
 {
+    /**
+     * Safely get and sanitize GET data
+     *
+     * Note: This method is used for GET parameters (nonce, key) which are verified
+     * before use. Nonce verification happens in the calling code.
+     */
+    private static function getGetData(string $key, string $default = ''): string
+    {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- GET parameters are verified before use, data is sanitized below
+        if (!isset($_GET[$key])) {
+            return $default;
+        }
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- GET parameters are verified before use, data is sanitized below
+        return sanitize_text_field(wp_unslash($_GET[$key]));
+    }
+
     public static function register(): void
     {
         add_action('admin_menu', function () {
@@ -20,31 +36,32 @@ class ConfigAdminMenu
                 [self::class, 'renderPage'] // Callback
             );
         });
-        
+
         // Register admin_post handler for delete action
-        add_action('admin_post_minisite_config_delete', function() {
+        add_action('admin_post_minisite_config_delete', function () {
             // Check permissions
             if (!current_user_can('manage_options')) {
                 wp_die('Unauthorized');
             }
-            
+
             // Verify nonce
-            if (!isset($_GET['nonce']) || !wp_verify_nonce($_GET['nonce'], 'minisite_config_delete')) {
+            $nonce = self::getGetData('nonce');
+            if (empty($nonce) || !wp_verify_nonce($nonce, 'minisite_config_delete')) {
                 wp_die('Security check failed');
             }
-            
-            $key = sanitize_text_field($_GET['key'] ?? '');
+
+            $key = self::getGetData('key');
             if (empty($key)) {
                 wp_die('Invalid configuration key');
             }
-            
+
             if (!isset($GLOBALS['minisite_config_manager'])) {
                 wp_die('ConfigManager not initialized');
             }
-            
+
             $configManager = $GLOBALS['minisite_config_manager'];
             $configManager->delete($key);
-            
+
             wp_redirect(add_query_arg([
                 'page' => 'minisite-config',
                 'deleted' => '1'
@@ -52,17 +69,16 @@ class ConfigAdminMenu
             exit;
         });
     }
-    
+
     public static function renderPage(): void
     {
         // Check permissions
         if (!current_user_can('manage_options')) {
             wp_die('You do not have permission to access this page.');
         }
-        
+
         $controller = new ConfigAdminController();
         $controller->handleRequest();
         $controller->render();
     }
 }
-

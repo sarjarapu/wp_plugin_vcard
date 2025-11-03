@@ -13,37 +13,37 @@ final class Config
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'bigint')]
     public ?int $id = null;
-    
+
     #[ORM\Column(name: 'config_key', type: 'string', length: 100, unique: true)]
     public string $key; // lowercase with underscores, e.g., 'whatsapp_access_token'
-    
+
     #[ORM\Column(name: 'config_value', type: 'text', nullable: true)]
     public ?string $value = null;
-    
+
     #[ORM\Column(name: 'config_type', type: 'string', length: 20)]
     public string $type = 'string'; // 'string' | 'integer' | 'boolean' | 'json' | 'encrypted' | 'secret'
-    
+
     #[ORM\Column(type: 'text', nullable: true)]
     public ?string $description = null;
-    
+
     #[ORM\Column(name: 'is_sensitive', type: 'boolean')]
     public bool $isSensitive = false;
-    
+
     #[ORM\Column(name: 'is_required', type: 'boolean')]
     public bool $isRequired = false;
-    
+
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
     public \DateTimeImmutable $createdAt;
-    
+
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable')]
     public \DateTimeImmutable $updatedAt;
-    
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
     }
-    
+
     /**
      * Get typed value based on config type
      */
@@ -58,7 +58,7 @@ final class Config
             default => $this->value,
         };
     }
-    
+
     /**
      * Set typed value (encrypt if needed)
      */
@@ -72,17 +72,16 @@ final class Config
             'secret' => hash('sha256', (string) $value),
             default => (string) $value,
         };
-        
+
         $this->updatedAt = new \DateTimeImmutable();
     }
-    
+
     private function decryptValue(): ?string
     {
         if (!$this->value) {
             return null;
         }
-        
+
         return ConfigEncryption::decrypt($this->value);
     }
 }
-

@@ -9,12 +9,12 @@ use Psr\Log\LoggerInterface;
 class ConfigSeeder
 {
     private LoggerInterface $logger;
-    
+
     public function __construct()
     {
         $this->logger = LoggingServiceProvider::getFeatureLogger('config-seeder');
     }
-    
+
     /**
      * Seed default configurations
      * Only creates missing configs (preserves existing values)
@@ -22,7 +22,7 @@ class ConfigSeeder
     public function seedDefaults(ConfigManager $configManager): void
     {
         $this->logger->info("seedDefaults() entry");
-        
+
         try {
             $defaults = [
                 // API Keys (empty, to be filled by admin)
@@ -31,14 +31,14 @@ class ConfigSeeder
                     'type' => 'encrypted',
                     'description' => 'OpenAI API key for AI features'
                 ],
-                
+
                 // Encryption
                 'pii_encryption_key' => [
                     'value' => '',
                     'type' => 'encrypted',
                     'description' => 'Key for encrypting PII (Personally Identifiable Information) in reviews'
                 ],
-                
+
                 // Review Settings
                 'max_reviews_per_page' => [
                     'value' => 20,
@@ -46,7 +46,7 @@ class ConfigSeeder
                     'description' => 'Maximum number of reviews to display per page'
                 ],
             ];
-            
+
             $created = 0;
             foreach ($defaults as $key => $config) {
                 // Only create if doesn't exist (preserve existing values)
@@ -55,12 +55,12 @@ class ConfigSeeder
                         $key,
                         $config['value'],
                         $config['type'],
-                        $config['description'] ?? null
+                        $config['description']
                     );
                     $created++;
                 }
             }
-            
+
             $this->logger->info("seedDefaults() exit", [
                 'created' => $created,
                 'total_defaults' => count($defaults),
@@ -74,4 +74,3 @@ class ConfigSeeder
         }
     }
 }
-

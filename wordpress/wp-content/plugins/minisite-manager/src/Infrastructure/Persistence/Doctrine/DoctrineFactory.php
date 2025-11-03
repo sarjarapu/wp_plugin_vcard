@@ -14,7 +14,7 @@ class DoctrineFactory
 {
     /**
      * Create EntityManager with WordPress database connection
-     * 
+     *
      * @param \wpdb|null $wpdb Optional wpdb instance (for testing). If null, uses global $wpdb.
      * @return EntityManager
      */
@@ -24,7 +24,7 @@ class DoctrineFactory
         if ($wpdb === null) {
             global $wpdb;
         }
-        
+
         // Get WordPress database connection details
         $dbConfig = [
             'driver' => 'pdo_mysql',
@@ -34,7 +34,7 @@ class DoctrineFactory
             'dbname' => DB_NAME,
             'charset' => 'utf8mb4',
         ];
-        
+
         // Debug: Log connection details (without password) and PDO driver availability
         $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('doctrine-factory');
         $logger->debug("DoctrineFactory::createEntityManager() entry", [
@@ -45,17 +45,17 @@ class DoctrineFactory
             'pdo_mysql_loaded' => extension_loaded('pdo_mysql'),
             'mysqli_loaded' => extension_loaded('mysqli'),
         ]);
-        
+
         // Configure Doctrine
         $config = ORMSetup::createAttributeMetadataConfiguration(
             paths: [__DIR__ . '/../../../Domain/Entities'],
             isDevMode: defined('WP_DEBUG') && WP_DEBUG
         );
-        
+
         // Create connection
         try {
             $connection = DriverManager::getConnection($dbConfig, $config);
-            
+
             // Register ENUM type mapping to avoid schema introspection errors
             // WordPress and other plugins use ENUM columns that Doctrine doesn't natively support
             // We map them to string type for schema introspection purposes
@@ -63,7 +63,7 @@ class DoctrineFactory
             if (!$platform->hasDoctrineTypeMappingFor('enum')) {
                 $platform->registerDoctrineTypeMapping('enum', 'string');
             }
-            
+
             $logger->debug("DoctrineFactory::createEntityManager() connection created successfully");
         } catch (\Exception $e) {
             $logger->error("DoctrineFactory::createEntityManager() connection failed", [
@@ -73,15 +73,15 @@ class DoctrineFactory
             ]);
             throw $e;
         }
-        
+
         // Create EntityManager first
         $em = new EntityManager($connection, $config);
-        
+
         // Configure WordPress table prefix
-        // 
+        //
         // IMPORTANT: Prefix is fetched ONCE here and stored in the listener.
         // The listener does NOT access $wpdb at runtime - it uses the stored value.
-        // 
+        //
         // When does the listener execute?
         // - Only when Doctrine first loads entity metadata (lazy loading)
         // - Happens on first access to an entity (e.g., getRepository(Config::class))
@@ -94,8 +94,7 @@ class DoctrineFactory
             Events::loadClassMetadata, // Event name
             $tablePrefixListener        // Subscriber (not actively "listening")
         );
-        
+
         return $em;
     }
 }
-
