@@ -16,9 +16,9 @@ This document outlines the planned features for the Minisite Settings page (`/ac
 **Purpose**: Allow minisite owners to temporarily take their minisite offline without affecting subscription status.
 
 **Functionality**:
-- Toggle switch to set `_minisite_online` meta field (`true`/`false`)
-- When `offline`: Minisite is not publicly viewable (even with active subscription)
-- When `online`: Minisite is publicly viewable (if subscription is active)
+- Toggle switch to update `online` column in `wp_minisites` table (`0` = offline, `1` = online)
+- When `offline` (online=0): Minisite is not publicly viewable (even with active subscription)
+- When `online` (online=1): Minisite is publicly viewable (if subscription is active)
 - **Permission**: Owner OR assigned editor OR admin can toggle
 - **No subscription requirement**: Can toggle even without active subscription (but public view still blocked)
 
@@ -73,7 +73,7 @@ This document outlines the planned features for the Minisite Settings page (`/ac
 - Display current owner information
 - User picker/search to select new owner
 - **Permission**: Admin only (`minisite_admin` role)
-- Update `_minisite_owner_user_id` meta field
+- Update `owner_user_id` column in `wp_minisites` table
 - **Important**: Transfer should preserve all version history
 - Reset assigned editors (optional: admin can choose to keep or reset)
 - Audit log entry for ownership transfers
@@ -92,7 +92,7 @@ This document outlines the planned features for the Minisite Settings page (`/ac
 
 **Functionality**:
 - Display list of currently assigned editors (chips/badges)
-- Add/remove assigned editors from `_minisite_assigned_editors` meta array
+- Add/remove assigned editors from `assigned_editors` JSON column in `wp_minisites` table
 - **Permission**: 
   - Admin can assign to any minisite
   - Power users can view (but not modify) assignments
@@ -185,10 +185,27 @@ This document outlines the planned features for the Minisite Settings page (`/ac
 ## Technical Implementation
 
 ### Database Fields Required
-- `_minisite_online` (bool) - Online/offline status
-- `_minisite_owner_user_id` (int) - Minisite owner
-- `_minisite_assigned_editors` (array) - Array of user IDs
-- `post_status` (string) - WordPress post status (`publish`, `trash`, `draft`)
+
+**Important**: Minisites are stored in a **custom table** (`wp_minisites`), NOT as WordPress posts. The `_minisite_` fields need to be added as **columns** to the existing table.
+
+**Required Schema Changes**:
+```sql
+ALTER TABLE wp_minisites
+  ADD COLUMN owner_user_id BIGINT UNSIGNED NULL AFTER created_by,
+  ADD COLUMN online TINYINT(1) NOT NULL DEFAULT 0 AFTER owner_user_id,
+  ADD COLUMN assigned_editors JSON NULL AFTER online,
+  ADD INDEX idx_owner_user_id (owner_user_id),
+  ADD INDEX idx_online (online);
+```
+
+**Fields**:
+- `owner_user_id` (BIGINT UNSIGNED) - Minisite owner (separate from `created_by`)
+- `online` (TINYINT(1)) - Online/offline status (0 = offline, 1 = online)
+- `assigned_editors` (JSON) - Array of user IDs who can edit this minisite
+
+**Note**: `_minisite_current_version_id` already exists in the table. The `_minisite_` prefix in documentation is misleading - these should be direct column names (not post meta) since minisites are not WordPress posts.
+
+See `docs/features/minisite-settings/STORAGE_CLARIFICATION.md` for detailed explanation.
 
 ### WordPress AJAX Handlers Needed
 **Note**: The plugin currently uses WordPress AJAX handlers (not REST API endpoints) following the existing pattern established by slug availability checking. All handlers should be registered via `add_action('wp_ajax_...')` in the SettingsHooks class.
@@ -230,14 +247,16 @@ wp_ajax_get_minisite_subscription
 ### State Machine Rules
 
 **Online/Offline State**:
-- `online=true` + `subscription=active` + `published_version exists` → **Publicly viewable**
-- `online=false` → **Not publicly viewable** (offline message)
-- `online=true` + `subscription=inactive` → **Not publicly viewable** (inactive message)
-- `online=true` + `no published_version` → **Not publicly viewable** (draft message)
+- `online=1` (column in `wp_minisites`) + `subscription=active` + `published_version exists` → **Publicly viewable**
+- `online=0` → **Not publicly viewable** (offline message)
+- `online=1` + `subscription=inactive` → **Not publicly viewable** (inactive message)
+- `online=1` + `no published_version` → **Not publicly viewable** (draft message)
 
 **Deletion State**:
-- Soft delete → `post_status='trash'` → Hidden from listings, versions preserved
-- Hard delete → Row removed from database → Permanent deletion
+- Soft delete → Set `status='archived'` or add `deleted_at` timestamp column → Hidden from listings, versions preserved
+- Hard delete → Row removed from `wp_minisites` table → Permanent deletion
+
+**Note**: Since minisites are not WordPress posts, there's no `post_status` field. Use the existing `status` column or add a `deleted_at` column for soft deletes.
 
 ---
 
