@@ -117,7 +117,13 @@ final class ViewRenderer
             try {
                 \Timber\Timber::render('v2025/minisite.twig', $templateData);
             } catch (\Exception $e) {
-                error_log('Template rendering error: ' . $e->getMessage());
+                $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('view-renderer');
+                $logger->error('Template rendering error', [
+                    'error' => $e->getMessage(),
+                    'exception' => get_class($e),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]);
                 $this->renderFallbackVersionSpecificPreview($previewData);
             }
         } else {

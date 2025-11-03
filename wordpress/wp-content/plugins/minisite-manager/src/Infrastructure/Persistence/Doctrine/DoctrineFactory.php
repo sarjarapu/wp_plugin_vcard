@@ -35,6 +35,17 @@ class DoctrineFactory
             'charset' => 'utf8mb4',
         ];
         
+        // Debug: Log connection details (without password) and PDO driver availability
+        $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('doctrine-factory');
+        $logger->debug("DoctrineFactory::createEntityManager() entry", [
+            'db_host' => DB_HOST,
+            'db_user' => DB_USER,
+            'db_name' => DB_NAME,
+            'pdo_drivers' => extension_loaded('pdo') ? \PDO::getAvailableDrivers() : [],
+            'pdo_mysql_loaded' => extension_loaded('pdo_mysql'),
+            'mysqli_loaded' => extension_loaded('mysqli'),
+        ]);
+        
         // Configure Doctrine
         $config = ORMSetup::createAttributeMetadataConfiguration(
             paths: [__DIR__ . '/../../../Domain/Entities'],
@@ -42,7 +53,26 @@ class DoctrineFactory
         );
         
         // Create connection
-        $connection = DriverManager::getConnection($dbConfig, $config);
+        try {
+            $connection = DriverManager::getConnection($dbConfig, $config);
+            
+            // Register ENUM type mapping to avoid schema introspection errors
+            // WordPress and other plugins use ENUM columns that Doctrine doesn't natively support
+            // We map them to string type for schema introspection purposes
+            $platform = $connection->getDatabasePlatform();
+            if (!$platform->hasDoctrineTypeMappingFor('enum')) {
+                $platform->registerDoctrineTypeMapping('enum', 'string');
+            }
+            
+            $logger->debug("DoctrineFactory::createEntityManager() connection created successfully");
+        } catch (\Exception $e) {
+            $logger->error("DoctrineFactory::createEntityManager() connection failed", [
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+                'db_config' => array_merge($dbConfig, ['password' => '***']), // Mask password in logs
+            ]);
+            throw $e;
+        }
         
         // Create EntityManager first
         $em = new EntityManager($connection, $config);

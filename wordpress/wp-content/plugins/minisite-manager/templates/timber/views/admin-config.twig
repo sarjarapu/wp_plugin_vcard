@@ -33,16 +33,14 @@
       {{ function('wp_nonce_field', 'minisite_config_save', 'minisite_config_nonce')|raw }}
       <input type="hidden" name="action" value="save">
       
-      {% for category, items in configs_grouped %}
-        <h2>{{ category|replace({'_': ' '})|title }}</h2>
-        <table class="form-table">
-          <tbody>
-            {% for config in items %}
+      <table class="form-table">
+        <tbody>
+          {% for config in configs %}
               <tr>
-                <th scope="row">
+                <th scope="row" style="vertical-align: top; padding-top: 15px;">
                   <label for="config_{{ config.key }}">{{ config.display_name }}</label>
                 </th>
-                <td>
+                <td style="vertical-align: top;">
                   {% if config.type == 'boolean' %}
                     <label>
                       <input type="checkbox" 
@@ -90,83 +88,14 @@
                     <input type="hidden" name="config[{{ config.key }}][description]" value="{{ config.description }}">
                   {% endif %}
                 </td>
-                <td>
-                  <button type="submit" 
-                          name="action" 
-                          value="delete"
-                          formaction="{{ admin_url('admin-post.php?action=minisite_config_delete&key=' ~ config.key ~ '&nonce=' ~ delete_nonce) }}"
-                          class="button button-small"
-                          onclick="return confirm('Are you sure you want to delete this configuration?');">
-                    Delete
-                  </button>
-                </td>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% endfor %}
+          {% endfor %}
+        </tbody>
+      </table>
       
       {{ function('submit_button', 'Save Changes')|raw }}
     </form>
     
-    <hr>
-    
-    <h2>Add New Configuration</h2>
-    <form method="post" action="">
-      {{ function('wp_nonce_field', 'minisite_config_save', 'minisite_config_nonce')|raw }}
-      <input type="hidden" name="action" value="save">
-      
-      <table class="form-table">
-        <tr>
-          <th><label for="new_config_key">Configuration Key</label></th>
-          <td>
-            <input type="text" 
-                   id="new_config_key" 
-                   name="new_config_key" 
-                   class="regular-text" 
-                   placeholder="e.g., whatsapp_access_token"
-                   pattern="[a-z][a-z0-9_]*"
-                   required>
-            <p class="description">Use lowercase with underscores only (e.g., whatsapp_access_token)</p>
-          </td>
-        </tr>
-        <tr>
-          <th><label for="new_config_type">Type</label></th>
-          <td>
-            <select id="new_config_type" name="new_config_type" required>
-              <option value="string">String</option>
-              <option value="integer">Integer</option>
-              <option value="boolean">Boolean</option>
-              <option value="json">JSON</option>
-              <option value="encrypted">Encrypted (for API keys, tokens)</option>
-              <option value="secret">Secret (one-way hash)</option>
-            </select>
-          </td>
-        </tr>
-        <tr>
-          <th><label for="new_config_value">Value</label></th>
-          <td>
-            <textarea id="new_config_value" 
-                      name="new_config_value" 
-                      class="large-text" 
-                      rows="3"
-                      placeholder="Enter configuration value"></textarea>
-          </td>
-        </tr>
-        <tr>
-          <th><label for="new_config_description">Description</label></th>
-          <td>
-            <textarea id="new_config_description" 
-                      name="new_config_description" 
-                      class="large-text" 
-                      rows="2"
-                      placeholder="Optional description"></textarea>
-          </td>
-        </tr>
-      </table>
-      
-      {{ function('submit_button', 'Add Configuration')|raw }}
-    </form>
   </div>
 </body>
 </html>

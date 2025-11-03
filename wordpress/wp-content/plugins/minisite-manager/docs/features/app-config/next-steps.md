@@ -162,9 +162,11 @@ See `docs/testing/doctrine-testing-strategy.md` for testing approaches:
 
 - ✅ `TablePrefixListenerTest.php` - Unit test (created)
 - ✅ `ConfigRepositoryIntegrationTest.php` - Integration test (created)
-- ⚠️ `DoctrineMigrationRunnerTest.php` - Needs refactoring for testability
-- ⚠️ `ConfigManagerTest.php` - Should create
-- ⚠️ `ConfigEncryptionTest.php` - Should create
+- ✅ `DoctrineMigrationRunnerTest.php` - Unit tests for refactored methods (created)
+- ✅ `DoctrineMigrationRunnerIntegrationTest.php` - Integration tests for orchestration (created)
+- ✅ `Version20251103000000Test.php` - Integration tests for migration up/down (created)
+- ⚠️ `ConfigManagerTest.php` - Should create (pending)
+- ⚠️ `ConfigEncryptionTest.php` - Should create (pending)
 
 **Run Tests:**
 ```bash
@@ -281,11 +283,15 @@ if ($configManager->has('api_key')) {
 
 1. ✅ **Install Doctrine** - Run `composer update`
 2. ✅ **Verify Encryption Key** - Already in wp-config.php
-3. ⚠️ **Run Migration** - Activate/deactivate plugin
-4. ⚠️ **Verify Seeding** - Check default configs created
-5. ⚠️ **Test Admin UI** - Navigate to Configuration menu
-6. ⚠️ **Write Tests** - Unit and integration tests
-7. ⚠️ **Integrate** - Use ConfigManager in other features
+3. ✅ **Doctrine Migration Tests** - Comprehensive test coverage (92% for DoctrineMigrationRunner)
+4. ✅ **ConfigRepository Tests** - Integration tests with MySQL (created)
+5. ⚠️ **Run Migration** - Activate/deactivate plugin (ready, pending execution)
+6. ⚠️ **Verify Seeding** - Check default configs created (pending migration execution)
+7. ⚠️ **Test Admin UI** - Navigate to Configuration menu (pending migration execution)
+8. ⚠️ **ConfigManager Unit Tests** - Should create ConfigManagerTest.php (pending)
+9. ⚠️ **ConfigEncryption Unit Tests** - Should create ConfigEncryptionTest.php (pending)
+10. ⚠️ **Usage Documentation** - Create dedicated usage guide (pending)
+11. ⚠️ **Integrate** - Use ConfigManager in other features (pending)
 
 ---
 

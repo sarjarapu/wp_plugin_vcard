@@ -70,7 +70,7 @@ class ConfigAdminController
                 $description = $data['description'] ?? null;
                 
                 // Special handling: if sensitive field and value is masked, don't update
-                $existing = $configManager->findByKey($key);
+                $existing = $configManager->find($key);
                 if ($existing && $existing->isSensitive && $this->isMaskedValue($value)) {
                     continue; // Skip masked values (user didn't change it)
                 }
@@ -139,7 +139,40 @@ class ConfigAdminController
         ]);
         
         try {
+            // Prevent deletion of required/default configurations
+            $defaultConfigs = ['openai_api_key', 'pii_encryption_key', 'max_reviews_per_page'];
+            if (in_array($key, $defaultConfigs, true)) {
+                add_settings_error(
+                    'minisite_config',
+                    'config_error',
+                    'Cannot delete required configuration: ' . $key,
+                    'error'
+                );
+                
+                $this->logger->warning("handleDelete() blocked - required config", [
+                    'key' => $key,
+                ]);
+                return;
+            }
+            
             $configManager = $this->getConfigManager();
+            $config = $configManager->find($key);
+            
+            // Also check if config is marked as required in database
+            if ($config && $config->isRequired) {
+                add_settings_error(
+                    'minisite_config',
+                    'config_error',
+                    'Cannot delete required configuration: ' . $key,
+                    'error'
+                );
+                
+                $this->logger->warning("handleDelete() blocked - isRequired flag", [
+                    'key' => $key,
+                ]);
+                return;
+            }
+            
             $configManager->delete($key);
             
             add_settings_error(
@@ -185,15 +218,21 @@ class ConfigAdminController
         
         $configManager = $this->getConfigManager();
         $configs = $configManager->all(includeSensitive: true);
-        $grouped = $this->groupConfigs($configs);
+        
+        // Prepare configs for template (no grouping needed for fixed configs)
+        $preparedConfigs = array_map(
+            fn($config) => $this->prepareConfigForTemplate($config),
+            $configs
+        );
         
         $context = [
             'page_title' => 'Minisite Configuration',
             'page_description' => 'Manage application settings, API keys, and integration credentials.',
-            'configs_grouped' => $grouped,
+            'configs' => $preparedConfigs,
             'nonce' => wp_create_nonce('minisite_config_save'),
             'delete_nonce' => wp_create_nonce('minisite_config_delete'),
             'admin_url' => admin_url('admin.php'),
+            'admin_post_url' => admin_url('admin-post.php'),
             'messages' => $this->getSettingsMessages(),
         ];
         
@@ -246,6 +285,10 @@ class ConfigAdminController
     {
         $value = $config->getTypedValue();
         
+        // Default configs are required and cannot be deleted
+        $defaultConfigs = ['openai_api_key', 'pii_encryption_key', 'max_reviews_per_page'];
+        $isRequired = $config->isRequired || in_array($config->key, $defaultConfigs, true);
+        
         return [
             'key' => $config->key,
             'display_name' => $this->formatKeyName($config->key),
@@ -254,7 +297,7 @@ class ConfigAdminController
             'type' => $config->type,
             'description' => $config->description,
             'is_sensitive' => $config->isSensitive,
-            'is_required' => $config->isRequired,
+            'is_required' => $isRequired,
         ];
     }
     
@@ -268,8 +311,27 @@ class ConfigAdminController
     
     private function formatKeyName(string $key): string
     {
-        // Convert "whatsapp_access_token" to "WhatsApp Access Token"
-        return ucwords(str_replace('_', ' ', $key));
+        // Convert "openai_api_key" to "OpenAI API Key"
+        // Convert "pii_encryption_key" to "PII Encryption Key"
+        // Convert "max_reviews_per_page" to "Max Reviews Per Page"
+        
+        // Define acronyms that should be all uppercase
+        $acronyms = ['openai', 'pii', 'api', 'id', 'url', 'http', 'https', 'ssl', 'tls', 'oauth', 'jwt'];
+        
+        // Split by underscore and capitalize each word
+        $words = explode('_', $key);
+        $formatted = [];
+        
+        foreach ($words as $word) {
+            $lowerWord = strtolower($word);
+            if (in_array($lowerWord, $acronyms, true)) {
+                $formatted[] = strtoupper($word);
+            } else {
+                $formatted[] = ucfirst($word);
+            }
+        }
+        
+        return implode(' ', $formatted);
     }
     
     private function getSettingsMessages(): array

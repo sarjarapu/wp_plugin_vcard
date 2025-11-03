@@ -61,16 +61,16 @@ final class PluginBootstrap
     
     /**
      * Initialize configuration management system
+     * Public so it can be called from ActivationHandler if needed
      */
-    private static function initializeConfigSystem(): void
+    public static function initializeConfigSystem(): void
     {
         try {
             // Check if Doctrine is available
             if (!class_exists(\Doctrine\ORM\EntityManager::class)) {
                 // Doctrine not installed - skip initialization
-                if (defined('WP_DEBUG') && WP_DEBUG) {
-                    error_log('Doctrine ORM not available - ConfigManager will not be initialized');
-                }
+                $logger = LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
+                $logger->warning('Doctrine ORM not available - ConfigManager will not be initialized');
                 return;
             }
             
@@ -102,9 +102,13 @@ final class PluginBootstrap
             }
         } catch (\Exception $e) {
             // Log error but don't fail initialization
-            if (function_exists('error_log')) {
-                error_log('Failed to initialize config system: ' . $e->getMessage());
-            }
+            $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
+            $logger->error('Failed to initialize config system', [
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
         }
     }
 
