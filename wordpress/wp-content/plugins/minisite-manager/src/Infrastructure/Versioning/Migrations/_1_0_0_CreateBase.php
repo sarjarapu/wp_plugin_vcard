@@ -17,16 +17,20 @@ class _1_0_0_CreateBase implements Migration
 
     public function description(): string
     {
+        // NOTE: Review table creation has been moved to Doctrine migrations
+        // Review operations are no longer handled by this migration
         return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), ' .
-               'minisite_reviews, minisite_bookmarks, minisite_payments, minisite_payment_history, ' .
-               'minisite_reservations + auto-cleanup event + seed dev data';
+               'minisite_bookmarks, minisite_payments, minisite_payment_history, ' .
+               'minisite_reservations + auto-cleanup event + seed dev data. ' .
+               'NOTE: minisite_reviews table is now created by Doctrine migrations (Version20251104000000)';
     }
 
     public function up(): void
     {
         global $wpdb;
         $minisites      = $wpdb->prefix . 'minisites';
-        $reviews        = $wpdb->prefix . 'minisite_reviews';
+        // NOTE: Reviews table is now managed by Doctrine migrations - do NOT create it here
+        // $reviews        = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
         $versions       = $wpdb->prefix . 'minisite_versions';
         $bookmarks      = $wpdb->prefix . 'minisite_bookmarks';
         $payments       = $wpdb->prefix . 'minisite_payments';
@@ -46,10 +50,21 @@ class _1_0_0_CreateBase implements Migration
         );
 
         // ——— reviews ———
+        // NOTE: Review table creation has been moved to Doctrine-based migrations.
+        // The old SQL-based table creation is commented out below.
+        // All review table operations should now use Doctrine migrations.
+        //
+        // Table creation: See Version20251104000000 in Doctrine migrations
+        // (Creates complete table with all MVP fields if table doesn't exist,
+        //  or adds new columns if table already exists)
+        //
+        // OLD SQL FILE LOADING - COMMENTED OUT - DO NOT USE
+        /*
         SqlLoader::loadAndExecute(
             'minisite_reviews.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
+        */
 
         // ——— bookmarks ———
         SqlLoader::loadAndExecute(
@@ -83,13 +98,15 @@ class _1_0_0_CreateBase implements Migration
             $minisites,
             'id'
         );
-        $this->addForeignKeyIfNotExists(
-            $reviews,
-            'fk_reviews_minisite_id',
-            'minisite_id',
-            $minisites,
-            'id'
-        );
+        // NOTE: Reviews table foreign key is now managed by Doctrine migrations
+        // $reviews = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
+        // $this->addForeignKeyIfNotExists(
+        //     $reviews,
+        //     'fk_reviews_minisite_id',
+        //     'minisite_id',
+        //     $minisites,
+        //     'id'
+        // );
         $this->addForeignKeyIfNotExists(
             $bookmarks,
             'fk_bookmarks_minisite_id',
@@ -328,8 +345,18 @@ class _1_0_0_CreateBase implements Migration
     }
 
     /**
-     * Insert a review into the database
+     * OLD METHOD - Insert a review using wpdb
+     *
+     * NOTE: This method has been DEPRECATED and COMMENTED OUT.
+     * All review processing, editing, and sample data creation should now use the
+     * Doctrine-based ReviewRepository mechanism through ReviewSeederService.
+     *
+     * This method is kept (commented) for reference only and should NOT be used.
+     *
+     * @deprecated Use ReviewSeederService or ReviewRepository instead
+     * @see \Minisite\Domain\Services\ReviewSeederService
      */
+    /*
     protected function insertReview(
         string $minisiteId,
         string $authorName,
@@ -359,13 +386,15 @@ class _1_0_0_CreateBase implements Migration
             array( '%s', '%s', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%d' )
         );
     }
+    */
 
     public function down(): void
     {
         global $wpdb;
         $minisites      = $wpdb->prefix . 'minisites';
         $versions       = $wpdb->prefix . 'minisite_versions';
-        $reviews        = $wpdb->prefix . 'minisite_reviews';
+        // NOTE: Reviews table is now managed by Doctrine migrations - do NOT drop it here
+        // $reviews        = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
         $bookmarks      = $wpdb->prefix . 'minisite_bookmarks';
         $payments       = $wpdb->prefix . 'minisite_payments';
         $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
@@ -378,7 +407,7 @@ class _1_0_0_CreateBase implements Migration
         db::query("DROP TABLE IF EXISTS {$paymentHistory}");
         db::query("DROP TABLE IF EXISTS {$payments}");
         db::query("DROP TABLE IF EXISTS {$bookmarks}");
-        db::query("DROP TABLE IF EXISTS {$reviews}");
+        // db::query("DROP TABLE IF EXISTS {$reviews}"); // COMMENTED OUT - Reviews table managed by Doctrine migrations
         db::query("DROP TABLE IF EXISTS {$versions}");
         db::query("DROP TABLE IF EXISTS {$minisites}");
     }
@@ -394,7 +423,8 @@ class _1_0_0_CreateBase implements Migration
     {
         global $wpdb;
         $minisitesT = $wpdb->prefix . 'minisites';
-        $reviewsT   = $wpdb->prefix . 'minisite_reviews';
+        // NOTE: Reviews table operations have been moved to Doctrine ReviewSeederService
+        // $reviewsT   = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine ReviewSeederService instead
 
         // Avoid duplicate seeding (check any of our seeded slugs)
         $exists = (int) db::get_var(
@@ -550,7 +580,51 @@ class _1_0_0_CreateBase implements Migration
         }
 
         // ——— Reviews (5 per minisite) ———
+        // NOTE: Review seeding now uses Doctrine-based ReviewSeederService
+        // All review operations use ReviewRepository through ReviewSeederService
+        if (!empty($acmeId) || !empty($lotusId) || !empty($greenId) || !empty($swiftId)) {
+            // Ensure Doctrine is initialized and ReviewRepository is available
+            // If not in global, try to initialize it (migration might run before PluginBootstrap)
+            if (!isset($GLOBALS['minisite_review_repository'])) {
+                // Try to initialize Doctrine if not already done
+                if (!isset($GLOBALS['minisite_entity_manager'])) {
+                    if (class_exists(\Doctrine\ORM\EntityManager::class)) {
+                        $GLOBALS['minisite_entity_manager'] =
+                            \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
+                    } else {
+                        error_log('Doctrine ORM not available - skipping review seeding');
+                        return;
+                    }
+                }
 
+                // Ensure Doctrine migrations have run (create reviews table if needed)
+                /** @var \Doctrine\ORM\EntityManager $em */
+                $em = $GLOBALS['minisite_entity_manager'];
+                $migrationRunner = new \Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner($em);
+                $migrationRunner->migrate();
+
+                // Create ReviewRepository
+                $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository(
+                    $em,
+                    $em->getClassMetadata(\Minisite\Domain\Entities\Review::class)
+                );
+                $GLOBALS['minisite_review_repository'] = $reviewRepo;
+            }
+
+            /** @var \Minisite\Infrastructure\Persistence\Repositories\ReviewRepositoryInterface $reviewRepo */
+            $reviewRepo = $GLOBALS['minisite_review_repository'];
+            $seeder = new \Minisite\Domain\Services\ReviewSeederService($reviewRepo);
+            $seeder->seedAllTestReviews([
+                'ACME' => $acmeId,
+                'LOTUS' => $lotusId,
+                'GREEN' => $greenId,
+                'SWIFT' => $swiftId,
+            ]);
+        }
+
+        // OLD REVIEW INSERTION CODE - COMMENTED OUT - DO NOT USE
+        // All review operations should use Doctrine ReviewRepository instead
+        /*
         if ($acmeId) {
             // ACME Dental reviews (5 total)
             $this->insertReview(
@@ -727,5 +801,7 @@ class _1_0_0_CreateBase implements Migration
                 'en-AU'
             );
         }
+        */
+        // END OF COMMENTED OUT REVIEW INSERTION CODE
     }
 }

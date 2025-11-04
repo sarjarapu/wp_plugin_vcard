@@ -101,6 +101,16 @@ final class PluginBootstrap
             if (is_admin()) {
                 \Minisite\Features\AppConfig\WordPress\ConfigAdminMenu::register();
             }
+
+            // Initialize ReviewRepository
+            // Create ReviewRepository instance directly (same pattern as ConfigRepository)
+            $reviewRepository = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository(
+                $em,
+                $em->getClassMetadata(\Minisite\Domain\Entities\Review::class)
+            );
+
+            // Store in global for easy access
+            $GLOBALS['minisite_review_repository'] = $reviewRepository;
         } catch (\Exception $e) {
             // Log error but don't fail initialization
             $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');

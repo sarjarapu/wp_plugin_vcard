@@ -176,14 +176,13 @@ final class WordPressMinisiteManager
      */
     public function getReviewsForMinisite(string $minisiteId): array
     {
-        global $wpdb;
-
-        // Return empty array if wpdb is not available (e.g., in test environment)
-        if (!$wpdb) {
+        // Use global ReviewRepository (initialized in PluginBootstrap)
+        if (!isset($GLOBALS['minisite_review_repository'])) {
             return [];
         }
 
-        $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository($wpdb);
+        /** @var \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository $reviewRepo */
+        $reviewRepo = $GLOBALS['minisite_review_repository'];
         return $reviewRepo->listApprovedForMinisite($minisiteId);
     }
 }

@@ -9,182 +9,286 @@ use Minisite\Domain\Entities\Review;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
-use ReflectionMethod;
-use ReflectionNamedType;
-use ReflectionParameter;
-use ReflectionType;
 
 #[CoversClass(Review::class)]
 final class ReviewTest extends TestCase
 {
-    public function testConstructorSignature_StrictContract(): void
+    public function testConstructorSetsDefaultValues(): void
     {
-        $ctor = new ReflectionMethod(Review::class, '__construct');
-        $params = $ctor->getParameters();
+        $review = new Review();
 
-        $expected = [
-            ['id', 'int', true],
-            ['minisiteId', 'int', false],
-            ['authorName', 'string', false],
-            ['authorUrl', 'string', true],
-            ['rating', 'float', false],
-            ['body', 'string', false],
-            ['locale', 'string', true],
-            ['visitedMonth', 'string', true],
-            ['source', 'string', false],
-            ['sourceId', 'string', true],
-            ['status', 'string', false],
-            ['createdAt', DateTimeImmutable::class, true],
-            ['updatedAt', DateTimeImmutable::class, true],
-            ['createdBy', 'int', true],
-        ];
-
-        $this->assertSame(count($expected), count($params), 'Constructor parameter count changed');
-
-        foreach ($params as $i => $param) {
-            [$name, $typeName, $allowsNull] = $expected[$i];
-            $this->assertSame($name, $param->getName(), "Param #$i name mismatch");
-            $this->assertNotNull($param->getType(), "Param #$i type is missing");
-            [$actualTypeName, $actualAllowsNull] = $this->normalizeType($param);
-            $this->assertSame($typeName, $actualTypeName, "Param #$i type mismatch");
-            $this->assertSame($allowsNull, $actualAllowsNull, "Param #$i nullability mismatch");
-        }
+        $this->assertNull($review->id);
+        $this->assertInstanceOf(DateTimeImmutable::class, $review->createdAt);
+        $this->assertInstanceOf(DateTimeImmutable::class, $review->updatedAt);
+        $this->assertSame('manual', $review->source);
+        $this->assertSame('approved', $review->status);
+        $this->assertFalse($review->isEmailVerified);
+        $this->assertFalse($review->isPhoneVerified);
+        $this->assertSame(0, $review->helpfulCount);
     }
 
-    public function testConstructSetsAllFieldsWithFullPayload(): void
+    public function testCanSetAllFields(): void
     {
         $now = new DateTimeImmutable('2025-01-01T00:00:00Z');
-        $later = new DateTimeImmutable('2025-01-02T00:00:00Z');
+        $published = new DateTimeImmutable('2025-01-02T00:00:00Z');
 
-        $r = new Review(
-            id: 1,
-            minisiteId: 42,
-            authorName: 'Alice',
-            authorUrl: 'https://example.com',
-            rating: 4.5,
-            body: 'Great service!',
-            locale: 'en-US',
-            visitedMonth: '2025-07',
-            source: 'google',
-            sourceId: 'g-123',
-            status: 'approved',
-            createdAt: $now,
-            updatedAt: $later,
-            createdBy: 10,
-        );
+        $review = new Review();
+        $review->id = 1;
+        $review->minisiteId = 'minisite-123';
+        $review->authorName = 'Alice Smith';
+        $review->authorEmail = 'alice@example.com';
+        $review->authorPhone = '+1234567890';
+        $review->authorUrl = 'https://example.com/alice';
+        $review->rating = 4.5;
+        $review->body = 'Great service!';
+        $review->language = 'en';
+        $review->locale = 'en-US';
+        $review->visitedMonth = '2025-01';
+        $review->source = 'google';
+        $review->sourceId = 'g-123';
+        $review->status = 'approved';
+        $review->isEmailVerified = true;
+        $review->isPhoneVerified = false;
+        $review->helpfulCount = 5;
+        $review->spamScore = 0.1;
+        $review->sentimentScore = 0.8;
+        $review->displayOrder = 1;
+        $review->publishedAt = $published;
+        $review->moderationReason = null;
+        $review->moderatedBy = null;
+        $review->createdAt = $now;
+        $review->updatedAt = $now;
+        $review->createdBy = 10;
 
-        $this->assertSame(1, $r->id);
-        $this->assertSame(42, $r->minisiteId);
-        $this->assertSame('Alice', $r->authorName);
-        $this->assertSame('https://example.com', $r->authorUrl);
-        $this->assertSame(4.5, $r->rating);
-        $this->assertSame('Great service!', $r->body);
-        $this->assertSame('en-US', $r->locale);
-        $this->assertSame('2025-07', $r->visitedMonth);
-        $this->assertSame('google', $r->source);
-        $this->assertSame('g-123', $r->sourceId);
-        $this->assertSame('approved', $r->status);
-        $this->assertSame($now, $r->createdAt);
-        $this->assertSame($later, $r->updatedAt);
-        $this->assertSame(10, $r->createdBy);
+        $this->assertSame(1, $review->id);
+        $this->assertSame('minisite-123', $review->minisiteId);
+        $this->assertSame('Alice Smith', $review->authorName);
+        $this->assertSame('alice@example.com', $review->authorEmail);
+        $this->assertSame('+1234567890', $review->authorPhone);
+        $this->assertSame('https://example.com/alice', $review->authorUrl);
+        $this->assertSame(4.5, $review->rating);
+        $this->assertSame('Great service!', $review->body);
+        $this->assertSame('en', $review->language);
+        $this->assertSame('en-US', $review->locale);
+        $this->assertSame('2025-01', $review->visitedMonth);
+        $this->assertSame('google', $review->source);
+        $this->assertSame('g-123', $review->sourceId);
+        $this->assertSame('approved', $review->status);
+        $this->assertTrue($review->isEmailVerified);
+        $this->assertFalse($review->isPhoneVerified);
+        $this->assertSame(5, $review->helpfulCount);
+        $this->assertSame(0.1, $review->spamScore);
+        $this->assertSame(0.8, $review->sentimentScore);
+        $this->assertSame(1, $review->displayOrder);
+        $this->assertSame($published, $review->publishedAt);
+        $this->assertSame($now, $review->createdAt);
+        $this->assertSame($now, $review->updatedAt);
+        $this->assertSame(10, $review->createdBy);
     }
 
     public function testOptionalFieldsCanBeNull(): void
     {
-        $r = new Review(
-            id: null,
-            minisiteId: 42,
-            authorName: 'Bob',
-            authorUrl: null,
-            rating: 5.0,
-            body: 'Awesome',
-            locale: null,
-            visitedMonth: null,
-            source: 'manual',
-            sourceId: null,
-            status: 'pending',
-            createdAt: null,
-            updatedAt: null,
-            createdBy: null,
-        );
-
-        $this->assertNull($r->id);
-        $this->assertNull($r->authorUrl);
-        $this->assertNull($r->locale);
-        $this->assertNull($r->visitedMonth);
-        $this->assertNull($r->sourceId);
-        $this->assertNull($r->createdAt);
-        $this->assertNull($r->updatedAt);
-        $this->assertNull($r->createdBy);
+        $review = new Review();
+        $review->minisiteId = 'minisite-456';
+        $review->authorName = 'Bob';
+        $review->rating = 5.0;
+        $review->body = 'Excellent!';
+        
+        // All optional fields should be nullable
+        $this->assertNull($review->authorEmail);
+        $this->assertNull($review->authorPhone);
+        $this->assertNull($review->authorUrl);
+        $this->assertNull($review->language);
+        $this->assertNull($review->locale);
+        $this->assertNull($review->visitedMonth);
+        $this->assertNull($review->sourceId);
+        $this->assertNull($review->spamScore);
+        $this->assertNull($review->sentimentScore);
+        $this->assertNull($review->displayOrder);
+        $this->assertNull($review->publishedAt);
+        $this->assertNull($review->moderationReason);
+        $this->assertNull($review->moderatedBy);
+        $this->assertNull($review->createdBy);
     }
 
-    #[DataProvider('dpTypeErrorsOnInvalidTypes')]
-    public function testTypeErrorsOnInvalidTypes(callable $factory): void
+    public function testMarkAsPublished(): void
     {
-        $this->expectException(\TypeError::class);
-        $factory();
+        $before = new DateTimeImmutable();
+        
+        $review = new Review();
+        $review->status = 'pending';
+        $review->markAsPublished();
+        
+        usleep(1000); // Small delay to ensure timestamp is different
+        $after = new DateTimeImmutable();
+        
+        $this->assertSame('approved', $review->status);
+        $this->assertNotNull($review->publishedAt);
+        $this->assertGreaterThanOrEqual($before, $review->publishedAt);
+        $this->assertLessThanOrEqual($after, $review->publishedAt);
+        $this->assertGreaterThanOrEqual($before, $review->updatedAt);
     }
 
-    public static function dpTypeErrorsOnInvalidTypes(): array
+    public function testMarkAsPublishedWithModerator(): void
     {
-        return [
-            'minisiteId must be int' => [function (): void {
-                /** @phpstan-ignore-next-line */
-                new Review(id: null, minisiteId: '42', authorName: 'A', authorUrl: null, rating: 1.0, body: 'x', locale: null, visitedMonth: null, source: 'manual', sourceId: null, status: 'pending', createdAt: null, updatedAt: null, createdBy: null);
-            }],
-            'authorName must be string' => [function (): void {
-                /** @phpstan-ignore-next-line */
-                new Review(id: null, minisiteId: 1, authorName: 123, authorUrl: null, rating: 1.0, body: 'x', locale: null, visitedMonth: null, source: 'manual', sourceId: null, status: 'pending', createdAt: null, updatedAt: null, createdBy: null);
-            }],
-            'rating must be float' => [function (): void {
-                /** @phpstan-ignore-next-line */
-                new Review(id: null, minisiteId: 1, authorName: 'A', authorUrl: null, rating: '5', body: 'x', locale: null, visitedMonth: null, source: 'manual', sourceId: null, status: 'pending', createdAt: null, updatedAt: null, createdBy: null);
-            }],
-            'body must be string' => [function (): void {
-                /** @phpstan-ignore-next-line */
-                new Review(id: null, minisiteId: 1, authorName: 'A', authorUrl: null, rating: 5.0, body: 111, locale: null, visitedMonth: null, source: 'manual', sourceId: null, status: 'pending', createdAt: null, updatedAt: null, createdBy: null);
-            }],
-            'status must be string' => [function (): void {
-                /** @phpstan-ignore-next-line */
-                new Review(id: null, minisiteId: 1, authorName: 'A', authorUrl: null, rating: 5.0, body: 'x', locale: null, visitedMonth: null, source: 'manual', sourceId: null, status: 0, createdAt: null, updatedAt: null, createdBy: null);
-            }],
-            'createdAt must be DateTimeImmutable|null' => [function (): void {
-                /** @phpstan-ignore-next-line */
-                new Review(id: null, minisiteId: 1, authorName: 'A', authorUrl: null, rating: 5.0, body: 'x', locale: null, visitedMonth: null, source: 'manual', sourceId: null, status: 'pending', createdAt: 'now', updatedAt: null, createdBy: null);
-            }],
-        ];
+        $review = new Review();
+        $review->status = 'pending';
+        $review->markAsPublished(42);
+        
+        $this->assertSame('approved', $review->status);
+        $this->assertNotNull($review->publishedAt);
+        $this->assertSame(42, $review->moderatedBy);
     }
 
-    #[DataProvider('dpCommonStatuses')]
-    public function testStoresCommonStatuses(string $status): void
+    public function testMarkAsRejected(): void
     {
-        $r = new Review(id: null, minisiteId: 1, authorName: 'A', authorUrl: null, rating: 5.0, body: 'x', locale: null, visitedMonth: null, source: 'manual', sourceId: null, status: $status, createdAt: null, updatedAt: null, createdBy: null);
-        $this->assertSame($status, $r->status);
+        $before = new DateTimeImmutable();
+        
+        $review = new Review();
+        $review->status = 'pending';
+        $review->markAsRejected('Spam content');
+        
+        usleep(1000);
+        $after = new DateTimeImmutable();
+        
+        $this->assertSame('rejected', $review->status);
+        $this->assertSame('Spam content', $review->moderationReason);
+        $this->assertGreaterThanOrEqual($before, $review->updatedAt);
+        $this->assertLessThanOrEqual($after, $review->updatedAt);
     }
 
-    public static function dpCommonStatuses(): array
+    public function testMarkAsRejectedWithModerator(): void
+    {
+        $review = new Review();
+        $review->status = 'pending';
+        $review->markAsRejected('Inappropriate', 99);
+        
+        $this->assertSame('rejected', $review->status);
+        $this->assertSame('Inappropriate', $review->moderationReason);
+        $this->assertSame(99, $review->moderatedBy);
+    }
+
+    public function testMarkAsFlagged(): void
+    {
+        $before = new DateTimeImmutable();
+        
+        $review = new Review();
+        $review->status = 'approved';
+        $review->markAsFlagged('Needs review');
+        
+        usleep(1000);
+        $after = new DateTimeImmutable();
+        
+        $this->assertSame('flagged', $review->status);
+        $this->assertSame('Needs review', $review->moderationReason);
+        $this->assertGreaterThanOrEqual($before, $review->updatedAt);
+        $this->assertLessThanOrEqual($after, $review->updatedAt);
+    }
+
+    public function testMarkAsFlaggedWithModerator(): void
+    {
+        $review = new Review();
+        $review->status = 'approved';
+        $review->markAsFlagged('Suspicious activity', 88);
+        
+        $this->assertSame('flagged', $review->status);
+        $this->assertSame('Suspicious activity', $review->moderationReason);
+        $this->assertSame(88, $review->moderatedBy);
+    }
+
+    public function testTouchUpdatesTimestamp(): void
+    {
+        $review = new Review();
+        $originalUpdatedAt = $review->updatedAt;
+        
+        usleep(1000); // Small delay
+        $review->touch();
+        
+        $this->assertGreaterThan($originalUpdatedAt, $review->updatedAt);
+    }
+
+    #[DataProvider('dpValidStatuses')]
+    public function testStoresValidStatuses(string $status): void
+    {
+        $review = new Review();
+        $review->status = $status;
+        
+        $this->assertSame($status, $review->status);
+    }
+
+    public static function dpValidStatuses(): array
     {
         return [
             ['pending'],
             ['approved'],
             ['rejected'],
+            ['flagged'],
         ];
     }
 
-    /**
-     * @return array{0:string,1:bool}
-     */
-    private function normalizeType(ReflectionParameter $param): array
+    #[DataProvider('dpValidSources')]
+    public function testStoresValidSources(string $source): void
     {
-        $type = $param->getType();
-        if (!$type instanceof ReflectionType) {
-            return ['mixed', true];
-        }
-        $allowsNull = $type->allowsNull();
-        if ($type instanceof ReflectionNamedType) {
-            $name = $type->getName();
-            return [$name, $allowsNull];
-        }
-        return ['complex', $allowsNull];
+        $review = new Review();
+        $review->source = $source;
+        
+        $this->assertSame($source, $review->source);
+    }
+
+    public static function dpValidSources(): array
+    {
+        return [
+            ['manual'],
+            ['google'],
+            ['yelp'],
+            ['facebook'],
+            ['other'],
+        ];
+    }
+
+    public function testVerificationFlagsWorkIndependently(): void
+    {
+        $review = new Review();
+        
+        // Initially both false
+        $this->assertFalse($review->isEmailVerified);
+        $this->assertFalse($review->isPhoneVerified);
+        
+        // Set email verified
+        $review->isEmailVerified = true;
+        $this->assertTrue($review->isEmailVerified);
+        $this->assertFalse($review->isPhoneVerified);
+        
+        // Set phone verified
+        $review->isPhoneVerified = true;
+        $this->assertTrue($review->isEmailVerified);
+        $this->assertTrue($review->isPhoneVerified);
+        
+        // Unset email
+        $review->isEmailVerified = false;
+        $this->assertFalse($review->isEmailVerified);
+        $this->assertTrue($review->isPhoneVerified);
+    }
+
+    public function testScoresCanBeNull(): void
+    {
+        $review = new Review();
+        
+        $this->assertNull($review->spamScore);
+        $this->assertNull($review->sentimentScore);
+        
+        // Set values
+        $review->spamScore = 0.5;
+        $review->sentimentScore = 0.7;
+        
+        $this->assertSame(0.5, $review->spamScore);
+        $this->assertSame(0.7, $review->sentimentScore);
+        
+        // Can be set back to null
+        $review->spamScore = null;
+        $review->sentimentScore = null;
+        
+        $this->assertNull($review->spamScore);
+        $this->assertNull($review->sentimentScore);
     }
 }
