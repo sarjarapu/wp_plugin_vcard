@@ -1,15 +1,15 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Rendering;
+namespace Minisite\Features\ConfigurationManagement\Rendering;
 
-use Minisite\Features\AppConfig\Domain\Entities\Config;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 
 /**
- * AppConfigRenderer
+ * ConfigurationManagementRenderer
  *
  * SINGLE RESPONSIBILITY: Render configuration admin UI templates
  */
-final class AppConfigRenderer
+final class ConfigurationManagementRenderer
 {
     /**
      * Register Timber template locations

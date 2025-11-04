@@ -1,11 +1,11 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Repositories;
+namespace Minisite\Features\ConfigurationManagement\Repositories;
 
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
-use Minisite\Features\AppConfig\Domain\Entities\Config;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Handlers;
+namespace Minisite\Features\ConfigurationManagement\Handlers;
 
-use Minisite\Features\AppConfig\Commands\SaveConfigCommand;
-use Minisite\Features\AppConfig\Services\AppConfigService;
+use Minisite\Features\ConfigurationManagement\Commands\SaveConfigCommand;
+use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
 
 /**
  * SaveConfigHandler
@@ -13,7 +13,7 @@ use Minisite\Features\AppConfig\Services\AppConfigService;
 final class SaveConfigHandler
 {
     public function __construct(
-        private AppConfigService $configService
+        private ConfigurationManagementService $configService
     ) {
     }
 

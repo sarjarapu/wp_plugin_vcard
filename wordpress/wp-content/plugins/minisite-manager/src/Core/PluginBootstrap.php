@@ -80,7 +80,7 @@ final class PluginBootstrap
                     \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
             }
 
-            // Note: ConfigManager initialization is now handled by AppConfigFeature
+            // Note: ConfigManager initialization is now handled by ConfigurationManagementFeature
             // The feature will initialize and store the service in GLOBALS for backward compatibility
 
             // Initialize ReviewRepository

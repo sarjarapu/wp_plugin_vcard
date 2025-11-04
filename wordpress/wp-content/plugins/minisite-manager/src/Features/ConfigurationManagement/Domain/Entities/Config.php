@@ -1,11 +1,11 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Domain\Entities;
+namespace Minisite\Features\ConfigurationManagement\Domain\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
 use Minisite\Infrastructure\Security\ConfigEncryption;
 
-#[ORM\Entity(repositoryClass: \Minisite\Features\AppConfig\Repositories\ConfigRepository::class)]
+#[ORM\Entity(repositoryClass: \Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository::class)]
 #[ORM\Table(name: 'minisite_config')]
 final class Config
 {

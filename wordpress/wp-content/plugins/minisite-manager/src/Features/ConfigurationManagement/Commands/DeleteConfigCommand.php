@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Commands;
+namespace Minisite\Features\ConfigurationManagement\Commands;
 
 /**
  * DeleteConfigCommand

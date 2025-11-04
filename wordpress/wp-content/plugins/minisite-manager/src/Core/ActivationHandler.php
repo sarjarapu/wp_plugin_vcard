@@ -90,7 +90,7 @@ final class ActivationHandler
         }
 
         try {
-            $seeder = new \Minisite\Infrastructure\Config\ConfigSeeder();
+            $seeder = new \Minisite\Features\ConfigurationManagement\Services\ConfigSeeder();
             $seeder->seedDefaults($GLOBALS['minisite_config_manager']);
         } catch (\Exception $e) {
             // Log error with full details

@@ -1,21 +1,21 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Services;
+namespace Minisite\Features\ConfigurationManagement\Services;
 
-use Minisite\Features\AppConfig\Domain\Entities\Config;
-use Minisite\Features\AppConfig\Repositories\ConfigRepositoryInterface;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
+use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepositoryInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
 /**
- * AppConfig Service
+ * ConfigurationManagement Service
  *
  * SINGLE RESPONSIBILITY: Business logic for application configuration management
  * - Handles configuration CRUD operations
  * - Manages in-memory cache
  * - Provides typed accessors
  */
-class AppConfigService
+class ConfigurationManagementService
 {
     /**
      * In-memory cache (static across all instances)
@@ -33,7 +33,7 @@ class AppConfigService
     public function __construct(
         private ConfigRepositoryInterface $repository
     ) {
-        $this->logger = LoggingServiceProvider::getFeatureLogger('app-config-service');
+        $this->logger = LoggingServiceProvider::getFeatureLogger('configuration-management-service');
     }
 
     /**

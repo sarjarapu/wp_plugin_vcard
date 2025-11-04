@@ -1,23 +1,23 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Hooks;
+namespace Minisite\Features\ConfigurationManagement\Hooks;
 
-use Minisite\Features\AppConfig\Controllers\AppConfigController;
-use Minisite\Features\AppConfig\Commands\DeleteConfigCommand;
-use Minisite\Features\AppConfig\Handlers\DeleteConfigHandler;
+use Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController;
+use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
+use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
 
 /**
- * AppConfigHooks
+ * ConfigurationManagementHooks
  *
  * SINGLE RESPONSIBILITY: WordPress hook registration and routing for configuration management
  * - Registers WordPress admin menu hooks
  * - Handles admin page rendering
  * - Delegates to controller
  */
-final class AppConfigHooks
+final class ConfigurationManagementHooks
 {
     public function __construct(
-        private AppConfigController $controller,
+        private ConfigurationManagementController $controller,
         private DeleteConfigHandler $deleteHandler
     ) {
     }

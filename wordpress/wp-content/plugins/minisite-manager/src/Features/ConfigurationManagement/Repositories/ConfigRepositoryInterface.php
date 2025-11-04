@@ -1,8 +1,8 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Repositories;
+namespace Minisite\Features\ConfigurationManagement\Repositories;
 
-use Minisite\Features\AppConfig\Domain\Entities\Config;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 
 interface ConfigRepositoryInterface
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Minisite\Infrastructure\Config;
+namespace Minisite\Features\ConfigurationManagement\Services;
 
-use Minisite\Features\AppConfig\Services\AppConfigService;
+use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
@@ -19,7 +19,7 @@ class ConfigSeeder
      * Seed default configurations
      * Only creates missing configs (preserves existing values)
      */
-    public function seedDefaults(AppConfigService $configManager): void
+    public function seedDefaults(ConfigurationManagementService $configManager): void
     {
         $this->logger->info("seedDefaults() entry");
 

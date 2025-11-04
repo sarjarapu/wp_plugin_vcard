@@ -1,18 +1,18 @@
 <?php
 
-namespace Minisite\Features\AppConfig\Controllers;
+namespace Minisite\Features\ConfigurationManagement\Controllers;
 
-use Minisite\Features\AppConfig\Handlers\DeleteConfigHandler;
-use Minisite\Features\AppConfig\Handlers\SaveConfigHandler;
-use Minisite\Features\AppConfig\Commands\SaveConfigCommand;
-use Minisite\Features\AppConfig\Commands\DeleteConfigCommand;
-use Minisite\Features\AppConfig\Services\AppConfigService;
-use Minisite\Features\AppConfig\Rendering\AppConfigRenderer;
+use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
+use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
+use Minisite\Features\ConfigurationManagement\Commands\SaveConfigCommand;
+use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
+use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
+use Minisite\Features\ConfigurationManagement\Rendering\ConfigurationManagementRenderer;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
 /**
- * AppConfigController
+ * ConfigurationManagementController
  *
  * SINGLE RESPONSIBILITY: HTTP request orchestration for configuration management
  * - Handles POST requests
@@ -20,17 +20,17 @@ use Psr\Log\LoggerInterface;
  * - Delegates to handlers
  * - Coordinates rendering
  */
-final class AppConfigController
+final class ConfigurationManagementController
 {
     private LoggerInterface $logger;
 
     public function __construct(
         private SaveConfigHandler $saveHandler,
         private DeleteConfigHandler $deleteHandler,
-        private AppConfigService $configService,
-        private AppConfigRenderer $renderer
+        private ConfigurationManagementService $configService,
+        private ConfigurationManagementRenderer $renderer
     ) {
-        $this->logger = LoggingServiceProvider::getFeatureLogger('app-config-controller');
+        $this->logger = LoggingServiceProvider::getFeatureLogger('configuration-management-controller');
     }
 
     /**
