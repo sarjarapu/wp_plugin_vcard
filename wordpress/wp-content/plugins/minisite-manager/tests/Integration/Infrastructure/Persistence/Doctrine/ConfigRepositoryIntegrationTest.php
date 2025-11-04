@@ -101,8 +101,12 @@ final class ConfigRepositoryIntegrationTest extends TestCase
             $tablePrefixListener
         );
         
+        // Drop tables and migration tracking to ensure clean slate
+        // This ensures migrations will run fresh every time
+        $this->cleanupTables();
+        
         // Ensure migrations have run (table exists)
-        // Note: This is idempotent - won't re-run if already executed
+        // Now that tables are dropped, migrations will run fresh
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
         
@@ -161,6 +165,24 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         
         $this->em->close();
         parent::tearDown();
+    }
+    
+    /**
+     * Drop tables and migration tracking to ensure clean slate
+     * This ensures migrations can run fresh before each test
+     */
+    private function cleanupTables(): void
+    {
+        $connection = $this->em->getConnection();
+        $tables = ['wp_minisite_config', 'wp_minisite_migrations'];
+        
+        foreach ($tables as $table) {
+            try {
+                $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
+            } catch (\Exception $e) {
+                // Ignore errors - table might not exist
+            }
+        }
     }
     
     /**
