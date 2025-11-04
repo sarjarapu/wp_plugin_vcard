@@ -42,8 +42,8 @@
       <directory>tests/Integration</directory>
       <exclude>tests/Integration/Infrastructure/Migrations/Doctrine/AbstractDoctrineMigrationTest.php</exclude>
     </testsuite>
-    <testsuite name="MinisiteEdit">
-      <directory>tests/Unit/Features/MinisiteEdit</directory>
+    <testsuite name="feat">
+      <directory>tests/Unit/Features/VersionManagement</directory>
     </testsuite>
     <testsuite name="Core">
       <directory>tests/Unit/Core</directory>
@@ -53,6 +53,9 @@
     </testsuite>
     <testsuite name="Features">
       <directory>tests/Unit/Features</directory>
+    </testsuite>
+    <testsuite name="Infrastructure">
+      <directory>tests/Unit/Infrastructure</directory>
     </testsuite>
   </testsuites>
 
