@@ -6,32 +6,9 @@ This document outlines the standardized architecture pattern for creating new fe
 
 The plugin follows a feature-based architecture where each major functionality is organized as a self-contained feature with clear separation of concerns.
 
-## Feature Structure
+> **📋 Structure Standards:** For complete directory structure, organization patterns, and file locations, see **[Project Structure Standards](../../project/structure-analysis.md)**.
 
-Each feature follows this standardized directory structure:
-
-```
-src/Features/{FeatureName}/
-├── {FeatureName}Feature.php              # Main bootstrap class
-├── Controllers/                          # HTTP request handlers
-│   └── {Feature}Controller.php           # Main controller
-├── Services/                             # Business logic layer
-│   └── {Feature}Service.php              # Core business logic
-├── Hooks/                               # WordPress hook registration
-│   ├── {Feature}Hooks.php               # Main hooks class
-│   └── {Feature}HooksFactory.php        # Dependency injection factory
-├── WordPress/                           # WordPress-specific utilities
-│   └── WordPress{Feature}Manager.php    # WordPress API wrapper
-├── Http/                               # HTTP-related classes
-│   ├── {Feature}RequestHandler.php      # Request processing
-│   └── {Feature}ResponseHandler.php     # Response handling
-├── Rendering/                          # Template rendering
-│   └── {Feature}Renderer.php            # Template renderer
-├── Handlers/                           # Command handlers
-│   └── {Action}Handler.php              # Specific action handlers
-└── Commands/                           # Command pattern implementations
-    └── {Action}Command.php              # Command objects
-```
+> **💻 Code Examples:** For concrete implementation examples, see **[Feature Code Examples](../../development/feature-code-examples.md)**.
 
 ## Core Components
 

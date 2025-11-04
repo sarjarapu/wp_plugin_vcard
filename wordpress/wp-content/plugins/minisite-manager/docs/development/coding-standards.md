@@ -29,28 +29,9 @@ The Minisite Manager plugin follows WordPress Coding Standards (WPCS) with addit
 
 ## File Structure
 
-### Directory Organization
+> **📋 For complete project structure standards and organization patterns, see [Project Structure Standards](../../project/structure-analysis.md)**
 
-```
-minisite-manager/
-├── src/                          # Source code
-│   ├── Application/              # Application layer
-│   │   ├── Controllers/          # Request handlers
-│   │   ├── Http/                 # HTTP-related classes
-│   │   └── Rendering/            # View rendering
-│   ├── Domain/                   # Business logic
-│   │   ├── Entities/             # Domain entities
-│   │   ├── Services/             # Domain services
-│   │   └── ValueObjects/         # Value objects
-│   └── Infrastructure/           # External concerns
-│       ├── Persistence/          # Database layer
-│       ├── Utils/                # Utility classes
-│       └── Versioning/           # Version management
-├── tests/                        # Test files
-├── templates/                    # Twig templates
-├── docs/                         # Documentation
-└── scripts/                      # Build and utility scripts
-```
+The project follows a feature-based architecture where each feature is self-contained with all related code co-located.
 
 ### File Naming
 

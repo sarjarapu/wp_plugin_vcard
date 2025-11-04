@@ -480,6 +480,11 @@ data/seeds/reviews/
 
 **All review-related code is in one place.** Easy to find, understand, modify, and test.
 
+## Code Examples
+
+For concrete implementation examples of these patterns, see:
+- **[Feature Code Examples](../development/feature-code-examples.md)** - Complete code samples for Command/Handler, Factory, Service, Repository, and Controller patterns
+
 ## Summary
 
 This structure prioritizes:
