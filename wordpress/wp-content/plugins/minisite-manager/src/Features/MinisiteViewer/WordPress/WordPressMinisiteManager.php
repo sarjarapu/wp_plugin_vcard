@@ -181,7 +181,7 @@ final class WordPressMinisiteManager
             return [];
         }
 
-        /** @var \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository $reviewRepo */
+        /** @var \Minisite\Features\ReviewManagement\Repositories\ReviewRepository $reviewRepo */
         $reviewRepo = $GLOBALS['minisite_review_repository'];
         return $reviewRepo->listApprovedForMinisite($minisiteId);
     }

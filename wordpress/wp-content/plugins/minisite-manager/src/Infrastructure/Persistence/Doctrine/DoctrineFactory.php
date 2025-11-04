@@ -47,8 +47,12 @@ class DoctrineFactory
         ]);
 
         // Configure Doctrine
+        // Include both legacy Domain/Entities and new feature-based entities
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [__DIR__ . '/../../../Domain/Entities'],
+            paths: [
+                __DIR__ . '/../../../Domain/Entities',
+                __DIR__ . '/../../../Features/ReviewManagement/Domain/Entities',
+            ],
             isDevMode: defined('WP_DEBUG') && WP_DEBUG
         );
 

@@ -67,8 +67,12 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
         // Create EntityManager with MySQL connection
         // In dev mode, Doctrine automatically uses ArrayCache if no cache is provided
         // We don't need to manually configure Symfony cache for tests
+        // Include both legacy Domain/Entities and new feature-based entities
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [__DIR__ . '/../../../../src/Domain/Entities'],
+            paths: [
+                __DIR__ . '/../../../../src/Domain/Entities',
+                __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
+            ],
             isDevMode: true
         );
         

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Infrastructure\Persistence\Doctrine;
 
-use Minisite\Domain\Entities\Review;
-use Minisite\Infrastructure\Persistence\Repositories\ReviewRepository;
+use Minisite\Features\ReviewManagement\Domain\Entities\Review;
+use Minisite\Features\ReviewManagement\Repositories\ReviewRepository;
 use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
@@ -60,7 +60,10 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         
         // Create EntityManager with MySQL connection
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [__DIR__ . '/../../../../src/Domain/Entities'],
+            paths: [
+                __DIR__ . '/../../../../src/Domain/Entities',
+                __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
+            ],
             isDevMode: true
         );
         
