@@ -609,6 +609,14 @@ function wp_unslash($value)
     
     function get_current_user_id()
     {
+        // Check for test-specific mock override (for Brain Monkey compatibility)
+        if (isset($GLOBALS['_test_mock_get_current_user_id'])) {
+            $callback = $GLOBALS['_test_mock_get_current_user_id'];
+            if (is_callable($callback)) {
+                return $callback();
+            }
+            return $GLOBALS['_test_mock_get_current_user_id'];
+        }
         return 1;
     }
     

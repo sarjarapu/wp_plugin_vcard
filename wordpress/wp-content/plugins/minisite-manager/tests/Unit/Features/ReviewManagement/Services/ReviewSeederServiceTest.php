@@ -28,17 +28,19 @@ final class ReviewSeederServiceTest extends TestCase
         \Brain\Monkey\setUp();
 
         $this->reviewRepository = $this->createMock(ReviewRepositoryInterface::class);
+        
+        // Use global variable approach instead of Brain Monkey for get_current_user_id
+        // since it's already defined in bootstrap.php before Brain Monkey can intercept
+        $GLOBALS['_test_mock_get_current_user_id'] = 0;
+        
         $this->service = new ReviewSeederService($this->reviewRepository);
-
-        // Mock WordPress function
-        Functions\when('get_current_user_id')->justReturn(0);
-        Functions\when('date')->alias(function ($format) {
-            return date($format);
-        });
     }
 
     protected function tearDown(): void
     {
+        // Clean up global mocks
+        unset($GLOBALS['_test_mock_get_current_user_id']);
+        
         \Brain\Monkey\tearDown();
         parent::tearDown();
     }
@@ -62,17 +64,13 @@ final class ReviewSeederServiceTest extends TestCase
      */
     public function test_insertReview_creates_review_with_required_fields(): void
     {
-        $review = new Review();
-        $review->id = 1;
-
         $this->reviewRepository
             ->expects($this->once())
             ->method('save')
             ->willReturnCallback(function (Review $review) {
                 $review->id = 1;
                 return $review;
-            })
-            ->willReturn($review);
+            });
 
         $result = $this->service->insertReview(
             'minisite-123',
@@ -93,16 +91,12 @@ final class ReviewSeederServiceTest extends TestCase
      */
     public function test_insertReview_sets_default_values(): void
     {
-        $review = new Review();
-        $review->id = 1;
-
         $this->reviewRepository
             ->method('save')
             ->willReturnCallback(function (Review $review) {
                 $review->id = 1;
                 return $review;
-            })
-            ->willReturn($review);
+            });
 
         $result = $this->service->insertReview(
             'minisite-123',
@@ -128,16 +122,12 @@ final class ReviewSeederServiceTest extends TestCase
      */
     public function test_insertReview_with_optional_fields(): void
     {
-        $review = new Review();
-        $review->id = 1;
-
         $this->reviewRepository
             ->method('save')
             ->willReturnCallback(function (Review $review) {
                 $review->id = 1;
                 return $review;
-            })
-            ->willReturn($review);
+            });
 
         $result = $this->service->insertReview(
             'minisite-123',
@@ -192,18 +182,18 @@ final class ReviewSeederServiceTest extends TestCase
      */
     public function test_insertReview_with_logged_in_user(): void
     {
-        Functions\when('get_current_user_id')->justReturn(42);
-
-        $review = new Review();
-        $review->id = 1;
+        // Set user ID before creating service
+        $GLOBALS['_test_mock_get_current_user_id'] = 42;
+        
+        // Recreate service to pick up the new user ID
+        $this->service = new ReviewSeederService($this->reviewRepository);
 
         $this->reviewRepository
             ->method('save')
             ->willReturnCallback(function (Review $review) {
                 $review->id = 1;
                 return $review;
-            })
-            ->willReturn($review);
+            });
 
         $result = $this->service->insertReview(
             'minisite-123',
