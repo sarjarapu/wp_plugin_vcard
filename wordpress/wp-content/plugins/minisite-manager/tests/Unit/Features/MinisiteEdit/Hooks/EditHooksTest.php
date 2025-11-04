@@ -6,6 +6,7 @@ use Minisite\Features\MinisiteEdit\Hooks\EditHooks;
 use Minisite\Features\MinisiteEdit\Controllers\EditController;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
 
@@ -33,7 +34,10 @@ class EditHooksTest extends TestCase
             }
         };
         
-        $this->hooks = new EditHooks($this->mockEditController, $this->mockWordPressManager, $stubMinisitePageController);
+        // Use TestTerminationHandler so exit doesn't terminate tests
+        $terminationHandler = new TestTerminationHandler();
+        
+        $this->hooks = new EditHooks($this->mockEditController, $this->mockWordPressManager, $stubMinisitePageController, $terminationHandler);
     }
 
     protected function tearDown(): void
@@ -91,13 +95,12 @@ class EditHooksTest extends TestCase
                 return $default;
             });
 
-        // Controller now uses TerminationHandlerInterface which is testable
-        // In production, it calls exit(). In tests, we inject TestTerminationHandler
-        // which does nothing, allowing tests to continue.
+        // Hook handles termination via TerminationHandlerInterface
+        // In production: calls exit(). In tests: TestTerminationHandler does nothing
         $this->mockEditController->expects($this->once())
             ->method('handleEdit');
 
-        // Call handleEditRoutes - controller handles termination internally
+        // Call handleEditRoutes - hook handles termination after controller
         // but won't exit in tests due to TestTerminationHandler injection
         $this->hooks->handleEditRoutes();
     }

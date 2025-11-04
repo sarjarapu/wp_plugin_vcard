@@ -42,22 +42,22 @@ class EditHooksFactory
         // Create form security helper
         $formSecurityHelper = new FormSecurityHelper($wordPressManager);
 
-        // Create controller
-        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
-        
+        // Create controller (no termination handler needed - hook handles it)
         $editController = new EditController(
             $editService,
             $editRenderer,
             $wordPressManager,
-            $formSecurityHelper,
-            $terminationHandler
+            $formSecurityHelper
         );
 
         // Get MinisiteViewer controller for preview delegation
         $viewHooks = ViewHooksFactory::create();
         $minisiteViewerController = $viewHooks->getController();
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new EditHooks($editController, $wordPressManager, $minisiteViewerController);
+        return new EditHooks($editController, $wordPressManager, $minisiteViewerController, $terminationHandler);
     }
 }
