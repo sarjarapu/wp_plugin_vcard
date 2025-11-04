@@ -40,7 +40,7 @@ class VersionResponseHandler
             $redirectUrl .= '?redirect_to=' . urlencode($redirectTo);
         }
         $this->wordPressManager->redirect($redirectUrl);
-        exit;
+        // exit; // Removed - handled by WordPressVersionManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
     }
 
     /**
@@ -49,7 +49,7 @@ class VersionResponseHandler
     public function redirectToSites(): void
     {
         $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
-        exit;
+        // exit; // Removed - handled by WordPressVersionManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
     }
 
     /**

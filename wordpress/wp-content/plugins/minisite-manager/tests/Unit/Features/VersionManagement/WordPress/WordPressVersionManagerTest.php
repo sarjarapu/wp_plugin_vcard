@@ -3,6 +3,7 @@
 namespace Minisite\Features\VersionManagement\WordPress;
 
 use PHPUnit\Framework\TestCase;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 
 /**
  * Test for WordPressVersionManager
@@ -13,7 +14,8 @@ class WordPressVersionManagerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->wordPressManager = new WordPressVersionManager();
+        $terminationHandler = new TestTerminationHandler();
+        $this->wordPressManager = new WordPressVersionManager($terminationHandler);
         $this->setupWordPressMocks();
     }
 

@@ -24,8 +24,11 @@ class NewMinisiteHooksFactory
      */
     public static function create(): NewMinisiteHooks
     {
-        // Create WordPress manager
-        $wordPressManager = new WordPressNewMinisiteManager();
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+        
+        // Create WordPress manager (requires TerminationHandlerInterface)
+        $wordPressManager = new WordPressNewMinisiteManager($terminationHandler);
 
         // Create service
         $newMinisiteService = new NewMinisiteService($wordPressManager);
@@ -49,10 +52,10 @@ class NewMinisiteHooksFactory
             $formSecurityHelper
         );
 
-        // Create termination handler for hook
-        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+        // Create termination handler for hook (separate instance for hook)
+        $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
 
         // Create and return hooks
-        return new NewMinisiteHooks($newMinisiteController, $wordPressManager, $terminationHandler);
+        return new NewMinisiteHooks($newMinisiteController, $wordPressManager, $hookTerminationHandler);
     }
 }

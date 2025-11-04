@@ -25,8 +25,11 @@ class EditHooksFactory
      */
     public static function create(): EditHooks
     {
-        // Create WordPress manager
-        $wordPressManager = new WordPressEditManager();
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+        
+        // Create WordPress manager (requires TerminationHandlerInterface)
+        $wordPressManager = new WordPressEditManager($terminationHandler);
 
         // Create service
         $editService = new EditService($wordPressManager);

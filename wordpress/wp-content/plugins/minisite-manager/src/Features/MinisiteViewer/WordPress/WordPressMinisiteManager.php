@@ -2,10 +2,12 @@
 
 namespace Minisite\Features\MinisiteViewer\WordPress;
 
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress Minisite Manager
@@ -15,10 +17,20 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
  * - Handles WordPress database interactions
  * - Provides clean interface for minisite operations
  */
-final class WordPressMinisiteManager
+final class WordPressMinisiteManager extends BaseWordPressManager
 {
     private ?MinisiteRepository $repository = null;
     private ?VersionRepository $versionRepository = null;
+
+    /**
+     * Constructor
+     *
+     * @param TerminationHandlerInterface $terminationHandler Handler for terminating script execution
+     */
+    public function __construct(TerminationHandlerInterface $terminationHandler)
+    {
+        parent::__construct($terminationHandler);
+    }
 
     /**
      * Get minisite repository instance
@@ -114,14 +126,12 @@ final class WordPressMinisiteManager
 
     /**
      * Redirect to URL
-     *
-     * @param string $url
-     * @return void
+     * Uses base class redirect() method which handles termination
      */
-    public function redirect(string $url): void
+    public function redirect(string $url, int $status = 302): void
     {
-        wp_redirect($url);
-        exit;
+        parent::redirect($url, $status);
+        // exit; // Removed - handled by BaseWordPressManager::redirect() via TerminationHandler
     }
 
     /**

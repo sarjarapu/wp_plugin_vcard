@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Minisite\Features\MinisiteListing\WordPress;
 
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress Listing Manager
@@ -15,13 +17,19 @@ use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
  * - Provides WordPress-specific data formatting
  * - Acts as a bridge between the listing service and WordPress
  */
-final class WordPressListingManager
+final class WordPressListingManager extends BaseWordPressManager
 {
     private MinisiteRepository $minisiteRepository;
     private VersionRepository $versionRepository;
 
-    public function __construct()
+    /**
+     * Constructor
+     *
+     * @param TerminationHandlerInterface $terminationHandler Handler for terminating script execution
+     */
+    public function __construct(TerminationHandlerInterface $terminationHandler)
     {
+        parent::__construct($terminationHandler);
         global $wpdb;
         $this->minisiteRepository = new MinisiteRepository($wpdb);
         $this->versionRepository = new VersionRepository($wpdb);
@@ -61,10 +69,12 @@ final class WordPressListingManager
 
     /**
      * Redirect to URL
+     * Uses base class redirect() method which handles termination
      */
     public function redirect(string $location, int $status = 302): void
     {
-        wp_redirect($location, $status);
+        parent::redirect($location, $status);
+        // exit; // Removed - handled by BaseWordPressManager::redirect() via TerminationHandler
     }
 
     /**

@@ -25,7 +25,7 @@ final class AuthResponseHandler
     public function redirect(string $url): void
     {
         $this->wordPressManager->redirect($url);
-        exit;
+        // exit; // Removed - handled by WordPressUserManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
     }
 
     /**

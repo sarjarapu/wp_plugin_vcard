@@ -25,8 +25,11 @@ final class ListingHooksFactory
      */
     public static function create(): ListingHooks
     {
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+        
         // Create services
-        $listingManager = new WordPressListingManager();
+        $listingManager = new WordPressListingManager($terminationHandler);
         $listingService = new MinisiteListingService($listingManager);
 
         // Create handlers
@@ -47,10 +50,10 @@ final class ListingHooksFactory
             $listingManager
         );
 
-        // Create termination handler for hook
-        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+        // Create termination handler for hook (separate instance for hook)
+        $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
 
         // Create and return hooks
-        return new ListingHooks($listingController, $terminationHandler);
+        return new ListingHooks($listingController, $hookTerminationHandler);
     }
 }

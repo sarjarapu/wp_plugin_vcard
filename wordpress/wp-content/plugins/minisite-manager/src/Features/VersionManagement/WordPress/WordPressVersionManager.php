@@ -2,13 +2,25 @@
 
 namespace Minisite\Features\VersionManagement\WordPress;
 
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress-specific utilities for version management
  */
-class WordPressVersionManager implements WordPressManagerInterface
+class WordPressVersionManager extends BaseWordPressManager implements WordPressManagerInterface
 {
+    /**
+     * Constructor
+     *
+     * @param TerminationHandlerInterface $terminationHandler Handler for terminating script execution
+     */
+    public function __construct(TerminationHandlerInterface $terminationHandler)
+    {
+        parent::__construct($terminationHandler);
+    }
+
     /**
      * Check if user is logged in
      */
@@ -95,10 +107,12 @@ class WordPressVersionManager implements WordPressManagerInterface
 
     /**
      * Redirect to URL
+     * Uses base class redirect() method which handles termination
      */
     public function redirect(string $location, int $status = 302): void
     {
-        wp_redirect($location, $status);
+        parent::redirect($location, $status);
+        // exit; // Removed - handled by BaseWordPressManager::redirect() via TerminationHandler
     }
 
     /**

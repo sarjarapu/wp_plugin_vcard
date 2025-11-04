@@ -28,8 +28,11 @@ class PublishHooksFactory
      */
     public static function create(): PublishHooks
     {
-        // Create WordPress manager
-        $wordPressManager = new WordPressPublishManager();
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+        
+        // Create WordPress manager (requires TerminationHandlerInterface)
+        $wordPressManager = new WordPressPublishManager($terminationHandler);
 
         // Create services
         $slugAvailabilityService = new SlugAvailabilityService($wordPressManager);
@@ -63,10 +66,10 @@ class PublishHooksFactory
             $reservationService
         );
 
-        // Create termination handler for hook
-        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+        // Create termination handler for hook (separate instance for hook)
+        $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
 
         // Create and return hooks
-        return new PublishHooks($publishController, $wordPressManager, $wooCommerceIntegration, $terminationHandler);
+        return new PublishHooks($publishController, $wordPressManager, $wooCommerceIntegration, $hookTerminationHandler);
     }
 }
