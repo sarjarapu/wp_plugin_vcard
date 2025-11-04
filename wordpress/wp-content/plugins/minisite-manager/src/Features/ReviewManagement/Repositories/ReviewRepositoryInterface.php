@@ -52,4 +52,3 @@ interface ReviewRepositoryInterface
      */
     public function countByStatusForMinisite(string $minisiteId, string $status): int;
 }
-

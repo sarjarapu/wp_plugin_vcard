@@ -150,4 +150,3 @@ final class Review
         $this->updatedAt = new \DateTimeImmutable();
     }
 }
-

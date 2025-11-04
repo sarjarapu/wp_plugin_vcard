@@ -28,4 +28,3 @@ final class ReviewHooks
         // When review management UI is added, routes and handlers will be registered here
     }
 }
-

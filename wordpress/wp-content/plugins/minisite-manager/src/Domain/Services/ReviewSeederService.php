@@ -136,21 +136,38 @@ class ReviewSeederService
         $review->sourceId = $reviewData['sourceId'] ?? null;
 
         // Verification flags
-        $review->isEmailVerified = isset($reviewData['isEmailVerified']) ? (bool) $reviewData['isEmailVerified'] : false;
-        $review->isPhoneVerified = isset($reviewData['isPhoneVerified']) ? (bool) $reviewData['isPhoneVerified'] : false;
+        $review->isEmailVerified = isset($reviewData['isEmailVerified'])
+            ? (bool) $reviewData['isEmailVerified']
+            : false;
+        $review->isPhoneVerified = isset($reviewData['isPhoneVerified'])
+            ? (bool) $reviewData['isPhoneVerified']
+            : false;
 
         // Engagement metrics
-        $review->helpfulCount = isset($reviewData['helpfulCount']) ? (int) $reviewData['helpfulCount'] : 0;
-        $review->spamScore = isset($reviewData['spamScore']) && $reviewData['spamScore'] !== null ? (float) $reviewData['spamScore'] : null;
-        $review->sentimentScore = isset($reviewData['sentimentScore']) && $reviewData['sentimentScore'] !== null ? (float) $reviewData['sentimentScore'] : null;
+        $review->helpfulCount = isset($reviewData['helpfulCount'])
+            ? (int) $reviewData['helpfulCount']
+            : 0;
+        $review->spamScore = isset($reviewData['spamScore']) && $reviewData['spamScore'] !== null
+            ? (float) $reviewData['spamScore']
+            : null;
+        $review->sentimentScore = isset($reviewData['sentimentScore'])
+            && $reviewData['sentimentScore'] !== null
+            ? (float) $reviewData['sentimentScore']
+            : null;
 
         // Display and sorting
-        $review->displayOrder = isset($reviewData['displayOrder']) && $reviewData['displayOrder'] !== null ? (int) $reviewData['displayOrder'] : null;
+        $review->displayOrder = isset($reviewData['displayOrder'])
+            && $reviewData['displayOrder'] !== null
+            ? (int) $reviewData['displayOrder']
+            : null;
 
         // Status and moderation
         $review->status = $reviewData['status'] ?? 'approved';
         $review->moderationReason = $reviewData['moderationReason'] ?? null;
-        $review->moderatedBy = isset($reviewData['moderatedBy']) && $reviewData['moderatedBy'] !== null ? (int) $reviewData['moderatedBy'] : null;
+        $review->moderatedBy = isset($reviewData['moderatedBy'])
+            && $reviewData['moderatedBy'] !== null
+            ? (int) $reviewData['moderatedBy']
+            : null;
 
         // Timestamps - parse from JSON or use current time
         if (isset($reviewData['createdAt']) && $reviewData['createdAt']) {
@@ -165,7 +182,10 @@ class ReviewSeederService
             $review->updatedAt = new \DateTimeImmutable();
         }
 
-        $review->createdBy = isset($reviewData['createdBy']) && $reviewData['createdBy'] !== null ? (int) $reviewData['createdBy'] : $nowUser;
+        $review->createdBy = isset($reviewData['createdBy'])
+            && $reviewData['createdBy'] !== null
+            ? (int) $reviewData['createdBy']
+            : $nowUser;
 
         // PublishedAt - parse from JSON or set via markAsPublished if approved
         if (isset($reviewData['publishedAt']) && $reviewData['publishedAt']) {

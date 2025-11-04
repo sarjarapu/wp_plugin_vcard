@@ -33,4 +33,3 @@ final class ReviewHooksFactory
         return new ReviewHooks($reviewRepository);
     }
 }
-

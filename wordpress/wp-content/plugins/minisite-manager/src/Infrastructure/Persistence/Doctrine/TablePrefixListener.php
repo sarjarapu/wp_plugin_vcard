@@ -79,7 +79,11 @@ class TablePrefixListener implements EventSubscriber
 
         // Only apply to our entities (namespace check)
         // Skip WordPress core entities, other plugins, etc.
-        if (!str_starts_with($classMetadata->getName(), 'Minisite\\Domain\\Entities\\')) {
+        // Support both legacy Domain\Entities and new feature-based Features\*\Domain\Entities
+        if (
+            !str_starts_with($classMetadata->getName(), 'Minisite\\Domain\\Entities\\')
+            && !str_starts_with($classMetadata->getName(), 'Minisite\\Features\\')
+        ) {
             return;
         }
 

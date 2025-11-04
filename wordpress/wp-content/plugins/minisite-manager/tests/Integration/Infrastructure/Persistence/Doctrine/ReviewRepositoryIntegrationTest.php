@@ -69,6 +69,33 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         
         $this->em = new EntityManager($connection, $config);
         
+        // Reset connection state to ensure clean transaction state
+        // This prevents savepoint/transaction errors from previous tests
+        try {
+            // Clear any existing savepoints and transactions by executing ROLLBACK
+            // This is safe even if no transaction is active
+            $connection->executeStatement('ROLLBACK');
+        } catch (\Exception $e) {
+            // Ignore - connection might already be clean or ROLLBACK might not be needed
+        }
+        
+        // Ensure connection is ready for new operations
+        try {
+            // Reset any savepoint counter by starting and immediately committing a transaction
+            $connection->beginTransaction();
+            $connection->commit();
+        } catch (\Exception $e) {
+            // If this fails, try to rollback
+            try {
+                $connection->rollBack();
+            } catch (\Exception $e2) {
+                // Ignore - just continue
+            }
+        }
+        
+        // Clear any UnitOfWork state
+        $this->em->clear();
+        
         // Set up $wpdb object for TablePrefixListener (needed for prefix)
         if (!isset($GLOBALS['wpdb'])) {
             $GLOBALS['wpdb'] = new \wpdb();
@@ -90,6 +117,36 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         // Now that tables are dropped, migrations will run fresh
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
+        
+        // Reset connection state again after migrations (migrations may leave connection in bad state)
+        // This is critical because migrations might leave the connection in an inconsistent state
+        try {
+            // Rollback any active transactions
+            while ($connection->isTransactionActive()) {
+                $connection->rollBack();
+            }
+        } catch (\Exception $e) {
+            // If rollback fails, try to execute a direct ROLLBACK
+            try {
+                $connection->executeStatement('ROLLBACK');
+            } catch (\Exception $e2) {
+                // Ignore - connection might already be clean
+            }
+        }
+        
+        // Clear EntityManager state again after migrations
+        // This ensures any UnitOfWork state from migrations is cleared
+        $this->em->clear();
+        
+        // Force a fresh connection state by closing and letting it reconnect
+        // This is the most reliable way to ensure clean state
+        try {
+            $connection->close();
+        } catch (\Exception $e) {
+            // Ignore - connection might already be closed
+        }
+        
+        // EntityManager will automatically reconnect when needed
         
         // Create ReviewRepository instance directly (same pattern as ConfigRepository)
         $this->repository = new ReviewRepository(

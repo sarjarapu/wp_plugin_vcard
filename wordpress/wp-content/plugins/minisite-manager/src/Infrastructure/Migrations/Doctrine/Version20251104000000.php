@@ -8,31 +8,30 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Migration: Create or update minisite_reviews table for enhanced review management
+ * Migration: Create minisite_reviews table with all MVP fields (fresh start)
  * Date: 2025-11-04
  *
- * This migration replaces the old SQL file-based table creation.
+ * This migration creates the complete wp_minisite_reviews table from scratch.
  *
- * If table doesn't exist: Creates complete table with all MVP columns (21+ fields)
- * If table exists: Adds new columns to existing table
+ * Assumptions:
+ * - Fresh start: This migration creates the complete table with all 24 MVP columns
+ * - If table exists: It was created by this migration, so skip gracefully (idempotent)
+ * - No upgrade scenario: Old SQL-based tables are not supported
  *
- * Base columns: id, minisite_id, author_name, author_url, rating, body, locale,
- *               visited_month, source, source_id, status, created_at, updated_at, created_by
- *
- * Additional columns added:
- * - author_email, author_phone (verification fields)
- * - language (auto-detected language)
- * - is_email_verified, is_phone_verified (separate verification flags)
- * - helpful_count, spam_score, sentiment_score (engagement and quality metrics)
- * - display_order, published_at (display and sorting)
- * - moderation_reason, moderated_by (moderation tracking)
- * - Extends status enum to include 'flagged'
+ * All MVP columns (24 fields):
+ * - Core: id, minisite_id, author_name, author_email, author_phone, author_url
+ * - Review content: rating, body, language, locale, visited_month
+ * - Metadata: source, source_id, status, created_at, updated_at, created_by
+ * - Verification: is_email_verified, is_phone_verified
+ * - Metrics: helpful_count, spam_score, sentiment_score
+ * - Display: display_order, published_at
+ * - Moderation: moderation_reason, moderated_by
  */
 final class Version20251104000000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Create or update minisite_reviews table with all MVP fields (replaces old SQL file-based creation)';
+        return 'Create minisite_reviews table with all MVP fields (fresh start, replaces old SQL file-based creation)';
     }
 
     public function up(Schema $schema): void
@@ -116,8 +115,15 @@ final class Version20251104000000 extends AbstractMigration
 
         $tableName = $wpdb->prefix . 'minisite_reviews';
 
-        if ($schema->hasTable($tableName)) {
-            $schema->dropTable($tableName);
+        // Use direct SQL to drop table (more reliable than Schema API for down migrations)
+        $connection = $this->connection;
+        $tableExists = $connection->executeQuery(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
+            [$connection->getDatabase(), $tableName]
+        )->fetchOne() > 0;
+
+        if ($tableExists) {
+            $this->addSql("DROP TABLE IF EXISTS `{$tableName}`");
         }
     }
 

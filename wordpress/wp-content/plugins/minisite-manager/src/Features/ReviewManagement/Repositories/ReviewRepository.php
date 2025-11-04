@@ -241,4 +241,3 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
         }
     }
 }
-
