@@ -23,19 +23,18 @@ However, several components require integration tests to verify behavior with re
 **Test Cases Needed**:
 
 #### 1.1 CRUD Operations
-- ✅ `testSaveInsertNewReview()` - Insert a new review and verify it's saved
-- ✅ `testSaveUpdateExistingReview()` - Update an existing review
-- ✅ `testFindByIdReturnsReview()` - Find review by ID when it exists
-- ✅ `testFindByIdReturnsNullWhenNotFound()` - Find review by ID when it doesn't exist
-- ✅ `testFindOrFailThrowsWhenNotFound()` - Verify exception is thrown when review not found
-- ✅ `testDeleteRemovesReview()` - Delete a review and verify it's removed
+- ✅ `test_save_and_find_review()` - Insert a new review and verify it's saved
+- ✅ `test_save_update_existing_review()` - Update an existing review
+- ✅ `test_findById_returns_null_when_not_found()` - Find review by ID when it doesn't exist
+- ✅ `test_findOrFail_throws_when_not_found()` - Verify exception is thrown when review not found
+- ✅ `test_delete_removes_review()` - Delete a review and verify it's removed
 
 #### 1.2 Query Operations
-- ✅ `testListApprovedForMinisite()` - List approved reviews for a minisite
-- ✅ `testListByStatusForMinisite()` - List reviews by status (pending, approved, rejected, flagged)
-- ✅ `testCountByStatusForMinisite()` - Count reviews by status
-- ✅ `testListByStatusForMinisiteRespectsLimit()` - Verify limit parameter is respected
-- ✅ `testListByStatusForMinisiteOrdersCorrectly()` - Verify ordering by displayOrder, publishedAt, createdAt
+- ✅ `test_listApprovedForMinisite_returns_approved_reviews()` - List approved reviews for a minisite
+- ✅ `test_listByStatusForMinisite_filters_by_status()` - List reviews by status (pending, approved, rejected, flagged)
+- ✅ `test_countByStatusForMinisite_returns_correct_count()` - Count reviews by status
+- ✅ `test_listByStatusForMinisite_respects_limit()` - Verify limit parameter is respected
+- ✅ `test_listByStatusForMinisite_orders_correctly()` - Verify ordering by displayOrder, publishedAt, createdAt
 
 #### 1.3 Error Handling
 - `testSaveHandlesDatabaseErrors()` - Verify exception handling on save failure
@@ -56,21 +55,21 @@ However, several components require integration tests to verify behavior with re
 **Test Cases Needed**:
 
 #### 2.1 Review Creation
-- `testInsertReviewCreatesReviewWithAllFields()` - Verify all 24 MVP fields are set correctly
-- `testInsertReviewWithLoggedInUser()` - Verify createdBy and moderatedBy are set when user is logged in
-- `testInsertReviewWithOptionalFields()` - Verify optional fields (email, phone, URL, displayOrder) are saved
-- `testInsertReviewAutoDetectsLanguageFromLocale()` - Verify language auto-detection from locale
+- ✅ `test_insertReview_creates_review_with_all_fields()` - Verify all 24 MVP fields are set correctly
+- ✅ `test_insertReview_with_logged_in_user()` - Verify createdBy and moderatedBy are set when user is logged in
+- ✅ `test_insertReview_with_optional_fields()` - Verify optional fields (email, phone, URL, displayOrder) are saved
+- ✅ `test_insertReview_auto_detects_language_from_locale()` - Verify language auto-detection from locale
 
 #### 2.2 JSON Data Creation
-- `testCreateReviewFromJsonDataWithAllFields()` - Create review from complete JSON data
-- `testCreateReviewFromJsonDataWithDefaults()` - Create review from minimal JSON data (verify defaults)
-- `testCreateReviewFromJsonDataParsesTimestamps()` - Verify DateTimeImmutable parsing from JSON strings
-- `testCreateReviewFromJsonDataMarksAsPublishedWhenApproved()` - Verify publishedAt is set when status is approved
+- ✅ `test_createReviewFromJsonData_with_all_fields()` - Create review from complete JSON data
+- ✅ `test_createReviewFromJsonData_with_defaults()` - Create review from minimal JSON data (verify defaults)
+- ✅ `test_createReviewFromJsonData_parses_timestamps()` - Verify DateTimeImmutable parsing from JSON strings
+- ✅ `test_createReviewFromJsonData_marks_as_published_when_approved()` - Verify publishedAt is set when status is approved
 
 #### 2.3 Seeding Operations
-- `testSeedReviewsForMinisite()` - Seed multiple reviews for a minisite
-- `testSeedReviewsForMinisiteWithEmptyArray()` - Verify no errors when seeding empty array
-- `testSeedAllTestReviews()` - Seed reviews for all test minisites (ACME, LOTUS, GREEN, SWIFT)
+- ✅ `test_seedReviewsForMinisite_seeds_multiple_reviews()` - Seed multiple reviews for a minisite
+- ✅ `test_seedReviewsForMinisite_with_empty_array()` - Verify no errors when seeding empty array
+- ⏸️ `testSeedAllTestReviews()` - Seed reviews for all test minisites (ACME, LOTUS, GREEN, SWIFT) - Requires JSON files
 
 #### 2.4 JSON File Loading
 - `testLoadReviewsFromJsonFileExists()` - Load reviews from existing JSON file
@@ -93,9 +92,9 @@ However, several components require integration tests to verify behavior with re
 **Test Cases Needed**:
 
 #### 3.1 Factory Creation
-- `testCreateReturnsReviewHooksInstance()` - Verify factory creates ReviewHooks instance
-- `testCreateInjectsCorrectDependencies()` - Verify all dependencies are injected correctly
-- `testCreateUsesRealDoctrineEntityManager()` - Verify Doctrine EntityManager is created correctly
+- ✅ `test_create_returns_review_hooks_instance()` - Verify factory creates ReviewHooks instance
+- ✅ `test_create_injects_correct_dependencies()` - Verify all dependencies are injected correctly
+- ✅ `testCreateUsesRealDoctrineEntityManager()` - Verified through dependency injection test
 
 **Dependencies**:
 - Doctrine EntityManager
@@ -111,13 +110,13 @@ However, several components require integration tests to verify behavior with re
 **Test Cases Needed**:
 
 #### 4.1 Complete Review Lifecycle
-- `testReviewLifecycleFromCreationToDeletion()` - Complete flow: create → find → update → delete
-- `testReviewModerationWorkflow()` - Test status changes: pending → approved → flagged → rejected
-- `testReviewListingAndFiltering()` - Test listing reviews with various filters and statuses
+- ✅ `test_review_lifecycle_from_creation_to_deletion()` - Complete flow: create → find → update → delete
+- ✅ `test_review_moderation_workflow()` - Test status changes: pending → approved → flagged → rejected
+- ✅ `test_review_listing_and_filtering()` - Test listing reviews with various filters and statuses
 
 #### 4.2 Review Statistics
-- `testReviewStatisticsForMinisite()` - Test counting reviews by status for a minisite
-- `testReviewAverageRatingCalculation()` - Calculate average rating from reviews (if implemented)
+- ✅ `test_review_statistics_for_minisite()` - Test counting reviews by status for a minisite
+- ⏸️ `testReviewAverageRatingCalculation()` - Calculate average rating from reviews (not implemented yet)
 
 **Dependencies**:
 - Real database

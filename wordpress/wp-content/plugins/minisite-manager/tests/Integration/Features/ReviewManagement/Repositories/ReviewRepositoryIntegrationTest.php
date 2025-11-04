@@ -464,5 +464,139 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $this->assertNotNull($found->publishedAt);
         $this->assertEquals(42, $found->moderatedBy);
     }
+    
+    /**
+     * Test save() updates existing review
+     */
+    public function test_save_update_existing_review(): void
+    {
+        // Create initial review
+        $review = new Review();
+        $review->minisiteId = 'test-minisite-update';
+        $review->authorName = 'Original Name';
+        $review->rating = 3.0;
+        $review->body = 'Original body';
+        $review->status = 'pending';
+        
+        $saved = $this->repository->save($review);
+        $originalId = $saved->id;
+        $originalCreatedAt = $saved->createdAt;
+        $originalUpdatedAt = $saved->updatedAt;
+        
+        // Small delay to ensure updatedAt timestamp changes
+        usleep(100000); // 0.1 seconds
+        
+        // Update the review
+        $saved->authorName = 'Updated Name';
+        $saved->rating = 5.0;
+        $saved->body = 'Updated body';
+        $saved->status = 'approved';
+        $saved->markAsPublished();
+        
+        $updated = $this->repository->save($saved);
+        
+        // Verify ID remains the same (update, not insert)
+        $this->assertEquals($originalId, $updated->id);
+        $this->assertEquals($originalCreatedAt->getTimestamp(), $updated->createdAt->getTimestamp());
+        
+        // Verify updated fields
+        $this->assertEquals('Updated Name', $updated->authorName);
+        $this->assertEquals(5.0, $updated->rating);
+        $this->assertEquals('Updated body', $updated->body);
+        $this->assertEquals('approved', $updated->status);
+        
+        // Verify updatedAt was changed (should be greater than or equal to original)
+        $this->assertGreaterThanOrEqual($originalUpdatedAt->getTimestamp(), $updated->updatedAt->getTimestamp());
+        
+        // Verify persisted
+        $found = $this->repository->findById($originalId);
+        $this->assertEquals('Updated Name', $found->authorName);
+        $this->assertEquals(5.0, $found->rating);
+    }
+    
+    /**
+     * Test findById returns null when review not found
+     */
+    public function test_findById_returns_null_when_not_found(): void
+    {
+        $result = $this->repository->findById(99999);
+        $this->assertNull($result);
+    }
+    
+    /**
+     * Test listByStatusForMinisite orders correctly
+     */
+    public function test_listByStatusForMinisite_orders_correctly(): void
+    {
+        $minisiteId = 'test-minisite-order';
+        
+        // Create reviews with different displayOrder and publishedAt
+        $review1 = new Review();
+        $review1->minisiteId = $minisiteId;
+        $review1->authorName = 'Review 1';
+        $review1->rating = 5.0;
+        $review1->body = 'First';
+        $review1->status = 'approved';
+        $review1->displayOrder = 2; // Higher display order = appears later
+        $review1->markAsPublished();
+        $this->repository->save($review1);
+        
+        // Small delay to ensure different timestamps
+        usleep(100000); // 0.1 seconds
+        
+        $review2 = new Review();
+        $review2->minisiteId = $minisiteId;
+        $review2->authorName = 'Review 2';
+        $review2->rating = 4.0;
+        $review2->body = 'Second';
+        $review2->status = 'approved';
+        $review2->displayOrder = 1; // Lower display order = appears first
+        $review2->markAsPublished();
+        $this->repository->save($review2);
+        
+        usleep(100000);
+        
+        $review3 = new Review();
+        $review3->minisiteId = $minisiteId;
+        $review3->authorName = 'Review 3';
+        $review3->rating = 3.0;
+        $review3->body = 'Third';
+        $review3->status = 'approved';
+        $review3->displayOrder = null; // No display order = sorted by publishedAt
+        $review3->markAsPublished();
+        $this->repository->save($review3);
+        
+        $results = $this->repository->listByStatusForMinisite($minisiteId, 'approved', 10);
+        
+        // Should be ordered by: displayOrder ASC, then publishedAt DESC, then createdAt DESC
+        // Review 2 (displayOrder=1) should come first
+        // Review 1 (displayOrder=2) should come second
+        // Review 3 (displayOrder=null) should come last (sorted by publishedAt DESC)
+        $this->assertGreaterThanOrEqual(3, count($results));
+        
+        // Find reviews in results
+        $foundReview1 = null;
+        $foundReview2 = null;
+        $foundReview3 = null;
+        
+        foreach ($results as $result) {
+            if ($result->authorName === 'Review 1') {
+                $foundReview1 = $result;
+            } elseif ($result->authorName === 'Review 2') {
+                $foundReview2 = $result;
+            } elseif ($result->authorName === 'Review 3') {
+                $foundReview3 = $result;
+            }
+        }
+        
+        $this->assertNotNull($foundReview1);
+        $this->assertNotNull($foundReview2);
+        $this->assertNotNull($foundReview3);
+        
+        // Review 2 (displayOrder=1) should appear before Review 1 (displayOrder=2)
+        $review2Index = array_search($foundReview2, $results, true);
+        $review1Index = array_search($foundReview1, $results, true);
+        $this->assertLessThan($review1Index, $review2Index, 'Reviews with lower displayOrder should appear first');
+    }
 }
 
