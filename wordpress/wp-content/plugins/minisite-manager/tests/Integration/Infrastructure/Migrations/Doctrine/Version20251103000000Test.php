@@ -172,7 +172,8 @@ final class Version20251103000000Test extends AbstractDoctrineMigrationTest
         $migration->down($targetSchema);
         
         // Calculate the diff and apply it
-        $comparator = new \Doctrine\DBAL\Schema\Comparator();
+        $platform = $this->connection->getDatabasePlatform();
+        $comparator = new \Doctrine\DBAL\Schema\Comparator($platform);
         $schemaDiff = $comparator->compareSchemas($currentSchema, $targetSchema);
         $schemaManager->alterSchema($schemaDiff);
         
@@ -195,7 +196,8 @@ final class Version20251103000000Test extends AbstractDoctrineMigrationTest
         $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('doctrine-migrations');
         $migration = new \Minisite\Infrastructure\Migrations\Doctrine\Version20251103000000($this->connection, $logger);
         $schemaManager = $this->connection->createSchemaManager();
-        $comparator = new \Doctrine\DBAL\Schema\Comparator();
+        $platform = $this->connection->getDatabasePlatform();
+        $comparator = new \Doctrine\DBAL\Schema\Comparator($platform);
         
         // Run down() first time - should drop table
         $currentSchema1 = $schemaManager->introspectSchema();

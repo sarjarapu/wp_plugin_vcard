@@ -30,13 +30,17 @@
 | `createdAt` | DATETIME | ✅ Already have |
 | `updatedAt` | DATETIME | ✅ Already have |
 | `createdBy` | INT | ✅ Already have - NULL for anonymous, user_id if registered |
-| `isRegisteredUser` | BOOLEAN | NEW - Was review left by registered user? |
+| `isEmailVerified` | BOOLEAN | NEW - Email verified |
+| `isPhoneVerified` | BOOLEAN | NEW - Phone verified |
 | `helpfulCount` | INT | NEW - Helpful votes (simplified from helpfulVotes) |
 | `displayOrder` | INT | NEW - Manual sorting for featured reviews |
 | `spamScore` | DECIMAL(3,2) | NEW - Auto-calculated spam probability (0-1) |
 | `sentimentScore` | DECIMAL(3,2) | NEW - Auto-calculated sentiment (-1 to +1) |
+| `publishedAt` | DATETIME | NEW - When review was approved/published (for sorting) |
+| `moderationReason` | VARCHAR(200) | NEW - Why rejected/flagged (for transparency) |
+| `moderatedBy` | INT | NEW - User ID who moderated this |
 
-**Total: ~15 core fields for MVP**
+**Total: ~21 core fields for MVP**
 
 ---
 
@@ -44,13 +48,9 @@
 
 | Field Name | Type | Rationale |
 |------------|------|-----------|
-| `publishedAt` | DATETIME | When review was approved/published (for sorting) |
 | `photoUrls` | JSON | Array of photo URLs - **flexible display** |
 | `photoCount` | INT | Quick check without parsing JSON |
 | `hasPhotos` | BOOLEAN | Fast filter for reviews with photos |
-| `isVerified` | BOOLEAN | Verified email/phone (different from registered user) |
-| `moderationReason` | VARCHAR(200) | Why rejected/flagged (for transparency) |
-| `moderatedBy` | INT | User ID who moderated this |
 | `moderatedAt` | DATETIME | When moderation happened |
 
 **Add after MVP when photo handling strategy is clear**
@@ -609,26 +609,27 @@ foreach ($businessKeywords as $keyword) {
 6. `rating` - 1-5 stars
 7. `body` - Review text
 8. `language` - Auto-detected (en, hi, mr, etc.)
-9. `status` - pending/approved/rejected
-10. `isRegisteredUser` - Boolean
-11. `isVerified` - Email/phone verified
+9. `status` - pending/approved/rejected/flagged
+10. `isEmailVerified` - Email verified (Boolean)
+11. `isPhoneVerified` - Phone verified (Boolean)
 12. `helpfulCount` - Helpful votes
 13. `spamScore` - Auto-calculated (0-1)
 14. `sentimentScore` - Auto-calculated (-1 to +1)
 15. `displayOrder` - Manual sorting
 16. `publishedAt` - When approved
-17. `createdAt` - When submitted
-18. `updatedAt` - Last update
-19. `createdBy` - User ID (nullable)
+17. `moderationReason` - Why rejected/flagged (Text)
+18. `moderatedBy` - User ID who moderated
+19. `createdAt` - When submitted
+20. `updatedAt` - Last update
+21. `createdBy` - User ID (nullable)
 
 ### Phase 2 Fields (Add After MVP)
-20. `photoUrls` - JSON array
-21. `photoCount` - Integer
-22. `hasPhotos` - Boolean
-23. `moderationReason` - Text
-24. `moderatedBy` - User ID
+22. `photoUrls` - JSON array
+23. `photoCount` - Integer
+24. `hasPhotos` - Boolean
+25. `moderatedAt` - When moderation happened
 
-**Total MVP: 19 fields** (manageable, focused)
+**Total MVP: 21 fields** (manageable, focused)
 
 ---
 
@@ -662,8 +663,8 @@ foreach ($businessKeywords as $keyword) {
 
 ## Key Takeaways
 
-1. **Start Simple** - 19 core fields, expand later
-2. **Optional Registration** - More reviews, verify via email
+1. **Start Simple** - 21 core fields, expand later
+2. **Optional Registration** - Track via `createdBy` (NULL for anonymous), verify via email/phone separately
 3. **Hybrid Moderation** - Auto positive, manual negative
 4. **Simple Spam Detection** - Heuristics for MVP
 5. **Photo Support** - Add when display strategy is clear

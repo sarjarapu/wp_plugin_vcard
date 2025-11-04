@@ -63,8 +63,13 @@ class TimberRenderer
 
     protected function fetchReviews(string $minisiteId): array
     {
-        global $wpdb;
-        $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository($wpdb);
+        // Use global ReviewRepository (initialized in PluginBootstrap)
+        if (!isset($GLOBALS['minisite_review_repository'])) {
+            return [];
+        }
+
+        /** @var \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository $reviewRepo */
+        $reviewRepo = $GLOBALS['minisite_review_repository'];
         return $reviewRepo->listApprovedForMinisite($minisiteId);
     }
 

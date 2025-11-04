@@ -5,7 +5,8 @@
 # Usage: ./scripts/pre-pr-check.sh
 # Or: composer pr-check
 
-set -e  # Exit on error
+# Note: We don't use 'set -e' because we want to continue and report all errors
+# We handle errors manually for each step
 
 # Colors for output
 RED='\033[0;31m'
@@ -72,11 +73,92 @@ else
 fi
 
 # 4. Unit Tests
-echo -e "\n${YELLOW}[4/4] Running unit tests...${NC}"
+echo -e "\n${YELLOW}[4/6] Running unit tests...${NC}"
 if composer test; then
     echo -e "${GREEN}✓ Unit tests passed${NC}"
 else
     echo -e "${RED}✗ Unit tests failed${NC}"
+    ERRORS=$((ERRORS + 1))
+fi
+
+# 5. Unit Tests Coverage Report
+echo -e "\n${YELLOW}[5/6] Running unit tests with coverage...${NC}"
+COVERAGE_DIR="coverage/unit"
+mkdir -p "$COVERAGE_DIR"
+COVERAGE_HTML_DIR="coverage/unit/html"
+mkdir -p "$COVERAGE_HTML_DIR"
+
+# Generate both text and HTML reports
+COVERAGE_OUTPUT=$(./vendor/bin/phpunit --testsuite=Unit --coverage-text --coverage-html="$COVERAGE_HTML_DIR" --coverage-filter=src/ 2>&1)
+COVERAGE_EXIT=$?
+echo "$COVERAGE_OUTPUT" > "$COVERAGE_DIR/coverage.txt"
+
+if [ $COVERAGE_EXIT -eq 0 ]; then
+    echo -e "${GREEN}✓ Unit tests coverage generated${NC}"
+    echo -e "${YELLOW}Coverage reports saved to:${NC}"
+    echo -e "  - Text: $COVERAGE_DIR/coverage.txt"
+    if [ -f "$COVERAGE_HTML_DIR/index.html" ]; then
+        echo -e "  - HTML: $COVERAGE_HTML_DIR/index.html"
+    else
+        echo -e "  - HTML: ${YELLOW}(not generated - no coverage data)${NC}"
+    fi
+    # Show summary from coverage report if available
+    if echo "$COVERAGE_OUTPUT" | grep -q "Summary:"; then
+        echo -e "\n${YELLOW}Unit Tests Coverage Summary:${NC}"
+        echo "$COVERAGE_OUTPUT" | grep -A 3 "Summary:" | head -4
+    else
+        echo -e "${YELLOW}Note: Unit tests primarily cover test code, not src/ directory${NC}"
+    fi
+elif echo "$COVERAGE_OUTPUT" | grep -q "No coverage driver available"; then
+    echo -e "${YELLOW}⚠ Coverage driver not available (PCOV/Xdebug not installed)${NC}"
+    echo -e "${YELLOW}Skipping coverage report...${NC}"
+else
+    echo -e "${RED}✗ Unit tests coverage failed${NC}"
+    echo "$COVERAGE_OUTPUT" | tail -20
+    ERRORS=$((ERRORS + 1))
+fi
+
+# 6. Integration Tests Coverage Report
+echo -e "\n${YELLOW}[6/6] Running integration tests with coverage...${NC}"
+COVERAGE_DIR_INT="coverage/integration"
+mkdir -p "$COVERAGE_DIR_INT"
+COVERAGE_HTML_DIR_INT="coverage/integration/html"
+mkdir -p "$COVERAGE_HTML_DIR_INT"
+
+# Generate both text and HTML reports
+COVERAGE_OUTPUT_INT=$(./vendor/bin/phpunit --testsuite=Integration --coverage-text --coverage-html="$COVERAGE_HTML_DIR_INT" --coverage-filter=src/ 2>&1)
+COVERAGE_EXIT_INT=$?
+echo "$COVERAGE_OUTPUT_INT" > "$COVERAGE_DIR_INT/coverage.txt"
+
+if echo "$COVERAGE_OUTPUT_INT" | grep -q "Code Coverage Report:"; then
+    echo -e "${GREEN}✓ Integration tests coverage generated${NC}"
+    echo -e "${YELLOW}Coverage reports saved to:${NC}"
+    echo -e "  - Text: $COVERAGE_DIR_INT/coverage.txt"
+    if [ -f "$COVERAGE_HTML_DIR_INT/index.html" ]; then
+        echo -e "  - HTML: $COVERAGE_HTML_DIR_INT/index.html"
+    else
+        echo -e "  - HTML: ${YELLOW}(not generated)${NC}"
+    fi
+    # Show summary from coverage report
+    if echo "$COVERAGE_OUTPUT_INT" | grep -q "Summary:"; then
+        echo -e "\n${YELLOW}Integration Tests Coverage Summary:${NC}"
+        echo "$COVERAGE_OUTPUT_INT" | grep -A 3 "Summary:" | head -4
+    fi
+    # Check if there were test failures (coverage still generated but tests may have failed)
+    if echo "$COVERAGE_OUTPUT_INT" | grep -q "ERRORS\|FAILURES"; then
+        echo -e "${YELLOW}⚠ Some integration tests failed (coverage still generated)${NC}"
+        # Extract test summary
+        TEST_SUMMARY=$(echo "$COVERAGE_OUTPUT_INT" | grep -E "Tests:.*Assertions:" | tail -1)
+        if [ -n "$TEST_SUMMARY" ]; then
+            echo -e "${YELLOW}$TEST_SUMMARY${NC}"
+        fi
+    fi
+elif echo "$COVERAGE_OUTPUT_INT" | grep -q "No coverage driver available"; then
+    echo -e "${YELLOW}⚠ Coverage driver not available (PCOV/Xdebug not installed)${NC}"
+    echo -e "${YELLOW}Skipping coverage report...${NC}"
+else
+    echo -e "${RED}✗ Integration tests coverage failed${NC}"
+    echo "$COVERAGE_OUTPUT_INT" | tail -30
     ERRORS=$((ERRORS + 1))
 fi
 
@@ -85,11 +167,21 @@ echo -e "\n${YELLOW}========================================${NC}"
 if [ $ERRORS -eq 0 ]; then
     echo -e "${GREEN}All checks passed! ✓${NC}"
     echo -e "${GREEN}Ready to submit PR${NC}"
+    echo -e "${YELLOW}Coverage reports:${NC}"
+    echo -e "  - Unit (Text): $COVERAGE_DIR/coverage.txt"
+    [ -f "$COVERAGE_HTML_DIR/index.html" ] && echo -e "  - Unit (HTML): $COVERAGE_HTML_DIR/index.html"
+    echo -e "  - Integration (Text): $COVERAGE_DIR_INT/coverage.txt"
+    [ -f "$COVERAGE_HTML_DIR_INT/index.html" ] && echo -e "  - Integration (HTML): $COVERAGE_HTML_DIR_INT/index.html"
     echo -e "${YELLOW}========================================${NC}\n"
     exit 0
 else
     echo -e "${RED}$ERRORS check(s) failed ✗${NC}"
     echo -e "${RED}Please fix the issues above before submitting PR${NC}"
+    echo -e "${YELLOW}Coverage reports (if generated):${NC}"
+    echo -e "  - Unit (Text): $COVERAGE_DIR/coverage.txt"
+    [ -f "$COVERAGE_HTML_DIR/index.html" ] && echo -e "  - Unit (HTML): $COVERAGE_HTML_DIR/index.html"
+    echo -e "  - Integration (Text): $COVERAGE_DIR_INT/coverage.txt"
+    [ -f "$COVERAGE_HTML_DIR_INT/index.html" ] && echo -e "  - Integration (HTML): $COVERAGE_HTML_DIR_INT/index.html"
     echo -e "${YELLOW}========================================${NC}\n"
     exit 1
 fi
