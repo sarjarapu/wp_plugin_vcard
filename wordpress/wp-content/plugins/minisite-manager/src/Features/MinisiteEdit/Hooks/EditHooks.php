@@ -44,7 +44,9 @@ class EditHooks
     {
         // Only handle account management routes (edit, preview, versions, etc.)
         // The rewrite rules set minisite_account=1 for account routes
-        $isAccountRoute = $this->wordPressManager->getQueryVar('minisite_account') === self::ACCOUNT_ROUTE_FLAG;
+        // Handle both string '1' and integer 1 (WordPress query vars can be either)
+        $accountValue = $this->wordPressManager->getQueryVar('minisite_account');
+        $isAccountRoute = ($accountValue === self::ACCOUNT_ROUTE_FLAG || $accountValue === 1);
         if (!$isAccountRoute) {
             return; // Not an account route, let other handlers process it
         }
@@ -54,10 +56,13 @@ class EditHooks
         // Handle edit and preview routes
         if ($action === 'edit') {
             $this->editController->handleEdit();
-            exit;
+            // Controller handles termination internally via TerminationHandlerInterface
+            // In production: calls exit(). In tests: no-op, allowing tests to continue.
         } elseif ($action === 'preview') {
             // Delegate version-specific preview to MinisiteViewer
             $this->minisiteViewerController->handleVersionSpecificPreview();
+            // Note: MinisiteViewer controller doesn't yet use TerminationHandlerInterface
+            // so it still needs exit here until it's refactored
             exit;
         }
     }

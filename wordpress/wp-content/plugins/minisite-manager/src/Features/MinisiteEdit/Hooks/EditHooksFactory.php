@@ -43,11 +43,14 @@ class EditHooksFactory
         $formSecurityHelper = new FormSecurityHelper($wordPressManager);
 
         // Create controller
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+        
         $editController = new EditController(
             $editService,
             $editRenderer,
             $wordPressManager,
-            $formSecurityHelper
+            $formSecurityHelper,
+            $terminationHandler
         );
 
         // Get MinisiteViewer controller for preview delegation

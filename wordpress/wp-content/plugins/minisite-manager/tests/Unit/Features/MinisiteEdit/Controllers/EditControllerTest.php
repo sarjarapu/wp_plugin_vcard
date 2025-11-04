@@ -6,6 +6,7 @@ use Minisite\Features\MinisiteEdit\Controllers\EditController;
 use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
@@ -32,12 +33,14 @@ class EditControllerTest extends TestCase
         $this->mockEditRenderer = $this->createMock(EditRenderer::class);
         $this->mockWordPressManager = $this->createMock(WordPressEditManager::class);
         $this->mockFormSecurityHelper = $this->createMock(FormSecurityHelper::class);
+        $terminationHandler = new TestTerminationHandler();
 
         $this->controller = new EditController(
             $this->mockEditService,
             $this->mockEditRenderer,
             $this->mockWordPressManager,
-            $this->mockFormSecurityHelper
+            $this->mockFormSecurityHelper,
+            $terminationHandler
         );
     }
 

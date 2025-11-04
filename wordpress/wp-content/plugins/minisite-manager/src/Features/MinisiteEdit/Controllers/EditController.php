@@ -5,6 +5,7 @@ namespace Minisite\Features\MinisiteEdit\Controllers;
 use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 use Psr\Log\LoggerInterface;
@@ -25,7 +26,8 @@ class EditController
         private EditService $editService,
         private EditRenderer $editRenderer,
         private WordPressEditManager $wordPressManager,
-        private FormSecurityHelper $formSecurityHelper
+        private FormSecurityHelper $formSecurityHelper,
+        private TerminationHandlerInterface $terminationHandler
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('minisite-edit-controller');
     }
@@ -115,6 +117,8 @@ class EditController
             $editData->errorMessage = !empty($errors) ? implode(', ', $errors) : '';
 
             $this->editRenderer->renderEditForm($editData);
+            // Terminate after rendering to prevent WordPress from loading default template
+            $this->terminationHandler->terminate();
         } catch (\RuntimeException $e) {
             // Handle access denied or not found
             if (strpos($e->getMessage(), 'Access denied') !== false) {
@@ -124,6 +128,8 @@ class EditController
             } else {
                 // Display error page
                 $this->editRenderer->renderError($e->getMessage());
+                // Terminate after rendering error to prevent WordPress from loading default template
+                $this->terminationHandler->terminate();
             }
         }
     }
