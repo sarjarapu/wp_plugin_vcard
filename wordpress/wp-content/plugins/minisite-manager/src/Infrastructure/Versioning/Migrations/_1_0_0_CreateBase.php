@@ -354,7 +354,7 @@ class _1_0_0_CreateBase implements Migration
      * This method is kept (commented) for reference only and should NOT be used.
      *
      * @deprecated Use ReviewSeederService or ReviewRepository instead
-     * @see \Minisite\Domain\Services\ReviewSeederService
+     * @see \Minisite\Features\ReviewManagement\Services\ReviewSeederService
      */
     /*
     protected function insertReview(
@@ -604,16 +604,16 @@ class _1_0_0_CreateBase implements Migration
                 $migrationRunner->migrate();
 
                 // Create ReviewRepository
-                $reviewRepo = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository(
+                $reviewRepo = new \Minisite\Features\ReviewManagement\Repositories\ReviewRepository(
                     $em,
-                    $em->getClassMetadata(\Minisite\Domain\Entities\Review::class)
+                    $em->getClassMetadata(\Minisite\Features\ReviewManagement\Domain\Entities\Review::class)
                 );
                 $GLOBALS['minisite_review_repository'] = $reviewRepo;
             }
 
-            /** @var \Minisite\Infrastructure\Persistence\Repositories\ReviewRepositoryInterface $reviewRepo */
+            /** @var \Minisite\Features\ReviewManagement\Repositories\ReviewRepositoryInterface $reviewRepo */
             $reviewRepo = $GLOBALS['minisite_review_repository'];
-            $seeder = new \Minisite\Domain\Services\ReviewSeederService($reviewRepo);
+            $seeder = new \Minisite\Features\ReviewManagement\Services\ReviewSeederService($reviewRepo);
             $seeder->seedAllTestReviews([
                 'ACME' => $acmeId,
                 'LOTUS' => $lotusId,

@@ -20,6 +20,7 @@ final class FeatureRegistry
         \Minisite\Features\MinisiteEdit\MinisiteEditFeature::class,
         \Minisite\Features\NewMinisite\NewMinisiteFeature::class,
         \Minisite\Features\PublishMinisite\PublishMinisiteFeature::class,
+        \Minisite\Features\ReviewManagement\ReviewManagementFeature::class,
         // Future features
         // \Minisite\Features\Settings\SettingsFeature::class,
         // \Minisite\Features\Commerce\CommerceFeature::class,

@@ -132,7 +132,7 @@ final class Version20251103000000Test extends AbstractDoctrineMigrationTest
         $runner->migrate();
         
         // Verify migration tracking table exists
-        $this->assertTableExists('wp_doctrine_migration_versions', 'Migration tracking table should exist');
+        $this->assertTableExists('wp_minisite_migrations', 'Migration tracking table should exist');
     }
     
     /**
@@ -144,8 +144,8 @@ final class Version20251103000000Test extends AbstractDoctrineMigrationTest
         $runner->migrate();
         
         // Verify required columns exist (Doctrine migrations tracking table)
-        $this->assertTableHasColumn('wp_doctrine_migration_versions', 'version');
-        $this->assertTableHasColumn('wp_doctrine_migration_versions', 'executed_at');
+        $this->assertTableHasColumn('wp_minisite_migrations', 'version');
+        $this->assertTableHasColumn('wp_minisite_migrations', 'executed_at');
     }
     
     /**

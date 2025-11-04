@@ -57,7 +57,7 @@ docker exec $(docker-compose ps -q wordpress) grep "MINISITE_ENCRYPTION_KEY" /va
 - This triggers `ActivationHandler::handle()`
 - Which runs `DoctrineMigrationRunner::migrate()`
 - Creates `wp_minisite_config` table
-- Creates `wp_doctrine_migration_versions` table (tracking table)
+- Creates `wp_minisite_migrations` table (tracking table)
 
 **Option B: Manual Migration (for testing)**
 ```php
@@ -72,12 +72,12 @@ $runner->migrate();
 SHOW TABLES LIKE 'wp_minisite_config';
 
 -- Check migration tracking
-SELECT * FROM wp_doctrine_migration_versions;
+SELECT * FROM wp_minisite_migrations;
 ```
 
 **Expected Results:**
 - `wp_minisite_config` table created
-- `Version20251103000000` recorded in `wp_doctrine_migration_versions`
+- `Version20251103000000` recorded in `wp_minisite_migrations`
 
 ---
 

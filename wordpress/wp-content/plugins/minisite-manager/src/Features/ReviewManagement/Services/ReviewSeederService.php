@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Minisite\Domain\Services;
+namespace Minisite\Features\ReviewManagement\Services;
 
-use Minisite\Domain\Entities\Review;
-use Minisite\Infrastructure\Persistence\Repositories\ReviewRepositoryInterface;
+use Minisite\Features\ReviewManagement\Domain\Entities\Review;
+use Minisite\Features\ReviewManagement\Repositories\ReviewRepositoryInterface;
 
 /**
  * Service for seeding sample review data using Doctrine

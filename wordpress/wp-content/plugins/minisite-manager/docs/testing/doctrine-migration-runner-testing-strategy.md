@@ -21,7 +21,7 @@
 - ✅ What happens if migrations exist but none are pending?
 
 ### 2. **Metadata Storage Management**
-- ✅ Does it create `wp_doctrine_migration_versions` table on first run?
+- ✅ Does it create `wp_minisite_migrations` table on first run?
 - ✅ Does it correctly use WordPress table prefix (`$wpdb->prefix`)?
 - ✅ Does it track executed migrations correctly?
 
@@ -107,7 +107,7 @@ class DoctrineMigrationRunnerIntegrationTest extends AbstractDoctrineMigrationTe
    - Verify state is consistent
 
 4. **`test_migrate_creates_metadata_storage_table()`**
-   - First run creates `wp_doctrine_migration_versions`
+   - First run creates `wp_minisite_migrations`
    - Verify table structure
 
 5. **`test_migrate_uses_wordpress_table_prefix()`**
@@ -216,7 +216,7 @@ final class DoctrineMigrationRunnerIntegrationTest extends AbstractDoctrineMigra
         $runner->migrate();
         
         // Verify metadata table uses wp_ prefix
-        $this->assertTableExists('wp_doctrine_migration_versions');
+        $this->assertTableExists('wp_minisite_migrations');
     }
     
     // ... more tests

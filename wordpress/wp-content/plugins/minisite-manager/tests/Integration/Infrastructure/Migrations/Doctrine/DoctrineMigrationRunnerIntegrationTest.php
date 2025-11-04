@@ -146,17 +146,17 @@ final class DoctrineMigrationRunnerIntegrationTest extends AbstractDoctrineMigra
         $runner = new DoctrineMigrationRunner($this->em);
         
         // Verify metadata table doesn't exist initially
-        $this->assertTableNotExists('wp_doctrine_migration_versions', 'Metadata table should not exist initially');
+        $this->assertTableNotExists('wp_minisite_migrations', 'Metadata table should not exist initially');
         
         // Run migrations - this should create metadata storage table
         $runner->migrate();
         
         // Verify metadata table was created
-        $this->assertTableExists('wp_doctrine_migration_versions', 'Metadata storage table should be created');
+        $this->assertTableExists('wp_minisite_migrations', 'Metadata storage table should be created');
         
         // Verify table has correct schema
-        $this->assertTableHasColumn('wp_doctrine_migration_versions', 'version', 'Metadata table should have version column');
-        $this->assertTableHasColumn('wp_doctrine_migration_versions', 'executed_at', 'Metadata table should have executed_at column');
+        $this->assertTableHasColumn('wp_minisite_migrations', 'version', 'Metadata table should have version column');
+        $this->assertTableHasColumn('wp_minisite_migrations', 'executed_at', 'Metadata table should have executed_at column');
     }
     
     /**
@@ -173,7 +173,7 @@ final class DoctrineMigrationRunnerIntegrationTest extends AbstractDoctrineMigra
         $runner->migrate();
         
         // Verify metadata table uses wp_ prefix
-        $this->assertTableExists('wp_doctrine_migration_versions', 'Metadata table should use wp_ prefix');
+        $this->assertTableExists('wp_minisite_migrations', 'Metadata table should use wp_ prefix');
         
         // Verify migration table uses wp_ prefix
         $this->assertTableExists('wp_minisite_config', 'Migration table should use wp_ prefix');
@@ -336,7 +336,7 @@ final class DoctrineMigrationRunnerIntegrationTest extends AbstractDoctrineMigra
         // The prefix is used in the table_storage configuration
         // We verify this indirectly by checking migrations work correctly
         $runner->migrate();
-        $this->assertTableExists('wp_doctrine_migration_versions', 'Metadata table should use wp_ prefix');
+        $this->assertTableExists('wp_minisite_migrations', 'Metadata table should use wp_ prefix');
     }
     
     /**

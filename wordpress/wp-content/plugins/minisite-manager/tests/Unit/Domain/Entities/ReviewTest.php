@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Entities;
 
 use DateTimeImmutable;
-use Minisite\Domain\Entities\Review;
+use Minisite\Features\ReviewManagement\Domain\Entities\Review;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;

@@ -146,7 +146,7 @@ $em = new EntityManager($connection, $config);
 Integration tests should verify:
 
 1. ✅ **Table Creation**: Migration creates `wp_minisite_config` table
-2. ✅ **Tracking Table**: Migration creates `wp_doctrine_migration_versions` table
+2. ✅ **Tracking Table**: Migration creates `wp_minisite_migrations` table
 3. ✅ **Migration Recording**: Executed migration is recorded in tracking table
 4. ✅ **Idempotency**: Running migration twice doesn't cause errors
 5. ✅ **Schema Correctness**: Table has all expected columns with correct types

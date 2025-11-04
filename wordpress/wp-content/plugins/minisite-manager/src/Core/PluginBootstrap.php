@@ -104,9 +104,9 @@ final class PluginBootstrap
 
             // Initialize ReviewRepository
             // Create ReviewRepository instance directly (same pattern as ConfigRepository)
-            $reviewRepository = new \Minisite\Infrastructure\Persistence\Repositories\ReviewRepository(
+            $reviewRepository = new \Minisite\Features\ReviewManagement\Repositories\ReviewRepository(
                 $em,
-                $em->getClassMetadata(\Minisite\Domain\Entities\Review::class)
+                $em->getClassMetadata(\Minisite\Features\ReviewManagement\Domain\Entities\Review::class)
             );
 
             // Store in global for easy access

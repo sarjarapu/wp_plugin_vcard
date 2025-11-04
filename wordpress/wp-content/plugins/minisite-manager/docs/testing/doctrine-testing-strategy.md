@@ -230,7 +230,7 @@ class DoctrineMigrationIntegrationTest extends TestCase
     {
         // Clean up migration table
         $pdo = $this->dbUtils->getPdo();
-        $pdo->exec("DROP TABLE IF EXISTS wp_doctrine_migration_versions");
+        $pdo->exec("DROP TABLE IF EXISTS wp_minisite_migrations");
         $pdo->exec("DROP TABLE IF EXISTS wp_minisite_config");
     }
     

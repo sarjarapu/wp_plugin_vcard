@@ -86,5 +86,5 @@ If you see fatal errors about missing classes, it's likely related to:
 ### Test Isolation
 Each test cleans up its own tables. If tests fail unexpectedly:
 - Check for leftover tables: `mysql -h 127.0.0.1 -P 3307 -u minisite -pminisite minisite_test -e "SHOW TABLES"`
-- Manually clean if needed: `docker-compose exec mysql_integration mysql -u minisite -pminisite minisite_test -e "DROP TABLE IF EXISTS wp_minisite_config, wp_doctrine_migration_versions"`
+- Manually clean if needed: `docker-compose exec mysql_integration mysql -u minisite -pminisite minisite_test -e "DROP TABLE IF EXISTS wp_minisite_config, wp_minisite_migrations"`
 

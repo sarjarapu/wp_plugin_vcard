@@ -1,5 +1,7 @@
 # Feature-Based Architecture Refactor Flow
 
+> **⚠️ DEPRECATED:** This document is outdated. For current structure standards, see **[Project Structure Standards](../project/structure-analysis.md)**.
+
 ## Overview
 
 This document outlines the migration strategy from the current layer-based architecture to a feature-based architecture for the Minisite Manager WordPress plugin.

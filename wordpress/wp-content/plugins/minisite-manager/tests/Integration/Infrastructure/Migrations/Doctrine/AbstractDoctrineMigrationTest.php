@@ -67,8 +67,12 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
         // Create EntityManager with MySQL connection
         // In dev mode, Doctrine automatically uses ArrayCache if no cache is provided
         // We don't need to manually configure Symfony cache for tests
+        // Include both legacy Domain/Entities and new feature-based entities
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [__DIR__ . '/../../../../src/Domain/Entities'],
+            paths: [
+                __DIR__ . '/../../../../src/Domain/Entities',
+                __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
+            ],
             isDevMode: true
         );
         
@@ -118,7 +122,7 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
         $tables = $this->getMigrationTables();
         
         // Always include the migration tracking table
-        $tables[] = 'wp_doctrine_migration_versions';
+        $tables[] = 'wp_minisite_migrations';
         
         foreach ($tables as $table) {
             try {
@@ -242,12 +246,12 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
      */
     protected function getExecutedMigrations(): array
     {
-        if (!$this->tableExists('wp_doctrine_migration_versions')) {
+        if (!$this->tableExists('wp_minisite_migrations')) {
             return [];
         }
         
         return $this->connection->fetchAllAssociative(
-            "SELECT version, executed_at FROM wp_doctrine_migration_versions ORDER BY executed_at"
+            "SELECT version, executed_at FROM wp_minisite_migrations ORDER BY executed_at"
         );
     }
     
