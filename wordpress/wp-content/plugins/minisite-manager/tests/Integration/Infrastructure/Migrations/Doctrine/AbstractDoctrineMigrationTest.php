@@ -118,7 +118,7 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
         $tables = $this->getMigrationTables();
         
         // Always include the migration tracking table
-        $tables[] = 'wp_doctrine_migration_versions';
+        $tables[] = 'wp_minisite_migrations';
         
         foreach ($tables as $table) {
             try {
@@ -242,12 +242,12 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
      */
     protected function getExecutedMigrations(): array
     {
-        if (!$this->tableExists('wp_doctrine_migration_versions')) {
+        if (!$this->tableExists('wp_minisite_migrations')) {
             return [];
         }
         
         return $this->connection->fetchAllAssociative(
-            "SELECT version, executed_at FROM wp_doctrine_migration_versions ORDER BY executed_at"
+            "SELECT version, executed_at FROM wp_minisite_migrations ORDER BY executed_at"
         );
     }
     

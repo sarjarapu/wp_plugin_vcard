@@ -77,9 +77,9 @@ final class Version20251104000000Test extends AbstractDoctrineMigrationTest
         
         // Remove migration tracking to simulate fresh state (if needed)
         // This allows the test to verify the migration runs correctly
-        if ($this->tableExists('wp_doctrine_migration_versions')) {
+        if ($this->tableExists('wp_minisite_migrations')) {
             $this->connection->executeStatement(
-                "DELETE FROM wp_doctrine_migration_versions WHERE version = '20251104000000'"
+                "DELETE FROM wp_minisite_migrations WHERE version = '20251104000000'"
             );
         }
         

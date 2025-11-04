@@ -111,7 +111,7 @@ class DoctrineMigrationRunner
             'check_database_platform' => true,
             'organize_migrations' => 'none',
             'table_storage' => [
-                'table_name' => $this->getTablePrefix() . 'doctrine_migration_versions',
+                'table_name' => $this->getTablePrefix() . 'minisite_migrations',
             ],
         ]);
     }

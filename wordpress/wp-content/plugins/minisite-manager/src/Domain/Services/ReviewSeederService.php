@@ -96,27 +96,136 @@ class ReviewSeederService
     }
 
     /**
+     * Create a Review entity from JSON data array
+     *
+     * Populates all fields from JSON data, with sensible defaults for missing fields.
+     *
+     * @param string $minisiteId The minisite ID
+     * @param array $reviewData Review data from JSON
+     * @return Review The created review entity
+     */
+    public function createReviewFromJsonData(string $minisiteId, array $reviewData): Review
+    {
+        $nowUser = get_current_user_id() ?: null;
+
+        // Create Review entity
+        $review = new Review();
+
+        // Core required fields
+        $review->minisiteId = $minisiteId;
+        $review->authorName = $reviewData['authorName'] ?? '';
+        $review->rating = isset($reviewData['rating']) ? (float) $reviewData['rating'] : 5.0;
+        $review->body = $reviewData['body'] ?? '';
+
+        // Optional author fields
+        $review->authorEmail = $reviewData['authorEmail'] ?? null;
+        $review->authorPhone = $reviewData['authorPhone'] ?? null;
+        $review->authorUrl = $reviewData['authorUrl'] ?? null;
+
+        // Language and locale
+        $locale = $reviewData['locale'] ?? 'en-US';
+        $review->locale = $locale;
+        // Use explicit language from JSON, or auto-detect from locale
+        $review->language = $reviewData['language'] ?? ($locale ? substr($locale, 0, 2) : null);
+
+        // Visit tracking
+        $review->visitedMonth = $reviewData['visitedMonth'] ?? date('Y-m');
+
+        // Source tracking
+        $review->source = $reviewData['source'] ?? 'manual';
+        $review->sourceId = $reviewData['sourceId'] ?? null;
+
+        // Verification flags
+        $review->isEmailVerified = isset($reviewData['isEmailVerified']) ? (bool) $reviewData['isEmailVerified'] : false;
+        $review->isPhoneVerified = isset($reviewData['isPhoneVerified']) ? (bool) $reviewData['isPhoneVerified'] : false;
+
+        // Engagement metrics
+        $review->helpfulCount = isset($reviewData['helpfulCount']) ? (int) $reviewData['helpfulCount'] : 0;
+        $review->spamScore = isset($reviewData['spamScore']) && $reviewData['spamScore'] !== null ? (float) $reviewData['spamScore'] : null;
+        $review->sentimentScore = isset($reviewData['sentimentScore']) && $reviewData['sentimentScore'] !== null ? (float) $reviewData['sentimentScore'] : null;
+
+        // Display and sorting
+        $review->displayOrder = isset($reviewData['displayOrder']) && $reviewData['displayOrder'] !== null ? (int) $reviewData['displayOrder'] : null;
+
+        // Status and moderation
+        $review->status = $reviewData['status'] ?? 'approved';
+        $review->moderationReason = $reviewData['moderationReason'] ?? null;
+        $review->moderatedBy = isset($reviewData['moderatedBy']) && $reviewData['moderatedBy'] !== null ? (int) $reviewData['moderatedBy'] : null;
+
+        // Timestamps - parse from JSON or use current time
+        if (isset($reviewData['createdAt']) && $reviewData['createdAt']) {
+            $review->createdAt = new \DateTimeImmutable($reviewData['createdAt']);
+        } else {
+            $review->createdAt = new \DateTimeImmutable();
+        }
+
+        if (isset($reviewData['updatedAt']) && $reviewData['updatedAt']) {
+            $review->updatedAt = new \DateTimeImmutable($reviewData['updatedAt']);
+        } else {
+            $review->updatedAt = new \DateTimeImmutable();
+        }
+
+        $review->createdBy = isset($reviewData['createdBy']) && $reviewData['createdBy'] !== null ? (int) $reviewData['createdBy'] : $nowUser;
+
+        // PublishedAt - parse from JSON or set via markAsPublished if approved
+        if (isset($reviewData['publishedAt']) && $reviewData['publishedAt']) {
+            $review->publishedAt = new \DateTimeImmutable($reviewData['publishedAt']);
+        } elseif ($review->status === 'approved') {
+            // If status is approved but no publishedAt, mark as published
+            $review->markAsPublished($review->moderatedBy ?? $nowUser);
+        }
+
+        return $review;
+    }
+
+    /**
      * Seed sample reviews for a minisite
      *
      * This is the Doctrine-based replacement for the old review seeding in CreateBase.
+     * Now loads all fields from JSON data.
      *
      * @param string $minisiteId The minisite ID to seed reviews for
-     * @param array $reviews Array of review data:
-     *                      ['authorName' => string, 'rating' => float, 'body' => string, 'locale' => string?]
+     * @param array $reviews Array of review data from JSON (all fields supported)
      */
     public function seedReviewsForMinisite(string $minisiteId, array $reviews): void
     {
         foreach ($reviews as $reviewData) {
-            $this->insertReview(
-                $minisiteId,
-                $reviewData['authorName'],
-                $reviewData['rating'],
-                $reviewData['body'],
-                $reviewData['locale'] ?? 'en-US',
-                $reviewData['authorEmail'] ?? null,
-                $reviewData['authorPhone'] ?? null
+            $review = $this->createReviewFromJsonData($minisiteId, $reviewData);
+            $this->reviewRepository->save($review);
+        }
+    }
+
+    /**
+     * Load reviews from JSON file
+     *
+     * @param string $jsonFile JSON filename (e.g., 'acme-dental-reviews.json')
+     * @return array Array of review data
+     * @throws \RuntimeException If file not found or invalid JSON
+     */
+    protected function loadReviewsFromJson(string $jsonFile): array
+    {
+        $jsonPath = MINISITE_PLUGIN_DIR . 'data/json/reviews/' . $jsonFile;
+
+        if (!file_exists($jsonPath)) {
+            throw new \RuntimeException('JSON file not found: ' . esc_html($jsonPath));
+        }
+
+        $jsonContent = file_get_contents($jsonPath);
+        $data = json_decode($jsonContent, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \RuntimeException(
+                'Invalid JSON in file: ' . esc_html($jsonFile) . '. Error: ' . esc_html(json_last_error_msg())
             );
         }
+
+        if (!isset($data['reviews']) || !is_array($data['reviews'])) {
+            throw new \RuntimeException(
+                'Invalid JSON structure in file: ' . esc_html($jsonFile) . '. Missing \'reviews\' array.'
+            );
+        }
+
+        return $data['reviews'];
     }
 
     /**
@@ -128,181 +237,30 @@ class ReviewSeederService
      * - Green Bites (London)
      * - Swift Transit (Sydney)
      *
+     * Reviews are loaded from JSON files in data/json/reviews/
+     *
      * @param array $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT'
      */
     public function seedAllTestReviews(array $minisiteIds): void
     {
-        // ACME Dental reviews (5 total)
-        if (!empty($minisiteIds['ACME'])) {
-            $this->seedReviewsForMinisite($minisiteIds['ACME'], [
-                [
-                    'authorName' => 'Jane Doe',
-                    'rating' => 5.0,
-                    'body' => 'The hygienist was incredibly gentle and explained every step before she started. ' .
-                             'The clinic is spotless and the equipment looks brand new. ' .
-                             'I left feeling well cared for and finally not dreading my next visit.',
-                    'locale' => 'en-US',
-                ],
-                [
-                    'authorName' => 'Mark T.',
-                    'rating' => 4.5,
-                    'body' => 'Booked a last‑minute appointment for a chipped tooth and they fit me in the same day. ' .
-                             'The repair was quick and painless, and the billing was clear. ' .
-                             'Parking was easy which is a bonus in Dallas.',
-                    'locale' => 'en-US',
-                ],
-                [
-                    'authorName' => 'Priya S.',
-                    'rating' => 4.8,
-                    'body' => 'I had whitening done here and the results were immediate. ' .
-                             'The dentist checked sensitivity throughout and gave me clear ' .
-                             'aftercare instructions. Front desk followed up the next day to see how I was doing.',
-                    'locale' => 'en-US',
-                ],
-                [
-                    'authorName' => 'Daniel K.',
-                    'rating' => 4.9,
-                    'body' => 'Super organized practice with on‑time appointments. ' .
-                             'They walked me through options for a crown and never pushed extras. ' .
-                             'Waiting area is calm and the coffee machine is a nice touch.',
-                    'locale' => 'en-US',
-                ],
-                [
-                    'authorName' => 'Alicia M.',
-                    'rating' => 5.0,
-                    'body' => 'Brought my teen for Invisalign and the consultation was thorough ' .
-                             'without being overwhelming. Clear timeline, fair pricing, and they ' .
-                             'answered all our questions. We feel confident continuing care here.',
-                    'locale' => 'en-US',
-                ],
-            ]);
-        }
+        // Map of minisite keys to their JSON review files
+        $reviewFiles = [
+            'ACME' => 'acme-dental-reviews.json',
+            'LOTUS' => 'lotus-textiles-reviews.json',
+            'GREEN' => 'green-bites-reviews.json',
+            'SWIFT' => 'swift-transit-reviews.json',
+        ];
 
-        // Lotus Textiles reviews (5 total)
-        if (!empty($minisiteIds['LOTUS'])) {
-            $this->seedReviewsForMinisite($minisiteIds['LOTUS'], [
-                [
-                    'authorName' => 'Asha P.',
-                    'rating' => 5.0,
-                    'body' => 'Beautiful fabric selection and honest pricing. ' .
-                             'The team helped me pick the right silk and arranged quick alterations. ' .
-                             'I received so many compliments at the event.',
-                    'locale' => 'en-IN',
-                ],
-                [
-                    'authorName' => 'Rohit K.',
-                    'rating' => 4.6,
-                    'body' => 'Quality linens and attentive staff. ' .
-                             'Turnaround for tailoring was faster than expected and the fit was perfect.',
-                    'locale' => 'en-IN',
-                ],
-                [
-                    'authorName' => 'Neha S.',
-                    'rating' => 4.8,
-                    'body' => 'They sourced a specific shade of chiffon for me within two days. ' .
-                             'Great communication throughout and careful packaging.',
-                    'locale' => 'en-IN',
-                ],
-                [
-                    'authorName' => 'Imran V.',
-                    'rating' => 4.7,
-                    'body' => 'Got a sherwani tailored here. ' .
-                             'Professional fittings and precise embroidery work. ' .
-                             'Delivery was on the promised date.',
-                    'locale' => 'en-IN',
-                ],
-                [
-                    'authorName' => 'Kavita D.',
-                    'rating' => 4.9,
-                    'body' => 'Staff were patient while I compared several silks. ' .
-                             'They suggested blouse lining and care tips that really helped.',
-                    'locale' => 'en-IN',
-                ],
-            ]);
-        }
-
-        // Green Bites reviews (5 total)
-        if (!empty($minisiteIds['GREEN'])) {
-            $this->seedReviewsForMinisite($minisiteIds['GREEN'], [
-                [
-                    'authorName' => 'Alex P.',
-                    'rating' => 5.0,
-                    'body' => 'Best sourdough in the City. ' .
-                             'The crust has real depth of flavor and the bowls are generous. ' .
-                             'Staff remembered my usual after two visits.',
-                    'locale' => 'en-GB',
-                ],
-                [
-                    'authorName' => 'Maria G.',
-                    'rating' => 4.7,
-                    'body' => 'Delicious bowls and quick service at lunch. ' .
-                             'Great coffee with oat milk, and I love the rotating specials.',
-                    'locale' => 'en-GB',
-                ],
-                [
-                    'authorName' => 'Tom H.',
-                    'rating' => 4.6,
-                    'body' => 'Great place for a quick, healthy lunch. ' .
-                             'Seating fills up at noon but the line moves fast.',
-                    'locale' => 'en-GB',
-                ],
-                [
-                    'authorName' => 'Ella R.',
-                    'rating' => 4.8,
-                    'body' => 'Excellent espresso and friendly baristas. ' .
-                             'The vegan bowl had great textures and bright flavors.',
-                    'locale' => 'en-GB',
-                ],
-                [
-                    'authorName' => 'Ben S.',
-                    'rating' => 4.9,
-                    'body' => 'Love the seasonal menu changes and the sourdough loaves on Fridays. ' .
-                             'Consistently great quality.',
-                    'locale' => 'en-GB',
-                ],
-            ]);
-        }
-
-        // Swift Transit reviews (5 total)
-        if (!empty($minisiteIds['SWIFT'])) {
-            $this->seedReviewsForMinisite($minisiteIds['SWIFT'], [
-                [
-                    'authorName' => 'Zoe L.',
-                    'rating' => 5.0,
-                    'body' => 'Super fast and careful with fragile items. ' .
-                             'They handled our clinic samples with documented chain-of-custody ' .
-                             'and delivered earlier than promised.',
-                    'locale' => 'en-AU',
-                ],
-                [
-                    'authorName' => 'Nick R.',
-                    'rating' => 4.8,
-                    'body' => 'Great communication and tracking. ' .
-                             'Dispatch answered within seconds, and the driver called ahead for loading dock access.',
-                    'locale' => 'en-AU',
-                ],
-                [
-                    'authorName' => 'Sam D.',
-                    'rating' => 4.7,
-                    'body' => 'Booked an urgent pickup at 4 pm and it reached the CBD in under an hour. ' .
-                             'Clear proof‑of‑delivery emailed instantly.',
-                    'locale' => 'en-AU',
-                ],
-                [
-                    'authorName' => 'Priya V.',
-                    'rating' => 4.9,
-                    'body' => 'Courteous drivers and clean vehicles. ' .
-                             'Our bulk transfers were secured properly and arrived without damage.',
-                    'locale' => 'en-AU',
-                ],
-                [
-                    'authorName' => 'Owen C.',
-                    'rating' => 4.8,
-                    'body' => 'We use their scheduled routes daily. ' .
-                             'Reliable timings and proactive updates whenever traffic is heavy.',
-                    'locale' => 'en-AU',
-                ],
-            ]);
+        foreach ($reviewFiles as $key => $jsonFile) {
+            if (!empty($minisiteIds[$key])) {
+                try {
+                    $reviews = $this->loadReviewsFromJson($jsonFile);
+                    $this->seedReviewsForMinisite($minisiteIds[$key], $reviews);
+                } catch (\RuntimeException $e) {
+                    // Log error but continue with other minisites
+                    error_log('Failed to load reviews from ' . $jsonFile . ': ' . $e->getMessage());
+                }
+            }
         }
     }
 }

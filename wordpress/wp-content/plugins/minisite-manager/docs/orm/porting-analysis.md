@@ -214,7 +214,7 @@ $em->flush();
 **Doctrine Migrations:**
 - Uses timestamp-based versioning (`20240101000000`)
 - Different migration class structure
-- Tracks versions in `doctrine_migration_versions` table
+- Tracks versions in `minisite_migrations` table
 - Migration files: `Version20240101000000.php`
 
 **Conversion Required:**

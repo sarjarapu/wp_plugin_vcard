@@ -15,7 +15,7 @@ We're testing **`DoctrineMigrationRunner::migrate()`** - the code that runs Doct
 
 **Example:** When plugin activates, it should:
 - Create `wp_minisite_config` table (from `Version20251103000000.php`)
-- Record that this migration ran in `wp_doctrine_migration_versions` table
+- Record that this migration ran in `wp_minisite_migrations` table
 
 ## How Do Integration Tests Validate This?
 
@@ -134,7 +134,7 @@ public function test_migrate_records_executed_migration(): void
     
     // Step 2: Query the tracking table directly
     $executedMigrations = $this->connection->fetchAllAssociative(
-        "SELECT version FROM wp_doctrine_migration_versions"
+        "SELECT version FROM wp_minisite_migrations"
     );
     
     // Step 3: Verify migration was recorded
@@ -144,7 +144,7 @@ public function test_migrate_records_executed_migration(): void
 ```
 
 **What This Validates:**
-- ✅ **Tracking Table**: `wp_doctrine_migration_versions` exists
+- ✅ **Tracking Table**: `wp_minisite_migrations` exists
 - ✅ **Migration Recorded**: Executed migration is logged
 - ✅ **Idempotency**: Running migration twice doesn't duplicate records
 
@@ -174,7 +174,7 @@ public function test_migrate_records_executed_migration(): void
 │   3. Creates migration plan                                │
 │   4. Executes Version20251103000000::up()                  │
 │      → Creates wp_minisite_config table                    │
-│   5. Records in wp_doctrine_migration_versions             │
+│   5. Records in wp_minisite_migrations             │
 └─────────────────────────────────────────────────────────────┘
                           │
                           ▼
@@ -233,7 +233,7 @@ public function test_migrate_records_executed_migration(): void
 Our 7 tests validate:
 
 1. **Table Creation**: `wp_minisite_config` table exists after migration
-2. **Tracking Table**: `wp_doctrine_migration_versions` table exists
+2. **Tracking Table**: `wp_minisite_migrations` table exists
 3. **Migration Recording**: Executed migration is logged
 4. **Idempotency**: Running migration twice is safe
 5. **Schema Correctness**: All expected columns exist with correct types

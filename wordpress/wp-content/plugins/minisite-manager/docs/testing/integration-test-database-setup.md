@@ -104,7 +104,7 @@ private function cleanupTestTables(): void
 {
     $tables = [
         'wp_minisite_config',
-        'wp_doctrine_migration_versions',
+        'wp_minisite_migrations',
     ];
     
     foreach ($tables as $table) {
@@ -154,7 +154,7 @@ vendor/bin/phpunit tests/Integration/Infrastructure/Migrations/Doctrine/Doctrine
 
 **Solution:**
 - Cleanup should handle this, but if it persists:
-  - Manually drop tables: `DROP TABLE IF EXISTS wp_minisite_config, wp_doctrine_migration_versions;`
+  - Manually drop tables: `DROP TABLE IF EXISTS wp_minisite_config, wp_minisite_migrations;`
   - Or drop and recreate database: `DROP DATABASE minisite_test; CREATE DATABASE minisite_test;`
 
 ## Benefits of Real MySQL Tests
