@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Infrastructure\Persistence\Doctrine;
 
-use Minisite\Domain\Entities\Config;
-use Minisite\Infrastructure\Persistence\Repositories\ConfigRepository;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
+use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
 use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
 use Doctrine\DBAL\DriverManager;
@@ -35,6 +35,9 @@ final class ConfigRepositoryIntegrationTest extends TestCase
     {
         parent::setUp();
         
+        // Initialize LoggingServiceProvider if not already initialized
+        \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
+        
         // Get database configuration from environment (same as AbstractDoctrineMigrationTest)
         $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
         $port = getenv('MYSQL_PORT') ?: '3307';
@@ -54,8 +57,12 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         ]);
         
         // Create EntityManager with MySQL connection (same as AbstractDoctrineMigrationTest)
+        // Use the new feature-based entity path
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [__DIR__ . '/../../../../src/Domain/Entities'],
+            paths: [
+                __DIR__ . '/../../../../src/Features/ConfigurationManagement/Domain/Entities',
+                __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
+            ],
             isDevMode: true
         );
         
@@ -141,7 +148,9 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         // EntityManager will automatically reconnect when needed
         
         // Get repository (automatically uses wp_minisite_config via TablePrefixListener)
-        $this->repository = $this->em->getRepository(Config::class);
+        // Use the new feature-based repository
+        $classMetadata = $this->em->getClassMetadata(Config::class);
+        $this->repository = new ConfigRepository($this->em, $classMetadata);
         
         // Clean up test data (but keep table structure)
         $this->cleanupTestData();
@@ -310,4 +319,3 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         $this->assertEquals($newValue, $updated->getTypedValue(), 'Decrypted new value should match');
     }
 }
-

@@ -2,25 +2,30 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\Services;
+namespace Tests\Unit\Features\ConfigurationManagement\Services;
 
-use Minisite\Domain\Entities\Config;
-use Minisite\Domain\Services\ConfigManager;
-use Minisite\Infrastructure\Persistence\Repositories\ConfigRepositoryInterface;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
+use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
+use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
- * Unit tests for ConfigManager
+ * Unit tests for ConfigurationManagementService
  */
-final class ConfigManagerTest extends TestCase
+#[CoversClass(ConfigurationManagementService::class)]
+final class ConfigurationManagementServiceTest extends TestCase
 {
     private ConfigRepositoryInterface|MockObject $repository;
-    private ConfigManager $configManager;
+    private ConfigurationManagementService $service;
     
     protected function setUp(): void
     {
         parent::setUp();
+        
+        // Initialize LoggingServiceProvider if not already initialized
+        \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
         
         // Define encryption key for tests that use encrypted type
         if (!defined('MINISITE_ENCRYPTION_KEY')) {
@@ -31,7 +36,7 @@ final class ConfigManagerTest extends TestCase
         $this->resetStaticCache();
         
         $this->repository = $this->createMock(ConfigRepositoryInterface::class);
-        $this->configManager = new ConfigManager($this->repository);
+        $this->service = new ConfigurationManagementService($this->repository);
     }
     
     protected function tearDown(): void
@@ -42,11 +47,11 @@ final class ConfigManagerTest extends TestCase
     }
     
     /**
-     * Reset ConfigManager static cache using reflection
+     * Reset ConfigurationManagementService static cache using reflection
      */
     private function resetStaticCache(): void
     {
-        $reflection = new \ReflectionClass(ConfigManager::class);
+        $reflection = new \ReflectionClass(ConfigurationManagementService::class);
         
         $cacheProperty = $reflection->getProperty('cache');
         $cacheProperty->setAccessible(true);
@@ -66,7 +71,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->get('test_key');
+        $result = $this->service->get('test_key');
         
         $this->assertEquals('test_value', $result);
     }
@@ -78,7 +83,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([]);
         
-        $result = $this->configManager->get('non_existent', 'default_value');
+        $result = $this->service->get('non_existent', 'default_value');
         
         $this->assertEquals('default_value', $result);
     }
@@ -90,7 +95,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([]);
         
-        $result = $this->configManager->get('non_existent');
+        $result = $this->service->get('non_existent');
         
         $this->assertNull($result);
     }
@@ -105,14 +110,14 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $this->configManager->get('cached_key');
+        $this->service->get('cached_key');
         
         // Second call should use cache (no additional repository call)
         $this->repository
             ->expects($this->never())
             ->method('getAll');
         
-        $result = $this->configManager->get('cached_key');
+        $result = $this->service->get('cached_key');
         $this->assertEquals('cached_value', $result);
     }
     
@@ -125,7 +130,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->get('int_key');
+        $result = $this->service->get('int_key');
         
         $this->assertIsInt($result);
         $this->assertEquals(42, $result);
@@ -140,7 +145,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->get('bool_key');
+        $result = $this->service->get('bool_key');
         
         $this->assertIsBool($result);
         $this->assertTrue($result);
@@ -156,7 +161,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->get('json_key');
+        $result = $this->service->get('json_key');
         
         $this->assertIsArray($result);
         $this->assertEquals($jsonData, $result);
@@ -179,7 +184,7 @@ final class ConfigManagerTest extends TestCase
                     && $config->type === 'string';
             }));
         
-        $this->configManager->set('new_key', 'new_value');
+        $this->service->set('new_key', 'new_value');
     }
     
     public function test_set_updates_existing_config(): void
@@ -200,7 +205,7 @@ final class ConfigManagerTest extends TestCase
                     && $config->value === 'updated_value';
             }));
         
-        $this->configManager->set('existing_key', 'updated_value');
+        $this->service->set('existing_key', 'updated_value');
     }
     
     public function test_set_clears_cache(): void
@@ -213,7 +218,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $this->configManager->get('test_key');
+        $this->service->get('test_key');
         
         // Set new value - should clear cache
         $this->repository
@@ -225,10 +230,10 @@ final class ConfigManagerTest extends TestCase
             ->expects($this->once())
             ->method('save');
         
-        $this->configManager->set('new_key', 'new_value');
+        $this->service->set('new_key', 'new_value');
         
         // Next get should reload from repository
-        $this->configManager->get('test_key');
+        $this->service->get('test_key');
     }
     
     public function test_set_converts_integer_value(): void
@@ -245,7 +250,7 @@ final class ConfigManagerTest extends TestCase
                 return $config->type === 'integer' && $config->value === '42';
             }));
         
-        $this->configManager->set('int_key', 42, 'integer');
+        $this->service->set('int_key', 42, 'integer');
     }
     
     public function test_set_converts_boolean_value(): void
@@ -262,7 +267,7 @@ final class ConfigManagerTest extends TestCase
                 return $config->type === 'boolean' && $config->value === '1';
             }));
         
-        $this->configManager->set('bool_key', true, 'boolean');
+        $this->service->set('bool_key', true, 'boolean');
     }
     
     public function test_set_converts_json_value(): void
@@ -282,7 +287,7 @@ final class ConfigManagerTest extends TestCase
                     && $config->value === json_encode($jsonData);
             }));
         
-        $this->configManager->set('json_key', $jsonData, 'json');
+        $this->service->set('json_key', $jsonData, 'json');
     }
     
     public function test_set_marks_encrypted_type_as_sensitive(): void
@@ -299,7 +304,7 @@ final class ConfigManagerTest extends TestCase
                 return $config->type === 'encrypted' && $config->isSensitive === true;
             }));
         
-        $this->configManager->set('encrypted_key', 'secret', 'encrypted');
+        $this->service->set('encrypted_key', 'secret', 'encrypted');
     }
     
     public function test_has_returns_true_when_config_exists(): void
@@ -311,7 +316,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $this->assertTrue($this->configManager->has('test_key'));
+        $this->assertTrue($this->service->has('test_key'));
     }
     
     public function test_has_returns_false_when_config_not_exists(): void
@@ -321,7 +326,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([]);
         
-        $this->assertFalse($this->configManager->has('non_existent'));
+        $this->assertFalse($this->service->has('non_existent'));
     }
     
     public function test_delete_removes_config_and_clears_cache(): void
@@ -331,7 +336,7 @@ final class ConfigManagerTest extends TestCase
             ->method('delete')
             ->with('key_to_delete');
         
-        $this->configManager->delete('key_to_delete');
+        $this->service->delete('key_to_delete');
         
         // Cache should be cleared, so next get should reload
         $this->repository
@@ -339,7 +344,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([]);
         
-        $this->configManager->get('any_key');
+        $this->service->get('any_key');
     }
     
     public function test_all_returns_all_configs(): void
@@ -352,7 +357,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config1, $config2]);
         
-        $result = $this->configManager->all();
+        $result = $this->service->all();
         
         $this->assertCount(2, $result);
         $this->assertContains($config1, $result);
@@ -372,7 +377,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$normalConfig, $sensitiveConfig]);
         
-        $result = $this->configManager->all(includeSensitive: false);
+        $result = $this->service->all(includeSensitive: false);
         
         $this->assertCount(1, $result);
         $this->assertContains($normalConfig, $result);
@@ -390,7 +395,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$normalConfig, $sensitiveConfig]);
         
-        $result = $this->configManager->all(includeSensitive: true);
+        $result = $this->service->all(includeSensitive: true);
         
         $this->assertCount(2, $result);
     }
@@ -405,7 +410,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config1, $config2]);
         
-        $result = $this->configManager->keys();
+        $result = $this->service->keys();
         
         $this->assertEquals(['key1', 'key2'], $result);
     }
@@ -419,7 +424,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->find('test_key');
+        $result = $this->service->find('test_key');
         
         $this->assertInstanceOf(Config::class, $result);
         $this->assertEquals($config, $result);
@@ -432,7 +437,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([]);
         
-        $result = $this->configManager->find('non_existent');
+        $result = $this->service->find('non_existent');
         
         $this->assertNull($result);
     }
@@ -447,13 +452,13 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $this->configManager->get('test_key');
+        $this->service->get('test_key');
         
         // Reload should clear cache
-        $this->configManager->reload();
+        $this->service->reload();
         
         // Next get should reload from repository
-        $this->configManager->get('test_key');
+        $this->service->get('test_key');
     }
     
     public function test_getString_returns_string_value(): void
@@ -465,7 +470,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->getString('string_key', 'default');
+        $result = $this->service->getString('string_key', 'default');
         
         $this->assertIsString($result);
         $this->assertEquals('123', $result);
@@ -480,7 +485,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->getInt('int_key', 0);
+        $result = $this->service->getInt('int_key', 0);
         
         $this->assertIsInt($result);
         $this->assertEquals(42, $result);
@@ -495,7 +500,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->getBool('bool_key', false);
+        $result = $this->service->getBool('bool_key', false);
         
         $this->assertIsBool($result);
         $this->assertTrue($result);
@@ -511,7 +516,7 @@ final class ConfigManagerTest extends TestCase
             ->method('getAll')
             ->willReturn([$config]);
         
-        $result = $this->configManager->getJson('json_key', []);
+        $result = $this->service->getJson('json_key', []);
         
         $this->assertIsArray($result);
         $this->assertEquals($jsonData, $result);
@@ -527,7 +532,7 @@ final class ConfigManagerTest extends TestCase
             ->willReturn([$config]);
         
         $default = ['default' => 'value'];
-        $result = $this->configManager->getJson('invalid_json', $default);
+        $result = $this->service->getJson('invalid_json', $default);
         
         $this->assertEquals($default, $result);
     }
