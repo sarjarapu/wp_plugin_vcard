@@ -2,9 +2,11 @@
 
 namespace Minisite\Features\ConfigurationManagement\Hooks;
 
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
 use Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController;
 use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
 use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * ConfigurationManagementHooks
@@ -14,12 +16,14 @@ use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
  * - Handles admin page rendering
  * - Delegates to controller
  */
-final class ConfigurationManagementHooks
+final class ConfigurationManagementHooks extends BaseHook
 {
     public function __construct(
         private ConfigurationManagementController $controller,
-        private DeleteConfigHandler $deleteHandler
+        private DeleteConfigHandler $deleteHandler,
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -92,6 +96,7 @@ final class ConfigurationManagementHooks
             'page' => 'minisite-config',
             'deleted' => '1'
         ], admin_url('admin.php')));
-        exit;
+        // Terminate after handling route (inherited from BaseHook)
+        $this->terminate();
     }
 }

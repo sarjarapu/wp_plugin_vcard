@@ -1,8 +1,10 @@
 <?php
 
-namespace Minisite\Features\VersionManagement\Hooks;
+namespace Minisite\Tests\Unit\Features\VersionManagement\Hooks;
 
+use Minisite\Features\VersionManagement\Hooks\VersionHooks;
 use Minisite\Features\VersionManagement\Controllers\VersionController;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -17,7 +19,11 @@ class VersionHooksTest extends TestCase
     protected function setUp(): void
     {
         $this->versionController = $this->createMock(VersionController::class);
-        $this->hooks = new VersionHooks($this->versionController);
+        
+        // Use TestTerminationHandler so exit doesn't terminate tests
+        $terminationHandler = new TestTerminationHandler();
+        
+        $this->hooks = new VersionHooks($this->versionController, $terminationHandler);
         $this->setupWordPressMocks();
     }
 
@@ -64,30 +70,49 @@ class VersionHooksTest extends TestCase
 
     private function setupWordPressMocks(): void
     {
-        $functions = ['add_action', 'is_page'];
+        $functions = ['add_action', 'is_page', 'get_query_var'];
 
         foreach ($functions as $function) {
             if (!function_exists($function)) {
-                eval("
-                    function {$function}(...\$args) {
-                        if (isset(\$GLOBALS['_test_mock_{$function}'])) {
-                            return \$GLOBALS['_test_mock_{$function}'];
+                if ($function === 'get_query_var') {
+                    eval("
+                        function get_query_var(\$var, \$default = '') {
+                            if (isset(\$GLOBALS['_test_mock_get_query_var'])) {
+                                \$callback = \$GLOBALS['_test_mock_get_query_var'];
+                                if (is_callable(\$callback)) {
+                                    return \$callback(\$var, \$default);
+                                }
+                            }
+                            return \$default;
                         }
-                        return null;
-                    }
-                ");
+                    ");
+                } else {
+                    eval("
+                        function {$function}(...\$args) {
+                            if (isset(\$GLOBALS['_test_mock_{$function}'])) {
+                                return \$GLOBALS['_test_mock_{$function}'];
+                            }
+                            return null;
+                        }
+                    ");
+                }
             }
         }
     }
 
     private function mockWordPressFunction(string $functionName, mixed $returnValue): void
     {
-        $GLOBALS['_test_mock_' . $functionName] = $returnValue;
+        if ($functionName === 'get_query_var' && is_callable($returnValue)) {
+            // Store the callback in GLOBALS for the mocked function to use
+            $GLOBALS['_test_mock_get_query_var'] = $returnValue;
+        } else {
+            $GLOBALS['_test_mock_' . $functionName] = $returnValue;
+        }
     }
 
     private function clearWordPressMocks(): void
     {
-        $functions = ['add_action', 'is_page'];
+        $functions = ['add_action', 'is_page', 'get_query_var'];
         foreach ($functions as $func) {
             unset($GLOBALS['_test_mock_' . $func]);
         }

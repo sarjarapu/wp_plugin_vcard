@@ -2,9 +2,11 @@
 
 namespace Minisite\Features\PublishMinisite\Hooks;
 
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
 use Minisite\Features\PublishMinisite\Controllers\PublishController;
 use Minisite\Features\PublishMinisite\Services\WooCommerceIntegration;
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * Publish Hooks
@@ -14,7 +16,7 @@ use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
  * - Hooks into WordPress template_redirect
  * - Manages publish route handling
  */
-class PublishHooks
+class PublishHooks extends BaseHook
 {
     /**
      * Flag value set by rewrite rules to indicate account management routes
@@ -24,8 +26,10 @@ class PublishHooks
     public function __construct(
         private PublishController $publishController,
         private WordPressPublishManager $wordPressManager,
-        private WooCommerceIntegration $wooCommerceIntegration
+        private WooCommerceIntegration $wooCommerceIntegration,
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -82,7 +86,8 @@ class PublishHooks
         // Handle publish route
         if ($action === 'publish') {
             $this->publishController->handlePublish();
-            exit;
+            // Terminate after handling route (inherited from BaseHook)
+            $this->terminate();
         }
     }
 

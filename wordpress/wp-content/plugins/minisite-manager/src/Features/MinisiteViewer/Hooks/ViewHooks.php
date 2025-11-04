@@ -2,8 +2,10 @@
 
 namespace Minisite\Features\MinisiteViewer\Hooks;
 
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * View Hooks
@@ -13,12 +15,14 @@ use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
  * - Hooks into WordPress template_redirect
  * - Manages minisite view route handling
  */
-final class ViewHooks
+final class ViewHooks extends BaseHook
 {
     public function __construct(
         private MinisitePageController $minisitePageController,
-        private WordPressMinisiteManager $wordPressManager
+        private WordPressMinisiteManager $wordPressManager,
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -69,8 +73,8 @@ final class ViewHooks
         // Route to controller
         $this->minisitePageController->handleView();
 
-        // Exit to prevent the old system from handling this request
-        exit;
+        // Terminate after handling route (inherited from BaseHook)
+        $this->terminate();
     }
 
     /**

@@ -276,6 +276,13 @@ if (!function_exists('add_rewrite_rule')) {
 if (!function_exists('get_query_var')) {
     function get_query_var($var, $default = '')
     {
+        // Check for test-specific mock override
+        if (isset($GLOBALS['_test_mock_get_query_var'])) {
+            $callback = $GLOBALS['_test_mock_get_query_var'];
+            if (is_callable($callback)) {
+                return $callback($var, $default);
+            }
+        }
         return $default;
     }
     

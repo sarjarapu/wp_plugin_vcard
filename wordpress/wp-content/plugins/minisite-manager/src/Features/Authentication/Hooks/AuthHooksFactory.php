@@ -54,7 +54,10 @@ final class AuthHooksFactory
             $renderer
         );
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new AuthHooks($authController);
+        return new AuthHooks($authController, $terminationHandler);
     }
 }

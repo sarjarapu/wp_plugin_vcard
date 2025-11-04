@@ -4,6 +4,7 @@ namespace Tests\Unit\Features\Authentication\Hooks;
 
 use Minisite\Features\Authentication\Hooks\AuthHooks;
 use Minisite\Features\Authentication\Controllers\AuthController;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -21,12 +22,54 @@ final class AuthHooksTest extends TestCase
     protected function setUp(): void
     {
         $this->authController = $this->createMock(AuthController::class);
-        $this->authHooks = new AuthHooks($this->authController);
+        
+        // Use TestTerminationHandler so exit doesn't terminate tests
+        $terminationHandler = new TestTerminationHandler();
+        
+        $this->authHooks = new AuthHooks($this->authController, $terminationHandler);
+        
+        // Setup WordPress function mocks
+        $this->setupWordPressMocks();
         
         // Reset global variables
         $_SERVER = [];
         $_POST = [];
         $_GET = [];
+    }
+
+    protected function tearDown(): void
+    {
+        $this->clearWordPressMocks();
+        parent::tearDown();
+    }
+
+    /**
+     * Setup WordPress function mocks
+     */
+    private function setupWordPressMocks(): void
+    {
+        // Ensure get_query_var function exists for testing
+        if (!function_exists('get_query_var')) {
+            eval("
+                function get_query_var(\$var, \$default = '') {
+                    if (isset(\$GLOBALS['_test_mock_get_query_var'])) {
+                        \$callback = \$GLOBALS['_test_mock_get_query_var'];
+                        if (is_callable(\$callback)) {
+                            return \$callback(\$var, \$default);
+                        }
+                    }
+                    return \$default;
+                }
+            ");
+        }
+    }
+
+    /**
+     * Clear WordPress function mocks
+     */
+    private function clearWordPressMocks(): void
+    {
+        unset($GLOBALS['_test_mock_get_query_var']);
     }
 
     /**
@@ -227,7 +270,10 @@ final class AuthHooksTest extends TestCase
      */
     private function mockWordPressFunction(string $functionName, mixed $returnValue): void
     {
-        if (!function_exists($functionName)) {
+        if ($functionName === 'get_query_var' && is_callable($returnValue)) {
+            // Store the callback in GLOBALS for the mocked function to use
+            $GLOBALS['_test_mock_get_query_var'] = $returnValue;
+        } elseif (!function_exists($functionName)) {
             if (is_callable($returnValue)) {
                 eval("function {$functionName}(...\$args) { return call_user_func_array(" . var_export($returnValue, true) . ", \$args); }");
             } else {

@@ -63,7 +63,10 @@ class PublishHooksFactory
             $reservationService
         );
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new PublishHooks($publishController, $wordPressManager, $wooCommerceIntegration);
+        return new PublishHooks($publishController, $wordPressManager, $wooCommerceIntegration, $terminationHandler);
     }
 }

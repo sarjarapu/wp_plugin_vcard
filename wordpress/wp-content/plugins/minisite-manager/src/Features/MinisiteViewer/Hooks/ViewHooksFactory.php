@@ -52,7 +52,10 @@ final class ViewHooksFactory
             $wordPressManager
         );
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new ViewHooks($minisitePageController, $wordPressManager);
+        return new ViewHooks($minisitePageController, $wordPressManager, $terminationHandler);
     }
 }

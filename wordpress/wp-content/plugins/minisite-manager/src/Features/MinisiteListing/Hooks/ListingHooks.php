@@ -2,7 +2,9 @@
 
 namespace Minisite\Features\MinisiteListing\Hooks;
 
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
 use Minisite\Features\MinisiteListing\Controllers\ListingController;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * Listing Hooks
@@ -12,11 +14,13 @@ use Minisite\Features\MinisiteListing\Controllers\ListingController;
  * - Hooks into WordPress template_redirect
  * - Manages listing route handling
  */
-final class ListingHooks
+final class ListingHooks extends BaseHook
 {
     public function __construct(
-        private ListingController $listingController
+        private ListingController $listingController,
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -61,7 +65,9 @@ final class ListingHooks
             switch ($action) {
                 case 'sites':
                     $this->listingController->handleList();
-                    exit;
+                    // Terminate after handling route (inherited from BaseHook)
+                    $this->terminate();
+                    break;
             }
         }
     }

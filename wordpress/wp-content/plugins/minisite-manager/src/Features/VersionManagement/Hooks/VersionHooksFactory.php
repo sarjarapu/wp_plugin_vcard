@@ -66,7 +66,10 @@ class VersionHooksFactory
             $wordPressManager
         );
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create hooks
-        return new VersionHooks($versionController);
+        return new VersionHooks($versionController, $terminationHandler);
     }
 }

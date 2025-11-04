@@ -49,7 +49,10 @@ class NewMinisiteHooksFactory
             $formSecurityHelper
         );
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new NewMinisiteHooks($newMinisiteController, $wordPressManager);
+        return new NewMinisiteHooks($newMinisiteController, $wordPressManager, $terminationHandler);
     }
 }

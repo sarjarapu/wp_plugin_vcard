@@ -2,16 +2,20 @@
 
 namespace Minisite\Features\VersionManagement\Hooks;
 
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
 use Minisite\Features\VersionManagement\Controllers\VersionController;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress hooks for version management
  */
-class VersionHooks
+class VersionHooks extends BaseHook
 {
     public function __construct(
-        private VersionController $versionController
+        private VersionController $versionController,
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -38,7 +42,8 @@ class VersionHooks
             get_query_var('minisite_account_action') === 'versions'
         ) {
             $this->versionController->handleListVersions();
-            exit;
+            // Terminate after handling route (inherited from BaseHook)
+            $this->terminate();
         }
     }
 

@@ -47,7 +47,10 @@ final class ListingHooksFactory
             $listingManager
         );
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new ListingHooks($listingController);
+        return new ListingHooks($listingController, $terminationHandler);
     }
 }
