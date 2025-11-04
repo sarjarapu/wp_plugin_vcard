@@ -21,7 +21,7 @@ use Minisite\Features\Authentication\Rendering\AuthRenderer;
  *
  * This controller only orchestrates the flow - it doesn't do the work itself!
  */
-final class AuthController
+class AuthController
 {
     public function __construct(
         private LoginHandler $loginHandler,

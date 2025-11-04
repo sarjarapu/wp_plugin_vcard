@@ -12,7 +12,7 @@ use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
  * - Sets HTTP headers
  * - Handles error responses
  */
-final class ListingResponseHandler
+class ListingResponseHandler
 {
     public function __construct(
         private WordPressListingManager $wordPressManager

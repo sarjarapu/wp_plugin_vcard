@@ -10,7 +10,7 @@ namespace Minisite\Features\MinisiteViewer\Http;
  * - Handles redirects and error responses
  * - Creates standardized response contexts
  */
-final class ViewResponseHandler
+class ViewResponseHandler
 {
     /**
      * Set 404 response

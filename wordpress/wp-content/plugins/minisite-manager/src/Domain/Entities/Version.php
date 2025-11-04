@@ -5,7 +5,7 @@ namespace Minisite\Domain\Entities;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
 
-final class Version
+class Version
 {
     public function __construct(
         public ?int $id,

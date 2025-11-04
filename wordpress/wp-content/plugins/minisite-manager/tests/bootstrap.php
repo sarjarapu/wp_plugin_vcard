@@ -1,9 +1,10 @@
 <?php
 
-// Enable BypassFinals FIRST before any other code
-if (class_exists('DG\BypassFinals')) {
-    DG\BypassFinals::enable();
-}
+// BypassFinals disabled - we've removed final from classes that need mocking
+// This prevents Patchwork conflicts and is no longer needed
+// if (class_exists('DG\BypassFinals')) {
+//     DG\BypassFinals::enable();
+// }
 
 /**
  * PHPUnit Bootstrap File

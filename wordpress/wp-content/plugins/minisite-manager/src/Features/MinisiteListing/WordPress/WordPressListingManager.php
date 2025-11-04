@@ -17,7 +17,7 @@ use Minisite\Infrastructure\Http\TerminationHandlerInterface;
  * - Provides WordPress-specific data formatting
  * - Acts as a bridge between the listing service and WordPress
  */
-final class WordPressListingManager extends BaseWordPressManager
+class WordPressListingManager extends BaseWordPressManager
 {
     private MinisiteRepository $minisiteRepository;
     private VersionRepository $versionRepository;

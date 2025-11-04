@@ -21,7 +21,7 @@ use Minisite\Infrastructure\Security\FormSecurityHelper;
  * - Creates command objects
  * - Handles nonce verification
  */
-final class AuthRequestHandler
+class AuthRequestHandler
 {
     public function __construct(
         private WordPressUserManager $wordPressManager,

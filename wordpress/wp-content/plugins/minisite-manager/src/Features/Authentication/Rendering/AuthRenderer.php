@@ -9,7 +9,7 @@ namespace Minisite\Features\Authentication\Rendering;
  * - Manages Timber template rendering
  * - Handles template context
  */
-final class AuthRenderer
+class AuthRenderer
 {
     /**
      * Render authentication page using Timber

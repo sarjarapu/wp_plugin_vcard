@@ -20,7 +20,7 @@ use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
  *
  * This controller only orchestrates the listing flow - it doesn't do the work itself!
  */
-final class ListingController
+class ListingController
 {
     public function __construct(
         private ListMinisitesHandler $listMinisitesHandler,

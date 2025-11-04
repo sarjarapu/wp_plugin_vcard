@@ -13,7 +13,7 @@ use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
  * - Processes view requests
  * - Returns standardized results
  */
-final class ViewHandler
+class ViewHandler
 {
     public function __construct(
         private MinisiteViewService $viewService

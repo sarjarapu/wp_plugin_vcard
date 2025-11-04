@@ -14,7 +14,7 @@ use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
  * - Creates command objects
  * - Handles nonce verification
  */
-final class ListingRequestHandler
+class ListingRequestHandler
 {
     public function __construct(
         private WordPressListingManager $wordPressManager

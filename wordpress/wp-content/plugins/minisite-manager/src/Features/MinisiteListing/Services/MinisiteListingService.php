@@ -10,7 +10,7 @@ use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
  *
  * Handles minisite listing business logic.
  */
-final class MinisiteListingService
+class MinisiteListingService
 {
     public function __construct(
         private WordPressListingManager $listingManager

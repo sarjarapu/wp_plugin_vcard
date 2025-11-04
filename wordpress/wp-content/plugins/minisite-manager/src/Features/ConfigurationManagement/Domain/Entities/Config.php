@@ -7,7 +7,7 @@ use Minisite\Infrastructure\Security\ConfigEncryption;
 
 #[ORM\Entity(repositoryClass: \Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository::class)]
 #[ORM\Table(name: 'minisite_config')]
-final class Config
+class Config
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

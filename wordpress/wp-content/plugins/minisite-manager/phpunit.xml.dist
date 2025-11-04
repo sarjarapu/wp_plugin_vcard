@@ -43,7 +43,7 @@
       <exclude>tests/Integration/Infrastructure/Migrations/Doctrine/AbstractDoctrineMigrationTest.php</exclude>
     </testsuite>
     <testsuite name="feat">
-      <directory>tests/Unit/Features/VersionManagement</directory>
+      <directory>tests/Unit</directory>
     </testsuite>
     <testsuite name="Core">
       <directory>tests/Unit/Core</directory>
@@ -60,12 +60,14 @@
   </testsuites>
 
 
-  <extensions>
+  <!-- BypassFinals extension disabled - we've removed final from classes that need mocking -->
+  <!-- This prevents Patchwork conflicts with coverage tools -->
+  <!-- <extensions>
     <bootstrap class="DG\BypassFinals\PHPUnitExtension">
       <parameter name="bypassFinal" value="true"/>
       <parameter name="bypassReadOnly" value="false"/>
     </bootstrap>
-  </extensions>
+  </extensions> -->
 
   <php>
     <env name="MYSQL_HOST" value="127.0.0.1"/>

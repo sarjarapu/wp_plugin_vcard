@@ -9,7 +9,7 @@ namespace Minisite\Features\MinisiteListing\Rendering;
  * - Manages Timber template rendering
  * - Handles template context
  */
-final class ListingRenderer
+class ListingRenderer
 {
     /**
      * Render list page using Timber

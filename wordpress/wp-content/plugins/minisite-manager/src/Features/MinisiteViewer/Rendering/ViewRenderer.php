@@ -10,7 +10,7 @@ namespace Minisite\Features\MinisiteViewer\Rendering;
  * - Handles fallback rendering
  * - Provides clean interface for view output
  */
-final class ViewRenderer
+class ViewRenderer
 {
     private ?object $renderer;
     private object $wordPressManager;

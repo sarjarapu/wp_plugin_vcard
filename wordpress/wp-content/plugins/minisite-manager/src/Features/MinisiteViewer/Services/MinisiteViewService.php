@@ -13,7 +13,7 @@ use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
  * - Handles view logic and error conditions
  * - Provides clean interface for view operations
  */
-final class MinisiteViewService
+class MinisiteViewService
 {
     public function __construct(
         private WordPressMinisiteManager $wordPressManager

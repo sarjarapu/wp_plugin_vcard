@@ -13,7 +13,7 @@ use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
  * - Creates command objects from HTTP requests
  * - Handles request validation and sanitization
  */
-final class ViewRequestHandler
+class ViewRequestHandler
 {
     public function __construct(
         private WordPressMinisiteManager $wordPressManager

@@ -12,7 +12,7 @@ use Minisite\Features\Authentication\WordPress\WordPressUserManager;
  * - Handles error/success responses
  * - Manages HTTP status codes
  */
-final class AuthResponseHandler
+class AuthResponseHandler
 {
     public function __construct(
         private WordPressUserManager $wordPressManager

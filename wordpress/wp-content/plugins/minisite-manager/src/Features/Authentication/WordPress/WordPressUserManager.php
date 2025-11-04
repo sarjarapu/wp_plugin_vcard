@@ -16,7 +16,7 @@ use Minisite\Infrastructure\Http\TerminationHandlerInterface;
  * allowing us to mock them easily in tests.
  * Implements WordPressManagerInterface for compatibility with FormSecurityHelper.
  */
-final class WordPressUserManager extends BaseWordPressManager implements WordPressManagerInterface
+class WordPressUserManager extends BaseWordPressManager implements WordPressManagerInterface
 {
     /**
      * Constructor

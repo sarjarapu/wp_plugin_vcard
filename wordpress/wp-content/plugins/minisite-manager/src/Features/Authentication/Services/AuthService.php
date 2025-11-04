@@ -13,7 +13,7 @@ use Minisite\Features\Authentication\WordPress\WordPressUserManager;
  * Handles all authentication business logic including login, registration,
  * password reset, and user session management.
  */
-final class AuthService
+class AuthService
 {
     public function __construct(
         private WordPressUserManager $wordPressManager

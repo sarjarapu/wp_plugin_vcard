@@ -17,7 +17,7 @@ use Minisite\Infrastructure\Http\TerminationHandlerInterface;
  * - Handles WordPress database interactions
  * - Provides clean interface for minisite operations
  */
-final class WordPressMinisiteManager extends BaseWordPressManager
+class WordPressMinisiteManager extends BaseWordPressManager
 {
     private ?MinisiteRepository $repository = null;
     private ?VersionRepository $versionRepository = null;
