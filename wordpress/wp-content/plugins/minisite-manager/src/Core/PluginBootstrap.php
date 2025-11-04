@@ -80,30 +80,12 @@ final class PluginBootstrap
                     \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
             }
 
-            // Initialize ConfigManager
-            /** @var \Doctrine\ORM\EntityManager $em */
-            $em = $GLOBALS['minisite_entity_manager'];
-
-            // Create ConfigRepository instance directly
-            // Note: We can't use $em->getRepository() because it returns default EntityRepository
-            // We need our custom ConfigRepository that implements ConfigRepositoryInterface
-            $configRepository = new \Minisite\Infrastructure\Persistence\Repositories\ConfigRepository(
-                $em,
-                $em->getClassMetadata(\Minisite\Domain\Entities\Config::class)
-            );
-
-            $configManager = new \Minisite\Domain\Services\ConfigManager($configRepository);
-
-            // Store in global for easy access
-            $GLOBALS['minisite_config_manager'] = $configManager;
-
-            // Register admin menu for config management
-            if (is_admin()) {
-                \Minisite\Features\AppConfig\WordPress\ConfigAdminMenu::register();
-            }
+            // Note: ConfigManager initialization is now handled by AppConfigFeature
+            // The feature will initialize and store the service in GLOBALS for backward compatibility
 
             // Initialize ReviewRepository
             // Create ReviewRepository instance directly (same pattern as ConfigRepository)
+            $em = $GLOBALS['minisite_entity_manager'];
             $reviewRepository = new \Minisite\Features\ReviewManagement\Repositories\ReviewRepository(
                 $em,
                 $em->getClassMetadata(\Minisite\Features\ReviewManagement\Domain\Entities\Review::class)
