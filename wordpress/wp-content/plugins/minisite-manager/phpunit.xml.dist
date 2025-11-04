@@ -27,8 +27,10 @@
       <directory>tests/Unit/Core</directory>
       <directory>tests/Unit/Domain</directory>
       <directory>tests/Unit/Features/Authentication</directory>
+      <directory>tests/Unit/Features/ConfigurationManagement</directory>
       <directory>tests/Unit/Features/MinisiteListing</directory>
       <directory>tests/Unit/Features/MinisiteViewer</directory>
+      <directory>tests/Unit/Features/ReviewManagement</directory>
       <directory>tests/Unit/Features/VersionManagement</directory>
       <directory>tests/Unit/Features/MinisiteEdit/Controllers</directory>
       <directory>tests/Unit/Features/MinisiteEdit/Hooks</directory>

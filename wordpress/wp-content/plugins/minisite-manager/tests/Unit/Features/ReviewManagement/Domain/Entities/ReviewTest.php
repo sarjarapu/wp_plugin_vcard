@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\Entities;
+namespace Tests\Unit\Features\ReviewManagement\Domain\Entities;
 
 use DateTimeImmutable;
 use Minisite\Features\ReviewManagement\Domain\Entities\Review;
@@ -292,3 +292,4 @@ final class ReviewTest extends TestCase
         $this->assertNull($review->sentimentScore);
     }
 }
+

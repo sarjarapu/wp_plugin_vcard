@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Integration\Infrastructure\Persistence\Doctrine;
+namespace Tests\Integration\Features\ConfigurationManagement\Repositories;
 
 use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
@@ -60,8 +60,8 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         // Use the new feature-based entity path
         $config = ORMSetup::createAttributeMetadataConfiguration(
             paths: [
-                __DIR__ . '/../../../../src/Features/ConfigurationManagement/Domain/Entities',
-                __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
+                __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+                __DIR__ . '/../../../../../src/Features/ReviewManagement/Domain/Entities',
             ],
             isDevMode: true
         );
@@ -319,3 +319,4 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         $this->assertEquals($newValue, $updated->getTypedValue(), 'Decrypted new value should match');
     }
 }
+
