@@ -2,6 +2,7 @@
 
 namespace Minisite\Features\MinisiteEdit\Hooks;
 
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
 use Minisite\Features\MinisiteEdit\Controllers\EditController;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
@@ -15,7 +16,7 @@ use Minisite\Infrastructure\Http\TerminationHandlerInterface;
  * - Hooks into WordPress template_redirect
  * - Manages edit route handling
  */
-class EditHooks
+class EditHooks extends BaseHook
 {
     /**
      * Flag value set by rewrite rules to indicate account management routes
@@ -26,8 +27,9 @@ class EditHooks
         private EditController $editController,
         private WordPressEditManager $wordPressManager,
         private MinisitePageController $minisiteViewerController,
-        private TerminationHandlerInterface $terminationHandler
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -58,14 +60,13 @@ class EditHooks
         // Handle edit and preview routes
         if ($action === 'edit') {
             $this->editController->handleEdit();
-            // Hook handles termination: prevent WordPress from loading default template
-            // In production: calls exit(). In tests: no-op, allowing tests to continue.
-            $this->terminationHandler->terminate();
+            // Terminate after handling route (inherited from BaseHook)
+            $this->terminate();
         } elseif ($action === 'preview') {
             // Delegate version-specific preview to MinisiteViewer
             $this->minisiteViewerController->handleVersionSpecificPreview();
-            // Hook handles termination: prevent WordPress from loading default template
-            $this->terminationHandler->terminate();
+            // Terminate after handling route (inherited from BaseHook)
+            $this->terminate();
         }
     }
 }
