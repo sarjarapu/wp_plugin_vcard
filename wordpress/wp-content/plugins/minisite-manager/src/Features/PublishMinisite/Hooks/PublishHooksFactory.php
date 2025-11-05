@@ -70,6 +70,11 @@ class PublishHooksFactory
         $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
 
         // Create and return hooks
-        return new PublishHooks($publishController, $wordPressManager, $wooCommerceIntegration, $hookTerminationHandler);
+        return new PublishHooks(
+            $publishController,
+            $wordPressManager,
+            $wooCommerceIntegration,
+            $hookTerminationHandler
+        );
     }
 }

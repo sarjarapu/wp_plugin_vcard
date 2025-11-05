@@ -30,7 +30,6 @@ class ListingResponseHandler
         }
 
         $this->wordPressManager->redirect($loginUrl);
-        // exit; // Removed - handled by WordPressListingManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
     }
 
     /**
@@ -39,7 +38,6 @@ class ListingResponseHandler
     public function redirectToSites(): void
     {
         $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
-        // exit; // Removed - handled by WordPressListingManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
     }
 
     /**
@@ -48,6 +46,5 @@ class ListingResponseHandler
     public function redirect(string $url): void
     {
         $this->wordPressManager->redirect($url);
-        // exit; // Removed - handled by WordPressListingManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
     }
 }

@@ -218,7 +218,6 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
     public function redirect(string $location, int $status = 302): void
     {
         parent::redirect($location, $status);
-        // exit; // Removed - handled by BaseWordPressManager::redirect() via TerminationHandler
     }
 
     /**

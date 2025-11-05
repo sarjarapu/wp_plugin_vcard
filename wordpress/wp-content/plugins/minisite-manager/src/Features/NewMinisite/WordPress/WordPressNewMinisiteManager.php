@@ -151,7 +151,6 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
     public function redirect(string $url, int $status = 302): void
     {
         parent::redirect($url, $status);
-        // exit; // Removed - handled by BaseWordPressManager::redirect() via TerminationHandler
     }
 
     /**

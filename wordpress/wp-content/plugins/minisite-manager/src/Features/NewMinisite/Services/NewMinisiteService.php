@@ -103,7 +103,10 @@ class NewMinisiteService
                     'action' => 'minisite_edit',
                 ));
 
-                return (object) array('success' => false, 'errors' => array('Security check failed. Please try again.'));
+                return (object) array(
+                    'success' => false,
+                    'errors' => array('Security check failed. Please try again.'),
+                );
             }
 
             $currentUser = $this->wordPressManager->getCurrentUser();

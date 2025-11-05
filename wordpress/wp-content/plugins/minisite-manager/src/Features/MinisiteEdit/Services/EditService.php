@@ -121,7 +121,10 @@ class EditService
                     'minisite_edit'
                 )
             ) {
-                return (object) array('success' => false, 'errors' => array('Security check failed. Please try again.'));
+                return (object) array(
+                    'success' => false,
+                    'errors' => array('Security check failed. Please try again.'),
+                );
             }
 
             $minisite = $this->wordPressManager->findMinisiteById($siteId);

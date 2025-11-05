@@ -254,7 +254,12 @@ class MinisiteFormProcessor
             'name' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_name', 'name'),
             'city' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_city', 'city'),
             'region' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_region', 'region'),
-            'country' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_country', 'country'),
+            'country' => $this->getFormValue(
+                $formData,
+                $siteJson['business'] ?? array(),
+                'business_country',
+                'country'
+            ),
             'postal' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_postal', 'postal'),
         ));
 
@@ -372,7 +377,13 @@ class MinisiteFormProcessor
         $siteJson['brand'] = array_merge($siteJson['brand'] ?? array(), array(
             'name' => $this->getFormValue($formData, $siteJson['brand'] ?? array(), 'brand_name', 'name'),
             'logo' => $this->getFormValue($formData, $siteJson['brand'] ?? array(), 'brand_logo', 'logo'),
-            'palette' => $this->getFormValue($formData, $siteJson['brand'] ?? array(), 'brand_palette', 'palette', 'blue'),
+            'palette' => $this->getFormValue(
+                $formData,
+                $siteJson['brand'] ?? array(),
+                'brand_palette',
+                'palette',
+                'blue'
+            ),
             'industry' => $this->getFormValue($formData, $siteJson['brand'] ?? array(), 'brand_industry', 'industry'),
         ));
 
@@ -387,10 +398,20 @@ class MinisiteFormProcessor
         // Always build the SEO section structure
         $siteJson['seo'] = array_merge($siteJson['seo'] ?? array(), array(
             'title' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'seo_title', 'title'),
-            'description' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'seo_description', 'description'),
+            'description' => $this->getFormValue(
+                $formData,
+                $siteJson['seo'] ?? array(),
+                'seo_description',
+                'description'
+            ),
             'keywords' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'seo_keywords', 'keywords'),
             'favicon' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'seo_favicon', 'favicon'),
-            'search_terms' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'search_terms', 'search_terms'),
+            'search_terms' => $this->getFormValue(
+                $formData,
+                $siteJson['seo'] ?? array(),
+                'search_terms',
+                'search_terms'
+            ),
         ));
 
         return $siteJson;

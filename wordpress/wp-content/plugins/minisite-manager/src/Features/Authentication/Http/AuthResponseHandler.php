@@ -25,7 +25,6 @@ class AuthResponseHandler
     public function redirect(string $url): void
     {
         $this->wordPressManager->redirect($url);
-        // exit; // Removed - handled by WordPressUserManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
     }
 
     /**
@@ -51,8 +50,11 @@ class AuthResponseHandler
     /**
      * Create error response context
      */
-    public function createErrorContext(string $pageTitle, string $errorMessage, array $additionalContext = array()): array
-    {
+    public function createErrorContext(
+        string $pageTitle,
+        string $errorMessage,
+        array $additionalContext = array()
+    ): array {
         return array_merge(array(
             'page_title' => $pageTitle,
             'error_msg' => $errorMessage,

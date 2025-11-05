@@ -158,12 +158,24 @@ class MinisiteDatabaseCoordinator
                     ?: 'Untitled Minisite',
                 city: $formProcessor->getFormValue($formData, array(), 'business_city', 'business_city', ''),
                 region: $formProcessor->getFormValue($formData, array(), 'business_region', 'business_region', ''),
-                countryCode: $formProcessor->getFormValue($formData, array(), 'business_country', 'business_country', ''),
+                countryCode: $formProcessor->getFormValue(
+                    $formData,
+                    array(),
+                    'business_country',
+                    'business_country',
+                    ''
+                ),
                 postalCode: $formProcessor->getFormValue($formData, array(), 'business_postal', 'business_postal', ''),
                 geo: $geo,
                 siteTemplate: $formProcessor->getFormValue($formData, array(), 'site_template', 'site_template', '')
                     ?: 'v2025',
-                palette: $formProcessor->getFormValue($formData, array(), 'brand_palette', 'brand_palette', '') ?: 'blue',
+                palette: $formProcessor->getFormValue(
+                    $formData,
+                    array(),
+                    'brand_palette',
+                    'brand_palette',
+                    ''
+                ) ?: 'blue',
                 industry: $formProcessor->getFormValue($formData, array(), 'brand_industry', 'brand_industry', ''),
                 defaultLocale: $formProcessor->getFormValue($formData, array(), 'default_locale', 'default_locale', '')
                     ?: 'en-US',
@@ -264,13 +276,25 @@ class MinisiteDatabaseCoordinator
                 name: $formProcessor->getFormValue($formData, array(), 'business_name', 'business_name', ''),
                 city: $formProcessor->getFormValue($formData, array(), 'business_city', 'business_city', ''),
                 region: $formProcessor->getFormValue($formData, array(), 'business_region', 'business_region', ''),
-                countryCode: $formProcessor->getFormValue($formData, array(), 'business_country', 'business_country', ''),
+                countryCode: $formProcessor->getFormValue(
+                    $formData,
+                    array(),
+                    'business_country',
+                    'business_country',
+                    ''
+                ),
                 postalCode: $formProcessor->getFormValue($formData, array(), 'business_postal', 'business_postal', ''),
                 geo: $geo,
                 siteTemplate: $formProcessor->getFormValue($formData, array(), 'site_template', 'site_template', ''),
                 palette: $formProcessor->getFormValue($formData, array(), 'brand_palette', 'brand_palette', ''),
                 industry: $formProcessor->getFormValue($formData, array(), 'brand_industry', 'brand_industry', ''),
-                defaultLocale: $formProcessor->getFormValue($formData, array(), 'default_locale', 'default_locale', 'en'),
+                defaultLocale: $formProcessor->getFormValue(
+                    $formData,
+                    array(),
+                    'default_locale',
+                    'default_locale',
+                    'en'
+                ),
                 schemaVersion: 1,
                 siteVersion: 1,
                 searchTerms: $formProcessor->getFormValue($formData, array(), 'search_terms', 'search_terms', '')

@@ -183,15 +183,15 @@ class _1_0_0_CreateBase implements Migration
         global $wpdb;
         // Check if the constraint already exists
         $constraintExists = db::get_var(
-            "SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE 
+            "SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE
              WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND CONSTRAINT_NAME = %s",
             array(DB_NAME, $table, $constraintName)
         );
 
         if (! $constraintExists) {
             db::query(
-                "ALTER TABLE {$table} ADD CONSTRAINT {$constraintName} 
-                 FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn}) 
+                "ALTER TABLE {$table} ADD CONSTRAINT {$constraintName}
+                 FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn})
                  ON DELETE CASCADE"
             );
         }
@@ -292,13 +292,13 @@ class _1_0_0_CreateBase implements Migration
 
         db::query(
             "INSERT INTO {$minisitesT} (
-                id, slug, business_slug, location_slug, title, name, city, region, 
-                country_code, postal_code, location_point, site_template, palette, 
-                industry, default_locale, schema_version, site_version, site_json, 
-                search_terms, status, publish_status, created_at, updated_at, 
+                id, slug, business_slug, location_slug, title, name, city, region,
+                country_code, postal_code, location_point, site_template, palette,
+                industry, default_locale, schema_version, site_version, site_json,
+                search_terms, status, publish_status, created_at, updated_at,
                 published_at, created_by, updated_by, _minisite_current_version_id
             ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, POINT(%f, %f), %s, %s, %s, 
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, POINT(%f, %f), %s, %s, %s,
                 %s, %d, %d, %s, %s, %s, %s, %s, %s, %s, %d, %d, %s
             )",
             array(
@@ -428,12 +428,21 @@ class _1_0_0_CreateBase implements Migration
 
         // Avoid duplicate seeding (check any of our seeded slugs)
         $exists = (int) db::get_var(
-            "SELECT COUNT(*) FROM {$minisitesT} 
-             WHERE (business_slug=%s AND location_slug=%s) 
-                OR (business_slug=%s AND location_slug=%s) 
-                OR (business_slug=%s AND location_slug=%s) 
+            "SELECT COUNT(*) FROM {$minisitesT}
+             WHERE (business_slug=%s AND location_slug=%s)
+                OR (business_slug=%s AND location_slug=%s)
+                OR (business_slug=%s AND location_slug=%s)
                 OR (business_slug=%s AND location_slug=%s)",
-            array('acme-dental', 'dallas', 'lotus-textiles', 'mumbai', 'green-bites', 'london', 'swift-transit', 'sydney')
+            array(
+                'acme-dental',
+                'dallas',
+                'lotus-textiles',
+                'mumbai',
+                'green-bites',
+                'london',
+                'swift-transit',
+                'sydney',
+            )
         );
         if ($exists > 0) {
             return;
