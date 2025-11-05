@@ -17,7 +17,7 @@ class VersionResponseHandler
     /**
      * Send JSON success response
      */
-    public function sendJsonSuccess(array $data = [], int $statusCode = 200): void
+    public function sendJsonSuccess(array $data = array(), int $statusCode = 200): void
     {
         $this->wordPressManager->sendJsonSuccess($data, $statusCode);
     }
@@ -40,7 +40,6 @@ class VersionResponseHandler
             $redirectUrl .= '?redirect_to=' . urlencode($redirectTo);
         }
         $this->wordPressManager->redirect($redirectUrl);
-        exit;
     }
 
     /**
@@ -49,7 +48,6 @@ class VersionResponseHandler
     public function redirectToSites(): void
     {
         $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
-        exit;
     }
 
     /**

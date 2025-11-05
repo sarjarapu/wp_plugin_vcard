@@ -37,6 +37,7 @@ final class PaymentConstants
     public static function calculateExpirationDate(?string $baseDate = null): string
     {
         $base = $baseDate ?: current_time('mysql');
+
         return date('Y-m-d H:i:s', strtotime($base . ' +' . self::SUBSCRIPTION_DURATION_MONTHS . ' months'));
     }
 }

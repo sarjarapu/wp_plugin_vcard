@@ -1,9 +1,10 @@
 <?php
 
-// Enable BypassFinals FIRST before any other code
-if (class_exists('DG\BypassFinals')) {
-    DG\BypassFinals::enable();
-}
+// BypassFinals disabled - we've removed final from classes that need mocking
+// This prevents Patchwork conflicts and is no longer needed
+// if (class_exists('DG\BypassFinals')) {
+//     DG\BypassFinals::enable();
+// }
 
 /**
  * PHPUnit Bootstrap File
@@ -72,8 +73,6 @@ if (!defined('WPMU_PLUGIN_DIR')) {
 if (!defined('WPMU_PLUGIN_URL')) {
     define('WPMU_PLUGIN_URL', 'http://localhost/wp-content/mu-plugins');
 }
-
-// MINISITE_PLUGIN_DIR is defined in the main plugin file
 
 // WordPress classes (minimal stubs)
 if (!class_exists('wpdb')) {
@@ -276,6 +275,13 @@ if (!function_exists('add_rewrite_rule')) {
 if (!function_exists('get_query_var')) {
     function get_query_var($var, $default = '')
     {
+        // Check for test-specific mock override
+        if (isset($GLOBALS['_test_mock_get_query_var'])) {
+            $callback = $GLOBALS['_test_mock_get_query_var'];
+            if (is_callable($callback)) {
+                return $callback($var, $default);
+            }
+        }
         return $default;
     }
     
@@ -601,6 +607,14 @@ function wp_unslash($value)
     
     function get_current_user_id()
     {
+        // Check for test-specific mock override (for Brain Monkey compatibility)
+        if (isset($GLOBALS['_test_mock_get_current_user_id'])) {
+            $callback = $GLOBALS['_test_mock_get_current_user_id'];
+            if (is_callable($callback)) {
+                return $callback();
+            }
+            return $GLOBALS['_test_mock_get_current_user_id'];
+        }
         return 1;
     }
     

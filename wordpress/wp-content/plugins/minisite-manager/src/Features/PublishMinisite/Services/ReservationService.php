@@ -4,8 +4,8 @@ namespace Minisite\Features\PublishMinisite\Services;
 
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
+use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -65,12 +65,13 @@ class ReservationService
                      WHERE minisite_id = %s 
                      AND (expires_at > NOW() OR grace_period_ends_at > NOW()) 
                      LIMIT 1",
-                    [$existingMinisite->id]
+                    array($existingMinisite->id)
                 );
 
                 if ($activePayment) {
                     // Minisite has active subscription or is in grace period - slug is protected
                     db::query('ROLLBACK');
+
                     throw new \RuntimeException(
                         'This slug combination is already taken by an existing minisite with an active subscription'
                     );
@@ -87,19 +88,20 @@ class ReservationService
                     "SELECT * FROM {$reservationsTable} 
                      WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '') 
                      AND expires_at > NOW() AND user_id != %d",
-                    [$businessSlug, $userId]
+                    array($businessSlug, $userId)
                 );
             } else {
                 $existingReservation = db::get_row(
                     "SELECT * FROM {$reservationsTable} 
                      WHERE business_slug = %s AND location_slug = %s 
                      AND expires_at > NOW() AND user_id != %d",
-                    [$businessSlug, $locationSlug, $userId]
+                    array($businessSlug, $locationSlug, $userId)
                 );
             }
 
             if ($existingReservation) {
                 db::query('ROLLBACK');
+
                 throw new \RuntimeException('This slug combination is currently reserved by another user');
             }
 
@@ -109,14 +111,14 @@ class ReservationService
                     "SELECT * FROM {$reservationsTable} 
                      WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '') 
                      AND user_id = %d AND expires_at > NOW()",
-                    [$businessSlug, $userId]
+                    array($businessSlug, $userId)
                 );
             } else {
                 $userReservation = db::get_row(
                     "SELECT * FROM {$reservationsTable} 
                      WHERE business_slug = %s AND location_slug = %s 
                      AND user_id = %d AND expires_at > NOW()",
-                    [$businessSlug, $locationSlug, $userId]
+                    array($businessSlug, $locationSlug, $userId)
                 );
             }
 
@@ -130,17 +132,17 @@ class ReservationService
                         "UPDATE {$reservationsTable} 
                          SET expires_at = %s, created_at = NOW() 
                          WHERE id = %d",
-                        [$newExpiresAt, $reservationId]
+                        array($newExpiresAt, $reservationId)
                     );
 
                     db::query('COMMIT');
 
-                    return (object) [
+                    return (object) array(
                         'reservation_id' => (int) $reservationId,
                         'expires_at' => $newExpiresAt,
                         'expires_in_seconds' => 300,
                         'message' => 'Slug reservation extended for 5 minutes. Complete payment to secure it.',
-                    ];
+                    );
                 }
             }
 
@@ -149,45 +151,47 @@ class ReservationService
 
             $result = db::insert(
                 $reservationsTable,
-                [
+                array(
                     'business_slug' => $businessSlug,
                     'location_slug' => empty($locationSlug) ? null : $locationSlug,
                     'user_id' => $userId,
                     'minisite_id' => null, // Will be set when payment completes
                     'expires_at' => $expiresAt,
-                ],
-                ['%s', '%s', '%d', '%s', '%s']
+                ),
+                array('%s', '%s', '%d', '%s', '%s')
             );
 
             if ($result === false) {
                 db::query('ROLLBACK');
+
                 throw new \RuntimeException('Failed to create reservation');
             }
 
             $reservationId = (int) db::get_insert_id();
             db::query('COMMIT');
 
-            $this->logger->info('Created slug reservation', [
+            $this->logger->info('Created slug reservation', array(
                 'reservation_id' => $reservationId,
                 'business_slug' => $businessSlug,
                 'location_slug' => $locationSlug,
                 'user_id' => $userId,
-            ]);
+            ));
 
-            return (object) [
+            return (object) array(
                 'reservation_id' => $reservationId,
                 'expires_at' => $expiresAt,
                 'expires_in_seconds' => 300,
                 'message' => 'Slug reserved for 5 minutes. Complete payment to secure it.',
-            ];
+            );
         } catch (\Exception $e) {
             db::query('ROLLBACK');
-            $this->logger->error('Failed to reserve slug', [
+            $this->logger->error('Failed to reserve slug', array(
                 'business_slug' => $businessSlug,
                 'location_slug' => $locationSlug,
                 'user_id' => $userId,
                 'error' => $e->getMessage(),
-            ]);
+            ));
+
             throw $e;
         }
     }

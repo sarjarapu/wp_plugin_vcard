@@ -58,8 +58,29 @@ else
     ERRORS=$((ERRORS + 1))
 fi
 
-# 3. Code Style (PHPCS)
-echo -e "\n${YELLOW}[3/4] Running code style check (PHPCS)...${NC}"
+# 3. Code Style (PHP CS Fixer + PHPCS)
+echo -e "\n${YELLOW}[3/4] Running code style check...${NC}"
+echo -e "${YELLOW}Auto-formatting code with PHP CS Fixer...${NC}"
+FORMAT_OUTPUT=$(composer format 2>&1)
+FORMAT_EXIT=$?
+
+if [ $FORMAT_EXIT -eq 0 ]; then
+    echo -e "${GREEN}✓ PHP CS Fixer formatting completed${NC}"
+else
+    echo -e "${YELLOW}⚠ PHP CS Fixer completed with warnings${NC}"
+fi
+
+echo -e "${YELLOW}Auto-fixing code style issues with phpcbf...${NC}"
+LINT_FIX_OUTPUT=$(composer lint:fix 2>&1)
+LINT_FIX_EXIT=$?
+
+if [ $LINT_FIX_EXIT -eq 0 ]; then
+    echo -e "${GREEN}✓ phpcbf auto-fix completed${NC}"
+else
+    echo -e "${YELLOW}⚠ phpcbf auto-fix completed with warnings${NC}"
+fi
+
+echo -e "${YELLOW}Running code style check...${NC}"
 LINT_OUTPUT=$(composer lint 2>&1)
 LINT_EXIT=$?
 
@@ -69,7 +90,7 @@ else
     echo -e "${RED}✗ Code style check failed${NC}"
     echo "$LINT_OUTPUT"
     ERRORS=$((ERRORS + 1))
-    echo -e "${YELLOW}Tip: Run 'composer lint:fix' to auto-fix some issues${NC}"
+    echo -e "${YELLOW}Tip: Some issues may require manual fixes${NC}"
 fi
 
 # 4. Unit Tests

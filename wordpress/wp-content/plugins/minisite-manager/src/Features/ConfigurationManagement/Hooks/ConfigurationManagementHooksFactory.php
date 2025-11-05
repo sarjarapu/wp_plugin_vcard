@@ -2,12 +2,12 @@
 
 namespace Minisite\Features\ConfigurationManagement\Hooks;
 
+use Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController;
+use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
+use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
+use Minisite\Features\ConfigurationManagement\Rendering\ConfigurationManagementRenderer;
 use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
 use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
-use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
-use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
-use Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController;
-use Minisite\Features\ConfigurationManagement\Rendering\ConfigurationManagementRenderer;
 use Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory;
 
 /**
@@ -56,7 +56,10 @@ final class ConfigurationManagementHooksFactory
         // See: src/Core/ActivationHandler.php and src/Features/ConfigurationManagement/Services/ConfigSeeder.php
         $GLOBALS['minisite_config_manager'] = $configService;
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new ConfigurationManagementHooks($controller, $deleteHandler);
+        return new ConfigurationManagementHooks($controller, $deleteHandler, $terminationHandler);
     }
 }

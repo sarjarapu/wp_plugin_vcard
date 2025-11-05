@@ -41,7 +41,7 @@ class PublishService
     public function getMinisiteForPublishing(string $siteId): object
     {
         $minisite = $this->wordPressManager->findMinisiteById($siteId);
-        if (!$minisite) {
+        if (! $minisite) {
             throw new \RuntimeException('Minisite not found');
         }
 
@@ -51,12 +51,12 @@ class PublishService
             throw new \RuntimeException('Access denied');
         }
 
-        return (object) [
+        return (object) array(
             'minisite' => $minisite,
-            'currentSlugs' => [
+            'currentSlugs' => array(
                 'business' => $minisite->slugs->business ?? '',
                 'location' => $minisite->slugs->location ?? '',
-            ],
-        ];
+            ),
+        );
     }
 }

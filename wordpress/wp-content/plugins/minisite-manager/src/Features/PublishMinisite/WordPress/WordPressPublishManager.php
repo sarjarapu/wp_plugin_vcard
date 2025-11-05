@@ -2,9 +2,11 @@
 
 namespace Minisite\Features\PublishMinisite\WordPress;
 
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
-use Minisite\Domain\Interfaces\WordPressManagerInterface;
 
 /**
  * WordPress Publish Manager
@@ -14,9 +16,19 @@ use Minisite\Domain\Interfaces\WordPressManagerInterface;
  * - Provides clean interface for WordPress functions
  * - Handles user authentication and authorization
  */
-class WordPressPublishManager implements WordPressManagerInterface
+class WordPressPublishManager extends BaseWordPressManager implements WordPressManagerInterface
 {
     private ?MinisiteRepository $minisiteRepository = null;
+
+    /**
+     * Constructor
+     *
+     * @param TerminationHandlerInterface $terminationHandler Handler for terminating script execution
+     */
+    public function __construct(TerminationHandlerInterface $terminationHandler)
+    {
+        parent::__construct($terminationHandler);
+    }
 
     /**
      * Get minisite repository instance
@@ -26,6 +38,7 @@ class WordPressPublishManager implements WordPressManagerInterface
         if ($this->minisiteRepository === null) {
             $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
         }
+
         return $this->minisiteRepository;
     }
 
@@ -63,11 +76,11 @@ class WordPressPublishManager implements WordPressManagerInterface
 
     /**
      * Redirect to URL
+     * Uses base class redirect() method which handles termination
      */
     public function redirect(string $url, int $status = 302): void
     {
-        wp_redirect($url, $status);
-        exit;
+        parent::redirect($url, $status);
     }
 
     /**
@@ -126,6 +139,7 @@ class WordPressPublishManager implements WordPressManagerInterface
         if ($text === null) {
             return '';
         }
+
         return sanitize_text_field(wp_unslash($text));
     }
 
@@ -137,6 +151,7 @@ class WordPressPublishManager implements WordPressManagerInterface
         if ($text === null) {
             return '';
         }
+
         return sanitize_textarea_field(wp_unslash($text));
     }
 
@@ -148,6 +163,7 @@ class WordPressPublishManager implements WordPressManagerInterface
         if ($url === null) {
             return '';
         }
+
         return esc_url_raw(wp_unslash($url));
     }
 
@@ -159,6 +175,7 @@ class WordPressPublishManager implements WordPressManagerInterface
         if ($email === null) {
             return '';
         }
+
         return sanitize_email(wp_unslash($email));
     }
 
@@ -204,6 +221,7 @@ class WordPressPublishManager implements WordPressManagerInterface
     public function hasBeenPublished(string $siteId): bool
     {
         $minisite = $this->findMinisiteById($siteId);
+
         return $minisite !== null && $minisite->status === 'published';
     }
 
@@ -269,9 +287,10 @@ class WordPressPublishManager implements WordPressManagerInterface
     public function getPostData(string $key, $default = null)
     {
         // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Caller is responsible for nonce verification and sanitization
-        if (!isset($_POST[$key])) {
+        if (! isset($_POST[$key])) {
             return $default;
         }
+
         return wp_unslash($_POST[$key]);
         // phpcs:enable
     }

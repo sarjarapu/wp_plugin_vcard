@@ -10,7 +10,7 @@ use Minisite\Features\Authentication\Services\AuthService;
  *
  * Handles login command execution by delegating to AuthService.
  */
-final class LoginHandler
+class LoginHandler
 {
     public function __construct(
         private AuthService $authService

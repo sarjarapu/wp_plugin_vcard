@@ -2,11 +2,11 @@
 
 namespace Minisite\Features\MinisiteEdit\Hooks;
 
-use Minisite\Features\MinisiteEdit\Controllers\EditController;
-use Minisite\Features\MinisiteEdit\Services\EditService;
-use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
-use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Features\MinisiteEdit\Controllers\EditController;
+use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
+use Minisite\Features\MinisiteEdit\Services\EditService;
+use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteViewer\Hooks\ViewHooksFactory;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
@@ -25,8 +25,11 @@ class EditHooksFactory
      */
     public static function create(): EditHooks
     {
-        // Create WordPress manager
-        $wordPressManager = new WordPressEditManager();
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
+        // Create WordPress manager (requires TerminationHandlerInterface)
+        $wordPressManager = new WordPressEditManager($terminationHandler);
 
         // Create service
         $editService = new EditService($wordPressManager);
@@ -42,7 +45,7 @@ class EditHooksFactory
         // Create form security helper
         $formSecurityHelper = new FormSecurityHelper($wordPressManager);
 
-        // Create controller
+        // Create controller (no termination handler needed - hook handles it)
         $editController = new EditController(
             $editService,
             $editRenderer,
@@ -54,7 +57,10 @@ class EditHooksFactory
         $viewHooks = ViewHooksFactory::create();
         $minisiteViewerController = $viewHooks->getController();
 
+        // Create termination handler for hook
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new EditHooks($editController, $wordPressManager, $minisiteViewerController);
+        return new EditHooks($editController, $wordPressManager, $minisiteViewerController, $terminationHandler);
     }
 }

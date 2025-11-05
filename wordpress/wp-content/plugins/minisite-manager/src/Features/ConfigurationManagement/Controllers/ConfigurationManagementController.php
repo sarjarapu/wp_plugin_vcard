@@ -2,12 +2,12 @@
 
 namespace Minisite\Features\ConfigurationManagement\Controllers;
 
+use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
+use Minisite\Features\ConfigurationManagement\Commands\SaveConfigCommand;
 use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
 use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
-use Minisite\Features\ConfigurationManagement\Commands\SaveConfigCommand;
-use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
-use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
 use Minisite\Features\ConfigurationManagement\Rendering\ConfigurationManagementRenderer;
+use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
@@ -47,26 +47,28 @@ final class ConfigurationManagementController
             return;
         }
 
-        $this->logger->debug("handleRequest() entry", [
+        $this->logger->debug("handleRequest() entry", array(
             'method' => $requestMethod,
-        ]);
+        ));
 
         // Verify nonce
-        if (!$this->verifyNonce('minisite_config_save', 'minisite_config_nonce')) {
+        if (! $this->verifyNonce('minisite_config_save', 'minisite_config_nonce')) {
             wp_die('Security check failed');
         }
 
         // Handle delete action
         $action = $this->getPostData('action');
         $configKey = $this->getPostData('config_key');
-        if ($action === 'delete' && !empty($configKey)) {
+        if ($action === 'delete' && ! empty($configKey)) {
             $this->handleDelete($configKey);
+
             return;
         }
 
         // Handle save action
         if ($action === 'save') {
             $this->handleSave();
+
             return;
         }
     }
@@ -82,7 +84,7 @@ final class ConfigurationManagementController
 
         // Prepare configs for template
         $preparedConfigs = array_map(
-            fn($config) => $this->renderer->prepareConfigForTemplate($config),
+            fn ($config) => $this->renderer->prepareConfigForTemplate($config),
             $configs
         );
 
@@ -106,7 +108,7 @@ final class ConfigurationManagementController
         $this->logger->debug("handleSave() entry");
 
         $updated = 0;
-        $errors = [];
+        $errors = array();
 
         // Process each config field
         $configData = $this->getPostDataArray('config');
@@ -130,23 +132,23 @@ final class ConfigurationManagementController
                 $updated++;
             } catch (\Exception $e) {
                 $errors[] = "Failed to save {$key}: " . $e->getMessage();
-                $this->logger->error("handleSave() failed for key", [
+                $this->logger->error("handleSave() failed for key", array(
                     'key' => $key,
                     'error' => $e->getMessage(),
-                ]);
+                ));
             }
         }
 
         // Handle new config addition
         $newKey = $this->getPostData('new_config_key');
-        if (!empty($newKey)) {
+        if (! empty($newKey)) {
             $key = $newKey;
             $value = $this->getPostDataTextarea('new_config_value');
             $type = $this->getPostData('new_config_type', 'string');
             $description = $this->getPostDataTextarea('new_config_description');
 
             // Validate key format (lowercase with underscores only)
-            if (!preg_match('/^[a-z][a-z0-9_]*$/', $key)) {
+            if (! preg_match('/^[a-z][a-z0-9_]*$/', $key)) {
                 $errors[] = "Invalid key format. Use lowercase letters, numbers, and underscores only "
                     . "(e.g., 'whatsapp_access_token')";
             } else {
@@ -156,10 +158,10 @@ final class ConfigurationManagementController
                     $updated++;
                 } catch (\Exception $e) {
                     $errors[] = "Failed to add new config: " . $e->getMessage();
-                    $this->logger->error("handleSave() failed for new config", [
+                    $this->logger->error("handleSave() failed for new config", array(
                         'key' => $key,
                         'error' => $e->getMessage(),
-                    ]);
+                    ));
                 }
             }
         }
@@ -174,16 +176,16 @@ final class ConfigurationManagementController
             );
         }
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             foreach ($errors as $error) {
                 add_settings_error('minisite_config', 'config_error', $error, 'error');
             }
         }
 
-        $this->logger->debug("handleSave() exit", [
+        $this->logger->debug("handleSave() exit", array(
             'updated' => $updated,
             'errors' => count($errors),
-        ]);
+        ));
     }
 
     /**
@@ -191,13 +193,13 @@ final class ConfigurationManagementController
      */
     private function handleDelete(string $key): void
     {
-        $this->logger->debug("handleDelete() entry", [
+        $this->logger->debug("handleDelete() entry", array(
             'key' => $key,
-        ]);
+        ));
 
         try {
             // Prevent deletion of required/default configurations
-            $defaultConfigs = ['openai_api_key', 'pii_encryption_key', 'max_reviews_per_page'];
+            $defaultConfigs = array('openai_api_key', 'pii_encryption_key', 'max_reviews_per_page');
             if (in_array($key, $defaultConfigs, true)) {
                 add_settings_error(
                     'minisite_config',
@@ -206,9 +208,10 @@ final class ConfigurationManagementController
                     'error'
                 );
 
-                $this->logger->warning("handleDelete() blocked - required config", [
+                $this->logger->warning("handleDelete() blocked - required config", array(
                     'key' => $key,
-                ]);
+                ));
+
                 return;
             }
 
@@ -223,9 +226,10 @@ final class ConfigurationManagementController
                     'error'
                 );
 
-                $this->logger->warning("handleDelete() blocked - isRequired flag", [
+                $this->logger->warning("handleDelete() blocked - isRequired flag", array(
                     'key' => $key,
-                ]);
+                ));
+
                 return;
             }
 
@@ -239,9 +243,9 @@ final class ConfigurationManagementController
                 'updated'
             );
 
-            $this->logger->debug("handleDelete() exit", [
+            $this->logger->debug("handleDelete() exit", array(
                 'key' => $key,
-            ]);
+            ));
         } catch (\Exception $e) {
             add_settings_error(
                 'minisite_config',
@@ -250,10 +254,10 @@ final class ConfigurationManagementController
                 'error'
             );
 
-            $this->logger->error("handleDelete() failed", [
+            $this->logger->error("handleDelete() failed", array(
                 'key' => $key,
                 'error' => $e->getMessage(),
-            ]);
+            ));
         }
     }
 
@@ -266,9 +270,10 @@ final class ConfigurationManagementController
     private function getPostData(string $key, string $default = ''): string
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized below
-        if (!isset($_POST[$key])) {
+        if (! isset($_POST[$key])) {
             return $default;
         }
+
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized below
         return sanitize_text_field(wp_unslash($_POST[$key]));
     }
@@ -282,9 +287,10 @@ final class ConfigurationManagementController
     private function getPostDataTextarea(string $key, string $default = ''): string
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized below
-        if (!isset($_POST[$key])) {
+        if (! isset($_POST[$key])) {
             return $default;
         }
+
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized below
         return sanitize_textarea_field(wp_unslash($_POST[$key]));
     }
@@ -295,12 +301,13 @@ final class ConfigurationManagementController
      * Note: This method should only be called after nonce verification.
      * Nonce verification is handled in handleRequest() before calling this method.
      */
-    private function getPostDataArray(string $key, array $default = []): array
+    private function getPostDataArray(string $key, array $default = array()): array
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized in loop
-        if (!isset($_POST[$key]) || !is_array($_POST[$key])) {
+        if (! isset($_POST[$key]) || ! is_array($_POST[$key])) {
             return $default;
         }
+
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, data is sanitized in loop
         return wp_unslash($_POST[$key]);
     }
@@ -311,7 +318,8 @@ final class ConfigurationManagementController
     private function verifyNonce(string $action, string $nonceField): bool
     {
         $nonce = $this->getPostData($nonceField);
-        return !empty($nonce) && wp_verify_nonce($nonce, $action);
+
+        return ! empty($nonce) && wp_verify_nonce($nonce, $action);
     }
 
     /**
@@ -327,14 +335,14 @@ final class ConfigurationManagementController
      */
     private function getSettingsMessages(): array
     {
-        $messages = [];
+        $messages = array();
         $errors = get_settings_errors('minisite_config');
 
         foreach ($errors as $error) {
-            $messages[] = [
+            $messages[] = array(
                 'type' => $error['type'],
                 'message' => $error['message'],
-            ];
+            );
         }
 
         return $messages;

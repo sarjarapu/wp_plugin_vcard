@@ -3,12 +3,24 @@
 namespace Minisite\Features\VersionManagement\WordPress;
 
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress-specific utilities for version management
  */
-class WordPressVersionManager implements WordPressManagerInterface
+class WordPressVersionManager extends BaseWordPressManager implements WordPressManagerInterface
 {
+    /**
+     * Constructor
+     *
+     * @param TerminationHandlerInterface $terminationHandler Handler for terminating script execution
+     */
+    public function __construct(TerminationHandlerInterface $terminationHandler)
+    {
+        parent::__construct($terminationHandler);
+    }
+
     /**
      * Check if user is logged in
      */
@@ -36,6 +48,7 @@ class WordPressVersionManager implements WordPressManagerInterface
         if ($text === null) {
             return '';
         }
+
         return sanitize_text_field($text);
     }
 
@@ -50,6 +63,7 @@ class WordPressVersionManager implements WordPressManagerInterface
         if ($text === null) {
             return '';
         }
+
         return sanitize_textarea_field($text);
     }
 
@@ -80,7 +94,7 @@ class WordPressVersionManager implements WordPressManagerInterface
     /**
      * Send JSON success response
      */
-    public function sendJsonSuccess(array $data = [], int $statusCode = 200): void
+    public function sendJsonSuccess(array $data = array(), int $statusCode = 200): void
     {
         wp_send_json_success($data, $statusCode);
     }
@@ -95,10 +109,11 @@ class WordPressVersionManager implements WordPressManagerInterface
 
     /**
      * Redirect to URL
+     * Uses base class redirect() method which handles termination
      */
     public function redirect(string $location, int $status = 302): void
     {
-        wp_redirect($location, $status);
+        parent::redirect($location, $status);
     }
 
     /**
@@ -136,6 +151,7 @@ class WordPressVersionManager implements WordPressManagerInterface
         if ($email === null) {
             return '';
         }
+
         return sanitize_email($email);
     }
 
@@ -150,6 +166,7 @@ class WordPressVersionManager implements WordPressManagerInterface
         if ($url === null) {
             return '';
         }
+
         return esc_url_raw($url);
     }
 
@@ -184,6 +201,7 @@ class WordPressVersionManager implements WordPressManagerInterface
     public function getCurrentUser(): ?object
     {
         $user = wp_get_current_user();
+
         return $user && $user->ID > 0 ? $user : null;
     }
 
@@ -225,6 +243,7 @@ class WordPressVersionManager implements WordPressManagerInterface
     public function getMinisiteRepository(): object
     {
         global $wpdb;
+
         return new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     }
 
@@ -237,6 +256,7 @@ class WordPressVersionManager implements WordPressManagerInterface
     public function findMinisiteById(string $id): ?object
     {
         $repo = $this->getMinisiteRepository();
+
         return $repo->findById($id);
     }
 
@@ -249,6 +269,7 @@ class WordPressVersionManager implements WordPressManagerInterface
     public function hasBeenPublished(string $id): bool
     {
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+
         return $versionRepo->findPublishedVersion($id) !== null;
     }
 
@@ -261,6 +282,7 @@ class WordPressVersionManager implements WordPressManagerInterface
     public function getNextVersionNumber(string $id): int
     {
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+
         return $versionRepo->getNextVersionNumber($id);
     }
 
@@ -274,6 +296,7 @@ class WordPressVersionManager implements WordPressManagerInterface
     {
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
         $versionRepo->save($version);
+
         return $version;
     }
 

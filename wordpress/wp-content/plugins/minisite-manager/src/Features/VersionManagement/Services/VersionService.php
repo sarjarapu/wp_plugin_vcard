@@ -30,7 +30,7 @@ class VersionService
     {
         // Verify minisite exists and user has access
         $minisite = $this->minisiteRepository->findById($command->siteId);
-        if (!$minisite) {
+        if (! $minisite) {
             throw new \Exception('Minisite not found');
         }
 
@@ -48,7 +48,7 @@ class VersionService
     {
         // Verify minisite exists and user has access
         $minisite = $this->minisiteRepository->findById($command->siteId);
-        if (!$minisite) {
+        if (! $minisite) {
             throw new \Exception('Minisite not found');
         }
 
@@ -82,7 +82,7 @@ class VersionService
     {
         // Verify minisite exists and user has access
         $minisite = $this->minisiteRepository->findById($command->siteId);
-        if (!$minisite) {
+        if (! $minisite) {
             throw new \Exception('Minisite not found');
         }
 
@@ -91,7 +91,7 @@ class VersionService
         }
 
         $version = $this->versionRepository->findById($command->versionId);
-        if (!$version || $version->minisiteId !== $command->siteId) {
+        if (! $version || $version->minisiteId !== $command->siteId) {
             throw new \Exception('Version not found');
         }
 
@@ -109,7 +109,7 @@ class VersionService
     {
         // Verify minisite exists and user has access
         $minisite = $this->minisiteRepository->findById($command->siteId);
-        if (!$minisite) {
+        if (! $minisite) {
             throw new \Exception('Minisite not found');
         }
 
@@ -118,7 +118,7 @@ class VersionService
         }
 
         $sourceVersion = $this->versionRepository->findById($command->sourceVersionId);
-        if (!$sourceVersion || $sourceVersion->minisiteId !== $command->siteId) {
+        if (! $sourceVersion || $sourceVersion->minisiteId !== $command->siteId) {
             throw new \Exception('Source version not found');
         }
 
@@ -143,13 +143,13 @@ class VersionService
                 "UPDATE {$wpdb->prefix}minisite_versions 
                  SET status = 'draft' 
                  WHERE minisite_id = %s AND status = 'published'",
-                [$minisiteId]
+                array($minisiteId)
             );
 
             // Publish new version
             db::query(
                 "UPDATE {$wpdb->prefix}minisite_versions SET status = 'published', published_at = NOW() WHERE id = %d",
-                [$versionId]
+                array($versionId)
             );
 
             // Update profile with published version data and current version ID
@@ -160,7 +160,7 @@ class VersionService
                      industry = %s, default_locale = %s, schema_version = %d, site_version = %d, 
                      search_terms = %s, _minisite_current_version_id = %d, updated_at = NOW() 
                  WHERE id = %s",
-                [
+                array(
                     $this->wordPressManager->jsonEncode($version->siteJson),
                     $version->title,
                     $version->name,
@@ -176,21 +176,22 @@ class VersionService
                     $version->siteVersion,
                     $version->searchTerms,
                     $versionId,
-                    $minisiteId
-                ]
+                    $minisiteId,
+                )
             );
 
             // Update location_point if geo data exists
             if ($version->geo && $version->geo->getLat() && $version->geo->getLng()) {
                 db::query(
                     "UPDATE {$wpdb->prefix}minisites SET location_point = POINT(%f, %f) WHERE id = %s",
-                    [$version->geo->getLng(), $version->geo->getLat(), $minisiteId]
+                    array($version->geo->getLng(), $version->geo->getLat(), $minisiteId)
                 );
             }
 
             db::query('COMMIT');
         } catch (\Exception $e) {
             db::query('ROLLBACK');
+
             throw $e;
         }
     }
@@ -245,12 +246,12 @@ class VersionService
     public function getMinisiteForRendering(string $siteId): ?object
     {
         $minisite = $this->minisiteRepository->findById($siteId);
-        if (!$minisite) {
+        if (! $minisite) {
             return null;
         }
 
         // Verify user has access to this minisite
-        if (!$this->hasUserAccess($minisite)) {
+        if (! $this->hasUserAccess($minisite)) {
             return null;
         }
 
@@ -262,11 +263,12 @@ class VersionService
      */
     private function hasUserAccess(object $minisite): bool
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             return false;
         }
 
         $currentUser = $this->wordPressManager->getCurrentUser();
+
         return $minisite->createdBy === (int) $currentUser->ID;
     }
 }

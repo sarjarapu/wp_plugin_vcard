@@ -10,7 +10,7 @@ use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
  *
  * Handles minisite listing business logic.
  */
-final class MinisiteListingService
+class MinisiteListingService
 {
     public function __construct(
         private WordPressListingManager $listingManager
@@ -32,15 +32,15 @@ final class MinisiteListingService
                 $command->offset
             );
 
-            return [
+            return array(
                 'success' => true,
-                'minisites' => $minisites
-            ];
+                'minisites' => $minisites,
+            );
         } catch (\Exception $e) {
-            return [
+            return array(
                 'success' => false,
-                'error' => 'Failed to retrieve minisites: ' . $e->getMessage()
-            ];
+                'error' => 'Failed to retrieve minisites: ' . $e->getMessage(),
+            );
         }
     }
 }

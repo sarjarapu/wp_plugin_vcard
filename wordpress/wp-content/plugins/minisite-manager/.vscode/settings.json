@@ -1,0 +1,29 @@
+{
+    "php.suggest.basic": false,
+    "php.validate.enable": true,
+    "php.validate.executablePath": "/opt/homebrew/bin/php",
+    "phpcs.executablePath": "./vendor/bin/phpcs",
+    "phpcs.standard": "phpcs.xml",
+    "phpcs.enable": true,
+    "phpcs.autoConfigSearch": false,
+    "editor.formatOnSave": true,
+    "editor.rulers": [120],
+    "[php]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "junstyle.php-cs-fixer",
+        "editor.rulers": [120],
+        "editor.wordWrap": "wordWrapColumn",
+        "editor.wordWrapColumn": 120
+    },
+    "php-cs-fixer.executablePath": "${workspaceFolder}/vendor/bin/php-cs-fixer",
+    "php-cs-fixer.executable": "${workspaceFolder}/vendor/bin/php-cs-fixer",
+    "php-cs-fixer.config": ".php-cs-fixer.php",
+    "php-cs-fixer.onsave": true,
+    "intelephense.format.enable": false,
+    "files.eol": "\n",
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+    }
+}

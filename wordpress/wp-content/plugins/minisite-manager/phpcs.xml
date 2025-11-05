@@ -1,37 +1,37 @@
 <?xml version="1.0"?>
 <ruleset name="Minisite Manager">
   <description>PSR-12 coding standards for Minisite Manager</description>
-  
+
   <file>src</file>
   <file>minisite-manager.php</file>
-  
+
   <!-- PSR-12 base standards -->
   <rule ref="PSR12"/>
-  
+
   <!-- Security rules (keep these for WordPress integration) -->
   <rule ref="WordPress.Security.EscapeOutput"/>
   <rule ref="WordPress.Security.ValidatedSanitizedInput"/>
   <rule ref="WordPress.Security.NonceVerification"/>
   <rule ref="WordPress.DB.DirectDatabaseQuery"/>
   <rule ref="WordPress.DB.PreparedSQL"/>
-  
+
   <!-- Exclude patterns -->
   <exclude-pattern>*/vendor/*</exclude-pattern>
   <exclude-pattern>*/tests/*</exclude-pattern>
   <exclude-pattern>*/build/*</exclude-pattern>
   <exclude-pattern>*/scripts/*</exclude-pattern>
   <exclude-pattern>*/templates/*</exclude-pattern>
-  
+
   <!-- Domain layer should not be subject to WordPress-specific rules -->
   <rule ref="WordPress.Security.EscapeOutput">
     <exclude-pattern>*/Domain/*</exclude-pattern>
   </rule>
-  
+
   <!-- WordPress plugin main file can have mixed symbols and side effects -->
   <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
     <exclude-pattern>minisite-manager.php</exclude-pattern>
   </rule>
-  
+
   <!-- Arguments -->
   <arg name="colors"/>
   <arg name="parallel" value="80"/>

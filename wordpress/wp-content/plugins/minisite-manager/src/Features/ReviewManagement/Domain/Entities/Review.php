@@ -8,14 +8,14 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: \Minisite\Features\ReviewManagement\Repositories\ReviewRepository::class)]
 #[ORM\Table(name: 'minisite_reviews')]
-#[ORM\Index(columns: ['minisite_id'], name: 'idx_minisite')]
-#[ORM\Index(columns: ['status', 'created_at'], name: 'idx_status_date')]
-#[ORM\Index(columns: ['rating'], name: 'idx_rating')]
+#[ORM\Index(columns: array('minisite_id'), name: 'idx_minisite')]
+#[ORM\Index(columns: array('status', 'created_at'), name: 'idx_status_date')]
+#[ORM\Index(columns: array('rating'), name: 'idx_rating')]
 final class Review
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'bigint', options: ['unsigned' => true])]
+    #[ORM\Column(type: 'bigint', options: array('unsigned' => true))]
     public ?int $id = null;
 
     #[ORM\Column(name: 'minisite_id', type: 'string', length: 32)]
@@ -57,13 +57,13 @@ final class Review
     #[ORM\Column(type: 'string', length: 20)]
     public string $status = 'approved'; // 'pending'|'approved'|'rejected'|'flagged'
 
-    #[ORM\Column(name: 'is_email_verified', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_email_verified', type: 'boolean', options: array('default' => false))]
     public bool $isEmailVerified = false;
 
-    #[ORM\Column(name: 'is_phone_verified', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'is_phone_verified', type: 'boolean', options: array('default' => false))]
     public bool $isPhoneVerified = false;
 
-    #[ORM\Column(name: 'helpful_count', type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(name: 'helpful_count', type: 'integer', options: array('default' => 0))]
     public int $helpfulCount = 0;
 
     #[ORM\Column(name: 'spam_score', type: 'decimal', precision: 3, scale: 2, nullable: true)]
@@ -81,7 +81,7 @@ final class Review
     #[ORM\Column(name: 'moderation_reason', type: 'string', length: 200, nullable: true)]
     public ?string $moderationReason = null; // Why rejected/flagged (for transparency)
 
-    #[ORM\Column(name: 'moderated_by', type: 'bigint', nullable: true, options: ['unsigned' => true])]
+    #[ORM\Column(name: 'moderated_by', type: 'bigint', nullable: true, options: array('unsigned' => true))]
     public ?int $moderatedBy = null; // User ID who moderated this
 
     #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
@@ -90,7 +90,7 @@ final class Review
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable')]
     public \DateTimeImmutable $updatedAt;
 
-    #[ORM\Column(name: 'created_by', type: 'bigint', nullable: true, options: ['unsigned' => true])]
+    #[ORM\Column(name: 'created_by', type: 'bigint', nullable: true, options: array('unsigned' => true))]
     public ?int $createdBy = null; // NULL for anonymous, user_id if registered
 
     public function __construct()

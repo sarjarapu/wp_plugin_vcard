@@ -2,17 +2,16 @@
 
 namespace Minisite\Infrastructure\Logging;
 
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use Monolog\Handler\RotatingFileHandler;
-use Monolog\Handler\DatabaseHandler;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\DatabaseHandler;
+use Monolog\Handler\RotatingFileHandler;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
 use Monolog\Processor\IntrospectionProcessor;
 use Monolog\Processor\MemoryUsageProcessor;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Log\LoggerInterface;
-use wpdb;
 
 /**
  * Factory for creating PSR-3 compatible loggers using Monolog
@@ -46,7 +45,7 @@ class LoggerFactory
         // Adds class, function (method), file, line automatically
         // Skip frames: LoggerFactory itself, and any intermediate logging wrappers
         $logger->pushProcessor(
-            new IntrospectionProcessor(Logger::DEBUG, ['Monolog\\', 'Minisite\\Infrastructure\\Logging\\'])
+            new IntrospectionProcessor(Logger::DEBUG, array('Monolog\\', 'Minisite\\Infrastructure\\Logging\\'))
         );
 
         // Adds memory_usage to context
@@ -68,7 +67,7 @@ class LoggerFactory
         $logger->pushHandler($fileHandler);
 
         // Add error log handler for critical issues (skip during tests)
-        if (!self::isRunningInTests()) {
+        if (! self::isRunningInTests()) {
             $errorHandler = new StreamHandler('php://stderr', Logger::ERROR);
             $lineFormatter = new LineFormatter(
                 "[%datetime%] %channel%.%level_name%: %message% %context% %extra%\n",
@@ -173,6 +172,7 @@ class LoggerFactory
                 $record['extra']['feature'] = $feature;
                 $record['extra']['plugin_version'] = defined('MINISITE_MANAGER_VERSION')
                     ? MINISITE_MANAGER_VERSION : 'unknown';
+
                 return $record;
             });
         }

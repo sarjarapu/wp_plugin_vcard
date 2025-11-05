@@ -14,7 +14,7 @@ final class RoleManager
 {
     public static function initialize(): void
     {
-        add_action('init', [self::class, 'syncRolesAndCapabilities'], 20);
+        add_action('init', array(self::class, 'syncRolesAndCapabilities'), 20);
     }
 
     public static function syncRolesAndCapabilities(): void
@@ -36,7 +36,7 @@ final class RoleManager
 
     private static function getCapabilities(): array
     {
-        return [
+        return array(
             'minisite_read',
             'minisite_create',
             'minisite_publish',
@@ -56,15 +56,15 @@ final class RoleManager
             'minisite_view_saved_contacts',
             'minisite_view_billing',
             'minisite_manage_plugin',
-        ];
+        );
     }
 
     private static function getRoles(): array
     {
-        return [
-            'minisite_user' => [
+        return array(
+            'minisite_user' => array(
                 'name' => 'Minisite User',
-                'capabilities' => [
+                'capabilities' => array(
                     'read' => true,
                     'minisite_read' => true,
                     'minisite_create' => true,
@@ -73,11 +73,11 @@ final class RoleManager
                     'minisite_save_contact' => true,
                     'minisite_view_saved_contacts' => true,
                     'minisite_apply_discounts' => true,
-                ]
-            ],
-            'minisite_member' => [
+                ),
+            ),
+            'minisite_member' => array(
                 'name' => 'Minisite Member',
-                'capabilities' => [
+                'capabilities' => array(
                     'read' => true,
                     'minisite_read' => true,
                     'minisite_create' => true,
@@ -92,11 +92,11 @@ final class RoleManager
                     'minisite_apply_discounts' => true,
                     'edit_posts' => true,
                     'upload_files' => true,
-                ]
-            ],
-            'minisite_power' => [
+                ),
+            ),
+            'minisite_power' => array(
                 'name' => 'Minisite Power',
-                'capabilities' => [
+                'capabilities' => array(
                     'read' => true,
                     'minisite_read' => true,
                     'minisite_create' => true,
@@ -117,11 +117,11 @@ final class RoleManager
                     'minisite_view_billing' => true,
                     'edit_posts' => true,
                     'upload_files' => true,
-                ]
-            ],
-            'minisite_admin' => [
+                ),
+            ),
+            'minisite_admin' => array(
                 'name' => 'Minisite Admin',
-                'capabilities' => [
+                'capabilities' => array(
                     'read' => true,
                     'minisite_read' => true,
                     'minisite_create' => true,
@@ -143,15 +143,15 @@ final class RoleManager
                     'minisite_manage_plugin' => true,
                     'edit_posts' => true,
                     'upload_files' => true,
-                ]
-            ],
-        ];
+                ),
+            ),
+        );
     }
 
     private static function addOrUpdateRole(string $slug, string $name, array $caps): void
     {
         $role = get_role($slug);
-        if (!$role) {
+        if (! $role) {
             add_role($slug, $name, $caps);
             $role = get_role($slug);
         }

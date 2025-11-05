@@ -9,19 +9,19 @@ namespace Minisite\Features\Authentication\Rendering;
  * - Manages Timber template rendering
  * - Handles template context
  */
-final class AuthRenderer
+class AuthRenderer
 {
     /**
      * Render authentication page using Timber
      */
-    public function render(string $template, array $context = []): void
+    public function render(string $template, array $context = array()): void
     {
         $viewsBase = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber/views';
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
-                    \Timber\Timber::$locations ?? [],
-                    [$viewsBase]
+                    \Timber\Timber::$locations ?? array(),
+                    array($viewsBase)
                 )
             )
         );

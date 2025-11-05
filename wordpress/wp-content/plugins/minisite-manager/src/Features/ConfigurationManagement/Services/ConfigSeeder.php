@@ -2,7 +2,6 @@
 
 namespace Minisite\Features\ConfigurationManagement\Services;
 
-use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
@@ -24,33 +23,33 @@ class ConfigSeeder
         $this->logger->info("seedDefaults() entry");
 
         try {
-            $defaults = [
+            $defaults = array(
                 // API Keys (empty, to be filled by admin)
-                'openai_api_key' => [
+                'openai_api_key' => array(
                     'value' => '',
                     'type' => 'encrypted',
-                    'description' => 'OpenAI API key for AI features'
-                ],
+                    'description' => 'OpenAI API key for AI features',
+                ),
 
                 // Encryption
-                'pii_encryption_key' => [
+                'pii_encryption_key' => array(
                     'value' => '',
                     'type' => 'encrypted',
-                    'description' => 'Key for encrypting PII (Personally Identifiable Information) in reviews'
-                ],
+                    'description' => 'Key for encrypting PII (Personally Identifiable Information) in reviews',
+                ),
 
                 // Review Settings
-                'max_reviews_per_page' => [
+                'max_reviews_per_page' => array(
                     'value' => 20,
                     'type' => 'integer',
-                    'description' => 'Maximum number of reviews to display per page'
-                ],
-            ];
+                    'description' => 'Maximum number of reviews to display per page',
+                ),
+            );
 
             $created = 0;
             foreach ($defaults as $key => $config) {
                 // Only create if doesn't exist (preserve existing values)
-                if (!$configManager->has($key)) {
+                if (! $configManager->has($key)) {
                     $configManager->set(
                         $key,
                         $config['value'],
@@ -61,15 +60,16 @@ class ConfigSeeder
                 }
             }
 
-            $this->logger->info("seedDefaults() exit", [
+            $this->logger->info("seedDefaults() exit", array(
                 'created' => $created,
                 'total_defaults' => count($defaults),
-            ]);
+            ));
         } catch (\Exception $e) {
-            $this->logger->error("seedDefaults() failed", [
+            $this->logger->error("seedDefaults() failed", array(
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }

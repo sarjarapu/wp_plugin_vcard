@@ -31,6 +31,7 @@ class VersionRenderer
             );
 
             \Timber\Timber::render('account-sites-versions.twig', $data);
+
             return;
         }
 

@@ -3,9 +3,9 @@
 namespace Minisite\Features\Authentication\Hooks;
 
 use Minisite\Features\Authentication\Controllers\AuthController;
+use Minisite\Features\Authentication\Handlers\ForgotPasswordHandler;
 use Minisite\Features\Authentication\Handlers\LoginHandler;
 use Minisite\Features\Authentication\Handlers\RegisterHandler;
-use Minisite\Features\Authentication\Handlers\ForgotPasswordHandler;
 use Minisite\Features\Authentication\Services\AuthService;
 use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
@@ -25,8 +25,11 @@ final class AuthHooksFactory
      */
     public static function create(): AuthHooks
     {
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create services
-        $wordPressManager = new WordPressUserManager();
+        $wordPressManager = new WordPressUserManager($terminationHandler);
         $authService = new AuthService($wordPressManager);
 
         // Create handlers
@@ -54,7 +57,10 @@ final class AuthHooksFactory
             $renderer
         );
 
+        // Create termination handler for hook (separate instance for hook)
+        $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new AuthHooks($authController);
+        return new AuthHooks($authController, $hookTerminationHandler);
     }
 }

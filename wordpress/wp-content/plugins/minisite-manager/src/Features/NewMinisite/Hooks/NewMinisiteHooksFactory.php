@@ -2,11 +2,11 @@
 
 namespace Minisite\Features\NewMinisite\Hooks;
 
-use Minisite\Features\NewMinisite\Controllers\NewMinisiteController;
-use Minisite\Features\NewMinisite\Services\NewMinisiteService;
-use Minisite\Features\NewMinisite\Rendering\NewMinisiteRenderer;
-use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Features\NewMinisite\Controllers\NewMinisiteController;
+use Minisite\Features\NewMinisite\Rendering\NewMinisiteRenderer;
+use Minisite\Features\NewMinisite\Services\NewMinisiteService;
+use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
@@ -24,8 +24,11 @@ class NewMinisiteHooksFactory
      */
     public static function create(): NewMinisiteHooks
     {
-        // Create WordPress manager
-        $wordPressManager = new WordPressNewMinisiteManager();
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
+        // Create WordPress manager (requires TerminationHandlerInterface)
+        $wordPressManager = new WordPressNewMinisiteManager($terminationHandler);
 
         // Create service
         $newMinisiteService = new NewMinisiteService($wordPressManager);
@@ -49,7 +52,10 @@ class NewMinisiteHooksFactory
             $formSecurityHelper
         );
 
+        // Create termination handler for hook (separate instance for hook)
+        $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new NewMinisiteHooks($newMinisiteController, $wordPressManager);
+        return new NewMinisiteHooks($newMinisiteController, $wordPressManager, $hookTerminationHandler);
     }
 }

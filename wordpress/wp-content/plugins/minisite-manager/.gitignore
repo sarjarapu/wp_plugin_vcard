@@ -28,6 +28,7 @@ wordpress/wp-content/minisite-logs/
 
 # IDE
 .vscode/
+!.vscode/settings.json
 *.sublime-project
 *.sublime-workspace
 
@@ -127,3 +128,5 @@ fabric.properties
 !.idea/runConfigurations
 
 # End of https://www.toptal.com/developers/gitignore/api/phpstorm+all
+
+.php-cs-fixer.cache

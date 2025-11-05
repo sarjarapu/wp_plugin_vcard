@@ -2,10 +2,12 @@
 
 namespace Minisite\Features\MinisiteEdit\WordPress;
 
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
-use Minisite\Domain\Interfaces\WordPressManagerInterface;
 
 /**
  * WordPress Edit Manager
@@ -15,10 +17,20 @@ use Minisite\Domain\Interfaces\WordPressManagerInterface;
  * - Provides clean interface for WordPress functions
  * - Handles user authentication and authorization
  */
-class WordPressEditManager implements WordPressManagerInterface
+class WordPressEditManager extends BaseWordPressManager implements WordPressManagerInterface
 {
     private ?MinisiteRepository $minisiteRepository = null;
     private ?VersionRepository $versionRepository = null;
+
+    /**
+     * Constructor
+     *
+     * @param TerminationHandlerInterface $terminationHandler Handler for terminating script execution
+     */
+    public function __construct(TerminationHandlerInterface $terminationHandler)
+    {
+        parent::__construct($terminationHandler);
+    }
 
     /**
      * Get minisite repository instance
@@ -28,6 +40,7 @@ class WordPressEditManager implements WordPressManagerInterface
         if ($this->minisiteRepository === null) {
             $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
         }
+
         return $this->minisiteRepository;
     }
 
@@ -39,6 +52,7 @@ class WordPressEditManager implements WordPressManagerInterface
         if ($this->versionRepository === null) {
             $this->versionRepository = new VersionRepository(db::getWpdb());
         }
+
         return $this->versionRepository;
     }
 
@@ -74,6 +88,7 @@ class WordPressEditManager implements WordPressManagerInterface
         if ($text === null) {
             return '';
         }
+
         return sanitize_text_field(wp_unslash($text));
     }
 
@@ -85,6 +100,7 @@ class WordPressEditManager implements WordPressManagerInterface
         if ($text === null) {
             return '';
         }
+
         return sanitize_textarea_field(wp_unslash($text));
     }
 
@@ -96,6 +112,7 @@ class WordPressEditManager implements WordPressManagerInterface
         if ($url === null) {
             return '';
         }
+
         return esc_url_raw(wp_unslash($url));
     }
 
@@ -107,6 +124,7 @@ class WordPressEditManager implements WordPressManagerInterface
         if ($email === null) {
             return '';
         }
+
         return sanitize_email(wp_unslash($email));
     }
 
@@ -128,11 +146,11 @@ class WordPressEditManager implements WordPressManagerInterface
 
     /**
      * Redirect to URL
+     * Uses base class redirect() method which handles termination
      */
-    public function redirect(string $url): void
+    public function redirect(string $url, int $status = 302): void
     {
-        wp_redirect($url);
-        exit;
+        parent::redirect($url, $status);
     }
 
     /**

@@ -4,6 +4,7 @@ namespace Tests\Unit\Features\MinisiteListing\Hooks;
 
 use Minisite\Features\MinisiteListing\Hooks\ListingHooks;
 use Minisite\Features\MinisiteListing\Controllers\ListingController;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -38,12 +39,56 @@ final class ListingHooksTest extends TestCase
     protected function setUp(): void
     {
         $this->listingController = $this->createMock(ListingController::class);
-        $this->listingHooks = new ListingHooks($this->listingController);
+        
+        // Use TestTerminationHandler so exit doesn't terminate tests
+        $terminationHandler = new TestTerminationHandler();
+        
+        $this->listingHooks = new ListingHooks($this->listingController, $terminationHandler);
+        
+        // Setup WordPress function mocks
+        $this->setupWordPressMocks();
         
         // Reset global variables
         $_SERVER = [];
         $_POST = [];
         $_GET = [];
+    }
+
+    protected function tearDown(): void
+    {
+        $this->clearWordPressMocks();
+        parent::tearDown();
+    }
+
+    /**
+     * Setup WordPress function mocks
+     */
+    private function setupWordPressMocks(): void
+    {
+        // Ensure get_query_var function exists for testing
+        // Note: If get_query_var already exists (from WordPress), we can't override it
+        // So we use a namespace workaround or ensure our mock is set up correctly
+        if (!function_exists('get_query_var')) {
+            eval("
+                function get_query_var(\$var, \$default = '') {
+                    if (isset(\$GLOBALS['_test_mock_get_query_var'])) {
+                        \$callback = \$GLOBALS['_test_mock_get_query_var'];
+                        if (is_callable(\$callback)) {
+                            return \$callback(\$var, \$default);
+                        }
+                    }
+                    return \$default;
+                }
+            ");
+        }
+    }
+
+    /**
+     * Clear WordPress function mocks
+     */
+    private function clearWordPressMocks(): void
+    {
+        unset($GLOBALS['_test_mock_get_query_var']);
     }
 
     /**
@@ -141,14 +186,14 @@ final class ListingHooksTest extends TestCase
             return null;
         });
 
-        // Test that the method can be called without fatal errors
-        try {
-            $this->listingHooks->handleListingRoutes();
-        } catch (\Exception $e) {
-            // Expected due to exit
-        }
+        // Hook handles termination via TerminationHandlerInterface
+        // In production: calls exit(). In tests: TestTerminationHandler does nothing
+        $this->listingController->expects($this->once())
+            ->method('handleList');
 
-        $this->assertTrue(true); // If we get here, the method was called
+        // Call handleListingRoutes - hook handles termination after controller
+        // but won't exit in tests due to TestTerminationHandler injection
+        $this->listingHooks->handleListingRoutes();
     }
 
     /**
@@ -375,7 +420,10 @@ final class ListingHooksTest extends TestCase
      */
     private function mockWordPressFunction(string $functionName, mixed $returnValue): void
     {
-        if (!function_exists($functionName)) {
+        if ($functionName === 'get_query_var' && is_callable($returnValue)) {
+            // Store the callback in GLOBALS for the mocked function to use
+            $GLOBALS['_test_mock_get_query_var'] = $returnValue;
+        } elseif (!function_exists($functionName)) {
             if (is_callable($returnValue)) {
                 eval("function {$functionName}(...\$args) { return call_user_func_array(" . var_export($returnValue, true) . ", \$args); }");
             } else {

@@ -31,7 +31,7 @@ class MigrationRunner
         $logger ??= static function ($msg) {
         };
         $current = $this->current();
-        $target  = $this->targetVersion;
+        $target = $this->targetVersion;
 
         $migs = $this->locator->all();
         foreach ($migs as $m) {
@@ -59,7 +59,7 @@ class MigrationRunner
 
         // We go reverse order for down
         $migs = $this->locator->all();
-        usort($migs, fn($a, $b) => \version_compare($b->version(), $a->version()));
+        usort($migs, fn ($a, $b) => \version_compare($b->version(), $a->version()));
 
         foreach ($migs as $m) {
             $ver = $m->version();

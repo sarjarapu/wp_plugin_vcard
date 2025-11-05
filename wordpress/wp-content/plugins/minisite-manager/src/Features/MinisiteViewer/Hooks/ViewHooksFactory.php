@@ -22,8 +22,11 @@ final class ViewHooksFactory
      */
     public static function create(): ViewHooks
     {
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create services
-        $wordPressManager = new WordPressMinisiteManager();
+        $wordPressManager = new WordPressMinisiteManager($terminationHandler);
         $viewService = new MinisiteViewService($wordPressManager);
 
         // Create handlers
@@ -52,7 +55,10 @@ final class ViewHooksFactory
             $wordPressManager
         );
 
+        // Create termination handler for hook (separate instance for hook)
+        $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new ViewHooks($minisitePageController, $wordPressManager);
+        return new ViewHooks($minisitePageController, $wordPressManager, $hookTerminationHandler);
     }
 }

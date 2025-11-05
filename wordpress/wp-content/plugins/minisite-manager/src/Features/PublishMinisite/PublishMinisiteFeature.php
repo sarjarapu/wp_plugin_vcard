@@ -23,6 +23,6 @@ final class PublishMinisiteFeature
         $publishHooks->register();
 
         // Register template_redirect handler with priority 4 (after NewMinisite priority 2, Edit priority 3)
-        add_action('template_redirect', [$publishHooks, 'handlePublishRoutes'], 4);
+        add_action('template_redirect', array($publishHooks, 'handlePublishRoutes'), 4);
     }
 }

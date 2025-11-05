@@ -44,7 +44,7 @@ final class Version20251104000000 extends AbstractMigration
         $connection = $this->connection;
         $tableExists = $connection->executeQuery(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
-            [$connection->getDatabase(), $tableName]
+            array($connection->getDatabase(), $tableName)
         )->fetchOne() > 0;
 
         if ($tableExists) {
@@ -58,55 +58,55 @@ final class Version20251104000000 extends AbstractMigration
         // This replaces the old SQL file-based table creation
         $table = $schema->createTable($tableName);
 
-        $table->addColumn('id', 'bigint', [
+        $table->addColumn('id', 'bigint', array(
             'unsigned' => true,
             'autoincrement' => true,
-        ]);
-        $table->addColumn('minisite_id', 'string', ['length' => 32]);
-        $table->addColumn('author_name', 'string', ['length' => 160]);
-        $table->addColumn('author_email', 'string', ['length' => 255, 'notnull' => false]);
-        $table->addColumn('author_phone', 'string', ['length' => 20, 'notnull' => false]);
-        $table->addColumn('author_url', 'string', ['length' => 300, 'notnull' => false]);
-        $table->addColumn('rating', 'decimal', ['precision' => 2, 'scale' => 1]);
+        ));
+        $table->addColumn('minisite_id', 'string', array('length' => 32));
+        $table->addColumn('author_name', 'string', array('length' => 160));
+        $table->addColumn('author_email', 'string', array('length' => 255, 'notnull' => false));
+        $table->addColumn('author_phone', 'string', array('length' => 20, 'notnull' => false));
+        $table->addColumn('author_url', 'string', array('length' => 300, 'notnull' => false));
+        $table->addColumn('rating', 'decimal', array('precision' => 2, 'scale' => 1));
         $table->addColumn('body', 'text');
-        $table->addColumn('language', 'string', ['length' => 10, 'notnull' => false]);
-        $table->addColumn('locale', 'string', ['length' => 10, 'notnull' => false]);
-        $table->addColumn('visited_month', 'string', ['length' => 7, 'notnull' => false]);
-        $table->addColumn('source', 'string', [
+        $table->addColumn('language', 'string', array('length' => 10, 'notnull' => false));
+        $table->addColumn('locale', 'string', array('length' => 10, 'notnull' => false));
+        $table->addColumn('visited_month', 'string', array('length' => 7, 'notnull' => false));
+        $table->addColumn('source', 'string', array(
             'length' => 20,
             'default' => 'manual',
-            'comment' => "ENUM('manual','google','yelp','facebook','other')"
-        ]);
-        $table->addColumn('source_id', 'string', ['length' => 160, 'notnull' => false]);
-        $table->addColumn('status', 'string', [
+            'comment' => "ENUM('manual','google','yelp','facebook','other')",
+        ));
+        $table->addColumn('source_id', 'string', array('length' => 160, 'notnull' => false));
+        $table->addColumn('status', 'string', array(
             'length' => 20,
             'default' => 'approved',
-            'comment' => "ENUM('pending','approved','rejected','flagged')"
-        ]);
-        $table->addColumn('is_email_verified', 'boolean', ['default' => false]);
-        $table->addColumn('is_phone_verified', 'boolean', ['default' => false]);
-        $table->addColumn('helpful_count', 'integer', ['default' => 0]);
-        $table->addColumn('spam_score', 'decimal', ['precision' => 3, 'scale' => 2, 'notnull' => false]);
-        $table->addColumn('sentiment_score', 'decimal', ['precision' => 3, 'scale' => 2, 'notnull' => false]);
-        $table->addColumn('display_order', 'integer', ['notnull' => false]);
-        $table->addColumn('published_at', 'datetime', ['notnull' => false]);
-        $table->addColumn('moderation_reason', 'string', ['length' => 200, 'notnull' => false]);
-        $table->addColumn('moderated_by', 'bigint', ['unsigned' => true, 'notnull' => false]);
-        $table->addColumn('created_at', 'datetime_immutable', [
+            'comment' => "ENUM('pending','approved','rejected','flagged')",
+        ));
+        $table->addColumn('is_email_verified', 'boolean', array('default' => false));
+        $table->addColumn('is_phone_verified', 'boolean', array('default' => false));
+        $table->addColumn('helpful_count', 'integer', array('default' => 0));
+        $table->addColumn('spam_score', 'decimal', array('precision' => 3, 'scale' => 2, 'notnull' => false));
+        $table->addColumn('sentiment_score', 'decimal', array('precision' => 3, 'scale' => 2, 'notnull' => false));
+        $table->addColumn('display_order', 'integer', array('notnull' => false));
+        $table->addColumn('published_at', 'datetime', array('notnull' => false));
+        $table->addColumn('moderation_reason', 'string', array('length' => 200, 'notnull' => false));
+        $table->addColumn('moderated_by', 'bigint', array('unsigned' => true, 'notnull' => false));
+        $table->addColumn('created_at', 'datetime_immutable', array(
             'notnull' => true,
             'default' => 'CURRENT_TIMESTAMP',
-        ]);
-        $table->addColumn('updated_at', 'datetime_immutable', [
+        ));
+        $table->addColumn('updated_at', 'datetime_immutable', array(
             'notnull' => true,
             'default' => 'CURRENT_TIMESTAMP',
             'comment' => 'ON UPDATE CURRENT_TIMESTAMP',
-        ]);
-        $table->addColumn('created_by', 'bigint', ['unsigned' => true, 'notnull' => false]);
+        ));
+        $table->addColumn('created_by', 'bigint', array('unsigned' => true, 'notnull' => false));
 
-        $table->setPrimaryKey(['id']);
-        $table->addIndex(['minisite_id'], 'idx_minisite');
-        $table->addIndex(['status', 'created_at'], 'idx_status_date');
-        $table->addIndex(['rating'], 'idx_rating');
+        $table->setPrimaryKey(array('id'));
+        $table->addIndex(array('minisite_id'), 'idx_minisite');
+        $table->addIndex(array('status', 'created_at'), 'idx_status_date');
+        $table->addIndex(array('rating'), 'idx_rating');
     }
 
     public function down(Schema $schema): void
@@ -119,7 +119,7 @@ final class Version20251104000000 extends AbstractMigration
         $connection = $this->connection;
         $tableExists = $connection->executeQuery(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
-            [$connection->getDatabase(), $tableName]
+            array($connection->getDatabase(), $tableName)
         )->fetchOne() > 0;
 
         if ($tableExists) {

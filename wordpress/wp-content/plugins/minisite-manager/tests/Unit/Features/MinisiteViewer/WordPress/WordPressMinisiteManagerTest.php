@@ -4,6 +4,7 @@ namespace Tests\Unit\Features\MinisiteViewer\WordPress;
 
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 use PHPUnit\Framework\TestCase;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 
 /**
  * Test WordPressMinisiteManager
@@ -17,7 +18,8 @@ final class WordPressMinisiteManagerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->wordPressManager = new WordPressMinisiteManager();
+        $terminationHandler = new TestTerminationHandler();
+        $this->wordPressManager = new WordPressMinisiteManager($terminationHandler);
     }
 
     /**
@@ -47,15 +49,18 @@ final class WordPressMinisiteManagerTest extends TestCase
     }
 
     /**
-     * Test constructor has no parameters
+     * Test constructor requires TerminationHandlerInterface parameter
      */
-    public function test_constructor_has_no_parameters(): void
+    public function test_constructor_requires_termination_handler(): void
     {
         $reflection = new \ReflectionClass($this->wordPressManager);
         $constructor = $reflection->getConstructor();
         
-        // WordPressMinisiteManager uses PHP's default constructor (no explicit constructor)
-        $this->assertNull($constructor);
+        // WordPressMinisiteManager now requires TerminationHandlerInterface
+        $this->assertNotNull($constructor);
+        $params = $constructor->getParameters();
+        $this->assertCount(1, $params);
+        $this->assertEquals('Minisite\Infrastructure\Http\TerminationHandlerInterface', $params[0]->getType()->getName());
     }
 
     /**

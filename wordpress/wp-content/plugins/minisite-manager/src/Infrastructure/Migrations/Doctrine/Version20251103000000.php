@@ -6,7 +6,6 @@ namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
-use Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -32,7 +31,7 @@ final class Version20251103000000 extends AbstractMigration
         $connection = $this->connection;
         $tableExists = $connection->executeQuery(
             "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
-            [$connection->getDatabase(), $tableName]
+            array($connection->getDatabase(), $tableName)
         )->fetchOne() > 0;
 
         if ($tableExists) {
@@ -42,31 +41,31 @@ final class Version20251103000000 extends AbstractMigration
 
         $table = $schema->createTable($tableName);
 
-        $table->addColumn('id', 'bigint', [
+        $table->addColumn('id', 'bigint', array(
             'unsigned' => true,
             'autoincrement' => true,
-        ]);
-        $table->addColumn('config_key', 'string', ['length' => 100]);
-        $table->addColumn('config_value', 'text', ['notnull' => false]);
-        $table->addColumn('config_type', 'string', [
+        ));
+        $table->addColumn('config_key', 'string', array('length' => 100));
+        $table->addColumn('config_value', 'text', array('notnull' => false));
+        $table->addColumn('config_type', 'string', array(
             'length' => 20,
             'default' => 'string',
-            'comment' => 'string|integer|boolean|json|encrypted|secret'
-        ]);
-        $table->addColumn('description', 'text', ['notnull' => false]);
-        $table->addColumn('is_sensitive', 'boolean', ['default' => false]);
-        $table->addColumn('is_required', 'boolean', ['default' => false]);
-        $table->addColumn('created_at', 'datetime_immutable', [
+            'comment' => 'string|integer|boolean|json|encrypted|secret',
+        ));
+        $table->addColumn('description', 'text', array('notnull' => false));
+        $table->addColumn('is_sensitive', 'boolean', array('default' => false));
+        $table->addColumn('is_required', 'boolean', array('default' => false));
+        $table->addColumn('created_at', 'datetime_immutable', array(
             'notnull' => true,
-        ]);
-        $table->addColumn('updated_at', 'datetime_immutable', [
+        ));
+        $table->addColumn('updated_at', 'datetime_immutable', array(
             'notnull' => true,
-        ]);
+        ));
 
-        $table->setPrimaryKey(['id']);
-        $table->addUniqueIndex(['config_key'], 'uniq_config_key');
-        $table->addIndex(['is_sensitive'], 'idx_sensitive');
-        $table->addIndex(['is_required'], 'idx_required');
+        $table->setPrimaryKey(array('id'));
+        $table->addUniqueIndex(array('config_key'), 'uniq_config_key');
+        $table->addIndex(array('is_sensitive'), 'idx_sensitive');
+        $table->addIndex(array('is_required'), 'idx_required');
     }
 
     public function down(Schema $schema): void

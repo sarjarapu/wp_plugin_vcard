@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Minisite\Features\MinisiteListing\WordPress;
 
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 
@@ -15,13 +17,19 @@ use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
  * - Provides WordPress-specific data formatting
  * - Acts as a bridge between the listing service and WordPress
  */
-final class WordPressListingManager
+class WordPressListingManager extends BaseWordPressManager
 {
     private MinisiteRepository $minisiteRepository;
     private VersionRepository $versionRepository;
 
-    public function __construct()
+    /**
+     * Constructor
+     *
+     * @param TerminationHandlerInterface $terminationHandler Handler for terminating script execution
+     */
+    public function __construct(TerminationHandlerInterface $terminationHandler)
     {
+        parent::__construct($terminationHandler);
         global $wpdb;
         $this->minisiteRepository = new MinisiteRepository($wpdb);
         $this->versionRepository = new VersionRepository($wpdb);
@@ -61,10 +69,11 @@ final class WordPressListingManager
 
     /**
      * Redirect to URL
+     * Uses base class redirect() method which handles termination
      */
     public function redirect(string $location, int $status = 302): void
     {
-        wp_redirect($location, $status);
+        parent::redirect($location, $status);
     }
 
     /**
@@ -85,14 +94,14 @@ final class WordPressListingManager
             );
             $statusChip = $minisite->status === 'published' ? 'Published' : 'Draft';
 
-            return [
+            return array(
                 'id' => $minisite->id,
                 'title' => $minisite->title ?: $minisite->name,
                 'name' => $minisite->name,
-                'slugs' => [
+                'slugs' => array(
                     'business' => $minisite->slugs->business,
                     'location' => $minisite->slugs->location,
-                ],
+                ),
                 'route' => $route,
                 'location' => trim(
                     $minisite->city . (isset($minisite->region) && $minisite->region ? ', ' . $minisite->region : '') .
@@ -106,7 +115,7 @@ final class WordPressListingManager
                 // TODO: real subscription and online flags
                 'subscription' => 'Unknown',
                 'online' => 'Unknown',
-            ];
+            );
         }, $minisites);
 
         return $result;

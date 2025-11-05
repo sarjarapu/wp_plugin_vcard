@@ -3,6 +3,8 @@
 namespace Minisite\Features\Authentication\Hooks;
 
 use Minisite\Features\Authentication\Controllers\AuthController;
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * Authentication Hooks
@@ -12,11 +14,13 @@ use Minisite\Features\Authentication\Controllers\AuthController;
  * - Hooks into WordPress template_redirect
  * - Manages authentication route handling
  */
-final class AuthHooks
+final class AuthHooks extends BaseHook
 {
     public function __construct(
-        private AuthController $authController
+        private AuthController $authController,
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -24,7 +28,7 @@ final class AuthHooks
      */
     public function register(): void
     {
-        add_action('init', [$this, 'addRewriteRules']);
+        add_action('init', array($this, 'addRewriteRules'));
         // Note: template_redirect is registered by AuthenticationFeature
     }
 
@@ -36,7 +40,7 @@ final class AuthHooks
     public function addRewriteRules(): void
     {
         // Add query vars for our new authentication system
-        add_filter('query_vars', [$this, 'addQueryVars']);
+        add_filter('query_vars', array($this, 'addQueryVars'));
     }
 
     /**
@@ -63,8 +67,8 @@ final class AuthHooks
         $action = get_query_var('minisite_account_action');
 
         // Only handle authentication routes, let the old system handle sites, new, etc.
-        $authActions = ['login', 'logout', 'dashboard', 'register', 'forgot'];
-        if (!in_array($action, $authActions)) {
+        $authActions = array('login', 'logout', 'dashboard', 'register', 'forgot');
+        if (! in_array($action, $authActions)) {
             return;
         }
 
@@ -78,8 +82,8 @@ final class AuthHooks
             default => $this->handleNotFound()
         };
 
-        // Exit to prevent the old system from handling this request
-        exit;
+        // Terminate after handling route (inherited from BaseHook)
+        $this->terminate();
     }
 
     /**
@@ -91,6 +95,7 @@ final class AuthHooks
         $wp_query->set_404();
         status_header(404);
         get_template_part('404');
-        exit;
+        // Terminate after handling route (inherited from BaseHook)
+        $this->terminate();
     }
 }

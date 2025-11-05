@@ -30,11 +30,11 @@ class MigrationLocator
                 // Only include classes that physically live under this directory (safety)
                 // Use realpath to handle symlinks (e.g., /var -> /private/var on macOS)
                 $fileRealPath = realpath($ref->getFileName());
-                $dirRealPath  = realpath($this->dirAbsolute);
+                $dirRealPath = realpath($this->dirAbsolute);
 
                 if ($fileRealPath && $dirRealPath && str_starts_with($fileRealPath, $dirRealPath)) {
                     /** @var Migration $instance */
-                    $instance     = $ref->newInstance();
+                    $instance = $ref->newInstance();
                     $migrations[] = $instance;
                 }
             }
@@ -42,7 +42,7 @@ class MigrationLocator
 
         usort(
             $migrations,
-            fn(Migration $a, Migration $b) =>
+            fn (Migration $a, Migration $b) =>
             \version_compare($a->version(), $b->version())
         );
 

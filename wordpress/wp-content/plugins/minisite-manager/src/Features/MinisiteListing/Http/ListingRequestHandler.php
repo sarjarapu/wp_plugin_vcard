@@ -14,7 +14,7 @@ use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
  * - Creates command objects
  * - Handles nonce verification
  */
-final class ListingRequestHandler
+class ListingRequestHandler
 {
     public function __construct(
         private WordPressListingManager $wordPressManager
@@ -29,7 +29,7 @@ final class ListingRequestHandler
     public function parseListMinisitesRequest(): ?ListMinisitesCommand
     {
         $currentUser = $this->wordPressManager->getCurrentUser();
-        if (!$currentUser || !isset($currentUser->ID) || !$currentUser->ID || $currentUser->ID <= 0) {
+        if (! $currentUser || ! isset($currentUser->ID) || ! $currentUser->ID || $currentUser->ID <= 0) {
             return null;
         }
 

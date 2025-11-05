@@ -12,7 +12,7 @@ use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
  * - Sets HTTP headers
  * - Handles error responses
  */
-final class ListingResponseHandler
+class ListingResponseHandler
 {
     public function __construct(
         private WordPressListingManager $wordPressManager
@@ -30,7 +30,6 @@ final class ListingResponseHandler
         }
 
         $this->wordPressManager->redirect($loginUrl);
-        exit;
     }
 
     /**
@@ -39,7 +38,6 @@ final class ListingResponseHandler
     public function redirectToSites(): void
     {
         $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
-        exit;
     }
 
     /**
@@ -48,6 +46,5 @@ final class ListingResponseHandler
     public function redirect(string $url): void
     {
         $this->wordPressManager->redirect($url);
-        exit;
     }
 }

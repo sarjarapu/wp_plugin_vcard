@@ -2,10 +2,9 @@
 
 namespace Minisite\Infrastructure\Versioning\Migrations;
 
-use Minisite\Infrastructure\Versioning\Contracts\Migration;
-use Minisite\Infrastructure\Versioning\Support\DbDelta;
-use Minisite\Infrastructure\Utils\SqlLoader;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
+use Minisite\Infrastructure\Utils\SqlLoader;
+use Minisite\Infrastructure\Versioning\Contracts\Migration;
 
 // phpcs:ignore Squiz.Classes.ValidClassName.NotCamelCaps -- Migration class with version-based naming convention
 class _1_0_0_CreateBase implements Migration
@@ -28,14 +27,14 @@ class _1_0_0_CreateBase implements Migration
     public function up(): void
     {
         global $wpdb;
-        $minisites      = $wpdb->prefix . 'minisites';
+        $minisites = $wpdb->prefix . 'minisites';
         // NOTE: Reviews table is now managed by Doctrine migrations - do NOT create it here
         // $reviews        = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
-        $versions       = $wpdb->prefix . 'minisite_versions';
-        $bookmarks      = $wpdb->prefix . 'minisite_bookmarks';
-        $payments       = $wpdb->prefix . 'minisite_payments';
+        $versions = $wpdb->prefix . 'minisite_versions';
+        $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
+        $payments = $wpdb->prefix . 'minisite_payments';
         $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
-        $reservations   = $wpdb->prefix . 'minisite_reservations';
+        $reservations = $wpdb->prefix . 'minisite_reservations';
 
         // ——— minisites (live) ———
         SqlLoader::loadAndExecute(
@@ -184,15 +183,15 @@ class _1_0_0_CreateBase implements Migration
         global $wpdb;
         // Check if the constraint already exists
         $constraintExists = db::get_var(
-            "SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE 
+            "SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE
              WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND CONSTRAINT_NAME = %s",
-            [DB_NAME, $table, $constraintName]
+            array(DB_NAME, $table, $constraintName)
         );
 
         if (! $constraintExists) {
             db::query(
-                "ALTER TABLE {$table} ADD CONSTRAINT {$constraintName} 
-                 FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn}) 
+                "ALTER TABLE {$table} ADD CONSTRAINT {$constraintName}
+                 FOREIGN KEY ({$column}) REFERENCES {$referencedTable}({$referencedColumn})
                  ON DELETE CASCADE"
             );
         }
@@ -210,7 +209,7 @@ class _1_0_0_CreateBase implements Migration
         }
 
         $jsonContent = file_get_contents($jsonPath);
-        $data        = json_decode($jsonContent, true);
+        $data = json_decode($jsonContent, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \RuntimeException(
@@ -248,11 +247,12 @@ class _1_0_0_CreateBase implements Migration
             if (isset($data['location']['latitude']) && isset($data['location']['longitude'])) {
                 $data['location_point'] = array(
                     'longitude' => (float) $data['location']['longitude'],
-                    'latitude'  => (float) $data['location']['latitude'],
+                    'latitude' => (float) $data['location']['latitude'],
                 );
                 unset($data['location']); // Remove the JSON location format
             }
         }
+
         return $data;
     }
 
@@ -261,15 +261,15 @@ class _1_0_0_CreateBase implements Migration
      */
     protected function setComputedFields(array $data): array
     {
-        $now    = current_time('mysql');
+        $now = current_time('mysql');
         $userId = get_current_user_id() ?: null;
 
         // Set audit fields - always use current values for seeding
-        $data['created_at']   = $data['created_at'] ?? $now;
-        $data['updated_at']   = $data['updated_at'] ?? $now;
+        $data['created_at'] = $data['created_at'] ?? $now;
+        $data['updated_at'] = $data['updated_at'] ?? $now;
         $data['published_at'] = $data['published_at'] ?? $now;
-        $data['created_by']   = $userId; // Always reset to current user for proper ownership
-        $data['updated_by']   = $userId; // Always reset to current user for proper ownership
+        $data['created_by'] = $userId; // Always reset to current user for proper ownership
+        $data['updated_by'] = $userId; // Always reset to current user for proper ownership
 
         // Set computed slug if not provided
         if (! isset($data['slug']) && isset($data['business_slug']) && isset($data['location_slug'])) {
@@ -292,16 +292,16 @@ class _1_0_0_CreateBase implements Migration
 
         db::query(
             "INSERT INTO {$minisitesT} (
-                id, slug, business_slug, location_slug, title, name, city, region, 
-                country_code, postal_code, location_point, site_template, palette, 
-                industry, default_locale, schema_version, site_version, site_json, 
-                search_terms, status, publish_status, created_at, updated_at, 
+                id, slug, business_slug, location_slug, title, name, city, region,
+                country_code, postal_code, location_point, site_template, palette,
+                industry, default_locale, schema_version, site_version, site_json,
+                search_terms, status, publish_status, created_at, updated_at,
                 published_at, created_by, updated_by, _minisite_current_version_id
             ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, POINT(%f, %f), %s, %s, %s, 
+                %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, POINT(%f, %f), %s, %s, %s,
                 %s, %d, %d, %s, %s, %s, %s, %s, %s, %s, %d, %d, %s
             )",
-            [
+            array(
                 $minisiteData['id'],
                 $minisiteData['slug'],
                 $minisiteData['business_slug'],
@@ -329,8 +329,8 @@ class _1_0_0_CreateBase implements Migration
                 $minisiteData['published_at'],
                 $minisiteData['created_by'],
                 $minisiteData['updated_by'],
-                $minisiteData['_minisite_current_version_id']
-            ]
+                $minisiteData['_minisite_current_version_id'],
+            )
         );
 
         // // Debug: Check if minisite was inserted correctly
@@ -391,14 +391,14 @@ class _1_0_0_CreateBase implements Migration
     public function down(): void
     {
         global $wpdb;
-        $minisites      = $wpdb->prefix . 'minisites';
-        $versions       = $wpdb->prefix . 'minisite_versions';
+        $minisites = $wpdb->prefix . 'minisites';
+        $versions = $wpdb->prefix . 'minisite_versions';
         // NOTE: Reviews table is now managed by Doctrine migrations - do NOT drop it here
         // $reviews        = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
-        $bookmarks      = $wpdb->prefix . 'minisite_bookmarks';
-        $payments       = $wpdb->prefix . 'minisite_payments';
+        $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
+        $payments = $wpdb->prefix . 'minisite_payments';
         $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
-        $reservations   = $wpdb->prefix . 'minisite_reservations';
+        $reservations = $wpdb->prefix . 'minisite_reservations';
 
         // Drop MySQL event
         db::query("DROP EVENT IF EXISTS {$wpdb->prefix}minisite_purge_reservations_event");
@@ -428,12 +428,21 @@ class _1_0_0_CreateBase implements Migration
 
         // Avoid duplicate seeding (check any of our seeded slugs)
         $exists = (int) db::get_var(
-            "SELECT COUNT(*) FROM {$minisitesT} 
-             WHERE (business_slug=%s AND location_slug=%s) 
-                OR (business_slug=%s AND location_slug=%s) 
-                OR (business_slug=%s AND location_slug=%s) 
+            "SELECT COUNT(*) FROM {$minisitesT}
+             WHERE (business_slug=%s AND location_slug=%s)
+                OR (business_slug=%s AND location_slug=%s)
+                OR (business_slug=%s AND location_slug=%s)
                 OR (business_slug=%s AND location_slug=%s)",
-            ['acme-dental', 'dallas', 'lotus-textiles', 'mumbai', 'green-bites', 'london', 'swift-transit', 'sydney']
+            array(
+                'acme-dental',
+                'dallas',
+                'lotus-textiles',
+                'mumbai',
+                'green-bites',
+                'london',
+                'swift-transit',
+                'sydney',
+            )
         );
         if ($exists > 0) {
             return;
@@ -445,7 +454,7 @@ class _1_0_0_CreateBase implements Migration
             'acme-dental.json' => 'ACME',
             'lotus-textiles.json' => 'LOTUS',
             'green-bites.json' => 'GREEN',
-            'swift-transit.json' => 'SWIFT'
+            'swift-transit.json' => 'SWIFT',
         );
 
         foreach ($minisiteConfigs as $filename => $prefix) {
@@ -468,10 +477,10 @@ class _1_0_0_CreateBase implements Migration
 
         // ——— Versions for each profile (version 1 as published) ———
         $versionsT = $wpdb->prefix . 'minisite_versions';
-        $nowUser   = get_current_user_id() ?: null;
+        $nowUser = get_current_user_id() ?: null;
         foreach (
             array(
-            $acmeId  => 'US',
+            $acmeId => 'US',
             $lotusId => 'IN',
             $greenId => 'GB',
             $swiftId => 'AU',
@@ -482,44 +491,44 @@ class _1_0_0_CreateBase implements Migration
             }
 
             // Get the profile data for the initial version
-            $minisite = db::get_row("SELECT * FROM {$minisitesT} WHERE id = %s", [$pid]);
+            $minisite = db::get_row("SELECT * FROM {$minisitesT} WHERE id = %s", array($pid));
             $siteJson = $minisite ? $minisite['site_json'] : wp_json_encode(
                 array(
-                    'note'    => 'initial version',
+                    'note' => 'initial version',
                     'country' => $cc,
                 )
             );
 
             // Create version 1 as published with all profile fields
             $versionData = array(
-                'minisite_id'       => $pid,
-                'version_number'    => 1,
-                'status'            => 'published',
-                'label'             => 'Initial version',
-                'comment'           => 'Migrated from existing data',
-                'created_by'        => $nowUser,
-                'created_at'        => current_time('mysql'),
-                'published_at'      => current_time('mysql'),
+                'minisite_id' => $pid,
+                'version_number' => 1,
+                'status' => 'published',
+                'label' => 'Initial version',
+                'comment' => 'Migrated from existing data',
+                'created_by' => $nowUser,
+                'created_at' => current_time('mysql'),
+                'published_at' => current_time('mysql'),
                 'source_version_id' => null,
 
                 // Profile fields (exact match with profiles table order)
-                'business_slug'     => $minisite['business_slug'] ?? null,
-                'location_slug'     => $minisite['location_slug'] ?? null,
-                'title'             => $minisite['title'] ?? null,
-                'name'              => $minisite['name'] ?? null,
-                'city'              => $minisite['city'] ?? null,
-                'region'            => $minisite['region'] ?? null,
-                'country_code'      => $minisite['country_code'] ?? null,
-                'postal_code'       => $minisite['postal_code'] ?? null,
-                'location_point'    => null, // Will be set separately if needed
-                'site_template'     => $minisite['site_template'] ?? null,
-                'palette'           => $minisite['palette'] ?? null,
-                'industry'          => $minisite['industry'] ?? null,
-                'default_locale'    => $minisite['default_locale'] ?? null,
-                'schema_version'    => $minisite['schema_version'] ?? null,
-                'site_version'      => $minisite['site_version'] ?? null,
-                'site_json'         => $siteJson,
-                'search_terms'      => $minisite['search_terms'] ?? null,
+                'business_slug' => $minisite['business_slug'] ?? null,
+                'location_slug' => $minisite['location_slug'] ?? null,
+                'title' => $minisite['title'] ?? null,
+                'name' => $minisite['name'] ?? null,
+                'city' => $minisite['city'] ?? null,
+                'region' => $minisite['region'] ?? null,
+                'country_code' => $minisite['country_code'] ?? null,
+                'postal_code' => $minisite['postal_code'] ?? null,
+                'location_point' => null, // Will be set separately if needed
+                'site_template' => $minisite['site_template'] ?? null,
+                'palette' => $minisite['palette'] ?? null,
+                'industry' => $minisite['industry'] ?? null,
+                'default_locale' => $minisite['default_locale'] ?? null,
+                'schema_version' => $minisite['schema_version'] ?? null,
+                'site_version' => $minisite['site_version'] ?? null,
+                'site_json' => $siteJson,
+                'search_terms' => $minisite['search_terms'] ?? null,
             );
 
             db::insert(
@@ -558,7 +567,7 @@ class _1_0_0_CreateBase implements Migration
 
             // Set location_point based on profile ID (hardcoded coordinates)
             $coordinates = array(
-                $acmeId  => array( -96.7970, 32.7767 ),   // Dallas, TX
+                $acmeId => array( -96.7970, 32.7767 ),   // Dallas, TX
                 $lotusId => array( 72.8777, 19.0760 ),   // Mumbai, IN
                 $greenId => array( -0.118092, 51.509865 ), // London, GB
                 $swiftId => array( 151.2093, -33.8688 ),   // Sydney, AU
@@ -568,31 +577,32 @@ class _1_0_0_CreateBase implements Migration
                 [$lng, $lat] = $coordinates[ $pid ];
                 db::query(
                     "UPDATE {$versionsT} SET location_point = POINT(%f, %f) WHERE id = %d",
-                    [$lng, $lat, $versionId]
+                    array($lng, $lat, $versionId)
                 );
             }
 
             // Update profile with current version ID
             db::query(
                 "UPDATE {$minisitesT} SET _minisite_current_version_id = %d WHERE id = %s",
-                [$versionId, $pid]
+                array($versionId, $pid)
             );
         }
 
         // ——— Reviews (5 per minisite) ———
         // NOTE: Review seeding now uses Doctrine-based ReviewSeederService
         // All review operations use ReviewRepository through ReviewSeederService
-        if (!empty($acmeId) || !empty($lotusId) || !empty($greenId) || !empty($swiftId)) {
+        if (! empty($acmeId) || ! empty($lotusId) || ! empty($greenId) || ! empty($swiftId)) {
             // Ensure Doctrine is initialized and ReviewRepository is available
             // If not in global, try to initialize it (migration might run before PluginBootstrap)
-            if (!isset($GLOBALS['minisite_review_repository'])) {
+            if (! isset($GLOBALS['minisite_review_repository'])) {
                 // Try to initialize Doctrine if not already done
-                if (!isset($GLOBALS['minisite_entity_manager'])) {
+                if (! isset($GLOBALS['minisite_entity_manager'])) {
                     if (class_exists(\Doctrine\ORM\EntityManager::class)) {
                         $GLOBALS['minisite_entity_manager'] =
                             \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
                     } else {
                         error_log('Doctrine ORM not available - skipping review seeding');
+
                         return;
                     }
                 }
@@ -614,12 +624,12 @@ class _1_0_0_CreateBase implements Migration
             /** @var \Minisite\Features\ReviewManagement\Repositories\ReviewRepositoryInterface $reviewRepo */
             $reviewRepo = $GLOBALS['minisite_review_repository'];
             $seeder = new \Minisite\Features\ReviewManagement\Services\ReviewSeederService($reviewRepo);
-            $seeder->seedAllTestReviews([
+            $seeder->seedAllTestReviews(array(
                 'ACME' => $acmeId,
                 'LOTUS' => $lotusId,
                 'GREEN' => $greenId,
                 'SWIFT' => $swiftId,
-            ]);
+            ));
         }
 
         // OLD REVIEW INSERTION CODE - COMMENTED OUT - DO NOT USE

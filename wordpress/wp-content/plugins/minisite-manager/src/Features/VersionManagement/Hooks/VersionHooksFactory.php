@@ -2,6 +2,7 @@
 
 namespace Minisite\Features\VersionManagement\Hooks;
 
+use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Features\VersionManagement\Controllers\VersionController;
 use Minisite\Features\VersionManagement\Handlers\CreateDraftHandler;
 use Minisite\Features\VersionManagement\Handlers\ListVersionsHandler;
@@ -14,7 +15,6 @@ use Minisite\Features\VersionManagement\Services\VersionService;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
@@ -32,8 +32,11 @@ class VersionHooksFactory
         $minisiteRepository = new MinisiteRepository($wpdb);
         $versionRepository = new VersionRepository($wpdb);
 
-        // Create WordPress manager
-        $wordPressManager = new WordPressVersionManager();
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
+        // Create WordPress manager (requires TerminationHandlerInterface)
+        $wordPressManager = new WordPressVersionManager($terminationHandler);
 
         // Create service
         $versionService = new VersionService($minisiteRepository, $versionRepository, $wordPressManager);
@@ -66,7 +69,10 @@ class VersionHooksFactory
             $wordPressManager
         );
 
+        // Create termination handler for hook (separate instance for hook)
+        $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create hooks
-        return new VersionHooks($versionController);
+        return new VersionHooks($versionController, $hookTerminationHandler);
     }
 }

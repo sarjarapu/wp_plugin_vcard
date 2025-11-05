@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Minisite\Features\Authentication\WordPress;
 
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress User Manager
@@ -14,8 +16,18 @@ use Minisite\Domain\Interfaces\WordPressManagerInterface;
  * allowing us to mock them easily in tests.
  * Implements WordPressManagerInterface for compatibility with FormSecurityHelper.
  */
-final class WordPressUserManager implements WordPressManagerInterface
+class WordPressUserManager extends BaseWordPressManager implements WordPressManagerInterface
 {
+    /**
+     * Constructor
+     *
+     * @param TerminationHandlerInterface $terminationHandler Handler for terminating script execution
+     */
+    public function __construct(TerminationHandlerInterface $terminationHandler)
+    {
+        parent::__construct($terminationHandler);
+    }
+
     /**
      * Authenticate a user with username/password
      *
@@ -61,6 +73,7 @@ final class WordPressUserManager implements WordPressManagerInterface
     public function getCurrentUser(): ?object
     {
         $user = wp_get_current_user();
+
         return $user && $user->ID > 0 ? $user : null;
     }
 
@@ -152,6 +165,7 @@ final class WordPressUserManager implements WordPressManagerInterface
         if ($email === null) {
             return '';
         }
+
         return sanitize_email($email);
     }
 
@@ -166,6 +180,7 @@ final class WordPressUserManager implements WordPressManagerInterface
         if ($url === null) {
             return '';
         }
+
         return sanitize_url($url);
     }
 
@@ -194,6 +209,7 @@ final class WordPressUserManager implements WordPressManagerInterface
 
     /**
      * Redirect to URL
+     * Uses base class redirect() method which handles termination
      *
      * @param string $location URL to redirect to
      * @param int $status HTTP status code
@@ -201,7 +217,7 @@ final class WordPressUserManager implements WordPressManagerInterface
      */
     public function redirect(string $location, int $status = 302): void
     {
-        wp_redirect($location, $status);
+        parent::redirect($location, $status);
     }
 
     /**
@@ -258,6 +274,7 @@ final class WordPressUserManager implements WordPressManagerInterface
     public function getWpQuery(): ?\WP_Query
     {
         global $wp_query;
+
         return $wp_query instanceof \WP_Query ? $wp_query : null;
     }
 
@@ -282,6 +299,7 @@ final class WordPressUserManager implements WordPressManagerInterface
         if ($text === null) {
             return '';
         }
+
         return sanitize_text_field(wp_unslash($text));
     }
 
@@ -293,6 +311,7 @@ final class WordPressUserManager implements WordPressManagerInterface
         if ($text === null) {
             return '';
         }
+
         return sanitize_textarea_field(wp_unslash($text));
     }
 

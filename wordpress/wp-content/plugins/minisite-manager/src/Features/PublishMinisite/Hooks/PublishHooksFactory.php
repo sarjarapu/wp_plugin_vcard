@@ -2,15 +2,15 @@
 
 namespace Minisite\Features\PublishMinisite\Hooks;
 
+use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Features\PublishMinisite\Controllers\PublishController;
+use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;
 use Minisite\Features\PublishMinisite\Services\PublishService;
-use Minisite\Features\PublishMinisite\Services\SlugAvailabilityService;
 use Minisite\Features\PublishMinisite\Services\ReservationService;
+use Minisite\Features\PublishMinisite\Services\SlugAvailabilityService;
 use Minisite\Features\PublishMinisite\Services\SubscriptionActivationService;
 use Minisite\Features\PublishMinisite\Services\WooCommerceIntegration;
-use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
-use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
@@ -28,8 +28,11 @@ class PublishHooksFactory
      */
     public static function create(): PublishHooks
     {
-        // Create WordPress manager
-        $wordPressManager = new WordPressPublishManager();
+        // Create termination handler for WordPress manager
+        $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
+        // Create WordPress manager (requires TerminationHandlerInterface)
+        $wordPressManager = new WordPressPublishManager($terminationHandler);
 
         // Create services
         $slugAvailabilityService = new SlugAvailabilityService($wordPressManager);
@@ -63,7 +66,15 @@ class PublishHooksFactory
             $reservationService
         );
 
+        // Create termination handler for hook (separate instance for hook)
+        $hookTerminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
+
         // Create and return hooks
-        return new PublishHooks($publishController, $wordPressManager, $wooCommerceIntegration);
+        return new PublishHooks(
+            $publishController,
+            $wordPressManager,
+            $wooCommerceIntegration,
+            $hookTerminationHandler
+        );
     }
 }

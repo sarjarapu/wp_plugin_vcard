@@ -13,7 +13,7 @@
  * @package MinisiteManager
  */
 
-if (!defined('ABSPATH')) {
+if (! defined('ABSPATH')) {
     exit; // phpcs:ignore WordPress.Security.Exit
 }
 
@@ -27,7 +27,7 @@ define('MINISITE_DB_OPTION', 'minisite_db_version');
 define('MINISITE_DEFAULT_TEMPLATE', 'v2025');
 
 // Environment: set to true in production to prevent destructive dev resets
-if (!defined('MINISITE_LIVE_PRODUCTION')) {
+if (! defined('MINISITE_LIVE_PRODUCTION')) {
     define('MINISITE_LIVE_PRODUCTION', false);
 }
 

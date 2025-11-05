@@ -25,11 +25,12 @@ class FormSecurityHelper
     public function verifyNonce(string $action, string $nonceField = 'minisite_edit_nonce'): bool
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verification handled in the next line
-        if (!isset($_POST[$nonceField])) {
+        if (! isset($_POST[$nonceField])) {
             return false;
         }
 
         $nonce = $this->getPostData($nonceField);
+
         return $this->wordPressManager->verifyNonce($nonce, $action);
     }
 
@@ -40,6 +41,7 @@ class FormSecurityHelper
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, unslashing handled by WordPressManager
         $value = $_POST[$key] ?? $default;
+
         return $this->wordPressManager->sanitizeTextField($value);
     }
 
@@ -58,6 +60,7 @@ class FormSecurityHelper
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, unslashing handled by WordPressManager
         $value = $_POST[$key] ?? $default;
+
         return $this->wordPressManager->sanitizeUrl($value);
     }
 
@@ -68,6 +71,7 @@ class FormSecurityHelper
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, unslashing handled by WordPressManager
         $value = $_POST[$key] ?? $default;
+
         return $this->wordPressManager->sanitizeEmail($value);
     }
 
@@ -78,6 +82,7 @@ class FormSecurityHelper
     {
         // phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Nonce verified before calling this method, unslashing handled by WordPressManager
         $value = $_POST[$key] ?? $default;
+
         return $this->wordPressManager->sanitizeTextareaField($value);
     }
 

@@ -10,7 +10,7 @@ use Minisite\Features\Authentication\Services\AuthService;
  *
  * Handles registration command execution by delegating to AuthService.
  */
-final class RegisterHandler
+class RegisterHandler
 {
     public function __construct(
         private AuthService $authService

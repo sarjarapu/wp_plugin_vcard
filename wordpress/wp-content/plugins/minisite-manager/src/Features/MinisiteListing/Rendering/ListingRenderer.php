@@ -9,15 +9,16 @@ namespace Minisite\Features\MinisiteListing\Rendering;
  * - Manages Timber template rendering
  * - Handles template context
  */
-final class ListingRenderer
+class ListingRenderer
 {
     /**
      * Render list page using Timber
      */
     public function renderListPage(array $data): void
     {
-        if (!class_exists('Timber\\Timber')) {
+        if (! class_exists('Timber\\Timber')) {
             $this->renderFallback($data);
+
             return;
         }
 
@@ -34,8 +35,8 @@ final class ListingRenderer
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
-                    \Timber\Timber::$locations ?? [],
-                    [$viewsBase]
+                    \Timber\Timber::$locations ?? array(),
+                    array($viewsBase)
                 )
             )
         );
@@ -51,11 +52,11 @@ final class ListingRenderer
         echo '<title>' . esc_html($data['page_title'] ?? 'My Minisites') . '</title>';
         echo '<h1>' . esc_html($data['page_title'] ?? 'My Minisites') . '</h1>';
 
-        if (!empty($data['error'])) {
+        if (! empty($data['error'])) {
             echo '<p style="color: red;">Error: ' . esc_html($data['error']) . '</p>';
         }
 
-        if (!empty($data['sites'])) {
+        if (! empty($data['sites'])) {
             echo '<ul>';
             foreach ($data['sites'] as $site) {
                 echo '<li>' . esc_html($site['title'] ?? $site['name']) . ' - ' . esc_html($site['status']) . '</li>';

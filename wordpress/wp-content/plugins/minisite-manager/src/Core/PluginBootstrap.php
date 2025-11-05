@@ -2,8 +2,8 @@
 
 namespace Minisite\Core;
 
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\ErrorHandling\ErrorHandlingServiceProvider;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 
 /**
  * Plugin Bootstrap
@@ -18,14 +18,14 @@ final class PluginBootstrap
     public static function initialize(): void
     {
         // Register activation/deactivation hooks
-        register_activation_hook(MINISITE_PLUGIN_FILE, [self::class, 'onActivation']);
-        register_deactivation_hook(MINISITE_PLUGIN_FILE, [self::class, 'onDeactivation']);
+        register_activation_hook(MINISITE_PLUGIN_FILE, array(self::class, 'onActivation'));
+        register_deactivation_hook(MINISITE_PLUGIN_FILE, array(self::class, 'onDeactivation'));
 
         // Initialize core systems
-        add_action('init', [self::class, 'initializeCore'], 5);
+        add_action('init', array(self::class, 'initializeCore'), 5);
 
         // Initialize features
-        add_action('init', [self::class, 'initializeFeatures'], 10);
+        add_action('init', array(self::class, 'initializeFeatures'), 10);
     }
 
     public static function onActivation(): void
@@ -67,15 +67,16 @@ final class PluginBootstrap
     {
         try {
             // Check if Doctrine is available
-            if (!class_exists(\Doctrine\ORM\EntityManager::class)) {
+            if (! class_exists(\Doctrine\ORM\EntityManager::class)) {
                 // Doctrine not installed - skip initialization
                 $logger = LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
                 $logger->warning('Doctrine ORM not available - ConfigManager will not be initialized');
+
                 return;
             }
 
             // Initialize Doctrine EntityManager
-            if (!isset($GLOBALS['minisite_entity_manager'])) {
+            if (! isset($GLOBALS['minisite_entity_manager'])) {
                 $GLOBALS['minisite_entity_manager'] =
                     \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
             }
@@ -96,12 +97,12 @@ final class PluginBootstrap
         } catch (\Exception $e) {
             // Log error but don't fail initialization
             $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
-            $logger->error('Failed to initialize config system', [
+            $logger->error('Failed to initialize config system', array(
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
-            ]);
+            ));
         }
     }
 

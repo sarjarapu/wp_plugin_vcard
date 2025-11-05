@@ -6,6 +6,7 @@ namespace Tests\Unit\Features\Authentication\WordPress;
 
 use PHPUnit\Framework\TestCase;
 use Minisite\Features\Authentication\WordPress\WordPressUserManager;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 
 /**
  * Tests for WordPressUserManager
@@ -31,7 +32,8 @@ final class WordPressUserManagerTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->wordPressManager = new WordPressUserManager();
+        $terminationHandler = new TestTerminationHandler();
+        $this->wordPressManager = new WordPressUserManager($terminationHandler);
         $this->setupWordPressMocks();
     }
 
@@ -231,9 +233,12 @@ final class WordPressUserManagerTest extends TestCase
 
     /**
      * Test redirect method
+     * Note: redirect() calls wp_redirect() which throws an exception in tests (from bootstrap.php)
+     * The TerminationHandler in tests is a no-op, but wp_redirect() still throws
      */
     public function test_redirect(): void
     {
+        // bootstrap.php mock throws exception - this is expected behavior in tests
         $this->expectException(\Exception::class);
         $this->expectExceptionMessage('Redirect to: /dashboard (Status: 302)');
         

@@ -35,18 +35,20 @@ class VersionController
      */
     public function handleListVersions(): void
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Data is properly unslashed and sanitized
             $redirectUrl = isset($_SERVER['REQUEST_URI']) ?
                 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Data is properly unslashed and sanitized
                 $this->wordPressManager->sanitizeTextField(wp_unslash($_SERVER['REQUEST_URI'])) : '';
             $this->responseHandler->redirectToLogin($redirectUrl);
+
             return;
         }
 
         $command = $this->requestHandler->parseListVersionsRequest();
-        if (!$command) {
+        if (! $command) {
             $this->responseHandler->redirectToSites();
+
             return;
         }
 
@@ -55,16 +57,17 @@ class VersionController
 
             // Get minisite for rendering
             $minisite = $this->getMinisiteForRendering($command->siteId);
-            if (!$minisite) {
+            if (! $minisite) {
                 $this->responseHandler->redirectToSites();
+
                 return;
             }
 
-            $this->renderer->renderVersionHistory([
+            $this->renderer->renderVersionHistory(array(
                 'page_title' => 'Version History: ' . $minisite->title,
                 'profile' => $minisite,
                 'versions' => $versions,
-            ]);
+            ));
         } catch (\Exception $e) {
             $this->responseHandler->redirectToSites();
         }
@@ -75,26 +78,28 @@ class VersionController
      */
     public function handleCreateDraft(): void
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->responseHandler->sendJsonError('Not authenticated', 401);
+
             return;
         }
 
         $command = $this->requestHandler->parseCreateDraftRequest();
-        if (!$command) {
+        if (! $command) {
             $this->responseHandler->sendJsonError('Invalid request', 400);
+
             return;
         }
 
         try {
             $version = $this->createDraftHandler->handle($command);
 
-            $this->responseHandler->sendJsonSuccess([
+            $this->responseHandler->sendJsonSuccess(array(
                 'id' => $version->id,
                 'version_number' => $version->versionNumber,
                 'status' => $version->status,
                 'message' => 'Draft created successfully',
-            ]);
+            ));
         } catch (\Exception $e) {
             $this->responseHandler->sendJsonError('Failed to create draft: ' . $e->getMessage(), 500);
         }
@@ -105,24 +110,26 @@ class VersionController
      */
     public function handlePublishVersion(): void
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->responseHandler->sendJsonError('Not authenticated', 401);
+
             return;
         }
 
         $command = $this->requestHandler->parsePublishVersionRequest();
-        if (!$command) {
+        if (! $command) {
             $this->responseHandler->sendJsonError('Invalid request', 400);
+
             return;
         }
 
         try {
             $this->publishVersionHandler->handle($command);
 
-            $this->responseHandler->sendJsonSuccess([
+            $this->responseHandler->sendJsonSuccess(array(
                 'message' => 'Version published successfully',
                 'published_version_id' => $command->versionId,
-            ]);
+            ));
         } catch (\Exception $e) {
             $this->responseHandler->sendJsonError('Failed to publish version: ' . $e->getMessage(), 500);
         }
@@ -133,26 +140,28 @@ class VersionController
      */
     public function handleRollbackVersion(): void
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->responseHandler->sendJsonError('Not authenticated', 401);
+
             return;
         }
 
         $command = $this->requestHandler->parseRollbackVersionRequest();
-        if (!$command) {
+        if (! $command) {
             $this->responseHandler->sendJsonError('Invalid request', 400);
+
             return;
         }
 
         try {
             $version = $this->rollbackVersionHandler->handle($command);
 
-            $this->responseHandler->sendJsonSuccess([
+            $this->responseHandler->sendJsonSuccess(array(
                 'id' => $version->id,
                 'version_number' => $version->versionNumber,
                 'status' => $version->status,
                 'message' => 'Rollback draft created',
-            ]);
+            ));
         } catch (\Exception $e) {
             $this->responseHandler->sendJsonError('Failed to create rollback: ' . $e->getMessage(), 500);
         }

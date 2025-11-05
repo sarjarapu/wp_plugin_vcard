@@ -20,18 +20,31 @@ final class TablePrefixListenerTest extends TestCase
         
         // Create mock ClassMetadata for a Minisite entity
         $metadata = $this->createMock(ClassMetadata::class);
-        $metadata->name = 'Minisite\\Domain\\Entities\\Config';
-        $metadata->table = ['name' => 'minisite_config'];
-        $metadata->rootEntityName = 'Minisite\\Domain\\Entities\\Config';
         
+        // Mock getName() which is called first to check namespace
         $metadata->expects($this->once())
-            ->method('setTableName')
-            ->with('wp_minisite_config');
+            ->method('getName')
+            ->willReturn('Minisite\\Domain\\Entities\\Config');
         
+        // Mock getTableName() which is called after namespace check passes
+        $metadata->expects($this->once())
+            ->method('getTableName')
+            ->willReturn('minisite_config');
+        
+        // Mock isInheritanceTypeSingleTable() which is called before setTableName()
         $metadata->expects($this->once())
             ->method('isInheritanceTypeSingleTable')
             ->willReturn(false);
         
+        // Mock rootEntityName property access (used in condition check)
+        $metadata->rootEntityName = 'Minisite\\Domain\\Entities\\Config';
+        
+        // Mock setTableName() which should be called with prefixed table name
+        $metadata->expects($this->once())
+            ->method('setTableName')
+            ->with('wp_minisite_config');
+        
+        // Mock getAssociationMappings() which is called for join tables
         $metadata->expects($this->once())
             ->method('getAssociationMappings')
             ->willReturn([]);
@@ -53,10 +66,24 @@ final class TablePrefixListenerTest extends TestCase
         
         // Create mock ClassMetadata for non-Minisite entity
         $metadata = $this->createMock(ClassMetadata::class);
-        $metadata->name = 'SomeOther\\Entity\\User';
         
+        // Mock getName() - may be called multiple times during namespace checks
+        $metadata->expects($this->atLeastOnce())
+            ->method('getName')
+            ->willReturn('SomeOther\\Entity\\User');
+        
+        // Should never call setTableName() because namespace doesn't match (early return)
         $metadata->expects($this->never())
             ->method('setTableName');
+        
+        $metadata->expects($this->never())
+            ->method('getTableName');
+        
+        $metadata->expects($this->never())
+            ->method('isInheritanceTypeSingleTable');
+        
+        $metadata->expects($this->never())
+            ->method('getAssociationMappings');
         
         // Create event args
         $eventArgs = $this->createMock(LoadClassMetadataEventArgs::class);

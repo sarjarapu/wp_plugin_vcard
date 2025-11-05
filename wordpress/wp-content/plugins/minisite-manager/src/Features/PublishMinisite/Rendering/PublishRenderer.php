@@ -24,8 +24,9 @@ class PublishRenderer
      */
     public function renderPublishPage(object $publishData): void
     {
-        if (!$this->timberRenderer) {
+        if (! $this->timberRenderer) {
             $this->renderFallbackPublishPage($publishData);
+
             return;
         }
 
@@ -48,7 +49,7 @@ class PublishRenderer
      */
     private function setupTimberLocations(): void
     {
-        if (!class_exists('Timber\\Timber')) {
+        if (! class_exists('Timber\\Timber')) {
             return;
         }
 
@@ -59,8 +60,8 @@ class PublishRenderer
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
-                    \Timber\Timber::$locations ?? [],
-                    [$timberBase, $viewsBase, $componentsBase]
+                    \Timber\Timber::$locations ?? array(),
+                    array($timberBase, $viewsBase, $componentsBase)
                 )
             )
         );
@@ -74,7 +75,7 @@ class PublishRenderer
         $minisite = $publishData->minisite;
         $currentUser = wp_get_current_user();
 
-        return [
+        return array(
             'page_title' => 'Publish Your Minisite',
             'minisite_id' => $minisite->id,
             'minisite_name' => $minisite->name ?? 'Untitled Minisite',
@@ -87,7 +88,7 @@ class PublishRenderer
             'nonce_cancel_reservation' => wp_create_nonce('cancel_reservation'),
             'nonce_create_order' => wp_create_nonce('create_minisite_order'),
             'ajax_url' => admin_url('admin-ajax.php'),
-        ];
+        );
     }
 
     /**

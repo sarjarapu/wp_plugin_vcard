@@ -5,6 +5,7 @@ namespace Tests\Unit\Features\MinisiteViewer\Hooks;
 use Minisite\Features\MinisiteViewer\Hooks\ViewHooks;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -24,7 +25,11 @@ final class ViewHooksTest extends TestCase
     {
         $this->minisitePageController = $this->createMock(MinisitePageController::class);
         $this->wordPressManager = $this->createMock(WordPressMinisiteManager::class);
-        $this->viewHooks = new ViewHooks($this->minisitePageController, $this->wordPressManager);
+        
+        // Use TestTerminationHandler so exit doesn't terminate tests
+        $terminationHandler = new TestTerminationHandler();
+        
+        $this->viewHooks = new ViewHooks($this->minisitePageController, $this->wordPressManager, $terminationHandler);
     }
 
     /**
@@ -198,11 +203,13 @@ final class ViewHooksTest extends TestCase
         $constructor = $reflection->getConstructor();
         
         $this->assertNotNull($constructor);
-        $this->assertEquals(2, $constructor->getNumberOfParameters());
+        // Now expects 3 parameters: minisitePageController, wordPressManager, terminationHandler
+        $this->assertEquals(3, $constructor->getNumberOfParameters());
         
         $params = $constructor->getParameters();
         $this->assertEquals(MinisitePageController::class, $params[0]->getType()->getName());
         $this->assertEquals(WordPressMinisiteManager::class, $params[1]->getType()->getName());
+        $this->assertEquals('Minisite\Infrastructure\Http\TerminationHandlerInterface', $params[2]->getType()->getName());
     }
 
     /**

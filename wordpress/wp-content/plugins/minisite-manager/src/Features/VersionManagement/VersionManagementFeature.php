@@ -21,6 +21,6 @@ class VersionManagementFeature
         $hooks->register();
 
         // Register template_redirect handler immediately
-        add_action('template_redirect', [$hooks, 'handleVersionHistoryPage'], 5);
+        add_action('template_redirect', array($hooks, 'handleVersionHistoryPage'), 5);
     }
 }

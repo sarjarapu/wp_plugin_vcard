@@ -4,8 +4,8 @@ namespace Minisite\Infrastructure\Persistence\Doctrine;
 
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\ORMSetup;
 
 /**
  * Factory for creating Doctrine EntityManager with WordPress integration
@@ -26,33 +26,38 @@ class DoctrineFactory
         }
 
         // Get WordPress database connection details
-        $dbConfig = [
+        $dbConfig = array(
             'driver' => 'pdo_mysql',
             'host' => DB_HOST,
             'user' => DB_USER,
             'password' => DB_PASSWORD,
             'dbname' => DB_NAME,
             'charset' => 'utf8mb4',
-        ];
+        );
+
+        // Add port if DB_PORT constant is defined (for test environments)
+        if (defined('DB_PORT')) {
+            $dbConfig['port'] = (int) DB_PORT;
+        }
 
         // Debug: Log connection details (without password) and PDO driver availability
         $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('doctrine-factory');
-        $logger->debug("DoctrineFactory::createEntityManager() entry", [
+        $logger->debug("DoctrineFactory::createEntityManager() entry", array(
             'db_host' => DB_HOST,
             'db_user' => DB_USER,
             'db_name' => DB_NAME,
-            'pdo_drivers' => extension_loaded('pdo') ? \PDO::getAvailableDrivers() : [],
+            'pdo_drivers' => extension_loaded('pdo') ? \PDO::getAvailableDrivers() : array(),
             'pdo_mysql_loaded' => extension_loaded('pdo_mysql'),
             'mysqli_loaded' => extension_loaded('mysqli'),
-        ]);
+        ));
 
         // Configure Doctrine
         // Include both legacy Domain/Entities and new feature-based entities
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [
+            paths: array(
                 __DIR__ . '/../../../Domain/Entities',
                 __DIR__ . '/../../../Features/ReviewManagement/Domain/Entities',
-            ],
+            ),
             isDevMode: defined('WP_DEBUG') && WP_DEBUG
         );
 
@@ -64,17 +69,18 @@ class DoctrineFactory
             // WordPress and other plugins use ENUM columns that Doctrine doesn't natively support
             // We map them to string type for schema introspection purposes
             $platform = $connection->getDatabasePlatform();
-            if (!$platform->hasDoctrineTypeMappingFor('enum')) {
+            if (! $platform->hasDoctrineTypeMappingFor('enum')) {
                 $platform->registerDoctrineTypeMapping('enum', 'string');
             }
 
             $logger->debug("DoctrineFactory::createEntityManager() connection created successfully");
         } catch (\Exception $e) {
-            $logger->error("DoctrineFactory::createEntityManager() connection failed", [
+            $logger->error("DoctrineFactory::createEntityManager() connection failed", array(
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-                'db_config' => array_merge($dbConfig, ['password' => '***']), // Mask password in logs
-            ]);
+                'db_config' => array_merge($dbConfig, array('password' => '***')), // Mask password in logs
+            ));
+
             throw $e;
         }
 

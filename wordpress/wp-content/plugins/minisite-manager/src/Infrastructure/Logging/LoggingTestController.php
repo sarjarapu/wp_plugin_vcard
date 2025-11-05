@@ -38,18 +38,18 @@ class LoggingTestController
      */
     public function runTest(): array
     {
-        $results = [];
+        $results = array();
 
         try {
             // Test 1: Basic logging
-            $this->logger->info('Logging test started', ['test' => 'basic_logging']);
+            $this->logger->info('Logging test started', array('test' => 'basic_logging'));
             $results[] = '✓ Basic logging working';
 
             // Test 2: Different log levels
-            $this->logger->debug('Debug message', ['level' => 'debug']);
-            $this->logger->info('Info message', ['level' => 'info']);
-            $this->logger->warning('Warning message', ['level' => 'warning']);
-            $this->logger->error('Error message', ['level' => 'error']);
+            $this->logger->debug('Debug message', array('level' => 'debug'));
+            $this->logger->info('Info message', array('level' => 'info'));
+            $this->logger->warning('Warning message', array('level' => 'warning'));
+            $this->logger->error('Error message', array('level' => 'error'));
             $results[] = '✓ All log levels working';
 
             // Test 3: Check log files
@@ -58,7 +58,7 @@ class LoggingTestController
                 $results[] = '✓ Log directory exists: ' . $logDir;
 
                 $logFiles = glob($logDir . '/*.log*');
-                if (!empty($logFiles)) {
+                if (! empty($logFiles)) {
                     $results[] = '✓ Log files found: ' . count($logFiles) . ' files';
                     foreach ($logFiles as $file) {
                         $results[] = '  - ' . basename($file) . ' (' . filesize($file) . ' bytes)';
@@ -103,13 +103,13 @@ class LoggingTestController
                 $results[] = '⚠ WordPress database not available';
             }
 
-            $this->logger->info('Logging test completed successfully', ['results' => $results]);
+            $this->logger->info('Logging test completed successfully', array('results' => $results));
         } catch (\Exception $e) {
             $results[] = '✗ Error during logging test: ' . $e->getMessage();
-            $this->logger->error('Logging test failed', [
+            $this->logger->error('Logging test failed', array(
                 'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
+                'trace' => $e->getTraceAsString(),
+            ));
         }
 
         return $results;
@@ -126,7 +126,7 @@ class LoggingTestController
             'Logging Test',
             'manage_options',
             'minisite-logging-test',
-            [self::class, 'renderTestPage']
+            array(self::class, 'renderTestPage')
         );
     }
 
@@ -157,7 +157,7 @@ class LoggingTestController
         echo '<h2>Recent Log Entries:</h2>';
         $logDir = WP_CONTENT_DIR . '/minisite-logs';
         $logFiles = glob($logDir . '/*.log*');
-        if (!empty($logFiles)) {
+        if (! empty($logFiles)) {
             $latestFile = max($logFiles);
             $content = file_get_contents($latestFile);
             $lines = explode("\n", $content);
@@ -165,7 +165,7 @@ class LoggingTestController
 
             echo '<pre style="background: #f1f1f1; padding: 10px; max-height: 300px; overflow-y: auto;">';
             foreach ($recentLines as $line) {
-                if (!empty(trim($line))) {
+                if (! empty(trim($line))) {
                     echo esc_html($line) . "\n";
                 }
             }

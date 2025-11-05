@@ -23,6 +23,6 @@ final class MinisiteListingFeature
         $listingHooks->register();
 
         // Register template_redirect handler immediately
-        add_action('template_redirect', [$listingHooks, 'handleListingRoutes'], 5);
+        add_action('template_redirect', array($listingHooks, 'handleListingRoutes'), 5);
     }
 }

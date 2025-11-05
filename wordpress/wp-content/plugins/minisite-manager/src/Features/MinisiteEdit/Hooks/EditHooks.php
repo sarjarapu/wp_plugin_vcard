@@ -2,9 +2,11 @@
 
 namespace Minisite\Features\MinisiteEdit\Hooks;
 
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
 use Minisite\Features\MinisiteEdit\Controllers\EditController;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * Edit Hooks
@@ -14,7 +16,7 @@ use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
  * - Hooks into WordPress template_redirect
  * - Manages edit route handling
  */
-class EditHooks
+class EditHooks extends BaseHook
 {
     /**
      * Flag value set by rewrite rules to indicate account management routes
@@ -24,8 +26,10 @@ class EditHooks
     public function __construct(
         private EditController $editController,
         private WordPressEditManager $wordPressManager,
-        private MinisitePageController $minisiteViewerController
+        private MinisitePageController $minisiteViewerController,
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -44,8 +48,10 @@ class EditHooks
     {
         // Only handle account management routes (edit, preview, versions, etc.)
         // The rewrite rules set minisite_account=1 for account routes
-        $isAccountRoute = $this->wordPressManager->getQueryVar('minisite_account') === self::ACCOUNT_ROUTE_FLAG;
-        if (!$isAccountRoute) {
+        // Handle both string '1' and integer 1 (WordPress query vars can be either)
+        $accountValue = $this->wordPressManager->getQueryVar('minisite_account');
+        $isAccountRoute = ($accountValue === self::ACCOUNT_ROUTE_FLAG || $accountValue === 1);
+        if (! $isAccountRoute) {
             return; // Not an account route, let other handlers process it
         }
 
@@ -54,11 +60,13 @@ class EditHooks
         // Handle edit and preview routes
         if ($action === 'edit') {
             $this->editController->handleEdit();
-            exit;
+            // Terminate after handling route (inherited from BaseHook)
+            $this->terminate();
         } elseif ($action === 'preview') {
             // Delegate version-specific preview to MinisiteViewer
             $this->minisiteViewerController->handleVersionSpecificPreview();
-            exit;
+            // Terminate after handling route (inherited from BaseHook)
+            $this->terminate();
         }
     }
 }

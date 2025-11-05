@@ -2,15 +2,15 @@
 
 namespace Minisite\Infrastructure\Migrations\Doctrine;
 
-use Doctrine\Migrations\DependencyFactory;
-use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
 use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
+use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
+use Doctrine\Migrations\DependencyFactory;
 use Doctrine\Migrations\Metadata\AvailableMigrationsSet;
 use Doctrine\Migrations\MigratorConfiguration;
 use Doctrine\Migrations\Version\Version;
 use Doctrine\ORM\EntityManager;
-use Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -43,7 +43,7 @@ class DoctrineMigrationRunner
         $this->logger->info("migrate() entry");
 
         try {
-            if (!$this->isDoctrineAvailable()) {
+            if (! $this->isDoctrineAvailable()) {
                 return;
             }
 
@@ -53,7 +53,7 @@ class DoctrineMigrationRunner
             // Register ENUM type mapping to avoid schema introspection errors
             // This must be done on the connection used by migrations
             $platform = $connection->getDatabasePlatform();
-            if (!$platform->hasDoctrineTypeMappingFor('enum')) {
+            if (! $platform->hasDoctrineTypeMappingFor('enum')) {
                 $platform->registerDoctrineTypeMapping('enum', 'string');
             }
 
@@ -65,6 +65,7 @@ class DoctrineMigrationRunner
             $this->executePendingMigrations($dependencyFactory);
         } catch (\Exception $e) {
             $this->handleMigrationError($e);
+
             throw $e;
         }
     }
@@ -76,10 +77,12 @@ class DoctrineMigrationRunner
      */
     private function isDoctrineAvailable(): bool
     {
-        if (!class_exists(\Doctrine\Migrations\DependencyFactory::class)) {
+        if (! class_exists(\Doctrine\Migrations\DependencyFactory::class)) {
             $this->logger->warning("Doctrine Migrations not available - skipping");
+
             return false;
         }
+
         return true;
     }
 
@@ -103,17 +106,17 @@ class DoctrineMigrationRunner
         $migrationPath = __DIR__;
         $migrationNamespace = 'Minisite\\Infrastructure\\Migrations\\Doctrine';
 
-        return new ConfigurationArray([
-            'migrations_paths' => [
+        return new ConfigurationArray(array(
+            'migrations_paths' => array(
                 $migrationNamespace => $migrationPath,
-            ],
+            ),
             'all_or_nothing' => true,
             'check_database_platform' => true,
             'organize_migrations' => 'none',
-            'table_storage' => [
+            'table_storage' => array(
                 'table_name' => $this->getTablePrefix() . 'minisite_migrations',
-            ],
-        ]);
+            ),
+        ));
     }
 
     /**
@@ -147,9 +150,9 @@ class DoctrineMigrationRunner
         } catch (\Exception $e) {
             // If metadata storage fails to initialize, log and continue
             // The migration executor will try to initialize it anyway
-            $this->logger->warning("migrate() metadata storage initialization failed", [
+            $this->logger->warning("migrate() metadata storage initialization failed", array(
                 'error' => $e->getMessage(),
-            ]);
+            ));
         }
     }
 
@@ -188,9 +191,9 @@ class DoctrineMigrationRunner
         DependencyFactory $dependencyFactory,
         AvailableMigrationsSet $availableMigrations
     ): void {
-        $this->logger->info("migrate() executing migrations", [
+        $this->logger->info("migrate() executing migrations", array(
             'count' => count($availableMigrations),
-        ]);
+        ));
 
         $latestVersion = $this->findLatestMigrationVersion($dependencyFactory);
 
@@ -205,9 +208,9 @@ class DoctrineMigrationRunner
         $migratorConfig = new MigratorConfiguration();
         $migrator->migrate($plan, $migratorConfig);
 
-        $this->logger->info("migrate() exit - migrations completed", [
+        $this->logger->info("migrate() exit - migrations completed", array(
             'count' => count($availableMigrations),
-        ]);
+        ));
     }
 
     /**
@@ -241,17 +244,18 @@ class DoctrineMigrationRunner
         $migrationPath = __DIR__;
         $migrationNamespace = 'Minisite\\Infrastructure\\Migrations\\Doctrine';
 
-        $this->logger->error("migrate() no migrations found", [
+        $this->logger->error("migrate() no migrations found", array(
             'migration_path' => $migrationPath,
             'namespace' => $migrationNamespace,
             'path_exists' => is_dir($migrationPath),
             'glob_files' => glob($migrationPath . '/Version*.php'),
             'class_exists' => class_exists($migrationNamespace . '\\Version20251103000000'),
-        ]);
+        ));
 
         $filesFound = is_dir($migrationPath)
-            ? implode(', ', glob($migrationPath . '/Version*.php') ?: [])
+            ? implode(', ', glob($migrationPath . '/Version*.php') ?: array())
             : 'path does not exist';
+
         throw new \RuntimeException(
             'No migrations found in repository. ' .
             'Path: ' . esc_html($migrationPath) . ', ' .
@@ -268,11 +272,11 @@ class DoctrineMigrationRunner
      */
     private function handleMigrationError(\Exception $e): void
     {
-        $this->logger->error("migrate() failed", [
+        $this->logger->error("migrate() failed", array(
             'error' => $e->getMessage(),
             'exception' => get_class($e),
             'trace' => $e->getTraceAsString(),
-        ]);
+        ));
     }
 
     /**
@@ -281,6 +285,7 @@ class DoctrineMigrationRunner
     private function getTablePrefix(): string
     {
         global $wpdb;
+
         return $wpdb->prefix;
     }
 }

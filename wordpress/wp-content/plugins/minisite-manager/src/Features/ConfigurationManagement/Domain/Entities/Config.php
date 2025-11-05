@@ -7,7 +7,7 @@ use Minisite\Infrastructure\Security\ConfigEncryption;
 
 #[ORM\Entity(repositoryClass: \Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository::class)]
 #[ORM\Table(name: 'minisite_config')]
-final class Config
+class Config
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -78,7 +78,7 @@ final class Config
 
     private function decryptValue(): ?string
     {
-        if (!$this->value) {
+        if (! $this->value) {
             return null;
         }
 

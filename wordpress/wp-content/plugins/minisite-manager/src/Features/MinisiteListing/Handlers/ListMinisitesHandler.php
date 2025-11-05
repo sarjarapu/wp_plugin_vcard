@@ -10,7 +10,7 @@ use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
  *
  * Handles list minisites command execution by delegating to MinisiteListingService.
  */
-final class ListMinisitesHandler
+class ListMinisitesHandler
 {
     public function __construct(
         private MinisiteListingService $listingService

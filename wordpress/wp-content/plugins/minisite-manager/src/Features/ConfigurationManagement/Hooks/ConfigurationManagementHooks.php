@@ -2,9 +2,11 @@
 
 namespace Minisite\Features\ConfigurationManagement\Hooks;
 
-use Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController;
+use Minisite\Features\BaseFeature\Hooks\BaseHook;
 use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
+use Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController;
 use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * ConfigurationManagementHooks
@@ -14,12 +16,14 @@ use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
  * - Handles admin page rendering
  * - Delegates to controller
  */
-final class ConfigurationManagementHooks
+final class ConfigurationManagementHooks extends BaseHook
 {
     public function __construct(
         private ConfigurationManagementController $controller,
-        private DeleteConfigHandler $deleteHandler
+        private DeleteConfigHandler $deleteHandler,
+        TerminationHandlerInterface $terminationHandler
     ) {
+        parent::__construct($terminationHandler);
     }
 
     /**
@@ -27,8 +31,8 @@ final class ConfigurationManagementHooks
      */
     public function register(): void
     {
-        add_action('admin_menu', [$this, 'registerAdminMenu']);
-        add_action('admin_post_minisite_config_delete', [$this, 'handleDeleteAction']);
+        add_action('admin_menu', array($this, 'registerAdminMenu'));
+        add_action('admin_post_minisite_config_delete', array($this, 'handleDeleteAction'));
     }
 
     /**
@@ -43,7 +47,7 @@ final class ConfigurationManagementHooks
             'Configuration', // Menu title
             'manage_options', // Capability
             'minisite-config', // Menu slug
-            [$this, 'renderPage'] // Callback
+            array($this, 'renderPage') // Callback
         );
     }
 
@@ -53,7 +57,7 @@ final class ConfigurationManagementHooks
     public function renderPage(): void
     {
         // Check permissions
-        if (!current_user_can('manage_options')) {
+        if (! current_user_can('manage_options')) {
             wp_die('You do not have permission to access this page.');
         }
 
@@ -67,14 +71,14 @@ final class ConfigurationManagementHooks
     public function handleDeleteAction(): void
     {
         // Check permissions
-        if (!current_user_can('manage_options')) {
+        if (! current_user_can('manage_options')) {
             wp_die('Unauthorized');
         }
 
         // Verify nonce
         // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.ValidatedSanitizedInput.MissingUnslash
         $nonce = isset($_GET['nonce']) ? sanitize_text_field(wp_unslash($_GET['nonce'])) : '';
-        if (empty($nonce) || !wp_verify_nonce($nonce, 'minisite_config_delete')) {
+        if (empty($nonce) || ! wp_verify_nonce($nonce, 'minisite_config_delete')) {
             wp_die('Security check failed');
         }
 
@@ -88,10 +92,11 @@ final class ConfigurationManagementHooks
         $command = new DeleteConfigCommand($key);
         $this->deleteHandler->handle($command);
 
-        wp_redirect(add_query_arg([
+        wp_redirect(add_query_arg(array(
             'page' => 'minisite-config',
-            'deleted' => '1'
-        ], admin_url('admin.php')));
-        exit;
+            'deleted' => '1',
+        ), admin_url('admin.php')));
+        // Terminate after handling route (inherited from BaseHook)
+        $this->terminate();
     }
 }

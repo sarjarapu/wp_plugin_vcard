@@ -12,7 +12,7 @@ use Minisite\Features\Authentication\WordPress\WordPressUserManager;
  * - Handles error/success responses
  * - Manages HTTP status codes
  */
-final class AuthResponseHandler
+class AuthResponseHandler
 {
     public function __construct(
         private WordPressUserManager $wordPressManager
@@ -25,7 +25,6 @@ final class AuthResponseHandler
     public function redirect(string $url): void
     {
         $this->wordPressManager->redirect($url);
-        exit;
     }
 
     /**
@@ -51,12 +50,15 @@ final class AuthResponseHandler
     /**
      * Create error response context
      */
-    public function createErrorContext(string $pageTitle, string $errorMessage, array $additionalContext = []): array
-    {
-        return array_merge([
+    public function createErrorContext(
+        string $pageTitle,
+        string $errorMessage,
+        array $additionalContext = array()
+    ): array {
+        return array_merge(array(
             'page_title' => $pageTitle,
             'error_msg' => $errorMessage,
-        ], $additionalContext);
+        ), $additionalContext);
     }
 
     /**
@@ -65,12 +67,12 @@ final class AuthResponseHandler
     public function createSuccessContext(
         string $pageTitle,
         string $successMessage,
-        array $additionalContext = []
+        array $additionalContext = array()
     ): array {
-        return array_merge([
+        return array_merge(array(
             'page_title' => $pageTitle,
             'success_msg' => $successMessage,
-        ], $additionalContext);
+        ), $additionalContext);
     }
 
     /**
@@ -80,12 +82,12 @@ final class AuthResponseHandler
         string $pageTitle,
         ?string $errorMessage = null,
         ?string $successMessage = null,
-        array $additionalContext = []
+        array $additionalContext = array()
     ): array {
-        return array_merge([
+        return array_merge(array(
             'page_title' => $pageTitle,
             'error_msg' => $errorMessage,
             'success_msg' => $successMessage,
-        ], $additionalContext);
+        ), $additionalContext);
     }
 }

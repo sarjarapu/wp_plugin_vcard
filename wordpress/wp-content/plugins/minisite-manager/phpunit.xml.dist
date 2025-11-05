@@ -24,17 +24,7 @@
 
   <testsuites>
     <testsuite name="Unit">
-      <directory>tests/Unit/Core</directory>
-      <directory>tests/Unit/Domain</directory>
-      <directory>tests/Unit/Features/Authentication</directory>
-      <directory>tests/Unit/Features/MinisiteListing</directory>
-      <directory>tests/Unit/Features/MinisiteViewer</directory>
-      <directory>tests/Unit/Features/VersionManagement</directory>
-      <directory>tests/Unit/Features/MinisiteEdit/Controllers</directory>
-      <directory>tests/Unit/Features/MinisiteEdit/Hooks</directory>
-      <directory>tests/Unit/Features/MinisiteEdit/Rendering</directory>
-      <directory>tests/Unit/Features/MinisiteEdit/Services</directory>
-      <file>tests/Unit/Features/MinisiteEdit/MinisiteEditFeatureTest.php</file>
+      <directory>tests/Unit</directory>
     </testsuite>
     <testsuite name="Integration">
       <directory>tests/Integration</directory>
@@ -43,12 +33,14 @@
   </testsuites>
 
 
-  <extensions>
+  <!-- BypassFinals extension disabled - we've removed final from classes that need mocking -->
+  <!-- This prevents Patchwork conflicts with coverage tools -->
+  <!-- <extensions>
     <bootstrap class="DG\BypassFinals\PHPUnitExtension">
       <parameter name="bypassFinal" value="true"/>
       <parameter name="bypassReadOnly" value="false"/>
     </bootstrap>
-  </extensions>
+  </extensions> -->
 
   <php>
     <env name="MYSQL_HOST" value="127.0.0.1"/>

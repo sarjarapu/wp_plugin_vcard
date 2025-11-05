@@ -23,6 +23,6 @@ final class AuthenticationFeature
         $authHooks->register();
 
         // Register template_redirect handler immediately
-        add_action('template_redirect', [$authHooks, 'handleAuthRoutes'], 5);
+        add_action('template_redirect', array($authHooks, 'handleAuthRoutes'), 5);
     }
 }

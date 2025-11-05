@@ -10,7 +10,7 @@ use Minisite\Features\Authentication\Services\AuthService;
  *
  * Handles password reset command execution by delegating to AuthService.
  */
-final class ForgotPasswordHandler
+class ForgotPasswordHandler
 {
     public function __construct(
         private AuthService $authService

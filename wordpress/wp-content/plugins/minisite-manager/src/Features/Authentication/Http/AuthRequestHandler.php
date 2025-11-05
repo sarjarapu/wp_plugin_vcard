@@ -6,9 +6,9 @@ namespace Minisite\Features\Authentication\Http;
 // - Nonce verification happens in isValidNonce() method
 // - Input sanitization and unslashing happens in sanitizeInput() method
 
+use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
 use Minisite\Features\Authentication\Commands\LoginCommand;
 use Minisite\Features\Authentication\Commands\RegisterCommand;
-use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
 use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
@@ -21,7 +21,7 @@ use Minisite\Infrastructure\Security\FormSecurityHelper;
  * - Creates command objects
  * - Handles nonce verification
  */
-final class AuthRequestHandler
+class AuthRequestHandler
 {
     public function __construct(
         private WordPressUserManager $wordPressManager,
@@ -34,18 +34,18 @@ final class AuthRequestHandler
      */
     public function handleLoginRequest(): ?LoginCommand
     {
-        if (!$this->isPostRequest()) {
+        if (! $this->isPostRequest()) {
             return null;
         }
 
-        if (!$this->isValidNonce('minisite_login')) {
+        if (! $this->isValidNonce('minisite_login')) {
             throw new \InvalidArgumentException('Invalid nonce');
         }
 
         return new LoginCommand(
             userLogin: $this->formSecurityHelper->getPostData('user_login', ''),
             userPassword: $this->formSecurityHelper->getPostData('user_pass', ''),
-            remember: !empty($this->formSecurityHelper->getPostData('remember')),
+            remember: ! empty($this->formSecurityHelper->getPostData('remember')),
             redirectTo: $this->formSecurityHelper->getPostDataUrl(
                 'redirect_to',
                 $this->wordPressManager->getHomeUrl('/account/dashboard')
@@ -58,11 +58,11 @@ final class AuthRequestHandler
      */
     public function handleRegisterRequest(): ?RegisterCommand
     {
-        if (!$this->isPostRequest()) {
+        if (! $this->isPostRequest()) {
             return null;
         }
 
-        if (!$this->isValidNonce('minisite_register')) {
+        if (! $this->isValidNonce('minisite_register')) {
             throw new \InvalidArgumentException('Invalid nonce');
         }
 
@@ -82,11 +82,11 @@ final class AuthRequestHandler
      */
     public function handleForgotPasswordRequest(): ?ForgotPasswordCommand
     {
-        if (!$this->isPostRequest()) {
+        if (! $this->isPostRequest()) {
             return null;
         }
 
-        if (!$this->isValidNonce('minisite_forgot_password')) {
+        if (! $this->isValidNonce('minisite_forgot_password')) {
             throw new \InvalidArgumentException('Invalid nonce');
         }
 

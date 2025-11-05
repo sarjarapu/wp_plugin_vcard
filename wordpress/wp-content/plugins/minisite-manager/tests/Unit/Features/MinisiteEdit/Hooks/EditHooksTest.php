@@ -6,14 +6,13 @@ use Minisite\Features\MinisiteEdit\Hooks\EditHooks;
 use Minisite\Features\MinisiteEdit\Controllers\EditController;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteViewer\Controllers\MinisitePageController;
+use Minisite\Infrastructure\Http\TestTerminationHandler;
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
-use PHPUnit\Framework\Attributes\Group;
 
 /**
  * Test EditHooks
  */
-#[Group('skip')]
 class EditHooksTest extends TestCase
 {
     private EditHooks $hooks;
@@ -35,7 +34,10 @@ class EditHooksTest extends TestCase
             }
         };
         
-        $this->hooks = new EditHooks($this->mockEditController, $this->mockWordPressManager, $stubMinisitePageController);
+        // Use TestTerminationHandler so exit doesn't terminate tests
+        $terminationHandler = new TestTerminationHandler();
+        
+        $this->hooks = new EditHooks($this->mockEditController, $this->mockWordPressManager, $stubMinisitePageController, $terminationHandler);
     }
 
     protected function tearDown(): void
@@ -93,21 +95,14 @@ class EditHooksTest extends TestCase
                 return $default;
             });
 
-        // Note: exit() will terminate execution, but we can verify the controller was called
-        // In real environment, exit would be called after handleEdit()
+        // Hook handles termination via TerminationHandlerInterface
+        // In production: calls exit(). In tests: TestTerminationHandler does nothing
         $this->mockEditController->expects($this->once())
             ->method('handleEdit');
 
-        // This will call exit, but in tests we verify the controller was called
-        // We can't actually test exit() since it terminates the process
-        try {
-            $this->hooks->handleEditRoutes();
-            // If we get here, exit didn't terminate (test environment)
-            $this->assertTrue(true);
-        } catch (\Exception $e) {
-            // If exit throws in test environment, that's also fine
-            $this->assertTrue(true);
-        }
+        // Call handleEditRoutes - hook handles termination after controller
+        // but won't exit in tests due to TestTerminationHandler injection
+        $this->hooks->handleEditRoutes();
     }
 
     public function testHandleEditRoutesWithSiteId(): void

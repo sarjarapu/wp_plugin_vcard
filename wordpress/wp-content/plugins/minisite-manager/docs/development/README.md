@@ -27,10 +27,9 @@ This guide helps you set up the development environment for the Minisite Manager
 - `composer run check` - Run all quality checks
 
 ### Testing
-- `composer test` - Run all tests
+- `composer test` - Run all tests with coverage
 - `composer run test:unit` - Run unit tests only
 - `composer run test:integration` - Run integration tests only
-- `composer run test:all` - Run comprehensive tests with coverage (pre-push equivalent)
 - `composer run test:coverage` - Generate test coverage report
 
 ### Code Quality
