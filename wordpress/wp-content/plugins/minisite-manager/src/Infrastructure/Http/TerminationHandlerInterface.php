@@ -18,4 +18,3 @@ interface TerminationHandlerInterface
      */
     public function terminate(): void;
 }
-

@@ -27,7 +27,7 @@ class EditHooksFactory
     {
         // Create termination handler for WordPress manager
         $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
-        
+
         // Create WordPress manager (requires TerminationHandlerInterface)
         $wordPressManager = new WordPressEditManager($terminationHandler);
 

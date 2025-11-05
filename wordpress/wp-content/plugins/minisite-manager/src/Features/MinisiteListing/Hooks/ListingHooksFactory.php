@@ -27,7 +27,7 @@ final class ListingHooksFactory
     {
         // Create termination handler for WordPress manager
         $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
-        
+
         // Create services
         $listingManager = new WordPressListingManager($terminationHandler);
         $listingService = new MinisiteListingService($listingManager);

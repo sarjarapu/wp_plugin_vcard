@@ -18,4 +18,3 @@ final class WordPressTerminationHandler implements TerminationHandlerInterface
         exit;
     }
 }
-

@@ -45,4 +45,3 @@ abstract class BaseHook
         $this->terminationHandler->terminate();
     }
 }
-

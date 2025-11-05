@@ -34,7 +34,7 @@ class VersionHooksFactory
 
         // Create termination handler for WordPress manager
         $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
-        
+
         // Create WordPress manager (requires TerminationHandlerInterface)
         $wordPressManager = new WordPressVersionManager($terminationHandler);
 

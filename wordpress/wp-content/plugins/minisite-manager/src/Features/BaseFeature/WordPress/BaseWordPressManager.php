@@ -50,4 +50,3 @@ abstract class BaseWordPressManager
         $this->terminationHandler->terminate();
     }
 }
-

@@ -24,7 +24,7 @@ final class ViewHooksFactory
     {
         // Create termination handler for WordPress manager
         $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
-        
+
         // Create services
         $wordPressManager = new WordPressMinisiteManager($terminationHandler);
         $viewService = new MinisiteViewService($wordPressManager);

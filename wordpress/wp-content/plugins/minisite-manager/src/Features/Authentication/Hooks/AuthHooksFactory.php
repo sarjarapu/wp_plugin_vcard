@@ -27,7 +27,7 @@ final class AuthHooksFactory
     {
         // Create termination handler for WordPress manager
         $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();
-        
+
         // Create services
         $wordPressManager = new WordPressUserManager($terminationHandler);
         $authService = new AuthService($wordPressManager);

@@ -17,4 +17,3 @@ final class TestTerminationHandler implements TerminationHandlerInterface
         // Intentionally do nothing - tests should continue execution
     }
 }
-
