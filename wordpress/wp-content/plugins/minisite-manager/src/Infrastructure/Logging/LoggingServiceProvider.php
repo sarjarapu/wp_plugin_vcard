@@ -43,7 +43,12 @@ class LoggingServiceProvider
         $logsDir = WP_CONTENT_DIR . '/minisite-logs';
 
         if (! file_exists($logsDir)) {
-            wp_mkdir_p($logsDir);
+            if (function_exists('wp_mkdir_p')) {
+                wp_mkdir_p($logsDir);
+            } else {
+                // Fallback for test environments
+                @mkdir($logsDir, 0755, true);
+            }
         }
 
         // Create .htaccess to protect log files (Apache)
