@@ -24,8 +24,9 @@ class EditRenderer
      */
     public function renderEditForm(object $editData): void
     {
-        if (!$this->timberRenderer) {
+        if (! $this->timberRenderer) {
             $this->renderFallbackEditForm($editData);
+
             return;
         }
 
@@ -49,16 +50,17 @@ class EditRenderer
      */
     public function renderError(string $errorMessage): void
     {
-        if (!$this->timberRenderer) {
+        if (! $this->timberRenderer) {
             $this->renderFallbackError($errorMessage);
+
             return;
         }
 
         if (class_exists('Timber\\Timber')) {
-            \Timber\Timber::render('error.twig', [
+            \Timber\Timber::render('error.twig', array(
                 'error_message' => $errorMessage,
-                'page_title' => 'Error'
-            ]);
+                'page_title' => 'Error',
+            ));
         } else {
             $this->renderFallbackError($errorMessage);
         }
@@ -69,7 +71,7 @@ class EditRenderer
      */
     private function setupTimberLocations(): void
     {
-        if (!class_exists('Timber\\Timber')) {
+        if (! class_exists('Timber\\Timber')) {
             return;
         }
 
@@ -80,8 +82,8 @@ class EditRenderer
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
-                    \Timber\Timber::$locations ?? [],
-                    [$timberBase, $viewsBase, $componentsBase]
+                    \Timber\Timber::$locations ?? array(),
+                    array($timberBase, $viewsBase, $componentsBase)
                 )
             )
         );
@@ -95,7 +97,7 @@ class EditRenderer
         $profile = $editData->profileForForm;
         $siteJson = $editData->siteJson;
 
-        return [
+        return array(
             'page_title' => 'Edit Minisite',
             'page_subtitle' => 'Update your minisite information',
             'minisite' => $editData->minisite,
@@ -133,7 +135,7 @@ class EditRenderer
             'contact_lng' => $profile->geo && method_exists($profile->geo, 'getLng') ? $profile->geo->getLng() : '',
             'version_label' => $editData->editingVersion?->label ?? '',
             'version_comment' => $editData->editingVersion?->comment ?? '',
-        ];
+        );
     }
 
     /**

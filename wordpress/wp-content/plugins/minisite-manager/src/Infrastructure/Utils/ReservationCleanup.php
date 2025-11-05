@@ -13,6 +13,7 @@ final class ReservationCleanup
     {
         global $wpdb;
         $reservationsTable = $wpdb->prefix . 'minisite_reservations';
+
         return db::query("DELETE FROM {$reservationsTable} WHERE expires_at <= NOW()");
     }
 }

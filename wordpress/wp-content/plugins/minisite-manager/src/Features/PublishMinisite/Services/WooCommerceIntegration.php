@@ -30,12 +30,12 @@ class WooCommerceIntegration
      */
     public function transferCartDataToOrder($order, $data): void
     {
-        if (!function_exists('WC') || !WC()->session) {
+        if (! function_exists('WC') || ! WC()->session) {
             return;
         }
 
         $cartData = WC()->session->get('minisite_cart_data');
-        if (!$cartData) {
+        if (! $cartData) {
             return;
         }
 
@@ -43,10 +43,10 @@ class WooCommerceIntegration
         $order->update_meta_data('_slug', $cartData['minisite_slug'] ?? '');
         $order->update_meta_data('_reservation_id', $cartData['minisite_reservation_id'] ?? '');
 
-        $this->logger->info('Transferred minisite cart data to order', [
+        $this->logger->info('Transferred minisite cart data to order', array(
             'order_id' => $order->get_id(),
             'minisite_id' => $cartData['minisite_id'] ?? null,
-        ]);
+        ));
     }
 
     /**
@@ -54,7 +54,7 @@ class WooCommerceIntegration
      */
     public function transferCartItemToOrderItem($item, $cart_item_key, $values, $order): void
     {
-        if (!isset($values['minisite_id'])) {
+        if (! isset($values['minisite_id'])) {
             return;
         }
 
@@ -67,10 +67,10 @@ class WooCommerceIntegration
         $order->update_meta_data('_slug', $values['minisite_slug'] ?? '');
         $order->update_meta_data('_reservation_id', $values['minisite_reservation_id'] ?? '');
 
-        $this->logger->info('Transferred minisite cart item data to order item', [
+        $this->logger->info('Transferred minisite cart item data to order item', array(
             'order_id' => $order->get_id(),
             'minisite_id' => $values['minisite_id'] ?? null,
-        ]);
+        ));
     }
 
     /**
@@ -79,9 +79,9 @@ class WooCommerceIntegration
     public function activateSubscriptionOnOrderCompletion(int $orderId): void
     {
         try {
-            $this->logger->info('Processing order completion for minisite subscription', [
+            $this->logger->info('Processing order completion for minisite subscription', array(
                 'order_id' => $orderId,
-            ]);
+            ));
 
             $this->subscriptionActivationService->activateFromOrder($orderId);
 
@@ -91,10 +91,10 @@ class WooCommerceIntegration
             }
         } catch (\Exception $e) {
             // Log error but don't break the order completion process
-            $this->logger->error('Failed to activate minisite subscription for order', [
+            $this->logger->error('Failed to activate minisite subscription for order', array(
                 'order_id' => $orderId,
                 'error' => $e->getMessage(),
-            ]);
+            ));
         }
     }
 }

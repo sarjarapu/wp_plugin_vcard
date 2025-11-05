@@ -231,7 +231,7 @@ class ReviewSeederService
     {
         $jsonPath = MINISITE_PLUGIN_DIR . 'data/json/reviews/' . $jsonFile;
 
-        if (!file_exists($jsonPath)) {
+        if (! file_exists($jsonPath)) {
             throw new \RuntimeException('JSON file not found: ' . esc_html($jsonPath));
         }
 
@@ -244,7 +244,7 @@ class ReviewSeederService
             );
         }
 
-        if (!isset($data['reviews']) || !is_array($data['reviews'])) {
+        if (! isset($data['reviews']) || ! is_array($data['reviews'])) {
             throw new \RuntimeException(
                 'Invalid JSON structure in file: ' . esc_html($jsonFile) . '. Missing \'reviews\' array.'
             );
@@ -269,26 +269,26 @@ class ReviewSeederService
     public function seedAllTestReviews(array $minisiteIds): void
     {
         // Map of minisite keys to their JSON review files
-        $reviewFiles = [
+        $reviewFiles = array(
             'ACME' => 'acme-dental-reviews.json',
             'LOTUS' => 'lotus-textiles-reviews.json',
             'GREEN' => 'green-bites-reviews.json',
             'SWIFT' => 'swift-transit-reviews.json',
-        ];
+        );
 
         foreach ($reviewFiles as $key => $jsonFile) {
-            if (!empty($minisiteIds[$key])) {
+            if (! empty($minisiteIds[$key])) {
                 try {
                     $reviews = $this->loadReviewsFromJson($jsonFile);
                     $this->seedReviewsForMinisite($minisiteIds[$key], $reviews);
                 } catch (\RuntimeException $e) {
                     // Log error but continue with other minisites
-                    $this->logger->warning('Failed to load reviews from JSON file', [
+                    $this->logger->warning('Failed to load reviews from JSON file', array(
                         'json_file' => $jsonFile,
                         'minisite_key' => $key,
                         'minisite_id' => $minisiteIds[$key],
                         'error' => $e->getMessage(),
-                    ]);
+                    ));
                 }
             }
         }

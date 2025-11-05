@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Minisite\Features\Authentication\WordPress;
 
-use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
@@ -73,6 +73,7 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
     public function getCurrentUser(): ?object
     {
         $user = wp_get_current_user();
+
         return $user && $user->ID > 0 ? $user : null;
     }
 
@@ -164,6 +165,7 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
         if ($email === null) {
             return '';
         }
+
         return sanitize_email($email);
     }
 
@@ -178,6 +180,7 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
         if ($url === null) {
             return '';
         }
+
         return sanitize_url($url);
     }
 
@@ -272,6 +275,7 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
     public function getWpQuery(): ?\WP_Query
     {
         global $wp_query;
+
         return $wp_query instanceof \WP_Query ? $wp_query : null;
     }
 
@@ -296,6 +300,7 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
         if ($text === null) {
             return '';
         }
+
         return sanitize_text_field(wp_unslash($text));
     }
 
@@ -307,6 +312,7 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
         if ($text === null) {
             return '';
         }
+
         return sanitize_textarea_field(wp_unslash($text));
     }
 

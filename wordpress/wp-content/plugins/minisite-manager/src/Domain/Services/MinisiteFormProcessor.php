@@ -30,12 +30,12 @@ class MinisiteFormProcessor
      */
     public function validateFormData(array $data): array
     {
-        $this->logger->info('MinisiteFormProcessor::validateFormData() called', [
+        $this->logger->info('MinisiteFormProcessor::validateFormData() called', array(
             'data_count' => count($data),
-            'data_keys' => array_keys($data)
-        ]);
+            'data_keys' => array_keys($data),
+        ));
 
-        $errors = [];
+        $errors = array();
 
         // Add validation rules as needed
         if (empty($data['business_name'])) {
@@ -60,6 +60,7 @@ class MinisiteFormProcessor
         string $default = ''
     ): string {
         $existingKey = $existingKey ?? $formKey;
+
         return $this->wordPressManager->sanitizeTextField(
             $formData[$formKey] ?? $existingData[$existingKey] ?? $default
         );
@@ -86,15 +87,15 @@ class MinisiteFormProcessor
      */
     public function buildSiteJsonFromForm(array $formData, string $siteId, ?object $minisite = null): array
     {
-        $this->logger->info('MinisiteFormProcessor::buildSiteJsonFromForm() called', [
+        $this->logger->info('MinisiteFormProcessor::buildSiteJsonFromForm() called', array(
             'site_id' => $siteId,
             'form_data_count' => count($formData),
             'has_existing_minisite' => $minisite !== null,
-            'minisite_id' => $minisite?->id ?? 'new'
-        ]);
+            'minisite_id' => $minisite?->id ?? 'new',
+        ));
 
         // DEBUG: Log actual form data values for key fields
-        $this->logger->debug('Form data values for key fields', [
+        $this->logger->debug('Form data values for key fields', array(
             'site_id' => $siteId,
             'seo_title' => $formData['seo_title'] ?? 'NOT_SET',
             'seo_description' => $formData['seo_description'] ?? 'NOT_SET',
@@ -106,31 +107,31 @@ class MinisiteFormProcessor
             'hero_subheading' => $formData['hero_subheading'] ?? 'NOT_SET',
             'about_html' => $formData['about_html'] ?? 'NOT_SET',
             'business_name' => $formData['business_name'] ?? 'NOT_SET',
-            'business_city' => $formData['business_city'] ?? 'NOT_SET'
-        ]);
+            'business_city' => $formData['business_city'] ?? 'NOT_SET',
+        ));
 
         // Get existing siteJson to preserve all data
-        if (!$minisite) {
-            $this->logger->debug('No existing minisite provided, fetching from database', [
-                'site_id' => $siteId
-            ]);
+        if (! $minisite) {
+            $this->logger->debug('No existing minisite provided, fetching from database', array(
+                'site_id' => $siteId,
+            ));
             $minisite = $this->wordPressManager->findMinisiteById($siteId);
         }
 
         // For new minisites (no existing data), start with empty structure
         // For existing minisites, preserve existing data
-        if (!$minisite || !$minisite->siteJson) {
-            $this->logger->debug('No existing minisite or siteJson found, starting with empty structure', [
+        if (! $minisite || ! $minisite->siteJson) {
+            $this->logger->debug('No existing minisite or siteJson found, starting with empty structure', array(
                 'site_id' => $siteId,
                 'has_minisite' => $minisite !== null,
-                'has_site_json' => $minisite && $minisite->siteJson ? true : false
-            ]);
+                'has_site_json' => $minisite && $minisite->siteJson ? true : false,
+            ));
             $siteJson = $this->buildEmptySiteJson();
         } else {
-            $this->logger->debug('Using existing siteJson as base', [
+            $this->logger->debug('Using existing siteJson as base', array(
                 'site_id' => $siteId,
-                'existing_site_json_size' => strlen(json_encode($minisite->siteJson))
-            ]);
+                'existing_site_json_size' => strlen(json_encode($minisite->siteJson)),
+            ));
             $siteJson = $minisite->siteJson;
         }
 
@@ -147,20 +148,20 @@ class MinisiteFormProcessor
         $siteJson = $this->buildGallerySection($formData, $siteJson);
         $siteJson = $this->buildSocialSection($formData, $siteJson);
 
-        $this->logger->info('Site JSON build completed', [
+        $this->logger->info('Site JSON build completed', array(
             'site_id' => $siteId,
             'final_site_json_size' => strlen(json_encode($siteJson)),
-            'sections_built' => array_keys($siteJson)
-        ]);
+            'sections_built' => array_keys($siteJson),
+        ));
 
         // DEBUG: Log the actual siteJson content for key sections
-        $this->logger->debug('Final siteJson content for key sections', [
+        $this->logger->debug('Final siteJson content for key sections', array(
             'site_id' => $siteId,
             'seo_section' => $siteJson['seo'] ?? 'NOT_SET',
             'brand_section' => $siteJson['brand'] ?? 'NOT_SET',
             'hero_section' => $siteJson['hero'] ?? 'NOT_SET',
-            'about_section' => $siteJson['about'] ?? 'NOT_SET'
-        ]);
+            'about_section' => $siteJson['about'] ?? 'NOT_SET',
+        ));
 
         return $siteJson;
     }
@@ -170,77 +171,77 @@ class MinisiteFormProcessor
      */
     public function buildEmptySiteJson(): array
     {
-        return [
-            'seo' => [
+        return array(
+            'seo' => array(
                 'title' => '',
                 'description' => '',
                 'keywords' => '',
                 'favicon' => '',
-            ],
-            'brand' => [
+            ),
+            'brand' => array(
                 'name' => '',
                 'logo' => '',
                 'industry' => '',
                 'palette' => 'blue',
-            ],
-            'hero' => [
+            ),
+            'hero' => array(
                 'badge' => '',
                 'heading' => '',
                 'subheading' => '',
                 'image' => '',
                 'imageAlt' => '',
-                'ctas' => [
-                    [
+                'ctas' => array(
+                    array(
                         'text' => '',
                         'url' => '',
-                    ],
-                    [
+                    ),
+                    array(
                         'text' => '',
                         'url' => '',
-                    ],
-                ],
-                'rating' => [
+                    ),
+                ),
+                'rating' => array(
                     'value' => '',
                     'count' => '',
-                ],
-            ],
-            'about' => [
+                ),
+            ),
+            'about' => array(
                 'html' => '',
-            ],
-            'contact' => [
-                'phone' => [
+            ),
+            'contact' => array(
+                'phone' => array(
                     'text' => '',
                     'link' => '',
-                ],
-                'whatsapp' => [
+                ),
+                'whatsapp' => array(
                     'text' => '',
                     'link' => '',
-                ],
+                ),
                 'email' => '',
-                'website' => [
+                'website' => array(
                     'text' => '',
                     'link' => '',
-                ],
+                ),
                 'city' => '',
                 'region' => '',
                 'country' => '',
                 'postal' => '',
                 'lat' => null,
                 'lng' => null,
-            ],
-            'services' => [
+            ),
+            'services' => array(
                 'title' => 'Services',
-                'listing' => [],
-            ],
-            'social' => [
+                'listing' => array(),
+            ),
+            'social' => array(
                 'facebook' => '',
                 'instagram' => '',
                 'x' => '',
                 'youtube' => '',
                 'linkedin' => '',
-            ],
-            'gallery' => [],
-        ];
+            ),
+            'gallery' => array(),
+        );
     }
 
     /**
@@ -249,13 +250,13 @@ class MinisiteFormProcessor
     private function buildBusinessSection(array $formData, array $siteJson): array
     {
         // Always build the business section structure
-        $siteJson['business'] = array_merge($siteJson['business'] ?? [], [
-            'name' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_name', 'name'),
-            'city' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_city', 'city'),
-            'region' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_region', 'region'),
-            'country' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_country', 'country'),
-            'postal' => $this->getFormValue($formData, $siteJson['business'] ?? [], 'business_postal', 'postal'),
-        ]);
+        $siteJson['business'] = array_merge($siteJson['business'] ?? array(), array(
+            'name' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_name', 'name'),
+            'city' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_city', 'city'),
+            'region' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_region', 'region'),
+            'country' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_country', 'country'),
+            'postal' => $this->getFormValue($formData, $siteJson['business'] ?? array(), 'business_postal', 'postal'),
+        ));
 
         return $siteJson;
     }
@@ -275,88 +276,88 @@ class MinisiteFormProcessor
             isset($formData['contact_pluscode_url']) || isset($formData['contact_lat']) ||
             isset($formData['contact_lng']) || $this->hasHoursData($formData)
         ) {
-            $siteJson['contact'] = array_merge($siteJson['contact'] ?? [], [
-                'phone' => [
+            $siteJson['contact'] = array_merge($siteJson['contact'] ?? array(), array(
+                'phone' => array(
                     'text' => $this->getFormValue(
                         $formData,
-                        $siteJson['contact']['phone'] ?? [],
+                        $siteJson['contact']['phone'] ?? array(),
                         'contact_phone_text',
                         'text'
                     ),
                     'link' => $this->getFormValue(
                         $formData,
-                        $siteJson['contact']['phone'] ?? [],
+                        $siteJson['contact']['phone'] ?? array(),
                         'contact_phone_link',
                         'link'
                     ),
-                ],
-                'whatsapp' => [
+                ),
+                'whatsapp' => array(
                     'text' => $this->getFormValue(
                         $formData,
-                        $siteJson['contact']['whatsapp'] ?? [],
+                        $siteJson['contact']['whatsapp'] ?? array(),
                         'contact_whatsapp_text',
                         'text'
                     ),
                     'link' => $this->getFormValue(
                         $formData,
-                        $siteJson['contact']['whatsapp'] ?? [],
+                        $siteJson['contact']['whatsapp'] ?? array(),
                         'contact_whatsapp_link',
                         'link'
                     ),
-                ],
+                ),
                 'email' => $this->wordPressManager->sanitizeEmail(
                     $formData['contact_email'] ?? ($siteJson['contact']['email'] ?? '')
                 ),
-                'website' => [
+                'website' => array(
                     'text' => $this->getFormValue(
                         $formData,
-                        $siteJson['contact']['website'] ?? [],
+                        $siteJson['contact']['website'] ?? array(),
                         'contact_website_text',
                         'text'
                     ),
                     'link' => $this->wordPressManager->sanitizeUrl(
                         $formData['contact_website_link'] ?? ($siteJson['contact']['website']['link'] ?? '')
                     ),
-                ],
+                ),
                 'address_line1' => $this->getFormValue(
                     $formData,
-                    $siteJson['contact'] ?? [],
+                    $siteJson['contact'] ?? array(),
                     'contact_address1',
                     'address_line1'
                 ),
                 'address_line2' => $this->getFormValue(
                     $formData,
-                    $siteJson['contact'] ?? [],
+                    $siteJson['contact'] ?? array(),
                     'contact_address2',
                     'address_line2'
                 ),
                 'address_line3' => $this->getFormValue(
                     $formData,
-                    $siteJson['contact'] ?? [],
+                    $siteJson['contact'] ?? array(),
                     'contact_address3',
                     'address_line3'
                 ),
                 'address_line4' => $this->getFormValue(
                     $formData,
-                    $siteJson['contact'] ?? [],
+                    $siteJson['contact'] ?? array(),
                     'contact_address4',
                     'address_line4'
                 ),
                 'plusCode' => $this->getFormValue(
                     $formData,
-                    $siteJson['contact'] ?? [],
+                    $siteJson['contact'] ?? array(),
                     'contact_pluscode',
                     'plusCode'
                 ),
                 'plusCodeUrl' => $this->wordPressManager->sanitizeUrl(
                     $formData['contact_pluscode_url'] ?? ($siteJson['contact']['plusCodeUrl'] ?? '')
                 ),
-                'lat' => !empty($formData['contact_lat']) ? (float) $formData['contact_lat'] :
+                'lat' => ! empty($formData['contact_lat']) ? (float) $formData['contact_lat'] :
                     ($siteJson['contact']['lat'] ?? null),
-                'lng' => !empty($formData['contact_lng']) ? (float) $formData['contact_lng'] :
+                'lng' => ! empty($formData['contact_lng']) ? (float) $formData['contact_lng'] :
                     ($siteJson['contact']['lng'] ?? null),
-                'hours' => $this->buildHoursFromForm($formData, $siteJson['contact']['hours'] ?? []),
-            ]);
+                'hours' => $this->buildHoursFromForm($formData, $siteJson['contact']['hours'] ?? array()),
+            ));
         }
 
         return $siteJson;
@@ -368,12 +369,12 @@ class MinisiteFormProcessor
     private function buildBrandSection(array $formData, array $siteJson): array
     {
         // Always build the brand section structure
-        $siteJson['brand'] = array_merge($siteJson['brand'] ?? [], [
-            'name' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_name', 'name'),
-            'logo' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_logo', 'logo'),
-            'palette' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_palette', 'palette', 'blue'),
-            'industry' => $this->getFormValue($formData, $siteJson['brand'] ?? [], 'brand_industry', 'industry'),
-        ]);
+        $siteJson['brand'] = array_merge($siteJson['brand'] ?? array(), array(
+            'name' => $this->getFormValue($formData, $siteJson['brand'] ?? array(), 'brand_name', 'name'),
+            'logo' => $this->getFormValue($formData, $siteJson['brand'] ?? array(), 'brand_logo', 'logo'),
+            'palette' => $this->getFormValue($formData, $siteJson['brand'] ?? array(), 'brand_palette', 'palette', 'blue'),
+            'industry' => $this->getFormValue($formData, $siteJson['brand'] ?? array(), 'brand_industry', 'industry'),
+        ));
 
         return $siteJson;
     }
@@ -384,13 +385,13 @@ class MinisiteFormProcessor
     private function buildSeoSection(array $formData, array $siteJson): array
     {
         // Always build the SEO section structure
-        $siteJson['seo'] = array_merge($siteJson['seo'] ?? [], [
-            'title' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_title', 'title'),
-            'description' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_description', 'description'),
-            'keywords' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_keywords', 'keywords'),
-            'favicon' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'seo_favicon', 'favicon'),
-            'search_terms' => $this->getFormValue($formData, $siteJson['seo'] ?? [], 'search_terms', 'search_terms'),
-        ]);
+        $siteJson['seo'] = array_merge($siteJson['seo'] ?? array(), array(
+            'title' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'seo_title', 'title'),
+            'description' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'seo_description', 'description'),
+            'keywords' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'seo_keywords', 'keywords'),
+            'favicon' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'seo_favicon', 'favicon'),
+            'search_terms' => $this->getFormValue($formData, $siteJson['seo'] ?? array(), 'search_terms', 'search_terms'),
+        ));
 
         return $siteJson;
     }
@@ -401,20 +402,20 @@ class MinisiteFormProcessor
     private function buildSettingsSection(array $formData, array $siteJson): array
     {
         // Always build the settings section structure
-        $siteJson['settings'] = array_merge($siteJson['settings'] ?? [], [
+        $siteJson['settings'] = array_merge($siteJson['settings'] ?? array(), array(
             'template' => $this->getFormValue(
                 $formData,
-                $siteJson['settings'] ?? [],
+                $siteJson['settings'] ?? array(),
                 'site_template',
                 'template'
             ),
             'locale' => $this->getFormValue(
                 $formData,
-                $siteJson['settings'] ?? [],
+                $siteJson['settings'] ?? array(),
                 'default_locale',
                 'locale'
             ),
-        ]);
+        ));
 
         return $siteJson;
     }
@@ -425,55 +426,55 @@ class MinisiteFormProcessor
     private function buildHeroSection(array $formData, array $siteJson): array
     {
         // Always build the hero section structure
-        $siteJson['hero'] = array_merge($siteJson['hero'] ?? [], [
-            'badge' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_badge', 'badge'),
-            'heading' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_heading', 'heading'),
+        $siteJson['hero'] = array_merge($siteJson['hero'] ?? array(), array(
+            'badge' => $this->getFormValue($formData, $siteJson['hero'] ?? array(), 'hero_badge', 'badge'),
+            'heading' => $this->getFormValue($formData, $siteJson['hero'] ?? array(), 'hero_heading', 'heading'),
             'subheading' => $this->sanitizeRichTextContent(
                 $formData['hero_subheading'] ?? ($siteJson['hero']['subheading'] ?? '')
             ),
             'image' => $this->wordPressManager->sanitizeUrl(
                 $formData['hero_image'] ?? ($siteJson['hero']['image'] ?? '')
             ),
-            'imageAlt' => $this->getFormValue($formData, $siteJson['hero'] ?? [], 'hero_image_alt', 'imageAlt'),
-            'ctas' => [
-                [
+            'imageAlt' => $this->getFormValue($formData, $siteJson['hero'] ?? array(), 'hero_image_alt', 'imageAlt'),
+            'ctas' => array(
+                array(
                     'text' => $this->getFormValue(
                         $formData,
-                        $siteJson['hero']['ctas'][0] ?? [],
+                        $siteJson['hero']['ctas'][0] ?? array(),
                         'hero_cta1_text',
                         'text'
                     ),
                     'url' => $this->wordPressManager->sanitizeUrl(
                         $formData['hero_cta1_url'] ?? ($siteJson['hero']['ctas'][0]['url'] ?? '')
                     ),
-                ],
-                [
+                ),
+                array(
                     'text' => $this->getFormValue(
                         $formData,
-                        $siteJson['hero']['ctas'][1] ?? [],
+                        $siteJson['hero']['ctas'][1] ?? array(),
                         'hero_cta2_text',
                         'text'
                     ),
                     'url' => $this->wordPressManager->sanitizeUrl(
                         $formData['hero_cta2_url'] ?? ($siteJson['hero']['ctas'][1]['url'] ?? '')
                     ),
-                ],
-            ],
-            'rating' => [
+                ),
+            ),
+            'rating' => array(
                 'value' => $this->getFormValue(
                     $formData,
-                    $siteJson['hero']['rating'] ?? [],
+                    $siteJson['hero']['rating'] ?? array(),
                     'hero_rating_value',
                     'value'
                 ),
                 'count' => $this->getFormValue(
                     $formData,
-                    $siteJson['hero']['rating'] ?? [],
+                    $siteJson['hero']['rating'] ?? array(),
                     'hero_rating_count',
                     'count'
                 ),
-            ],
-        ]);
+            ),
+        ));
 
         return $siteJson;
     }
@@ -484,11 +485,11 @@ class MinisiteFormProcessor
     private function buildAboutSection(array $formData, array $siteJson): array
     {
         // Always build the about section structure
-        $siteJson['about'] = array_merge($siteJson['about'] ?? [], [
+        $siteJson['about'] = array_merge($siteJson['about'] ?? array(), array(
             'html' => $this->sanitizeRichTextContent(
                 $formData['about_html'] ?? ($siteJson['about']['html'] ?? '')
             ),
-        ]);
+        ));
 
         return $siteJson;
     }
@@ -499,15 +500,15 @@ class MinisiteFormProcessor
     private function buildWhyUsSection(array $formData, array $siteJson): array
     {
         // Always build the whyUs section structure
-        $siteJson['whyUs'] = array_merge($siteJson['whyUs'] ?? [], [
-            'title' => $this->getFormValue($formData, $siteJson['whyUs'] ?? [], 'whyus_title', 'title'),
+        $siteJson['whyUs'] = array_merge($siteJson['whyUs'] ?? array(), array(
+            'title' => $this->getFormValue($formData, $siteJson['whyUs'] ?? array(), 'whyus_title', 'title'),
             'html' => $this->sanitizeRichTextContent(
                 $formData['whyus_html'] ?? ($siteJson['whyUs']['html'] ?? '')
             ),
             'image' => $this->wordPressManager->sanitizeUrl(
                 $formData['whyus_image'] ?? ($siteJson['whyUs']['image'] ?? '')
             ),
-        ]);
+        ));
 
         return $siteJson;
     }
@@ -518,7 +519,7 @@ class MinisiteFormProcessor
     private function buildServicesSection(array $formData, array $siteJson): array
     {
         // Always build the services section structure
-        $siteJson['services'] = $this->buildServicesFromForm($formData, $siteJson['services'] ?? []);
+        $siteJson['services'] = $this->buildServicesFromForm($formData, $siteJson['services'] ?? array());
 
         return $siteJson;
     }
@@ -540,7 +541,7 @@ class MinisiteFormProcessor
     private function buildSocialSection(array $formData, array $siteJson): array
     {
         // Always build the social section structure
-        $siteJson['social'] = $this->buildSocialFromForm($formData, $siteJson['social'] ?? []);
+        $siteJson['social'] = $this->buildSocialFromForm($formData, $siteJson['social'] ?? array());
 
         return $siteJson;
     }
@@ -548,13 +549,13 @@ class MinisiteFormProcessor
     /**
      * Build services section from form data
      */
-    private function buildServicesFromForm(array $formData, array $existingServices = []): array
+    private function buildServicesFromForm(array $formData, array $existingServices = array()): array
     {
-        $services = [];
+        $services = array();
         $serviceCount = (int) ($formData['product_count'] ?? 0);
 
         for ($i = 0; $i < $serviceCount; $i++) {
-            $services[] = [
+            $services[] = array(
                 'title' => $this->wordPressManager->sanitizeTextField($formData["product_{$i}_title"] ?? ''),
                 'image' => $this->wordPressManager->sanitizeUrl($formData["product_{$i}_image"] ?? ''),
                 'description' => $this->sanitizeRichTextContent($formData["product_{$i}_description"] ?? ''),
@@ -562,15 +563,15 @@ class MinisiteFormProcessor
                 'icon' => $this->wordPressManager->sanitizeTextField($formData["product_{$i}_icon"] ?? ''),
                 'cta' => $this->wordPressManager->sanitizeTextField($formData["product_{$i}_cta_text"] ?? ''),
                 'url' => $this->wordPressManager->sanitizeUrl($formData["product_{$i}_cta_url"] ?? ''),
-            ];
+            );
         }
 
-        return [
+        return array(
             'title' => $this->wordPressManager->sanitizeTextField(
                 $formData['products_section_title'] ?? ($existingServices['title'] ?? 'Products & Services')
             ),
             'listing' => $services,
-        ];
+        );
     }
 
     /**
@@ -578,18 +579,18 @@ class MinisiteFormProcessor
      */
     private function buildGalleryFromForm(array $formData): array
     {
-        $gallery = [];
+        $gallery = array();
         $imageCount = (int) ($formData['gallery_count'] ?? 0);
 
         for ($i = 0; $i < $imageCount; $i++) {
             $imageUrl = $this->wordPressManager->sanitizeUrl($formData["gallery_{$i}_image"] ?? '');
             $imageAlt = $this->wordPressManager->sanitizeTextField($formData["gallery_{$i}_alt"] ?? '');
-            if (!empty($imageUrl)) {
-                $gallery[] = [
+            if (! empty($imageUrl)) {
+                $gallery[] = array(
                     'src' => $imageUrl,
                     'alt' => $imageAlt,
                     'caption' => $imageAlt, // Use alt as caption fallback
-                ];
+                );
             }
         }
 
@@ -599,14 +600,14 @@ class MinisiteFormProcessor
     /**
      * Build social section from form data
      */
-    private function buildSocialFromForm(array $formData, array $existingSocial = []): array
+    private function buildSocialFromForm(array $formData, array $existingSocial = array()): array
     {
-        $networks = ['facebook', 'instagram', 'x', 'youtube', 'linkedin', 'tiktok'];
+        $networks = array('facebook', 'instagram', 'x', 'youtube', 'linkedin', 'tiktok');
         $social = $existingSocial; // Start with existing data
 
         foreach ($networks as $network) {
             $url = $this->wordPressManager->sanitizeUrl($formData["social_{$network}"] ?? '');
-            if (!empty($url)) {
+            if (! empty($url)) {
                 $social[$network] = $url;
             } elseif (isset($formData["social_{$network}"])) {
                 // If field is explicitly set but empty, remove it
@@ -620,28 +621,28 @@ class MinisiteFormProcessor
     /**
      * Build hours section from form data
      */
-    private function buildHoursFromForm(array $formData, array $existingHours = []): array
+    private function buildHoursFromForm(array $formData, array $existingHours = array()): array
     {
-        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        $days = array('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday');
         $hours = $existingHours; // Start with existing data
 
         foreach ($days as $day) {
-            $isClosed = !empty($formData["hours_{$day}_closed"]);
+            $isClosed = ! empty($formData["hours_{$day}_closed"]);
             $openTime = $this->wordPressManager->sanitizeTextField($formData["hours_{$day}_open"] ?? '');
             $closeTime = $this->wordPressManager->sanitizeTextField($formData["hours_{$day}_close"] ?? '');
 
             $dayName = ucfirst($day);
 
             if ($isClosed) {
-                $hours[$dayName] = [
+                $hours[$dayName] = array(
                     'closed' => true,
-                ];
-            } elseif (!empty($openTime) && !empty($closeTime)) {
+                );
+            } elseif (! empty($openTime) && ! empty($closeTime)) {
                 // Store times in 24-hour format for HTML time inputs
-                $hours[$dayName] = [
+                $hours[$dayName] = array(
                     'open' => $openTime,
                     'close' => $closeTime,
-                ];
+                );
             } elseif (isset($formData["hours_{$day}_open"]) || isset($formData["hours_{$day}_close"])) {
                 // If fields are explicitly set but empty, remove the day
                 unset($hours[$dayName]);
@@ -656,7 +657,7 @@ class MinisiteFormProcessor
      */
     private function hasHoursData(array $formData): bool
     {
-        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        $days = array('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday');
 
         foreach ($days as $day) {
             if (
@@ -680,37 +681,37 @@ class MinisiteFormProcessor
         $content = wp_unslash($content);
 
         // Allow safe HTML tags for rich text content
-        $allowedTags = [
-            'p' => [],
-            'br' => [],
-            'strong' => [],
-            'b' => [],
-            'em' => [],
-            'i' => [],
-            'u' => [],
-            'span' => [
-                'class' => [],
-                'style' => [],
-            ],
-            'div' => [
-                'class' => [],
-                'style' => [],
-            ],
-            'h1' => [],
-            'h2' => [],
-            'h3' => [],
-            'h4' => [],
-            'h5' => [],
-            'h6' => [],
-            'ul' => [],
-            'ol' => [],
-            'li' => [],
-            'a' => [
-                'href' => [],
-                'target' => [],
-                'rel' => [],
-            ],
-        ];
+        $allowedTags = array(
+            'p' => array(),
+            'br' => array(),
+            'strong' => array(),
+            'b' => array(),
+            'em' => array(),
+            'i' => array(),
+            'u' => array(),
+            'span' => array(
+                'class' => array(),
+                'style' => array(),
+            ),
+            'div' => array(
+                'class' => array(),
+                'style' => array(),
+            ),
+            'h1' => array(),
+            'h2' => array(),
+            'h3' => array(),
+            'h4' => array(),
+            'h5' => array(),
+            'h6' => array(),
+            'ul' => array(),
+            'ol' => array(),
+            'li' => array(),
+            'a' => array(
+                'href' => array(),
+                'target' => array(),
+                'rel' => array(),
+            ),
+        );
 
         return wp_kses($content, $allowedTags);
     }

@@ -23,6 +23,6 @@ final class NewMinisiteFeature
         $newMinisiteHooks->register();
 
         // Register template_redirect handler with priority 2 to run before EditFeature (priority 3)
-        add_action('template_redirect', [$newMinisiteHooks, 'handleNewMinisiteRoutes'], 2);
+        add_action('template_redirect', array($newMinisiteHooks, 'handleNewMinisiteRoutes'), 2);
     }
 }

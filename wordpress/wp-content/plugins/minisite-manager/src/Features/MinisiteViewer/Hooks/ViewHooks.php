@@ -30,9 +30,9 @@ final class ViewHooks extends BaseHook
      */
     public function register(): void
     {
-        add_action('init', [$this, 'addRewriteRules']);
+        add_action('init', array($this, 'addRewriteRules'));
         // Use priority 5 to run before the main plugin's template_redirect (which runs at priority 10)
-        add_action('template_redirect', [$this, 'handleViewRoutes'], 5);
+        add_action('template_redirect', array($this, 'handleViewRoutes'), 5);
     }
 
     /**
@@ -43,7 +43,7 @@ final class ViewHooks extends BaseHook
     public function addRewriteRules(): void
     {
         // Add query vars for our new display system
-        add_filter('query_vars', [$this, 'addQueryVars']);
+        add_filter('query_vars', array($this, 'addQueryVars'));
     }
 
     /**
@@ -66,7 +66,7 @@ final class ViewHooks extends BaseHook
         $businessSlug = $this->wordPressManager->getQueryVar('minisite_biz');
         $locationSlug = $this->wordPressManager->getQueryVar('minisite_loc');
 
-        if (!$businessSlug || !$locationSlug) {
+        if (! $businessSlug || ! $locationSlug) {
             return;
         }
 

@@ -51,12 +51,12 @@ class AuthResponseHandler
     /**
      * Create error response context
      */
-    public function createErrorContext(string $pageTitle, string $errorMessage, array $additionalContext = []): array
+    public function createErrorContext(string $pageTitle, string $errorMessage, array $additionalContext = array()): array
     {
-        return array_merge([
+        return array_merge(array(
             'page_title' => $pageTitle,
             'error_msg' => $errorMessage,
-        ], $additionalContext);
+        ), $additionalContext);
     }
 
     /**
@@ -65,12 +65,12 @@ class AuthResponseHandler
     public function createSuccessContext(
         string $pageTitle,
         string $successMessage,
-        array $additionalContext = []
+        array $additionalContext = array()
     ): array {
-        return array_merge([
+        return array_merge(array(
             'page_title' => $pageTitle,
             'success_msg' => $successMessage,
-        ], $additionalContext);
+        ), $additionalContext);
     }
 
     /**
@@ -80,12 +80,12 @@ class AuthResponseHandler
         string $pageTitle,
         ?string $errorMessage = null,
         ?string $successMessage = null,
-        array $additionalContext = []
+        array $additionalContext = array()
     ): array {
-        return array_merge([
+        return array_merge(array(
             'page_title' => $pageTitle,
             'error_msg' => $errorMessage,
             'success_msg' => $successMessage,
-        ], $additionalContext);
+        ), $additionalContext);
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Minisite\Domain\Entities;
 
-use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Domain\ValueObjects\SlugPair;
 
 class Minisite
 {

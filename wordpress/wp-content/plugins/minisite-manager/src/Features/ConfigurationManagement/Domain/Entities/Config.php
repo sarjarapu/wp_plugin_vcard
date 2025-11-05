@@ -78,7 +78,7 @@ class Config
 
     private function decryptValue(): ?string
     {
-        if (!$this->value) {
+        if (! $this->value) {
             return null;
         }
 

@@ -24,9 +24,9 @@ class VersionHooks extends BaseHook
     public function register(): void
     {
         // Register AJAX actions for version management
-        add_action('wp_ajax_minisite_create_draft', [$this, 'handleCreateDraft']);
-        add_action('wp_ajax_minisite_publish_version', [$this, 'handlePublishVersion']);
-        add_action('wp_ajax_minisite_rollback_version', [$this, 'handleRollbackVersion']);
+        add_action('wp_ajax_minisite_create_draft', array($this, 'handleCreateDraft'));
+        add_action('wp_ajax_minisite_publish_version', array($this, 'handlePublishVersion'));
+        add_action('wp_ajax_minisite_rollback_version', array($this, 'handleRollbackVersion'));
 
         // Note: template_redirect is registered by VersionManagementFeature
     }

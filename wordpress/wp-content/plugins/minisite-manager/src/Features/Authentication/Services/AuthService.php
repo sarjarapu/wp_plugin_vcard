@@ -2,9 +2,9 @@
 
 namespace Minisite\Features\Authentication\Services;
 
+use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
 use Minisite\Features\Authentication\Commands\LoginCommand;
 use Minisite\Features\Authentication\Commands\RegisterCommand;
-use Minisite\Features\Authentication\Commands\ForgotPasswordCommand;
 use Minisite\Features\Authentication\WordPress\WordPressUserManager;
 
 /**
@@ -27,33 +27,33 @@ class AuthService
      */
     public function login(LoginCommand $command): array
     {
-        if (!$this->validateLoginCredentials($command)) {
-            return [
+        if (! $this->validateLoginCredentials($command)) {
+            return array(
                 'success' => false,
-                'error' => 'Please enter both username/email and password.'
-            ];
+                'error' => 'Please enter both username/email and password.',
+            );
         }
 
-        $creds = [
+        $creds = array(
             'user_login' => $command->userLogin,
             'user_password' => $command->userPassword,
             'remember' => $command->remember,
-        ];
+        );
 
         $user = $this->wordPressManager->signon($creds, false);
 
         if ($this->wordPressManager->isWpError($user)) {
-            return [
+            return array(
                 'success' => false,
-                'error' => $user->get_error_message()
-            ];
+                'error' => $user->get_error_message(),
+            );
         }
 
-        return [
+        return array(
             'success' => true,
             'user' => $user,
-            'redirect_to' => $command->redirectTo
-        ];
+            'redirect_to' => $command->redirectTo,
+        );
     }
 
     /**
@@ -65,11 +65,11 @@ class AuthService
     public function register(RegisterCommand $command): array
     {
         $validation = $this->validateRegistrationData($command);
-        if (!$validation['valid']) {
-            return [
+        if (! $validation['valid']) {
+            return array(
                 'success' => false,
-                'error' => $validation['error']
-            ];
+                'error' => $validation['error'],
+            );
         }
 
         $user_id = $this->wordPressManager->createUser(
@@ -79,10 +79,10 @@ class AuthService
         );
 
         if ($this->wordPressManager->isWpError($user_id)) {
-            return [
+            return array(
                 'success' => false,
-                'error' => $user_id->get_error_message()
-            ];
+                'error' => $user_id->get_error_message(),
+            );
         }
 
         // Auto-login the new user
@@ -90,11 +90,11 @@ class AuthService
         $this->wordPressManager->setCurrentUser($user_id);
         $this->wordPressManager->setAuthCookie($user_id);
 
-        return [
+        return array(
             'success' => true,
             'user' => $user,
-            'redirect_to' => $command->redirectTo
-        ];
+            'redirect_to' => $command->redirectTo,
+        );
     }
 
     /**
@@ -106,33 +106,33 @@ class AuthService
     public function forgotPassword(ForgotPasswordCommand $command): array
     {
         if (empty($command->userLogin)) {
-            return [
+            return array(
                 'success' => false,
-                'error' => 'Please enter your username or email address.'
-            ];
+                'error' => 'Please enter your username or email address.',
+            );
         }
 
         $user = $this->findUserByLoginOrEmail($command->userLogin);
-        if (!$user) {
-            return [
+        if (! $user) {
+            return array(
                 'success' => false,
-                'error' => 'Invalid username or email address.'
-            ];
+                'error' => 'Invalid username or email address.',
+            );
         }
 
         $result = $this->wordPressManager->retrievePassword($user->user_login);
 
         if ($this->wordPressManager->isWpError($result)) {
-            return [
+            return array(
                 'success' => false,
-                'error' => $result->get_error_message()
-            ];
+                'error' => $result->get_error_message(),
+            );
         }
 
-        return [
+        return array(
             'success' => true,
-            'message' => 'Password reset email sent. Please check your inbox.'
-        ];
+            'message' => 'Password reset email sent. Please check your inbox.',
+        );
     }
 
     /**
@@ -157,6 +157,7 @@ class AuthService
     public function getCurrentUser(): ?\WP_User
     {
         $user = $this->wordPressManager->getCurrentUser();
+
         return $user->ID ? $user : null;
     }
 
@@ -165,7 +166,7 @@ class AuthService
      */
     private function validateLoginCredentials(LoginCommand $command): bool
     {
-        return !empty($command->userLogin) && !empty($command->userPassword);
+        return ! empty($command->userLogin) && ! empty($command->userPassword);
     }
 
     /**
@@ -176,27 +177,27 @@ class AuthService
     private function validateRegistrationData(RegisterCommand $command): array
     {
         if (empty($command->userLogin) || empty($command->userEmail) || empty($command->userPassword)) {
-            return [
+            return array(
                 'valid' => false,
-                'error' => 'Please fill in all required fields.'
-            ];
+                'error' => 'Please fill in all required fields.',
+            );
         }
 
-        if (!$this->wordPressManager->isEmail($command->userEmail)) {
-            return [
+        if (! $this->wordPressManager->isEmail($command->userEmail)) {
+            return array(
                 'valid' => false,
-                'error' => 'Please enter a valid email address.'
-            ];
+                'error' => 'Please enter a valid email address.',
+            );
         }
 
         if (strlen($command->userPassword) < 6) {
-            return [
+            return array(
                 'valid' => false,
-                'error' => 'Password must be at least 6 characters long.'
-            ];
+                'error' => 'Password must be at least 6 characters long.',
+            );
         }
 
-        return ['valid' => true];
+        return array('valid' => true);
     }
 
     /**
@@ -205,9 +206,10 @@ class AuthService
     private function findUserByLoginOrEmail(string $login): ?\WP_User
     {
         $user = $this->wordPressManager->getUserBy('login', $login);
-        if (!$user) {
+        if (! $user) {
             $user = $this->wordPressManager->getUserBy('email', $login);
         }
+
         return $user ?: null;
     }
 }

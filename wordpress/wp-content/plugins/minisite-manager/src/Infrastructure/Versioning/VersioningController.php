@@ -26,7 +26,7 @@ class VersioningController
 
         // Safety (dev only): if our tables are missing but option says up-to-date, force a migration run
         if (
-            ( !defined('MINISITE_LIVE_PRODUCTION') || ! MINISITE_LIVE_PRODUCTION ) &&
+            (! defined('MINISITE_LIVE_PRODUCTION') || ! MINISITE_LIVE_PRODUCTION) &&
             $this->tablesMissing($wpdb)
         ) {
             // Reset stored version so runner applies base migration
@@ -61,11 +61,12 @@ class VersioningController
 
         foreach ($tables as $t) {
             // SHOW TABLES LIKE is portable enough for our case
-            $exists = (string) db::get_var('SHOW TABLES LIKE %s', [$t]);
+            $exists = (string) db::get_var('SHOW TABLES LIKE %s', array($t));
             if ($exists !== $t) {
                 return true; // Missing at least one table
             }
         }
+
         return false;
     }
 }

@@ -24,8 +24,9 @@ class NewMinisiteRenderer
      */
     public function renderNewMinisiteForm(object $newMinisiteData): void
     {
-        if (!$this->timberRenderer) {
+        if (! $this->timberRenderer) {
             $this->renderFallbackNewMinisiteForm($newMinisiteData);
+
             return;
         }
 
@@ -49,16 +50,17 @@ class NewMinisiteRenderer
      */
     public function renderError(string $errorMessage): void
     {
-        if (!$this->timberRenderer) {
+        if (! $this->timberRenderer) {
             $this->renderFallbackError($errorMessage);
+
             return;
         }
 
         if (class_exists('Timber\\Timber')) {
-            \Timber\Timber::render('error.twig', [
+            \Timber\Timber::render('error.twig', array(
                 'error_message' => $errorMessage,
-                'page_title' => 'Error'
-            ]);
+                'page_title' => 'Error',
+            ));
         } else {
             $this->renderFallbackError($errorMessage);
         }
@@ -69,7 +71,7 @@ class NewMinisiteRenderer
      */
     private function setupTimberLocations(): void
     {
-        if (!class_exists('Timber\\Timber')) {
+        if (! class_exists('Timber\\Timber')) {
             return;
         }
 
@@ -80,8 +82,8 @@ class NewMinisiteRenderer
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
-                    \Timber\Timber::$locations ?? [],
-                    [$timberBase, $viewsBase, $componentsBase]
+                    \Timber\Timber::$locations ?? array(),
+                    array($timberBase, $viewsBase, $componentsBase)
                 )
             )
         );
@@ -95,12 +97,12 @@ class NewMinisiteRenderer
         $formData = $newMinisiteData->formData;
 
         // Create mock objects to match EditRenderer's expected structure
-        $mockMinisite = (object) [
+        $mockMinisite = (object) array(
             'id' => 'new',
-            'status' => 'draft'
-        ];
+            'status' => 'draft',
+        );
 
-        $mockProfile = (object) [
+        $mockProfile = (object) array(
             'name' => $formData['business']['name'] ?? '',
             'city' => $formData['business']['city'] ?? '',
             'region' => $formData['business']['region'] ?? '',
@@ -112,31 +114,31 @@ class NewMinisiteRenderer
             'industry' => $formData['brand']['industry'] ?? '',
             'defaultLocale' => $formData['settings']['locale'] ?? '',
             'searchTerms' => $formData['seo']['searchTerms'] ?? '',
-            'geo' => null
-        ];
+            'geo' => null,
+        );
 
         // Add geo data if available
-        if (!empty($formData['contact']['lat']) && !empty($formData['contact']['lng'])) {
-            $mockProfile->geo = (object) [
-                'getLat' => fn() => $formData['contact']['lat'],
-                'getLng' => fn() => $formData['contact']['lng']
-            ];
+        if (! empty($formData['contact']['lat']) && ! empty($formData['contact']['lng'])) {
+            $mockProfile->geo = (object) array(
+                'getLat' => fn () => $formData['contact']['lat'],
+                'getLng' => fn () => $formData['contact']['lng'],
+            );
         }
 
-        $mockEditingVersion = (object) [
+        $mockEditingVersion = (object) array(
             'label' => 'Initial Draft',
-            'comment' => 'First draft of the new minisite'
-        ];
+            'comment' => 'First draft of the new minisite',
+        );
 
         // Return same structure as EditRenderer for template compatibility
-        return [
+        return array(
             'page_title' => 'Create New Minisite',
             'page_subtitle' => 'Create a new minisite for your business',
             'minisite' => $mockMinisite,
             'editing_version' => $mockEditingVersion,
             'latest_draft' => null, // No existing draft for new minisite
             'profile' => $mockProfile,
-            'site_json' => [], // Empty site JSON for new minisite
+            'site_json' => array(), // Empty site JSON for new minisite
             'success_message' => $newMinisiteData->successMessage,
             'error_message' => $newMinisiteData->errorMessage,
             'form_nonce' => wp_create_nonce('minisite_edit'),
@@ -166,7 +168,7 @@ class NewMinisiteRenderer
                 ? $mockProfile->geo->getLng() : '',
             'version_label' => $mockEditingVersion->label,
             'version_comment' => $mockEditingVersion->comment,
-        ];
+        );
     }
 
     /**

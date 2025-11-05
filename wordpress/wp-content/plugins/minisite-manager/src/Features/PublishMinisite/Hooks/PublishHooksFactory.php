@@ -2,15 +2,15 @@
 
 namespace Minisite\Features\PublishMinisite\Hooks;
 
+use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Features\PublishMinisite\Controllers\PublishController;
+use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;
 use Minisite\Features\PublishMinisite\Services\PublishService;
-use Minisite\Features\PublishMinisite\Services\SlugAvailabilityService;
 use Minisite\Features\PublishMinisite\Services\ReservationService;
+use Minisite\Features\PublishMinisite\Services\SlugAvailabilityService;
 use Minisite\Features\PublishMinisite\Services\SubscriptionActivationService;
 use Minisite\Features\PublishMinisite\Services\WooCommerceIntegration;
-use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
-use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**

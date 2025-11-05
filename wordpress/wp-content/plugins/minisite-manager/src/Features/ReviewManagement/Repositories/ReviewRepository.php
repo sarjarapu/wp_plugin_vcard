@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Minisite\Features\ReviewManagement\Repositories;
 
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Minisite\Features\ReviewManagement\Domain\Entities\Review;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
@@ -33,30 +33,31 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
      */
     public function save(Review $review): Review
     {
-        $this->logger->debug("save() entry", [
+        $this->logger->debug("save() entry", array(
             'review_id' => $review->id,
             'minisite_id' => $review->minisiteId,
             'status' => $review->status,
-        ]);
+        ));
 
         try {
             $review->touch();
             $this->getEntityManager()->persist($review);
             $this->getEntityManager()->flush();
 
-            $this->logger->debug("save() exit", [
+            $this->logger->debug("save() exit", array(
                 'review_id' => $review->id,
                 'minisite_id' => $review->minisiteId,
-            ]);
+            ));
 
             return $review;
         } catch (\Exception $e) {
-            $this->logger->error("save() failed", [
+            $this->logger->error("save() failed", array(
                 'review_id' => $review->id,
                 'minisite_id' => $review->minisiteId,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -72,30 +73,31 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
         \Doctrine\DBAL\LockMode|int|null $lockMode = null,
         ?int $lockVersion = null
     ): ?Review {
-        if (!is_int($id)) {
+        if (! is_int($id)) {
             throw new \InvalidArgumentException('Review ID must be an integer');
         }
 
-        $this->logger->debug("find() entry", [
+        $this->logger->debug("find() entry", array(
             'review_id' => $id,
-        ]);
+        ));
 
         try {
             // Call parent::find() to use Doctrine's implementation with locking support
             $result = parent::find($id, $lockMode, $lockVersion);
 
-            $this->logger->debug("find() exit", [
+            $this->logger->debug("find() exit", array(
                 'review_id' => $id,
                 'found' => $result !== null,
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("find() failed", [
+            $this->logger->error("find() failed", array(
                 'review_id' => $id,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -118,6 +120,7 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
             // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
             throw new \RuntimeException(sprintf('Review with ID %d not found', $id));
         }
+
         return $review;
     }
 
@@ -126,25 +129,26 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
      */
     public function delete(Review $review): void
     {
-        $this->logger->debug("delete() entry", [
+        $this->logger->debug("delete() entry", array(
             'review_id' => $review->id,
             'minisite_id' => $review->minisiteId,
-        ]);
+        ));
 
         try {
             $this->getEntityManager()->remove($review);
             $this->getEntityManager()->flush();
 
-            $this->logger->debug("delete() exit", [
+            $this->logger->debug("delete() exit", array(
                 'review_id' => $review->id,
                 'deleted' => true,
-            ]);
+            ));
         } catch (\Exception $e) {
-            $this->logger->error("delete() failed", [
+            $this->logger->error("delete() failed", array(
                 'review_id' => $review->id,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -166,11 +170,11 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
      */
     public function listByStatusForMinisite(string $minisiteId, string $status, int $limit = 20): array
     {
-        $this->logger->debug("listByStatusForMinisite() entry", [
+        $this->logger->debug("listByStatusForMinisite() entry", array(
             'minisite_id' => $minisiteId,
             'status' => $status,
             'limit' => $limit,
-        ]);
+        ));
 
         try {
             $qb = $this->createQueryBuilder('r')
@@ -185,20 +189,21 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
 
             $result = $qb->getQuery()->getResult();
 
-            $this->logger->debug("listByStatusForMinisite() exit", [
+            $this->logger->debug("listByStatusForMinisite() exit", array(
                 'minisite_id' => $minisiteId,
                 'status' => $status,
                 'count' => count($result),
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("listByStatusForMinisite() failed", [
+            $this->logger->error("listByStatusForMinisite() failed", array(
                 'minisite_id' => $minisiteId,
                 'status' => $status,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -208,10 +213,10 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
      */
     public function countByStatusForMinisite(string $minisiteId, string $status): int
     {
-        $this->logger->debug("countByStatusForMinisite() entry", [
+        $this->logger->debug("countByStatusForMinisite() entry", array(
             'minisite_id' => $minisiteId,
             'status' => $status,
-        ]);
+        ));
 
         try {
             $qb = $this->createQueryBuilder('r')
@@ -223,20 +228,21 @@ class ReviewRepository extends EntityRepository implements ReviewRepositoryInter
 
             $result = (int) $qb->getQuery()->getSingleScalarResult();
 
-            $this->logger->debug("countByStatusForMinisite() exit", [
+            $this->logger->debug("countByStatusForMinisite() exit", array(
                 'minisite_id' => $minisiteId,
                 'status' => $status,
                 'count' => $result,
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("countByStatusForMinisite() failed", [
+            $this->logger->error("countByStatusForMinisite() failed", array(
                 'minisite_id' => $minisiteId,
                 'status' => $status,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }

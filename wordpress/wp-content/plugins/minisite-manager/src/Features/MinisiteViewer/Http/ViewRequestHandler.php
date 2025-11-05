@@ -30,7 +30,7 @@ class ViewRequestHandler
         $businessSlug = $this->wordPressManager->getQueryVar('minisite_biz');
         $locationSlug = $this->wordPressManager->getQueryVar('minisite_loc');
 
-        if (!$businessSlug || !$locationSlug) {
+        if (! $businessSlug || ! $locationSlug) {
             return null;
         }
 
@@ -48,6 +48,7 @@ class ViewRequestHandler
     public function getBusinessSlug(): ?string
     {
         $slug = $this->wordPressManager->getQueryVar('minisite_biz');
+
         return $this->sanitizeSlug($slug);
     }
 
@@ -59,6 +60,7 @@ class ViewRequestHandler
     public function getLocationSlug(): ?string
     {
         $slug = $this->wordPressManager->getQueryVar('minisite_loc');
+
         return $this->sanitizeSlug($slug);
     }
 

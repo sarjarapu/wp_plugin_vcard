@@ -18,7 +18,7 @@ final class DeactivationHandler
         flush_rewrite_rules();
 
         // Cleanup in non-production
-        if (!defined('MINISITE_LIVE_PRODUCTION') || !MINISITE_LIVE_PRODUCTION) {
+        if (! defined('MINISITE_LIVE_PRODUCTION') || ! MINISITE_LIVE_PRODUCTION) {
             self::cleanupNonProduction();
         }
     }
@@ -35,7 +35,7 @@ final class DeactivationHandler
         delete_option(MINISITE_DB_OPTION);
 
         // Remove custom roles
-        foreach (['minisite_user', 'minisite_member', 'minisite_power', 'minisite_admin'] as $roleSlug) {
+        foreach (array('minisite_user', 'minisite_member', 'minisite_power', 'minisite_admin') as $roleSlug) {
             remove_role($roleSlug);
         }
     }

@@ -51,7 +51,7 @@ class EditHooks extends BaseHook
         // Handle both string '1' and integer 1 (WordPress query vars can be either)
         $accountValue = $this->wordPressManager->getQueryVar('minisite_account');
         $isAccountRoute = ($accountValue === self::ACCOUNT_ROUTE_FLAG || $accountValue === 1);
-        if (!$isAccountRoute) {
+        if (! $isAccountRoute) {
             return; // Not an account route, let other handlers process it
         }
 

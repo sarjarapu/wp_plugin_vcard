@@ -28,7 +28,7 @@ final class AuthHooks extends BaseHook
      */
     public function register(): void
     {
-        add_action('init', [$this, 'addRewriteRules']);
+        add_action('init', array($this, 'addRewriteRules'));
         // Note: template_redirect is registered by AuthenticationFeature
     }
 
@@ -40,7 +40,7 @@ final class AuthHooks extends BaseHook
     public function addRewriteRules(): void
     {
         // Add query vars for our new authentication system
-        add_filter('query_vars', [$this, 'addQueryVars']);
+        add_filter('query_vars', array($this, 'addQueryVars'));
     }
 
     /**
@@ -67,8 +67,8 @@ final class AuthHooks extends BaseHook
         $action = get_query_var('minisite_account_action');
 
         // Only handle authentication routes, let the old system handle sites, new, etc.
-        $authActions = ['login', 'logout', 'dashboard', 'register', 'forgot'];
-        if (!in_array($action, $authActions)) {
+        $authActions = array('login', 'logout', 'dashboard', 'register', 'forgot');
+        if (! in_array($action, $authActions)) {
             return;
         }
 

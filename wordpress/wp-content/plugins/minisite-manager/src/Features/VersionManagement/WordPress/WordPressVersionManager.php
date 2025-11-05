@@ -2,8 +2,8 @@
 
 namespace Minisite\Features\VersionManagement\WordPress;
 
-use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
@@ -48,6 +48,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
         if ($text === null) {
             return '';
         }
+
         return sanitize_text_field($text);
     }
 
@@ -62,6 +63,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
         if ($text === null) {
             return '';
         }
+
         return sanitize_textarea_field($text);
     }
 
@@ -92,7 +94,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     /**
      * Send JSON success response
      */
-    public function sendJsonSuccess(array $data = [], int $statusCode = 200): void
+    public function sendJsonSuccess(array $data = array(), int $statusCode = 200): void
     {
         wp_send_json_success($data, $statusCode);
     }
@@ -150,6 +152,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
         if ($email === null) {
             return '';
         }
+
         return sanitize_email($email);
     }
 
@@ -164,6 +167,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
         if ($url === null) {
             return '';
         }
+
         return esc_url_raw($url);
     }
 
@@ -198,6 +202,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     public function getCurrentUser(): ?object
     {
         $user = wp_get_current_user();
+
         return $user && $user->ID > 0 ? $user : null;
     }
 
@@ -239,6 +244,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     public function getMinisiteRepository(): object
     {
         global $wpdb;
+
         return new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     }
 
@@ -251,6 +257,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     public function findMinisiteById(string $id): ?object
     {
         $repo = $this->getMinisiteRepository();
+
         return $repo->findById($id);
     }
 
@@ -263,6 +270,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     public function hasBeenPublished(string $id): bool
     {
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+
         return $versionRepo->findPublishedVersion($id) !== null;
     }
 
@@ -275,6 +283,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     public function getNextVersionNumber(string $id): int
     {
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+
         return $versionRepo->getNextVersionNumber($id);
     }
 
@@ -288,6 +297,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     {
         $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
         $versionRepo->save($version);
+
         return $version;
     }
 

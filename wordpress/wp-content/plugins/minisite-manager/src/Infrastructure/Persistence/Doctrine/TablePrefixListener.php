@@ -54,7 +54,7 @@ class TablePrefixListener implements EventSubscriber
      */
     public function getSubscribedEvents(): array
     {
-        return [Events::loadClassMetadata];
+        return array(Events::loadClassMetadata);
     }
 
     /**
@@ -81,8 +81,8 @@ class TablePrefixListener implements EventSubscriber
         // Skip WordPress core entities, other plugins, etc.
         // Support both legacy Domain\Entities and new feature-based Features\*\Domain\Entities
         if (
-            !str_starts_with($classMetadata->getName(), 'Minisite\\Domain\\Entities\\')
-            && !str_starts_with($classMetadata->getName(), 'Minisite\\Features\\')
+            ! str_starts_with($classMetadata->getName(), 'Minisite\\Domain\\Entities\\')
+            && ! str_starts_with($classMetadata->getName(), 'Minisite\\Features\\')
         ) {
             return;
         }
@@ -93,7 +93,7 @@ class TablePrefixListener implements EventSubscriber
         // Modify it: prepend stored prefix (uses $this->prefix, NOT $wpdb!)
         // Result: 'wp_minisite_config'
         if (
-            !$classMetadata->isInheritanceTypeSingleTable() ||
+            ! $classMetadata->isInheritanceTypeSingleTable() ||
             $classMetadata->getName() === $classMetadata->rootEntityName
         ) {
             $classMetadata->setTableName($this->prefix . $currentTableName);

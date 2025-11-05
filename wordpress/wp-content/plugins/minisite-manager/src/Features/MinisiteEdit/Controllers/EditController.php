@@ -2,8 +2,8 @@
 
 namespace Minisite\Features\MinisiteEdit\Controllers;
 
-use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
+use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
@@ -36,12 +36,12 @@ class EditController
     public function handleEdit(): void
     {
         // Check authentication
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->wordPressManager->redirect($this->wordPressManager->getLoginRedirectUrl());
         }
 
         $siteId = $this->wordPressManager->getQueryVar('minisite_id');
-        if (!$siteId) {
+        if (! $siteId) {
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
         }
 
@@ -50,6 +50,7 @@ class EditController
         // Handle form submission
         if ($this->formSecurityHelper->isPostRequest()) {
             $this->handleFormSubmission($siteId);
+
             return;
         }
 
@@ -63,17 +64,18 @@ class EditController
     private function handleFormSubmission(string $siteId): void
     {
         // Verify nonce first
-        if (!$this->formSecurityHelper->verifyNonce('minisite_edit', 'minisite_edit_nonce')) {
-            $this->logger->warning('EditController::handleFormSubmission() - Invalid nonce', [
+        if (! $this->formSecurityHelper->verifyNonce('minisite_edit', 'minisite_edit_nonce')) {
+            $this->logger->warning('EditController::handleFormSubmission() - Invalid nonce', array(
                 'site_id' => $siteId,
-                'nonce_value' => $this->formSecurityHelper->getPostData('minisite_edit_nonce', 'MISSING')
-            ]);
+                'nonce_value' => $this->formSecurityHelper->getPostData('minisite_edit_nonce', 'MISSING'),
+            ));
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
+
             return;
         }
 
         // Log form submission details for debugging
-        $this->logger->debug('EditController::handleFormSubmission() called', [
+        $this->logger->debug('EditController::handleFormSubmission() called', array(
             'site_id' => $siteId,
             // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
             'post_data_count' => count($_POST),
@@ -88,9 +90,9 @@ class EditController
             'hero_subheading' => $this->formSecurityHelper->getPostData('hero_subheading', 'NOT_SET'),
             'about_html' => $this->formSecurityHelper->getPostDataTextarea('about_html', 'NOT_SET'),
             'contact_email' => $this->formSecurityHelper->getPostDataEmail('contact_email', 'NOT_SET'),
-            'has_nonce' => !empty($this->formSecurityHelper->getPostData('minisite_edit_nonce')),
-            'nonce_value' => $this->formSecurityHelper->getPostData('minisite_edit_nonce', 'MISSING')
-        ]);
+            'has_nonce' => ! empty($this->formSecurityHelper->getPostData('minisite_edit_nonce')),
+            'nonce_value' => $this->formSecurityHelper->getPostData('minisite_edit_nonce', 'MISSING'),
+        ));
 
         // Pass sanitized POST data to service
         // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above
@@ -100,7 +102,7 @@ class EditController
             $this->wordPressManager->redirect($result->redirectUrl);
         } else {
             // Display form with errors
-            $this->displayEditForm($siteId, null, $result->errors ?? []);
+            $this->displayEditForm($siteId, null, $result->errors ?? array());
         }
     }
 
@@ -108,11 +110,11 @@ class EditController
     /**
      * Display edit form
      */
-    private function displayEditForm(string $siteId, ?string $versionId, array $errors = []): void
+    private function displayEditForm(string $siteId, ?string $versionId, array $errors = array()): void
     {
         try {
             $editData = $this->editService->getMinisiteForEditing($siteId, $versionId);
-            $editData->errorMessage = !empty($errors) ? implode(', ', $errors) : '';
+            $editData->errorMessage = ! empty($errors) ? implode(', ', $errors) : '';
 
             $this->editRenderer->renderEditForm($editData);
             // Hook handles termination - controller just renders

@@ -23,6 +23,6 @@ final class MinisiteEditFeature
         $editHooks->register();
 
         // Register template_redirect handler with priority 3 to run before VersionManagementFeature (priority 5)
-        add_action('template_redirect', [$editHooks, 'handleEditRoutes'], 3);
+        add_action('template_redirect', array($editHooks, 'handleEditRoutes'), 3);
     }
 }

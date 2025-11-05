@@ -41,42 +41,44 @@ class ConfigurationManagementService
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        $this->logger->debug("get() entry", [
+        $this->logger->debug("get() entry", array(
             'key' => $key,
             'has_default' => $default !== null,
             'default_type' => $default !== null ? gettype($default) : null,
-        ]);
+        ));
 
         try {
             $this->ensureLoaded();
 
             $config = self::$cache[$key] ?? null;
-            if (!$config) {
+            if (! $config) {
                 $result = $default;
-                $this->logger->debug("get() returning default", [
+                $this->logger->debug("get() returning default", array(
                     'key' => $key,
                     'result' => $this->sanitizeForLogging($result),
                     'result_type' => gettype($result),
-                ]);
+                ));
+
                 return $result;
             }
 
             $result = $config->getTypedValue();
 
-            $this->logger->debug("get() returning value", [
+            $this->logger->debug("get() returning value", array(
                 'key' => $key,
                 'result' => $this->sanitizeForLogging($result),
                 'result_type' => gettype($result),
                 'is_sensitive' => $config->isSensitive,
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("get() failed", [
+            $this->logger->error("get() failed", array(
                 'key' => $key,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -86,11 +88,11 @@ class ConfigurationManagementService
      */
     public function set(string $key, mixed $value, string $type = 'string', ?string $description = null): void
     {
-        $this->logger->debug("set() entry", [
+        $this->logger->debug("set() entry", array(
             'key' => $key,
             'type' => $type,
             'has_description' => $description !== null,
-        ]);
+        ));
 
         try {
             $existing = $this->repository->findByKey($key);
@@ -118,16 +120,17 @@ class ConfigurationManagementService
             // Invalidate cache - next get() will reload from DB
             $this->clearCache();
 
-            $this->logger->debug("set() exit", [
+            $this->logger->debug("set() exit", array(
                 'key' => $key,
                 'type' => $type,
-            ]);
+            ));
         } catch (\Exception $e) {
-            $this->logger->error("set() failed", [
+            $this->logger->error("set() failed", array(
                 'key' => $key,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -137,26 +140,27 @@ class ConfigurationManagementService
      */
     public function has(string $key): bool
     {
-        $this->logger->debug("has() entry", [
+        $this->logger->debug("has() entry", array(
             'key' => $key,
-        ]);
+        ));
 
         try {
             $this->ensureLoaded();
             $result = isset(self::$cache[$key]);
 
-            $this->logger->debug("has() exit", [
+            $this->logger->debug("has() exit", array(
                 'key' => $key,
                 'result' => $result,
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("has() failed", [
+            $this->logger->error("has() failed", array(
                 'key' => $key,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -166,23 +170,24 @@ class ConfigurationManagementService
      */
     public function delete(string $key): void
     {
-        $this->logger->debug("delete() entry", [
+        $this->logger->debug("delete() entry", array(
             'key' => $key,
-        ]);
+        ));
 
         try {
             $this->repository->delete($key);
             $this->clearCache(); // Invalidate cache
 
-            $this->logger->debug("delete() exit", [
+            $this->logger->debug("delete() exit", array(
                 'key' => $key,
-            ]);
+            ));
         } catch (\Exception $e) {
-            $this->logger->error("delete() failed", [
+            $this->logger->error("delete() failed", array(
                 'key' => $key,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -192,30 +197,31 @@ class ConfigurationManagementService
      */
     public function all(bool $includeSensitive = false): array
     {
-        $this->logger->debug("all() entry", [
+        $this->logger->debug("all() entry", array(
             'include_sensitive' => $includeSensitive,
-        ]);
+        ));
 
         try {
             $this->ensureLoaded();
 
             $all = array_values(self::$cache);
 
-            if (!$includeSensitive) {
-                $all = array_filter($all, fn($config) => !$config->isSensitive);
+            if (! $includeSensitive) {
+                $all = array_filter($all, fn ($config) => ! $config->isSensitive);
             }
 
-            $this->logger->debug("all() exit", [
+            $this->logger->debug("all() exit", array(
                 'count' => count($all),
                 'include_sensitive' => $includeSensitive,
-            ]);
+            ));
 
             return $all;
         } catch (\Exception $e) {
-            $this->logger->error("all() failed", [
+            $this->logger->error("all() failed", array(
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -231,16 +237,17 @@ class ConfigurationManagementService
             $this->ensureLoaded();
             $result = array_keys(self::$cache);
 
-            $this->logger->debug("keys() exit", [
+            $this->logger->debug("keys() exit", array(
                 'count' => count($result),
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("keys() failed", [
+            $this->logger->error("keys() failed", array(
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -250,26 +257,27 @@ class ConfigurationManagementService
      */
     public function find(string $key): ?Config
     {
-        $this->logger->debug("find() entry", [
+        $this->logger->debug("find() entry", array(
             'key' => $key,
-        ]);
+        ));
 
         try {
             $this->ensureLoaded();
             $result = self::$cache[$key] ?? null;
 
-            $this->logger->debug("find() exit", [
+            $this->logger->debug("find() exit", array(
                 'key' => $key,
                 'found' => $result !== null,
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("find() failed", [
+            $this->logger->error("find() failed", array(
                 'key' => $key,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -286,10 +294,11 @@ class ConfigurationManagementService
 
             $this->logger->debug("reload() exit");
         } catch (\Exception $e) {
-            $this->logger->error("reload() failed", [
+            $this->logger->error("reload() failed", array(
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -312,9 +321,10 @@ class ConfigurationManagementService
         return (bool) $this->get($key, $default);
     }
 
-    public function getJson(string $key, array $default = []): array
+    public function getJson(string $key, array $default = array()): array
     {
         $value = $this->get($key, $default);
+
         return is_array($value) ? $value : $default;
     }
 
@@ -331,7 +341,7 @@ class ConfigurationManagementService
         $allConfigs = $this->repository->getAll();
 
         // Index by key for fast O(1) lookup
-        self::$cache = [];
+        self::$cache = array();
         foreach ($allConfigs as $config) {
             self::$cache[$config->key] = $config;
         }
@@ -353,7 +363,7 @@ class ConfigurationManagementService
      */
     private function isSensitiveType(string $type): bool
     {
-        return in_array($type, ['encrypted', 'secret'], true);
+        return in_array($type, array('encrypted', 'secret'), true);
     }
 
     /**

@@ -2,12 +2,12 @@
 
 namespace Minisite\Features\MinisiteViewer\WordPress;
 
+use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
-use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress Minisite Manager
@@ -40,6 +40,7 @@ class WordPressMinisiteManager extends BaseWordPressManager
         if ($this->repository === null) {
             $this->repository = new MinisiteRepository(db::getWpdb());
         }
+
         return $this->repository;
     }
 
@@ -51,6 +52,7 @@ class WordPressMinisiteManager extends BaseWordPressManager
         if ($this->versionRepository === null) {
             $this->versionRepository = new VersionRepository(db::getWpdb());
         }
+
         return $this->versionRepository;
     }
 
@@ -64,6 +66,7 @@ class WordPressMinisiteManager extends BaseWordPressManager
     public function findMinisiteBySlugs(string $businessSlug, string $locationSlug): ?object
     {
         $slugPair = new SlugPair($businessSlug, $locationSlug);
+
         return $this->getRepository()->findBySlugs($slugPair);
     }
 
@@ -187,12 +190,13 @@ class WordPressMinisiteManager extends BaseWordPressManager
     public function getReviewsForMinisite(string $minisiteId): array
     {
         // Use global ReviewRepository (initialized in PluginBootstrap)
-        if (!isset($GLOBALS['minisite_review_repository'])) {
-            return [];
+        if (! isset($GLOBALS['minisite_review_repository'])) {
+            return array();
         }
 
         /** @var \Minisite\Features\ReviewManagement\Repositories\ReviewRepository $reviewRepo */
         $reviewRepo = $GLOBALS['minisite_review_repository'];
+
         return $reviewRepo->listApprovedForMinisite($minisiteId);
     }
 }

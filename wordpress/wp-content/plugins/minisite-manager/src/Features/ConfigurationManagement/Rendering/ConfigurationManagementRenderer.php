@@ -20,8 +20,8 @@ final class ConfigurationManagementRenderer
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
-                    \Timber\Timber::$locations ?? [],
-                    [$base]
+                    \Timber\Timber::$locations ?? array(),
+                    array($base)
                 )
             )
         );
@@ -32,13 +32,13 @@ final class ConfigurationManagementRenderer
      */
     public function render(array $configs, array $messages, string $nonce, string $deleteNonce): void
     {
-        if (!class_exists('Timber\\Timber')) {
+        if (! class_exists('Timber\\Timber')) {
             wp_die('Timber plugin is required for admin pages.');
         }
 
         $this->registerTimberLocations();
 
-        $context = [
+        $context = array(
             'page_title' => 'Minisite Configuration',
             'page_description' => 'Manage application settings, API keys, and integration credentials.',
             'configs' => $configs,
@@ -47,7 +47,7 @@ final class ConfigurationManagementRenderer
             'admin_url' => admin_url('admin.php'),
             'admin_post_url' => admin_url('admin-post.php'),
             'messages' => $messages,
-        ];
+        );
 
         \Timber\Timber::render('views/admin-config.twig', $context);
     }
@@ -60,10 +60,10 @@ final class ConfigurationManagementRenderer
         $value = $config->getTypedValue();
 
         // Default configs are required and cannot be deleted
-        $defaultConfigs = ['openai_api_key', 'pii_encryption_key', 'max_reviews_per_page'];
+        $defaultConfigs = array('openai_api_key', 'pii_encryption_key', 'max_reviews_per_page');
         $isRequired = $config->isRequired || in_array($config->key, $defaultConfigs, true);
 
-        return [
+        return array(
             'key' => $config->key,
             'display_name' => $this->formatKeyName($config->key),
             'value' => $value,
@@ -72,7 +72,7 @@ final class ConfigurationManagementRenderer
             'description' => $config->description,
             'is_sensitive' => $config->isSensitive,
             'is_required' => $isRequired,
-        ];
+        );
     }
 
     /**
@@ -83,6 +83,7 @@ final class ConfigurationManagementRenderer
         if (strlen($value) <= 4) {
             return '••••';
         }
+
         return '••••••••' . substr($value, -4);
     }
 
@@ -92,11 +93,11 @@ final class ConfigurationManagementRenderer
     private function formatKeyName(string $key): string
     {
         // Define acronyms that should be all uppercase
-        $acronyms = ['openai', 'pii', 'api', 'id', 'url', 'http', 'https', 'ssl', 'tls', 'oauth', 'jwt'];
+        $acronyms = array('openai', 'pii', 'api', 'id', 'url', 'http', 'https', 'ssl', 'tls', 'oauth', 'jwt');
 
         // Split by underscore and capitalize each word
         $words = explode('_', $key);
-        $formatted = [];
+        $formatted = array();
 
         foreach ($words as $word) {
             $lowerWord = strtolower($word);

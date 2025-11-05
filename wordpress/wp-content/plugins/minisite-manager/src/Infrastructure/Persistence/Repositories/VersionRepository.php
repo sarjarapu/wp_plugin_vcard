@@ -18,33 +18,33 @@ class VersionRepository implements VersionRepositoryInterface
     public function save(Version $version): Version
     {
         $data = array(
-            'minisite_id'       => $version->minisiteId,
-            'version_number'    => $version->versionNumber,
-            'status'            => $version->status,
-            'label'             => $version->label,
-            'comment'           => $version->comment,
-            'created_by'        => $version->createdBy,
-            'created_at'        => $version->createdAt?->format('Y-m-d H:i:s') ?? current_time('mysql'),
-            'published_at'      => $version->publishedAt?->format('Y-m-d H:i:s'),
+            'minisite_id' => $version->minisiteId,
+            'version_number' => $version->versionNumber,
+            'status' => $version->status,
+            'label' => $version->label,
+            'comment' => $version->comment,
+            'created_by' => $version->createdBy,
+            'created_at' => $version->createdAt?->format('Y-m-d H:i:s') ?? current_time('mysql'),
+            'published_at' => $version->publishedAt?->format('Y-m-d H:i:s'),
             'source_version_id' => $version->sourceVersionId,
 
             // Minisite fields
-            'business_slug'     => $version->slugs?->business,
-            'location_slug'     => $version->slugs?->location,
-            'title'             => $version->title,
-            'name'              => $version->name,
-            'city'              => $version->city,
-            'region'            => $version->region,
-            'country_code'      => $version->countryCode,
-            'postal_code'       => $version->postalCode,
-            'site_template'     => $version->siteTemplate,
-            'palette'           => $version->palette,
-            'industry'          => $version->industry,
-            'default_locale'    => $version->defaultLocale,
-            'schema_version'    => $version->schemaVersion,
-            'site_version'      => $version->siteVersion,
-            'site_json'         => wp_json_encode($version->siteJson),
-            'search_terms'      => $version->searchTerms,
+            'business_slug' => $version->slugs?->business,
+            'location_slug' => $version->slugs?->location,
+            'title' => $version->title,
+            'name' => $version->name,
+            'city' => $version->city,
+            'region' => $version->region,
+            'country_code' => $version->countryCode,
+            'postal_code' => $version->postalCode,
+            'site_template' => $version->siteTemplate,
+            'palette' => $version->palette,
+            'industry' => $version->industry,
+            'default_locale' => $version->defaultLocale,
+            'schema_version' => $version->schemaVersion,
+            'site_version' => $version->siteVersion,
+            'site_json' => wp_json_encode($version->siteJson),
+            'search_terms' => $version->searchTerms,
         );
 
         $formats = array(
@@ -95,9 +95,9 @@ class VersionRepository implements VersionRepositoryInterface
                     $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger(
                         'version-repository'
                     );
-                    $logger->error('Failed to update location_point for version', [
+                    $logger->error('Failed to update location_point for version', array(
                         'version_id' => $version->id,
-                    ]);
+                    ));
                 }
             }
         } else {
@@ -160,7 +160,8 @@ class VersionRepository implements VersionRepositoryInterface
         );
 
         $rows = $this->db->get_results($sql, ARRAY_A) ?: array();
-        return array_map(fn($row) => $this->mapRow($row), $rows);
+
+        return array_map(fn ($row) => $this->mapRow($row), $rows);
     }
 
     public function findLatestVersion(string $minisiteId): ?Version
@@ -174,6 +175,7 @@ class VersionRepository implements VersionRepositoryInterface
         );
 
         $row = $this->db->get_row($sql, ARRAY_A);
+
         return $row ? $this->mapRow($row) : null;
     }
 
@@ -188,6 +190,7 @@ class VersionRepository implements VersionRepositoryInterface
         );
 
         $row = $this->db->get_row($sql, ARRAY_A);
+
         return $row ? $this->mapRow($row) : null;
     }
 
@@ -262,6 +265,7 @@ class VersionRepository implements VersionRepositoryInterface
         );
 
         $row = $this->db->get_row($sql, ARRAY_A);
+
         return $row ? $this->mapRow($row) : null;
     }
 
@@ -273,12 +277,14 @@ class VersionRepository implements VersionRepositoryInterface
         );
 
         $result = $this->db->get_var($sql);
+
         return $result ? (int) $result + 1 : 1;
     }
 
     public function delete(int $id): bool
     {
         $result = $this->db->delete($this->table(), array( 'id' => $id ), array( '%d' ));
+
         return $result !== false;
     }
 

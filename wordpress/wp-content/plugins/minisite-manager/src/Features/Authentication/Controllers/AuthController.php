@@ -2,13 +2,13 @@
 
 namespace Minisite\Features\Authentication\Controllers;
 
+use Minisite\Features\Authentication\Handlers\ForgotPasswordHandler;
 use Minisite\Features\Authentication\Handlers\LoginHandler;
 use Minisite\Features\Authentication\Handlers\RegisterHandler;
-use Minisite\Features\Authentication\Handlers\ForgotPasswordHandler;
-use Minisite\Features\Authentication\Services\AuthService;
 use Minisite\Features\Authentication\Http\AuthRequestHandler;
 use Minisite\Features\Authentication\Http\AuthResponseHandler;
 use Minisite\Features\Authentication\Rendering\AuthRenderer;
+use Minisite\Features\Authentication\Services\AuthService;
 
 /**
  * Refactored Auth Controller
@@ -44,10 +44,12 @@ class AuthController
 
             if ($command) {
                 $this->processLogin($command);
+
                 return;
             }
         } catch (\InvalidArgumentException $e) {
             $this->renderLoginPage($e->getMessage());
+
             return;
         }
 
@@ -64,10 +66,12 @@ class AuthController
 
             if ($command) {
                 $this->processRegistration($command);
+
                 return;
             }
         } catch (\InvalidArgumentException $e) {
             $this->renderRegisterPage($e->getMessage());
+
             return;
         }
 
@@ -84,10 +88,12 @@ class AuthController
 
             if ($command) {
                 $this->processForgotPassword($command);
+
                 return;
             }
         } catch (\InvalidArgumentException $e) {
             $this->renderForgotPasswordPage($e->getMessage());
+
             return;
         }
 
@@ -99,18 +105,19 @@ class AuthController
      */
     public function handleDashboard(): void
     {
-        if (!$this->authService->isLoggedIn()) {
+        if (! $this->authService->isLoggedIn()) {
             $redirectTo = isset($_SERVER['REQUEST_URI']) ?
                 sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
             $this->responseHandler->redirectToLogin($redirectTo);
+
             return;
         }
 
         $user = $this->authService->getCurrentUser();
-        $context = [
+        $context = array(
             'page_title' => 'Dashboard',
             'user' => $user,
-        ];
+        );
 
         $this->renderer->render('dashboard.twig', $context);
     }
@@ -133,6 +140,7 @@ class AuthController
 
         if ($result['success']) {
             $this->responseHandler->redirect($result['redirect_to']);
+
             return;
         }
 
@@ -152,6 +160,7 @@ class AuthController
                 $result['user']->set_role(MINISITE_ROLE_USER);
             }
             $this->responseHandler->redirect($result['redirect_to']);
+
             return;
         }
 
@@ -188,7 +197,7 @@ class AuthController
         $context = $this->responseHandler->createErrorContext(
             'Sign In',
             $errorMessage ?? '',
-            ['redirect_to' => $this->requestHandler->getRedirectTo()]
+            array('redirect_to' => $this->requestHandler->getRedirectTo())
         );
 
         $this->renderer->render('account-login.twig', $context);
@@ -202,7 +211,7 @@ class AuthController
         $context = $this->responseHandler->createErrorContext(
             'Create Account',
             $errorMessage ?? '',
-            ['redirect_to' => $this->requestHandler->getRedirectTo()]
+            array('redirect_to' => $this->requestHandler->getRedirectTo())
         );
 
         $this->renderer->render('account-register.twig', $context);

@@ -95,7 +95,7 @@ class SqlLoader
     public static function createStandardVariables($wpdb): array
     {
         return array(
-            'prefix'  => $wpdb->prefix,
+            'prefix' => $wpdb->prefix,
             'charset' => $wpdb->get_charset_collate(),
         );
     }

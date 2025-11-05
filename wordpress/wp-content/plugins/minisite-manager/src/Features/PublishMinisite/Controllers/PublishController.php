@@ -2,10 +2,10 @@
 
 namespace Minisite\Features\PublishMinisite\Controllers;
 
+use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;
 use Minisite\Features\PublishMinisite\Services\PublishService;
 use Minisite\Features\PublishMinisite\Services\ReservationService;
 use Minisite\Features\PublishMinisite\Services\SubscriptionActivationService;
-use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
@@ -42,18 +42,18 @@ class PublishController
     public function handlePublish(): void
     {
         // Check authentication
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/login'));
         }
 
         // Get site ID from query variable (works for both rewrite rules and query parameters)
         $siteId = $this->wordPressManager->getQueryVar('minisite_id');
 
-        if (!$siteId) {
-            $this->logger->warning('Publish page accessed without site_id', [
+        if (! $siteId) {
+            $this->logger->warning('Publish page accessed without site_id', array(
                 // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Logging only, not processing form data
                 'query_vars' => $_GET,
-            ]);
+            ));
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
         }
 
@@ -61,10 +61,10 @@ class PublishController
             $publishData = $this->publishService->getMinisiteForPublishing($siteId);
             $this->publishRenderer->renderPublishPage($publishData);
         } catch (\Exception $e) {
-            $this->logger->error('Failed to load publish page', [
+            $this->logger->error('Failed to load publish page', array(
                 'site_id' => $siteId,
                 'error' => $e->getMessage(),
-            ]);
+            ));
             $this->wordPressManager->redirect(
                 $this->wordPressManager->getHomeUrl('/account/sites?error=' . urlencode($e->getMessage()))
             );
@@ -76,13 +76,15 @@ class PublishController
      */
     public function handleCheckSlugAvailability(): void
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->wordPressManager->sendJsonError('Not authenticated', 401);
+
             return;
         }
 
-        if (!$this->formSecurityHelper->verifyNonce('check_slug_availability', 'nonce')) {
+        if (! $this->formSecurityHelper->verifyNonce('check_slug_availability', 'nonce')) {
             $this->wordPressManager->sendJsonError('Security check failed', 403);
+
             return;
         }
 
@@ -99,16 +101,16 @@ class PublishController
                 $locationSlug
             );
 
-            $this->wordPressManager->sendJsonSuccess([
+            $this->wordPressManager->sendJsonSuccess(array(
                 'available' => $result->available,
                 'message' => $result->message,
-            ]);
+            ));
         } catch (\Exception $e) {
-            $this->logger->error('Failed to check slug availability', [
+            $this->logger->error('Failed to check slug availability', array(
                 'business_slug' => $businessSlug,
                 'location_slug' => $locationSlug,
                 'error' => $e->getMessage(),
-            ]);
+            ));
             $this->wordPressManager->sendJsonError('Failed to check slug availability: ' . $e->getMessage(), 500);
         }
     }
@@ -118,13 +120,15 @@ class PublishController
      */
     public function handleReserveSlug(): void
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->wordPressManager->sendJsonError('Not authenticated', 401);
+
             return;
         }
 
-        if (!$this->formSecurityHelper->verifyNonce('reserve_slug', 'nonce')) {
+        if (! $this->formSecurityHelper->verifyNonce('reserve_slug', 'nonce')) {
             $this->wordPressManager->sendJsonError('Security check failed', 403);
+
             return;
         }
 
@@ -136,19 +140,21 @@ class PublishController
         );
 
         // Validate slug format
-        if (empty($businessSlug) || !preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
+        if (empty($businessSlug) || ! preg_match('/^[a-z0-9-]+$/', $businessSlug)) {
             $this->wordPressManager->sendJsonError(
                 'Business slug is required and can only contain lowercase letters, numbers, and hyphens',
                 400
             );
+
             return;
         }
 
-        if (!empty($locationSlug) && !preg_match('/^[a-z0-9-]+$/', $locationSlug)) {
+        if (! empty($locationSlug) && ! preg_match('/^[a-z0-9-]+$/', $locationSlug)) {
             $this->wordPressManager->sendJsonError(
                 'Location slug can only contain lowercase letters, numbers, and hyphens',
                 400
             );
+
             return;
         }
 
@@ -156,18 +162,18 @@ class PublishController
             $userId = $this->wordPressManager->getCurrentUserId();
             $result = $this->reservationService->reserveSlug($businessSlug, $locationSlug, $userId);
 
-            $this->wordPressManager->sendJsonSuccess([
+            $this->wordPressManager->sendJsonSuccess(array(
                 'reservation_id' => $result->reservation_id,
                 'expires_at' => $result->expires_at,
                 'expires_in_seconds' => $result->expires_in_seconds,
                 'message' => $result->message,
-            ]);
+            ));
         } catch (\Exception $e) {
-            $this->logger->error('Failed to reserve slug', [
+            $this->logger->error('Failed to reserve slug', array(
                 'business_slug' => $businessSlug,
                 'location_slug' => $locationSlug,
                 'error' => $e->getMessage(),
-            ]);
+            ));
             $this->wordPressManager->sendJsonError($e->getMessage(), 409);
         }
     }
@@ -177,13 +183,15 @@ class PublishController
      */
     public function handleCancelReservation(): void
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->wordPressManager->sendJsonError('Not authenticated', 401);
+
             return;
         }
 
-        if (!$this->formSecurityHelper->verifyNonce('cancel_reservation', 'nonce')) {
+        if (! $this->formSecurityHelper->verifyNonce('cancel_reservation', 'nonce')) {
             $this->wordPressManager->sendJsonError('Security check failed', 403);
+
             return;
         }
 
@@ -196,13 +204,15 @@ class PublishController
      */
     public function handleCreateWooCommerceOrder(): void
     {
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->wordPressManager->sendJsonError('Not authenticated', 401);
+
             return;
         }
 
-        if (!$this->formSecurityHelper->verifyNonce('create_minisite_order', 'nonce')) {
+        if (! $this->formSecurityHelper->verifyNonce('create_minisite_order', 'nonce')) {
             $this->wordPressManager->sendJsonError('Security check failed', 403);
+
             return;
         }
 
@@ -221,13 +231,15 @@ class PublishController
 
         if (empty($minisiteId) || empty($businessSlug) || empty($reservationId)) {
             $this->wordPressManager->sendJsonError('Missing required fields', 400);
+
             return;
         }
 
         try {
             // Check if WooCommerce is active
-            if (!class_exists('WooCommerce')) {
+            if (! class_exists('WooCommerce')) {
                 $this->wordPressManager->sendJsonError('WooCommerce is not active', 500);
+
                 return;
             }
 
@@ -240,7 +252,7 @@ class PublishController
                  WHERE minisite_id = %s 
                  AND status IN ('active', 'grace_period') 
                  AND expires_at > NOW()",
-                [$minisiteId]
+                array($minisiteId)
             );
 
             if ($existingPayment) {
@@ -253,17 +265,19 @@ class PublishController
                     $reservationId
                 );
 
-                $this->wordPressManager->sendJsonSuccess([
+                $this->wordPressManager->sendJsonSuccess(array(
                     'message' => 'Minisite published successfully! You already have an active subscription.',
                     'redirect_url' => $this->wordPressManager->getHomeUrl('/account/sites'),
-                ]);
+                ));
+
                 return;
             }
 
             // Find the minisite subscription product by SKU
             $productId = wc_get_product_id_by_sku('NMS001');
-            if (!$productId) {
+            if (! $productId) {
                 $this->wordPressManager->sendJsonError('Minisite subscription product (SKU: NMS001) not found', 500);
+
                 return;
             }
 
@@ -273,14 +287,15 @@ class PublishController
             // Add the subscription product to cart
             $cartItemKey = WC()->cart->add_to_cart($productId, 1);
 
-            if (!$cartItemKey) {
+            if (! $cartItemKey) {
                 $this->wordPressManager->sendJsonError('Failed to add product to cart', 500);
+
                 return;
             }
 
             // Build slug string
             $slugString = $businessSlug;
-            if (!empty($locationSlug)) {
+            if (! empty($locationSlug)) {
                 $slugString .= '/' . $locationSlug;
             }
 
@@ -292,11 +307,11 @@ class PublishController
             // Also store in session for later retrieval
             WC()->session->set(
                 'minisite_cart_data',
-                [
+                array(
                     'minisite_id' => $minisiteId,
                     'minisite_slug' => $slugString,
                     'minisite_reservation_id' => $reservationId,
-                ]
+                )
             );
 
             // Save cart
@@ -305,20 +320,20 @@ class PublishController
             // Get cart URL
             $cartUrl = wc_get_cart_url();
 
-            $this->logger->info('Added minisite subscription to cart', [
+            $this->logger->info('Added minisite subscription to cart', array(
                 'minisite_id' => $minisiteId,
                 'cart_url' => $cartUrl,
-            ]);
+            ));
 
-            $this->wordPressManager->sendJsonSuccess([
+            $this->wordPressManager->sendJsonSuccess(array(
                 'cart_url' => $cartUrl,
                 'message' => 'Product added to cart successfully. Redirecting to cart...',
-            ]);
+            ));
         } catch (\Exception $e) {
-            $this->logger->error('Failed to create WooCommerce order', [
+            $this->logger->error('Failed to create WooCommerce order', array(
                 'minisite_id' => $minisiteId,
                 'error' => $e->getMessage(),
-            ]);
+            ));
             $this->wordPressManager->sendJsonError('Failed to create order: ' . $e->getMessage(), 500);
         }
     }

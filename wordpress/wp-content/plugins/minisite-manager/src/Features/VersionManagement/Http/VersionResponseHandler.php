@@ -17,7 +17,7 @@ class VersionResponseHandler
     /**
      * Send JSON success response
      */
-    public function sendJsonSuccess(array $data = [], int $statusCode = 200): void
+    public function sendJsonSuccess(array $data = array(), int $statusCode = 200): void
     {
         $this->wordPressManager->sendJsonSuccess($data, $statusCode);
     }
@@ -40,7 +40,8 @@ class VersionResponseHandler
             $redirectUrl .= '?redirect_to=' . urlencode($redirectTo);
         }
         $this->wordPressManager->redirect($redirectUrl);
-        // exit; // Removed - handled by WordPressVersionManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
+        // exit; // Removed - handled by WordPressVersionManager::redirect() via
+        // BaseWordPressManager::redirect() which uses TerminationHandler
     }
 
     /**
@@ -49,7 +50,8 @@ class VersionResponseHandler
     public function redirectToSites(): void
     {
         $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
-        // exit; // Removed - handled by WordPressVersionManager::redirect() via BaseWordPressManager::redirect() which uses TerminationHandler
+        // exit; // Removed - handled by WordPressVersionManager::redirect() via
+        // BaseWordPressManager::redirect() which uses TerminationHandler
     }
 
     /**

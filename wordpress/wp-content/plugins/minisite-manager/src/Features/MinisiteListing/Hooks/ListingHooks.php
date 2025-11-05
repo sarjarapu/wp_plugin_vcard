@@ -28,7 +28,7 @@ final class ListingHooks extends BaseHook
      */
     public function register(): void
     {
-        add_action('init', [$this, 'addRewriteRules']);
+        add_action('init', array($this, 'addRewriteRules'));
         // Note: template_redirect is registered by MinisiteListingFeature
     }
 
@@ -40,7 +40,7 @@ final class ListingHooks extends BaseHook
     public function addRewriteRules(): void
     {
         // Add query vars for our new listing system
-        add_filter('query_vars', [$this, 'addQueryVars']);
+        add_filter('query_vars', array($this, 'addQueryVars'));
     }
 
     /**
@@ -67,6 +67,7 @@ final class ListingHooks extends BaseHook
                     $this->listingController->handleList();
                     // Terminate after handling route (inherited from BaseHook)
                     $this->terminate();
+
                     break;
             }
         }

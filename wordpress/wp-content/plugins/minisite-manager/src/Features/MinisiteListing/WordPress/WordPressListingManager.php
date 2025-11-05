@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Minisite\Features\MinisiteListing\WordPress;
 
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress Listing Manager
@@ -95,14 +95,14 @@ class WordPressListingManager extends BaseWordPressManager
             );
             $statusChip = $minisite->status === 'published' ? 'Published' : 'Draft';
 
-            return [
+            return array(
                 'id' => $minisite->id,
                 'title' => $minisite->title ?: $minisite->name,
                 'name' => $minisite->name,
-                'slugs' => [
+                'slugs' => array(
                     'business' => $minisite->slugs->business,
                     'location' => $minisite->slugs->location,
-                ],
+                ),
                 'route' => $route,
                 'location' => trim(
                     $minisite->city . (isset($minisite->region) && $minisite->region ? ', ' . $minisite->region : '') .
@@ -116,7 +116,7 @@ class WordPressListingManager extends BaseWordPressManager
                 // TODO: real subscription and online flags
                 'subscription' => 'Unknown',
                 'online' => 'Unknown',
-            ];
+            );
         }, $minisites);
 
         return $result;

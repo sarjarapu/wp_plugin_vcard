@@ -2,11 +2,11 @@
 
 namespace Minisite\Features\NewMinisite\Hooks;
 
-use Minisite\Features\NewMinisite\Controllers\NewMinisiteController;
-use Minisite\Features\NewMinisite\Services\NewMinisiteService;
-use Minisite\Features\NewMinisite\Rendering\NewMinisiteRenderer;
-use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Features\NewMinisite\Controllers\NewMinisiteController;
+use Minisite\Features\NewMinisite\Rendering\NewMinisiteRenderer;
+use Minisite\Features\NewMinisite\Services\NewMinisiteService;
+use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**

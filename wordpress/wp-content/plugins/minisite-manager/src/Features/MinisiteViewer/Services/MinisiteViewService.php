@@ -34,22 +34,22 @@ class MinisiteViewService
                 $command->locationSlug
             );
 
-            if (!$minisite) {
-                return [
+            if (! $minisite) {
+                return array(
                     'success' => false,
-                    'error' => 'Minisite not found'
-                ];
+                    'error' => 'Minisite not found',
+                );
             }
 
-            return [
+            return array(
                 'success' => true,
-                'minisite' => $minisite
-            ];
+                'minisite' => $minisite,
+            );
         } catch (\Exception $e) {
-            return [
+            return array(
                 'success' => false,
-                'error' => 'Error retrieving minisite: ' . $e->getMessage()
-            ];
+                'error' => 'Error retrieving minisite: ' . $e->getMessage(),
+            );
         }
     }
 
@@ -79,7 +79,7 @@ class MinisiteViewService
     {
         // Get minisite and verify access
         $minisite = $this->wordPressManager->findMinisiteById($siteId);
-        if (!$minisite) {
+        if (! $minisite) {
             throw new \RuntimeException('Minisite not found');
         }
 
@@ -94,13 +94,13 @@ class MinisiteViewService
         $siteJson = null;
         $version = null;
 
-        if ($versionId === 'current' || !$versionId) {
+        if ($versionId === 'current' || ! $versionId) {
             // Show current published version (from profile.siteJson)
             $siteJson = $minisite->siteJson;
         } else {
             // Show specific version
             $version = $versionRepo->findById((int) $versionId);
-            if (!$version) {
+            if (! $version) {
                 throw new \RuntimeException('Version not found');
             }
             if ($version->minisiteId !== $siteId) {
@@ -121,11 +121,11 @@ class MinisiteViewService
             // Add other fields as needed
         }
 
-        return (object) [
+        return (object) array(
             'minisite' => $minisite,
             'version' => $version,
             'siteJson' => $siteJson,
-            'versionId' => $versionId
-        ];
+            'versionId' => $versionId,
+        );
     }
 }

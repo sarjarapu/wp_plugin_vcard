@@ -56,7 +56,7 @@ class ConfigEncryption
 
         // Encryption key must be defined in wp-config.php
         // This is a security requirement, not a convenience choice
-        if (!defined('MINISITE_ENCRYPTION_KEY')) {
+        if (! defined('MINISITE_ENCRYPTION_KEY')) {
             throw new \RuntimeException(
                 'MINISITE_ENCRYPTION_KEY constant must be defined in wp-config.php. ' .
                 'This key is required to decrypt sensitive configuration values. ' .
@@ -66,7 +66,7 @@ class ConfigEncryption
 
         $decodedKey = base64_decode(constant('MINISITE_ENCRYPTION_KEY'), true);
         // phpstan-ignore-next-line -- base64_decode can return false or string, we check both
-        if ($decodedKey === false || !is_string($decodedKey)) {
+        if ($decodedKey === false || ! is_string($decodedKey)) {
             throw new \RuntimeException('Invalid MINISITE_ENCRYPTION_KEY - must be valid base64 encoded key');
         }
 

@@ -3,8 +3,8 @@
 namespace Minisite\Infrastructure\Persistence\Repositories;
 
 use Minisite\Domain\Entities\Minisite;
-use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
@@ -63,14 +63,15 @@ class MinisiteRepository implements MinisiteRepositoryInterface
      */
     public function listByOwner(int $userId, int $limit = 50, int $offset = 0): array
     {
-        $sql  = $this->db->prepare(
+        $sql = $this->db->prepare(
             "SELECT * FROM {$this->table()} WHERE created_by=%d ORDER BY updated_at DESC, id DESC LIMIT %d OFFSET %d",
             $userId,
             $limit,
             $offset
         );
         $rows = $this->db->get_results($sql, ARRAY_A) ?: array();
-        return array_map(fn($r) => $this->mapRow($r), $rows);
+
+        return array_map(fn ($r) => $this->mapRow($r), $rows);
     }
 
     /**
@@ -82,6 +83,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             "SELECT COUNT(*) FROM {$this->table()} WHERE created_by=%d",
             $userId
         );
+
         return (int) $this->db->get_var($sql);
     }
 
@@ -95,6 +97,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         if (! $row) {
             return null;
         }
+
         return $this->mapRow($row);
     }
 
@@ -121,19 +124,20 @@ class MinisiteRepository implements MinisiteRepositoryInterface
      */
     public function updateCoordinates(string $id, ?float $lat, ?float $lng, int $updatedBy): void
     {
-        $this->logger->debug('MinisiteRepository::updateCoordinates() - Input', [
+        $this->logger->debug('MinisiteRepository::updateCoordinates() - Input', array(
             'minisite_id' => $id,
             'lat' => $lat,
             'lng' => $lng,
             'updated_by' => $updatedBy,
-            'operation_type' => 'input'
-        ]);
+            'operation_type' => 'input',
+        ));
 
         if ($lat === null || $lng === null) {
-            $this->logger->debug('MinisiteRepository::updateCoordinates() - No coordinates provided, skipping', [
+            $this->logger->debug('MinisiteRepository::updateCoordinates() - No coordinates provided, skipping', array(
                 'minisite_id' => $id,
-                'operation_type' => 'skipped'
-            ]);
+                'operation_type' => 'skipped',
+            ));
+
             return;
         }
 
@@ -146,27 +150,28 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             $id
         );
 
-        $this->logger->debug('MinisiteRepository::updateCoordinates() - Executing SQL', [
+        $this->logger->debug('MinisiteRepository::updateCoordinates() - Executing SQL', array(
             'minisite_id' => $id,
             'sql_query' => $sql,
-            'operation_type' => 'sql_execution'
-        ]);
+            'operation_type' => 'sql_execution',
+        ));
 
         $rows_affected = $this->db->query($sql);
 
-        $this->logger->debug('MinisiteRepository::updateCoordinates() - Output', [
+        $this->logger->debug('MinisiteRepository::updateCoordinates() - Output', array(
             'minisite_id' => $id,
             'rows_affected' => $rows_affected,
             'last_error' => $this->db->last_error,
-            'operation_type' => 'output'
-        ]);
+            'operation_type' => 'output',
+        ));
 
         if ($rows_affected === 0) {
-            $this->logger->error('MinisiteRepository::updateCoordinates() - Error', [
+            $this->logger->error('MinisiteRepository::updateCoordinates() - Error', array(
                 'minisite_id' => $id,
                 'error_message' => 'Minisite not found or update failed',
-                'operation_type' => 'error'
-            ]);
+                'operation_type' => 'error',
+            ));
+
             throw new \RuntimeException('Minisite not found or update failed.');
         }
     }
@@ -176,12 +181,12 @@ class MinisiteRepository implements MinisiteRepositoryInterface
      */
     public function updateMinisiteFields(string $minisiteId, array $fields, int $updatedBy): void
     {
-        $this->logger->debug('MinisiteRepository::updateMinisiteFields() - Input', [
+        $this->logger->debug('MinisiteRepository::updateMinisiteFields() - Input', array(
             'minisite_id' => $minisiteId,
             'fields_count' => count($fields),
             'updated_by' => $updatedBy,
-            'operation_type' => 'input'
-        ]);
+            'operation_type' => 'input',
+        ));
 
         $updateFields = array(
             'updated_by' => $updatedBy,
@@ -207,13 +212,14 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         foreach ($fields as $field => $value) {
             if ($field === 'location_point' && strpos($value, 'POINT(') === 0) {
                 $hasRawSql = true;
+
                 break;
             }
         }
 
         if ($hasRawSql) {
             // Build custom SQL for raw fields
-            $setParts = [];
+            $setParts = array();
             foreach ($updateFields as $field => $value) {
                 if ($field === 'location_point' && strpos($value, 'POINT(') === 0) {
                     $setParts[] = "`$field` = $value";
@@ -224,7 +230,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
 
             $sql = "UPDATE {$this->table()} SET " . implode(', ', $setParts) . " WHERE id = %s";
             $values = array_values(array_filter($updateFields, function ($value, $field) {
-                return !($field === 'location_point' && strpos($value, 'POINT(') === 0);
+                return ! ($field === 'location_point' && strpos($value, 'POINT(') === 0);
             }, ARRAY_FILTER_USE_BOTH));
             $values[] = $minisiteId;
 
@@ -240,19 +246,20 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             );
         }
 
-        $this->logger->debug('MinisiteRepository::updateMinisiteFields() - Output', [
+        $this->logger->debug('MinisiteRepository::updateMinisiteFields() - Output', array(
             'minisite_id' => $minisiteId,
             'result' => $result,
             'last_error' => $this->db->last_error,
-            'operation_type' => 'output'
-        ]);
+            'operation_type' => 'output',
+        ));
 
         if ($result === false) {
-            $this->logger->error('MinisiteRepository::updateMinisiteFields() - Error', [
+            $this->logger->error('MinisiteRepository::updateMinisiteFields() - Error', array(
                 'minisite_id' => $minisiteId,
                 'error_message' => 'Failed to update minisite fields',
-                'operation_type' => 'error'
-            ]);
+                'operation_type' => 'error',
+            ));
+
             throw new \RuntimeException('Failed to update minisite fields.');
         }
     }
@@ -366,24 +373,24 @@ class MinisiteRepository implements MinisiteRepositoryInterface
 
             // Update main table with published content
             $updateData = array(
-                'site_json'                    => wp_json_encode($versionToPublish->siteJson),
-                'title'                        => $versionToPublish->title,
-                'name'                         => $versionToPublish->name,
-                'city'                         => $versionToPublish->city,
-                'region'                       => $versionToPublish->region,
-                'country_code'                 => $versionToPublish->countryCode,
-                'postal_code'                  => $versionToPublish->postalCode,
-                'site_template'                => $versionToPublish->siteTemplate,
-                'palette'                      => $versionToPublish->palette,
-                'industry'                     => $versionToPublish->industry,
-                'default_locale'               => $versionToPublish->defaultLocale,
-                'schema_version'               => $versionToPublish->schemaVersion,
-                'site_version'                 => $versionToPublish->siteVersion,
-                'search_terms'                 => $versionToPublish->searchTerms,
-                'status'                       => 'published',
-                'publish_status'               => 'published',
+                'site_json' => wp_json_encode($versionToPublish->siteJson),
+                'title' => $versionToPublish->title,
+                'name' => $versionToPublish->name,
+                'city' => $versionToPublish->city,
+                'region' => $versionToPublish->region,
+                'country_code' => $versionToPublish->countryCode,
+                'postal_code' => $versionToPublish->postalCode,
+                'site_template' => $versionToPublish->siteTemplate,
+                'palette' => $versionToPublish->palette,
+                'industry' => $versionToPublish->industry,
+                'default_locale' => $versionToPublish->defaultLocale,
+                'schema_version' => $versionToPublish->schemaVersion,
+                'site_version' => $versionToPublish->siteVersion,
+                'search_terms' => $versionToPublish->searchTerms,
+                'status' => 'published',
+                'publish_status' => 'published',
                 '_minisite_current_version_id' => $versionToPublish->id,
-                'updated_at'                   => date('Y-m-d H:i:s'),
+                'updated_at' => date('Y-m-d H:i:s'),
             );
 
             $updateResult = $this->db->update(
@@ -409,6 +416,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             $this->db->query('COMMIT');
         } catch (\Exception $e) {
             $this->db->query('ROLLBACK');
+
             throw $e;
         }
     }
@@ -423,31 +431,31 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         $search = trim(strtolower("{$site->name} {$site->city} {$site->industry} {$site->palette} {$site->title}"));
 
         $data = array(
-            'id'             => $site->id,
-            'slug'           => $site->slug,
-            'business_slug'  => $site->slugs->business,
-            'location_slug'  => $site->slugs->location,
-            'title'          => $site->title,
-            'name'           => $site->name,
-            'city'           => $site->city,
-            'region'         => $site->region,
-            'country_code'   => $site->countryCode,
-            'postal_code'    => $site->postalCode,
-            'site_template'  => $site->siteTemplate,
-            'palette'        => $site->palette,
-            'industry'       => $site->industry,
+            'id' => $site->id,
+            'slug' => $site->slug,
+            'business_slug' => $site->slugs->business,
+            'location_slug' => $site->slugs->location,
+            'title' => $site->title,
+            'name' => $site->name,
+            'city' => $site->city,
+            'region' => $site->region,
+            'country_code' => $site->countryCode,
+            'postal_code' => $site->postalCode,
+            'site_template' => $site->siteTemplate,
+            'palette' => $site->palette,
+            'industry' => $site->industry,
             'default_locale' => $site->defaultLocale,
             'schema_version' => $site->schemaVersion,
-            'site_version'   => $site->siteVersion,
-            'site_json'      => wp_json_encode($site->siteJson),
-            'search_terms'   => $search,
-            'status'         => $site->status,
+            'site_version' => $site->siteVersion,
+            'site_json' => wp_json_encode($site->siteJson),
+            'search_terms' => $search,
+            'status' => $site->status,
             'publish_status' => $site->status, // Set publish_status to same as status initially
-            'created_at'     => $site->createdAt->format('Y-m-d H:i:s'),
-            'updated_at'     => $site->updatedAt->format('Y-m-d H:i:s'),
-            'published_at'   => $site->publishedAt?->format('Y-m-d H:i:s'),
-            'created_by'     => $site->createdBy,
-            'updated_by'     => $site->updatedBy,
+            'created_at' => $site->createdAt->format('Y-m-d H:i:s'),
+            'updated_at' => $site->updatedAt->format('Y-m-d H:i:s'),
+            'published_at' => $site->publishedAt?->format('Y-m-d H:i:s'),
+            'created_by' => $site->createdBy,
+            'updated_by' => $site->updatedBy,
         );
 
         $result = $this->db->insert(
@@ -506,22 +514,22 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         $search = trim(strtolower("{$m->name} {$m->city} {$m->industry} {$m->palette} {$m->title}"));
 
         // Update existing by slugs + expected version (optimistic lock)
-        $data   = array(
-            'title'          => $m->title,
-            'name'           => $m->name,
-            'city'           => $m->city,
-            'region'         => $m->region,
-            'country_code'   => $m->countryCode,
-            'postal_code'    => $m->postalCode,
-            'site_template'  => $m->siteTemplate,
-            'palette'        => $m->palette,
-            'industry'       => $m->industry,
+        $data = array(
+            'title' => $m->title,
+            'name' => $m->name,
+            'city' => $m->city,
+            'region' => $m->region,
+            'country_code' => $m->countryCode,
+            'postal_code' => $m->postalCode,
+            'site_template' => $m->siteTemplate,
+            'palette' => $m->palette,
+            'industry' => $m->industry,
             'default_locale' => $m->defaultLocale,
             'schema_version' => $m->schemaVersion,
-            'site_json'      => wp_json_encode($m->siteJson),
-            'search_terms'   => $search,
-            'status'         => $m->status,
-            'updated_by'     => $m->updatedBy,
+            'site_json' => wp_json_encode($m->siteJson),
+            'search_terms' => $search,
+            'status' => $m->status,
+            'updated_by' => $m->updatedBy,
         );
         $format = array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s', '%d' );
 
@@ -577,6 +585,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         if (! $fresh) {
             throw new \RuntimeException('Failed to reload minisite after save.');
         }
+
         return $fresh;
     }
 
@@ -659,7 +668,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         $result = $this->db->update(
             $this->table(),
             array(
-                'status'       => $status,
+                'status' => $status,
                 'published_at' => $status === 'published' ? current_time('mysql') : null,
             ),
             array( 'id' => $minisiteId ),
@@ -685,7 +694,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         // Add the business info fields
         foreach ($fields as $field => $value) {
             $updateFields[ $field ] = $value;
-            $formatFields[]         = '%s';
+            $formatFields[] = '%s';
         }
 
         $result = $this->db->update(

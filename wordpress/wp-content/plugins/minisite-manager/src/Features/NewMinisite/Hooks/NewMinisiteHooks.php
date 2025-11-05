@@ -47,7 +47,7 @@ class NewMinisiteHooks extends BaseHook
         // Only handle account management routes (new minisite creation)
         // The rewrite rules set minisite_account=1 for account routes
         $isAccountRoute = $this->wordPressManager->getQueryVar('minisite_account') === self::ACCOUNT_ROUTE_FLAG;
-        if (!$isAccountRoute) {
+        if (! $isAccountRoute) {
             return; // Not an account route, let other handlers process it
         }
 

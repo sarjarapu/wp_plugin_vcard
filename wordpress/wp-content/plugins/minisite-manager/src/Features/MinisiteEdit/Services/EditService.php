@@ -2,11 +2,10 @@
 
 namespace Minisite\Features\MinisiteEdit\Services;
 
-use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
-use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\Entities\Version;
-use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
+use Minisite\Domain\Services\MinisiteFormProcessor;
+use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
@@ -34,13 +33,13 @@ class EditService
     public function getMinisiteForEditing(string $siteId, ?string $versionId = null): object
     {
         $minisite = $this->wordPressManager->findMinisiteById($siteId);
-        if (!$minisite) {
+        if (! $minisite) {
             throw new \RuntimeException('Minisite not found');
         }
 
         // Check ownership
         $currentUser = $this->wordPressManager->getCurrentUser();
-        if (!$this->wordPressManager->userOwnsMinisite($minisite, (int) $currentUser->ID)) {
+        if (! $this->wordPressManager->userOwnsMinisite($minisite, (int) $currentUser->ID)) {
             throw new \RuntimeException('Access denied');
         }
 
@@ -51,15 +50,15 @@ class EditService
         // Create profile object for form
         $profileForForm = $this->createProfileForForm($minisite, $editingVersion);
 
-        return (object) [
+        return (object) array(
             'minisite' => $minisite,
             'editingVersion' => $editingVersion,
             'latestDraft' => $latestDraft,
             'profileForForm' => $profileForForm,
             'siteJson' => $editingVersion ? $editingVersion->siteJson : $minisite->siteJson,
             'successMessage' => $this->getSuccessMessage(),
-            'errorMessage' => ''
-        ];
+            'errorMessage' => '',
+        );
     }
 
 
@@ -69,7 +68,7 @@ class EditService
     public function saveDraft(string $siteId, array $formData): object
     {
         // Log detailed form data for debugging
-        $this->logger->debug('EditService::saveDraft() called', [
+        $this->logger->debug('EditService::saveDraft() called', array(
             'site_id' => $siteId,
             'form_data_count' => count($formData),
             'business_name' => $formData['business_name'] ?? 'NOT_SET',
@@ -101,8 +100,8 @@ class EditService
             'version_label' => $formData['version_label'] ?? 'NOT_SET',
             'version_comment' => $formData['version_comment'] ?? 'NOT_SET',
             'has_nonce' => isset($formData['minisite_edit_nonce']),
-            'nonce_value' => $formData['minisite_edit_nonce'] ?? 'MISSING'
-        ]);
+            'nonce_value' => $formData['minisite_edit_nonce'] ?? 'MISSING',
+        ));
 
         try {
             // Create shared components
@@ -111,18 +110,18 @@ class EditService
 
             // Validate form data
             $errors = $formProcessor->validateFormData($formData);
-            if (!empty($errors)) {
-                return (object) ['success' => false, 'errors' => $errors];
+            if (! empty($errors)) {
+                return (object) array('success' => false, 'errors' => $errors);
             }
 
             // Verify nonce
             if (
-                !$this->wordPressManager->verifyNonce(
+                ! $this->wordPressManager->verifyNonce(
                     $this->wordPressManager->sanitizeTextField($formData['minisite_edit_nonce']),
                     'minisite_edit'
                 )
             ) {
-                return (object) ['success' => false, 'errors' => ['Security check failed. Please try again.']];
+                return (object) array('success' => false, 'errors' => array('Security check failed. Please try again.'));
             }
 
             $minisite = $this->wordPressManager->findMinisiteById($siteId);
@@ -133,14 +132,14 @@ class EditService
             $operationType = $hasBeenPublished ? 'edit_published' : 'edit_draft';
 
             // Use shared database coordinator
-            $this->logger->info('Calling MinisiteDatabaseCoordinator::saveMinisiteData', [
+            $this->logger->info('Calling MinisiteDatabaseCoordinator::saveMinisiteData', array(
                 'site_id' => $siteId,
                 'form_data_count' => count($formData),
                 'operation_type' => $operationType,
                 'has_been_published' => $hasBeenPublished,
                 'minisite_status' => $minisite->status ?? 'unknown',
-                'call_type' => 'call_database_coordinator'
-            ]);
+                'call_type' => 'call_database_coordinator',
+            ));
 
             $result = $dbCoordinator->saveMinisiteData(
                 $siteId,
@@ -151,18 +150,18 @@ class EditService
                 $hasBeenPublished
             );
 
-            $this->logger->info('MinisiteDatabaseCoordinator::saveMinisiteData completed', [
+            $this->logger->info('MinisiteDatabaseCoordinator::saveMinisiteData completed', array(
                 'site_id' => $siteId,
                 'success' => $result->success ?? false,
-                'has_errors' => !empty($result->errors ?? []),
-                'error_count' => count($result->errors ?? []),
-                'has_redirect_url' => !empty($result->redirectUrl ?? ''),
-                'operation_type' => 'database_coordinator_result'
-            ]);
+                'has_errors' => ! empty($result->errors ?? array()),
+                'error_count' => count($result->errors ?? array()),
+                'has_redirect_url' => ! empty($result->redirectUrl ?? ''),
+                'operation_type' => 'database_coordinator_result',
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error('EditService::saveDraft() - Exception caught', [
+            $this->logger->error('EditService::saveDraft() - Exception caught', array(
                 'site_id' => $siteId,
                 'form_data_count' => count($formData),
                 'error_message' => $e->getMessage(),
@@ -170,13 +169,13 @@ class EditService
                 'error_file' => $e->getFile(),
                 'error_line' => $e->getLine(),
                 'error_trace' => $e->getTraceAsString(),
-                'operation_type' => 'edit_service_exception'
-            ]);
+                'operation_type' => 'edit_service_exception',
+            ));
 
-            return (object) [
+            return (object) array(
                 'success' => false,
-                'errors' => ['Failed to save draft: ' . $e->getMessage()]
-            ];
+                'errors' => array('Failed to save draft: ' . $e->getMessage()),
+            );
         }
     }
 
@@ -185,12 +184,12 @@ class EditService
      */
     private function getEditingVersion(string $siteId, ?string $versionId): ?object
     {
-        if ($versionId === 'latest' || !$versionId) {
+        if ($versionId === 'latest' || ! $versionId) {
             return $this->wordPressManager->getLatestDraftForEditing($siteId);
         }
 
         $version = $this->wordPressManager->findVersionById((int) $versionId);
-        if (!$version || $version->minisiteId !== $siteId) {
+        if (! $version || $version->minisiteId !== $siteId) {
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl("/account/sites/{$siteId}/edit"));
         }
 
@@ -230,6 +229,7 @@ class EditService
         if (isset($_GET['draft_saved']) && $_GET['draft_saved'] === '1') {
             return 'Draft saved successfully!';
         }
+
         return '';
     }
 }

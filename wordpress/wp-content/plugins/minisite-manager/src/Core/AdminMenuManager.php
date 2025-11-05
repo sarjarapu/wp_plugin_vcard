@@ -46,7 +46,7 @@ final class AdminMenuManager
     public function addMainMenu(): void
     {
         $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('admin-menu');
-        $logger->debug('Adding main menu', ['capability' => $this->getMainMenuCapability()]);
+        $logger->debug('Adding main menu', array('capability' => $this->getMainMenuCapability()));
 
         // Main menu page
         add_menu_page(
@@ -54,7 +54,7 @@ final class AdminMenuManager
             self::MENU_TITLE,
             $this->getMainMenuCapability(),
             self::MENU_SLUG,
-            [$this, 'renderDashboardPage'],
+            array($this, 'renderDashboardPage'),
             self::MENU_ICON,
             self::MENU_POSITION
         );
@@ -66,7 +66,7 @@ final class AdminMenuManager
             'Dashboard',
             $this->getMainMenuCapability(),
             self::MENU_SLUG,
-            [$this, 'renderDashboardPage']
+            array($this, 'renderDashboardPage')
         );
 
         // My Sites submenu
@@ -76,7 +76,7 @@ final class AdminMenuManager
             'My Sites',
             $this->getSitesMenuCapability(),
             'minisite-my-sites',
-            [$this, 'renderMySitesPage']
+            array($this, 'renderMySitesPage')
         );
 
         // Logging Test submenu (only in development)

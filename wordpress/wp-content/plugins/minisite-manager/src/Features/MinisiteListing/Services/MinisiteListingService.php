@@ -32,15 +32,15 @@ class MinisiteListingService
                 $command->offset
             );
 
-            return [
+            return array(
                 'success' => true,
-                'minisites' => $minisites
-            ];
+                'minisites' => $minisites,
+            );
         } catch (\Exception $e) {
-            return [
+            return array(
                 'success' => false,
-                'error' => 'Failed to retrieve minisites: ' . $e->getMessage()
-            ];
+                'error' => 'Failed to retrieve minisites: ' . $e->getMessage(),
+            );
         }
     }
 }

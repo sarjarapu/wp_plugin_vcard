@@ -15,6 +15,7 @@ class TimberRenderer
     {
         if (! class_exists('Timber\\Timber')) {
             $this->renderFallback($minisite);
+
             return;
         }
 
@@ -31,12 +32,12 @@ class TimberRenderer
 
     protected function getMinisiteData(Minisite $minisite): array
     {
-        $reviews              = $this->fetchReviews($minisite->id);
+        $reviews = $this->fetchReviews($minisite->id);
         $minisiteWithUserData = $this->fetchMinisiteWithUserData($minisite);
 
         return array(
             'minisite' => $minisiteWithUserData,
-            'reviews'  => $reviews,
+            'reviews' => $reviews,
         );
     }
 
@@ -50,7 +51,7 @@ class TimberRenderer
 
     protected function registerTimberLocations(): void
     {
-        $base                      = trailingslashit(\MINISITE_PLUGIN_DIR) . 'templates/timber';
+        $base = trailingslashit(\MINISITE_PLUGIN_DIR) . 'templates/timber';
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
@@ -64,19 +65,20 @@ class TimberRenderer
     protected function fetchReviews(string $minisiteId): array
     {
         // Use global ReviewRepository (initialized in PluginBootstrap)
-        if (!isset($GLOBALS['minisite_review_repository'])) {
-            return [];
+        if (! isset($GLOBALS['minisite_review_repository'])) {
+            return array();
         }
 
         /** @var \Minisite\Features\ReviewManagement\Repositories\ReviewRepository $reviewRepo */
         $reviewRepo = $GLOBALS['minisite_review_repository'];
+
         return $reviewRepo->listApprovedForMinisite($minisiteId);
     }
 
     protected function fetchMinisiteWithUserData(Minisite $minisite): Minisite
     {
         $isBookmarked = $this->checkIfBookmarked($minisite->id);
-        $canEdit      = $this->checkIfCanEdit($minisite->id);
+        $canEdit = $this->checkIfCanEdit($minisite->id);
 
         return new Minisite(
             id: $minisite->id,
@@ -117,10 +119,10 @@ class TimberRenderer
         }
 
         global $wpdb;
-        $userId         = get_current_user_id();
+        $userId = get_current_user_id();
         $bookmarkExists = db::get_var(
             "SELECT id FROM {$wpdb->prefix}minisite_bookmarks WHERE user_id = %d AND minisite_id = %d",
-            [$userId, $minisiteId]
+            array($userId, $minisiteId)
         );
 
         return (bool) $bookmarkExists;

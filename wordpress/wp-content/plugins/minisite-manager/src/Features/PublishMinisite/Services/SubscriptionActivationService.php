@@ -32,7 +32,7 @@ class SubscriptionActivationService
     public function activateFromOrder(int $orderId): void
     {
         $order = wc_get_order($orderId);
-        if (!$order) {
+        if (! $order) {
             throw new \RuntimeException('Order not found');
         }
 
@@ -42,20 +42,21 @@ class SubscriptionActivationService
         $reservationId = $order->get_meta('_reservation_id');
 
         // If not found in order meta, try to get from order items
-        if (!$minisiteId) {
+        if (! $minisiteId) {
             foreach ($order->get_items() as $item) {
                 $itemMinisiteId = $item->get_meta('_minisite_id');
                 if ($itemMinisiteId) {
                     $minisiteId = $itemMinisiteId;
                     $slug = $item->get_meta('_minisite_slug') ?: $slug;
                     $reservationId = $item->get_meta('_minisite_reservation_id') ?: $reservationId;
+
                     break;
                 }
             }
         }
 
         // If still not found, try session (fallback)
-        if (!$minisiteId && function_exists('WC') && WC()->session) {
+        if (! $minisiteId && function_exists('WC') && WC()->session) {
             $cartData = WC()->session->get('minisite_cart_data');
             if ($cartData) {
                 $minisiteId = $cartData['minisite_id'] ?? '';
@@ -64,7 +65,7 @@ class SubscriptionActivationService
             }
         }
 
-        if (!$minisiteId) {
+        if (! $minisiteId) {
             throw new \RuntimeException('No minisite ID found in order or session');
         }
 
@@ -73,7 +74,7 @@ class SubscriptionActivationService
         $businessSlug = $slugParts[0] ?? '';
         $locationSlug = $slugParts[1] ?? '';
 
-        if (!$businessSlug) {
+        if (! $businessSlug) {
             throw new \RuntimeException('Invalid slug format');
         }
 
@@ -86,7 +87,7 @@ class SubscriptionActivationService
                 "SELECT expires_at FROM {$wpdb->prefix}minisite_payments 
                  WHERE minisite_id = %s AND status = 'active' 
                  ORDER BY expires_at DESC LIMIT 1",
-                [$minisiteId]
+                array($minisiteId)
             );
 
             // Calculate new expiration date
@@ -102,7 +103,7 @@ class SubscriptionActivationService
             // Create payment record
             $paymentId = db::insert(
                 $wpdb->prefix . 'minisite_payments',
-                [
+                array(
                     'minisite_id' => $minisiteId,
                     'user_id' => $order->get_customer_id(),
                     'woocommerce_order_id' => $orderId,
@@ -116,8 +117,8 @@ class SubscriptionActivationService
                     'grace_period_ends_at' => $gracePeriodEnds,
                     'renewed_at' => null,
                     'reclaimed_at' => null,
-                ],
-                ['%s', '%d', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s']
+                ),
+                array('%s', '%d', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')
             );
 
             if ($paymentId === false) {
@@ -139,24 +140,25 @@ class SubscriptionActivationService
                 $reservationsTable = $wpdb->prefix . 'minisite_reservations';
                 db::query(
                     "DELETE FROM {$reservationsTable} WHERE id = %s",
-                    [$reservationId]
+                    array($reservationId)
                 );
             }
 
             db::query('COMMIT');
 
-            $this->logger->info('Successfully activated minisite subscription', [
+            $this->logger->info('Successfully activated minisite subscription', array(
                 'order_id' => $orderId,
                 'minisite_id' => $minisiteId,
                 'payment_id' => db::get_insert_id(),
-            ]);
+            ));
         } catch (\Exception $e) {
             db::query('ROLLBACK');
-            $this->logger->error('Failed to activate subscription', [
+            $this->logger->error('Failed to activate subscription', array(
                 'order_id' => $orderId,
                 'minisite_id' => $minisiteId,
                 'error' => $e->getMessage(),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -179,7 +181,7 @@ class SubscriptionActivationService
 
         db::insert(
             $wpdb->prefix . 'minisite_payment_history',
-            [
+            array(
                 'minisite_id' => $minisiteId,
                 'payment_id' => $paymentId,
                 'action' => $action,
@@ -189,8 +191,8 @@ class SubscriptionActivationService
                 'expires_at' => $expiresAt,
                 'grace_period_ends_at' => $gracePeriodEndsAt,
                 'new_owner_user_id' => null,
-            ],
-            ['%s', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%d']
+            ),
+            array('%s', '%d', '%s', '%f', '%s', '%s', '%s', '%s', '%d')
         );
     }
 
@@ -225,21 +227,22 @@ class SubscriptionActivationService
                 $reservationsTable = $wpdb->prefix . 'minisite_reservations';
                 db::query(
                     "DELETE FROM {$reservationsTable} WHERE id = %s",
-                    [$reservationId]
+                    array($reservationId)
                 );
             }
 
             db::query('COMMIT');
 
-            $this->logger->info('Successfully published minisite directly (existing subscriber)', [
+            $this->logger->info('Successfully published minisite directly (existing subscriber)', array(
                 'minisite_id' => $minisiteId,
-            ]);
+            ));
         } catch (\Exception $e) {
             db::query('ROLLBACK');
-            $this->logger->error('Failed to publish minisite directly', [
+            $this->logger->error('Failed to publish minisite directly', array(
                 'minisite_id' => $minisiteId,
                 'error' => $e->getMessage(),
-            ]);
+            ));
+
             throw $e;
         }
     }

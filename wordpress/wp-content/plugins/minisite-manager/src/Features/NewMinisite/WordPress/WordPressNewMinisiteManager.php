@@ -2,12 +2,12 @@
 
 namespace Minisite\Features\NewMinisite\WordPress;
 
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
-use Minisite\Domain\Interfaces\WordPressManagerInterface;
-use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress New Minisite Manager
@@ -40,6 +40,7 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         if ($this->minisiteRepository === null) {
             $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
         }
+
         return $this->minisiteRepository;
     }
 
@@ -51,6 +52,7 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         if ($this->versionRepository === null) {
             $this->versionRepository = new VersionRepository(db::getWpdb());
         }
+
         return $this->versionRepository;
     }
 
@@ -86,6 +88,7 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         if ($text === null) {
             return '';
         }
+
         return sanitize_text_field(wp_unslash($text));
     }
 
@@ -97,6 +100,7 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         if ($text === null) {
             return '';
         }
+
         return sanitize_textarea_field(wp_unslash($text));
     }
 
@@ -108,6 +112,7 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         if ($url === null) {
             return '';
         }
+
         return esc_url_raw(wp_unslash($url));
     }
 
@@ -119,6 +124,7 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         if ($email === null) {
             return '';
         }
+
         return sanitize_email(wp_unslash($email));
     }
 

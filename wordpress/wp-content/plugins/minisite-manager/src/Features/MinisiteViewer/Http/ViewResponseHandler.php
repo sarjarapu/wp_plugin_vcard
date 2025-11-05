@@ -31,11 +31,11 @@ class ViewResponseHandler
      */
     public function createSuccessContext(object $minisite): array
     {
-        return [
+        return array(
             'minisite' => $minisite,
             'page_title' => $minisite->name ?? 'Minisite',
-            'success' => true
-        ];
+            'success' => true,
+        );
     }
 
     /**
@@ -46,11 +46,11 @@ class ViewResponseHandler
      */
     public function createErrorContext(string $errorMessage): array
     {
-        return [
+        return array(
             'error_message' => $errorMessage,
             'page_title' => 'Minisite Not Found',
-            'success' => false
-        ];
+            'success' => false,
+        );
     }
 
     /**

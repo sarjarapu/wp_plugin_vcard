@@ -4,8 +4,8 @@ namespace Minisite\Features\PublishMinisite\Services;
 
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
+use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -44,18 +44,18 @@ class SlugAvailabilityService
         ReservationCleanup::cleanupExpired();
 
         // Validate slug formats
-        if (!$this->validateSlugFormat($businessSlug)) {
-            return (object) [
+        if (! $this->validateSlugFormat($businessSlug)) {
+            return (object) array(
                 'available' => false,
                 'message' => 'Business slug can only contain lowercase letters, numbers, and hyphens',
-            ];
+            );
         }
 
-        if (!empty($locationSlug) && !$this->validateSlugFormat($locationSlug)) {
-            return (object) [
+        if (! empty($locationSlug) && ! $this->validateSlugFormat($locationSlug)) {
+            return (object) array(
                 'available' => false,
                 'message' => 'Location slug can only contain lowercase letters, numbers, and hyphens',
-            ];
+            );
         }
 
         try {
@@ -64,10 +64,10 @@ class SlugAvailabilityService
             $existingMinisite = $minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
 
             if ($existingMinisite) {
-                return (object) [
+                return (object) array(
                     'available' => false,
                     'message' => 'This slug combination is already taken by an existing minisite',
-                ];
+                );
             }
 
             // Check if combination is currently reserved
@@ -81,13 +81,13 @@ class SlugAvailabilityService
                 $reservation = db::get_row(
                     "SELECT * FROM {$reservationsTable} 
                      WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '') AND expires_at > NOW()",
-                    [$businessSlug]
+                    array($businessSlug)
                 );
             } else {
                 $reservation = db::get_row(
                     "SELECT * FROM {$reservationsTable} 
                      WHERE business_slug = %s AND location_slug = %s AND expires_at > NOW()",
-                    [$businessSlug, $locationSlug]
+                    array($businessSlug, $locationSlug)
                 );
             }
 
@@ -97,24 +97,25 @@ class SlugAvailabilityService
                 $expiresIn = $expiresAt ? (strtotime($expiresAt) - time()) : 0;
                 $minutesLeft = max(0, ceil($expiresIn / 60));
 
-                return (object) [
+                return (object) array(
                     'available' => false,
                     'message' => "This slug combination is currently reserved " .
                                 "(expires in {$minutesLeft} minutes)",
-                ];
+                );
             }
 
             // Slug combination is available
-            return (object) [
+            return (object) array(
                 'available' => true,
                 'message' => 'This slug combination is available',
-            ];
+            );
         } catch (\Exception $e) {
-            $this->logger->error('Failed to check slug availability', [
+            $this->logger->error('Failed to check slug availability', array(
                 'business_slug' => $businessSlug,
                 'location_slug' => $locationSlug,
                 'error' => $e->getMessage(),
-            ]);
+            ));
+
             throw new \RuntimeException('Failed to check slug availability: ' . esc_html($e->getMessage()));
         }
     }

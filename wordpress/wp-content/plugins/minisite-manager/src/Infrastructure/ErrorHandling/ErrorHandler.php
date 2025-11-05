@@ -2,8 +2,8 @@
 
 namespace Minisite\Infrastructure\ErrorHandling;
 
-use Psr\Log\LoggerInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Comprehensive error handling for the Minisite Manager plugin
@@ -28,13 +28,13 @@ class ErrorHandler
         }
 
         // Set error handler for PHP errors (E_ERROR, E_WARNING, etc.)
-        set_error_handler([$this, 'handleError']);
+        set_error_handler(array($this, 'handleError'));
 
         // Set exception handler for uncaught exceptions
-        set_exception_handler([$this, 'handleException']);
+        set_exception_handler(array($this, 'handleException'));
 
         // Set shutdown function for fatal errors
-        register_shutdown_function([$this, 'handleShutdown']);
+        register_shutdown_function(array($this, 'handleShutdown'));
 
         $this->isRegistered = true;
         $this->logger->info('Error handlers registered successfully');
@@ -46,24 +46,24 @@ class ErrorHandler
     public function handleError(int $severity, string $message, string $file, int $line): bool
     {
         // Don't handle errors that are suppressed with @
-        if (!(error_reporting() & $severity)) {
+        if (! (error_reporting() & $severity)) {
             return false;
         }
 
-        $this->logger->error('PHP Error caught', [
+        $this->logger->error('PHP Error caught', array(
             'severity' => $this->getSeverityName($severity),
             'message' => sanitize_text_field($message),
             'file' => sanitize_text_field($file),
             'line' => $line,
-            'context' => [
+            'context' => array(
                 'request_uri' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'] ?? 'unknown')),
                 'user_agent' => sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')),
-                'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown'))
-            ]
-        ]);
+                'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown')),
+            ),
+        ));
 
         // For fatal errors, convert to exception so it can be caught
-        if (in_array($severity, [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR])) {
+        if (in_array($severity, array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR))) {
             throw new \ErrorException(
                 esc_html($message),
                 0,
@@ -81,22 +81,22 @@ class ErrorHandler
      */
     public function handleException(\Throwable $exception): void
     {
-        $this->logger->error('Uncaught Exception', [
+        $this->logger->error('Uncaught Exception', array(
             'exception_class' => get_class($exception),
             'message' => $exception->getMessage(),
             'code' => $exception->getCode(),
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
             'trace' => $exception->getTraceAsString(),
-            'context' => [
+            'context' => array(
                 'request_uri' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'] ?? 'unknown')),
                 'user_agent' => sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')),
-                'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown'))
-            ]
-        ]);
+                'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown')),
+            ),
+        ));
 
         // Show user-friendly error page
-        if (!headers_sent()) {
+        if (! headers_sent()) {
             http_response_code(500);
             header('Content-Type: text/html; charset=utf-8');
         }
@@ -121,18 +121,18 @@ class ErrorHandler
     {
         $error = error_get_last();
 
-        if ($error && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
-            $this->logger->error('Fatal Error detected on shutdown', [
+        if ($error && in_array($error['type'], array(E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR))) {
+            $this->logger->error('Fatal Error detected on shutdown', array(
                 'type' => $this->getSeverityName($error['type']),
                 'message' => $error['message'],
                 'file' => $error['file'],
                 'line' => $error['line'],
-                'context' => [
+                'context' => array(
                     'request_uri' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'] ?? 'unknown')),
                     'user_agent' => sanitize_text_field(wp_unslash($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')),
-                    'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown'))
-                ]
-            ]);
+                    'request_method' => sanitize_text_field(wp_unslash($_SERVER['REQUEST_METHOD'] ?? 'unknown')),
+                ),
+            ));
         }
     }
 
@@ -154,7 +154,7 @@ class ErrorHandler
      */
     private function getSeverityName(int $severity): string
     {
-        $severities = [
+        $severities = array(
             E_ERROR => 'E_ERROR',
             E_WARNING => 'E_WARNING',
             E_PARSE => 'E_PARSE',
@@ -170,7 +170,7 @@ class ErrorHandler
             E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
             E_DEPRECATED => 'E_DEPRECATED',
             E_USER_DEPRECATED => 'E_USER_DEPRECATED',
-        ];
+        );
 
         return $severities[$severity] ?? 'UNKNOWN';
     }

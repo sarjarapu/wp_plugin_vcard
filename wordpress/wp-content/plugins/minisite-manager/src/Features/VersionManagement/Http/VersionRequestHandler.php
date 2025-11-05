@@ -27,13 +27,13 @@ class VersionRequestHandler
     {
         $siteId = $this->wordPressManager->getQueryVar('minisite_id');
 
-        if (!$siteId) {
+        if (! $siteId) {
             return null;
         }
 
         $currentUser = $this->wordPressManager->getCurrentUser();
 
-        if (!$currentUser || !$currentUser->ID) {
+        if (! $currentUser || ! $currentUser->ID) {
             return null;
         }
 
@@ -69,22 +69,22 @@ class VersionRequestHandler
      */
     public function parseCreateDraftRequest(): ?CreateDraftCommand
     {
-        if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             return null;
         }
 
         // Verify nonce first before processing any form data
-        if (!$this->verifyNonce()) {
+        if (! $this->verifyNonce()) {
             return null;
         }
 
         $siteId = $this->getPostData('site_id');
-        if (!$siteId) {
+        if (! $siteId) {
             return null;
         }
 
         $currentUser = $this->wordPressManager->getCurrentUser();
-        if (!$currentUser || !$currentUser->ID) {
+        if (! $currentUser || ! $currentUser->ID) {
             return null;
         }
 
@@ -107,24 +107,24 @@ class VersionRequestHandler
      */
     public function parsePublishVersionRequest(): ?PublishVersionCommand
     {
-        if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             return null;
         }
 
         // Verify nonce first before processing any form data
-        if (!$this->verifyNonce()) {
+        if (! $this->verifyNonce()) {
             return null;
         }
 
         $siteId = $this->getPostData('site_id');
         $versionId = $this->getPostDataInt('version_id');
 
-        if (!$siteId || !$versionId) {
+        if (! $siteId || ! $versionId) {
             return null;
         }
 
         $currentUser = $this->wordPressManager->getCurrentUser();
-        if (!$currentUser || !$currentUser->ID) {
+        if (! $currentUser || ! $currentUser->ID) {
             return null;
         }
 
@@ -136,24 +136,24 @@ class VersionRequestHandler
      */
     public function parseRollbackVersionRequest(): ?RollbackVersionCommand
     {
-        if (!isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (! isset($_SERVER['REQUEST_METHOD']) || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             return null;
         }
 
         // Verify nonce first before processing any form data
-        if (!$this->verifyNonce()) {
+        if (! $this->verifyNonce()) {
             return null;
         }
 
         $siteId = $this->getPostData('site_id');
         $sourceVersionId = $this->getPostDataInt('source_version_id');
 
-        if (!$siteId || !$sourceVersionId) {
+        if (! $siteId || ! $sourceVersionId) {
             return null;
         }
 
         $currentUser = $this->wordPressManager->getCurrentUser();
-        if (!$currentUser || !$currentUser->ID) {
+        if (! $currentUser || ! $currentUser->ID) {
             return null;
         }
 
@@ -166,6 +166,7 @@ class VersionRequestHandler
     private function getFormData(array $formData, string $key, string $default = ''): string
     {
         $value = sanitize_text_field(wp_unslash($formData[$key] ?? $default));
+
         return $value ?? $default;
     }
 
@@ -175,6 +176,7 @@ class VersionRequestHandler
     private function getFormDataUrl(array $formData, string $key, string $default = ''): string
     {
         $value = esc_url_raw(wp_unslash($formData[$key] ?? $default));
+
         return $value ?? $default;
     }
 
@@ -184,6 +186,7 @@ class VersionRequestHandler
     private function getFormDataTextarea(array $formData, string $key, string $default = ''): string
     {
         $value = sanitize_textarea_field(wp_unslash($formData[$key] ?? $default));
+
         return $value ?? $default;
     }
 

@@ -3,10 +3,10 @@
 namespace Minisite\Features\MinisiteViewer\Controllers;
 
 use Minisite\Features\MinisiteViewer\Handlers\ViewHandler;
-use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use Minisite\Features\MinisiteViewer\Http\ViewRequestHandler;
 use Minisite\Features\MinisiteViewer\Http\ViewResponseHandler;
 use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 
 /**
@@ -40,8 +40,9 @@ class MinisitePageController
         try {
             $command = $this->requestHandler->handleViewRequest();
 
-            if (!$command) {
+            if (! $command) {
                 $this->handleInvalidRequest();
+
                 return;
             }
 
@@ -60,6 +61,7 @@ class MinisitePageController
 
         if ($result['success']) {
             $this->renderMinisite($result['minisite']);
+
             return;
         }
 
@@ -108,12 +110,12 @@ class MinisitePageController
     public function handleVersionSpecificPreview(): void
     {
         // Check authentication
-        if (!$this->wordPressManager->isUserLoggedIn()) {
+        if (! $this->wordPressManager->isUserLoggedIn()) {
             $this->wordPressManager->redirect($this->wordPressManager->getLoginRedirectUrl());
         }
 
         $siteId = $this->wordPressManager->getQueryVar('minisite_id');
-        if (!$siteId) {
+        if (! $siteId) {
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl('/account/sites'));
         }
 

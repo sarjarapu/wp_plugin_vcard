@@ -9,9 +9,10 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 [*.php]
-indent_style = tab
+indent_style = space
 indent_size = 4
 max_line_length = 120
+
 
 [*.{json,yml,yaml}]
 indent_style = space

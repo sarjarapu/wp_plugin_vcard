@@ -12,7 +12,7 @@ namespace Minisite\Core;
  */
 final class FeatureRegistry
 {
-    private static array $features = [
+    private static array $features = array(
         \Minisite\Features\Authentication\AuthenticationFeature::class,
         \Minisite\Features\MinisiteViewer\MinisiteViewerFeature::class,
         \Minisite\Features\MinisiteListing\MinisiteListingFeature::class,
@@ -26,7 +26,7 @@ final class FeatureRegistry
         // \Minisite\Features\Settings\SettingsFeature::class,
         // \Minisite\Features\Commerce\CommerceFeature::class,
         // \Minisite\Features\Subscription\SubscriptionFeature::class,
-    ];
+    );
 
     public static function initializeAll(): void
     {
@@ -39,7 +39,7 @@ final class FeatureRegistry
 
     public static function registerFeature(string $featureClass): void
     {
-        if (!in_array($featureClass, self::$features)) {
+        if (! in_array($featureClass, self::$features)) {
             self::$features[] = $featureClass;
         }
     }

@@ -2,7 +2,7 @@
 
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__ . '/src')
-    ->in(__DIR__ . '/minisite-manager.php')
+    ->append([__DIR__ . '/minisite-manager.php'])
     ->exclude('vendor')
     ->exclude('tests')
     ->exclude('build')
@@ -32,9 +32,8 @@ return $config
         ],
         'line_ending' => true,
     ])
-    ->setLineLengthLimit(120)
     ->setLineEnding("\n")
-    ->setIndent("\t")
+    ->setIndent("    ")  // 4 spaces instead of tabs
     ->setRiskyAllowed(true)
     ->setFinder($finder);
 

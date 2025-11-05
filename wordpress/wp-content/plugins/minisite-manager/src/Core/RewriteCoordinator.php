@@ -16,7 +16,7 @@ final class RewriteCoordinator
     {
         // Register rewrite rules immediately
         self::registerRewriteRules();
-        add_filter('query_vars', [self::class, 'addQueryVars']);
+        add_filter('query_vars', array(self::class, 'addQueryVars'));
 
         // One-time flush after activation
         if (get_option('minisite_flush_rewrites')) {
@@ -42,6 +42,7 @@ final class RewriteCoordinator
         $vars[] = 'minisite_account_action';
         $vars[] = 'minisite_id';
         $vars[] = 'minisite_version_id';
+
         return $vars;
     }
 }

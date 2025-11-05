@@ -29,7 +29,7 @@ class ListingRequestHandler
     public function parseListMinisitesRequest(): ?ListMinisitesCommand
     {
         $currentUser = $this->wordPressManager->getCurrentUser();
-        if (!$currentUser || !isset($currentUser->ID) || !$currentUser->ID || $currentUser->ID <= 0) {
+        if (! $currentUser || ! isset($currentUser->ID) || ! $currentUser->ID || $currentUser->ID <= 0) {
             return null;
         }
 

@@ -38,28 +38,28 @@ class PublishHooks extends BaseHook
     public function register(): void
     {
         // AJAX handlers for slug operations
-        add_action('wp_ajax_check_slug_availability', [$this->publishController, 'handleCheckSlugAvailability']);
-        add_action('wp_ajax_reserve_slug', [$this->publishController, 'handleReserveSlug']);
-        add_action('wp_ajax_cancel_reservation', [$this->publishController, 'handleCancelReservation']);
-        add_action('wp_ajax_create_minisite_order', [$this->publishController, 'handleCreateWooCommerceOrder']);
+        add_action('wp_ajax_check_slug_availability', array($this->publishController, 'handleCheckSlugAvailability'));
+        add_action('wp_ajax_reserve_slug', array($this->publishController, 'handleReserveSlug'));
+        add_action('wp_ajax_cancel_reservation', array($this->publishController, 'handleCancelReservation'));
+        add_action('wp_ajax_create_minisite_order', array($this->publishController, 'handleCreateWooCommerceOrder'));
 
         // WooCommerce integration hooks
         if (class_exists('WooCommerce')) {
             add_action(
                 'woocommerce_checkout_create_order',
-                [$this->wooCommerceIntegration, 'transferCartDataToOrder'],
+                array($this->wooCommerceIntegration, 'transferCartDataToOrder'),
                 10,
                 2
             );
             add_action(
                 'woocommerce_checkout_create_order_line_item',
-                [$this->wooCommerceIntegration, 'transferCartItemToOrderItem'],
+                array($this->wooCommerceIntegration, 'transferCartItemToOrderItem'),
                 10,
                 4
             );
             add_action(
                 'woocommerce_order_status_completed',
-                [$this->wooCommerceIntegration, 'activateSubscriptionOnOrderCompletion'],
+                array($this->wooCommerceIntegration, 'activateSubscriptionOnOrderCompletion'),
                 10,
                 1
             );
@@ -77,7 +77,7 @@ class PublishHooks extends BaseHook
         // Only handle account management routes (publish)
         // The rewrite rules set minisite_account=1 for account routes
         $isAccountRoute = $this->wordPressManager->getQueryVar('minisite_account') === self::ACCOUNT_ROUTE_FLAG;
-        if (!$isAccountRoute) {
+        if (! $isAccountRoute) {
             return; // Not an account route, let other handlers process it
         }
 

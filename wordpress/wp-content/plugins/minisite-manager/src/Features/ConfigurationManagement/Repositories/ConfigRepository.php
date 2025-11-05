@@ -2,8 +2,8 @@
 
 namespace Minisite\Features\ConfigurationManagement\Repositories;
 
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
@@ -39,16 +39,17 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
                 ->getQuery()
                 ->getResult();
 
-            $this->logger->debug("getAll() exit", [
+            $this->logger->debug("getAll() exit", array(
                 'count' => count($result),
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("getAll() failed", [
+            $this->logger->error("getAll() failed", array(
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -61,27 +62,28 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
      */
     public function findByKey(string $key): ?Config
     {
-        $this->logger->debug("findByKey() entry", [
+        $this->logger->debug("findByKey() entry", array(
             'key' => $key,
-        ]);
+        ));
 
         try {
             // Use Doctrine's native findOneBy() - no custom implementation needed
-            $result = $this->findOneBy(['key' => $key]);
+            $result = $this->findOneBy(array('key' => $key));
 
-            $this->logger->debug("findByKey() exit", [
+            $this->logger->debug("findByKey() exit", array(
                 'key' => $key,
                 'found' => $result !== null,
                 'result_id' => $result?->id,
-            ]);
+            ));
 
             return $result;
         } catch (\Exception $e) {
-            $this->logger->error("findByKey() failed", [
+            $this->logger->error("findByKey() failed", array(
                 'key' => $key,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -91,28 +93,29 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
      */
     public function save(Config $config): Config
     {
-        $this->logger->debug("save() entry", [
+        $this->logger->debug("save() entry", array(
             'key' => $config->key,
             'type' => $config->type,
             'has_id' => $config->id !== null,
-        ]);
+        ));
 
         try {
             $this->getEntityManager()->persist($config);
             $this->getEntityManager()->flush();
 
-            $this->logger->debug("save() exit", [
+            $this->logger->debug("save() exit", array(
                 'key' => $config->key,
                 'id' => $config->id,
-            ]);
+            ));
 
             return $config;
         } catch (\Exception $e) {
-            $this->logger->error("save() failed", [
+            $this->logger->error("save() failed", array(
                 'key' => $config->key,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }
@@ -122,9 +125,9 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
      */
     public function delete(string $key): void
     {
-        $this->logger->debug("delete() entry", [
+        $this->logger->debug("delete() entry", array(
             'key' => $key,
-        ]);
+        ));
 
         try {
             $config = $this->findByKey($key);
@@ -132,23 +135,24 @@ class ConfigRepository extends EntityRepository implements ConfigRepositoryInter
                 $this->getEntityManager()->remove($config);
                 $this->getEntityManager()->flush();
 
-                $this->logger->debug("delete() exit", [
+                $this->logger->debug("delete() exit", array(
                     'key' => $key,
                     'deleted' => true,
-                ]);
+                ));
             } else {
-                $this->logger->debug("delete() exit", [
+                $this->logger->debug("delete() exit", array(
                     'key' => $key,
                     'deleted' => false,
                     'reason' => 'config_not_found',
-                ]);
+                ));
             }
         } catch (\Exception $e) {
-            $this->logger->error("delete() failed", [
+            $this->logger->error("delete() failed", array(
                 'key' => $key,
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
-            ]);
+            ));
+
             throw $e;
         }
     }

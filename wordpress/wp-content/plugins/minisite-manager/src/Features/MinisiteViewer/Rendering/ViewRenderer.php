@@ -32,6 +32,7 @@ class ViewRenderer
         // Delegate to the Timber renderer if available
         if (method_exists($this->renderer, 'render')) {
             $this->renderer->render($minisite);
+
             return;
         }
 
@@ -50,6 +51,7 @@ class ViewRenderer
     {
         if (method_exists($this->renderer, 'render')) {
             $this->renderer->render($template, $context);
+
             return;
         }
 
@@ -103,6 +105,7 @@ class ViewRenderer
     {
         if ($this->renderer === null) {
             $this->renderFallbackVersionSpecificPreview($previewData);
+
             return;
         }
 
@@ -118,12 +121,12 @@ class ViewRenderer
                 \Timber\Timber::render('v2025/minisite.twig', $templateData);
             } catch (\Exception $e) {
                 $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('view-renderer');
-                $logger->error('Template rendering error', [
+                $logger->error('Template rendering error', array(
                     'error' => $e->getMessage(),
                     'exception' => get_class($e),
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
-                ]);
+                ));
                 $this->renderFallbackVersionSpecificPreview($previewData);
             }
         } else {
@@ -146,15 +149,15 @@ class ViewRenderer
         $reviews = $this->fetchReviews($minisite->id);
 
         // Use the same data structure as public minisite view
-        return [
+        return array(
             'minisite' => $minisite,
             'reviews' => $reviews, // Fetch actual reviews for preview
             // Additional version-specific preview data
             'version' => $version,
             'versionId' => $previewData->versionId,
             'isVersionSpecificPreview' => true,
-            'previewTitle' => $version ? "Preview: {$version->label}" : 'Preview: Current Version'
-        ];
+            'previewTitle' => $version ? "Preview: {$version->label}" : 'Preview: Current Version',
+        );
     }
 
     /**
@@ -205,7 +208,7 @@ class ViewRenderer
      */
     private function setupTimberLocations(): void
     {
-        if (!class_exists('Timber\\Timber')) {
+        if (! class_exists('Timber\\Timber')) {
             return;
         }
 
@@ -216,8 +219,8 @@ class ViewRenderer
         \Timber\Timber::$locations = array_values(
             array_unique(
                 array_merge(
-                    \Timber\Timber::$locations ?? [],
-                    [$timberBase, $viewsBase, $componentsBase]
+                    \Timber\Timber::$locations ?? array(),
+                    array($timberBase, $viewsBase, $componentsBase)
                 )
             )
         );
@@ -235,10 +238,11 @@ class ViewRenderer
         // This avoids direct wpdb access and follows the established pattern
         try {
             $reviews = $this->wordPressManager->getReviewsForMinisite($minisiteId);
+
             return $reviews;
         } catch (\Exception $e) {
             // If method doesn't exist or fails, return empty array
-            return [];
+            return array();
         }
     }
 }

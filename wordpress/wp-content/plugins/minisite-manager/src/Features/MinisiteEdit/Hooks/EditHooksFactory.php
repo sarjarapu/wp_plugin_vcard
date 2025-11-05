@@ -2,11 +2,11 @@
 
 namespace Minisite\Features\MinisiteEdit\Hooks;
 
-use Minisite\Features\MinisiteEdit\Controllers\EditController;
-use Minisite\Features\MinisiteEdit\Services\EditService;
-use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
-use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Features\MinisiteEdit\Controllers\EditController;
+use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
+use Minisite\Features\MinisiteEdit\Services\EditService;
+use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteViewer\Hooks\ViewHooksFactory;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 

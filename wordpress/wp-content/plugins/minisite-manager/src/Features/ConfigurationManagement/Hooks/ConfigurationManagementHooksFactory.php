@@ -2,12 +2,12 @@
 
 namespace Minisite\Features\ConfigurationManagement\Hooks;
 
+use Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController;
+use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
+use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
+use Minisite\Features\ConfigurationManagement\Rendering\ConfigurationManagementRenderer;
 use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
 use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
-use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
-use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
-use Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController;
-use Minisite\Features\ConfigurationManagement\Rendering\ConfigurationManagementRenderer;
 use Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory;
 
 /**

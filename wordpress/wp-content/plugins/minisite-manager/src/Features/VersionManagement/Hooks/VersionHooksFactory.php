@@ -2,6 +2,7 @@
 
 namespace Minisite\Features\VersionManagement\Hooks;
 
+use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Features\VersionManagement\Controllers\VersionController;
 use Minisite\Features\VersionManagement\Handlers\CreateDraftHandler;
 use Minisite\Features\VersionManagement\Handlers\ListVersionsHandler;
@@ -14,7 +15,6 @@ use Minisite\Features\VersionManagement\Services\VersionService;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Application\Rendering\TimberRenderer;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**

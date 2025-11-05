@@ -2,11 +2,11 @@
 
 namespace Minisite\Features\PublishMinisite\WordPress;
 
+use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
+use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
-use Minisite\Domain\Interfaces\WordPressManagerInterface;
-use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**
  * WordPress Publish Manager
@@ -38,6 +38,7 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
         if ($this->minisiteRepository === null) {
             $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
         }
+
         return $this->minisiteRepository;
     }
 
@@ -139,6 +140,7 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
         if ($text === null) {
             return '';
         }
+
         return sanitize_text_field(wp_unslash($text));
     }
 
@@ -150,6 +152,7 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
         if ($text === null) {
             return '';
         }
+
         return sanitize_textarea_field(wp_unslash($text));
     }
 
@@ -161,6 +164,7 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
         if ($url === null) {
             return '';
         }
+
         return esc_url_raw(wp_unslash($url));
     }
 
@@ -172,6 +176,7 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
         if ($email === null) {
             return '';
         }
+
         return sanitize_email(wp_unslash($email));
     }
 
@@ -217,6 +222,7 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
     public function hasBeenPublished(string $siteId): bool
     {
         $minisite = $this->findMinisiteById($siteId);
+
         return $minisite !== null && $minisite->status === 'published';
     }
 
@@ -282,9 +288,10 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
     public function getPostData(string $key, $default = null)
     {
         // phpcs:disable WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Caller is responsible for nonce verification and sanitization
-        if (!isset($_POST[$key])) {
+        if (! isset($_POST[$key])) {
             return $default;
         }
+
         return wp_unslash($_POST[$key]);
         // phpcs:enable
     }
