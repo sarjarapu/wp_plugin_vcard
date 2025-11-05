@@ -67,7 +67,8 @@ jobs:
           --health-interval=5s
           --health-timeout=3s
           --health-retries=10
-        command: --default-authentication-plugin=mysql_native_password --sql-mode=NO_ENGINE_SUBSTITUTION
+          --default-authentication-plugin=mysql_native_password
+          --sql-mode=NO_ENGINE_SUBSTITUTION
 
     steps:
     - name: Checkout
