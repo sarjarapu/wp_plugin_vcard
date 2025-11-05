@@ -39,6 +39,7 @@
     },
     "scripts": {
         "test": "phpunit --testsuite=Unit,Integration --coverage-text --coverage-html=build/coverage",
+        "test:all": "bash scripts/run-tests.sh",
         "test:unit": "phpunit --testsuite=Unit",
         "test:integration": "phpunit --testsuite=Integration",
         "test:coverage": "phpunit --testsuite=Unit,Integration --coverage-html=build/coverage",
@@ -61,7 +62,6 @@
         ],
         "pr-check": "bash scripts/pre-pr-check.sh",
         "setup:hooks": "bash scripts/setup-git-hooks.sh",
-        "test:all": "bash scripts/run-tests.sh",
         "changelog": "php scripts/generate-changelog.php",
         "changelog:update": "php scripts/generate-changelog.php",
         "post-install-cmd": [

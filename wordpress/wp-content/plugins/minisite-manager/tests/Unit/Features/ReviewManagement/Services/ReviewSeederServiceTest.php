@@ -397,5 +397,145 @@ final class ReviewSeederServiceTest extends TestCase
 
         $this->service->seedReviewsForMinisite('minisite-123', []);
     }
+
+    /**
+     * Test createReviewFromJsonData with publishedAt provided in JSON
+     */
+    public function test_createReviewFromJsonData_with_publishedAt_in_json(): void
+    {
+        $reviewData = [
+            'authorName' => 'Test User',
+            'body' => 'Test',
+            'publishedAt' => '2025-01-15T10:00:00Z',
+            'status' => 'approved'
+        ];
+
+        $review = $this->service->createReviewFromJsonData('test-minisite-pub', $reviewData);
+
+        $this->assertNotNull($review->publishedAt);
+        $this->assertEquals('2025-01-15 10:00:00', $review->publishedAt->format('Y-m-d H:i:s'));
+    }
+
+    /**
+     * Test createReviewFromJsonData with approved status but no publishedAt
+     */
+    public function test_createReviewFromJsonData_approved_without_publishedAt(): void
+    {
+        $reviewData = [
+            'authorName' => 'Test User',
+            'body' => 'Test',
+            'status' => 'approved'
+            // No publishedAt provided
+        ];
+
+        $review = $this->service->createReviewFromJsonData('test-minisite-approve', $reviewData);
+
+        $this->assertEquals('approved', $review->status);
+        $this->assertNotNull($review->publishedAt); // Should be set by markAsPublished
+    }
+
+    /**
+     * Test createReviewFromJsonData with missing createdAt uses current time
+     */
+    public function test_createReviewFromJsonData_missing_createdAt_uses_current_time(): void
+    {
+        $before = new \DateTimeImmutable();
+        
+        $reviewData = [
+            'authorName' => 'Test User',
+            'body' => 'Test'
+            // No createdAt provided
+        ];
+
+        $review = $this->service->createReviewFromJsonData('test-minisite-time', $reviewData);
+        
+        $after = new \DateTimeImmutable();
+
+        $this->assertInstanceOf(\DateTimeImmutable::class, $review->createdAt);
+        $this->assertGreaterThanOrEqual($before->getTimestamp(), $review->createdAt->getTimestamp());
+        $this->assertLessThanOrEqual($after->getTimestamp(), $review->createdAt->getTimestamp());
+    }
+
+    /**
+     * Test createReviewFromJsonData with missing updatedAt uses current time
+     */
+    public function test_createReviewFromJsonData_missing_updatedAt_uses_current_time(): void
+    {
+        $before = new \DateTimeImmutable();
+        
+        $reviewData = [
+            'authorName' => 'Test User',
+            'body' => 'Test'
+            // No updatedAt provided
+        ];
+
+        $review = $this->service->createReviewFromJsonData('test-minisite-time2', $reviewData);
+        
+        $after = new \DateTimeImmutable();
+
+        $this->assertInstanceOf(\DateTimeImmutable::class, $review->updatedAt);
+        $this->assertGreaterThanOrEqual($before->getTimestamp(), $review->updatedAt->getTimestamp());
+        $this->assertLessThanOrEqual($after->getTimestamp(), $review->updatedAt->getTimestamp());
+    }
+
+    /**
+     * Test createReviewFromJsonData with missing createdBy uses current user
+     */
+    public function test_createReviewFromJsonData_missing_createdBy_uses_current_user(): void
+    {
+        $GLOBALS['_test_mock_get_current_user_id'] = 99;
+        
+        // Recreate service to pick up new user ID
+        $this->service = new ReviewSeederService($this->reviewRepository);
+
+        $reviewData = [
+            'authorName' => 'Test User',
+            'body' => 'Test'
+            // No createdBy provided
+        ];
+
+        $review = $this->service->createReviewFromJsonData('test-minisite-user2', $reviewData);
+
+        $this->assertEquals(99, $review->createdBy);
+    }
+
+    /**
+     * Test createReviewFromJsonData with null createdBy uses current user
+     */
+    public function test_createReviewFromJsonData_null_createdBy_uses_current_user(): void
+    {
+        $GLOBALS['_test_mock_get_current_user_id'] = 88;
+        
+        // Recreate service to pick up new user ID
+        $this->service = new ReviewSeederService($this->reviewRepository);
+
+        $reviewData = [
+            'authorName' => 'Test User',
+            'body' => 'Test',
+            'createdBy' => null // Explicitly null
+        ];
+
+        $review = $this->service->createReviewFromJsonData('test-minisite-user3', $reviewData);
+
+        $this->assertEquals(88, $review->createdBy);
+    }
+
+    /**
+     * Test createReviewFromJsonData with non-approved status doesn't set publishedAt
+     */
+    public function test_createReviewFromJsonData_pending_status_no_publishedAt(): void
+    {
+        $reviewData = [
+            'authorName' => 'Test User',
+            'body' => 'Test',
+            'status' => 'pending'
+            // No publishedAt provided
+        ];
+
+        $review = $this->service->createReviewFromJsonData('test-minisite-pending', $reviewData);
+
+        $this->assertEquals('pending', $review->status);
+        $this->assertNull($review->publishedAt); // Should not be set for non-approved
+    }
 }
 

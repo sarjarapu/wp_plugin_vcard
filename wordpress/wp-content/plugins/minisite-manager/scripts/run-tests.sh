@@ -34,7 +34,8 @@ echo -e "${CYAN} 🧪 Running all tests with coverage...${NC}"
 echo -e "${GRAY} 💡 This includes unit tests, integration tests, and coverage reporting${NC}"
 echo ""
 
-vendor/bin/phpunit --testsuite="Unit,Integration" --coverage-text --coverage-html=build/coverage
+vendor/bin/phpunit --testsuite=Unit,Integration --coverage-text --coverage-html=build/coverage
+cp data/styles/custom.css build/coverage/_css/custom.css
 
 echo -e "${GREEN} 🎉 All tests completed!${NC}"
 echo -e "${GRAY} 📊 Coverage report generated in build/coverage/${NC}"

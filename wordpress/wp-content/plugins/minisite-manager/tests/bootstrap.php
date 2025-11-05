@@ -74,8 +74,6 @@ if (!defined('WPMU_PLUGIN_URL')) {
     define('WPMU_PLUGIN_URL', 'http://localhost/wp-content/mu-plugins');
 }
 
-// MINISITE_PLUGIN_DIR is defined in the main plugin file
-
 // WordPress classes (minimal stubs)
 if (!class_exists('wpdb')) {
     class wpdb
