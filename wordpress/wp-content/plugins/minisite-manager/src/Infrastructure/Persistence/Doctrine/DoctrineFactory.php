@@ -34,6 +34,11 @@ class DoctrineFactory
             'dbname' => DB_NAME,
             'charset' => 'utf8mb4',
         ];
+        
+        // Add port if DB_PORT constant is defined (for test environments)
+        if (defined('DB_PORT')) {
+            $dbConfig['port'] = (int) DB_PORT;
+        }
 
         // Debug: Log connection details (without password) and PDO driver availability
         $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('doctrine-factory');

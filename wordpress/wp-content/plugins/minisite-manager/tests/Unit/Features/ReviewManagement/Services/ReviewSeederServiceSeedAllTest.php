@@ -23,7 +23,6 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
     private ReviewRepositoryInterface|MockObject $reviewRepository;
     private ReviewSeederService $service;
     private string $testJsonDir;
-    private string|false $originalErrorLog;
 
     protected function setUp(): void
     {
@@ -41,26 +40,10 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
         $this->testJsonDir = sys_get_temp_dir() . '/minisite-test-reviews-' . uniqid();
         mkdir($this->testJsonDir, 0755, true);
         mkdir($this->testJsonDir . '/data/json/reviews', 0755, true);
-        
-        // Suppress error_log output during tests to reduce noise from expected errors
-        // These tests intentionally test error scenarios, so error_log messages are expected
-        $this->originalErrorLog = ini_get('error_log');
-        if (PHP_OS_FAMILY === 'Windows') {
-            ini_set('error_log', 'nul');
-        } else {
-            ini_set('error_log', '/dev/null');
-        }
     }
 
     protected function tearDown(): void
     {
-        // Restore error_log
-        if (isset($this->originalErrorLog)) {
-            ini_set('error_log', $this->originalErrorLog);
-        } else {
-            ini_restore('error_log');
-        }
-        
         // Clean up global mocks
         unset($GLOBALS['_test_mock_get_current_user_id']);
         

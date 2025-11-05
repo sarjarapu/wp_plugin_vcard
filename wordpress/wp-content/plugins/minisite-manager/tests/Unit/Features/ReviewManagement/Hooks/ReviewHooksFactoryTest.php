@@ -43,28 +43,32 @@ final class ReviewHooksFactoryTest extends TestCase
     /**
      * Test create method returns ReviewHooks instance
      * NOTE: This will fail if Doctrine is not available or DB connection fails
+     * This test is primarily for coverage - full testing is done in integration tests
      */
     public function test_create_returns_review_hooks_instance(): void
     {
         // Define DB constants if not already defined
         if (!defined('DB_HOST')) {
-            define('DB_HOST', 'localhost');
+            define('DB_HOST', getenv('MYSQL_HOST') ?: '127.0.0.1');
         }
         if (!defined('DB_USER')) {
-            define('DB_USER', 'test_user');
+            define('DB_USER', getenv('MYSQL_USER') ?: 'minisite');
         }
         if (!defined('DB_PASSWORD')) {
-            define('DB_PASSWORD', 'test_password');
+            define('DB_PASSWORD', getenv('MYSQL_PASSWORD') ?: 'minisite');
         }
         if (!defined('DB_NAME')) {
-            define('DB_NAME', 'test_database');
+            define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'minisite_test');
         }
 
         try {
+            // Call create() to ensure code is executed for coverage
             $hooks = ReviewHooksFactory::create();
             $this->assertInstanceOf(ReviewHooks::class, $hooks);
         } catch (\Exception $e) {
             // If Doctrine is not available or DB connection fails, skip this test
+            // But note: This means coverage won't be recorded for this test
+            // Integration tests should provide coverage when DB is available
             $errorMessage = $e->getMessage();
             if (str_contains($errorMessage, 'DB_HOST') || 
                 str_contains($errorMessage, 'Doctrine') ||

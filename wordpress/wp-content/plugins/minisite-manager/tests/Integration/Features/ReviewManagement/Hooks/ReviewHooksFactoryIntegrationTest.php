@@ -22,14 +22,24 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(ReviewHooksFactory::class)]
 final class ReviewHooksFactoryIntegrationTest extends TestCase
 {
-    /**
-     * Test create returns ReviewHooks instance
-     */
-    public function test_create_returns_review_hooks_instance(): void
+    protected function setUp(): void
     {
+        parent::setUp();
+        
+        // Ensure WordPress constants are defined
+        if (!defined('WP_CONTENT_DIR')) {
+            define('WP_CONTENT_DIR', '/tmp/wp-content');
+        }
+        
         // Define DB constants if not already defined
+        $dbHost = getenv('MYSQL_HOST') ?: '127.0.0.1';
+        $dbPort = getenv('MYSQL_PORT') ?: '3307';
+        
         if (!defined('DB_HOST')) {
-            define('DB_HOST', getenv('MYSQL_HOST') ?: '127.0.0.1');
+            define('DB_HOST', $dbHost);
+        }
+        if (!defined('DB_PORT')) {
+            define('DB_PORT', $dbPort);
         }
         if (!defined('DB_USER')) {
             define('DB_USER', getenv('MYSQL_USER') ?: 'minisite');
@@ -40,7 +50,19 @@ final class ReviewHooksFactoryIntegrationTest extends TestCase
         if (!defined('DB_NAME')) {
             define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'minisite_test');
         }
+        
+        // Set up $wpdb for TablePrefixListener
+        if (!isset($GLOBALS['wpdb'])) {
+            $GLOBALS['wpdb'] = new \wpdb();
+        }
+        $GLOBALS['wpdb']->prefix = 'wp_';
+    }
 
+    /**
+     * Test create returns ReviewHooks instance
+     */
+    public function test_create_returns_review_hooks_instance(): void
+    {
         try {
             $hooks = ReviewHooksFactory::create();
             $this->assertInstanceOf(ReviewHooks::class, $hooks);
@@ -52,7 +74,8 @@ final class ReviewHooksFactoryIntegrationTest extends TestCase
                 str_contains($errorMessage, 'PDO') ||
                 str_contains($errorMessage, 'Connection') ||
                 str_contains($errorMessage, 'No such file or directory') ||
-                str_contains($errorMessage, 'SQLSTATE')) {
+                str_contains($errorMessage, 'SQLSTATE') ||
+                str_contains($errorMessage, 'WP_CONTENT_DIR')) {
                 $this->markTestSkipped('Doctrine not available or DB connection failed: ' . $errorMessage);
             } else {
                 throw $e;
@@ -65,20 +88,6 @@ final class ReviewHooksFactoryIntegrationTest extends TestCase
      */
     public function test_create_injects_correct_dependencies(): void
     {
-        // Define DB constants if not already defined
-        if (!defined('DB_HOST')) {
-            define('DB_HOST', getenv('MYSQL_HOST') ?: '127.0.0.1');
-        }
-        if (!defined('DB_USER')) {
-            define('DB_USER', getenv('MYSQL_USER') ?: 'minisite');
-        }
-        if (!defined('DB_PASSWORD')) {
-            define('DB_PASSWORD', getenv('MYSQL_PASSWORD') ?: 'minisite');
-        }
-        if (!defined('DB_NAME')) {
-            define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'minisite_test');
-        }
-
         try {
             $hooks = ReviewHooksFactory::create();
             
@@ -100,7 +109,8 @@ final class ReviewHooksFactoryIntegrationTest extends TestCase
                 str_contains($errorMessage, 'PDO') ||
                 str_contains($errorMessage, 'Connection') ||
                 str_contains($errorMessage, 'No such file or directory') ||
-                str_contains($errorMessage, 'SQLSTATE')) {
+                str_contains($errorMessage, 'SQLSTATE') ||
+                str_contains($errorMessage, 'WP_CONTENT_DIR')) {
                 $this->markTestSkipped('Doctrine not available or DB connection failed: ' . $errorMessage);
             } else {
                 throw $e;

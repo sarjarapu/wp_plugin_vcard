@@ -6,6 +6,8 @@ namespace Minisite\Features\ReviewManagement\Services;
 
 use Minisite\Features\ReviewManagement\Domain\Entities\Review;
 use Minisite\Features\ReviewManagement\Repositories\ReviewRepositoryInterface;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Service for seeding sample review data using Doctrine
@@ -16,9 +18,12 @@ use Minisite\Features\ReviewManagement\Repositories\ReviewRepositoryInterface;
  */
 class ReviewSeederService
 {
+    private LoggerInterface $logger;
+
     public function __construct(
         private ReviewRepositoryInterface $reviewRepository
     ) {
+        $this->logger = LoggingServiceProvider::getFeatureLogger('review-seeder');
     }
 
     /**
@@ -278,7 +283,12 @@ class ReviewSeederService
                     $this->seedReviewsForMinisite($minisiteIds[$key], $reviews);
                 } catch (\RuntimeException $e) {
                     // Log error but continue with other minisites
-                    error_log('Failed to load reviews from ' . $jsonFile . ': ' . $e->getMessage());
+                    $this->logger->warning('Failed to load reviews from JSON file', [
+                        'json_file' => $jsonFile,
+                        'minisite_key' => $key,
+                        'minisite_id' => $minisiteIds[$key],
+                        'error' => $e->getMessage(),
+                    ]);
                 }
             }
         }
