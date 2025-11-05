@@ -28,6 +28,7 @@ wordpress/wp-content/minisite-logs/
 
 # IDE
 .vscode/
+!.vscode/settings.json
 *.sublime-project
 *.sublime-workspace
 
