@@ -2,10 +2,10 @@
 
 namespace Minisite\Tests\Unit\Features\MinisiteEdit\Rendering;
 
-use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
-use Minisite\Application\Rendering\TimberRenderer;
-use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
+use Minisite\Application\Rendering\TimberRenderer;
+use Minisite\Features\MinisiteEdit\Rendering\EditRenderer;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Test EditRenderer
@@ -22,23 +22,27 @@ class EditRendererTest extends TestCase
 
         $this->mockTimberRenderer = $this->createMock(TimberRenderer::class);
         $this->renderer = new EditRenderer($this->mockTimberRenderer);
-        $this->setupWordPressMocks();
     }
 
     protected function tearDown(): void
     {
-        $this->clearWordPressMocks();
+        // Clean up any global mocks
+        unset($GLOBALS['_test_mock_wp_create_nonce']);
         \Brain\Monkey\tearDown();
         parent::tearDown();
     }
 
     public function testRenderEditFormWithTimber(): void
     {
-        $editData = (object) [
-            'minisite' => (object) ['id' => '123', 'name' => 'Test Minisite'],
-            'editingVersion' => (object) ['label' => 'Test Version', 'comment' => 'Test Comment'],
-            'latestDraft' => (object) ['id' => 1],
-            'profileForForm' => (object) [
+        // wp_create_nonce is now defined in WordPressFunctions.php
+        // Set up a mock value for this test
+        $GLOBALS['_test_mock_wp_create_nonce'] = 'test_nonce';
+
+        $editData = (object) array(
+            'minisite' => (object) array('id' => '123', 'name' => 'Test Minisite'),
+            'editingVersion' => (object) array('label' => 'Test Version', 'comment' => 'Test Comment'),
+            'latestDraft' => (object) array('id' => 1),
+            'profileForForm' => (object) array(
                 'name' => 'Test Business',
                 'city' => 'Test City',
                 'region' => 'Test Region',
@@ -50,12 +54,12 @@ class EditRendererTest extends TestCase
                 'industry' => 'services',
                 'defaultLocale' => 'en-US',
                 'searchTerms' => 'test search',
-                'geo' => (object) ['getLat' => function() { return 40.7128; }, 'getLng' => function() { return -74.0060; }]
-            ],
-            'siteJson' => ['test' => 'data'],
+                'geo' => (object) array('getLat' => function () { return 40.7128; }, 'getLng' => function () { return -74.0060; }),
+            ),
+            'siteJson' => array('test' => 'data'),
             'successMessage' => 'Draft saved successfully!',
-            'errorMessage' => ''
-        ];
+            'errorMessage' => '',
+        );
 
         // This will fail with Timber integration issues, but we can test the method signature
         try {
@@ -70,23 +74,25 @@ class EditRendererTest extends TestCase
     public function testRenderEditFormWithoutTimber(): void
     {
         $renderer = new EditRenderer(null);
-        
-        $editData = (object) [
-            'minisite' => (object) ['id' => '123'],
-            'editingVersion' => (object) ['label' => 'Test Version', 'comment' => 'Test Comment'],
+
+        $editData = (object) array(
+            'minisite' => (object) array('id' => '123'),
+            'editingVersion' => (object) array('label' => 'Test Version', 'comment' => 'Test Comment'),
             'latestDraft' => null,
-            'profileForForm' => (object) [
+            'profileForForm' => (object) array(
                 'name' => 'Test Business',
                 'city' => 'Test City',
                 'title' => 'Test Title',
-                'geo' => null
-            ],
-            'siteJson' => [],
+                'geo' => null,
+            ),
+            'siteJson' => array(),
             'successMessage' => '',
-            'errorMessage' => 'Test error'
-        ];
+            'errorMessage' => 'Test error',
+        );
 
-        $this->mockWordPressFunction('wp_create_nonce', 'test_nonce');
+        // wp_create_nonce is now defined in WordPressFunctions.php
+        // It returns a predictable nonce based on action, or can be overridden via $GLOBALS
+        $GLOBALS['_test_mock_wp_create_nonce'] = 'test_nonce';
 
         // Capture output
         ob_start();
@@ -130,11 +136,11 @@ class EditRendererTest extends TestCase
 
     public function testPrepareTemplateData(): void
     {
-        $editData = (object) [
-            'minisite' => (object) ['id' => '123'],
-            'editingVersion' => (object) ['label' => 'Test Version', 'comment' => 'Test Comment'],
-            'latestDraft' => (object) ['id' => 1],
-            'profileForForm' => (object) [
+        $editData = (object) array(
+            'minisite' => (object) array('id' => '123'),
+            'editingVersion' => (object) array('label' => 'Test Version', 'comment' => 'Test Comment'),
+            'latestDraft' => (object) array('id' => 1),
+            'profileForForm' => (object) array(
                 'name' => 'Test Business',
                 'city' => 'Test City',
                 'region' => 'Test Region',
@@ -146,14 +152,16 @@ class EditRendererTest extends TestCase
                 'industry' => 'services',
                 'defaultLocale' => 'en-US',
                 'searchTerms' => 'test search',
-                'geo' => $this->createMockGeoPoint(40.7128, -74.0060)
-            ],
-            'siteJson' => ['test' => 'data'],
+                'geo' => $this->createMockGeoPoint(40.7128, -74.0060),
+            ),
+            'siteJson' => array('test' => 'data'),
             'successMessage' => 'Success!',
-            'errorMessage' => 'Error!'
-        ];
+            'errorMessage' => 'Error!',
+        );
 
-        $this->mockWordPressFunction('wp_create_nonce', 'test_nonce');
+        // wp_create_nonce is now defined in WordPressFunctions.php
+        // It returns a predictable nonce based on action, or can be overridden via $GLOBALS
+        $GLOBALS['_test_mock_wp_create_nonce'] = 'test_nonce';
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($this->renderer);
@@ -177,21 +185,23 @@ class EditRendererTest extends TestCase
 
     public function testPrepareTemplateDataWithNullGeo(): void
     {
-        $editData = (object) [
-            'minisite' => (object) ['id' => '123'],
-            'editingVersion' => (object) ['label' => 'Test Version', 'comment' => 'Test Comment'],
+        $editData = (object) array(
+            'minisite' => (object) array('id' => '123'),
+            'editingVersion' => (object) array('label' => 'Test Version', 'comment' => 'Test Comment'),
             'latestDraft' => null,
-            'profileForForm' => (object) [
+            'profileForForm' => (object) array(
                 'name' => 'Test Business',
                 'city' => 'Test City',
-                'geo' => null
-            ],
-            'siteJson' => [],
+                'geo' => null,
+            ),
+            'siteJson' => array(),
             'successMessage' => '',
-            'errorMessage' => ''
-        ];
+            'errorMessage' => '',
+        );
 
-        $this->mockWordPressFunction('wp_create_nonce', 'test_nonce');
+        // wp_create_nonce is now defined in WordPressFunctions.php
+        // It returns a predictable nonce based on action, or can be overridden via $GLOBALS
+        $GLOBALS['_test_mock_wp_create_nonce'] = 'test_nonce';
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($this->renderer);
@@ -210,7 +220,7 @@ class EditRendererTest extends TestCase
 
         // Mock Timber class
         $mockTimber = $this->createMock(\stdClass::class);
-        $mockTimber->locations = [];
+        $mockTimber->locations = array();
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($this->renderer);
@@ -222,70 +232,29 @@ class EditRendererTest extends TestCase
         $this->assertTrue(true);
     }
 
-    /**
-     * Setup WordPress function mocks for this test class
-     */
-    private function setupWordPressMocks(): void
-    {
-        $functions = [
-            'wp_create_nonce', 'esc_html', 'esc_attr', 'esc_textarea'
-        ];
-
-        foreach ($functions as $function) {
-            if (!function_exists($function)) {
-                eval("
-                    function {$function}(...\$args) {
-                        if (isset(\$GLOBALS['_test_mock_{$function}'])) {
-                            return \$GLOBALS['_test_mock_{$function}'];
-                        }
-                        return htmlspecialchars(\$args[0] ?? '', ENT_QUOTES, 'UTF-8');
-                    }
-                ");
-            }
-        }
-    }
-
-    /**
-     * Mock WordPress function for specific test cases
-     */
-    private function mockWordPressFunction(string $functionName, mixed $returnValue): void
-    {
-        $GLOBALS['_test_mock_' . $functionName] = $returnValue;
-    }
-
-    /**
-     * Clear WordPress function mocks
-     */
-    private function clearWordPressMocks(): void
-    {
-        $functions = [
-            'wp_create_nonce', 'esc_html', 'esc_attr', 'esc_textarea'
-        ];
-
-        foreach ($functions as $func) {
-            unset($GLOBALS['_test_mock_' . $func]);
-        }
-    }
 
     /**
      * Create a mock GeoPoint object
      */
     private function createMockGeoPoint(float $lat, float $lng): object
     {
-        return new class($lat, $lng) {
+        return new class ($lat, $lng) {
             private float $lat;
             private float $lng;
-            
-            public function __construct(float $lat, float $lng) {
+
+            public function __construct(float $lat, float $lng)
+            {
                 $this->lat = $lat;
                 $this->lng = $lng;
             }
-            
-            public function getLat(): float {
+
+            public function getLat(): float
+            {
                 return $this->lat;
             }
-            
-            public function getLng(): float {
+
+            public function getLng(): float
+            {
                 return $this->lng;
             }
         };
