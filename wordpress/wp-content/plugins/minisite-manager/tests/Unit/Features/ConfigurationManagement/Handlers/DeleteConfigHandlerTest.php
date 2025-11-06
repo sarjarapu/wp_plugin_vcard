@@ -61,12 +61,12 @@ final class DeleteConfigHandlerTest extends TestCase
     }
 
     /**
-     * Test class is final
+     * Test class is not final (removed to allow mocking in tests)
      */
-    public function test_class_is_final(): void
+    public function test_class_is_not_final(): void
     {
         $reflection = new \ReflectionClass(DeleteConfigHandler::class);
-        $this->assertTrue($reflection->isFinal());
+        $this->assertFalse($reflection->isFinal());
     }
 }
 

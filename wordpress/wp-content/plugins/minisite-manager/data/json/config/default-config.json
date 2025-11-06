@@ -1,0 +1,45 @@
+{
+  "configs": [
+    {
+      "key": "openai_api_key",
+      "value": "",
+      "type": "encrypted",
+      "description": "OpenAI API key for AI features",
+      "is_sensitive": true,
+      "is_required": true
+    },
+    {
+      "key": "pii_encryption_key",
+      "value": "",
+      "type": "encrypted",
+      "description": "Key for encrypting PII (Personally Identifiable Information) in reviews",
+      "is_sensitive": true,
+      "is_required": true
+    },
+    {
+      "key": "max_reviews_per_page",
+      "value": 20,
+      "type": "integer",
+      "description": "Maximum number of reviews to display per page",
+      "is_sensitive": false,
+      "is_required": true
+    },
+    {
+      "key": "max_minisites_list_limit",
+      "value": 50,
+      "type": "integer",
+      "description": "Maximum number of minisites to display in listing pages",
+      "is_sensitive": false,
+      "is_required": false
+    },
+    {
+      "key": "max_versions_list_limit",
+      "value": 50,
+      "type": "integer",
+      "description": "Maximum number of versions to display in listing pages",
+      "is_sensitive": false,
+      "is_required": false
+    }
+  ]
+}
+

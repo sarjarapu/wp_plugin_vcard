@@ -10,7 +10,7 @@ use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementSe
  *
  * SINGLE RESPONSIBILITY: Handle save configuration command
  */
-final class SaveConfigHandler
+class SaveConfigHandler
 {
     public function __construct(
         private ConfigurationManagementService $configService

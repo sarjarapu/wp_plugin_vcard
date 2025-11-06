@@ -381,13 +381,16 @@ final class ConfigurationManagementServiceIntegrationTest extends TestCase
             "UPDATE wp_minisite_config SET config_value = 'value2' WHERE config_key = 'test_key'"
         );
 
-        // Should still return cached value
+        // Clear EntityManager cache so it doesn't return cached entities
+        $this->em->clear();
+
+        // Should still return cached value (service cache, not EntityManager cache)
         $this->assertEquals('value1', $this->service->get('test_key'));
 
-        // Reload should clear cache
+        // Reload should clear service cache
         $this->service->reload();
 
-        // Should now return new value
+        // Should now return new value from DB
         $this->assertEquals('value2', $this->service->get('test_key'));
     }
 

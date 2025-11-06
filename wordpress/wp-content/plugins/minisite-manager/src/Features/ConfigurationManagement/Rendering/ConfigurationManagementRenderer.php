@@ -9,7 +9,7 @@ use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
  *
  * SINGLE RESPONSIBILITY: Render configuration admin UI templates
  */
-final class ConfigurationManagementRenderer
+class ConfigurationManagementRenderer
 {
     /**
      * Register Timber template locations
