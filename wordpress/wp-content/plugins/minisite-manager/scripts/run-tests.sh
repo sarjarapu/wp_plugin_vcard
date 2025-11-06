@@ -34,8 +34,20 @@ echo -e "${CYAN} 🧪 Running all tests with coverage...${NC}"
 echo -e "${GRAY} 💡 This includes unit tests, integration tests, and coverage reporting${NC}"
 echo ""
 
+# Run phpunit and capture exit code (temporarily disable set -e to allow capture)
+set +e
 vendor/bin/phpunit --testsuite=Unit,Integration --coverage-text --coverage-html=build/coverage
+PHPUNIT_EXIT_CODE=$?
+set -e
+
+# Always run copy command (like finally block)
 cp data/styles/custom.css build/coverage/_css/custom.css
 
-echo -e "${GREEN} 🎉 All tests completed!${NC}"
-echo -e "${GRAY} 📊 Coverage report generated in build/coverage/${NC}"
+# Echo completion messages only if PHPUnit succeeded
+if [ $PHPUNIT_EXIT_CODE -eq 0 ]; then
+    echo -e "${GREEN} 🎉 All tests completed!${NC}"
+    echo -e "${GRAY} 📊 Coverage report generated in build/coverage/${NC}"
+fi
+
+# Exit with phpunit's exit code if it failed, otherwise exit 0
+exit ${PHPUNIT_EXIT_CODE:-0}
