@@ -206,36 +206,6 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     }
 
     /**
-     * Start database transaction
-     */
-    public function startTransaction(): void
-    {
-        global $wpdb;
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Transaction management requires direct queries
-        $wpdb->query('START TRANSACTION');
-    }
-
-    /**
-     * Commit database transaction
-     */
-    public function commitTransaction(): void
-    {
-        global $wpdb;
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Transaction management requires direct queries
-        $wpdb->query('COMMIT');
-    }
-
-    /**
-     * Rollback database transaction
-     */
-    public function rollbackTransaction(): void
-    {
-        global $wpdb;
-        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Transaction management requires direct queries
-        $wpdb->query('ROLLBACK');
-    }
-
-    /**
      * Find minisite by ID
      * NOTE: Still used in MinisiteFormProcessor - will be refactored in Phase 2
      */

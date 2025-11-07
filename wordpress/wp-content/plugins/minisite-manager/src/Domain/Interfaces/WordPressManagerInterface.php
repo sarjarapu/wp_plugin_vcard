@@ -65,21 +65,6 @@ interface WordPressManagerInterface
     public function updateMinisiteFields(string $siteId, array $fields, int $userId): void;
 
     /**
-     * Start database transaction
-     */
-    public function startTransaction(): void;
-
-    /**
-     * Commit database transaction
-     */
-    public function commitTransaction(): void;
-
-    /**
-     * Rollback database transaction
-     */
-    public function rollbackTransaction(): void;
-
-    /**
      * Get minisite repository
      * NOTE: This is still used in multiple services and will be refactored in Phase 2
      */

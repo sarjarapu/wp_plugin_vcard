@@ -4,6 +4,7 @@ namespace Minisite\Domain\Services;
 
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -20,7 +21,8 @@ class MinisiteFormProcessor
     private LoggerInterface $logger;
 
     public function __construct(
-        private WordPressManagerInterface $wordPressManager
+        private WordPressManagerInterface $wordPressManager,
+        private MinisiteRepository $minisiteRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('form-processor');
     }
@@ -115,7 +117,7 @@ class MinisiteFormProcessor
             $this->logger->debug('No existing minisite provided, fetching from database', array(
                 'site_id' => $siteId,
             ));
-            $minisite = $this->wordPressManager->findMinisiteById($siteId);
+            $minisite = $this->minisiteRepository->findById($siteId);
         }
 
         // For new minisites (no existing data), start with empty structure

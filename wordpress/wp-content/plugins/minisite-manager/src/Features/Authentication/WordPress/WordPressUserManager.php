@@ -347,36 +347,6 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
     }
 
     /**
-     * Start database transaction
-     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
-     */
-    public function startTransaction(): void
-    {
-        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to use TransactionManager
-        // Authentication doesn't need this, but must implement for interface compliance
-    }
-
-    /**
-     * Commit database transaction
-     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
-     */
-    public function commitTransaction(): void
-    {
-        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to use TransactionManager
-        // Authentication doesn't need this, but must implement for interface compliance
-    }
-
-    /**
-     * Rollback database transaction
-     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
-     */
-    public function rollbackTransaction(): void
-    {
-        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to use TransactionManager
-        // Authentication doesn't need this, but must implement for interface compliance
-    }
-
-    /**
      * Get minisite repository
      * NOTE: Still used in multiple services - will be refactored in Phase 2
      */

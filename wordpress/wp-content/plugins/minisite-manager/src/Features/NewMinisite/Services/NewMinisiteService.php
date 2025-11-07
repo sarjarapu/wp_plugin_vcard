@@ -9,6 +9,7 @@ use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Infrastructure\Persistence\WordPressTransactionManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -81,8 +82,14 @@ class NewMinisiteService
 
         try {
             // Create shared components
-            $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
-            $dbCoordinator = new MinisiteDatabaseCoordinator($this->wordPressManager, $this->versionRepository);
+            $formProcessor = new MinisiteFormProcessor($this->wordPressManager, $this->minisiteRepository);
+            $transactionManager = new WordPressTransactionManager();
+            $dbCoordinator = new MinisiteDatabaseCoordinator(
+                $this->wordPressManager,
+                $this->versionRepository,
+                $this->minisiteRepository,
+                $transactionManager
+            );
 
             // Validate form data
             $errors = $formProcessor->validateFormData($formData);
@@ -161,7 +168,7 @@ class NewMinisiteService
      */
     public function getEmptyFormData(): array
     {
-        $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
+        $formProcessor = new MinisiteFormProcessor($this->wordPressManager, $this->minisiteRepository);
 
         return $formProcessor->buildEmptySiteJson();
     }

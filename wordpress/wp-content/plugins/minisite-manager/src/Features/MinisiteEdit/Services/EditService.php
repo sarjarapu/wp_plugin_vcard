@@ -9,6 +9,7 @@ use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Infrastructure\Persistence\WordPressTransactionManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -109,8 +110,14 @@ class EditService
 
         try {
             // Create shared components
-            $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
-            $dbCoordinator = new MinisiteDatabaseCoordinator($this->wordPressManager, $this->versionRepository);
+            $formProcessor = new MinisiteFormProcessor($this->wordPressManager, $this->minisiteRepository);
+            $transactionManager = new WordPressTransactionManager();
+            $dbCoordinator = new MinisiteDatabaseCoordinator(
+                $this->wordPressManager,
+                $this->versionRepository,
+                $this->minisiteRepository,
+                $transactionManager
+            );
 
             // Validate form data
             $errors = $formProcessor->validateFormData($formData);

@@ -4,6 +4,7 @@ namespace Minisite\Features\PublishMinisite\Services;
 
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Psr\Log\LoggerInterface;
 
@@ -21,7 +22,8 @@ class SubscriptionActivationService
     private LoggerInterface $logger;
 
     public function __construct(
-        private WordPressPublishManager $wordPressManager
+        private WordPressPublishManager $wordPressManager,
+        private MinisiteRepository $minisiteRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('subscription-activation-service');
     }
@@ -84,8 +86,8 @@ class SubscriptionActivationService
         try {
             // Get current expiration date (if any)
             $currentExpiration = db::get_var(
-                "SELECT expires_at FROM {$wpdb->prefix}minisite_payments 
-                 WHERE minisite_id = %s AND status = 'active' 
+                "SELECT expires_at FROM {$wpdb->prefix}minisite_payments
+                 WHERE minisite_id = %s AND status = 'active'
                  ORDER BY expires_at DESC LIMIT 1",
                 array($minisiteId)
             );
@@ -96,9 +98,8 @@ class SubscriptionActivationService
             $gracePeriodEnds = PaymentConstants::calculateGracePeriodEnd($newExpiration);
 
             // Update minisite with permanent slugs and publish it
-            $minisiteRepository = $this->wordPressManager->getMinisiteRepository();
-            $minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
-            $minisiteRepository->publishMinisite($minisiteId);
+            $this->minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
+            $this->minisiteRepository->publishMinisite($minisiteId);
 
             // Create payment record
             $paymentId = db::insert(
@@ -210,15 +211,14 @@ class SubscriptionActivationService
         db::query('START TRANSACTION');
 
         try {
-            $minisiteRepository = $this->wordPressManager->getMinisiteRepository();
-            $minisiteRepository->updateStatus($minisiteId, 'published');
+            $this->minisiteRepository->updateStatus($minisiteId, 'published');
 
             // Update slugs if they're different from current ones
-            $currentMinisite = $minisiteRepository->findById($minisiteId);
+            $currentMinisite = $this->minisiteRepository->findById($minisiteId);
             if ($currentMinisite) {
                 $currentSlugs = $currentMinisite->slugs;
                 if ($currentSlugs->business !== $businessSlug || $currentSlugs->location !== $locationSlug) {
-                    $minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
+                    $this->minisiteRepository->updateSlugs($minisiteId, $businessSlug, $locationSlug);
                 }
             }
 

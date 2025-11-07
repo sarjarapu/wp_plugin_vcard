@@ -144,30 +144,6 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
     }
 
     /**
-     * Start database transaction
-     */
-    public function startTransaction(): void
-    {
-        db::query('START TRANSACTION');
-    }
-
-    /**
-     * Commit database transaction
-     */
-    public function commitTransaction(): void
-    {
-        db::query('COMMIT');
-    }
-
-    /**
-     * Rollback database transaction
-     */
-    public function rollbackTransaction(): void
-    {
-        db::query('ROLLBACK');
-    }
-
-    /**
      * Check if user owns minisite
      */
     public function userOwnsMinisite(object $minisite, int $userId): bool

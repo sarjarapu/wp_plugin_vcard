@@ -4,6 +4,7 @@ namespace Minisite\Features\PublishMinisite\Services;
 
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Psr\Log\LoggerInterface;
@@ -24,7 +25,8 @@ class ReservationService
     private LoggerInterface $logger;
 
     public function __construct(
-        private WordPressPublishManager $wordPressManager
+        private WordPressPublishManager $wordPressManager,
+        private MinisiteRepository $minisiteRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('reservation-service');
     }
@@ -52,18 +54,16 @@ class ReservationService
         db::query('START TRANSACTION');
 
         try {
-            $minisiteRepository = $this->wordPressManager->getMinisiteRepository();
-
             // Check if combination already exists in minisites
-            $existingMinisite = $minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
+            $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
             if ($existingMinisite) {
                 // Check if this minisite has an active subscription or is in grace period
                 // A slug is protected if: expires_at > NOW() (active) OR grace_period_ends_at > NOW() (grace period)
                 $paymentsTable = $wpdb->prefix . 'minisite_payments';
                 $activePayment = db::get_row(
-                    "SELECT * FROM {$paymentsTable} 
-                     WHERE minisite_id = %s 
-                     AND (expires_at > NOW() OR grace_period_ends_at > NOW()) 
+                    "SELECT * FROM {$paymentsTable}
+                     WHERE minisite_id = %s
+                     AND (expires_at > NOW() OR grace_period_ends_at > NOW())
                      LIMIT 1",
                     array($existingMinisite->id)
                 );
@@ -85,15 +85,15 @@ class ReservationService
 
             if ($locationSlugForQuery === null) {
                 $existingReservation = db::get_row(
-                    "SELECT * FROM {$reservationsTable} 
-                     WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '') 
+                    "SELECT * FROM {$reservationsTable}
+                     WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '')
                      AND expires_at > NOW() AND user_id != %d",
                     array($businessSlug, $userId)
                 );
             } else {
                 $existingReservation = db::get_row(
-                    "SELECT * FROM {$reservationsTable} 
-                     WHERE business_slug = %s AND location_slug = %s 
+                    "SELECT * FROM {$reservationsTable}
+                     WHERE business_slug = %s AND location_slug = %s
                      AND expires_at > NOW() AND user_id != %d",
                     array($businessSlug, $locationSlug, $userId)
                 );
@@ -108,15 +108,15 @@ class ReservationService
             // If user already has a reservation for this slug, extend it
             if ($locationSlugForQuery === null) {
                 $userReservation = db::get_row(
-                    "SELECT * FROM {$reservationsTable} 
-                     WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '') 
+                    "SELECT * FROM {$reservationsTable}
+                     WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '')
                      AND user_id = %d AND expires_at > NOW()",
                     array($businessSlug, $userId)
                 );
             } else {
                 $userReservation = db::get_row(
-                    "SELECT * FROM {$reservationsTable} 
-                     WHERE business_slug = %s AND location_slug = %s 
+                    "SELECT * FROM {$reservationsTable}
+                     WHERE business_slug = %s AND location_slug = %s
                      AND user_id = %d AND expires_at > NOW()",
                     array($businessSlug, $locationSlug, $userId)
                 );
@@ -129,8 +129,8 @@ class ReservationService
 
                 if ($reservationId) {
                     db::query(
-                        "UPDATE {$reservationsTable} 
-                         SET expires_at = %s, created_at = NOW() 
+                        "UPDATE {$reservationsTable}
+                         SET expires_at = %s, created_at = NOW()
                          WHERE id = %d",
                         array($newExpiresAt, $reservationId)
                     );

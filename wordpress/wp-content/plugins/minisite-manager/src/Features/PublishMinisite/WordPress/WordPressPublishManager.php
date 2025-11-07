@@ -209,30 +209,6 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
     }
 
     /**
-     * Start database transaction
-     */
-    public function startTransaction(): void
-    {
-        db::query('START TRANSACTION');
-    }
-
-    /**
-     * Commit database transaction
-     */
-    public function commitTransaction(): void
-    {
-        db::query('COMMIT');
-    }
-
-    /**
-     * Rollback database transaction
-     */
-    public function rollbackTransaction(): void
-    {
-        db::query('ROLLBACK');
-    }
-
-    /**
      * Get POST data (unslashed, caller should sanitize)
      */
     public function getPostData(string $key, $default = null)

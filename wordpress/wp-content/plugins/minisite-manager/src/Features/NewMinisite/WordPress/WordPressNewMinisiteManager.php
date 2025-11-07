@@ -151,30 +151,6 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
     }
 
     /**
-     * Start database transaction
-     */
-    public function startTransaction(): void
-    {
-        db::query('START TRANSACTION');
-    }
-
-    /**
-     * Commit database transaction
-     */
-    public function commitTransaction(): void
-    {
-        db::query('COMMIT');
-    }
-
-    /**
-     * Rollback database transaction
-     */
-    public function rollbackTransaction(): void
-    {
-        db::query('ROLLBACK');
-    }
-
-    /**
      * Find minisite by ID
      * NOTE: Still used in MinisiteFormProcessor - will be refactored in Phase 2
      */
