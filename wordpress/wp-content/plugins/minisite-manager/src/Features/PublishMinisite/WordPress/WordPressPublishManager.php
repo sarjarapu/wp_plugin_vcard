@@ -96,6 +96,7 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
      */
     public function getAdminUrl(string $path = '', string $scheme = 'admin'): string
     {
+        // phpstan-ignore-next-line -- WordPress admin_url() accepts 2 parameters (path, scheme)
         return admin_url($path, $scheme);
     }
 

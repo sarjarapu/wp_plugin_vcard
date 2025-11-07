@@ -10,7 +10,7 @@ use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementSe
  *
  * SINGLE RESPONSIBILITY: Handle delete configuration command
  */
-final class DeleteConfigHandler
+class DeleteConfigHandler
 {
     public function __construct(
         private ConfigurationManagementService $configService

@@ -20,7 +20,7 @@ use Psr\Log\LoggerInterface;
  * - Delegates to handlers
  * - Coordinates rendering
  */
-final class ConfigurationManagementController
+class ConfigurationManagementController
 {
     private LoggerInterface $logger;
 
