@@ -268,7 +268,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
      */
     public function hasBeenPublished(string $id): bool
     {
-        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+        $versionRepo = $GLOBALS['minisite_version_repository'] ?? $this->getVersionRepository();
 
         return $versionRepo->findPublishedVersion($id) !== null;
     }
@@ -281,7 +281,7 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
      */
     public function getNextVersionNumber(string $id): int
     {
-        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+        $versionRepo = $GLOBALS['minisite_version_repository'] ?? $this->getVersionRepository();
 
         return $versionRepo->getNextVersionNumber($id);
     }
@@ -294,10 +294,28 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
      */
     public function saveVersion(object $version): object
     {
-        $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($GLOBALS['wpdb']);
+        $versionRepo = $GLOBALS['minisite_version_repository'] ?? $this->getVersionRepository();
         $versionRepo->save($version);
 
         return $version;
+    }
+
+    /**
+     * Get VersionRepository instance (from global or create if needed)
+     *
+     * @return \Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface
+     */
+    private function getVersionRepository(): \Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface
+    {
+        // Try to get from global first (Doctrine-based repository)
+        if (isset($GLOBALS['minisite_version_repository'])) {
+            return $GLOBALS['minisite_version_repository'];
+        }
+
+        // Fallback: Create old repository if Doctrine not available
+        // This provides backward compatibility during migration
+        global $wpdb;
+        return new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
     }
 
     /**

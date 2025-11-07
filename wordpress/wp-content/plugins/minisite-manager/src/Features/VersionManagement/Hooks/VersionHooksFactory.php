@@ -30,7 +30,9 @@ class VersionHooksFactory
         // Create repositories
         global $wpdb;
         $minisiteRepository = new MinisiteRepository($wpdb);
-        $versionRepository = new VersionRepository($wpdb);
+
+        // Use Doctrine-based VersionRepository from global if available, otherwise create old one
+        $versionRepository = $GLOBALS['minisite_version_repository'] ?? new VersionRepository($wpdb);
 
         // Create termination handler for WordPress manager
         $terminationHandler = new \Minisite\Infrastructure\Http\WordPressTerminationHandler();

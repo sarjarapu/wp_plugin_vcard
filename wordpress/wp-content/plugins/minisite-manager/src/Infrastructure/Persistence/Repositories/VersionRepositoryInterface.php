@@ -2,7 +2,7 @@
 
 namespace Minisite\Infrastructure\Persistence\Repositories;
 
-use Minisite\Domain\Entities\Version;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 
 interface VersionRepositoryInterface
 {
@@ -14,4 +14,6 @@ interface VersionRepositoryInterface
     public function findPublishedVersion(string $minisiteId): ?Version;
     public function getNextVersionNumber(string $minisiteId): int;
     public function delete(int $id): bool;
+    public function getLatestDraftForEditing(string $minisiteId): Version;
+    public function createDraftFromVersion(Version $sourceVersion): Version;
 }

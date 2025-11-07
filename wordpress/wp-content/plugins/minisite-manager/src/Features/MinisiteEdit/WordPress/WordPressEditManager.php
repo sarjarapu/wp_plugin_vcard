@@ -7,6 +7,7 @@ use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
@@ -20,7 +21,7 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 class WordPressEditManager extends BaseWordPressManager implements WordPressManagerInterface
 {
     private ?MinisiteRepository $minisiteRepository = null;
-    private ?VersionRepository $versionRepository = null;
+    private ?VersionRepositoryInterface $versionRepository = null;
 
     /**
      * Constructor
@@ -46,11 +47,18 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
 
     /**
      * Get version repository instance
+     * Uses Doctrine-based repository from global if available, otherwise creates old one
      */
-    public function getVersionRepository(): VersionRepository
+    public function getVersionRepository(): VersionRepositoryInterface
     {
         if ($this->versionRepository === null) {
-            $this->versionRepository = new VersionRepository(db::getWpdb());
+            // Use Doctrine-based repository from global if available
+            if (isset($GLOBALS['minisite_version_repository'])) {
+                $this->versionRepository = $GLOBALS['minisite_version_repository'];
+            } else {
+                // Fallback: Create old repository if Doctrine not available
+                $this->versionRepository = new VersionRepository(db::getWpdb());
+            }
         }
 
         return $this->versionRepository;

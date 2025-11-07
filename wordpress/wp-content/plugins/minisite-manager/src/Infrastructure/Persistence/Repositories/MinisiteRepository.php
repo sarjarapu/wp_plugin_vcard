@@ -326,7 +326,8 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         $this->db->query('START TRANSACTION');
 
         try {
-            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($this->db);
+            // Use Doctrine-based VersionRepository from global if available, otherwise create old one
+            $versionRepo = $GLOBALS['minisite_version_repository'] ?? new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($this->db);
 
             // Try to find latest draft first (preferred)
             $versionToPublish = $versionRepo->findLatestDraft($id);
@@ -353,7 +354,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             if ($currentPublishedVersion) {
                 $this->db->query(
                     $this->db->prepare(
-                        "UPDATE {$this->db->prefix}minisite_versions 
+                        "UPDATE {$this->db->prefix}minisite_versions
                      SET status = 'draft', label = CONCAT('Archived - ', label)
                      WHERE id = %d",
                         $currentPublishedVersion->id
@@ -364,8 +365,8 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             // Publish the target version
             $this->db->query(
                 $this->db->prepare(
-                    "UPDATE {$this->db->prefix}minisite_versions 
-                 SET status = 'published', published_at = NOW() 
+                    "UPDATE {$this->db->prefix}minisite_versions
+                 SET status = 'published', published_at = NOW()
                  WHERE id = %d",
                     $versionToPublish->id
                 )
@@ -403,8 +404,8 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             if ($versionToPublish->geo && $versionToPublish->geo->getLat() && $versionToPublish->geo->getLng()) {
                 $this->db->query(
                     $this->db->prepare(
-                        "UPDATE {$this->table()} 
-                     SET location_point = POINT(%f, %f) 
+                        "UPDATE {$this->table()}
+                     SET location_point = POINT(%f, %f)
                      WHERE id = %s",
                         $versionToPublish->geo->getLng(),
                         $versionToPublish->geo->getLat(),

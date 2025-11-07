@@ -57,6 +57,7 @@ class DoctrineFactory
             paths: array(
                 __DIR__ . '/../../../Domain/Entities',
                 __DIR__ . '/../../../Features/ReviewManagement/Domain/Entities',
+                __DIR__ . '/../../../Features/VersionManagement/Domain/Entities',
             ),
             isDevMode: defined('WP_DEBUG') && WP_DEBUG
         );
