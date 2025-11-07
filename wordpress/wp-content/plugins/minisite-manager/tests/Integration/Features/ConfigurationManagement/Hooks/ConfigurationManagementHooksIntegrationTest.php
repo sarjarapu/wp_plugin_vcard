@@ -7,7 +7,7 @@ namespace Tests\Integration\Features\ConfigurationManagement\Hooks;
 use Minisite\Features\ConfigurationManagement\Hooks\ConfigurationManagementHooks;
 use Minisite\Features\ConfigurationManagement\Hooks\ConfigurationManagementHooksFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\Features\ConfigurationManagement\BaseConfigurationManagementIntegrationTest;
 
 /**
  * Integration tests for ConfigurationManagementHooks
@@ -20,38 +20,8 @@ use PHPUnit\Framework\TestCase;
  * - Database constants must be defined (handled by bootstrap.php)
  */
 #[CoversClass(ConfigurationManagementHooks::class)]
-final class ConfigurationManagementHooksIntegrationTest extends TestCase
+final class ConfigurationManagementHooksIntegrationTest extends BaseConfigurationManagementIntegrationTest
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        // Initialize LoggingServiceProvider if not already initialized
-        \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
-
-        // Ensure database constants are defined (required by DoctrineFactory)
-        if (! defined('DB_HOST')) {
-            define('DB_HOST', getenv('MYSQL_HOST') ?: '127.0.0.1');
-        }
-        if (! defined('DB_PORT')) {
-            define('DB_PORT', getenv('MYSQL_PORT') ?: '3307');
-        }
-        if (! defined('DB_USER')) {
-            define('DB_USER', getenv('MYSQL_USER') ?: 'minisite');
-        }
-        if (! defined('DB_PASSWORD')) {
-            define('DB_PASSWORD', getenv('MYSQL_PASSWORD') ?: 'minisite');
-        }
-        if (! defined('DB_NAME')) {
-            define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'minisite_test');
-        }
-
-        // Ensure $wpdb is set (required by TablePrefixListener)
-        if (! isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-    }
 
     /**
      * Test register() registers WordPress hooks correctly
