@@ -176,93 +176,37 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
     }
 
     /**
-     * Get next version number (required by interface, but not used)
-     * EditService injects VersionRepositoryInterface directly instead
-     */
-    public function getNextVersionNumber(string $siteId): int
-    {
-        // Not used - EditService injects VersionRepositoryInterface directly
-        // Return 1 as default
-        return 1;
-    }
-
-    /**
-     * Save version (required by interface, but not used)
-     * EditService injects VersionRepositoryInterface directly instead
-     */
-    public function saveVersion(object $version): object
-    {
-        // Not used - EditService injects VersionRepositoryInterface directly
-        // Return version as-is
-        return $version;
-    }
-
-    /**
-     * Check if minisite has been published (required by interface, but not used)
-     * EditService injects VersionRepositoryInterface directly instead
-     */
-    public function hasBeenPublished(string $siteId): bool
-    {
-        // Not used - EditService injects VersionRepositoryInterface directly
-        // Return false as default
-        return false;
-    }
-
-    /**
-     * Find minisite by ID (required by interface, but not used)
-     * EditService injects MinisiteRepository directly instead
+     * Find minisite by ID
+     * NOTE: Still used in MinisiteFormProcessor - will be refactored in Phase 2
      */
     public function findMinisiteById(string $siteId): ?object
     {
-        // Not used - EditService injects MinisiteRepository directly
-        return null;
+        // TODO: Phase 2 - Refactor MinisiteFormProcessor to inject MinisiteRepository directly
+        global $wpdb;
+        $repo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+        return $repo->findById($siteId);
     }
 
     /**
-     * Update business info (required by interface, but not used)
-     * Services should inject MinisiteRepository directly instead
-     */
-    public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
-    {
-        // Not used - services should inject MinisiteRepository directly
-    }
-
-    /**
-     * Update coordinates (required by interface, but not used)
-     * Services should inject MinisiteRepository directly instead
-     */
-    public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
-    {
-        // Not used - services should inject MinisiteRepository directly
-    }
-
-    /**
-     * Update title (required by interface, but not used)
-     * Services should inject MinisiteRepository directly instead
-     */
-    public function updateTitle(string $siteId, string $title): void
-    {
-        // Not used - services should inject MinisiteRepository directly
-    }
-
-    /**
-     * Update multiple minisite fields (required by interface, but not used)
-     * Services should inject MinisiteRepository directly instead
+     * Update multiple minisite fields in a single operation
+     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
      */
     public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
     {
-        // Not used - services should inject MinisiteRepository directly
+        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to inject MinisiteRepository directly
+        global $wpdb;
+        $repo = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+        $repo->updateMinisiteFields($siteId, $fields, $userId);
     }
 
     /**
-     * Get minisite repository (required by interface, but not used)
-     * Services should inject MinisiteRepository directly instead
+     * Get minisite repository
+     * NOTE: Still used in multiple services - will be refactored in Phase 2
      */
     public function getMinisiteRepository(): object
     {
-        // Not used - services should inject MinisiteRepository directly
+        // TODO: Phase 2 - Refactor services to inject MinisiteRepository directly
         global $wpdb;
-
         return new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     }
 }

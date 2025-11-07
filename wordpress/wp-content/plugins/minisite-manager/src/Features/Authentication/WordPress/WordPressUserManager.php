@@ -323,101 +323,67 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
         return wp_create_nonce($action);
     }
 
-    // WordPressManagerInterface methods - Not applicable for Authentication, return defaults
+    // WordPressManagerInterface methods - Not applicable for Authentication
 
     /**
-     * Find minisite by ID (not applicable for Authentication)
+     * Find minisite by ID
+     * NOTE: Still used in MinisiteFormProcessor - will be refactored in Phase 2
      */
     public function findMinisiteById(string $siteId): ?object
     {
+        // TODO: Phase 2 - Refactor MinisiteFormProcessor to inject MinisiteRepository directly
+        // Authentication doesn't need this, but must implement for interface compliance
         return null;
     }
 
     /**
-     * Get next version number (not applicable for Authentication)
-     */
-    public function getNextVersionNumber(string $minisiteId): int
-    {
-        return 1;
-    }
-
-    /**
-     * Save version (not applicable for Authentication)
-     */
-    public function saveVersion(object $version): object
-    {
-        return $version;
-    }
-
-    /**
-     * Check if minisite has been published (not applicable for Authentication)
-     */
-    public function hasBeenPublished(string $siteId): bool
-    {
-        return false;
-    }
-
-    /**
-     * Update business info (not applicable for Authentication)
-     */
-    public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
-    {
-        // No-op for Authentication
-    }
-
-    /**
-     * Update coordinates (not applicable for Authentication)
-     */
-    public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
-    {
-        // No-op for Authentication
-    }
-
-    /**
-     * Update title (not applicable for Authentication)
-     */
-    public function updateTitle(string $siteId, string $title): void
-    {
-        // No-op for Authentication
-    }
-
-    /**
-     * Update minisite fields (not applicable for Authentication)
+     * Update multiple minisite fields in a single operation
+     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
      */
     public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
     {
-        // No-op for Authentication
+        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to inject MinisiteRepository directly
+        // Authentication doesn't need this, but must implement for interface compliance
     }
 
     /**
-     * Start transaction (not applicable for Authentication)
+     * Start database transaction
+     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
      */
     public function startTransaction(): void
     {
-        // No-op for Authentication
+        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to use TransactionManager
+        // Authentication doesn't need this, but must implement for interface compliance
     }
 
     /**
-     * Commit transaction (not applicable for Authentication)
+     * Commit database transaction
+     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
      */
     public function commitTransaction(): void
     {
-        // No-op for Authentication
+        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to use TransactionManager
+        // Authentication doesn't need this, but must implement for interface compliance
     }
 
     /**
-     * Rollback transaction (not applicable for Authentication)
+     * Rollback database transaction
+     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
      */
     public function rollbackTransaction(): void
     {
-        // No-op for Authentication
+        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to use TransactionManager
+        // Authentication doesn't need this, but must implement for interface compliance
     }
 
     /**
-     * Get minisite repository (not applicable for Authentication)
+     * Get minisite repository
+     * NOTE: Still used in multiple services - will be refactored in Phase 2
      */
     public function getMinisiteRepository(): object
     {
+        // TODO: Phase 2 - Refactor services to inject MinisiteRepository directly
+        // Authentication doesn't need this, but must implement for interface compliance
         return new \stdClass();
     }
 }

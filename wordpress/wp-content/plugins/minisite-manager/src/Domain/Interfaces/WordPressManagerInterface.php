@@ -54,41 +54,13 @@ interface WordPressManagerInterface
 
     /**
      * Find minisite by ID
+     * NOTE: This is still used in MinisiteFormProcessor and will be refactored in Phase 2
      */
     public function findMinisiteById(string $siteId): ?object;
 
     /**
-     * Get next version number
-     */
-    public function getNextVersionNumber(string $minisiteId): int;
-
-    /**
-     * Save version
-     */
-    public function saveVersion(object $version): object;
-
-    /**
-     * Check if minisite has been published
-     */
-    public function hasBeenPublished(string $siteId): bool;
-
-    /**
-     * Update business info fields
-     */
-    public function updateBusinessInfo(string $siteId, array $fields, int $userId): void;
-
-    /**
-     * Update coordinates
-     */
-    public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void;
-
-    /**
-     * Update title
-     */
-    public function updateTitle(string $siteId, string $title): void;
-
-    /**
      * Update multiple minisite fields in a single operation
+     * NOTE: This is still used in MinisiteDatabaseCoordinator and will be refactored in Phase 2
      */
     public function updateMinisiteFields(string $siteId, array $fields, int $userId): void;
 
@@ -109,6 +81,7 @@ interface WordPressManagerInterface
 
     /**
      * Get minisite repository
+     * NOTE: This is still used in multiple services and will be refactored in Phase 2
      */
     public function getMinisiteRepository(): object;
 }
