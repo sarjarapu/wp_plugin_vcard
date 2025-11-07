@@ -707,7 +707,7 @@ if (! function_exists('update_option')) {
 }
 
 if (! function_exists('admin_url')) {
-    function admin_url($path = '')
+    function admin_url($path = '', $scheme = null)
     {
         return 'http://example.com/wp-admin/' . ltrim($path, '/');
     }
