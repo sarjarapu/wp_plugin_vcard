@@ -12,7 +12,6 @@ use PHPUnit\Framework\TestCase;
  * Integration tests for ConfigurationManagementFeature
  *
  * Tests the initialize() method which registers hooks and requires database connection.
- * This covers functionality that is skipped in unit tests when Doctrine/DB is not available.
  *
  * Prerequisites:
  * - MySQL test database must be running (Docker container on port 3307)
@@ -28,61 +27,37 @@ final class ConfigurationManagementFeatureIntegrationTest extends TestCase
         // Initialize LoggingServiceProvider if not already initialized
         \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
 
-        // Ensure database constants are defined
-        if (!defined('DB_HOST')) {
+        // Ensure database constants are defined (required by DoctrineFactory)
+        if (! defined('DB_HOST')) {
             define('DB_HOST', getenv('MYSQL_HOST') ?: '127.0.0.1');
         }
-        if (!defined('DB_USER')) {
+        if (! defined('DB_PORT')) {
+            define('DB_PORT', getenv('MYSQL_PORT') ?: '3307');
+        }
+        if (! defined('DB_USER')) {
             define('DB_USER', getenv('MYSQL_USER') ?: 'minisite');
         }
-        if (!defined('DB_PASSWORD')) {
+        if (! defined('DB_PASSWORD')) {
             define('DB_PASSWORD', getenv('MYSQL_PASSWORD') ?: 'minisite');
         }
-        if (!defined('DB_NAME')) {
+        if (! defined('DB_NAME')) {
             define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'minisite_test');
         }
+
+        // Ensure $wpdb is set (required by TablePrefixListener)
+        if (! isset($GLOBALS['wpdb'])) {
+            $GLOBALS['wpdb'] = new \wpdb();
+        }
+        $GLOBALS['wpdb']->prefix = 'wp_';
     }
 
     /**
-     * Test initialize can be called successfully with database available
-     * This covers the functionality skipped in unit tests
+     * Test initialize can be called successfully
      */
-    public function test_initialize_can_be_called_with_database(): void
+    public function test_initialize_can_be_called(): void
     {
-        // initialize() should not throw when database is available
-        try {
-            ConfigurationManagementFeature::initialize();
-            $this->assertTrue(true); // If we get here, no exception was thrown
-        } catch (\Exception $e) {
-            // Only skip if it's a database-related error
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                // Other errors should fail the test
-                throw $e;
-            }
-        } catch (\Error $e) {
-            // Handle fatal errors
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                throw $e;
-            }
-        }
+        ConfigurationManagementFeature::initialize();
+        $this->assertTrue(true); // If we get here, no exception was thrown
     }
 
     /**
@@ -90,40 +65,68 @@ final class ConfigurationManagementFeatureIntegrationTest extends TestCase
      */
     public function test_initialize_registers_hooks(): void
     {
-        try {
-            // Call initialize
-            ConfigurationManagementFeature::initialize();
+        // Clear any existing hooks
+        global $wp_filter;
+        $wp_filter = null; // Reset to allow fresh initialization
 
-            // Verify hooks were registered by checking that WordPress functions were called
-            // Since we can't directly inspect WordPress hooks, we verify the method completed
-            $this->assertTrue(true); // Test passes if initialize() completes without error
-        } catch (\Exception $e) {
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                throw $e;
-            }
-        } catch (\Error $e) {
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                throw $e;
-            }
-        }
+        // Call initialize
+        ConfigurationManagementFeature::initialize();
+
+        // Verify hooks were registered by checking WordPress filter object
+        // The hooks should be registered in $wp_filter->callbacks
+        $this->assertNotNull($wp_filter, '$wp_filter should be initialized');
+        $this->assertObjectHasProperty('callbacks', $wp_filter);
+        $this->assertArrayHasKey('admin_menu', $wp_filter->callbacks);
+        $this->assertArrayHasKey('admin_post_minisite_config_delete', $wp_filter->callbacks);
+
+        // Verify the hooks are callable
+        $adminMenuHooks = $wp_filter->callbacks['admin_menu'] ?? array();
+        $this->assertNotEmpty($adminMenuHooks, 'admin_menu hook should be registered');
+
+        $adminPostHooks = $wp_filter->callbacks['admin_post_minisite_config_delete'] ?? array();
+        $this->assertNotEmpty($adminPostHooks, 'admin_post_minisite_config_delete hook should be registered');
+    }
+
+    /**
+     * Test initialize sets GLOBALS correctly
+     */
+    public function test_initialize_sets_globals_config_manager(): void
+    {
+        // Clear GLOBALS before test
+        unset($GLOBALS['minisite_config_manager']);
+
+        // Call initialize
+        ConfigurationManagementFeature::initialize();
+
+        // Verify GLOBALS is set (set by factory)
+        $this->assertArrayHasKey('minisite_config_manager', $GLOBALS);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService::class,
+            $GLOBALS['minisite_config_manager']
+        );
+    }
+
+    /**
+     * Test initialize creates hooks instance via factory
+     */
+    public function test_initialize_creates_hooks_via_factory(): void
+    {
+        // Clear GLOBALS before test
+        unset($GLOBALS['minisite_config_manager']);
+
+        // Call initialize
+        ConfigurationManagementFeature::initialize();
+
+        // Verify that factory was called by checking GLOBALS is set
+        // (factory sets GLOBALS['minisite_config_manager'])
+        $this->assertArrayHasKey('minisite_config_manager', $GLOBALS);
+
+        // Verify hooks were registered (indirect verification that factory created hooks)
+        global $wp_filter;
+        $this->assertNotNull($wp_filter, '$wp_filter should be initialized');
+        $this->assertObjectHasProperty('callbacks', $wp_filter);
+        $this->assertArrayHasKey('admin_menu', $wp_filter->callbacks);
+        $this->assertArrayHasKey('admin_post_minisite_config_delete', $wp_filter->callbacks);
     }
 
     /**
@@ -131,41 +134,12 @@ final class ConfigurationManagementFeatureIntegrationTest extends TestCase
      */
     public function test_initialize_can_be_called_multiple_times(): void
     {
-        try {
-            // Call initialize multiple times
-            ConfigurationManagementFeature::initialize();
-            ConfigurationManagementFeature::initialize();
-            ConfigurationManagementFeature::initialize();
+        // Call initialize multiple times
+        ConfigurationManagementFeature::initialize();
+        ConfigurationManagementFeature::initialize();
+        ConfigurationManagementFeature::initialize();
 
-            // Should not throw or cause errors
-            $this->assertTrue(true);
-        } catch (\Exception $e) {
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                throw $e;
-            }
-        } catch (\Error $e) {
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                throw $e;
-            }
-        }
+        // Should not throw or cause errors
+        $this->assertTrue(true);
     }
 }
-

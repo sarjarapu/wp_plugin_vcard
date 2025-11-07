@@ -151,4 +151,158 @@ final class ConfigurationManagementRendererTest extends TestCase
         $reflection = new \ReflectionClass(ConfigurationManagementRenderer::class);
         $this->assertFalse($reflection->isFinal());
     }
+
+    /**
+     * Test maskValue() with very short value (<= 4 chars)
+     */
+    public function test_maskValue_with_short_value(): void
+    {
+        $config = new Config();
+        $config->key = 'short_key';
+        $config->type = 'encrypted';
+        $config->isSensitive = true;
+        $config->setTypedValue('1234'); // Exactly 4 chars
+
+        $result = $this->renderer->prepareConfigForTemplate($config);
+
+        $this->assertStringStartsWith('••••', $result['display_value']);
+        $this->assertEquals('••••', $result['display_value']); // Should be exactly 4 dots
+    }
+
+    /**
+     * Test maskValue() with very short value (< 4 chars)
+     */
+    public function test_maskValue_with_very_short_value(): void
+    {
+        $config = new Config();
+        $config->key = 'tiny_key';
+        $config->type = 'encrypted';
+        $config->isSensitive = true;
+        $config->setTypedValue('12'); // Less than 4 chars
+
+        $result = $this->renderer->prepareConfigForTemplate($config);
+
+        $this->assertEquals('••••', $result['display_value']); // Should be exactly 4 dots
+    }
+
+    /**
+     * Test maskValue() with long value (> 4 chars)
+     */
+    public function test_maskValue_with_long_value(): void
+    {
+        $config = new Config();
+        $config->key = 'long_key';
+        $config->type = 'encrypted';
+        $config->isSensitive = true;
+        $config->setTypedValue('very_long_secret_value_12345');
+
+        $result = $this->renderer->prepareConfigForTemplate($config);
+
+        $this->assertStringStartsWith('••••••••', $result['display_value']);
+        $this->assertStringEndsWith('2345', $result['display_value']); // Last 4 chars
+        $this->assertNotEquals('very_long_secret_value_12345', $result['display_value']);
+    }
+
+    /**
+     * Test formatKeyName() with various key formats
+     */
+    public function test_formatKeyName_with_acronyms(): void
+    {
+        $config = new Config();
+        $config->key = 'openai_api_key';
+        $config->type = 'string';
+        $config->setTypedValue('test');
+
+        $result = $this->renderer->prepareConfigForTemplate($config);
+
+        $this->assertArrayHasKey('display_name', $result);
+        $this->assertIsString($result['display_name']);
+        // Should contain 'OPENAI' (uppercase acronym) and 'API' (uppercase acronym)
+        $this->assertStringContainsString('OPENAI', $result['display_name']);
+        $this->assertStringContainsString('API', $result['display_name']);
+    }
+
+    /**
+     * Test formatKeyName() with PII acronym
+     */
+    public function test_formatKeyName_with_pii_acronym(): void
+    {
+        $config = new Config();
+        $config->key = 'pii_encryption_key';
+        $config->type = 'string';
+        $config->setTypedValue('test');
+
+        $result = $this->renderer->prepareConfigForTemplate($config);
+
+        $this->assertArrayHasKey('display_name', $result);
+        // Should contain 'PII' (uppercase acronym)
+        $this->assertStringContainsString('PII', $result['display_name']);
+    }
+
+    /**
+     * Test formatKeyName() with single word key
+     */
+    public function test_formatKeyName_with_single_word(): void
+    {
+        $config = new Config();
+        $config->key = 'testkey';
+        $config->type = 'string';
+        $config->setTypedValue('test');
+
+        $result = $this->renderer->prepareConfigForTemplate($config);
+
+        $this->assertArrayHasKey('display_name', $result);
+        $this->assertIsString($result['display_name']);
+        $this->assertNotEmpty($result['display_name']);
+    }
+
+    /**
+     * Test formatKeyName() with multiple underscores
+     */
+    public function test_formatKeyName_with_multiple_underscores(): void
+    {
+        $config = new Config();
+        $config->key = 'test_key_with_many_parts';
+        $config->type = 'string';
+        $config->setTypedValue('test');
+
+        $result = $this->renderer->prepareConfigForTemplate($config);
+
+        $this->assertArrayHasKey('display_name', $result);
+        $this->assertIsString($result['display_name']);
+        // Should have spaces between words
+        $this->assertStringContainsString(' ', $result['display_name']);
+    }
+
+    /**
+     * Test registerTimberLocations() via reflection
+     */
+    public function test_registerTimberLocations_via_reflection(): void
+    {
+        $reflection = new \ReflectionClass(ConfigurationManagementRenderer::class);
+        $method = $reflection->getMethod('registerTimberLocations');
+        $method->setAccessible(true);
+
+        // Mock Timber class if it doesn't exist
+        if (!class_exists('Timber\Timber')) {
+            eval('
+                namespace Timber {
+                    class Timber {
+                        public static $locations = array();
+                    }
+                }
+            ');
+        }
+
+        // Call the method
+        $method->invoke($this->renderer);
+
+        // Verify Timber locations were set
+        if (class_exists('Timber\Timber')) {
+            $this->assertIsArray(\Timber\Timber::$locations);
+            // Should contain the template path
+            $expectedPath = trailingslashit(MINISITE_PLUGIN_DIR) . 'templates/timber';
+            $this->assertContains($expectedPath, \Timber\Timber::$locations);
+        }
+    }
 }

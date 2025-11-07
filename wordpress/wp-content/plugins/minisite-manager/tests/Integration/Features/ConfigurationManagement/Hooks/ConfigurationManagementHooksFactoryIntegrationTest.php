@@ -29,9 +29,12 @@ final class ConfigurationManagementHooksFactoryIntegrationTest extends TestCase
         // Initialize LoggingServiceProvider if not already initialized
         \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
 
-        // Ensure database constants are defined
+        // Ensure database constants are defined (required by DoctrineFactory)
         if (! defined('DB_HOST')) {
             define('DB_HOST', getenv('MYSQL_HOST') ?: '127.0.0.1');
+        }
+        if (! defined('DB_PORT')) {
+            define('DB_PORT', getenv('MYSQL_PORT') ?: '3307');
         }
         if (! defined('DB_USER')) {
             define('DB_USER', getenv('MYSQL_USER') ?: 'minisite');
@@ -42,50 +45,21 @@ final class ConfigurationManagementHooksFactoryIntegrationTest extends TestCase
         if (! defined('DB_NAME')) {
             define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'minisite_test');
         }
+
+        // Ensure $wpdb is set (required by TablePrefixListener)
+        if (! isset($GLOBALS['wpdb'])) {
+            $GLOBALS['wpdb'] = new \wpdb();
+        }
+        $GLOBALS['wpdb']->prefix = 'wp_';
     }
 
     /**
-     * Test create returns ConfigurationManagementHooks instance with database available
-     * This covers the functionality skipped in unit tests
+     * Test create returns ConfigurationManagementHooks instance
      */
-    public function test_create_returns_hooks_instance_with_database(): void
+    public function test_create_returns_hooks_instance(): void
     {
-        try {
-            // Call create() to ensure code is executed for coverage
-            $hooks = ConfigurationManagementHooksFactory::create();
-            $this->assertInstanceOf(ConfigurationManagementHooks::class, $hooks);
-        } catch (\Exception $e) {
-            // Only skip if it's a database-related error
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'No such file or directory') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                // Other errors should fail the test
-                throw $e;
-            }
-        } catch (\Error $e) {
-            // Handle fatal errors
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'No such file or directory') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                throw $e;
-            }
-        }
+        $hooks = ConfigurationManagementHooksFactory::create();
+        $this->assertInstanceOf(ConfigurationManagementHooks::class, $hooks);
     }
 
     /**
@@ -93,41 +67,84 @@ final class ConfigurationManagementHooksFactoryIntegrationTest extends TestCase
      */
     public function test_create_returns_consistent_instance(): void
     {
-        try {
-            $hooks1 = ConfigurationManagementHooksFactory::create();
-            $hooks2 = ConfigurationManagementHooksFactory::create();
+        $hooks1 = ConfigurationManagementHooksFactory::create();
+        $hooks2 = ConfigurationManagementHooksFactory::create();
 
-            $this->assertInstanceOf(ConfigurationManagementHooks::class, $hooks1);
-            $this->assertInstanceOf(ConfigurationManagementHooks::class, $hooks2);
-            // Note: They may be different instances, but should be same type
-        } catch (\Exception $e) {
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'No such file or directory') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                throw $e;
-            }
-        } catch (\Error $e) {
-            $errorMessage = $e->getMessage();
-            if (str_contains($errorMessage, 'DB_HOST') ||
-                str_contains($errorMessage, 'Doctrine') ||
-                str_contains($errorMessage, 'PDO') ||
-                str_contains($errorMessage, 'Connection') ||
-                str_contains($errorMessage, 'No such file or directory') ||
-                str_contains($errorMessage, 'SQLSTATE') ||
-                str_contains($errorMessage, 'Access denied') ||
-                str_contains($errorMessage, '1045')) {
-                $this->markTestSkipped('Database connection failed: ' . $errorMessage);
-            } else {
-                throw $e;
-            }
-        }
+        $this->assertInstanceOf(ConfigurationManagementHooks::class, $hooks1);
+        $this->assertInstanceOf(ConfigurationManagementHooks::class, $hooks2);
+        // Note: They may be different instances, but should be same type
+    }
+
+    /**
+     * Test create sets GLOBALS['minisite_config_manager']
+     */
+    public function test_create_sets_globals_config_manager(): void
+    {
+        // Clear GLOBALS before test
+        unset($GLOBALS['minisite_config_manager']);
+
+        $hooks = ConfigurationManagementHooksFactory::create();
+
+        // Verify GLOBALS is set
+        $this->assertArrayHasKey('minisite_config_manager', $GLOBALS);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService::class,
+            $GLOBALS['minisite_config_manager']
+        );
+    }
+
+    /**
+     * Test create wires dependencies correctly using reflection
+     */
+    public function test_create_wires_dependencies_correctly(): void
+    {
+        $hooks = ConfigurationManagementHooksFactory::create();
+
+        // Use reflection to verify dependencies are wired correctly
+        $reflection = new \ReflectionClass($hooks);
+
+        // Verify controller is set
+        $controllerProperty = $reflection->getProperty('controller');
+        $controllerProperty->setAccessible(true);
+        $controller = $controllerProperty->getValue($hooks);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController::class,
+            $controller
+        );
+
+        // Verify deleteHandler is set
+        $deleteHandlerProperty = $reflection->getProperty('deleteHandler');
+        $deleteHandlerProperty->setAccessible(true);
+        $deleteHandler = $deleteHandlerProperty->getValue($hooks);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler::class,
+            $deleteHandler
+        );
+
+        // Verify controller has correct dependencies
+        $controllerReflection = new \ReflectionClass($controller);
+        $saveHandlerProperty = $controllerReflection->getProperty('saveHandler');
+        $saveHandlerProperty->setAccessible(true);
+        $saveHandler = $saveHandlerProperty->getValue($controller);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler::class,
+            $saveHandler
+        );
+
+        $configServiceProperty = $controllerReflection->getProperty('configService');
+        $configServiceProperty->setAccessible(true);
+        $configService = $configServiceProperty->getValue($controller);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService::class,
+            $configService
+        );
+
+        $rendererProperty = $controllerReflection->getProperty('renderer');
+        $rendererProperty->setAccessible(true);
+        $renderer = $rendererProperty->getValue($controller);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Rendering\ConfigurationManagementRenderer::class,
+            $renderer
+        );
     }
 }

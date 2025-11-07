@@ -303,6 +303,180 @@ final class ConfigurationManagementControllerTest extends TestCase
     }
 
     /**
+     * Test handleRequest skips masked values (user didn't change sensitive field)
+     */
+    public function test_handleRequest_skips_masked_values(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['minisite_config_nonce'] = 'valid_nonce';
+        $_POST['action'] = 'save';
+        $_POST['config'] = array(
+            'sensitive_key' => array(
+                'value' => '••••••••1234', // Masked value
+                'type' => 'encrypted',
+            ),
+        );
+
+        // Create existing config that is sensitive
+        $existingConfig = $this->createMock(Config::class);
+        $existingConfig->isSensitive = true;
+        $existingConfig->key = 'sensitive_key';
+
+        $this->configService
+            ->expects($this->once())
+            ->method('find')
+            ->with('sensitive_key')
+            ->willReturn($existingConfig);
+
+        // Should NOT call saveHandler for masked values
+        $this->saveHandler
+            ->expects($this->never())
+            ->method('handle');
+
+        $this->controller->handleRequest();
+    }
+
+    /**
+     * Test handleRequest handles errors during save
+     */
+    public function test_handleRequest_handles_save_errors(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['minisite_config_nonce'] = 'valid_nonce';
+        $_POST['action'] = 'save';
+        $_POST['config'] = array(
+            'error_key' => array(
+                'value' => 'test_value',
+                'type' => 'string',
+            ),
+        );
+
+        $this->configService
+            ->expects($this->once())
+            ->method('find')
+            ->with('error_key')
+            ->willReturn(null);
+
+        // Make saveHandler throw an exception
+        $this->saveHandler
+            ->expects($this->once())
+            ->method('handle')
+            ->willThrowException(new \Exception('Save failed'));
+
+        // Should not throw, but should handle error gracefully
+        $this->controller->handleRequest();
+
+        // Verify error was added to settings errors
+        $errors = get_settings_errors('minisite_config');
+        $this->assertNotEmpty($errors);
+        $errorMessages = array_column($errors, 'message');
+        $this->assertNotEmpty(array_filter($errorMessages, fn($msg) => str_contains($msg, 'error_key')));
+    }
+
+    /**
+     * Test handleRequest blocks deletion of required configs (isRequired flag)
+     */
+    public function test_handleRequest_blocks_deletion_of_required_config_by_flag(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['minisite_config_nonce'] = 'valid_nonce';
+        $_POST['action'] = 'delete';
+        $_POST['config_key'] = 'required_key';
+
+        // Create config that is marked as required
+        $requiredConfig = $this->createMock(Config::class);
+        $requiredConfig->isRequired = true;
+        $requiredConfig->key = 'required_key';
+
+        $this->configService
+            ->expects($this->once())
+            ->method('find')
+            ->with('required_key')
+            ->willReturn($requiredConfig);
+
+        // Should NOT call deleteHandler
+        $this->deleteHandler
+            ->expects($this->never())
+            ->method('handle');
+
+        $this->controller->handleRequest();
+
+        // Verify error was added
+        $errors = get_settings_errors('minisite_config');
+        $this->assertNotEmpty($errors);
+        $errorMessages = array_column($errors, 'message');
+        $this->assertNotEmpty(array_filter($errorMessages, fn($msg) => str_contains($msg, 'Cannot delete required')));
+    }
+
+    /**
+     * Test handleRequest handles delete errors gracefully
+     */
+    public function test_handleRequest_handles_delete_errors(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['minisite_config_nonce'] = 'valid_nonce';
+        $_POST['action'] = 'delete';
+        $_POST['config_key'] = 'deletable_key';
+
+        $deletableConfig = $this->createMock(Config::class);
+        $deletableConfig->isRequired = false;
+        $deletableConfig->key = 'deletable_key';
+
+        $this->configService
+            ->expects($this->once())
+            ->method('find')
+            ->with('deletable_key')
+            ->willReturn($deletableConfig);
+
+        // Make deleteHandler throw an exception
+        $this->deleteHandler
+            ->expects($this->once())
+            ->method('handle')
+            ->willThrowException(new \Exception('Delete failed'));
+
+        // Should not throw, but should handle error gracefully
+        $this->controller->handleRequest();
+
+        // Verify error was added
+        $errors = get_settings_errors('minisite_config');
+        $this->assertNotEmpty($errors);
+        $errorMessages = array_column($errors, 'message');
+        $this->assertNotEmpty(array_filter($errorMessages, fn($msg) => str_contains($msg, 'Failed to delete')));
+    }
+
+    /**
+     * Test handleRequest handles successful save with multiple configs
+     */
+    public function test_handleRequest_handles_multiple_config_saves(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST['minisite_config_nonce'] = 'valid_nonce';
+        $_POST['action'] = 'save';
+        $_POST['config'] = array(
+            'key1' => array('value' => 'value1', 'type' => 'string'),
+            'key2' => array('value' => 'value2', 'type' => 'string'),
+            'key3' => array('value' => 'value3', 'type' => 'string'),
+        );
+
+        $this->configService
+            ->expects($this->exactly(3))
+            ->method('find')
+            ->willReturn(null);
+
+        $this->saveHandler
+            ->expects($this->exactly(3))
+            ->method('handle');
+
+        $this->controller->handleRequest();
+
+        // Verify success message
+        $errors = get_settings_errors('minisite_config');
+        $this->assertNotEmpty($errors);
+        $successMessages = array_filter($errors, fn($err) => $err['type'] === 'updated');
+        $this->assertNotEmpty($successMessages);
+    }
+
+    /**
      * Test class is not final (removed to allow mocking in tests)
      */
     public function test_class_is_not_final(): void

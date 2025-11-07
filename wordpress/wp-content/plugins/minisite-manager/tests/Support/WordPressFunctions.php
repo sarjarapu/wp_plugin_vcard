@@ -44,7 +44,27 @@ if (! function_exists('register_deactivation_hook')) {
 if (! function_exists('add_action')) {
     function add_action($hook, $callback, $priority = 10, $accepted_args = 1)
     {
-        // Mock - do nothing in tests
+        // Store hooks in global $wp_filter for testing
+        global $wp_filter;
+        if (! isset($wp_filter)) {
+            $wp_filter = new class {
+                public $callbacks = array();
+                public function __get($name)
+                {
+                    if ($name === 'callbacks') {
+                        return $this->callbacks;
+                    }
+                    return null;
+                }
+            };
+        }
+        if (! isset($wp_filter->callbacks[$hook])) {
+            $wp_filter->callbacks[$hook] = array();
+        }
+        if (! isset($wp_filter->callbacks[$hook][$priority])) {
+            $wp_filter->callbacks[$hook][$priority] = array();
+        }
+        $wp_filter->callbacks[$hook][$priority][] = $callback;
     }
 }
 
@@ -52,6 +72,14 @@ if (! function_exists('add_filter')) {
     function add_filter($hook, $callback, $priority = 10, $accepted_args = 1)
     {
         // Mock - do nothing in tests
+    }
+}
+
+if (! function_exists('add_submenu_page')) {
+    function add_submenu_page($parent_slug, $page_title, $menu_title, $capability, $menu_slug, $callback = '', $position = null)
+    {
+        // Mock - do nothing in tests, just return a fake page hook
+        return $menu_slug;
     }
 }
 
@@ -266,7 +294,17 @@ if (! function_exists('wp_get_current_user_id')) {
 if (! function_exists('current_user_can')) {
     function current_user_can($capability, ...$args)
     {
-        return true;
+        // Check for test-specific mock override
+        if (isset($GLOBALS['_test_mock_current_user_can'])) {
+            $callback = $GLOBALS['_test_mock_current_user_can'];
+            if (is_callable($callback)) {
+                return $callback($capability, ...$args);
+            }
+
+            return $GLOBALS['_test_mock_current_user_can'];
+        }
+
+        return true; // Default: allow in tests
     }
 }
 
@@ -399,6 +437,12 @@ if (! function_exists('sanitize_text_field')) {
 
         // Simulate WordPress sanitization: trim, strip tags, and clean
         $str = trim($str);
+
+        // Return empty string if result is empty after trim
+        if ($str === '') {
+            return '';
+        }
+
         $str = strip_tags($str);
         $str = preg_replace('/[<>"\']/', '', $str);
 
@@ -464,7 +508,17 @@ if (! function_exists('wp_create_nonce')) {
 if (! function_exists('wp_verify_nonce')) {
     function wp_verify_nonce($nonce, $action = -1)
     {
-        return true; // Always return true in tests
+        // Check for test-specific mock override
+        if (isset($GLOBALS['_test_mock_wp_verify_nonce'])) {
+            $callback = $GLOBALS['_test_mock_wp_verify_nonce'];
+            if (is_callable($callback)) {
+                return $callback($nonce, $action);
+            }
+
+            return $GLOBALS['_test_mock_wp_verify_nonce'];
+        }
+
+        return true; // Default: always return true in tests
     }
 }
 
@@ -486,6 +540,42 @@ if (! function_exists('home_url')) {
     function home_url($path = '', $scheme = null)
     {
         return 'http://example.com' . ($path ? '/' . ltrim($path, '/') : '');
+    }
+}
+
+if (! function_exists('add_query_arg')) {
+    function add_query_arg($key, $value = null, $url = null)
+    {
+        // If $key is an array, merge all key-value pairs
+        if (is_array($key)) {
+            $args = $key;
+            $url = $value;
+        } else {
+            $args = array($key => $value);
+        }
+
+        // Default URL is current request URI
+        if ($url === null) {
+            $url = 'http://example.com/wp-admin/admin.php';
+        }
+
+        // Parse URL
+        $parsed = parse_url($url);
+        $query = array();
+        if (isset($parsed['query'])) {
+            parse_str($parsed['query'], $query);
+        }
+
+        // Merge new args
+        $query = array_merge($query, $args);
+
+        // Rebuild URL
+        $scheme = isset($parsed['scheme']) ? $parsed['scheme'] . '://' : '';
+        $host = isset($parsed['host']) ? $parsed['host'] : '';
+        $path = isset($parsed['path']) ? $parsed['path'] : '';
+        $fragment = isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '';
+
+        return $scheme . $host . $path . '?' . http_build_query($query) . $fragment;
     }
 }
 

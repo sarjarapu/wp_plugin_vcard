@@ -558,5 +558,44 @@ final class ConfigSeederTest extends TestCase
 
         $this->assertTrue(true); // Placeholder - this scenario is better tested in integration tests
     }
+
+    /**
+     * Test seedDefaults() logs and rethrows exception when configManager fails
+     */
+    public function test_seedDefaults_logs_and_rethrows_exception(): void
+    {
+        // Mock configManager to throw exception during has() call
+        $this->configManager
+            ->expects($this->once())
+            ->method('has')
+            ->willThrowException(new \RuntimeException('Config manager error'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Config manager error');
+
+        $this->seeder->seedDefaults($this->configManager);
+    }
+
+    /**
+     * Test seedDefaults() exception handling when set() fails
+     */
+    public function test_seedDefaults_handles_set_exception(): void
+    {
+        // Mock configManager: has() returns false (config missing), but set() throws
+        $this->configManager
+            ->expects($this->once())
+            ->method('has')
+            ->willReturn(false);
+
+        $this->configManager
+            ->expects($this->once())
+            ->method('set')
+            ->willThrowException(new \RuntimeException('Failed to save config'));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Failed to save config');
+
+        $this->seeder->seedDefaults($this->configManager);
+    }
 }
 

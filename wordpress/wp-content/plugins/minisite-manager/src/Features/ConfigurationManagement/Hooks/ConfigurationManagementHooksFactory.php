@@ -51,9 +51,12 @@ final class ConfigurationManagementHooksFactory
         );
 
         // Store service in GLOBALS for backward compatibility with legacy code
-        // This is a temporary bridge until ActivationHandler and ConfigSeeder are refactored
-        // TODO: Remove GLOBALS usage once all legacy code is updated to use dependency injection
-        // See: src/Core/ActivationHandler.php and src/Features/ConfigurationManagement/Services/ConfigSeeder.php
+        // This is a temporary bridge until ActivationHandler is refactored to use dependency injection
+        // Note: ConfigSeeder already uses DI (takes ConfigurationManagementService as parameter)
+        // The issue is initialization order: ActivationHandler runs during plugin activation
+        // before the feature is fully initialized, so it needs GLOBALS to access the service
+        // TODO: Refactor ActivationHandler to receive ConfigurationManagementService via DI
+        // See: src/Core/ActivationHandler.php::seedDefaultConfigs()
         $GLOBALS['minisite_config_manager'] = $configService;
 
         // Create termination handler for hook

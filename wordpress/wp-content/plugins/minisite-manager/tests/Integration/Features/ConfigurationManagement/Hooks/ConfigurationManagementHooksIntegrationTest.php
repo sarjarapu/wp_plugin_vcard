@@ -1,0 +1,129 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests\Integration\Features\ConfigurationManagement\Hooks;
+
+use Minisite\Features\ConfigurationManagement\Hooks\ConfigurationManagementHooks;
+use Minisite\Features\ConfigurationManagement\Hooks\ConfigurationManagementHooksFactory;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Integration tests for ConfigurationManagementHooks
+ *
+ * Tests the hooks class with real dependencies created via the factory.
+ * This covers functionality that requires database connection and real object wiring.
+ *
+ * Prerequisites:
+ * - MySQL test database must be running (Docker container on port 3307)
+ * - Database constants must be defined (handled by bootstrap.php)
+ */
+#[CoversClass(ConfigurationManagementHooks::class)]
+final class ConfigurationManagementHooksIntegrationTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // Initialize LoggingServiceProvider if not already initialized
+        \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
+
+        // Ensure database constants are defined (required by DoctrineFactory)
+        if (! defined('DB_HOST')) {
+            define('DB_HOST', getenv('MYSQL_HOST') ?: '127.0.0.1');
+        }
+        if (! defined('DB_PORT')) {
+            define('DB_PORT', getenv('MYSQL_PORT') ?: '3307');
+        }
+        if (! defined('DB_USER')) {
+            define('DB_USER', getenv('MYSQL_USER') ?: 'minisite');
+        }
+        if (! defined('DB_PASSWORD')) {
+            define('DB_PASSWORD', getenv('MYSQL_PASSWORD') ?: 'minisite');
+        }
+        if (! defined('DB_NAME')) {
+            define('DB_NAME', getenv('MYSQL_DATABASE') ?: 'minisite_test');
+        }
+
+        // Ensure $wpdb is set (required by TablePrefixListener)
+        if (! isset($GLOBALS['wpdb'])) {
+            $GLOBALS['wpdb'] = new \wpdb();
+        }
+        $GLOBALS['wpdb']->prefix = 'wp_';
+    }
+
+    /**
+     * Test register() registers WordPress hooks correctly
+     */
+    public function test_register_registers_wordpress_hooks(): void
+    {
+        // Create hooks via factory (requires DB)
+        $hooks = ConfigurationManagementHooksFactory::create();
+
+        // Clear any existing hooks
+        global $wp_filter;
+        $wp_filter = null;
+
+        // Call register
+        $hooks->register();
+
+        // Verify hooks were registered
+        $this->assertNotNull($wp_filter, '$wp_filter should be initialized');
+        $this->assertObjectHasProperty('callbacks', $wp_filter);
+        $this->assertArrayHasKey('admin_menu', $wp_filter->callbacks);
+        $this->assertArrayHasKey('admin_post_minisite_config_delete', $wp_filter->callbacks);
+
+        // Verify callbacks are not empty
+        $adminMenuHooks = $wp_filter->callbacks['admin_menu'] ?? array();
+        $this->assertNotEmpty($adminMenuHooks, 'admin_menu hook should be registered');
+
+        $adminPostHooks = $wp_filter->callbacks['admin_post_minisite_config_delete'] ?? array();
+        $this->assertNotEmpty($adminPostHooks, 'admin_post_minisite_config_delete hook should be registered');
+    }
+
+    /**
+     * Test registerAdminMenu() can be called with real dependencies
+     */
+    public function test_registerAdminMenu_can_be_called_with_real_dependencies(): void
+    {
+        // Create hooks via factory (requires DB)
+        $hooks = ConfigurationManagementHooksFactory::create();
+
+        // Call registerAdminMenu - should not throw
+        $hooks->registerAdminMenu();
+
+        // Verify it completed successfully
+        $this->assertTrue(true);
+    }
+
+    /**
+     * Test hooks instance has correct dependencies wired via factory
+     */
+    public function test_hooks_has_correct_dependencies_wired(): void
+    {
+        // Create hooks via factory
+        $hooks = ConfigurationManagementHooksFactory::create();
+
+        // Use reflection to verify dependencies
+        $reflection = new \ReflectionClass($hooks);
+
+        // Verify controller is set
+        $controllerProperty = $reflection->getProperty('controller');
+        $controllerProperty->setAccessible(true);
+        $controller = $controllerProperty->getValue($hooks);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Controllers\ConfigurationManagementController::class,
+            $controller
+        );
+
+        // Verify deleteHandler is set
+        $deleteHandlerProperty = $reflection->getProperty('deleteHandler');
+        $deleteHandlerProperty->setAccessible(true);
+        $deleteHandler = $deleteHandlerProperty->getValue($hooks);
+        $this->assertInstanceOf(
+            \Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler::class,
+            $deleteHandler
+        );
+    }
+}
