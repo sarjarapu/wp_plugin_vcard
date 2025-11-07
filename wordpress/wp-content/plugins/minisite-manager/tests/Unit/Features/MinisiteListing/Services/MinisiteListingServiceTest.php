@@ -2,44 +2,85 @@
 
 namespace Tests\Unit\Features\MinisiteListing\Services;
 
+use Minisite\Domain\Entities\Minisite;
+use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand;
 use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Test MinisiteListingService
- * 
+ *
  * NOTE: These are "coverage tests" that verify method existence and basic functionality.
- * They use mocked WordPress managers but do not test complex business logic flows.
- * 
- * Current testing approach:
- * - Mocks WordPressListingManager to return pre-set values
- * - Verifies that service methods exist and return expected data structures
- * - Does NOT test actual business logic or WordPress integration
- * 
- * Limitations:
- * - Business logic is simplified to basic input/output verification
- * - No testing of complex listing scenarios
- * - No testing of actual database operations or WordPress integration
- * 
- * For true unit testing, MinisiteListingService would need:
- * - More comprehensive business logic testing
- * - Testing of complex listing scenarios
- * - Proper error handling verification
- * 
- * For integration testing, see: docs/testing/integration-testing-requirements.md
+ * They use mocked repositories and WordPress managers but do not test complex business logic flows.
  */
 final class MinisiteListingServiceTest extends TestCase
 {
     private MinisiteListingService $listingService;
     private WordPressListingManager|MockObject $listingManager;
+    private MinisiteRepository|MockObject $minisiteRepository;
 
     protected function setUp(): void
     {
         $this->listingManager = $this->createMock(WordPressListingManager::class);
-        $this->listingService = new MinisiteListingService($this->listingManager);
+        $this->minisiteRepository = $this->createMock(MinisiteRepository::class);
+        $this->listingService = new MinisiteListingService($this->listingManager, $this->minisiteRepository);
+
+        // Default URL generation mock
+        $this->listingManager
+            ->method('getHomeUrl')
+            ->willReturnCallback(function ($path) {
+                return 'http://example.com' . $path;
+            });
+    }
+
+    /**
+     * Helper to create a mock Minisite entity
+     */
+    private function createMinisiteEntity(
+        string $id,
+        string $name,
+        string $title,
+        string $businessSlug,
+        string $locationSlug,
+        string $city,
+        ?string $region,
+        string $countryCode,
+        string $status,
+        ?\DateTimeImmutable $updatedAt = null,
+        ?\DateTimeImmutable $publishedAt = null
+    ): Minisite {
+        return new Minisite(
+            id: $id,
+            slug: null,
+            slugs: new SlugPair($businessSlug, $locationSlug),
+            title: $title,
+            name: $name,
+            city: $city,
+            region: $region,
+            countryCode: $countryCode,
+            postalCode: null,
+            geo: null,
+            siteTemplate: 'v2025',
+            palette: 'blue',
+            industry: 'services',
+            defaultLocale: 'en-US',
+            schemaVersion: 1,
+            siteVersion: 1,
+            siteJson: [],
+            searchTerms: null,
+            status: $status,
+            publishStatus: $status,
+            createdAt: new \DateTimeImmutable('2025-01-01'),
+            updatedAt: $updatedAt ?? new \DateTimeImmutable('2025-01-06 10:00'),
+            publishedAt: $publishedAt,
+            createdBy: 123,
+            updatedBy: null,
+            currentVersionId: null
+        );
     }
 
     /**
@@ -48,48 +89,26 @@ final class MinisiteListingServiceTest extends TestCase
     public function test_list_minisites_with_successful_result(): void
     {
         $command = new ListMinisitesCommand(123, 50, 0);
-        $mockMinisites = [
-            [
-                'id' => '1',
-                'title' => 'Test Minisite 1',
-                'name' => 'test-minisite-1',
-                'slugs' => ['business' => 'test', 'location' => 'business'],
-                'route' => '/b/test/business',
-                'location' => 'New York, NY, US',
-                'status' => 'published',
-                'status_chip' => 'Published',
-                'updated_at' => '2025-01-06 10:00',
-                'published_at' => '2025-01-06 09:00',
-                'subscription' => 'Pro',
-                'online' => 'Yes'
-            ],
-            [
-                'id' => '2',
-                'title' => 'Test Minisite 2',
-                'name' => 'test-minisite-2',
-                'slugs' => ['business' => 'test2', 'location' => 'business2'],
-                'route' => '/b/test2/business2',
-                'location' => 'Los Angeles, CA, US',
-                'status' => 'draft',
-                'status_chip' => 'Draft',
-                'updated_at' => '2025-01-06 11:00',
-                'published_at' => null,
-                'subscription' => 'Basic',
-                'online' => 'No'
-            ]
+
+        $mockEntities = [
+            $this->createMinisiteEntity('1', 'test-minisite-1', 'Test Minisite 1', 'test', 'business', 'New York', 'NY', 'US', 'published'),
+            $this->createMinisiteEntity('2', 'test-minisite-2', 'Test Minisite 2', 'test2', 'business2', 'Los Angeles', 'CA', 'US', 'draft'),
         ];
 
-        $this->listingManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(123, 50, 0)
-            ->willReturn($mockMinisites);
+            ->willReturn($mockEntities);
 
         $result = $this->listingService->listMinisites($command);
 
         $this->assertTrue($result['success']);
-        $this->assertEquals($mockMinisites, $result['minisites']);
         $this->assertCount(2, $result['minisites']);
+        $this->assertEquals('1', $result['minisites'][0]['id']);
+        $this->assertEquals('Test Minisite 1', $result['minisites'][0]['title']);
+        $this->assertEquals('Published', $result['minisites'][0]['status_chip']);
+        $this->assertEquals('Draft', $result['minisites'][1]['status_chip']);
     }
 
     /**
@@ -99,9 +118,9 @@ final class MinisiteListingServiceTest extends TestCase
     {
         $command = new ListMinisitesCommand(456, 50, 0);
 
-        $this->listingManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(456, 50, 0)
             ->willReturn([]);
 
@@ -118,34 +137,20 @@ final class MinisiteListingServiceTest extends TestCase
     public function test_list_minisites_with_pagination(): void
     {
         $command = new ListMinisitesCommand(123, 10, 20);
-        $mockMinisites = [
-            [
-                'id' => '21',
-                'title' => 'Paged Minisite',
-                'name' => 'paged-minisite',
-                'slugs' => ['business' => 'paged', 'location' => 'business'],
-                'route' => '/b/paged/business',
-                'location' => 'Chicago, IL, US',
-                'status' => 'published',
-                'status_chip' => 'Published',
-                'updated_at' => '2025-01-06 12:00',
-                'published_at' => '2025-01-06 11:30',
-                'subscription' => 'Pro',
-                'online' => 'Yes'
-            ]
-        ];
 
-        $this->listingManager
+        $mockEntity = $this->createMinisiteEntity('21', 'paged-minisite', 'Paged Minisite', 'paged', 'business', 'Chicago', 'IL', 'US', 'published');
+
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(123, 10, 20)
-            ->willReturn($mockMinisites);
+            ->willReturn([$mockEntity]);
 
         $result = $this->listingService->listMinisites($command);
 
         $this->assertTrue($result['success']);
-        $this->assertEquals($mockMinisites, $result['minisites']);
         $this->assertCount(1, $result['minisites']);
+        $this->assertEquals('21', $result['minisites'][0]['id']);
     }
 
     /**
@@ -155,9 +160,9 @@ final class MinisiteListingServiceTest extends TestCase
     {
         $command = new ListMinisitesCommand(123, 50, 0);
 
-        $this->listingManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(123, 50, 0)
             ->willThrowException(new \Exception('Database connection failed'));
 
@@ -175,9 +180,9 @@ final class MinisiteListingServiceTest extends TestCase
     {
         $command = new ListMinisitesCommand(789, 25, 5);
 
-        $this->listingManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(789, 25, 5)
             ->willThrowException(new \Exception('Repository query failed'));
 
@@ -193,33 +198,19 @@ final class MinisiteListingServiceTest extends TestCase
     public function test_list_minisites_with_different_user_ids(): void
     {
         $command = new ListMinisitesCommand(999, 50, 0);
-        $mockMinisites = [
-            [
-                'id' => '5',
-                'title' => 'User 999 Minisite',
-                'name' => 'user-999-minisite',
-                'slugs' => ['business' => 'user999', 'location' => 'business'],
-                'route' => '/b/user999/business',
-                'location' => 'Miami, FL, US',
-                'status' => 'published',
-                'status_chip' => 'Published',
-                'updated_at' => '2025-01-06 13:00',
-                'published_at' => '2025-01-06 12:30',
-                'subscription' => 'Enterprise',
-                'online' => 'Yes'
-            ]
-        ];
 
-        $this->listingManager
+        $mockEntity = $this->createMinisiteEntity('5', 'user-999-minisite', 'User 999 Minisite', 'user999', 'business', 'Miami', 'FL', 'US', 'published');
+
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(999, 50, 0)
-            ->willReturn($mockMinisites);
+            ->willReturn([$mockEntity]);
 
         $result = $this->listingService->listMinisites($command);
 
         $this->assertTrue($result['success']);
-        $this->assertEquals($mockMinisites, $result['minisites']);
+        $this->assertCount(1, $result['minisites']);
     }
 
     /**
@@ -229,9 +220,9 @@ final class MinisiteListingServiceTest extends TestCase
     {
         $command = new ListMinisitesCommand(123, 0, 0);
 
-        $this->listingManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(123, 0, 0)
             ->willReturn([]);
 
@@ -248,9 +239,9 @@ final class MinisiteListingServiceTest extends TestCase
     {
         $command = new ListMinisitesCommand(123, 50, 1000);
 
-        $this->listingManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(123, 50, 1000)
             ->willReturn([]);
 
@@ -266,49 +257,23 @@ final class MinisiteListingServiceTest extends TestCase
     public function test_list_minisites_with_mixed_status(): void
     {
         $command = new ListMinisitesCommand(123, 50, 0);
-        $mockMinisites = [
-            [
-                'id' => '1',
-                'title' => 'Published Minisite',
-                'name' => 'published-minisite',
-                'slugs' => ['business' => 'published', 'location' => 'business'],
-                'route' => '/b/published/business',
-                'location' => 'Seattle, WA, US',
-                'status' => 'published',
-                'status_chip' => 'Published',
-                'updated_at' => '2025-01-06 14:00',
-                'published_at' => '2025-01-06 13:30',
-                'subscription' => 'Pro',
-                'online' => 'Yes'
-            ],
-            [
-                'id' => '2',
-                'title' => 'Draft Minisite',
-                'name' => 'draft-minisite',
-                'slugs' => ['business' => 'draft', 'location' => 'business'],
-                'route' => '/b/draft/business',
-                'location' => 'Portland, OR, US',
-                'status' => 'draft',
-                'status_chip' => 'Draft',
-                'updated_at' => '2025-01-06 15:00',
-                'published_at' => null,
-                'subscription' => 'Basic',
-                'online' => 'No'
-            ]
+
+        $mockEntities = [
+            $this->createMinisiteEntity('1', 'published-minisite', 'Published Minisite', 'published', 'business', 'Seattle', 'WA', 'US', 'published'),
+            $this->createMinisiteEntity('2', 'draft-minisite', 'Draft Minisite', 'draft', 'business', 'Portland', 'OR', 'US', 'draft'),
         ];
 
-        $this->listingManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('listMinisitesByOwner')
+            ->method('listByOwner')
             ->with(123, 50, 0)
-            ->willReturn($mockMinisites);
+            ->willReturn($mockEntities);
 
         $result = $this->listingService->listMinisites($command);
 
         $this->assertTrue($result['success']);
-        $this->assertEquals($mockMinisites, $result['minisites']);
         $this->assertCount(2, $result['minisites']);
-        
+
         // Verify status chips are correctly set
         $this->assertEquals('Published', $result['minisites'][0]['status_chip']);
         $this->assertEquals('Draft', $result['minisites'][1]['status_chip']);

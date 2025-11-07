@@ -267,6 +267,19 @@ class DoctrineTransactionManager implements TransactionManagerInterface
 
 ---
 
+## Outstanding Follow-Ups
+
+Even with Phase 2 implemented, a few items remain on the backlog:
+
+1. **Fix the failing composer tests** – resolve existing suite failures (e.g. `VersionRepository::save()` signature mismatch) so the build is green.
+2. **Add coverage for new flows** – add unit/integration tests for the Doctrine-backed version repository and transaction manager usage (mirroring Config/Review).
+3. **Retire the legacy `$wpdb` version repository** – remove the old implementation/fallbacks once end-to-end verification is complete.
+4. **Verify hooks/bootstrap wiring** – double-check that all hooks/controllers now rely solely on the Doctrine repository (no lingering globals).
+5. **Seeder/documentation refresh** – ensure JSON seeding notes/tests line up with the Doctrine entity workflow.
+6. **Deferred** – introduce `DoctrineTransactionManager` when Doctrine write-paths require shared transactions.
+
+---
+
 ## Final State After Phase 2
 
 ### WordPressManagerInterface will only contain:

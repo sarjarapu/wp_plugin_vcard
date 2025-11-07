@@ -11,6 +11,7 @@ use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Application\Rendering\TimberRenderer;
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
+use Tests\Support\FakeWpdb;
 
 /**
  * Test EditHooksFactory
@@ -22,12 +23,25 @@ class EditHooksFactoryTest extends TestCase
         parent::setUp();
         \Brain\Monkey\setUp();
 
+        // Mock global $wpdb
+        global $wpdb;
+        $wpdb = $this->createMock(FakeWpdb::class);
+        $wpdb->prefix = 'wp_';
+
+        // Mock $GLOBALS for repositories (required by factory)
+        $GLOBALS['minisite_version_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface::class);
+
         // Mock constants
         Functions\when('MINISITE_DEFAULT_TEMPLATE')->justReturn('v2025');
     }
 
     protected function tearDown(): void
     {
+        // Clean up globals
+        unset($GLOBALS['minisite_version_repository']);
+        global $wpdb;
+        $wpdb = null;
+
         \Brain\Monkey\tearDown();
         parent::tearDown();
     }
@@ -195,7 +209,7 @@ class EditHooksFactoryTest extends TestCase
         // Verify controller has all its dependencies
         $controllerReflection = new \ReflectionClass($controller);
         $controllerProperties = $controllerReflection->getProperties();
-        
+
         $hasEditService = false;
         $hasEditRenderer = false;
         $hasWordPressManager = false;
@@ -203,7 +217,7 @@ class EditHooksFactoryTest extends TestCase
         foreach ($controllerProperties as $property) {
             $property->setAccessible(true);
             $value = $property->getValue($controller);
-            
+
             if ($value instanceof EditService) {
                 $hasEditService = true;
             } elseif ($value instanceof EditRenderer) {

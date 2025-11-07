@@ -2,7 +2,7 @@
 
 namespace Minisite\Domain\Services;
 
-use Minisite\Domain\Entities\Version;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\Interfaces\TransactionManagerInterface;
@@ -260,7 +260,7 @@ class MinisiteDatabaseCoordinator
 
             // Create initial draft version
             $nextVersion = 1; // First version for new minisite
-            $version = new \Minisite\Domain\Entities\Version(
+            $version = new Version(
                 id: null,
                 minisiteId: $minisiteId,
                 versionNumber: $nextVersion,

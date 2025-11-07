@@ -2,27 +2,75 @@
 
 namespace Tests\Unit\Features\MinisiteViewer\Services;
 
+use Minisite\Domain\Entities\Minisite;
+use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Test MinisiteViewService
- * 
- * Tests the MinisiteViewService with mocked WordPress functions
- * 
+ *
+ * Tests the MinisiteViewService with mocked repositories and WordPress functions
+ *
  */
 final class MinisiteViewServiceTest extends TestCase
 {
     private MinisiteViewService $viewService;
     private WordPressMinisiteManager|MockObject $wordPressManager;
+    private MinisiteRepository|MockObject $minisiteRepository;
+    private VersionRepositoryInterface|MockObject $versionRepository;
 
     protected function setUp(): void
     {
         $this->wordPressManager = $this->createMock(WordPressMinisiteManager::class);
-        $this->viewService = new MinisiteViewService($this->wordPressManager);
+        $this->minisiteRepository = $this->createMock(MinisiteRepository::class);
+        $this->versionRepository = $this->createMock(VersionRepositoryInterface::class);
+        $this->viewService = new MinisiteViewService(
+            $this->wordPressManager,
+            $this->minisiteRepository,
+            $this->versionRepository
+        );
+    }
+
+    /**
+     * Helper to create a mock Minisite entity
+     */
+    private function createMockMinisite(string $id, string $name, string $businessSlug, string $locationSlug, int $createdBy = 1, array $siteJson = []): Minisite
+    {
+        return new Minisite(
+            id: $id,
+            slug: null,
+            slugs: new SlugPair($businessSlug, $locationSlug),
+            title: $name,
+            name: $name,
+            city: 'Test City',
+            region: null,
+            countryCode: 'US',
+            postalCode: null,
+            geo: null,
+            siteTemplate: 'v2025',
+            palette: 'blue',
+            industry: 'services',
+            defaultLocale: 'en-US',
+            schemaVersion: 1,
+            siteVersion: 1,
+            siteJson: $siteJson,
+            searchTerms: null,
+            status: 'published',
+            publishStatus: 'published',
+            createdAt: new \DateTimeImmutable(),
+            updatedAt: new \DateTimeImmutable(),
+            publishedAt: new \DateTimeImmutable(),
+            createdBy: $createdBy,
+            updatedBy: null,
+            currentVersionId: null
+        );
     }
 
     /**
@@ -31,17 +79,16 @@ final class MinisiteViewServiceTest extends TestCase
     public function test_get_minisite_for_display_with_valid_minisite(): void
     {
         $command = new ViewMinisiteCommand('coffee-shop', 'downtown');
-        $mockMinisite = (object)[
-            'id' => '123',
-            'name' => 'Coffee Shop',
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown'
-        ];
+        $mockMinisite = $this->createMockMinisite('123', 'Coffee Shop', 'coffee-shop', 'downtown');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteBySlugs')
-            ->with('coffee-shop', 'downtown')
+            ->method('findBySlugs')
+            ->with($this->callback(function ($slugPair) {
+                return $slugPair instanceof SlugPair
+                    && $slugPair->business === 'coffee-shop'
+                    && $slugPair->location === 'downtown';
+            }))
             ->willReturn($mockMinisite);
 
         $result = $this->viewService->getMinisiteForView($command);
@@ -58,10 +105,9 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('nonexistent', 'location');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteBySlugs')
-            ->with('nonexistent', 'location')
+            ->method('findBySlugs')
             ->willReturn(null);
 
         $result = $this->viewService->getMinisiteForView($command);
@@ -78,10 +124,9 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('business', 'location');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteBySlugs')
-            ->with('business', 'location')
+            ->method('findBySlugs')
             ->willThrowException(new \Exception('Database connection failed'));
 
         $result = $this->viewService->getMinisiteForView($command);
@@ -98,10 +143,9 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('', '');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteBySlugs')
-            ->with('', '')
+            ->method('findBySlugs')
             ->willReturn(null);
 
         $result = $this->viewService->getMinisiteForView($command);
@@ -116,17 +160,11 @@ final class MinisiteViewServiceTest extends TestCase
     public function test_get_minisite_for_display_with_special_characters(): void
     {
         $command = new ViewMinisiteCommand('café-&-restaurant', 'main-street-123');
-        $mockMinisite = (object)[
-            'id' => '456',
-            'name' => 'Café & Restaurant',
-            'business_slug' => 'café-&-restaurant',
-            'location_slug' => 'main-street-123'
-        ];
+        $mockMinisite = $this->createMockMinisite('456', 'Café & Restaurant', 'café-&-restaurant', 'main-street-123');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteBySlugs')
-            ->with('café-&-restaurant', 'main-street-123')
+            ->method('findBySlugs')
             ->willReturn($mockMinisite);
 
         $result = $this->viewService->getMinisiteForView($command);
@@ -141,12 +179,12 @@ final class MinisiteViewServiceTest extends TestCase
     public function test_minisite_exists_with_existing_minisite(): void
     {
         $command = new ViewMinisiteCommand('coffee-shop', 'downtown');
+        $mockMinisite = $this->createMockMinisite('123', 'Coffee Shop', 'coffee-shop', 'downtown');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('minisiteExists')
-            ->with('coffee-shop', 'downtown')
-            ->willReturn(true);
+            ->method('findBySlugs')
+            ->willReturn($mockMinisite);
 
         $result = $this->viewService->minisiteExists($command);
 
@@ -160,11 +198,10 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('nonexistent', 'location');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('minisiteExists')
-            ->with('nonexistent', 'location')
-            ->willReturn(false);
+            ->method('findBySlugs')
+            ->willReturn(null);
 
         $result = $this->viewService->minisiteExists($command);
 
@@ -178,11 +215,10 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('', '');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('minisiteExists')
-            ->with('', '')
-            ->willReturn(false);
+            ->method('findBySlugs')
+            ->willReturn(null);
 
         $result = $this->viewService->minisiteExists($command);
 
@@ -196,12 +232,14 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->viewService);
         $constructor = $reflection->getConstructor();
-        
+
         $this->assertNotNull($constructor);
-        $this->assertEquals(1, $constructor->getNumberOfParameters());
-        
+        $this->assertEquals(3, $constructor->getNumberOfParameters());
+
         $params = $constructor->getParameters();
         $this->assertEquals(WordPressMinisiteManager::class, $params[0]->getType()->getName());
+        $this->assertEquals(MinisiteRepository::class, $params[1]->getType()->getName());
+        $this->assertEquals(VersionRepositoryInterface::class, $params[2]->getType()->getName());
     }
 
     /**
@@ -211,10 +249,9 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('business', 'location');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteBySlugs')
-            ->with('business', 'location')
+            ->method('findBySlugs')
             ->willReturn(null);
 
         $result = $this->viewService->getMinisiteForView($command);
@@ -230,10 +267,9 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('business', 'location');
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteBySlugs')
-            ->with('business', 'location')
+            ->method('findBySlugs')
             ->willReturn(null);
 
         $result = $this->viewService->getMinisiteForView($command);
@@ -251,17 +287,12 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $siteId = '123';
         $versionId = 'current';
-        $mockMinisite = (object)[
-            'id' => $siteId,
-            'name' => 'Test Minisite',
-            'createdBy' => 1,
-            'siteJson' => ['test' => 'current data']
-        ];
+        $mockMinisite = $this->createMockMinisite($siteId, 'Test Minisite', 'test', 'location', 1, ['test' => 'current data']);
         $mockUser = (object)['ID' => 1];
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteById')
+            ->method('findById')
             ->with($siteId)
             ->willReturn($mockMinisite);
 
@@ -286,26 +317,21 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $siteId = '123';
         $versionId = '5';
-        $mockMinisite = (object)[
-            'id' => $siteId,
-            'name' => 'Test Minisite',
-            'createdBy' => 1,
-            'siteJson' => ['test' => 'current data']
-        ];
-        $mockVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $mockMinisite = $this->createMockMinisite($siteId, 'Test Minisite', 'test', 'location', 1);
+
+        $mockVersion = $this->createMock(Version::class);
         $mockVersion->id = 5;
         $mockVersion->minisiteId = $siteId;
         $mockVersion->name = 'Version 5';
         $mockVersion->city = 'Version City';
         $mockVersion->title = 'Version Title';
-        $mockVersion->label = 'Version 5';
         $mockVersion->siteJson = ['test' => 'version data'];
-        $mockUser = (object)['ID' => 1];
-        $mockVersionRepo = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepository::class);
 
-        $this->wordPressManager
+        $mockUser = (object)['ID' => 1];
+
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteById')
+            ->method('findById')
             ->with($siteId)
             ->willReturn($mockMinisite);
 
@@ -314,12 +340,7 @@ final class MinisiteViewServiceTest extends TestCase
             ->method('getCurrentUser')
             ->willReturn($mockUser);
 
-        $this->wordPressManager
-            ->expects($this->once())
-            ->method('getVersionRepository')
-            ->willReturn($mockVersionRepo);
-
-        $mockVersionRepo
+        $this->versionRepository
             ->expects($this->once())
             ->method('findById')
             ->with(5)
@@ -342,9 +363,9 @@ final class MinisiteViewServiceTest extends TestCase
         $siteId = 'nonexistent';
         $versionId = 'current';
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteById')
+            ->method('findById')
             ->with($siteId)
             ->willReturn(null);
 
@@ -361,16 +382,12 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $siteId = '123';
         $versionId = 'current';
-        $mockMinisite = (object)[
-            'id' => $siteId,
-            'name' => 'Test Minisite',
-            'createdBy' => 1 // Different user
-        ];
+        $mockMinisite = $this->createMockMinisite($siteId, 'Test Minisite', 'test', 'location', 1);
         $mockUser = (object)['ID' => 2]; // Different user
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteById')
+            ->method('findById')
             ->with($siteId)
             ->willReturn($mockMinisite);
 
@@ -392,18 +409,12 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $siteId = '123';
         $versionId = '999';
-        $mockMinisite = (object)[
-            'id' => $siteId,
-            'name' => 'Test Minisite',
-            'createdBy' => 1,
-            'siteJson' => ['test' => 'current data']
-        ];
+        $mockMinisite = $this->createMockMinisite($siteId, 'Test Minisite', 'test', 'location', 1, ['test' => 'current data']);
         $mockUser = (object)['ID' => 1];
-        $mockVersionRepo = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepository::class);
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteById')
+            ->method('findById')
             ->with($siteId)
             ->willReturn($mockMinisite);
 
@@ -412,12 +423,7 @@ final class MinisiteViewServiceTest extends TestCase
             ->method('getCurrentUser')
             ->willReturn($mockUser);
 
-        $this->wordPressManager
-            ->expects($this->once())
-            ->method('getVersionRepository')
-            ->willReturn($mockVersionRepo);
-
-        $mockVersionRepo
+        $this->versionRepository
             ->expects($this->once())
             ->method('findById')
             ->with(999)
@@ -436,23 +442,18 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $siteId = '123';
         $versionId = '5';
-        $mockMinisite = (object)[
-            'id' => $siteId,
-            'name' => 'Test Minisite',
-            'createdBy' => 1,
-            'siteJson' => ['test' => 'current data']
-        ];
-        $mockVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $mockMinisite = $this->createMockMinisite($siteId, 'Test Minisite', 'test', 'location', 1);
+
+        $mockVersion = $this->createMock(Version::class);
         $mockVersion->id = 5;
         $mockVersion->minisiteId = 'different-site-id'; // Different minisite
-        $mockVersion->name = 'Version 5';
         $mockVersion->siteJson = ['test' => 'version data'];
-        $mockUser = (object)['ID' => 1];
-        $mockVersionRepo = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepository::class);
 
-        $this->wordPressManager
+        $mockUser = (object)['ID' => 1];
+
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteById')
+            ->method('findById')
             ->with($siteId)
             ->willReturn($mockMinisite);
 
@@ -461,12 +462,7 @@ final class MinisiteViewServiceTest extends TestCase
             ->method('getCurrentUser')
             ->willReturn($mockUser);
 
-        $this->wordPressManager
-            ->expects($this->once())
-            ->method('getVersionRepository')
-            ->willReturn($mockVersionRepo);
-
-        $mockVersionRepo
+        $this->versionRepository
             ->expects($this->once())
             ->method('findById')
             ->with(5)
@@ -485,17 +481,12 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $siteId = '123';
         $versionId = null;
-        $mockMinisite = (object)[
-            'id' => $siteId,
-            'name' => 'Test Minisite',
-            'createdBy' => 1,
-            'siteJson' => ['test' => 'current data']
-        ];
+        $mockMinisite = $this->createMockMinisite($siteId, 'Test Minisite', 'test', 'location', 1, ['test' => 'current data']);
         $mockUser = (object)['ID' => 1];
 
-        $this->wordPressManager
+        $this->minisiteRepository
             ->expects($this->once())
-            ->method('findMinisiteById')
+            ->method('findById')
             ->with($siteId)
             ->willReturn($mockMinisite);
 
