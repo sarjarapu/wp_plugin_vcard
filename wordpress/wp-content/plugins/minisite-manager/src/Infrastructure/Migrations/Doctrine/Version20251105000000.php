@@ -55,87 +55,45 @@ final class Version20251105000000 extends AbstractMigration
             return;
         }
 
-        // Table doesn't exist - create complete table with all columns using Schema API
-        // This replaces the old SQL file-based table creation
-        $table = $schema->createTable($tableName);
-
-        // Primary key
-        $table->addColumn('id', 'bigint', array(
-            'unsigned' => true,
-            'autoincrement' => true,
-        ));
-
-        // Core versioning fields
-        $table->addColumn('minisite_id', 'string', array('length' => 32));
-        $table->addColumn('version_number', 'integer', array('unsigned' => true));
-        $table->addColumn('status', 'string', array(
-            'length' => 20,
-            'default' => 'draft',
-            'comment' => "ENUM('draft','published')",
-        ));
-        $table->addColumn('label', 'string', array('length' => 120, 'notnull' => false));
-        $table->addColumn('comment', 'text', array('notnull' => false));
-
-        // Timestamps and user tracking
-        $table->addColumn('created_by', 'bigint', array('unsigned' => true));
-        $table->addColumn('created_at', 'datetime_immutable', array(
-            'notnull' => true,
-            'default' => 'CURRENT_TIMESTAMP',
-        ));
-        $table->addColumn('published_at', 'datetime_immutable', array('notnull' => false));
-
-        // Rollback tracking
-        $table->addColumn('source_version_id', 'bigint', array('unsigned' => true, 'notnull' => false));
-
-        // Minisite fields - slugs
-        $table->addColumn('business_slug', 'string', array('length' => 120, 'notnull' => false));
-        $table->addColumn('location_slug', 'string', array('length' => 120, 'notnull' => false));
-
-        // Minisite fields - basic info
-        $table->addColumn('title', 'string', array('length' => 200, 'notnull' => false));
-        $table->addColumn('name', 'string', array('length' => 200, 'notnull' => false));
-
-        // Minisite fields - location
-        $table->addColumn('city', 'string', array('length' => 120, 'notnull' => false));
-        $table->addColumn('region', 'string', array('length' => 120, 'notnull' => false));
-        $table->addColumn('country_code', 'string', array('length' => 2, 'notnull' => false));
-        $table->addColumn('postal_code', 'string', array('length' => 20, 'notnull' => false));
-
-        // ⚠️ CRITICAL: location_point - POINT geometry type
-        // This is handled via raw SQL in the repository, not through Doctrine
-        // DO NOT modify the location_point handling logic
+        // Table doesn't exist - create complete table with all columns using raw SQL
+        // This includes location_point (POINT type) which Doctrine Schema API doesn't support
+        // ⚠️ CRITICAL: DO NOT modify the location_point handling logic
         // See: docs/issues/location-point-lessons-learned.md
-        // Note: Doctrine Schema API doesn't support POINT type directly, so we add it via raw SQL
-        // We'll add it after the table is created
+        $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+            `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `minisite_id` VARCHAR(32) NOT NULL,
+            `version_number` INT UNSIGNED NOT NULL,
+            `status` VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'ENUM(''draft'',''published'')',
+            `label` VARCHAR(120) NULL,
+            `comment` TEXT NULL,
+            `created_by` BIGINT UNSIGNED NOT NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `published_at` DATETIME NULL,
+            `source_version_id` BIGINT UNSIGNED NULL,
+            `business_slug` VARCHAR(120) NULL,
+            `location_slug` VARCHAR(120) NULL,
+            `title` VARCHAR(200) NULL,
+            `name` VARCHAR(200) NULL,
+            `city` VARCHAR(120) NULL,
+            `region` VARCHAR(120) NULL,
+            `country_code` VARCHAR(2) NULL,
+            `postal_code` VARCHAR(20) NULL,
+            `location_point` POINT NULL,
+            `site_template` VARCHAR(32) NULL,
+            `palette` VARCHAR(24) NULL,
+            `industry` VARCHAR(40) NULL,
+            `default_locale` VARCHAR(10) NULL,
+            `schema_version` SMALLINT UNSIGNED NULL,
+            `site_version` INT UNSIGNED NULL,
+            `site_json` TEXT NOT NULL,
+            `search_terms` TEXT NULL,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `uniq_minisite_version` (`minisite_id`, `version_number`),
+            KEY `idx_minisite_status` (`minisite_id`, `status`),
+            KEY `idx_minisite_created` (`minisite_id`, `created_at`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-        // Minisite fields - design and metadata
-        $table->addColumn('site_template', 'string', array('length' => 32, 'notnull' => false));
-        $table->addColumn('palette', 'string', array('length' => 24, 'notnull' => false));
-        $table->addColumn('industry', 'string', array('length' => 40, 'notnull' => false));
-        $table->addColumn('default_locale', 'string', array('length' => 10, 'notnull' => false));
-        $table->addColumn('schema_version', 'smallint', array('unsigned' => true, 'notnull' => false));
-        $table->addColumn('site_version', 'integer', array('unsigned' => true, 'notnull' => false));
-
-        // Content
-        $table->addColumn('site_json', 'text'); // LONGTEXT - contains the form data as JSON
-        $table->addColumn('search_terms', 'text', array('notnull' => false));
-
-        // Primary key
-        $table->setPrimaryKey(array('id'));
-
-        // Unique constraint: one version number per minisite
-        $table->addUniqueIndex(array('minisite_id', 'version_number'), 'uniq_minisite_version');
-
-        // Indexes for common queries
-        $table->addIndex(array('minisite_id', 'status'), 'idx_minisite_status');
-        $table->addIndex(array('minisite_id', 'created_at'), 'idx_minisite_created');
-
-        // ⚠️ CRITICAL: Add location_point column via raw SQL
-        // Doctrine Schema API doesn't support POINT type directly
-        // This must be added after table creation using raw SQL
-        // DO NOT modify the location_point handling logic
-        // See: docs/issues/location-point-lessons-learned.md
-        $this->addSql("ALTER TABLE `{$tableName}` ADD COLUMN `location_point` POINT NULL AFTER `postal_code`");
+        $this->addSql($createTableSql);
     }
 
     public function down(Schema $schema): void

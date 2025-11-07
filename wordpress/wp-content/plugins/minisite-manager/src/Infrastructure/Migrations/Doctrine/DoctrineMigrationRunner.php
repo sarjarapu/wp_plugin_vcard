@@ -50,11 +50,19 @@ class DoctrineMigrationRunner
             $em = $this->getEntityManager();
             $connection = $em->getConnection();
 
-            // Register ENUM type mapping to avoid schema introspection errors
+            // Register ENUM and POINT type mappings to avoid schema introspection errors
             // This must be done on the connection used by migrations
+            // Note: These mappings only affect how Doctrine reads the schema during introspection
+            // They do NOT change the actual database column types
             $platform = $connection->getDatabasePlatform();
             if (! $platform->hasDoctrineTypeMappingFor('enum')) {
                 $platform->registerDoctrineTypeMapping('enum', 'string');
+            }
+            // POINT is used for location_point - map to blob for introspection only
+            // The actual column remains POINT type in MySQL for spatial indexing
+            // Using 'blob' because it doesn't require length specification
+            if (! $platform->hasDoctrineTypeMappingFor('point')) {
+                $platform->registerDoctrineTypeMapping('point', 'blob');
             }
 
             $config = $this->createMigrationConfiguration();

@@ -1,0 +1,57 @@
+{
+  "versions": [
+    {
+      "versionNumber": 1,
+      "status": "published",
+      "label": "Initial Published Version",
+      "comment": "Initial published version of Swift Transit Sydney",
+      "businessSlug": "swift-transit",
+      "locationSlug": "sydney",
+      "title": "Swift Transit — Sydney",
+      "name": "Swift Transit",
+      "city": "Sydney",
+      "region": "NSW",
+      "countryCode": "AU",
+      "postalCode": "2000",
+      "location": {
+        "latitude": -33.8688,
+        "longitude": 151.2093
+      },
+      "siteTemplate": "v2025",
+      "palette": "teal",
+      "industry": "transport",
+      "defaultLocale": "en-AU",
+      "schemaVersion": 1,
+      "siteVersion": 1,
+      "searchTerms": "swift transit courier sydney logistics same day delivery",
+      "createdAt": "2025-09-29T12:51:33+00:00",
+      "publishedAt": "2025-09-29T12:51:33+00:00",
+      "createdBy": null,
+      "siteJson": {
+        "seo": {
+          "title": "Swift Transit — Sydney",
+          "description": "Fast courier and logistics services in Sydney",
+          "keywords": "swift transit, courier, sydney, logistics, delivery"
+        },
+        "brand": {
+          "palette": "teal",
+          "industry": "transport",
+          "name": "Swift Transit"
+        },
+        "hero": {
+          "heading": "Swift Transit",
+          "subheading": "Fast courier and logistics services in Sydney"
+        },
+        "contact": {
+          "phone": {
+            "text": "+61 2 1234 5678",
+            "link": "+61212345678"
+          },
+          "email": "info@swifttransit.com.au",
+          "address": "Sydney NSW 2000, Australia"
+        }
+      }
+    }
+  ]
+}
+

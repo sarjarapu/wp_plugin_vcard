@@ -66,12 +66,20 @@ class DoctrineFactory
         try {
             $connection = DriverManager::getConnection($dbConfig, $config);
 
-            // Register ENUM type mapping to avoid schema introspection errors
+            // Register ENUM and POINT type mappings to avoid schema introspection errors
             // WordPress and other plugins use ENUM columns that Doctrine doesn't natively support
             // We map them to string type for schema introspection purposes
+            // Note: These mappings only affect how Doctrine reads the schema during introspection
+            // They do NOT change the actual database column types
             $platform = $connection->getDatabasePlatform();
             if (! $platform->hasDoctrineTypeMappingFor('enum')) {
                 $platform->registerDoctrineTypeMapping('enum', 'string');
+            }
+            // POINT is used for location_point - map to blob for introspection only
+            // The actual column remains POINT type in MySQL for spatial indexing
+            // Using 'blob' because it doesn't require length specification
+            if (! $platform->hasDoctrineTypeMappingFor('point')) {
+                $platform->registerDoctrineTypeMapping('point', 'blob');
             }
 
             $logger->debug("DoctrineFactory::createEntityManager() connection created successfully");

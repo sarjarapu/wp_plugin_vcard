@@ -74,6 +74,7 @@ final class ConfigSeederIntegrationTest extends TestCase
         $config = ORMSetup::createAttributeMetadataConfiguration(
             paths: array(
                 __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
             ),
             isDevMode: true
         );
@@ -128,18 +129,35 @@ final class ConfigSeederIntegrationTest extends TestCase
             $connection->connect();
         }
 
-        // Ensure we're not in a transaction
-        if ($connection->isTransactionActive()) {
+        // Reset connection state again after migrations (migrations may leave connection in bad state)
+        // This is critical because migrations might leave the connection in an inconsistent state
+        try {
+            // Rollback any active transactions
+            while ($connection->isTransactionActive()) {
+                $connection->rollBack();
+            }
+        } catch (\Exception $e) {
+            // If rollback fails, try to execute a direct ROLLBACK
             try {
-                $connection->commit();
-            } catch (\Exception $e) {
-                try {
-                    $connection->rollBack();
-                } catch (\Exception $e2) {
-                    // Ignore
-                }
+                $connection->executeStatement('ROLLBACK');
+            } catch (\Exception $e2) {
+                // Ignore - connection might already be clean
             }
         }
+
+        // Clear EntityManager state again after migrations
+        // This ensures any UnitOfWork state from migrations is cleared
+        $this->em->clear();
+
+        // Force a fresh connection state by closing and letting it reconnect
+        // This is the most reliable way to ensure clean state and clear all savepoints
+        try {
+            $connection->close();
+        } catch (\Exception $e) {
+            // Ignore - connection might already be closed
+        }
+
+        // EntityManager will automatically reconnect when needed
 
         // Get repository
         $classMetadata = $this->em->getClassMetadata(Config::class);

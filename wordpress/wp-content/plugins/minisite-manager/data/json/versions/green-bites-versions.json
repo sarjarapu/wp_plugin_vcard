@@ -1,0 +1,57 @@
+{
+  "versions": [
+    {
+      "versionNumber": 1,
+      "status": "published",
+      "label": "Initial Published Version",
+      "comment": "Initial published version of Green Bites London",
+      "businessSlug": "green-bites",
+      "locationSlug": "london",
+      "title": "Green Bites — London",
+      "name": "Green Bites",
+      "city": "London",
+      "region": "London",
+      "countryCode": "GB",
+      "postalCode": "EC1A 1AA",
+      "location": {
+        "latitude": 51.509865,
+        "longitude": -0.118092
+      },
+      "siteTemplate": "v2025",
+      "palette": "amber",
+      "industry": "restaurant",
+      "defaultLocale": "en-GB",
+      "schemaVersion": 1,
+      "siteVersion": 1,
+      "searchTerms": "green bites lunch bowls london cafe vegan coffee",
+      "createdAt": "2025-09-29T12:51:33+00:00",
+      "publishedAt": "2025-09-29T12:51:33+00:00",
+      "createdBy": null,
+      "siteJson": {
+        "seo": {
+          "title": "Green Bites — London",
+          "description": "Healthy vegan lunch bowls and coffee in London",
+          "keywords": "green bites, vegan, london, cafe, coffee"
+        },
+        "brand": {
+          "palette": "amber",
+          "industry": "restaurant",
+          "name": "Green Bites"
+        },
+        "hero": {
+          "heading": "Green Bites",
+          "subheading": "Healthy vegan lunch bowls and coffee in London"
+        },
+        "contact": {
+          "phone": {
+            "text": "+44 20 1234 5678",
+            "link": "+442012345678"
+          },
+          "email": "hello@greenbites.co.uk",
+          "address": "London EC1A 1AA, UK"
+        }
+      }
+    }
+  ]
+}
+

@@ -67,6 +67,7 @@ final class ConfigurationManagementServiceIntegrationTest extends TestCase
         $config = ORMSetup::createAttributeMetadataConfiguration(
             paths: [
                 __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
             ],
             isDevMode: true
         );
