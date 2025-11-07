@@ -6,8 +6,6 @@ use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
@@ -21,7 +19,6 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPressManagerInterface
 {
     private ?MinisiteRepository $minisiteRepository = null;
-    private ?VersionRepositoryInterface $versionRepository = null;
 
     /**
      * Constructor
@@ -43,25 +40,6 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         }
 
         return $this->minisiteRepository;
-    }
-
-    /**
-     * Get version repository instance
-     * Uses Doctrine-based repository from global if available, otherwise creates old one
-     */
-    public function getVersionRepository(): VersionRepositoryInterface
-    {
-        if ($this->versionRepository === null) {
-            // Use Doctrine-based repository from global if available
-            if (isset($GLOBALS['minisite_version_repository'])) {
-                $this->versionRepository = $GLOBALS['minisite_version_repository'];
-            } else {
-                // Fallback: Create old repository if Doctrine not available
-                $this->versionRepository = new VersionRepository(db::getWpdb());
-            }
-        }
-
-        return $this->versionRepository;
     }
 
     /**
@@ -196,22 +174,6 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
     }
 
     /**
-     * Get next version number for new minisite
-     */
-    public function getNextVersionNumber(string $minisiteId): int
-    {
-        return $this->getVersionRepository()->getNextVersionNumber($minisiteId);
-    }
-
-    /**
-     * Save version
-     */
-    public function saveVersion(object $version): object
-    {
-        return $this->getVersionRepository()->save($version);
-    }
-
-    /**
      * Update business info
      */
     public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
@@ -273,6 +235,28 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
     public function findMinisiteById(string $siteId): ?object
     {
         return $this->getMinisiteRepository()->findById($siteId);
+    }
+
+    /**
+     * Get next version number (required by interface, but not used in NewMinisite)
+     * Services should inject VersionRepositoryInterface directly instead
+     */
+    public function getNextVersionNumber(string $minisiteId): int
+    {
+        // Not used - services should inject VersionRepositoryInterface directly
+        // Return 1 as default
+        return 1;
+    }
+
+    /**
+     * Save version (required by interface, but not used in NewMinisite)
+     * Services should inject VersionRepositoryInterface directly instead
+     */
+    public function saveVersion(object $version): object
+    {
+        // Not used - services should inject VersionRepositoryInterface directly
+        // Return version as-is
+        return $version;
     }
 
     /**

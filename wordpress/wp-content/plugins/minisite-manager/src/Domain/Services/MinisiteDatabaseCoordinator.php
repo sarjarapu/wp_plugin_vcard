@@ -6,6 +6,7 @@ use Minisite\Domain\Entities\Version;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,7 +23,8 @@ class MinisiteDatabaseCoordinator
     private LoggerInterface $logger;
 
     public function __construct(
-        private WordPressManagerInterface $wordPressManager
+        private WordPressManagerInterface $wordPressManager,
+        private VersionRepositoryInterface $versionRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('database-coordinator');
     }
@@ -40,7 +42,7 @@ class MinisiteDatabaseCoordinator
     ): object {
         // Determine hasBeenPublished if not provided
         if ($hasBeenPublished === null) {
-            $hasBeenPublished = $this->wordPressManager->hasBeenPublished($minisiteId);
+            $hasBeenPublished = $this->versionRepository->findPublishedVersion($minisiteId) !== null;
         }
 
         switch ($operationType) {
@@ -322,7 +324,7 @@ class MinisiteDatabaseCoordinator
                     'operation_type' => 'save_version',
                 ));
 
-                $savedVersion = $this->wordPressManager->saveVersion($version);
+                $savedVersion = $this->versionRepository->save($version);
 
                 $this->logger->info('Version database save completed successfully', array(
                     'minisite_id' => $minisiteId,
@@ -446,7 +448,7 @@ class MinisiteDatabaseCoordinator
 
         try {
             // Create new draft version
-            $nextVersion = $this->wordPressManager->getNextVersionNumber($minisiteId);
+            $nextVersion = $this->versionRepository->getNextVersionNumber($minisiteId);
             $slugs = $minisite->slugs;
 
             // Create GeoPoint from form data
@@ -539,7 +541,7 @@ class MinisiteDatabaseCoordinator
                 searchTerms: $formProcessor->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms')
             );
 
-            $savedVersion = $this->wordPressManager->saveVersion($version);
+            $savedVersion = $this->versionRepository->save($version);
 
             // Update main table for unpublished minisites
             $this->updateMainTableIfNeeded(

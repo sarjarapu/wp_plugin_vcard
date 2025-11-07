@@ -6,8 +6,6 @@ use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
@@ -21,7 +19,6 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 class WordPressEditManager extends BaseWordPressManager implements WordPressManagerInterface
 {
     private ?MinisiteRepository $minisiteRepository = null;
-    private ?VersionRepositoryInterface $versionRepository = null;
 
     /**
      * Constructor
@@ -43,25 +40,6 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
         }
 
         return $this->minisiteRepository;
-    }
-
-    /**
-     * Get version repository instance
-     * Uses Doctrine-based repository from global if available, otherwise creates old one
-     */
-    public function getVersionRepository(): VersionRepositoryInterface
-    {
-        if ($this->versionRepository === null) {
-            // Use Doctrine-based repository from global if available
-            if (isset($GLOBALS['minisite_version_repository'])) {
-                $this->versionRepository = $GLOBALS['minisite_version_repository'];
-            } else {
-                // Fallback: Create old repository if Doctrine not available
-                $this->versionRepository = new VersionRepository(db::getWpdb());
-            }
-        }
-
-        return $this->versionRepository;
     }
 
     /**
@@ -189,46 +167,6 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
     }
 
     /**
-     * Find version by ID
-     */
-    public function findVersionById(int $versionId): ?object
-    {
-        return $this->getVersionRepository()->findById($versionId);
-    }
-
-    /**
-     * Get latest draft for editing
-     */
-    public function getLatestDraftForEditing(string $siteId): ?object
-    {
-        return $this->getVersionRepository()->getLatestDraftForEditing($siteId);
-    }
-
-    /**
-     * Find latest draft
-     */
-    public function findLatestDraft(string $siteId): ?object
-    {
-        return $this->getVersionRepository()->findLatestDraft($siteId);
-    }
-
-    /**
-     * Get next version number
-     */
-    public function getNextVersionNumber(string $siteId): int
-    {
-        return $this->getVersionRepository()->getNextVersionNumber($siteId);
-    }
-
-    /**
-     * Save version
-     */
-    public function saveVersion(object $version): object
-    {
-        return $this->getVersionRepository()->save($version);
-    }
-
-    /**
      * Update business info
      */
     public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
@@ -261,14 +199,6 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
     }
 
     /**
-     * Find published version
-     */
-    public function findPublishedVersion(string $siteId): ?object
-    {
-        return $this->getVersionRepository()->findPublishedVersion($siteId);
-    }
-
-    /**
      * Start database transaction
      */
     public function startTransaction(): void
@@ -293,18 +223,43 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
     }
 
     /**
-     * Check if minisite has been published
-     */
-    public function hasBeenPublished(string $siteId): bool
-    {
-        return $this->findPublishedVersion($siteId) !== null;
-    }
-
-    /**
      * Check if user owns minisite
      */
     public function userOwnsMinisite(object $minisite, int $userId): bool
     {
         return $minisite->createdBy === $userId;
+    }
+
+    /**
+     * Get next version number (required by interface, but not used)
+     * EditService injects VersionRepositoryInterface directly instead
+     */
+    public function getNextVersionNumber(string $siteId): int
+    {
+        // Not used - EditService injects VersionRepositoryInterface directly
+        // Return 1 as default
+        return 1;
+    }
+
+    /**
+     * Save version (required by interface, but not used)
+     * EditService injects VersionRepositoryInterface directly instead
+     */
+    public function saveVersion(object $version): object
+    {
+        // Not used - EditService injects VersionRepositoryInterface directly
+        // Return version as-is
+        return $version;
+    }
+
+    /**
+     * Check if minisite has been published (required by interface, but not used)
+     * EditService injects VersionRepositoryInterface directly instead
+     */
+    public function hasBeenPublished(string $siteId): bool
+    {
+        // Not used - EditService injects VersionRepositoryInterface directly
+        // Return false as default
+        return false;
     }
 }

@@ -7,8 +7,6 @@ namespace Minisite\Features\MinisiteListing\WordPress;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 
 /**
  * WordPress Listing Manager
@@ -21,7 +19,6 @@ use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 class WordPressListingManager extends BaseWordPressManager
 {
     private MinisiteRepository $minisiteRepository;
-    private VersionRepositoryInterface $versionRepository;
 
     /**
      * Constructor
@@ -33,9 +30,6 @@ class WordPressListingManager extends BaseWordPressManager
         parent::__construct($terminationHandler);
         global $wpdb;
         $this->minisiteRepository = new MinisiteRepository($wpdb);
-
-        // Use Doctrine-based VersionRepository from global if available, otherwise create old one
-        $this->versionRepository = $GLOBALS['minisite_version_repository'] ?? new VersionRepository($wpdb);
     }
 
     /**

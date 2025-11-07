@@ -4,6 +4,7 @@ namespace Minisite\Features\MinisiteViewer\Services;
 
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 
 /**
  * Minisite View Service
@@ -16,7 +17,8 @@ use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 class MinisiteViewService
 {
     public function __construct(
-        private WordPressMinisiteManager $wordPressManager
+        private WordPressMinisiteManager $wordPressManager,
+        private VersionRepositoryInterface $versionRepository
     ) {
     }
 
@@ -90,7 +92,6 @@ class MinisiteViewService
         }
 
         // Handle version-specific preview
-        $versionRepo = $this->wordPressManager->getVersionRepository();
         $siteJson = null;
         $version = null;
 
@@ -99,7 +100,7 @@ class MinisiteViewService
             $siteJson = $minisite->siteJson;
         } else {
             // Show specific version
-            $version = $versionRepo->findById((int) $versionId);
+            $version = $this->versionRepository->findById((int) $versionId);
             if (! $version) {
                 throw new \RuntimeException('Version not found');
             }

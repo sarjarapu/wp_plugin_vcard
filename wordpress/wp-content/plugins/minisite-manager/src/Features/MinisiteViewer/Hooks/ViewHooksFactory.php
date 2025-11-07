@@ -27,7 +27,12 @@ final class ViewHooksFactory
 
         // Create services
         $wordPressManager = new WordPressMinisiteManager($terminationHandler);
-        $viewService = new MinisiteViewService($wordPressManager);
+
+        // Get VersionRepository from global (Doctrine-based) or create old one
+        global $wpdb;
+        $versionRepository = $GLOBALS['minisite_version_repository'] ?? new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+
+        $viewService = new MinisiteViewService($wordPressManager, $versionRepository);
 
         // Create handlers
         $viewHandler = new ViewHandler($viewService);

@@ -6,8 +6,6 @@ use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
@@ -21,7 +19,6 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 class WordPressMinisiteManager extends BaseWordPressManager
 {
     private ?MinisiteRepository $repository = null;
-    private ?VersionRepositoryInterface $versionRepository = null;
 
     /**
      * Constructor
@@ -43,25 +40,6 @@ class WordPressMinisiteManager extends BaseWordPressManager
         }
 
         return $this->repository;
-    }
-
-    /**
-     * Get version repository instance
-     * Uses Doctrine-based repository from global if available, otherwise creates old one
-     */
-    private function getVersionRepositoryInstance(): VersionRepositoryInterface
-    {
-        if ($this->versionRepository === null) {
-            // Use Doctrine-based repository from global if available
-            if (isset($GLOBALS['minisite_version_repository'])) {
-                $this->versionRepository = $GLOBALS['minisite_version_repository'];
-            } else {
-                // Fallback: Create old repository if Doctrine not available
-                $this->versionRepository = new VersionRepository(db::getWpdb());
-            }
-        }
-
-        return $this->versionRepository;
     }
 
     /**
@@ -176,16 +154,6 @@ class WordPressMinisiteManager extends BaseWordPressManager
     public function findMinisiteById(string $siteId): ?object
     {
         return $this->getRepository()->findById($siteId);
-    }
-
-    /**
-     * Get version repository (public access)
-     *
-     * @return VersionRepositoryInterface
-     */
-    public function getVersionRepository(): VersionRepositoryInterface
-    {
-        return $this->getVersionRepositoryInstance();
     }
 
     /**

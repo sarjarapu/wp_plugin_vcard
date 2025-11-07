@@ -261,61 +261,36 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     }
 
     /**
-     * Check if minisite has been published
-     *
-     * @param string $id Minisite ID
-     * @return bool True if published, false otherwise
-     */
-    public function hasBeenPublished(string $id): bool
-    {
-        $versionRepo = $GLOBALS['minisite_version_repository'] ?? $this->getVersionRepository();
-
-        return $versionRepo->findPublishedVersion($id) !== null;
-    }
-
-    /**
-     * Get next version number
-     *
-     * @param string $id Minisite ID
-     * @return int Next version number
+     * Get next version number (required by interface, but not used)
+     * VersionService injects VersionRepositoryInterface directly instead
      */
     public function getNextVersionNumber(string $id): int
     {
-        $versionRepo = $GLOBALS['minisite_version_repository'] ?? $this->getVersionRepository();
-
-        return $versionRepo->getNextVersionNumber($id);
+        // Not used - VersionService injects VersionRepositoryInterface directly
+        // Return 1 as default
+        return 1;
     }
 
     /**
-     * Save version
-     *
-     * @param object $version Version object
-     * @return object Saved version object
+     * Save version (required by interface, but not used)
+     * VersionService injects VersionRepositoryInterface directly instead
      */
     public function saveVersion(object $version): object
     {
-        $versionRepo = $GLOBALS['minisite_version_repository'] ?? $this->getVersionRepository();
-        $versionRepo->save($version);
-
+        // Not used - VersionService injects VersionRepositoryInterface directly
+        // Return version as-is
         return $version;
     }
 
     /**
-     * Get VersionRepository instance (from global or create if needed)
-     *
-     * @return \Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface
+     * Check if minisite has been published (required by interface, but not used)
+     * Services should inject VersionRepositoryInterface directly instead
      */
-    private function getVersionRepository(): \Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface
+    public function hasBeenPublished(string $id): bool
     {
-        // Try to get from global first (Doctrine-based repository)
-        if (isset($GLOBALS['minisite_version_repository'])) {
-            return $GLOBALS['minisite_version_repository'];
-        }
-
-        // Fallback: Create old repository if Doctrine not available
-        // This provides backward compatibility during migration
-        global $wpdb;
-        return new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
+        // Not used - services should inject VersionRepositoryInterface directly
+        // Return false as default
+        return false;
     }
 
     /**

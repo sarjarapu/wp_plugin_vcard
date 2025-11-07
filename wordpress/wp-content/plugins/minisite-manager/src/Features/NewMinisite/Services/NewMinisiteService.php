@@ -7,6 +7,7 @@ use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Domain\Services\MinisiteIdGenerator;
 use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,7 +23,8 @@ class NewMinisiteService
     private LoggerInterface $logger;
 
     public function __construct(
-        private WordPressNewMinisiteManager $wordPressManager
+        private WordPressNewMinisiteManager $wordPressManager,
+        private VersionRepositoryInterface $versionRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('new-minisite');
     }
@@ -78,7 +80,7 @@ class NewMinisiteService
         try {
             // Create shared components
             $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
-            $dbCoordinator = new MinisiteDatabaseCoordinator($this->wordPressManager);
+            $dbCoordinator = new MinisiteDatabaseCoordinator($this->wordPressManager, $this->versionRepository);
 
             // Validate form data
             $errors = $formProcessor->validateFormData($formData);
