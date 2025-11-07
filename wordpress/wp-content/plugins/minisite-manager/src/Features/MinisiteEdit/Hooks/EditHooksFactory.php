@@ -31,12 +31,13 @@ class EditHooksFactory
         // Create WordPress manager (requires TerminationHandlerInterface)
         $wordPressManager = new WordPressEditManager($terminationHandler);
 
-        // Get VersionRepository from global (Doctrine-based) or create old one
+        // Get repositories from global (Doctrine-based) or create old ones
         global $wpdb;
+        $minisiteRepository = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepository = $GLOBALS['minisite_version_repository'] ?? new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
 
         // Create service with repository injection
-        $editService = new EditService($wordPressManager, $versionRepository);
+        $editService = new EditService($wordPressManager, $minisiteRepository, $versionRepository);
 
         // Create renderer
         $timberRenderer = null;

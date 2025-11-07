@@ -236,31 +236,6 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     }
 
     /**
-     * Get minisite repository
-     *
-     * @return object Minisite repository
-     */
-    public function getMinisiteRepository(): object
-    {
-        global $wpdb;
-
-        return new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
-    }
-
-    /**
-     * Find minisite by ID
-     *
-     * @param string $id Minisite ID
-     * @return object|null Minisite object or null
-     */
-    public function findMinisiteById(string $id): ?object
-    {
-        $repo = $this->getMinisiteRepository();
-
-        return $repo->findById($id);
-    }
-
-    /**
      * Get next version number (required by interface, but not used)
      * VersionService injects VersionRepositoryInterface directly instead
      */
@@ -294,54 +269,59 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
     }
 
     /**
-     * Update business info
-     *
-     * @param string $siteId Site ID
-     * @param array $fields Fields to update
-     * @param int $userId User ID
+     * Update business info (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
     {
-        $repo = $this->getMinisiteRepository();
-        $repo->updateBusinessInfo($siteId, $fields, $userId);
+        // Not used - services should inject MinisiteRepository directly
     }
 
     /**
-     * Update coordinates
-     *
-     * @param string $siteId Site ID
-     * @param float $lat Latitude
-     * @param float $lng Longitude
-     * @param int $userId User ID
+     * Update coordinates (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
     {
-        $repo = $this->getMinisiteRepository();
-        $repo->updateCoordinates($siteId, $lat, $lng, $userId);
+        // Not used - services should inject MinisiteRepository directly
     }
 
     /**
-     * Update title
-     *
-     * @param string $siteId Site ID
-     * @param string $title Title
+     * Update title (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function updateTitle(string $siteId, string $title): void
     {
-        $repo = $this->getMinisiteRepository();
-        $repo->updateTitle($siteId, $title);
+        // Not used - services should inject MinisiteRepository directly
     }
 
     /**
-     * Update multiple minisite fields
-     *
-     * @param string $siteId Site ID
-     * @param array $fields Fields to update
-     * @param int $userId User ID
+     * Update multiple minisite fields (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
     {
-        $repo = $this->getMinisiteRepository();
-        $repo->updateMinisiteFields($siteId, $fields, $userId);
+        // Not used - services should inject MinisiteRepository directly
+    }
+
+    /**
+     * Find minisite by ID (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
+     */
+    public function findMinisiteById(string $siteId): ?object
+    {
+        // Not used - services should inject MinisiteRepository directly
+        return null;
+    }
+
+    /**
+     * Get minisite repository (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
+     */
+    public function getMinisiteRepository(): object
+    {
+        // Not used - services should inject MinisiteRepository directly
+        global $wpdb;
+        return new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     }
 }

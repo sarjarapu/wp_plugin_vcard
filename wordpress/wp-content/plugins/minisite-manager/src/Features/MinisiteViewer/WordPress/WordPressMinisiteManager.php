@@ -5,8 +5,6 @@ namespace Minisite\Features\MinisiteViewer\WordPress;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
  * WordPress Minisite Manager
@@ -18,8 +16,6 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
  */
 class WordPressMinisiteManager extends BaseWordPressManager
 {
-    private ?MinisiteRepository $repository = null;
-
     /**
      * Constructor
      *
@@ -28,44 +24,6 @@ class WordPressMinisiteManager extends BaseWordPressManager
     public function __construct(TerminationHandlerInterface $terminationHandler)
     {
         parent::__construct($terminationHandler);
-    }
-
-    /**
-     * Get minisite repository instance
-     */
-    private function getRepository(): MinisiteRepository
-    {
-        if ($this->repository === null) {
-            $this->repository = new MinisiteRepository(db::getWpdb());
-        }
-
-        return $this->repository;
-    }
-
-    /**
-     * Find minisite by business and location slugs
-     *
-     * @param string $businessSlug
-     * @param string $locationSlug
-     * @return object|null
-     */
-    public function findMinisiteBySlugs(string $businessSlug, string $locationSlug): ?object
-    {
-        $slugPair = new SlugPair($businessSlug, $locationSlug);
-
-        return $this->getRepository()->findBySlugs($slugPair);
-    }
-
-    /**
-     * Check if minisite exists
-     *
-     * @param string $businessSlug
-     * @param string $locationSlug
-     * @return bool
-     */
-    public function minisiteExists(string $businessSlug, string $locationSlug): bool
-    {
-        return $this->findMinisiteBySlugs($businessSlug, $locationSlug) !== null;
     }
 
     /**
@@ -144,17 +102,6 @@ class WordPressMinisiteManager extends BaseWordPressManager
     }
 
     // ===== VERSION-SPECIFIC METHODS =====
-
-    /**
-     * Find minisite by ID
-     *
-     * @param string $siteId
-     * @return object|null
-     */
-    public function findMinisiteById(string $siteId): ?object
-    {
-        return $this->getRepository()->findById($siteId);
-    }
 
     /**
      * Get reviews for a minisite

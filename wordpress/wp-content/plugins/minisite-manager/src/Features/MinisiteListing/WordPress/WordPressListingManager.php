@@ -6,7 +6,6 @@ namespace Minisite\Features\MinisiteListing\WordPress;
 
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 
 /**
  * WordPress Listing Manager
@@ -18,8 +17,6 @@ use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
  */
 class WordPressListingManager extends BaseWordPressManager
 {
-    private MinisiteRepository $minisiteRepository;
-
     /**
      * Constructor
      *
@@ -28,8 +25,6 @@ class WordPressListingManager extends BaseWordPressManager
     public function __construct(TerminationHandlerInterface $terminationHandler)
     {
         parent::__construct($terminationHandler);
-        global $wpdb;
-        $this->minisiteRepository = new MinisiteRepository($wpdb);
     }
 
     /**
@@ -73,48 +68,4 @@ class WordPressListingManager extends BaseWordPressManager
         parent::redirect($location, $status);
     }
 
-    /**
-     * List minisites by owner
-     *
-     * @param int $userId User ID
-     * @param int $limit Limit
-     * @param int $offset Offset
-     * @return array Array of minisites
-     */
-    public function listMinisitesByOwner(int $userId, int $limit = 50, int $offset = 0): array
-    {
-        $minisites = $this->minisiteRepository->listByOwner($userId, $limit, $offset);
-
-        $result = array_map(function ($minisite) {
-            $route = $this->getHomeUrl(
-                '/b/' . rawurlencode($minisite->slugs->business) . '/' . rawurlencode($minisite->slugs->location)
-            );
-            $statusChip = $minisite->status === 'published' ? 'Published' : 'Draft';
-
-            return array(
-                'id' => $minisite->id,
-                'title' => $minisite->title ?: $minisite->name,
-                'name' => $minisite->name,
-                'slugs' => array(
-                    'business' => $minisite->slugs->business,
-                    'location' => $minisite->slugs->location,
-                ),
-                'route' => $route,
-                'location' => trim(
-                    $minisite->city . (isset($minisite->region) && $minisite->region ? ', ' . $minisite->region : '') .
-                    ', ' . $minisite->countryCode,
-                    ', '
-                ),
-                'status' => $minisite->status,
-                'status_chip' => $statusChip,
-                'updated_at' => $minisite->updatedAt ? $minisite->updatedAt->format('Y-m-d H:i') : null,
-                'published_at' => $minisite->publishedAt ? $minisite->publishedAt->format('Y-m-d H:i') : null,
-                // TODO: real subscription and online flags
-                'subscription' => 'Unknown',
-                'online' => 'Unknown',
-            );
-        }, $minisites);
-
-        return $result;
-    }
 }

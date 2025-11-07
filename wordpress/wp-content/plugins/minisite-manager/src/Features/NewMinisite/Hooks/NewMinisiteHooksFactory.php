@@ -30,12 +30,13 @@ class NewMinisiteHooksFactory
         // Create WordPress manager (requires TerminationHandlerInterface)
         $wordPressManager = new WordPressNewMinisiteManager($terminationHandler);
 
-        // Get VersionRepository from global (Doctrine-based) or create old one
+        // Get repositories from global (Doctrine-based) or create old ones
         global $wpdb;
+        $minisiteRepository = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
         $versionRepository = $GLOBALS['minisite_version_repository'] ?? new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($wpdb);
 
         // Create service with repository injection
-        $newMinisiteService = new NewMinisiteService($wordPressManager, $versionRepository);
+        $newMinisiteService = new NewMinisiteService($wordPressManager, $minisiteRepository, $versionRepository);
 
         // Create renderer
         $timberRenderer = null;

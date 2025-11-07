@@ -4,6 +4,7 @@ namespace Minisite\Features\PublishMinisite\Services;
 
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -21,6 +22,7 @@ class PublishService
 
     public function __construct(
         private WordPressPublishManager $wordPressManager,
+        private MinisiteRepository $minisiteRepository,
         private SlugAvailabilityService $slugAvailabilityService,
         private ReservationService $reservationService
     ) {
@@ -40,7 +42,7 @@ class PublishService
      */
     public function getMinisiteForPublishing(string $siteId): object
     {
-        $minisite = $this->wordPressManager->findMinisiteById($siteId);
+        $minisite = $this->minisiteRepository->findById($siteId);
         if (! $minisite) {
             throw new \RuntimeException('Minisite not found');
         }

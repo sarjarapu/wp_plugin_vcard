@@ -7,6 +7,7 @@ use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Domain\Services\MinisiteIdGenerator;
 use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -24,6 +25,7 @@ class NewMinisiteService
 
     public function __construct(
         private WordPressNewMinisiteManager $wordPressManager,
+        private MinisiteRepository $minisiteRepository,
         private VersionRepositoryInterface $versionRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('new-minisite');
@@ -184,6 +186,6 @@ class NewMinisiteService
             return 0;
         }
 
-        return $this->wordPressManager->getUserMinisiteCount((int) $currentUser->ID);
+        return $this->minisiteRepository->countByOwner((int) $currentUser->ID);
     }
 }

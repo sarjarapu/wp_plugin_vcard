@@ -7,6 +7,7 @@ use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
 use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
@@ -24,6 +25,7 @@ class EditService
 
     public function __construct(
         private WordPressEditManager $wordPressManager,
+        private MinisiteRepository $minisiteRepository,
         private VersionRepositoryInterface $versionRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('minisite-edit-service');
@@ -34,7 +36,7 @@ class EditService
      */
     public function getMinisiteForEditing(string $siteId, ?string $versionId = null): object
     {
-        $minisite = $this->wordPressManager->findMinisiteById($siteId);
+        $minisite = $this->minisiteRepository->findById($siteId);
         if (! $minisite) {
             throw new \RuntimeException('Minisite not found');
         }
@@ -129,7 +131,7 @@ class EditService
                 );
             }
 
-            $minisite = $this->wordPressManager->findMinisiteById($siteId);
+            $minisite = $this->minisiteRepository->findById($siteId);
             $currentUser = $this->wordPressManager->getCurrentUser();
 
             // Determine operation type based on minisite status

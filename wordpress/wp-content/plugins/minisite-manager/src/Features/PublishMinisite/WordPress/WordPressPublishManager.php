@@ -5,7 +5,6 @@ namespace Minisite\Features\PublishMinisite\WordPress;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
@@ -18,8 +17,6 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
  */
 class WordPressPublishManager extends BaseWordPressManager implements WordPressManagerInterface
 {
-    private ?MinisiteRepository $minisiteRepository = null;
-
     /**
      * Constructor
      *
@@ -28,18 +25,6 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
     public function __construct(TerminationHandlerInterface $terminationHandler)
     {
         parent::__construct($terminationHandler);
-    }
-
-    /**
-     * Get minisite repository instance
-     */
-    public function getMinisiteRepository(): MinisiteRepository
-    {
-        if ($this->minisiteRepository === null) {
-            $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
-        }
-
-        return $this->minisiteRepository;
     }
 
     /**
@@ -189,73 +174,90 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
     }
 
     /**
-     * Find minisite by ID
+     * Find minisite by ID (required by interface, but not used)
+     * PublishService injects MinisiteRepository directly instead
      */
     public function findMinisiteById(string $minisiteId): ?object
     {
-        return $this->getMinisiteRepository()->findById($minisiteId);
+        // Not used - PublishService injects MinisiteRepository directly
+        return null;
     }
 
     /**
-     * Get next version number
+     * Get next version number (required by interface, but not used)
+     * Services should inject VersionRepositoryInterface directly instead
      */
     public function getNextVersionNumber(string $minisiteId): int
     {
-        // Not needed for publish feature, but required by interface
-        // Return 1 as default since publish doesn't create versions
+        // Not used - services should inject VersionRepositoryInterface directly
         return 1;
     }
 
     /**
-     * Save version
+     * Save version (required by interface, but not used)
+     * Services should inject VersionRepositoryInterface directly instead
      */
     public function saveVersion(object $version): object
     {
-        // Not needed for publish feature, but required by interface
-        // Return version as-is
+        // Not used - services should inject VersionRepositoryInterface directly
         return $version;
     }
 
     /**
-     * Check if minisite has been published
+     * Check if minisite has been published (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function hasBeenPublished(string $siteId): bool
     {
-        $minisite = $this->findMinisiteById($siteId);
-
-        return $minisite !== null && $minisite->status === 'published';
+        // Not used - services should inject MinisiteRepository directly
+        return false;
     }
 
     /**
-     * Update business info fields
+     * Update business info fields (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
     {
-        $this->getMinisiteRepository()->updateBusinessInfo($siteId, $fields, $userId);
+        // Not used - services should inject MinisiteRepository directly
     }
 
     /**
-     * Update coordinates
+     * Update coordinates (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
     {
-        $this->getMinisiteRepository()->updateCoordinates($siteId, $lat, $lng, $userId);
+        // Not used - services should inject MinisiteRepository directly
     }
 
     /**
-     * Update title
+     * Update title (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function updateTitle(string $siteId, string $title): void
     {
-        $this->getMinisiteRepository()->updateTitle($siteId, $title);
+        // Not used - services should inject MinisiteRepository directly
     }
 
     /**
-     * Update multiple minisite fields in a single operation
+     * Update multiple minisite fields (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
      */
     public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
     {
-        $this->getMinisiteRepository()->updateMinisiteFields($siteId, $fields, $userId);
+        // Not used - services should inject MinisiteRepository directly
+    }
+
+    /**
+     * Get minisite repository (required by interface, but not used)
+     * Services should inject MinisiteRepository directly instead
+     */
+    public function getMinisiteRepository(): object
+    {
+        // Not used - services should inject MinisiteRepository directly
+        global $wpdb;
+        return new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
     }
 
     /**
