@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\ConfigurationManagement\Repositories;
 
-use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
-use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Events;
-use PHPUnit\Framework\TestCase;
+use Doctrine\ORM\ORMSetup;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
+use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
+use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
+use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Integration tests for ConfigRepository
@@ -46,7 +46,7 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
 
         // Create real MySQL connection via Doctrine (same as AbstractDoctrineMigrationTest)
-        $connection = DriverManager::getConnection([
+        $connection = DriverManager::getConnection(array(
             'driver' => 'pdo_mysql',
             'host' => $host,
             'port' => (int)$port,
@@ -54,16 +54,16 @@ final class ConfigRepositoryIntegrationTest extends TestCase
             'password' => $pass,
             'dbname' => $dbName,
             'charset' => 'utf8mb4',
-        ]);
+        ));
 
         // Create EntityManager with MySQL connection (same as AbstractDoctrineMigrationTest)
         // Use the new feature-based entity path
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [
+            paths: array(
                 __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
                 __DIR__ . '/../../../../../src/Features/ReviewManagement/Domain/Entities',
                 __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
-            ],
+            ),
             isDevMode: true
         );
 
@@ -97,7 +97,7 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         $this->em->clear();
 
         // Set up $wpdb object for TablePrefixListener (needed for prefix)
-        if (!isset($GLOBALS['wpdb'])) {
+        if (! isset($GLOBALS['wpdb'])) {
             $GLOBALS['wpdb'] = new \wpdb();
         }
         $GLOBALS['wpdb']->prefix = 'wp_';
@@ -186,7 +186,7 @@ final class ConfigRepositoryIntegrationTest extends TestCase
     private function cleanupTables(): void
     {
         $connection = $this->em->getConnection();
-        $tables = ['wp_minisite_config', 'wp_minisite_migrations'];
+        $tables = array('wp_minisite_config', 'wp_minisite_migrations');
 
         foreach ($tables as $table) {
             try {
@@ -249,7 +249,7 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         $all = $this->repository->getAll();
 
         // Filter to our test data (might have other configs from migrations/seeding)
-        $testConfigs = array_filter($all, fn($c) => in_array($c->key, ['alpha', 'zebra']));
+        $testConfigs = array_filter($all, fn ($c) => in_array($c->key, array('alpha', 'zebra')));
         $testConfigs = array_values($testConfigs); // Re-index
 
         $this->assertGreaterThanOrEqual(2, count($testConfigs), 'Should have at least 2 test configs');
@@ -276,7 +276,7 @@ final class ConfigRepositoryIntegrationTest extends TestCase
     public function test_encrypted_config_stores_encrypted_value(): void
     {
         // Define encryption key for testing (generate a random key)
-        if (!defined('MINISITE_ENCRYPTION_KEY')) {
+        if (! defined('MINISITE_ENCRYPTION_KEY')) {
             define('MINISITE_ENCRYPTION_KEY', base64_encode(random_bytes(32)));
         }
 
@@ -292,7 +292,7 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         // Verify raw value in DB is encrypted (not plain text)
         // Note: Uses wp_minisite_config (with prefix) via TablePrefixListener
         $rawValue = $this->em->getConnection()
-            ->fetchOne("SELECT config_value FROM wp_minisite_config WHERE config_key = ?", ['encrypted_key']);
+            ->fetchOne("SELECT config_value FROM wp_minisite_config WHERE config_key = ?", array('encrypted_key'));
 
         // Verify stored value is encrypted
         $this->assertNotEquals($originalValue, $rawValue, 'Stored value should be encrypted, not plain text');
@@ -312,7 +312,7 @@ final class ConfigRepositoryIntegrationTest extends TestCase
 
         // Verify new value is encrypted in DB
         $newRawValue = $this->em->getConnection()
-            ->fetchOne("SELECT config_value FROM wp_minisite_config WHERE config_key = ?", ['encrypted_key']);
+            ->fetchOne("SELECT config_value FROM wp_minisite_config WHERE config_key = ?", array('encrypted_key'));
 
         $this->assertNotEquals($newValue, $newRawValue, 'New stored value should be encrypted');
         $this->assertNotEquals($rawValue, $newRawValue, 'New encrypted value should be different from old');
@@ -322,4 +322,3 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         $this->assertEquals($newValue, $updated->getTypedValue(), 'Decrypted new value should match');
     }
 }
-
