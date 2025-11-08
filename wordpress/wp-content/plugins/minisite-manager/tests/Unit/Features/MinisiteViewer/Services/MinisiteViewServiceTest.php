@@ -143,15 +143,15 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('', '');
 
+        // SlugPair validation happens before repository is called
         $this->minisiteRepository
-            ->expects($this->once())
-            ->method('findBySlugs')
-            ->willReturn(null);
+            ->expects($this->never())
+            ->method('findBySlugs');
 
         $result = $this->viewService->getMinisiteForView($command);
 
         $this->assertFalse($result['success']);
-        $this->assertEquals('Minisite not found', $result['error']);
+        $this->assertStringContainsString('Business slug must be a non-empty string', $result['error']);
     }
 
     /**
@@ -215,14 +215,16 @@ final class MinisiteViewServiceTest extends TestCase
     {
         $command = new ViewMinisiteCommand('', '');
 
+        // SlugPair validation happens before repository is called
         $this->minisiteRepository
-            ->expects($this->once())
-            ->method('findBySlugs')
-            ->willReturn(null);
+            ->expects($this->never())
+            ->method('findBySlugs');
 
-        $result = $this->viewService->minisiteExists($command);
+        // Expect exception to be thrown
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Business slug must be a non-empty string');
 
-        $this->assertFalse($result);
+        $this->viewService->minisiteExists($command);
     }
 
     /**
@@ -325,7 +327,7 @@ final class MinisiteViewServiceTest extends TestCase
         $mockVersion->name = 'Version 5';
         $mockVersion->city = 'Version City';
         $mockVersion->title = 'Version Title';
-        $mockVersion->siteJson = ['test' => 'version data'];
+        $mockVersion->siteJson = json_encode(['test' => 'version data']);
 
         $mockUser = (object)['ID' => 1];
 
@@ -447,7 +449,7 @@ final class MinisiteViewServiceTest extends TestCase
         $mockVersion = $this->createMock(Version::class);
         $mockVersion->id = 5;
         $mockVersion->minisiteId = 'different-site-id'; // Different minisite
-        $mockVersion->siteJson = ['test' => 'version data'];
+        $mockVersion->siteJson = json_encode(['test' => 'version data']);
 
         $mockUser = (object)['ID' => 1];
 

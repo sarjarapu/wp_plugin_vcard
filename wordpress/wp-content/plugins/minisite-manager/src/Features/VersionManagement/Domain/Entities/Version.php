@@ -23,7 +23,7 @@ use Minisite\Domain\ValueObjects\SlugPair;
 #[ORM\UniqueConstraint(name: 'uniq_minisite_version', columns: array('minisite_id', 'version_number'))]
 #[ORM\Index(name: 'idx_minisite_status', columns: array('minisite_id', 'status'))]
 #[ORM\Index(name: 'idx_minisite_created', columns: array('minisite_id', 'created_at'))]
-final class Version
+class Version
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]

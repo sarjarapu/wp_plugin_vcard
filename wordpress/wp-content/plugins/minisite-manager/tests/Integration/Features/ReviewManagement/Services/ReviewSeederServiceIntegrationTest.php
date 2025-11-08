@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\ReviewManagement\Services;
 
+use Doctrine\DBAL\DriverManager;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Events;
+use Doctrine\ORM\ORMSetup;
 use Minisite\Features\ReviewManagement\Domain\Entities\Review;
 use Minisite\Features\ReviewManagement\Repositories\ReviewRepository;
 use Minisite\Features\ReviewManagement\Services\ReviewSeederService;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
-use Doctrine\ORM\Events;
-use PHPUnit\Framework\TestCase;
+use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
+use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Integration tests for ReviewSeederService
@@ -49,7 +49,7 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
         $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
 
         // Create real MySQL connection
-        $connection = DriverManager::getConnection([
+        $connection = DriverManager::getConnection(array(
             'driver' => 'pdo_mysql',
             'host' => $host,
             'port' => (int)$port,
@@ -57,14 +57,14 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
             'password' => $pass,
             'dbname' => $dbName,
             'charset' => 'utf8mb4',
-        ]);
+        ));
 
         // Create EntityManager
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [
+            paths: array(
                 __DIR__ . '/../../../../../src/Features/ReviewManagement/Domain/Entities',
                 __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
-            ],
+            ),
             isDevMode: true
         );
 
@@ -91,7 +91,7 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
         $this->em->clear();
 
         // Set up $wpdb object for TablePrefixListener
-        if (!isset($GLOBALS['wpdb'])) {
+        if (! isset($GLOBALS['wpdb'])) {
             $GLOBALS['wpdb'] = new \wpdb();
         }
         $GLOBALS['wpdb']->prefix = 'wp_';
@@ -163,7 +163,7 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
     private function cleanupTables(): void
     {
         $connection = $this->em->getConnection();
-        $tables = ['wp_minisite_reviews', 'wp_minisite_migrations'];
+        $tables = array('wp_minisite_reviews', 'wp_minisite_migrations');
 
         foreach ($tables as $table) {
             try {
@@ -306,7 +306,7 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
      */
     public function test_createReviewFromJsonData_with_all_fields(): void
     {
-        $reviewData = [
+        $reviewData = array(
             'authorName' => 'JSON User',
             'authorEmail' => 'json@example.com',
             'authorPhone' => '+1111111111',
@@ -330,8 +330,8 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
             'createdAt' => '2025-01-01T00:00:00Z',
             'updatedAt' => '2025-01-02T00:00:00Z',
             'createdBy' => 10,
-            'publishedAt' => '2025-01-03T00:00:00Z'
-        ];
+            'publishedAt' => '2025-01-03T00:00:00Z',
+        );
 
         $review = $this->service->createReviewFromJsonData('test-minisite-json', $reviewData);
 
@@ -357,10 +357,10 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
      */
     public function test_createReviewFromJsonData_with_defaults(): void
     {
-        $reviewData = [
+        $reviewData = array(
             'authorName' => 'Minimal User',
-            'body' => 'Minimal review'
-        ];
+            'body' => 'Minimal review',
+        );
 
         $review = $this->service->createReviewFromJsonData('test-minisite-minimal', $reviewData);
 
@@ -379,13 +379,13 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
      */
     public function test_createReviewFromJsonData_parses_timestamps(): void
     {
-        $reviewData = [
+        $reviewData = array(
             'authorName' => 'Timestamp User',
             'body' => 'Test',
             'createdAt' => '2025-01-15T10:30:00Z',
             'updatedAt' => '2025-01-16T11:45:00Z',
-            'publishedAt' => '2025-01-17T12:00:00Z'
-        ];
+            'publishedAt' => '2025-01-17T12:00:00Z',
+        );
 
         $review = $this->service->createReviewFromJsonData('test-minisite-timestamp', $reviewData);
 
@@ -404,11 +404,11 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
      */
     public function test_createReviewFromJsonData_marks_as_published_when_approved(): void
     {
-        $reviewData = [
+        $reviewData = array(
             'authorName' => 'Approved User',
             'body' => 'Test',
-            'status' => 'approved'
-        ];
+            'status' => 'approved',
+        );
 
         $review = $this->service->createReviewFromJsonData('test-minisite-approved', $reviewData);
 
@@ -421,23 +421,23 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
      */
     public function test_seedReviewsForMinisite_seeds_multiple_reviews(): void
     {
-        $reviewData = [
-            [
+        $reviewData = array(
+            array(
                 'authorName' => 'User 1',
                 'rating' => 5.0,
-                'body' => 'Review 1'
-            ],
-            [
+                'body' => 'Review 1',
+            ),
+            array(
                 'authorName' => 'User 2',
                 'rating' => 4.0,
-                'body' => 'Review 2'
-            ],
-            [
+                'body' => 'Review 2',
+            ),
+            array(
                 'authorName' => 'User 3',
                 'rating' => 3.0,
-                'body' => 'Review 3'
-            ]
-        ];
+                'body' => 'Review 3',
+            ),
+        );
 
         $this->service->seedReviewsForMinisite('test-minisite-seed', $reviewData);
 
@@ -457,7 +457,7 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
     public function test_seedReviewsForMinisite_with_empty_array(): void
     {
         // Should not throw an exception
-        $this->service->seedReviewsForMinisite('test-minisite-empty', []);
+        $this->service->seedReviewsForMinisite('test-minisite-empty', array());
 
         $reviews = $this->repository->listApprovedForMinisite('test-minisite-empty');
         $this->assertCount(0, $reviews);
@@ -469,15 +469,15 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
     public function test_seedAllTestReviews_with_empty_minisite_ids(): void
     {
         // Should not throw an exception when all minisite IDs are empty
-        $this->service->seedAllTestReviews([]);
+        $this->service->seedAllTestReviews(array());
 
         // Also test with some keys but empty values
-        $this->service->seedAllTestReviews([
+        $this->service->seedAllTestReviews(array(
             'ACME' => '',
             'LOTUS' => null,
             'GREEN' => '',
-            'SWIFT' => ''
-        ]);
+            'SWIFT' => '',
+        ));
 
         // Verify no reviews were created (would need to check all minisites, but we'll just verify no exception)
         $this->assertTrue(true);
@@ -489,19 +489,17 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
     public function test_seedAllTestReviews_handles_file_not_found(): void
     {
         // Define MINISITE_PLUGIN_DIR to a non-existent path
-        if (!defined('MINISITE_PLUGIN_DIR')) {
+        if (! defined('MINISITE_PLUGIN_DIR')) {
             define('MINISITE_PLUGIN_DIR', '/nonexistent/path/');
         }
 
         // Should not throw exception, should log error and continue
-        $this->service->seedAllTestReviews([
+        $this->service->seedAllTestReviews(array(
             'ACME' => 'test-minisite-acme',
-            'LOTUS' => 'test-minisite-lotus'
-        ]);
+            'LOTUS' => 'test-minisite-lotus',
+        ));
 
         // Verify no exception was thrown (error should be logged)
         $this->assertTrue(true);
     }
 }
-
-

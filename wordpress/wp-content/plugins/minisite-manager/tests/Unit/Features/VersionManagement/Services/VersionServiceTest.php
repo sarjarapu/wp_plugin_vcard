@@ -110,7 +110,7 @@ class VersionServiceTest extends TestCase
         $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
         $nextVersion = 3;
-        $savedVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $savedVersion = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $savedVersion->id = 789;
         $savedVersion->versionNumber = $nextVersion;
 
@@ -141,7 +141,7 @@ class VersionServiceTest extends TestCase
         $command = new PublishVersionCommand('test-site', 123, 456);
         $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
         $minisite->createdBy = 456;
-        $version = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $version = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $version->status = 'published';
         $version->minisiteId = 'test-site';
 
@@ -171,10 +171,10 @@ class VersionServiceTest extends TestCase
 
         $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
-        $sourceVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $sourceVersion = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $sourceVersion->versionNumber = 2;
         $sourceVersion->minisiteId = $siteId;
-        $sourceVersion->siteJson = ['test' => 'data'];
+        $sourceVersion->siteJson = json_encode(['test' => 'data']);
         $sourceVersion->slugs = new \Minisite\Domain\ValueObjects\SlugPair('test-business', 'test-location');
         $sourceVersion->title = 'Test Title';
         $sourceVersion->name = 'Test Name';
@@ -192,7 +192,7 @@ class VersionServiceTest extends TestCase
         $sourceVersion->searchTerms = 'test';
 
         $nextVersion = 3;
-        $savedVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $savedVersion = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $savedVersion->id = 999;
         $savedVersion->versionNumber = $nextVersion;
 

@@ -106,7 +106,8 @@ class MinisiteViewService
             if ($version->minisiteId !== $siteId) {
                 throw new \RuntimeException('Version not found');
             }
-            $siteJson = $version->siteJson;
+            // Version stores siteJson as JSON string, decode it for Minisite (which expects array)
+            $siteJson = json_decode($version->siteJson, true);
         }
 
         // Update profile with version-specific data for rendering

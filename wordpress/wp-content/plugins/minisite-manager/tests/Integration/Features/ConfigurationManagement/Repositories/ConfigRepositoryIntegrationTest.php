@@ -118,10 +118,14 @@ final class ConfigRepositoryIntegrationTest extends TestCase
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
 
-        // Reset connection state again after migrations (migrations may leave connection in bad state)
-        // This is critical because migrations might leave the connection in an inconsistent state
+        // Reset connection state after migrations
+        // NOTE: We're NOT explicitly using savepoints, but Doctrine creates them automatically
+        // when flush() is called within transactions. After migrations, savepoint state can
+        // be corrupted. Closing the connection is the ONLY reliable way to clear ALL savepoints
+        // (they're connection-scoped). This is a known Doctrine limitation in test scenarios.
+        // See: docs/features/version-management/savepoint-investigation.md
         try {
-            // Rollback any active transactions
+            // Rollback any active transactions (shouldn't be any if migrations committed properly)
             while ($connection->isTransactionActive()) {
                 $connection->rollBack();
             }
@@ -134,19 +138,17 @@ final class ConfigRepositoryIntegrationTest extends TestCase
             }
         }
 
-        // Clear EntityManager state again after migrations
-        // This ensures any UnitOfWork state from migrations is cleared
+        // Clear EntityManager state after migrations
         $this->em->clear();
 
-        // Force a fresh connection state by closing and letting it reconnect
-        // This is the most reliable way to ensure clean state
+        // Close connection to clear ALL savepoints (connection-scoped)
+        // EntityManager will automatically reconnect when needed
+        // This is necessary because Doctrine's savepoint state persists even after transactions
         try {
             $connection->close();
         } catch (\Exception $e) {
             // Ignore - connection might already be closed
         }
-
-        // EntityManager will automatically reconnect when needed
 
         // Get repository (automatically uses wp_minisite_config via TablePrefixListener)
         // Use the new feature-based repository

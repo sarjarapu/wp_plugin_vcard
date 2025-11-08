@@ -18,7 +18,7 @@ class CreateDraftHandler
     /**
      * Handle the create draft command
      */
-    public function handle(CreateDraftCommand $command): \Minisite\Domain\Entities\Version
+    public function handle(CreateDraftCommand $command): \Minisite\Features\VersionManagement\Domain\Entities\Version
     {
         return $this->versionService->createDraft($command);
     }
