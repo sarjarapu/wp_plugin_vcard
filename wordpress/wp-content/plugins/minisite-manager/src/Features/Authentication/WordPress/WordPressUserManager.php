@@ -323,37 +323,4 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
         return wp_create_nonce($action);
     }
 
-    // WordPressManagerInterface methods - Not applicable for Authentication
-
-    /**
-     * Find minisite by ID
-     * NOTE: Still used in MinisiteFormProcessor - will be refactored in Phase 2
-     */
-    public function findMinisiteById(string $siteId): ?object
-    {
-        // TODO: Phase 2 - Refactor MinisiteFormProcessor to inject MinisiteRepository directly
-        // Authentication doesn't need this, but must implement for interface compliance
-        return null;
-    }
-
-    /**
-     * Update multiple minisite fields in a single operation
-     * NOTE: Still used in MinisiteDatabaseCoordinator - will be refactored in Phase 2
-     */
-    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
-    {
-        // TODO: Phase 2 - Refactor MinisiteDatabaseCoordinator to inject MinisiteRepository directly
-        // Authentication doesn't need this, but must implement for interface compliance
-    }
-
-    /**
-     * Get minisite repository
-     * NOTE: Still used in multiple services - will be refactored in Phase 2
-     */
-    public function getMinisiteRepository(): object
-    {
-        // TODO: Phase 2 - Refactor services to inject MinisiteRepository directly
-        // Authentication doesn't need this, but must implement for interface compliance
-        return new \stdClass();
-    }
 }

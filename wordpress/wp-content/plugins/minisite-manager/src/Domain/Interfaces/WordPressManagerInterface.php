@@ -51,22 +51,4 @@ interface WordPressManagerInterface
      * Get home URL
      */
     public function getHomeUrl(string $path = ''): string;
-
-    /**
-     * Find minisite by ID
-     * NOTE: This is still used in MinisiteFormProcessor and will be refactored in Phase 2
-     */
-    public function findMinisiteById(string $siteId): ?object;
-
-    /**
-     * Update multiple minisite fields in a single operation
-     * NOTE: This is still used in MinisiteDatabaseCoordinator and will be refactored in Phase 2
-     */
-    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void;
-
-    /**
-     * Get minisite repository
-     * NOTE: This is still used in multiple services and will be refactored in Phase 2
-     */
-    public function getMinisiteRepository(): object;
 }
