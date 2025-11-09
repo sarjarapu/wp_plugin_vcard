@@ -78,7 +78,7 @@ final class DissectSavePointErrorTest extends TestCase
     /**
      * Test: Drop table, create table, and insert using raw SQL
      */
-    public function t1est_raw_sql_operations(): void
+    public function test_raw_sql_operations(): void
     {
         // Step 1: Drop table if exists
         $this->connection->executeStatement('DROP TABLE IF EXISTS `wp_minisite_config`');
@@ -122,7 +122,7 @@ SQL;
     /**
      * Test: Create table using raw SQL, then use ConfigRepository for insert/select
      */
-    public function t1est_raw_sql_create_then_repository_operations(): void
+    public function test_raw_sql_create_then_repository_operations(): void
     {
         // Step 1: Setup ORM (needed for repository)
         $this->setupORM();
@@ -138,54 +138,37 @@ SQL;
     }
 
     /**
-     * Setup ORM (EntityManager) with WordPress table prefix
+     * Test: Create table using migration ->up() method, then use ConfigRepository
+     * Uses manual ->up() method (bypasses Doctrine Migrations framework)
+     * Expected: No savepoint errors since framework transaction management is bypassed
      */
-    private function setupORM(): void
-    {
-        // Create EntityManager with MySQL connection
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: array(
-                __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
-            ),
-            isDevMode: true
-        );
-
-        $this->em = new EntityManager($this->connection, $config);
-
-        // Set up $wpdb object for TablePrefixListener
-        if (! isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-
-        // Add TablePrefixListener
-        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
-        $this->em->getEventManager()->addEventListener(
-            Events::loadClassMetadata,
-            $tablePrefixListener
-        );
-    }
-
-    /**
-     * Create repository instance
-     */
-    private function setupRepository(): void
-    {
-        $classMetadata = $this->em->getClassMetadata(Config::class);
-        $this->repository = new ConfigRepository($this->em, $classMetadata);
-    }
-
-    /**
-     * Test: Use Doctrine Migrations to create table, then use ConfigRepository
-     * This brings in Doctrine Migrations components slowly to isolate savepoint issues
-     */
-    public function test_doctrine_migrations_then_repository_operations(): void
+    public function test_migration_up_method_then_repository_operations(): void
     {
         // Step 1: Setup ORM (needed for migrations)
         $this->setupORM();
 
-        // Step 2: Create table using Doctrine Migrations
-        $this->createTableUsingDoctrineMigrations();
+        // Step 2: Create table using migration ->up() method (bypasses framework)
+        $this->createTableViaMigrationUp();
+
+        // Step 3: Setup Repository
+        $this->setupRepository();
+
+        // Step 4: Use ConfigRepository operations
+        $this->performRepositoryOperations();
+    }
+
+    /**
+     * Test: Create table using migrator ->migrate() method, then use ConfigRepository
+     * Uses the actual Doctrine Migrations framework ($migrator->migrate())
+     * Expected: Savepoint error occurs due to framework's transaction management
+     */
+    public function test_migrator_migrate_method_then_repository_operations(): void
+    {
+        // Step 1: Setup ORM (needed for migrations)
+        $this->setupORM();
+
+        // Step 2: Create table using migrator ->migrate() method (uses framework)
+        $this->createTableViaMigratorMigrate();
 
         // Step 3: Setup Repository
         $this->setupRepository();
@@ -223,9 +206,10 @@ SQL;
     }
 
     /**
-     * Create table using Doctrine Migrations
+     * Create table using migration ->up() method (bypasses Doctrine Migrations framework)
+     * This manually executes the migration's up() method without using the migrator
      */
-    private function createTableUsingDoctrineMigrations(): void
+    private function createTableViaMigrationUp(): void
     {
         // Drop tables to ensure clean slate
         // Only drop config table and migrations tracking table
@@ -278,9 +262,9 @@ SQL;
         if (! $platform->hasDoctrineTypeMappingFor('enum')) {
             $platform->registerDoctrineTypeMapping('enum', 'string');
         }
-        // if (! $platform->hasDoctrineTypeMappingFor('point')) {
-        //     $platform->registerDoctrineTypeMapping('point', 'blob');
-        // }
+        if (! $platform->hasDoctrineTypeMappingFor('point')) {
+            $platform->registerDoctrineTypeMapping('point', 'blob');
+        }
 
         $logger = LoggingServiceProvider::getFeatureLogger('doctrine-migrations');
         $schemaManager = $this->connection->createSchemaManager();
@@ -298,74 +282,90 @@ SQL;
             $this->connection->executeStatement($query);
         }
 
-        // // Create migration configuration (from DoctrineMigrationRunner lines 112-128)
-        // // KEY: 'all_or_nothing' => true means all migrations run in a single transaction
-        // $migrationPath = __DIR__ . '/../../../../../src/Infrastructure/Migrations/Doctrine';
-        // $migrationNamespace = 'Minisite\\Infrastructure\\Migrations\\Doctrine';
-        // $config = new ConfigurationArray(array(
-        //     'migrations_paths' => array(
-        //         $migrationNamespace => $migrationPath,
-        //     ),
-        //     'all_or_nothing' => true, // ⚠️ THIS IS THE KEY SETTING
-        //     'check_database_platform' => true,
-        //     'organize_migrations' => 'none',
-        //     'table_storage' => array(
-        //         'table_name' => 'wp_minisite_migrations',
-        //     ),
-        // ));
+    }
 
-        // // Create dependency factory (from DoctrineMigrationRunner lines 137-145)
-        // $dependencyFactory = DependencyFactory::fromConnection(
-        //     $config,
-        //     new ExistingConnection($this->connection)
-        // );
+    /**
+     * Create table using migrator ->migrate() method (uses Doctrine Migrations framework)
+     * This uses the actual Doctrine Migrations framework and reproduces savepoint errors
+     */
+    private function createTableViaMigratorMigrate(): void
+    {
+        // Drop tables to ensure clean slate
+        $this->connection->executeStatement('DROP TABLE IF EXISTS `wp_minisite_config`');
+        $this->connection->executeStatement('DROP TABLE IF EXISTS `wp_minisite_migrations`');
 
-        // // Ensure metadata storage initialized (from DoctrineMigrationRunner lines 153-165)
-        // $metadataStorage = $dependencyFactory->getMetadataStorage();
-        // $metadataStorage->ensureInitialized();
+        // Register type mappings BEFORE any schema introspection
+        // This must be done BEFORE introspectSchema() to avoid "Unknown database type point" errors
+        $platform = $this->connection->getDatabasePlatform();
+        if (! $platform->hasDoctrineTypeMappingFor('enum')) {
+            $platform->registerDoctrineTypeMapping('enum', 'string');
+        }
+        if (! $platform->hasDoctrineTypeMappingFor('point')) {
+            $platform->registerDoctrineTypeMapping('point', 'blob');
+        }
 
-        // // Execute migrations - ONLY Version20251103000000 (config table)
-        // // Filter to only run the config table migration, skip reviews and versions migrations
-        // $statusCalculator = $dependencyFactory->getMigrationStatusCalculator();
-        // $availableMigrations = $statusCalculator->getNewMigrations();
+        // Create migration configuration (from DoctrineMigrationRunner lines 112-128)
+        // KEY: 'all_or_nothing' => true means all migrations run in a single transaction
+        $migrationPath = __DIR__ . '/../../../../../src/Infrastructure/Migrations/Doctrine';
+        $migrationNamespace = 'Minisite\\Infrastructure\\Migrations\\Doctrine';
+        $config = new ConfigurationArray(array(
+            'migrations_paths' => array(
+                $migrationNamespace => $migrationPath,
+            ),
+            'all_or_nothing' => true, // ⚠️ THIS IS THE KEY SETTING
+            'check_database_platform' => true,
+            'organize_migrations' => 'none',
+            'table_storage' => array(
+                'table_name' => 'wp_minisite_migrations',
+            ),
+        ));
 
-        // if (count($availableMigrations) > 0) {
-        //     $migrationItems = $availableMigrations->getItems();
+        // Create dependency factory (from DoctrineMigrationRunner lines 137-145)
+        $dependencyFactory = DependencyFactory::fromConnection(
+            $config,
+            new ExistingConnection($this->connection)
+        );
 
-        //     // Filter to only include Version20251103000000 (config table migration)
-        //     $targetVersion = null;
-        //     foreach ($migrationItems as $migration) {
-        //         $version = $migration->getVersion();
-        //         $versionString = $version->__toString();
-        //         # print the version string
-        //         echo " ==> Version string: " . $versionString . PHP_EOL;
-        //         // Extract version number from class name (e.g., "Minisite\...\Version20251103000000" -> "20251103000000")
-        //         // Match Version20251103000000 (config table only) - skip 20251104000000 and 20251105000000
-        //         if (str_ends_with($versionString, 'Version20251103000000')) {
-        //             $targetVersion = $version;
+        // Ensure metadata storage initialized (from DoctrineMigrationRunner lines 153-165)
+        $metadataStorage = $dependencyFactory->getMetadataStorage();
+        $metadataStorage->ensureInitialized();
 
-        //             break;
-        //         }
-        //     }
+        // Execute migrations - ONLY Version20251103000000 (config table)
+        // Filter to only run the config table migration, skip reviews and versions migrations
+        $statusCalculator = $dependencyFactory->getMigrationStatusCalculator();
+        $availableMigrations = $statusCalculator->getNewMigrations();
 
-        //     if ($targetVersion !== null) {
-        //         $planCalculator = $dependencyFactory->getMigrationPlanCalculator();
-        //         $plan = $planCalculator->getPlanUntilVersion($targetVersion);
+        if (count($availableMigrations) > 0) {
+            $migrationItems = $availableMigrations->getItems();
 
-        //         $migrator = $dependencyFactory->getMigrator();
-        //         $migratorConfig = new MigratorConfiguration();
-        //         $migrator->migrate($plan, $migratorConfig); // ⚠️ THIS IS WHERE SAVEPOINT ERRORS OCCUR
-        //     } else {
-        //         // Migration not found - show what was found for debugging
-        //         throw new \RuntimeException(
-        //             'Version20251103000000 migration not found. ' .
-        //             'Available versions: ' . implode(', ', $foundVersions)
-        //         );
-        //     }
-        // } else {
-        //     // No migrations available - this shouldn't happen if migrations table was dropped
-        //     throw new \RuntimeException('No new migrations found - migrations table may not have been properly dropped');
-        // }
+            // Filter to only include Version20251103000000 (config table migration)
+            $targetVersion = null;
+            foreach ($migrationItems as $migration) {
+                $version = $migration->getVersion();
+                $versionString = $version->__toString();
+                // Match Version20251103000000 (config table only) - skip 20251104000000 and 20251105000000
+                if (str_ends_with($versionString, 'Version20251103000000')) {
+                    $targetVersion = $version;
+
+                    break;
+                }
+            }
+
+            if ($targetVersion !== null) {
+                $planCalculator = $dependencyFactory->getMigrationPlanCalculator();
+                $plan = $planCalculator->getPlanUntilVersion($targetVersion);
+
+                $migrator = $dependencyFactory->getMigrator();
+                $migratorConfig = new MigratorConfiguration();
+                $migrator->migrate($plan, $migratorConfig); // ⚠️ THIS IS WHERE SAVEPOINT ERRORS OCCUR
+            } else {
+                // Migration not found
+                throw new \RuntimeException('Version20251103000000 migration not found in available migrations');
+            }
+        } else {
+            // No migrations available
+            throw new \RuntimeException('No new migrations found - migrations table may not have been properly dropped');
+        }
     }
 
     /**
@@ -406,5 +406,43 @@ SQL;
         }
 
         return $latestVersion;
+    }
+
+    /**
+     * Setup ORM (EntityManager) with WordPress table prefix
+     */
+    private function setupORM(): void
+    {
+        // Create EntityManager with MySQL connection
+        $config = ORMSetup::createAttributeMetadataConfiguration(
+            paths: array(
+                __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+            ),
+            isDevMode: true
+        );
+
+        $this->em = new EntityManager($this->connection, $config);
+
+        // Set up $wpdb object for TablePrefixListener
+        if (! isset($GLOBALS['wpdb'])) {
+            $GLOBALS['wpdb'] = new \wpdb();
+        }
+        $GLOBALS['wpdb']->prefix = 'wp_';
+
+        // Add TablePrefixListener
+        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
+        $this->em->getEventManager()->addEventListener(
+            Events::loadClassMetadata,
+            $tablePrefixListener
+        );
+    }
+
+    /**
+     * Create repository instance
+     */
+    private function setupRepository(): void
+    {
+        $classMetadata = $this->em->getClassMetadata(Config::class);
+        $this->repository = new ConfigRepository($this->em, $classMetadata);
     }
 }
