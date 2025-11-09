@@ -161,7 +161,7 @@ SQL;
     /**
      * Test: Create table using migrator ->migrate() method, then use ConfigRepository
      * Uses the actual Doctrine Migrations framework ($migrator->migrate())
-     * Expected: Savepoint error occurs due to framework's transaction management
+     * With isTransactional() => false on migration - Expected: No savepoint error
      */
     public function test_migrator_migrate_method_then_repository_operations(): void
     {
@@ -169,6 +169,7 @@ SQL;
         $this->setupORM();
 
         // Step 2: Create table using migrator ->migrate() method (uses framework)
+        // Migration has isTransactional() => false to avoid MySQL DDL implicit commit issues
         $this->createTableViaMigratorMigrate();
 
         // Step 3: Setup Repository
@@ -294,7 +295,7 @@ SQL;
 
     /**
      * Create table using migrator ->migrate() method (uses Doctrine Migrations framework)
-     * This uses the actual Doctrine Migrations framework and reproduces savepoint errors
+     * This uses the actual Doctrine Migrations framework
      */
     private function createTableViaMigratorMigrate(): void
     {
@@ -320,14 +321,13 @@ SQL;
         }
 
         // Create migration configuration (from DoctrineMigrationRunner lines 112-128)
-        // KEY: 'all_or_nothing' => true means all migrations run in a single transaction
         $migrationPath = __DIR__ . '/../../../../../src/Infrastructure/Migrations/Doctrine';
         $migrationNamespace = 'Minisite\\Infrastructure\\Migrations\\Doctrine';
         $config = new ConfigurationArray(array(
             'migrations_paths' => array(
                 $migrationNamespace => $migrationPath,
             ),
-            'all_or_nothing' => true, // ⚠️ THIS IS THE KEY SETTING
+            'all_or_nothing' => true, // Standard configuration
             'check_database_platform' => true,
             'organize_migrations' => 'none',
             'table_storage' => array(
@@ -372,7 +372,10 @@ SQL;
 
                 $migrator = $dependencyFactory->getMigrator();
                 $migratorConfig = new MigratorConfiguration();
-                $migrator->migrate($plan, $migratorConfig); // ⚠️ THIS IS WHERE SAVEPOINT ERRORS OCCUR
+
+                // Execute migrations
+                // With isTransactional() => false, MySQL DDL won't cause savepoint errors
+                $migrator->migrate($plan, $migratorConfig);
             } else {
                 // Migration not found
                 throw new \RuntimeException('Version20251103000000 migration not found in available migrations');

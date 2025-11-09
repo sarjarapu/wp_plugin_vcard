@@ -81,10 +81,15 @@ final class Version20251103000000 extends AbstractMigration
 
     /**
      * Indicate if this migration is transactional
-     * Return true to wrap migration in a transaction
+     *
+     * MySQL doesn't support transactional DDL (CREATE TABLE causes implicit commit).
+     * Setting this to false prevents Doctrine from wrapping the migration in a transaction,
+     * which avoids savepoint errors when MySQL auto-commits the DDL statement.
+     *
+     * @see https://www.doctrine-project.org/projects/doctrine-migrations/en/3.9/explanation/implicit-commits.html
      */
     public function isTransactional(): bool
     {
-        return true;
+        return false; // MySQL doesn't support transactional DDL
     }
 }
