@@ -10,14 +10,10 @@ use Doctrine\ORM\Events;
 use Doctrine\ORM\ORMSetup;
 use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
 use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
-use Monolog\Handler\StreamHandler;
-use Monolog\Logger;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\LoggerInterface;
 
 /**
  * Simplified ConfigRepository Integration Test - For Investigation
@@ -30,64 +26,10 @@ final class ConfigRepositoryIntegrationTestCopyWithOutNonsenseTest extends TestC
 {
     private \Doctrine\ORM\EntityManager $em;
     private ConfigRepository $repository;
-    private LoggerInterface $logger;
 
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Initialize LoggingServiceProvider and get logger
-        LoggingServiceProvider::register();
-        $this->logger = LoggingServiceProvider::getFeatureLogger('config-repo-test-debug');
-
-        // Add console output handler for tests (so we can see logs in real-time)
-        if ($this->logger instanceof Logger) {
-            $consoleHandler = new StreamHandler('php://stdout', Logger::DEBUG);
-
-            // Custom formatter that shows only filename and class name (not full paths/namespaces)
-            $formatter = new class () extends \Monolog\Formatter\LineFormatter {
-                public function format(\Monolog\LogRecord $record): string
-                {
-                    // Extract just filename from full path
-                    $filename = null;
-                    if (isset($record->extra['file'])) {
-                        $filename = basename($record->extra['file']);
-                    }
-
-                    // Extract just class name from full namespace
-                    $className = null;
-                    if (isset($record->extra['class'])) {
-                        $parts = explode('\\', $record->extra['class']);
-                        $className = end($parts);
-                    }
-
-                    // Format: [time] LEVEL: message [file:line] [class::method]
-                    $output = sprintf(
-                        "[%s] %s: %s",
-                        $record->datetime->format('H:i:s.v'),
-                        $record->level->getName(),
-                        $record->message
-                    );
-
-                    if ($filename && isset($record->extra['line'])) {
-                        $output .= sprintf(" [%s:%d]", $filename, $record->extra['line']);
-                    }
-
-                    if ($className && isset($record->extra['function'])) {
-                        $output .= sprintf(" [%s::%s()]", $className, $record->extra['function']);
-                    }
-
-                    $output .= "\n";
-
-                    return $output;
-                }
-            };
-
-            $consoleHandler->setFormatter($formatter);
-            $this->logger->pushHandler($consoleHandler);
-        }
-
-        $this->logger->info("setUp()");
 
         // Get database configuration from environment
         $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
@@ -195,7 +137,6 @@ final class ConfigRepositoryIntegrationTestCopyWithOutNonsenseTest extends TestC
 
     protected function tearDown(): void
     {
-        $this->logger->info("tearDown()");
         $this->cleanupTestData();
         $this->em->close();
         parent::tearDown();
@@ -237,8 +178,6 @@ final class ConfigRepositoryIntegrationTestCopyWithOutNonsenseTest extends TestC
      */
     public function test_save_and_find_config(): void
     {
-        $this->logger->info("test_save_and_find_config()");
-
         $config = new Config();
         $config->key = 'test_key';
         $config->type = 'string';
