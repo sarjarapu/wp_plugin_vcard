@@ -6,6 +6,7 @@ namespace Tests\Integration\Features\ConfigurationManagement\Repositories;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\Migrations\Configuration\Connection\ExistingConnection;
 use Doctrine\Migrations\Configuration\Migration\ConfigurationArray;
 use Doctrine\Migrations\DependencyFactory;
@@ -262,8 +263,15 @@ SQL;
         if (! $platform->hasDoctrineTypeMappingFor('enum')) {
             $platform->registerDoctrineTypeMapping('enum', 'string');
         }
+
+        // Register custom POINT type (proper implementation, not just blob mapping)
+        // This provides proper type conversion between GeoPoint value object and MySQL POINT
+        if (! \Doctrine\DBAL\Types\Type::hasType('point')) {
+            \Doctrine\DBAL\Types\Type::addType('point', \Minisite\Infrastructure\Persistence\Doctrine\Types\PointType::class);
+        }
+        // Map MySQL POINT type to our custom PointType
         if (! $platform->hasDoctrineTypeMappingFor('point')) {
-            $platform->registerDoctrineTypeMapping('point', 'blob');
+            $platform->registerDoctrineTypeMapping('point', 'point');
         }
 
         $logger = LoggingServiceProvider::getFeatureLogger('doctrine-migrations');
@@ -300,8 +308,15 @@ SQL;
         if (! $platform->hasDoctrineTypeMappingFor('enum')) {
             $platform->registerDoctrineTypeMapping('enum', 'string');
         }
+
+        // Register custom POINT type (proper implementation, not just blob mapping)
+        // This provides proper type conversion between GeoPoint value object and MySQL POINT
+        if (! Type::hasType('point')) {
+            Type::addType('point', \Minisite\Infrastructure\Persistence\Doctrine\Types\PointType::class);
+        }
+        // Map MySQL POINT type to our custom PointType
         if (! $platform->hasDoctrineTypeMappingFor('point')) {
-            $platform->registerDoctrineTypeMapping('point', 'blob');
+            $platform->registerDoctrineTypeMapping('point', 'point');
         }
 
         // Create migration configuration (from DoctrineMigrationRunner lines 112-128)

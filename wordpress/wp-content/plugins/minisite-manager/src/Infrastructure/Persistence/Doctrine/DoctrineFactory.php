@@ -3,6 +3,7 @@
 namespace Minisite\Infrastructure\Persistence\Doctrine;
 
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\ORMSetup;
@@ -66,21 +67,8 @@ class DoctrineFactory
         try {
             $connection = DriverManager::getConnection($dbConfig, $config);
 
-            // Register ENUM and POINT type mappings to avoid schema introspection errors
-            // WordPress and other plugins use ENUM columns that Doctrine doesn't natively support
-            // We map them to string type for schema introspection purposes
-            // Note: These mappings only affect how Doctrine reads the schema during introspection
-            // They do NOT change the actual database column types
-            $platform = $connection->getDatabasePlatform();
-            if (! $platform->hasDoctrineTypeMappingFor('enum')) {
-                $platform->registerDoctrineTypeMapping('enum', 'string');
-            }
-            // POINT is used for location_point - map to blob for introspection only
-            // The actual column remains POINT type in MySQL for spatial indexing
-            // Using 'blob' because it doesn't require length specification
-            if (! $platform->hasDoctrineTypeMappingFor('point')) {
-                $platform->registerDoctrineTypeMapping('point', 'blob');
-            }
+            // Register custom types and mappings
+            self::registerCustomTypes($connection);
 
             $logger->debug("DoctrineFactory::createEntityManager() connection created successfully");
         } catch (\Exception $e) {
@@ -115,5 +103,42 @@ class DoctrineFactory
         );
 
         return $em;
+    }
+
+    /**
+     * Register custom Doctrine types and type mappings
+     *
+     * This method registers:
+     * - ENUM type mapping (for schema introspection)
+     * - POINT custom type (for proper GeoPoint ↔ MySQL POINT conversion)
+     *
+     * Should be called whenever a connection is created to ensure types are registered.
+     * This is safe to call multiple times (idempotent).
+     *
+     * @param \Doctrine\DBAL\Connection $connection
+     * @return void
+     */
+    public static function registerCustomTypes(\Doctrine\DBAL\Connection $connection): void
+    {
+        $platform = $connection->getDatabasePlatform();
+
+        // Register ENUM type mapping to avoid schema introspection errors
+        // WordPress and other plugins use ENUM columns that Doctrine doesn't natively support
+        // We map them to string type for schema introspection purposes
+        // Note: These mappings only affect how Doctrine reads the schema during introspection
+        // They do NOT change the actual database column types
+        if (! $platform->hasDoctrineTypeMappingFor('enum')) {
+            $platform->registerDoctrineTypeMapping('enum', 'string');
+        }
+
+        // Register custom POINT type (proper implementation, not just blob mapping)
+        // This provides proper type conversion between GeoPoint value object and MySQL POINT
+        if (! Type::hasType('point')) {
+            Type::addType('point', \Minisite\Infrastructure\Persistence\Doctrine\Types\PointType::class);
+        }
+        // Map MySQL POINT type to our custom PointType
+        if (! $platform->hasDoctrineTypeMappingFor('point')) {
+            $platform->registerDoctrineTypeMapping('point', 'point');
+        }
     }
 }
