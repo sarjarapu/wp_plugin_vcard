@@ -117,38 +117,6 @@ final class ConfigurationManagementRendererIntegrationTest extends TestCase
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
 
-        // Reset connection state after migrations
-        // NOTE: We're NOT explicitly using savepoints, but Doctrine creates them automatically
-        // when flush() is called within transactions. After migrations, savepoint state can
-        // be corrupted. Closing the connection is the ONLY reliable way to clear ALL savepoints
-        // (they're connection-scoped). This is a known Doctrine limitation in test scenarios.
-        // See: docs/features/version-management/savepoint-investigation.md
-        try {
-            // Rollback any active transactions (shouldn't be any if migrations committed properly)
-            while ($connection->isTransactionActive()) {
-                $connection->rollBack();
-            }
-        } catch (\Exception $e) {
-            // If rollback fails, try to execute a direct ROLLBACK
-            try {
-                $connection->executeStatement('ROLLBACK');
-            } catch (\Exception $e2) {
-                // Ignore - connection might already be clean
-            }
-        }
-
-        // Clear EntityManager state after migrations
-        $this->em->clear();
-
-        // Close connection to clear ALL savepoints (connection-scoped)
-        // EntityManager will automatically reconnect when needed
-        // This is necessary because Doctrine's savepoint state persists even after transactions
-        try {
-            $connection->close();
-        } catch (\Exception $e) {
-            // Ignore - connection might already be closed
-        }
-
         // Get repository and service
         $classMetadata = $this->em->getClassMetadata(Config::class);
         $this->repository = new ConfigRepository($this->em, $classMetadata);

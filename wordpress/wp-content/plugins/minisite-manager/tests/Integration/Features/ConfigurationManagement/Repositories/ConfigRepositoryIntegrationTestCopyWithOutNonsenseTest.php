@@ -16,10 +16,9 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Simplified ConfigRepository Integration Test - For Investigation
+ * Simplified ConfigRepository Integration Test
  *
- * This is a clean clone of ConfigRepositoryIntegrationTest for debugging savepoint issues.
- * Removed unnecessary complexity to focus on core functionality.
+ * This is a clean clone of ConfigRepositoryIntegrationTest for focused testing.
  */
 #[CoversClass(ConfigRepository::class)]
 final class ConfigRepositoryIntegrationTestCopyWithOutNonsenseTest extends TestCase
@@ -61,26 +60,6 @@ final class ConfigRepositoryIntegrationTestCopyWithOutNonsenseTest extends TestC
 
         $this->em = new EntityManager($connection, $config);
 
-        // Clean connection state
-        try {
-            $connection->executeStatement('ROLLBACK');
-        } catch (\Exception $e) {
-            // Ignore
-        }
-
-        try {
-            $connection->beginTransaction();
-            $connection->commit();
-        } catch (\Exception $e) {
-            try {
-                $connection->rollBack();
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
         // Set up $wpdb object for TablePrefixListener
         if (! isset($GLOBALS['wpdb'])) {
             $GLOBALS['wpdb'] = new \wpdb();
@@ -100,32 +79,6 @@ final class ConfigRepositoryIntegrationTestCopyWithOutNonsenseTest extends TestC
         // Run migrations
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
-
-        // Reset connection state after migrations
-        $connection = $this->em->getConnection();
-
-        try {
-            while ($connection->isTransactionActive()) {
-                $connection->rollBack();
-            }
-        } catch (\Exception $e) {
-            try {
-                $connection->executeStatement('ROLLBACK');
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
-        // ⚠️ CONNECTION CLOSE - COMMENT OUT TO TEST SAVEPOINT ERROR
-        // Close connection to clear ALL savepoints (connection-scoped)
-        // EntityManager will automatically reconnect when needed
-        try {
-            $connection->close();
-        } catch (\Exception $e) {
-            // Ignore - connection might already be closed
-        }
 
         // Create repository
         $classMetadata = $this->em->getClassMetadata(Config::class);
@@ -173,8 +126,6 @@ final class ConfigRepositoryIntegrationTestCopyWithOutNonsenseTest extends TestC
 
     /**
      * Test: Save and find config
-     *
-     * This is the simplest test - perfect for investigating savepoint errors.
      */
     public function test_save_and_find_config(): void
     {

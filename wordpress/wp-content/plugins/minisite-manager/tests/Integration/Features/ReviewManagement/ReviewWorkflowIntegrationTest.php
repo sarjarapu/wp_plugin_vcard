@@ -103,31 +103,6 @@ final class ReviewWorkflowIntegrationTest extends TestCase
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
 
-        // Reset connection state after migrations
-        try {
-            while ($connection->isTransactionActive()) {
-                $connection->rollBack();
-            }
-        } catch (\Exception $e) {
-            try {
-                $connection->executeStatement('ROLLBACK');
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
-        // Force a fresh connection state by closing and letting it reconnect
-        // This is the most reliable way to ensure clean state and clear all savepoints
-        try {
-            $connection->close();
-        } catch (\Exception $e) {
-            // Ignore - connection might already be closed
-        }
-
-        // EntityManager will automatically reconnect when needed
-
         $this->repository = new ReviewRepository(
             $this->em,
             $this->em->getClassMetadata(Review::class)

@@ -118,26 +118,6 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
 
-        // Reset connection state again after migrations
-        try {
-            while ($connection->isTransactionActive()) {
-                $connection->rollBack();
-            }
-        } catch (\Exception $e) {
-            try {
-                $connection->executeStatement('ROLLBACK');
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
-        try {
-            $connection->close();
-        } catch (\Exception $e) {
-            // Ignore
-        }
 
         // Get repository
         $classMetadata = $this->em->getClassMetadata(Config::class);
