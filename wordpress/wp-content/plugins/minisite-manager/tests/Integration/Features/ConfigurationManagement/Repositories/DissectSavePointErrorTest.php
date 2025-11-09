@@ -229,14 +229,48 @@ SQL;
     {
         // Drop tables to ensure clean slate
         // Only drop config table and migrations tracking table
-        // We also drop other tables that might have POINT columns (from previous test runs)
-        // to avoid schema introspection errors when introspectSchema() is called
         $this->connection->executeStatement('DROP TABLE IF EXISTS `wp_minisite_config`');
         $this->connection->executeStatement('DROP TABLE IF EXISTS `wp_minisite_migrations`');
-        // Drop tables with POINT columns to avoid introspection errors (not using these migrations)
-        $this->connection->executeStatement('DROP TABLE IF EXISTS `wp_minisite_versions`');
-        $this->connection->executeStatement('DROP TABLE IF EXISTS `wp_minisite_reviews`');
+
+        // Create wp_minisites table with POINT column to test introspection behavior
+        // This simulates a table from previous test runs that has a POINT column
+        // When introspectSchema() is called, it will encounter this POINT column
         $this->connection->executeStatement('DROP TABLE IF EXISTS `wp_minisites`');
+        $createMinisitesTableSql = <<<SQL
+CREATE TABLE `wp_minisites` (
+    `id` VARCHAR(32) NOT NULL,
+    `slug` VARCHAR(255) NULL,
+    `business_slug` VARCHAR(120) NULL,
+    `location_slug` VARCHAR(120) NULL,
+    `title` VARCHAR(200) NOT NULL,
+    `name` VARCHAR(200) NOT NULL,
+    `city` VARCHAR(120) NOT NULL,
+    `region` VARCHAR(120) NULL,
+    `country_code` CHAR(2) NOT NULL,
+    `postal_code` VARCHAR(20) NULL,
+    `location_point` POINT NULL,
+    `site_template` VARCHAR(32) NOT NULL DEFAULT 'v2025',
+    `palette` VARCHAR(24) NOT NULL DEFAULT 'blue',
+    `industry` VARCHAR(40) NOT NULL DEFAULT 'services',
+    `default_locale` VARCHAR(10) NOT NULL DEFAULT 'en-US',
+    `schema_version` SMALLINT UNSIGNED NOT NULL DEFAULT 1,
+    `site_version` INT UNSIGNED NOT NULL DEFAULT 1,
+    `site_json` LONGTEXT NOT NULL,
+    `search_terms` TEXT NULL,
+    `status` ENUM('draft','published','archived') NOT NULL DEFAULT 'published',
+    `publish_status` ENUM('draft','reserved','published') NOT NULL DEFAULT 'draft',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `published_at` DATETIME NULL,
+    `created_by` BIGINT UNSIGNED NULL,
+    `updated_by` BIGINT UNSIGNED NULL,
+    `_minisite_current_version_id` BIGINT UNSIGNED NULL,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uniq_slug` (`slug`),
+    UNIQUE KEY `uniq_business_location` (`business_slug`, `location_slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+SQL;
+        $this->connection->executeStatement($createMinisitesTableSql);
 
         // Register type mappings BEFORE any schema introspection
         // This must be done BEFORE introspectSchema() to avoid "Unknown database type point" errors
@@ -244,9 +278,9 @@ SQL;
         if (! $platform->hasDoctrineTypeMappingFor('enum')) {
             $platform->registerDoctrineTypeMapping('enum', 'string');
         }
-        if (! $platform->hasDoctrineTypeMappingFor('point')) {
-            $platform->registerDoctrineTypeMapping('point', 'blob');
-        }
+        // if (! $platform->hasDoctrineTypeMappingFor('point')) {
+        //     $platform->registerDoctrineTypeMapping('point', 'blob');
+        // }
 
         $logger = LoggingServiceProvider::getFeatureLogger('doctrine-migrations');
         $schemaManager = $this->connection->createSchemaManager();
