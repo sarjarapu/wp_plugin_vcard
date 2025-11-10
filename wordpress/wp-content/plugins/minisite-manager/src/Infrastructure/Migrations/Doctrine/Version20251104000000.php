@@ -36,7 +36,7 @@ final class Version20251104000000 extends AbstractMigration
     public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
     {
         parent::__construct($connection, $logger);
-        $this->logger = LoggingServiceProvider::getFeatureLogger('migration-reviews');
+        $this->logger = LoggingServiceProvider::getFeatureLogger('Version20251104000000');
     }
 
     public function getDescription(): string

@@ -22,7 +22,7 @@ final class Version20251103000000 extends AbstractMigration
     public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
     {
         parent::__construct($connection, $logger);
-        $this->logger = LoggingServiceProvider::getFeatureLogger('migration-config');
+        $this->logger = LoggingServiceProvider::getFeatureLogger('Version20251103000000');
     }
 
     public function getDescription(): string
@@ -43,11 +43,12 @@ final class Version20251103000000 extends AbstractMigration
             // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
             $schemaManager = $this->connection->createSchemaManager();
             if ($schemaManager->introspectSchema()->hasTable($tableName)) {
-                $this->logger->info('up() - table already exists, skipping', ['table' => $tableName]);
+                $this->logger->info('up() - table already exists, skipping', array('table' => $tableName));
+
                 return;
             }
 
-            $this->logger->info('up() - about to create table', ['table' => $tableName]);
+            $this->logger->info('up() - about to create table', array('table' => $tableName));
 
             // Table doesn't exist - create complete table with all columns using raw SQL
             // Using raw SQL for better readability and easier manual table creation
@@ -67,11 +68,12 @@ final class Version20251103000000 extends AbstractMigration
                 KEY `idx_required` (`is_required`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-            $this->logger->debug('up() - SQL', ['sql' => $createTableSql]);
+            $this->logger->debug('up() - SQL', array('sql' => $createTableSql));
             $this->addSql($createTableSql);
             $this->logger->info('up() - completed');
         } catch (\Exception $e) {
-            $this->logger->error('up() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->logger->error('up() - failed', array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString()));
+
             throw $e;
         }
     }
@@ -88,15 +90,16 @@ final class Version20251103000000 extends AbstractMigration
             // In down(), $schema is CURRENT (already introspected), so use directly
             if ($schema->hasTable($tableName)) {
                 $dropSql = "DROP TABLE IF EXISTS `{$tableName}`";
-                $this->logger->info('down() - about to drop table', ['table' => $tableName]);
-                $this->logger->debug('down() - SQL', ['sql' => $dropSql]);
+                $this->logger->info('down() - about to drop table', array('table' => $tableName));
+                $this->logger->debug('down() - SQL', array('sql' => $dropSql));
                 $this->addSql($dropSql);
                 $this->logger->info('down() - completed');
             } else {
-                $this->logger->info('down() - table does not exist, skipping', ['table' => $tableName]);
+                $this->logger->info('down() - table does not exist, skipping', array('table' => $tableName));
             }
         } catch (\Exception $e) {
-            $this->logger->error('down() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->logger->error('down() - failed', array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString()));
+
             throw $e;
         }
     }
