@@ -6,6 +6,8 @@ namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Migration: Create minisite_versions table for version management
@@ -30,6 +32,14 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20251105000000 extends AbstractMigration
 {
+    private LoggerInterface $logger;
+
+    public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
+    {
+        parent::__construct($connection, $logger);
+        $this->logger = LoggingServiceProvider::getFeatureLogger('migration-versions');
+    }
+
     public function getDescription(): string
     {
         return 'Create minisite_versions table for version management (fresh start, replaces old SQL file-based creation)';
@@ -39,22 +49,28 @@ final class Version20251105000000 extends AbstractMigration
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . 'minisite_versions';
+        $this->logger->info('up() - starting');
 
-        // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
-        $schemaManager = $this->connection->createSchemaManager();
-        if ($schemaManager->introspectSchema()->hasTable($tableName)) {
-            // Table already exists, skip (like config and reviews table migrations)
-            // Note: If table was created by old migration and needs new columns,
-            // a separate migration should handle that to keep migrations simple and focused
-            return;
-        }
+        try {
+            $tableName = $wpdb->prefix . 'minisite_versions';
 
-        // Table doesn't exist - create complete table with all columns using raw SQL
-        // This includes location_point (POINT type) which Doctrine Schema API doesn't support
-        // ⚠️ CRITICAL: DO NOT modify the location_point handling logic
-        // See: docs/issues/location-point-lessons-learned.md
-        $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+            // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
+            $schemaManager = $this->connection->createSchemaManager();
+            if ($schemaManager->introspectSchema()->hasTable($tableName)) {
+                $this->logger->info('up() - table already exists, skipping', ['table' => $tableName]);
+                // Table already exists, skip (like config and reviews table migrations)
+                // Note: If table was created by old migration and needs new columns,
+                // a separate migration should handle that to keep migrations simple and focused
+                return;
+            }
+
+            $this->logger->info('up() - about to create table', ['table' => $tableName]);
+
+            // Table doesn't exist - create complete table with all columns using raw SQL
+            // This includes location_point (POINT type) which Doctrine Schema API doesn't support
+            // ⚠️ CRITICAL: DO NOT modify the location_point handling logic
+            // See: docs/issues/location-point-lessons-learned.md
+            $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
             `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             `minisite_id` VARCHAR(32) NOT NULL,
             `version_number` INT UNSIGNED NOT NULL,
@@ -88,18 +104,37 @@ final class Version20251105000000 extends AbstractMigration
             KEY `idx_minisite_created` (`minisite_id`, `created_at`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-        $this->addSql($createTableSql);
+            $this->logger->debug('up() - SQL', ['sql' => $createTableSql]);
+            $this->addSql($createTableSql);
+            $this->logger->info('up() - completed');
+        } catch (\Exception $e) {
+            $this->logger->error('up() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            throw $e;
+        }
     }
 
     public function down(Schema $schema): void
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . 'minisite_versions';
+        $this->logger->info('down() - starting');
 
-        // In down(), $schema is CURRENT (already introspected), so use directly
-        if ($schema->hasTable($tableName)) {
-            $this->addSql("DROP TABLE IF EXISTS `{$tableName}`");
+        try {
+            $tableName = $wpdb->prefix . 'minisite_versions';
+
+            // In down(), $schema is CURRENT (already introspected), so use directly
+            if ($schema->hasTable($tableName)) {
+                $dropSql = "DROP TABLE IF EXISTS `{$tableName}`";
+                $this->logger->info('down() - about to drop table', ['table' => $tableName]);
+                $this->logger->debug('down() - SQL', ['sql' => $dropSql]);
+                $this->addSql($dropSql);
+                $this->logger->info('down() - completed');
+            } else {
+                $this->logger->info('down() - table does not exist, skipping', ['table' => $tableName]);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('down() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            throw $e;
         }
     }
 

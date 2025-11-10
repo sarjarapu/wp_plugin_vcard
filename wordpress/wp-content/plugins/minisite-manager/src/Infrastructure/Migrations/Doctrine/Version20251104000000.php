@@ -6,6 +6,8 @@ namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Migration: Create minisite_reviews table with all MVP fields (fresh start)
@@ -29,6 +31,14 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20251104000000 extends AbstractMigration
 {
+    private LoggerInterface $logger;
+
+    public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
+    {
+        parent::__construct($connection, $logger);
+        $this->logger = LoggingServiceProvider::getFeatureLogger('migration-reviews');
+    }
+
     public function getDescription(): string
     {
         return 'Create minisite_reviews table with all MVP fields (fresh start, replaces old SQL file-based creation)';
@@ -38,20 +48,26 @@ final class Version20251104000000 extends AbstractMigration
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . 'minisite_reviews';
+        $this->logger->info('up() - starting');
 
-        // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
-        $schemaManager = $this->connection->createSchemaManager();
-        if ($schemaManager->introspectSchema()->hasTable($tableName)) {
-            // Table already exists, skip (like config table migration)
-            // Note: If table was created by old migration and needs new columns,
-            // a separate migration should handle that to keep migrations simple and focused
-            return;
-        }
+        try {
+            $tableName = $wpdb->prefix . 'minisite_reviews';
 
-        // Table doesn't exist - create complete table with all columns using raw SQL
-        // Using raw SQL for better readability and easier manual table creation
-        $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+            // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
+            $schemaManager = $this->connection->createSchemaManager();
+            if ($schemaManager->introspectSchema()->hasTable($tableName)) {
+                $this->logger->info('up() - table already exists, skipping', ['table' => $tableName]);
+                // Table already exists, skip (like config table migration)
+                // Note: If table was created by old migration and needs new columns,
+                // a separate migration should handle that to keep migrations simple and focused
+                return;
+            }
+
+            $this->logger->info('up() - about to create table', ['table' => $tableName]);
+
+            // Table doesn't exist - create complete table with all columns using raw SQL
+            // Using raw SQL for better readability and easier manual table creation
+            $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
             `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             `minisite_id` VARCHAR(32) NOT NULL,
             `author_name` VARCHAR(160) NOT NULL,
@@ -84,18 +100,37 @@ final class Version20251104000000 extends AbstractMigration
             KEY `idx_rating` (`rating`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-        $this->addSql($createTableSql);
+            $this->logger->debug('up() - SQL', ['sql' => $createTableSql]);
+            $this->addSql($createTableSql);
+            $this->logger->info('up() - completed');
+        } catch (\Exception $e) {
+            $this->logger->error('up() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            throw $e;
+        }
     }
 
     public function down(Schema $schema): void
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . 'minisite_reviews';
+        $this->logger->info('down() - starting');
 
-        // In down(), $schema is CURRENT (already introspected), so use directly
-        if ($schema->hasTable($tableName)) {
-            $this->addSql("DROP TABLE IF EXISTS `{$tableName}`");
+        try {
+            $tableName = $wpdb->prefix . 'minisite_reviews';
+
+            // In down(), $schema is CURRENT (already introspected), so use directly
+            if ($schema->hasTable($tableName)) {
+                $dropSql = "DROP TABLE IF EXISTS `{$tableName}`";
+                $this->logger->info('down() - about to drop table', ['table' => $tableName]);
+                $this->logger->debug('down() - SQL', ['sql' => $dropSql]);
+                $this->addSql($dropSql);
+                $this->logger->info('down() - completed');
+            } else {
+                $this->logger->info('down() - table does not exist, skipping', ['table' => $tableName]);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('down() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            throw $e;
         }
     }
 

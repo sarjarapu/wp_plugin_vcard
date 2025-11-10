@@ -6,6 +6,8 @@ namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -15,6 +17,14 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20251103000000 extends AbstractMigration
 {
+    private LoggerInterface $logger;
+
+    public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
+    {
+        parent::__construct($connection, $logger);
+        $this->logger = LoggingServiceProvider::getFeatureLogger('migration-config');
+    }
+
     public function getDescription(): string
     {
         return 'Create minisite_config table for configuration management';
@@ -24,45 +34,70 @@ final class Version20251103000000 extends AbstractMigration
     {
         global $wpdb;
 
-        // Get table name with WordPress prefix
-        $tableName = $wpdb->prefix . 'minisite_config';
+        $this->logger->info('up() - starting');
 
-        // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
-        $schemaManager = $this->connection->createSchemaManager();
-        if ($schemaManager->introspectSchema()->hasTable($tableName)) {
-            return; // Table already exists
+        try {
+            // Get table name with WordPress prefix
+            $tableName = $wpdb->prefix . 'minisite_config';
+
+            // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
+            $schemaManager = $this->connection->createSchemaManager();
+            if ($schemaManager->introspectSchema()->hasTable($tableName)) {
+                $this->logger->info('up() - table already exists, skipping', ['table' => $tableName]);
+                return;
+            }
+
+            $this->logger->info('up() - about to create table', ['table' => $tableName]);
+
+            // Table doesn't exist - create complete table with all columns using raw SQL
+            // Using raw SQL for better readability and easier manual table creation
+            $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `config_key` VARCHAR(100) NOT NULL,
+                `config_value` TEXT NULL,
+                `config_type` VARCHAR(20) NOT NULL DEFAULT 'string' COMMENT 'string|integer|boolean|json|encrypted|secret',
+                `description` TEXT NULL,
+                `is_sensitive` TINYINT(1) NOT NULL DEFAULT 0,
+                `is_required` TINYINT(1) NOT NULL DEFAULT 0,
+                `created_at` DATETIME NOT NULL,
+                `updated_at` DATETIME NOT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uniq_config_key` (`config_key`),
+                KEY `idx_sensitive` (`is_sensitive`),
+                KEY `idx_required` (`is_required`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+
+            $this->logger->debug('up() - SQL', ['sql' => $createTableSql]);
+            $this->addSql($createTableSql);
+            $this->logger->info('up() - completed');
+        } catch (\Exception $e) {
+            $this->logger->error('up() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            throw $e;
         }
-
-        // Table doesn't exist - create complete table with all columns using raw SQL
-        // Using raw SQL for better readability and easier manual table creation
-        $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
-            `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            `config_key` VARCHAR(100) NOT NULL,
-            `config_value` TEXT NULL,
-            `config_type` VARCHAR(20) NOT NULL DEFAULT 'string' COMMENT 'string|integer|boolean|json|encrypted|secret',
-            `description` TEXT NULL,
-            `is_sensitive` TINYINT(1) NOT NULL DEFAULT 0,
-            `is_required` TINYINT(1) NOT NULL DEFAULT 0,
-            `created_at` DATETIME NOT NULL,
-            `updated_at` DATETIME NOT NULL,
-            PRIMARY KEY (`id`),
-            UNIQUE KEY `uniq_config_key` (`config_key`),
-            KEY `idx_sensitive` (`is_sensitive`),
-            KEY `idx_required` (`is_required`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-
-        $this->addSql($createTableSql);
     }
 
     public function down(Schema $schema): void
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . 'minisite_config';
+        $this->logger->info('down() - starting');
 
-        // In down(), $schema is CURRENT (already introspected), so use directly
-        if ($schema->hasTable($tableName)) {
-            $this->addSql("DROP TABLE IF EXISTS `{$tableName}`");
+        try {
+            $tableName = $wpdb->prefix . 'minisite_config';
+
+            // In down(), $schema is CURRENT (already introspected), so use directly
+            if ($schema->hasTable($tableName)) {
+                $dropSql = "DROP TABLE IF EXISTS `{$tableName}`";
+                $this->logger->info('down() - about to drop table', ['table' => $tableName]);
+                $this->logger->debug('down() - SQL', ['sql' => $dropSql]);
+                $this->addSql($dropSql);
+                $this->logger->info('down() - completed');
+            } else {
+                $this->logger->info('down() - table does not exist, skipping', ['table' => $tableName]);
+            }
+        } catch (\Exception $e) {
+            $this->logger->error('down() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            throw $e;
         }
     }
 
