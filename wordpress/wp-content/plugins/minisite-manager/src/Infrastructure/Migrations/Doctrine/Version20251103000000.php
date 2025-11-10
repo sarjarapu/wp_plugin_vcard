@@ -27,14 +27,9 @@ final class Version20251103000000 extends AbstractMigration
         // Get table name with WordPress prefix
         $tableName = $wpdb->prefix . 'minisite_config';
 
-        // Check if table exists using direct SQL query (avoids schema introspection issues with ENUM columns)
-        $connection = $this->connection;
-        $tableExists = $connection->executeQuery(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
-            array($connection->getDatabase(), $tableName)
-        )->fetchOne() > 0;
-
-        if ($tableExists) {
+        // Check if table exists using Schema API (more readable than raw SQL)
+        $schemaManager = $this->connection->createSchemaManager();
+        if ($schemaManager->introspectSchema()->hasTable($tableName)) {
             // Table already exists, skip
             return;
         }
@@ -66,14 +61,9 @@ final class Version20251103000000 extends AbstractMigration
 
         $tableName = $wpdb->prefix . 'minisite_config';
 
-        // Use direct SQL to drop table (more reliable than Schema API for down migrations)
-        $connection = $this->connection;
-        $tableExists = $connection->executeQuery(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
-            array($connection->getDatabase(), $tableName)
-        )->fetchOne() > 0;
-
-        if ($tableExists) {
+        // Use Schema API for readability (checks target schema)
+        if ($schema->hasTable($tableName)) {
+            // Use addSql() for compatibility with migration framework
             $this->addSql("DROP TABLE IF EXISTS `{$tableName}`");
         }
     }
