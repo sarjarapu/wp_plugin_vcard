@@ -28,6 +28,8 @@ final class Version20251103000000 extends AbstractMigration
         $tableName = $wpdb->prefix . 'minisite_config';
 
         // Check if table exists using Schema API (more readable than raw SQL)
+        // Note: In up(), $schema is the TARGET schema (what we want to build), so we need
+        // to introspect the actual database to check if table exists
         $schemaManager = $this->connection->createSchemaManager();
         if ($schemaManager->introspectSchema()->hasTable($tableName)) {
             // Table already exists, skip
@@ -61,9 +63,12 @@ final class Version20251103000000 extends AbstractMigration
 
         $tableName = $wpdb->prefix . 'minisite_config';
 
-        // Use Schema API for readability (checks target schema)
+        // Use Schema API for readability
+        // Note: In down(), $schema is the CURRENT database schema (what exists now)
         if ($schema->hasTable($tableName)) {
-            // Use addSql() for compatibility with migration framework
+            // Use addSql() instead of $schema->dropTable() because:
+            // - $schema->dropTable() modifies the schema object but doesn't generate SQL via getSql()
+            // - addSql() explicitly queues SQL that can be retrieved via getSql() for testing
             $this->addSql("DROP TABLE IF EXISTS `{$tableName}`");
         }
     }
