@@ -54,59 +54,42 @@ final class Version20251104000000 extends AbstractMigration
             return;
         }
 
-        // Table doesn't exist - create complete table with all columns using Schema API
-        // This replaces the old SQL file-based table creation
-        $table = $schema->createTable($tableName);
+        // Table doesn't exist - create complete table with all columns using raw SQL
+        // Using raw SQL for better readability and easier manual table creation
+        $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+            `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `minisite_id` VARCHAR(32) NOT NULL,
+            `author_name` VARCHAR(160) NOT NULL,
+            `author_email` VARCHAR(255) NULL,
+            `author_phone` VARCHAR(20) NULL,
+            `author_url` VARCHAR(300) NULL,
+            `rating` DECIMAL(2,1) NOT NULL,
+            `body` TEXT NOT NULL,
+            `language` VARCHAR(10) NULL,
+            `locale` VARCHAR(10) NULL,
+            `visited_month` VARCHAR(7) NULL,
+            `source` VARCHAR(20) NOT NULL DEFAULT 'manual' COMMENT 'ENUM(''manual'',''google'',''yelp'',''facebook'',''other'')',
+            `source_id` VARCHAR(160) NULL,
+            `status` VARCHAR(20) NOT NULL DEFAULT 'approved' COMMENT 'ENUM(''pending'',''approved'',''rejected'',''flagged'')',
+            `is_email_verified` TINYINT(1) NOT NULL DEFAULT 0,
+            `is_phone_verified` TINYINT(1) NOT NULL DEFAULT 0,
+            `helpful_count` INT NOT NULL DEFAULT 0,
+            `spam_score` DECIMAL(3,2) NULL,
+            `sentiment_score` DECIMAL(3,2) NULL,
+            `display_order` INT NULL,
+            `published_at` DATETIME NULL,
+            `moderation_reason` VARCHAR(200) NULL,
+            `moderated_by` BIGINT UNSIGNED NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            `created_by` BIGINT UNSIGNED NULL,
+            PRIMARY KEY (`id`),
+            KEY `idx_minisite` (`minisite_id`),
+            KEY `idx_status_date` (`status`, `created_at`),
+            KEY `idx_rating` (`rating`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-        $table->addColumn('id', 'bigint', array(
-            'unsigned' => true,
-            'autoincrement' => true,
-        ));
-        $table->addColumn('minisite_id', 'string', array('length' => 32));
-        $table->addColumn('author_name', 'string', array('length' => 160));
-        $table->addColumn('author_email', 'string', array('length' => 255, 'notnull' => false));
-        $table->addColumn('author_phone', 'string', array('length' => 20, 'notnull' => false));
-        $table->addColumn('author_url', 'string', array('length' => 300, 'notnull' => false));
-        $table->addColumn('rating', 'decimal', array('precision' => 2, 'scale' => 1));
-        $table->addColumn('body', 'text');
-        $table->addColumn('language', 'string', array('length' => 10, 'notnull' => false));
-        $table->addColumn('locale', 'string', array('length' => 10, 'notnull' => false));
-        $table->addColumn('visited_month', 'string', array('length' => 7, 'notnull' => false));
-        $table->addColumn('source', 'string', array(
-            'length' => 20,
-            'default' => 'manual',
-            'comment' => "ENUM('manual','google','yelp','facebook','other')",
-        ));
-        $table->addColumn('source_id', 'string', array('length' => 160, 'notnull' => false));
-        $table->addColumn('status', 'string', array(
-            'length' => 20,
-            'default' => 'approved',
-            'comment' => "ENUM('pending','approved','rejected','flagged')",
-        ));
-        $table->addColumn('is_email_verified', 'boolean', array('default' => false));
-        $table->addColumn('is_phone_verified', 'boolean', array('default' => false));
-        $table->addColumn('helpful_count', 'integer', array('default' => 0));
-        $table->addColumn('spam_score', 'decimal', array('precision' => 3, 'scale' => 2, 'notnull' => false));
-        $table->addColumn('sentiment_score', 'decimal', array('precision' => 3, 'scale' => 2, 'notnull' => false));
-        $table->addColumn('display_order', 'integer', array('notnull' => false));
-        $table->addColumn('published_at', 'datetime', array('notnull' => false));
-        $table->addColumn('moderation_reason', 'string', array('length' => 200, 'notnull' => false));
-        $table->addColumn('moderated_by', 'bigint', array('unsigned' => true, 'notnull' => false));
-        $table->addColumn('created_at', 'datetime_immutable', array(
-            'notnull' => true,
-            'default' => 'CURRENT_TIMESTAMP',
-        ));
-        $table->addColumn('updated_at', 'datetime_immutable', array(
-            'notnull' => true,
-            'default' => 'CURRENT_TIMESTAMP',
-            'comment' => 'ON UPDATE CURRENT_TIMESTAMP',
-        ));
-        $table->addColumn('created_by', 'bigint', array('unsigned' => true, 'notnull' => false));
-
-        $table->setPrimaryKey(array('id'));
-        $table->addIndex(array('minisite_id'), 'idx_minisite');
-        $table->addIndex(array('status', 'created_at'), 'idx_status_date');
-        $table->addIndex(array('rating'), 'idx_rating');
+        $this->addSql($createTableSql);
     }
 
     public function down(Schema $schema): void

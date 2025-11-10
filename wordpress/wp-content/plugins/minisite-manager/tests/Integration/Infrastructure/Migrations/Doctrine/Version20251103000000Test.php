@@ -167,15 +167,17 @@ final class Version20251103000000Test extends AbstractDoctrineMigrationTest
         // Get current schema from database
         $currentSchema = $schemaManager->introspectSchema();
         
-        // Create a new schema and apply down() to it
-        $targetSchema = clone $currentSchema;
-        $migration->down($targetSchema);
-        
-        // Calculate the diff and apply it
-        $platform = $this->connection->getDatabasePlatform();
-        $comparator = new \Doctrine\DBAL\Schema\Comparator($platform);
-        $schemaDiff = $comparator->compareSchemas($currentSchema, $targetSchema);
-        $schemaManager->alterSchema($schemaDiff);
+        // Call down() which should drop the table
+        $migration->down($this->connection->createSchemaManager()->introspectSchema());
+
+        // Execute the queued SQL statements
+        $sqlStatements = $migration->getSql();
+        foreach ($sqlStatements as $query) {
+            $this->connection->executeStatement($query->getStatement());
+        }
+
+        // Clear EntityManager state after dropping table
+        $this->em->clear();
         
         // Verify table is dropped
         $this->assertTableNotExists('wp_minisite_config', 'Table should not exist after down()');
@@ -200,19 +202,21 @@ final class Version20251103000000Test extends AbstractDoctrineMigrationTest
         $comparator = new \Doctrine\DBAL\Schema\Comparator($platform);
         
         // Run down() first time - should drop table
-        $currentSchema1 = $schemaManager->introspectSchema();
-        $targetSchema1 = clone $currentSchema1;
-        $migration->down($targetSchema1);
-        $schemaDiff1 = $comparator->compareSchemas($currentSchema1, $targetSchema1);
-        $schemaManager->alterSchema($schemaDiff1);
+        $migration->down($schemaManager->introspectSchema());
+        $sqlStatements1 = $migration->getSql();
+        foreach ($sqlStatements1 as $query) {
+            $this->connection->executeStatement($query->getStatement());
+        }
+        $this->em->clear();
         $this->assertTableNotExists('wp_minisite_config');
         
         // Run down() second time - should not error (table doesn't exist check)
-        $currentSchema2 = $schemaManager->introspectSchema();
-        $targetSchema2 = clone $currentSchema2;
-        $migration->down($targetSchema2);
-        $schemaDiff2 = $comparator->compareSchemas($currentSchema2, $targetSchema2);
-        $schemaManager->alterSchema($schemaDiff2);
+        $migration->down($schemaManager->introspectSchema());
+        $sqlStatements2 = $migration->getSql();
+        foreach ($sqlStatements2 as $query) {
+            $this->connection->executeStatement($query->getStatement());
+        }
+        $this->em->clear();
         $this->assertTableNotExists('wp_minisite_config', 'Table should still not exist after second down()');
     }
 }

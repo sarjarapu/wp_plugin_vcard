@@ -39,33 +39,25 @@ final class Version20251103000000 extends AbstractMigration
             return;
         }
 
-        $table = $schema->createTable($tableName);
+        // Table doesn't exist - create complete table with all columns using raw SQL
+        // Using raw SQL for better readability and easier manual table creation
+        $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+            `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `config_key` VARCHAR(100) NOT NULL,
+            `config_value` TEXT NULL,
+            `config_type` VARCHAR(20) NOT NULL DEFAULT 'string' COMMENT 'string|integer|boolean|json|encrypted|secret',
+            `description` TEXT NULL,
+            `is_sensitive` TINYINT(1) NOT NULL DEFAULT 0,
+            `is_required` TINYINT(1) NOT NULL DEFAULT 0,
+            `created_at` DATETIME NOT NULL,
+            `updated_at` DATETIME NOT NULL,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `uniq_config_key` (`config_key`),
+            KEY `idx_sensitive` (`is_sensitive`),
+            KEY `idx_required` (`is_required`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-        $table->addColumn('id', 'bigint', array(
-            'unsigned' => true,
-            'autoincrement' => true,
-        ));
-        $table->addColumn('config_key', 'string', array('length' => 100));
-        $table->addColumn('config_value', 'text', array('notnull' => false));
-        $table->addColumn('config_type', 'string', array(
-            'length' => 20,
-            'default' => 'string',
-            'comment' => 'string|integer|boolean|json|encrypted|secret',
-        ));
-        $table->addColumn('description', 'text', array('notnull' => false));
-        $table->addColumn('is_sensitive', 'boolean', array('default' => false));
-        $table->addColumn('is_required', 'boolean', array('default' => false));
-        $table->addColumn('created_at', 'datetime_immutable', array(
-            'notnull' => true,
-        ));
-        $table->addColumn('updated_at', 'datetime_immutable', array(
-            'notnull' => true,
-        ));
-
-        $table->setPrimaryKey(array('id'));
-        $table->addUniqueIndex(array('config_key'), 'uniq_config_key');
-        $table->addIndex(array('is_sensitive'), 'idx_sensitive');
-        $table->addIndex(array('is_required'), 'idx_required');
+        $this->addSql($createTableSql);
     }
 
     public function down(Schema $schema): void
@@ -74,8 +66,15 @@ final class Version20251103000000 extends AbstractMigration
 
         $tableName = $wpdb->prefix . 'minisite_config';
 
-        if ($schema->hasTable($tableName)) {
-            $schema->dropTable($tableName);
+        // Use direct SQL to drop table (more reliable than Schema API for down migrations)
+        $connection = $this->connection;
+        $tableExists = $connection->executeQuery(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
+            array($connection->getDatabase(), $tableName)
+        )->fetchOne() > 0;
+
+        if ($tableExists) {
+            $this->addSql("DROP TABLE IF EXISTS `{$tableName}`");
         }
     }
 
