@@ -51,7 +51,8 @@ class MinisiteListingService
                     ),
                     'route' => $route,
                     'location' => trim(
-                        $minisite->city . (isset($minisite->region) && $minisite->region ? ', ' . $minisite->region : '') .
+                        $minisite->city .
+                        (isset($minisite->region) && $minisite->region ? ', ' . $minisite->region : '') .
                         ', ' . $minisite->countryCode,
                         ', '
                     ),

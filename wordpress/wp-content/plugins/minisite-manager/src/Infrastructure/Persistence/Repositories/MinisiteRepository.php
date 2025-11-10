@@ -327,8 +327,10 @@ class MinisiteRepository implements MinisiteRepositoryInterface
 
         try {
             // Require Doctrine-based VersionRepository from global (initialized by PluginBootstrap)
-            if (!isset($GLOBALS['minisite_version_repository'])) {
-                throw new \RuntimeException('VersionRepository not initialized. Ensure PluginBootstrap::initializeConfigSystem() is called.');
+            if (! isset($GLOBALS['minisite_version_repository'])) {
+                throw new \RuntimeException(
+                    'VersionRepository not initialized. Ensure PluginBootstrap::initializeConfigSystem() is called.'
+                );
             }
             $versionRepo = $GLOBALS['minisite_version_repository'];
 

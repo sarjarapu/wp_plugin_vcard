@@ -6,10 +6,10 @@ use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;
 use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
-use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**

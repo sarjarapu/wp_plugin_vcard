@@ -2,10 +2,10 @@
 
 namespace Minisite\Domain\Services;
 
-use Minisite\Features\VersionManagement\Domain\Entities\Version;
+use Minisite\Domain\Interfaces\TransactionManagerInterface;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Domain\ValueObjects\GeoPoint;
-use Minisite\Domain\Interfaces\TransactionManagerInterface;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
@@ -393,10 +393,10 @@ class MinisiteDatabaseCoordinator
                 'saved_version_id' => $savedVersion->id ?? 'UNKNOWN',
                 'saved_version_status' => $savedVersion->status ?? 'UNKNOWN',
                 'saved_version_label' => $savedVersion->label ?? 'UNKNOWN',
-                'site_json_size' => strlen(json_encode($savedVersion->siteJson ?? array())),
-                'seo_title_in_version' => $savedVersion->siteJson['seo']['title'] ?? 'NOT_SET',
-                'brand_name_in_version' => $savedVersion->siteJson['brand']['name'] ?? 'NOT_SET',
-                'hero_heading_in_version' => $savedVersion->siteJson['hero']['heading'] ?? 'NOT_SET',
+                'site_json_size' => strlen($savedVersion->siteJson ?? '{}'),
+                'seo_title_in_version' => $this->getSiteJsonValue($savedVersion->siteJson, 'seo', 'title'),
+                'brand_name_in_version' => $this->getSiteJsonValue($savedVersion->siteJson, 'brand', 'name'),
+                'hero_heading_in_version' => $this->getSiteJsonValue($savedVersion->siteJson, 'hero', 'heading'),
             ));
 
             return (object) array(
@@ -697,5 +697,27 @@ class MinisiteDatabaseCoordinator
 
             $this->minisiteRepository->updateMinisiteFields($siteId, $allUpdateFields, (int) $currentUser->ID);
         }
+    }
+
+    /**
+     * Safely extract a nested value from siteJson string
+     *
+     * @param string|null $siteJson JSON string
+     * @param string $key1 First level key
+     * @param string $key2 Second level key
+     * @return string
+     */
+    private function getSiteJsonValue(?string $siteJson, string $key1, string $key2): string
+    {
+        if ($siteJson === null) {
+            return 'NOT_SET';
+        }
+
+        $decoded = json_decode($siteJson, true);
+        if (! is_array($decoded)) {
+            return 'NOT_SET';
+        }
+
+        return $decoded[$key1][$key2] ?? 'NOT_SET';
     }
 }

@@ -56,7 +56,8 @@ final class Version20251103000000 extends AbstractMigration
                 `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                 `config_key` VARCHAR(100) NOT NULL,
                 `config_value` TEXT NULL,
-                `config_type` VARCHAR(20) NOT NULL DEFAULT 'string' COMMENT 'string|integer|boolean|json|encrypted|secret',
+                `config_type` VARCHAR(20) NOT NULL DEFAULT 'string'
+                    COMMENT 'string|integer|boolean|json|encrypted|secret',
                 `description` TEXT NULL,
                 `is_sensitive` TINYINT(1) NOT NULL DEFAULT 0,
                 `is_required` TINYINT(1) NOT NULL DEFAULT 0,
@@ -72,7 +73,10 @@ final class Version20251103000000 extends AbstractMigration
             $this->addSql($createTableSql);
             $this->logger->info('up() - completed');
         } catch (\Exception $e) {
-            $this->logger->error('up() - failed', array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString()));
+            $this->logger->error(
+                'up() - failed',
+                array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString())
+            );
 
             throw $e;
         }
@@ -98,7 +102,10 @@ final class Version20251103000000 extends AbstractMigration
                 $this->logger->info('down() - table does not exist, skipping', array('table' => $tableName));
             }
         } catch (\Exception $e) {
-            $this->logger->error('down() - failed', array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString()));
+            $this->logger->error(
+                'down() - failed',
+                array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString())
+            );
 
             throw $e;
         }

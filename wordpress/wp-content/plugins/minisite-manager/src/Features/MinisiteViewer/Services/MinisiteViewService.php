@@ -65,6 +65,7 @@ class MinisiteViewService
     public function minisiteExists(ViewMinisiteCommand $command): bool
     {
         $slugPair = new SlugPair($command->businessSlug, $command->locationSlug);
+
         return $this->minisiteRepository->findBySlugs($slugPair) !== null;
     }
 

@@ -5,7 +5,6 @@ namespace Minisite\Features\MinisiteEdit\WordPress;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
  * WordPress Edit Manager
@@ -150,5 +149,4 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
     {
         return $minisite->createdBy === $userId;
     }
-
 }

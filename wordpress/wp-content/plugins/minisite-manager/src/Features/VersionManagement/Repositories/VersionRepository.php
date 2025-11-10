@@ -56,7 +56,9 @@ class VersionRepository extends EntityRepository implements VersionRepositoryInt
             }
 
             // Ensure siteJson is a string (entity stores it as string)
-            if (is_array($version->siteJson)) {
+            // Note: siteJson property is typed as string, so this check is for type safety
+            // If somehow an array was assigned, convert it to JSON string
+            if (is_array($version->siteJson)) { // @phpstan-ignore-line -- defensive check for edge cases
                 $version->setSiteJsonFromArray($version->siteJson);
             }
 
@@ -533,4 +535,3 @@ class VersionRepository extends EntityRepository implements VersionRepositoryInt
         }
     }
 }
-

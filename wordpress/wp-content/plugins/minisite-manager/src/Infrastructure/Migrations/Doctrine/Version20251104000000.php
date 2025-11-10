@@ -56,14 +56,15 @@ final class Version20251104000000 extends AbstractMigration
             // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
             $schemaManager = $this->connection->createSchemaManager();
             if ($schemaManager->introspectSchema()->hasTable($tableName)) {
-                $this->logger->info('up() - table already exists, skipping', ['table' => $tableName]);
+                $this->logger->info('up() - table already exists, skipping', array('table' => $tableName));
+
                 // Table already exists, skip (like config table migration)
                 // Note: If table was created by old migration and needs new columns,
                 // a separate migration should handle that to keep migrations simple and focused
                 return;
             }
 
-            $this->logger->info('up() - about to create table', ['table' => $tableName]);
+            $this->logger->info('up() - about to create table', array('table' => $tableName));
 
             // Table doesn't exist - create complete table with all columns using raw SQL
             // Using raw SQL for better readability and easier manual table creation
@@ -79,9 +80,11 @@ final class Version20251104000000 extends AbstractMigration
             `language` VARCHAR(10) NULL,
             `locale` VARCHAR(10) NULL,
             `visited_month` VARCHAR(7) NULL,
-            `source` VARCHAR(20) NOT NULL DEFAULT 'manual' COMMENT 'ENUM(''manual'',''google'',''yelp'',''facebook'',''other'')',
+            `source` VARCHAR(20) NOT NULL DEFAULT 'manual'
+                COMMENT 'ENUM(''manual'',''google'',''yelp'',''facebook'',''other'')',
             `source_id` VARCHAR(160) NULL,
-            `status` VARCHAR(20) NOT NULL DEFAULT 'approved' COMMENT 'ENUM(''pending'',''approved'',''rejected'',''flagged'')',
+            `status` VARCHAR(20) NOT NULL DEFAULT 'approved'
+                COMMENT 'ENUM(''pending'',''approved'',''rejected'',''flagged'')',
             `is_email_verified` TINYINT(1) NOT NULL DEFAULT 0,
             `is_phone_verified` TINYINT(1) NOT NULL DEFAULT 0,
             `helpful_count` INT NOT NULL DEFAULT 0,
@@ -100,11 +103,15 @@ final class Version20251104000000 extends AbstractMigration
             KEY `idx_rating` (`rating`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-            $this->logger->debug('up() - SQL', ['sql' => $createTableSql]);
+            $this->logger->debug('up() - SQL', array('sql' => $createTableSql));
             $this->addSql($createTableSql);
             $this->logger->info('up() - completed');
         } catch (\Exception $e) {
-            $this->logger->error('up() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->logger->error(
+                'up() - failed',
+                array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString())
+            );
+
             throw $e;
         }
     }
@@ -121,15 +128,19 @@ final class Version20251104000000 extends AbstractMigration
             // In down(), $schema is CURRENT (already introspected), so use directly
             if ($schema->hasTable($tableName)) {
                 $dropSql = "DROP TABLE IF EXISTS `{$tableName}`";
-                $this->logger->info('down() - about to drop table', ['table' => $tableName]);
-                $this->logger->debug('down() - SQL', ['sql' => $dropSql]);
+                $this->logger->info('down() - about to drop table', array('table' => $tableName));
+                $this->logger->debug('down() - SQL', array('sql' => $dropSql));
                 $this->addSql($dropSql);
                 $this->logger->info('down() - completed');
             } else {
-                $this->logger->info('down() - table does not exist, skipping', ['table' => $tableName]);
+                $this->logger->info('down() - table does not exist, skipping', array('table' => $tableName));
             }
         } catch (\Exception $e) {
-            $this->logger->error('down() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->logger->error(
+                'down() - failed',
+                array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString())
+            );
+
             throw $e;
         }
     }

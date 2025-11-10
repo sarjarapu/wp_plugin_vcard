@@ -177,7 +177,8 @@ class Version
             // siteJson: Accept array (for backward compatibility) or string (for Doctrine)
             // Use standard PHP json_encode() instead of wp_json_encode() for testability
             if ($siteJson !== null) {
-                $this->siteJson = is_array($siteJson) ? json_encode($siteJson, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : $siteJson;
+                // Parameter is typed as ?array, so we always encode it
+                $this->siteJson = json_encode($siteJson, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
             } else {
                 $this->siteJson = '{}';
             }

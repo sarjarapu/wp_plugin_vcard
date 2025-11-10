@@ -5,7 +5,6 @@ namespace Minisite\Features\PublishMinisite\WordPress;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
  * WordPress Publish Manager

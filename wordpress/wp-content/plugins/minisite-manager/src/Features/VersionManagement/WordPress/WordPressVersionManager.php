@@ -204,5 +204,4 @@ class WordPressVersionManager extends BaseWordPressManager implements WordPressM
 
         return $user && $user->ID > 0 ? $user : null;
     }
-
 }

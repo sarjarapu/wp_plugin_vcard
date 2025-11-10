@@ -28,7 +28,9 @@ use Psr\Log\LoggerInterface;
  * - Core versioning: id, minisite_id, version_number, status, label, comment
  * - Timestamps: created_at, published_at, created_by
  * - Rollback tracking: source_version_id
- * - Minisite fields: business_slug, location_slug, title, name, city, region, country_code, postal_code, location_point (POINT), site_template, palette, industry, default_locale, schema_version, site_version, site_json, search_terms
+ * - Minisite fields: business_slug, location_slug, title, name, city, region, country_code,
+ *   postal_code, location_point (POINT), site_template, palette, industry, default_locale,
+ *   schema_version, site_version, site_json, search_terms
  */
 final class Version20251105000000 extends AbstractMigration
 {
@@ -42,7 +44,8 @@ final class Version20251105000000 extends AbstractMigration
 
     public function getDescription(): string
     {
-        return 'Create minisite_versions table for version management (fresh start, replaces old SQL file-based creation)';
+        return 'Create minisite_versions table for version management '
+            . '(fresh start, replaces old SQL file-based creation)';
     }
 
     public function up(Schema $schema): void
@@ -57,14 +60,15 @@ final class Version20251105000000 extends AbstractMigration
             // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
             $schemaManager = $this->connection->createSchemaManager();
             if ($schemaManager->introspectSchema()->hasTable($tableName)) {
-                $this->logger->info('up() - table already exists, skipping', ['table' => $tableName]);
+                $this->logger->info('up() - table already exists, skipping', array('table' => $tableName));
+
                 // Table already exists, skip (like config and reviews table migrations)
                 // Note: If table was created by old migration and needs new columns,
                 // a separate migration should handle that to keep migrations simple and focused
                 return;
             }
 
-            $this->logger->info('up() - about to create table', ['table' => $tableName]);
+            $this->logger->info('up() - about to create table', array('table' => $tableName));
 
             // Table doesn't exist - create complete table with all columns using raw SQL
             // This includes location_point (POINT type) which Doctrine Schema API doesn't support
@@ -104,11 +108,15 @@ final class Version20251105000000 extends AbstractMigration
             KEY `idx_minisite_created` (`minisite_id`, `created_at`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
-            $this->logger->debug('up() - SQL', ['sql' => $createTableSql]);
+            $this->logger->debug('up() - SQL', array('sql' => $createTableSql));
             $this->addSql($createTableSql);
             $this->logger->info('up() - completed');
         } catch (\Exception $e) {
-            $this->logger->error('up() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->logger->error(
+                'up() - failed',
+                array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString())
+            );
+
             throw $e;
         }
     }
@@ -125,15 +133,19 @@ final class Version20251105000000 extends AbstractMigration
             // In down(), $schema is CURRENT (already introspected), so use directly
             if ($schema->hasTable($tableName)) {
                 $dropSql = "DROP TABLE IF EXISTS `{$tableName}`";
-                $this->logger->info('down() - about to drop table', ['table' => $tableName]);
-                $this->logger->debug('down() - SQL', ['sql' => $dropSql]);
+                $this->logger->info('down() - about to drop table', array('table' => $tableName));
+                $this->logger->debug('down() - SQL', array('sql' => $dropSql));
                 $this->addSql($dropSql);
                 $this->logger->info('down() - completed');
             } else {
-                $this->logger->info('down() - table does not exist, skipping', ['table' => $tableName]);
+                $this->logger->info('down() - table does not exist, skipping', array('table' => $tableName));
             }
         } catch (\Exception $e) {
-            $this->logger->error('down() - failed', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            $this->logger->error(
+                'down() - failed',
+                array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString())
+            );
+
             throw $e;
         }
     }
@@ -149,4 +161,3 @@ final class Version20251105000000 extends AbstractMigration
         return false;
     }
 }
-

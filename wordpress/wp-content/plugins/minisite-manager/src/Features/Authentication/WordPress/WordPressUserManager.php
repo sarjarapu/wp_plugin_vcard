@@ -322,5 +322,4 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
     {
         return wp_create_nonce($action);
     }
-
 }

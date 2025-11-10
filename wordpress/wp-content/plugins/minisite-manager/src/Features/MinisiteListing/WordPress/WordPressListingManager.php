@@ -67,5 +67,4 @@ class WordPressListingManager extends BaseWordPressManager
     {
         parent::redirect($location, $status);
     }
-
 }

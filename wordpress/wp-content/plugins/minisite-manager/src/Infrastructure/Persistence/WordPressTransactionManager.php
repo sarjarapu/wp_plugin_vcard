@@ -27,4 +27,3 @@ class WordPressTransactionManager implements TransactionManagerInterface
         db::query('ROLLBACK');
     }
 }
-

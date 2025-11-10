@@ -2,7 +2,6 @@
 
 namespace Minisite\Features\MinisiteViewer\WordPress;
 
-use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 

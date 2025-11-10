@@ -5,7 +5,6 @@ namespace Minisite\Features\NewMinisite\WordPress;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
  * WordPress New Minisite Manager
@@ -149,5 +148,4 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         // This can be extended with subscription checks, limits, etc.
         return user_can($userId, 'read');
     }
-
 }
