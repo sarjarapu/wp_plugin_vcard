@@ -1,0 +1,82 @@
+{
+  "versions": [
+    {
+      "versionNumber": 1,
+      "status": "published",
+      "label": "Initial Published Version",
+      "comment": "Initial published version of ACME Dental Dallas",
+      "businessSlug": "acme-dental",
+      "locationSlug": "dallas",
+      "title": "Acme Dental — Dallas",
+      "name": "Acme Dental",
+      "city": "Dallas",
+      "region": "TX",
+      "countryCode": "US",
+      "postalCode": "75201",
+      "location": {
+        "latitude": 32.7767,
+        "longitude": -96.7970
+      },
+      "siteTemplate": "v2025",
+      "palette": "blue",
+      "industry": "dentist",
+      "defaultLocale": "en-US",
+      "schemaVersion": 1,
+      "siteVersion": 1,
+      "searchTerms": "acme dental dentist dallas tx services clinic",
+      "createdAt": "2025-09-29T12:51:33+00:00",
+      "publishedAt": "2025-09-29T12:51:33+00:00",
+      "createdBy": null,
+      "siteJson": {
+        "seo": {
+          "title": "Acme Dental — Dallas",
+          "description": "Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.",
+          "keywords": "acme dental, dental care, dallas, tx, services, clinic",
+          "favicon": "https://cdn-icons-png.flaticon.com/512/8718/8718971.png"
+        },
+        "brand": {
+          "palette": "blue",
+          "industry": "dentist",
+          "logo": "https://cdn-icons-png.flaticon.com/512/8718/8718971.png",
+          "name": "Acme Dental"
+        },
+        "hero": {
+          "heading": "Acme Dental Care",
+          "subheading": "Your friendly Dallas,TX neighborhood dental clinic offering Preventative, cosmetic and emergency dentistry exceptional dental care in a very comfortable, relaxing stress-free environment at affordable prices.",
+          "badge": "Verified Business",
+          "image": "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=1600&q=80&auto=format&fit=crop",
+          "rating": {
+            "value": 4.8,
+            "count": 238
+          },
+          "ctas": [
+            {
+              "text": "Request Info",
+              "url": "#request-info"
+            },
+            {
+              "text": "Contact Us",
+              "url": "#contact"
+            }
+          ]
+        },
+        "about": {
+          "html": "<p>Acme Dental delivers modern, patient-first dental care backed by advanced imaging and minimally invasive techniques.</p><p>From routine cleanings to implants and cosmetic treatments, our Dallas team creates a calm experience with lasting results.</p><p>We welcome families and offer flexible scheduling and transparent pricing.</p>"
+        },
+        "contact": {
+          "phone": {
+            "text": "+1 (214) 555-0123",
+            "link": "+12145550123"
+          },
+          "email": "care@acmedental.us",
+          "website": {
+            "text": "acmedental.us",
+            "link": "https://acmedental.us"
+          },
+          "address": "123 Main St, Dallas, TX 75201"
+        }
+      }
+    }
+  ]
+}
+

@@ -326,7 +326,13 @@ class MinisiteRepository implements MinisiteRepositoryInterface
         $this->db->query('START TRANSACTION');
 
         try {
-            $versionRepo = new \Minisite\Infrastructure\Persistence\Repositories\VersionRepository($this->db);
+            // Require Doctrine-based VersionRepository from global (initialized by PluginBootstrap)
+            if (! isset($GLOBALS['minisite_version_repository'])) {
+                throw new \RuntimeException(
+                    'VersionRepository not initialized. Ensure PluginBootstrap::initializeConfigSystem() is called.'
+                );
+            }
+            $versionRepo = $GLOBALS['minisite_version_repository'];
 
             // Try to find latest draft first (preferred)
             $versionToPublish = $versionRepo->findLatestDraft($id);
@@ -353,7 +359,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             if ($currentPublishedVersion) {
                 $this->db->query(
                     $this->db->prepare(
-                        "UPDATE {$this->db->prefix}minisite_versions 
+                        "UPDATE {$this->db->prefix}minisite_versions
                      SET status = 'draft', label = CONCAT('Archived - ', label)
                      WHERE id = %d",
                         $currentPublishedVersion->id
@@ -364,8 +370,8 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             // Publish the target version
             $this->db->query(
                 $this->db->prepare(
-                    "UPDATE {$this->db->prefix}minisite_versions 
-                 SET status = 'published', published_at = NOW() 
+                    "UPDATE {$this->db->prefix}minisite_versions
+                 SET status = 'published', published_at = NOW()
                  WHERE id = %d",
                     $versionToPublish->id
                 )
@@ -403,8 +409,8 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             if ($versionToPublish->geo && $versionToPublish->geo->getLat() && $versionToPublish->geo->getLng()) {
                 $this->db->query(
                     $this->db->prepare(
-                        "UPDATE {$this->table()} 
-                     SET location_point = POINT(%f, %f) 
+                        "UPDATE {$this->table()}
+                     SET location_point = POINT(%f, %f)
                      WHERE id = %s",
                         $versionToPublish->geo->getLng(),
                         $versionToPublish->geo->getLat(),

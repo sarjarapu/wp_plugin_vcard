@@ -7,6 +7,9 @@ use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
 use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Infrastructure\Persistence\WordPressTransactionManager;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,7 +25,9 @@ class EditService
     private LoggerInterface $logger;
 
     public function __construct(
-        private WordPressEditManager $wordPressManager
+        private WordPressEditManager $wordPressManager,
+        private MinisiteRepository $minisiteRepository,
+        private VersionRepositoryInterface $versionRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('minisite-edit-service');
     }
@@ -32,7 +37,7 @@ class EditService
      */
     public function getMinisiteForEditing(string $siteId, ?string $versionId = null): object
     {
-        $minisite = $this->wordPressManager->findMinisiteById($siteId);
+        $minisite = $this->minisiteRepository->findById($siteId);
         if (! $minisite) {
             throw new \RuntimeException('Minisite not found');
         }
@@ -45,7 +50,7 @@ class EditService
 
         // Get version to edit
         $editingVersion = $this->getEditingVersion($siteId, $versionId);
-        $latestDraft = $this->wordPressManager->findLatestDraft($siteId);
+        $latestDraft = $this->versionRepository->findLatestDraft($siteId);
 
         // Create profile object for form
         $profileForForm = $this->createProfileForForm($minisite, $editingVersion);
@@ -105,8 +110,14 @@ class EditService
 
         try {
             // Create shared components
-            $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
-            $dbCoordinator = new MinisiteDatabaseCoordinator($this->wordPressManager);
+            $formProcessor = new MinisiteFormProcessor($this->wordPressManager, $this->minisiteRepository);
+            $transactionManager = new WordPressTransactionManager();
+            $dbCoordinator = new MinisiteDatabaseCoordinator(
+                $this->wordPressManager,
+                $this->versionRepository,
+                $this->minisiteRepository,
+                $transactionManager
+            );
 
             // Validate form data
             $errors = $formProcessor->validateFormData($formData);
@@ -127,11 +138,11 @@ class EditService
                 );
             }
 
-            $minisite = $this->wordPressManager->findMinisiteById($siteId);
+            $minisite = $this->minisiteRepository->findById($siteId);
             $currentUser = $this->wordPressManager->getCurrentUser();
 
             // Determine operation type based on minisite status
-            $hasBeenPublished = $this->wordPressManager->hasBeenPublished($siteId);
+            $hasBeenPublished = $this->versionRepository->findPublishedVersion($siteId) !== null;
             $operationType = $hasBeenPublished ? 'edit_published' : 'edit_draft';
 
             // Use shared database coordinator
@@ -188,10 +199,10 @@ class EditService
     private function getEditingVersion(string $siteId, ?string $versionId): ?object
     {
         if ($versionId === 'latest' || ! $versionId) {
-            return $this->wordPressManager->getLatestDraftForEditing($siteId);
+            return $this->versionRepository->getLatestDraftForEditing($siteId);
         }
 
-        $version = $this->wordPressManager->findVersionById((int) $versionId);
+        $version = $this->versionRepository->findById((int) $versionId);
         if (! $version || $version->minisiteId !== $siteId) {
             $this->wordPressManager->redirect($this->wordPressManager->getHomeUrl("/account/sites/{$siteId}/edit"));
         }

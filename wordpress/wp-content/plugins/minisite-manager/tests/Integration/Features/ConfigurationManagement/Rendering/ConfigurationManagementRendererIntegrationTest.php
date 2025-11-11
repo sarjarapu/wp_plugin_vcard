@@ -70,6 +70,7 @@ final class ConfigurationManagementRendererIntegrationTest extends TestCase
         $config = ORMSetup::createAttributeMetadataConfiguration(
             paths: [
                 __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
             ],
             isDevMode: true
         );
@@ -115,26 +116,6 @@ final class ConfigurationManagementRendererIntegrationTest extends TestCase
         // Ensure migrations have run (creates wp_minisite_config table)
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
-
-        // Clear EntityManager after migrations
-        $this->em->clear();
-
-        // Ensure connection is open and not in a transaction
-        if (! $connection->isConnected()) {
-            $connection->connect();
-        }
-
-        if ($connection->isTransactionActive()) {
-            try {
-                $connection->commit();
-            } catch (\Exception $e) {
-                try {
-                    $connection->rollBack();
-                } catch (\Exception $e2) {
-                    // Ignore
-                }
-            }
-        }
 
         // Get repository and service
         $classMetadata = $this->em->getClassMetadata(Config::class);

@@ -50,12 +50,10 @@ class DoctrineMigrationRunner
             $em = $this->getEntityManager();
             $connection = $em->getConnection();
 
-            // Register ENUM type mapping to avoid schema introspection errors
-            // This must be done on the connection used by migrations
-            $platform = $connection->getDatabasePlatform();
-            if (! $platform->hasDoctrineTypeMappingFor('enum')) {
-                $platform->registerDoctrineTypeMapping('enum', 'string');
-            }
+            // Register custom types and mappings
+            // This ensures types are registered even if EntityManager was injected (not created via DoctrineFactory)
+            // Safe to call multiple times (idempotent)
+            DoctrineFactory::registerCustomTypes($connection);
 
             $config = $this->createMigrationConfiguration();
             $dependencyFactory = $this->createDependencyFactory($config, $connection);

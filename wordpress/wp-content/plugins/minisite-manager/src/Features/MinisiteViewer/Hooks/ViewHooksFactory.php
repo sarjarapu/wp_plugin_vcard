@@ -27,7 +27,20 @@ final class ViewHooksFactory
 
         // Create services
         $wordPressManager = new WordPressMinisiteManager($terminationHandler);
-        $viewService = new MinisiteViewService($wordPressManager);
+
+        // Get repositories from global (Doctrine-based)
+        global $wpdb;
+        $minisiteRepository = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+
+        // Require Doctrine-based VersionRepository from global (initialized by PluginBootstrap)
+        if (! isset($GLOBALS['minisite_version_repository'])) {
+            throw new \RuntimeException(
+                'VersionRepository not initialized. Ensure PluginBootstrap::initializeConfigSystem() is called.'
+            );
+        }
+        $versionRepository = $GLOBALS['minisite_version_repository'];
+
+        $viewService = new MinisiteViewService($wordPressManager, $minisiteRepository, $versionRepository);
 
         // Create handlers
         $viewHandler = new ViewHandler($viewService);

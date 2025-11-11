@@ -5,8 +5,6 @@ namespace Minisite\Features\PublishMinisite\WordPress;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
  * WordPress Publish Manager
@@ -18,8 +16,6 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
  */
 class WordPressPublishManager extends BaseWordPressManager implements WordPressManagerInterface
 {
-    private ?MinisiteRepository $minisiteRepository = null;
-
     /**
      * Constructor
      *
@@ -28,18 +24,6 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
     public function __construct(TerminationHandlerInterface $terminationHandler)
     {
         parent::__construct($terminationHandler);
-    }
-
-    /**
-     * Get minisite repository instance
-     */
-    public function getMinisiteRepository(): MinisiteRepository
-    {
-        if ($this->minisiteRepository === null) {
-            $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
-        }
-
-        return $this->minisiteRepository;
     }
 
     /**
@@ -188,99 +172,6 @@ class WordPressPublishManager extends BaseWordPressManager implements WordPressM
         return class_exists('WooCommerce');
     }
 
-    /**
-     * Find minisite by ID
-     */
-    public function findMinisiteById(string $minisiteId): ?object
-    {
-        return $this->getMinisiteRepository()->findById($minisiteId);
-    }
-
-    /**
-     * Get next version number
-     */
-    public function getNextVersionNumber(string $minisiteId): int
-    {
-        // Not needed for publish feature, but required by interface
-        // Return 1 as default since publish doesn't create versions
-        return 1;
-    }
-
-    /**
-     * Save version
-     */
-    public function saveVersion(object $version): object
-    {
-        // Not needed for publish feature, but required by interface
-        // Return version as-is
-        return $version;
-    }
-
-    /**
-     * Check if minisite has been published
-     */
-    public function hasBeenPublished(string $siteId): bool
-    {
-        $minisite = $this->findMinisiteById($siteId);
-
-        return $minisite !== null && $minisite->status === 'published';
-    }
-
-    /**
-     * Update business info fields
-     */
-    public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateBusinessInfo($siteId, $fields, $userId);
-    }
-
-    /**
-     * Update coordinates
-     */
-    public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateCoordinates($siteId, $lat, $lng, $userId);
-    }
-
-    /**
-     * Update title
-     */
-    public function updateTitle(string $siteId, string $title): void
-    {
-        $this->getMinisiteRepository()->updateTitle($siteId, $title);
-    }
-
-    /**
-     * Update multiple minisite fields in a single operation
-     */
-    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateMinisiteFields($siteId, $fields, $userId);
-    }
-
-    /**
-     * Start database transaction
-     */
-    public function startTransaction(): void
-    {
-        db::query('START TRANSACTION');
-    }
-
-    /**
-     * Commit database transaction
-     */
-    public function commitTransaction(): void
-    {
-        db::query('COMMIT');
-    }
-
-    /**
-     * Rollback database transaction
-     */
-    public function rollbackTransaction(): void
-    {
-        db::query('ROLLBACK');
-    }
 
     /**
      * Get POST data (unslashed, caller should sanitize)

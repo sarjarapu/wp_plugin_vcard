@@ -30,7 +30,12 @@ final class ListingHooksFactory
 
         // Create services
         $listingManager = new WordPressListingManager($terminationHandler);
-        $listingService = new MinisiteListingService($listingManager);
+
+        // Get MinisiteRepository
+        global $wpdb;
+        $minisiteRepository = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+
+        $listingService = new MinisiteListingService($listingManager, $minisiteRepository);
 
         // Create handlers
         $listMinisitesHandler = new ListMinisitesHandler($listingService);

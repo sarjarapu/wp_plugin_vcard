@@ -18,10 +18,11 @@ class _1_0_0_CreateBase implements Migration
     {
         // NOTE: Review table creation has been moved to Doctrine migrations
         // Review operations are no longer handled by this migration
-        return 'Create base tables: minisites, minisite_versions (with complete profile field versioning), ' .
-               'minisite_bookmarks, minisite_payments, minisite_payment_history, ' .
+        // NOTE: Version table creation has been moved to Doctrine migrations (Version20251105000000)
+        return 'Create base tables: minisites, minisite_bookmarks, minisite_payments, minisite_payment_history, ' .
                'minisite_reservations + auto-cleanup event + seed dev data. ' .
-               'NOTE: minisite_reviews table is now created by Doctrine migrations (Version20251104000000)';
+               'NOTE: minisite_reviews table is now created by Doctrine migrations (Version20251104000000). ' .
+               'NOTE: minisite_versions table is now created by Doctrine migrations (Version20251105000000)';
     }
 
     public function up(): void
@@ -30,7 +31,8 @@ class _1_0_0_CreateBase implements Migration
         $minisites = $wpdb->prefix . 'minisites';
         // NOTE: Reviews table is now managed by Doctrine migrations - do NOT create it here
         // $reviews        = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
-        $versions = $wpdb->prefix . 'minisite_versions';
+        // NOTE: Versions table is now managed by Doctrine migrations - do NOT create it here
+        // $versions = $wpdb->prefix . 'minisite_versions'; // COMMENTED OUT - Use Doctrine migrations instead
         $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
         $payments = $wpdb->prefix . 'minisite_payments';
         $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
@@ -43,10 +45,21 @@ class _1_0_0_CreateBase implements Migration
         );
 
         // ——— versions (new versioning system) ———
+        // NOTE: Version table creation has been moved to Doctrine-based migrations.
+        // The old SQL-based table creation is commented out below.
+        // All version table operations should now use Doctrine migrations.
+        //
+        // Table creation: See Version20251105000000 in Doctrine migrations
+        // (Creates complete table with all 27 columns if table doesn't exist,
+        //  or adds new columns if table already exists)
+        //
+        // OLD SQL FILE LOADING - COMMENTED OUT - DO NOT USE
+        /*
         SqlLoader::loadAndExecute(
             'minisite_versions.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
+        */
 
         // ——— reviews ———
         // NOTE: Review table creation has been moved to Doctrine-based migrations.
@@ -90,13 +103,15 @@ class _1_0_0_CreateBase implements Migration
         );
 
         // Add foreign key constraints after table creation (only if they don't exist)
-        $this->addForeignKeyIfNotExists(
-            $versions,
-            'fk_versions_minisite_id',
-            'minisite_id',
-            $minisites,
-            'id'
-        );
+        // NOTE: Versions table foreign key is now managed by Doctrine migrations
+        // $versions = $wpdb->prefix . 'minisite_versions'; // COMMENTED OUT - Use Doctrine migrations instead
+        // $this->addForeignKeyIfNotExists(
+        //     $versions,
+        //     'fk_versions_minisite_id',
+        //     'minisite_id',
+        //     $minisites,
+        //     'id'
+        // );
         // NOTE: Reviews table foreign key is now managed by Doctrine migrations
         // $reviews = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
         // $this->addForeignKeyIfNotExists(

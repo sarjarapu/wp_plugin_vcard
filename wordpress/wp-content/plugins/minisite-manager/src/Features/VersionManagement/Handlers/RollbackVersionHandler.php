@@ -18,8 +18,9 @@ class RollbackVersionHandler
     /**
      * Handle the rollback version command
      */
-    public function handle(RollbackVersionCommand $command): \Minisite\Domain\Entities\Version
-    {
+    public function handle(
+        RollbackVersionCommand $command
+    ): \Minisite\Features\VersionManagement\Domain\Entities\Version {
         return $this->versionService->createRollbackVersion($command);
     }
 }

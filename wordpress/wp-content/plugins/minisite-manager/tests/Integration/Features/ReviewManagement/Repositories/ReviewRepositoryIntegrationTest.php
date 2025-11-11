@@ -18,10 +18,10 @@ use PHPUnit\Framework\Attributes\CoversClass;
 
 /**
  * Integration tests for ReviewRepository
- * 
+ *
  * Tests ReviewRepository against real MySQL database with WordPress prefix.
  * This is a REAL integration test - uses actual wp_minisite_reviews table.
- * 
+ *
  * Prerequisites:
  * - MySQL test database must be running (Docker container on port 3307)
  * - Base table must exist (created by custom migration system)
@@ -32,21 +32,21 @@ final class ReviewRepositoryIntegrationTest extends TestCase
 {
     private \Doctrine\ORM\EntityManager $em;
     private ReviewRepository $repository;
-    
+
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         // Initialize LoggingServiceProvider (required by ReviewRepository)
         LoggingServiceProvider::register();
-        
+
         // Get database configuration from environment (same as AbstractDoctrineMigrationTest)
         $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
         $port = getenv('MYSQL_PORT') ?: '3307';
         $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
         $user = getenv('MYSQL_USER') ?: 'minisite';
         $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-        
+
         // Create real MySQL connection via Doctrine
         $connection = DriverManager::getConnection([
             'driver' => 'pdo_mysql',
@@ -57,17 +57,18 @@ final class ReviewRepositoryIntegrationTest extends TestCase
             'dbname' => $dbName,
             'charset' => 'utf8mb4',
         ]);
-        
+
         // Create EntityManager with MySQL connection
         $config = ORMSetup::createAttributeMetadataConfiguration(
             paths: [
                 __DIR__ . '/../../../../../src/Features/ReviewManagement/Domain/Entities',
+                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
             ],
             isDevMode: true
         );
-        
+
         $this->em = new EntityManager($connection, $config);
-        
+
         // Reset connection state to ensure clean transaction state
         // This prevents savepoint/transaction errors from previous tests
         try {
@@ -77,7 +78,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         } catch (\Exception $e) {
             // Ignore - connection might already be clean or ROLLBACK might not be needed
         }
-        
+
         // Ensure connection is ready for new operations
         try {
             // Reset any savepoint counter by starting and immediately committing a transaction
@@ -91,32 +92,32 @@ final class ReviewRepositoryIntegrationTest extends TestCase
                 // Ignore - just continue
             }
         }
-        
+
         // Clear any UnitOfWork state
         $this->em->clear();
-        
+
         // Set up $wpdb object for TablePrefixListener (needed for prefix)
         if (!isset($GLOBALS['wpdb'])) {
             $GLOBALS['wpdb'] = new \wpdb();
         }
         $GLOBALS['wpdb']->prefix = 'wp_';
-        
+
         // Add TablePrefixListener (required for wp_minisite_reviews table)
         $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
         $this->em->getEventManager()->addEventListener(
             Events::loadClassMetadata,
             $tablePrefixListener
         );
-        
+
         // Drop tables and migration tracking to ensure clean slate
         // This ensures migrations will run fresh every time
         $this->cleanupTables();
-        
+
         // Ensure migrations have run (table and new columns exist)
         // Now that tables are dropped, migrations will run fresh
         $migrationRunner = new DoctrineMigrationRunner($this->em);
         $migrationRunner->migrate();
-        
+
         // Reset connection state again after migrations (migrations may leave connection in bad state)
         // This is critical because migrations might leave the connection in an inconsistent state
         try {
@@ -132,11 +133,11 @@ final class ReviewRepositoryIntegrationTest extends TestCase
                 // Ignore - connection might already be clean
             }
         }
-        
+
         // Clear EntityManager state again after migrations
         // This ensures any UnitOfWork state from migrations is cleared
         $this->em->clear();
-        
+
         // Force a fresh connection state by closing and letting it reconnect
         // This is the most reliable way to ensure clean state
         try {
@@ -144,28 +145,28 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         } catch (\Exception $e) {
             // Ignore - connection might already be closed
         }
-        
+
         // EntityManager will automatically reconnect when needed
-        
+
         // Create ReviewRepository instance directly (same pattern as ConfigRepository)
         $this->repository = new ReviewRepository(
             $this->em,
             $this->em->getClassMetadata(Review::class)
         );
-        
+
         // Clean up test data (but keep table structure)
         $this->cleanupTestData();
     }
-    
+
     protected function tearDown(): void
     {
         // Clean up test data (but keep table structure)
         $this->cleanupTestData();
-        
+
         $this->em->close();
         parent::tearDown();
     }
-    
+
     /**
      * Drop tables and migration tracking to ensure clean slate
      * This ensures migrations can run fresh before each test
@@ -174,7 +175,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
     {
         $connection = $this->em->getConnection();
         $tables = ['wp_minisite_reviews', 'wp_minisite_migrations'];
-        
+
         foreach ($tables as $table) {
             try {
                 $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
@@ -183,7 +184,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
             }
         }
     }
-    
+
     /**
      * Clean up test data (but keep table structure)
      * Deletes only test reviews, not the table itself
@@ -198,7 +199,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
             // Ignore errors - table might not exist or connection might be closed
         }
     }
-    
+
     public function test_save_and_find_review(): void
     {
         $review = new Review();
@@ -207,15 +208,15 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review->rating = 4.5;
         $review->body = 'Great service!';
         $review->status = 'approved';
-        
+
         $saved = $this->repository->save($review);
-        
+
         $this->assertNotNull($saved->id);
         $this->assertNotNull($saved->createdAt);
         $this->assertNotNull($saved->updatedAt);
-        
+
         $found = $this->repository->findById($saved->id);
-        
+
         $this->assertNotNull($found);
         $this->assertEquals($saved->id, $found->id);
         $this->assertEquals('test-minisite-123', $found->minisiteId);
@@ -223,7 +224,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $this->assertEquals(4.5, $found->rating);
         $this->assertEquals('Great service!', $found->body);
     }
-    
+
     public function test_save_with_all_new_fields(): void
     {
         $review = new Review();
@@ -241,9 +242,9 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review->spamScore = 0.1;
         $review->sentimentScore = 0.9;
         $review->displayOrder = 1;
-        
+
         $saved = $this->repository->save($review);
-        
+
         $this->assertNotNull($saved->id);
         $this->assertEquals('alice@example.com', $saved->authorEmail);
         $this->assertEquals('+1234567890', $saved->authorPhone);
@@ -254,22 +255,22 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $this->assertEquals(0.1, $saved->spamScore);
         $this->assertEquals(0.9, $saved->sentimentScore);
         $this->assertEquals(1, $saved->displayOrder);
-        
+
         // Verify it can be retrieved
         $found = $this->repository->findById($saved->id);
         $this->assertNotNull($found);
         $this->assertEquals('alice@example.com', $found->authorEmail);
         $this->assertTrue($found->isEmailVerified);
     }
-    
+
     public function test_findOrFail_throws_when_not_found(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Review with ID 99999 not found');
-        
+
         $this->repository->findOrFail(99999);
     }
-    
+
     public function test_delete_removes_review(): void
     {
         $review = new Review();
@@ -278,21 +279,21 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review->rating = 3.0;
         $review->body = 'Will be deleted';
         $review->status = 'approved';
-        
+
         $saved = $this->repository->save($review);
         $reviewId = $saved->id;
         $this->assertNotNull($reviewId);
         $this->assertNotNull($this->repository->findById($reviewId));
-        
+
         $this->repository->delete($saved);
-        
+
         $this->assertNull($this->repository->findById($reviewId));
     }
-    
+
     public function test_listApprovedForMinisite_returns_approved_reviews(): void
     {
         $minisiteId = 'test-minisite-list';
-        
+
         // Create approved reviews
         $review1 = new Review();
         $review1->minisiteId = $minisiteId;
@@ -302,7 +303,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review1->status = 'approved';
         $review1->markAsPublished();
         $this->repository->save($review1);
-        
+
         $review2 = new Review();
         $review2->minisiteId = $minisiteId;
         $review2->authorName = 'User 2';
@@ -311,7 +312,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review2->status = 'approved';
         $review2->markAsPublished();
         $this->repository->save($review2);
-        
+
         // Create pending review (should not appear)
         $review3 = new Review();
         $review3->minisiteId = $minisiteId;
@@ -320,23 +321,23 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review3->body = 'Pending';
         $review3->status = 'pending';
         $this->repository->save($review3);
-        
+
         $results = $this->repository->listApprovedForMinisite($minisiteId);
-        
+
         $this->assertIsArray($results);
         $this->assertGreaterThanOrEqual(2, count($results));
-        
+
         // Verify all results are approved
         foreach ($results as $result) {
             $this->assertEquals('approved', $result->status);
             $this->assertEquals($minisiteId, $result->minisiteId);
         }
     }
-    
+
     public function test_listByStatusForMinisite_filters_by_status(): void
     {
         $minisiteId = 'test-minisite-status';
-        
+
         // Create reviews with different statuses
         $pending = new Review();
         $pending->minisiteId = $minisiteId;
@@ -345,7 +346,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $pending->body = 'Pending review';
         $pending->status = 'pending';
         $this->repository->save($pending);
-        
+
         $rejected = new Review();
         $rejected->minisiteId = $minisiteId;
         $rejected->authorName = 'Rejected User';
@@ -353,7 +354,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $rejected->body = 'Rejected review';
         $rejected->status = 'rejected';
         $this->repository->save($rejected);
-        
+
         $flagged = new Review();
         $flagged->minisiteId = $minisiteId;
         $flagged->authorName = 'Flagged User';
@@ -361,30 +362,30 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $flagged->body = 'Flagged review';
         $flagged->status = 'flagged';
         $this->repository->save($flagged);
-        
+
         $pendingResults = $this->repository->listByStatusForMinisite($minisiteId, 'pending');
         $this->assertGreaterThanOrEqual(1, count($pendingResults));
         foreach ($pendingResults as $result) {
             $this->assertEquals('pending', $result->status);
         }
-        
+
         $rejectedResults = $this->repository->listByStatusForMinisite($minisiteId, 'rejected');
         $this->assertGreaterThanOrEqual(1, count($rejectedResults));
         foreach ($rejectedResults as $result) {
             $this->assertEquals('rejected', $result->status);
         }
-        
+
         $flaggedResults = $this->repository->listByStatusForMinisite($minisiteId, 'flagged');
         $this->assertGreaterThanOrEqual(1, count($flaggedResults));
         foreach ($flaggedResults as $result) {
             $this->assertEquals('flagged', $result->status);
         }
     }
-    
+
     public function test_countByStatusForMinisite_returns_correct_count(): void
     {
         $minisiteId = 'test-minisite-count';
-        
+
         // Create multiple approved reviews
         for ($i = 0; $i < 3; $i++) {
             $review = new Review();
@@ -395,7 +396,7 @@ final class ReviewRepositoryIntegrationTest extends TestCase
             $review->status = 'approved';
             $this->repository->save($review);
         }
-        
+
         // Create pending reviews
         for ($i = 0; $i < 2; $i++) {
             $review = new Review();
@@ -406,21 +407,21 @@ final class ReviewRepositoryIntegrationTest extends TestCase
             $review->status = 'pending';
             $this->repository->save($review);
         }
-        
+
         $approvedCount = $this->repository->countByStatusForMinisite($minisiteId, 'approved');
         $this->assertGreaterThanOrEqual(3, $approvedCount);
-        
+
         $pendingCount = $this->repository->countByStatusForMinisite($minisiteId, 'pending');
         $this->assertGreaterThanOrEqual(2, $pendingCount);
-        
+
         $rejectedCount = $this->repository->countByStatusForMinisite($minisiteId, 'rejected');
         $this->assertGreaterThanOrEqual(0, $rejectedCount);
     }
-    
+
     public function test_listByStatusForMinisite_respects_limit(): void
     {
         $minisiteId = 'test-minisite-limit';
-        
+
         // Create 5 approved reviews
         for ($i = 0; $i < 5; $i++) {
             $review = new Review();
@@ -432,12 +433,12 @@ final class ReviewRepositoryIntegrationTest extends TestCase
             $review->markAsPublished();
             $this->repository->save($review);
         }
-        
+
         $results = $this->repository->listByStatusForMinisite($minisiteId, 'approved', 3);
-        
+
         $this->assertLessThanOrEqual(3, count($results));
     }
-    
+
     public function test_markAsPublished_updates_fields(): void
     {
         $review = new Review();
@@ -446,25 +447,25 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review->rating = 4.0;
         $review->body = 'Test review';
         $review->status = 'pending';
-        
+
         $saved = $this->repository->save($review);
         $this->assertEquals('pending', $saved->status);
         $this->assertNull($saved->publishedAt);
-        
+
         $saved->markAsPublished(42);
         $updated = $this->repository->save($saved);
-        
+
         $this->assertEquals('approved', $updated->status);
         $this->assertNotNull($updated->publishedAt);
         $this->assertEquals(42, $updated->moderatedBy);
-        
+
         // Verify persisted
         $found = $this->repository->findById($updated->id);
         $this->assertEquals('approved', $found->status);
         $this->assertNotNull($found->publishedAt);
         $this->assertEquals(42, $found->moderatedBy);
     }
-    
+
     /**
      * Test save() updates existing review
      */
@@ -477,43 +478,43 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review->rating = 3.0;
         $review->body = 'Original body';
         $review->status = 'pending';
-        
+
         $saved = $this->repository->save($review);
         $originalId = $saved->id;
         $originalCreatedAt = $saved->createdAt;
         $originalUpdatedAt = $saved->updatedAt;
-        
+
         // Small delay to ensure updatedAt timestamp changes
         usleep(100000); // 0.1 seconds
-        
+
         // Update the review
         $saved->authorName = 'Updated Name';
         $saved->rating = 5.0;
         $saved->body = 'Updated body';
         $saved->status = 'approved';
         $saved->markAsPublished();
-        
+
         $updated = $this->repository->save($saved);
-        
+
         // Verify ID remains the same (update, not insert)
         $this->assertEquals($originalId, $updated->id);
         $this->assertEquals($originalCreatedAt->getTimestamp(), $updated->createdAt->getTimestamp());
-        
+
         // Verify updated fields
         $this->assertEquals('Updated Name', $updated->authorName);
         $this->assertEquals(5.0, $updated->rating);
         $this->assertEquals('Updated body', $updated->body);
         $this->assertEquals('approved', $updated->status);
-        
+
         // Verify updatedAt was changed (should be greater than or equal to original)
         $this->assertGreaterThanOrEqual($originalUpdatedAt->getTimestamp(), $updated->updatedAt->getTimestamp());
-        
+
         // Verify persisted
         $found = $this->repository->findById($originalId);
         $this->assertEquals('Updated Name', $found->authorName);
         $this->assertEquals(5.0, $found->rating);
     }
-    
+
     /**
      * Test findById returns null when review not found
      */
@@ -522,14 +523,14 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $result = $this->repository->findById(99999);
         $this->assertNull($result);
     }
-    
+
     /**
      * Test listByStatusForMinisite orders correctly
      */
     public function test_listByStatusForMinisite_orders_correctly(): void
     {
         $minisiteId = 'test-minisite-order';
-        
+
         // Create reviews with different displayOrder and publishedAt
         $review1 = new Review();
         $review1->minisiteId = $minisiteId;
@@ -540,10 +541,10 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review1->displayOrder = 2; // Higher display order = appears later
         $review1->markAsPublished();
         $this->repository->save($review1);
-        
+
         // Small delay to ensure different timestamps
         usleep(100000); // 0.1 seconds
-        
+
         $review2 = new Review();
         $review2->minisiteId = $minisiteId;
         $review2->authorName = 'Review 2';
@@ -553,9 +554,9 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review2->displayOrder = 1; // Lower display order = appears first
         $review2->markAsPublished();
         $this->repository->save($review2);
-        
+
         usleep(100000);
-        
+
         $review3 = new Review();
         $review3->minisiteId = $minisiteId;
         $review3->authorName = 'Review 3';
@@ -565,20 +566,20 @@ final class ReviewRepositoryIntegrationTest extends TestCase
         $review3->displayOrder = null; // No display order = sorted by publishedAt
         $review3->markAsPublished();
         $this->repository->save($review3);
-        
+
         $results = $this->repository->listByStatusForMinisite($minisiteId, 'approved', 10);
-        
+
         // Should be ordered by: displayOrder ASC, then publishedAt DESC, then createdAt DESC
         // Review 2 (displayOrder=1) should come first
         // Review 1 (displayOrder=2) should come second
         // Review 3 (displayOrder=null) should come last (sorted by publishedAt DESC)
         $this->assertGreaterThanOrEqual(3, count($results));
-        
+
         // Find reviews in results
         $foundReview1 = null;
         $foundReview2 = null;
         $foundReview3 = null;
-        
+
         foreach ($results as $result) {
             if ($result->authorName === 'Review 1') {
                 $foundReview1 = $result;
@@ -588,11 +589,11 @@ final class ReviewRepositoryIntegrationTest extends TestCase
                 $foundReview3 = $result;
             }
         }
-        
+
         $this->assertNotNull($foundReview1);
         $this->assertNotNull($foundReview2);
         $this->assertNotNull($foundReview3);
-        
+
         // Review 2 (displayOrder=1) should appear before Review 1 (displayOrder=2)
         $review2Index = array_search($foundReview2, $results, true);
         $review1Index = array_search($foundReview1, $results, true);

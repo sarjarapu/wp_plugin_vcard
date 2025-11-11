@@ -94,6 +94,16 @@ final class PluginBootstrap
 
             // Store in global for easy access
             $GLOBALS['minisite_review_repository'] = $reviewRepository;
+
+            // Initialize VersionRepository
+            // Create VersionRepository instance directly (same pattern as ReviewRepository)
+            $versionRepository = new \Minisite\Features\VersionManagement\Repositories\VersionRepository(
+                $em,
+                $em->getClassMetadata(\Minisite\Features\VersionManagement\Domain\Entities\Version::class)
+            );
+
+            // Store in global for backward compatibility
+            $GLOBALS['minisite_version_repository'] = $versionRepository;
         } catch (\Exception $e) {
             // Log error but don't fail initialization
             $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');

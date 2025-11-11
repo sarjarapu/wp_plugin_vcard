@@ -6,6 +6,8 @@ namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Migration: Create minisite_reviews table with all MVP fields (fresh start)
@@ -29,6 +31,14 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20251104000000 extends AbstractMigration
 {
+    private LoggerInterface $logger;
+
+    public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
+    {
+        parent::__construct($connection, $logger);
+        $this->logger = LoggingServiceProvider::getFeatureLogger('Version20251104000000');
+    }
+
     public function getDescription(): string
     {
         return 'Create minisite_reviews table with all MVP fields (fresh start, replaces old SQL file-based creation)';
@@ -38,100 +48,111 @@ final class Version20251104000000 extends AbstractMigration
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . 'minisite_reviews';
+        $this->logger->info('up() - starting');
 
-        // Check if table exists using direct SQL query (avoids schema introspection issues with ENUM columns)
-        $connection = $this->connection;
-        $tableExists = $connection->executeQuery(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
-            array($connection->getDatabase(), $tableName)
-        )->fetchOne() > 0;
+        try {
+            $tableName = $wpdb->prefix . 'minisite_reviews';
 
-        if ($tableExists) {
-            // Table already exists, skip (like config table migration)
-            // Note: If table was created by old migration and needs new columns,
-            // a separate migration should handle that to keep migrations simple and focused
-            return;
+            // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
+            $schemaManager = $this->connection->createSchemaManager();
+            if ($schemaManager->introspectSchema()->hasTable($tableName)) {
+                $this->logger->info('up() - table already exists, skipping', array('table' => $tableName));
+
+                // Table already exists, skip (like config table migration)
+                // Note: If table was created by old migration and needs new columns,
+                // a separate migration should handle that to keep migrations simple and focused
+                return;
+            }
+
+            $this->logger->info('up() - about to create table', array('table' => $tableName));
+
+            // Table doesn't exist - create complete table with all columns using raw SQL
+            // Using raw SQL for better readability and easier manual table creation
+            $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
+            `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `minisite_id` VARCHAR(32) NOT NULL,
+            `author_name` VARCHAR(160) NOT NULL,
+            `author_email` VARCHAR(255) NULL,
+            `author_phone` VARCHAR(20) NULL,
+            `author_url` VARCHAR(300) NULL,
+            `rating` DECIMAL(2,1) NOT NULL,
+            `body` TEXT NOT NULL,
+            `language` VARCHAR(10) NULL,
+            `locale` VARCHAR(10) NULL,
+            `visited_month` VARCHAR(7) NULL,
+            `source` VARCHAR(20) NOT NULL DEFAULT 'manual'
+                COMMENT 'ENUM(''manual'',''google'',''yelp'',''facebook'',''other'')',
+            `source_id` VARCHAR(160) NULL,
+            `status` VARCHAR(20) NOT NULL DEFAULT 'approved'
+                COMMENT 'ENUM(''pending'',''approved'',''rejected'',''flagged'')',
+            `is_email_verified` TINYINT(1) NOT NULL DEFAULT 0,
+            `is_phone_verified` TINYINT(1) NOT NULL DEFAULT 0,
+            `helpful_count` INT NOT NULL DEFAULT 0,
+            `spam_score` DECIMAL(3,2) NULL,
+            `sentiment_score` DECIMAL(3,2) NULL,
+            `display_order` INT NULL,
+            `published_at` DATETIME NULL,
+            `moderation_reason` VARCHAR(200) NULL,
+            `moderated_by` BIGINT UNSIGNED NULL,
+            `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            `created_by` BIGINT UNSIGNED NULL,
+            PRIMARY KEY (`id`),
+            KEY `idx_minisite` (`minisite_id`),
+            KEY `idx_status_date` (`status`, `created_at`),
+            KEY `idx_rating` (`rating`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+
+            $this->logger->debug('up() - SQL', array('sql' => $createTableSql));
+            $this->addSql($createTableSql);
+            $this->logger->info('up() - completed');
+        } catch (\Exception $e) {
+            $this->logger->error(
+                'up() - failed',
+                array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString())
+            );
+
+            throw $e;
         }
-
-        // Table doesn't exist - create complete table with all columns using Schema API
-        // This replaces the old SQL file-based table creation
-        $table = $schema->createTable($tableName);
-
-        $table->addColumn('id', 'bigint', array(
-            'unsigned' => true,
-            'autoincrement' => true,
-        ));
-        $table->addColumn('minisite_id', 'string', array('length' => 32));
-        $table->addColumn('author_name', 'string', array('length' => 160));
-        $table->addColumn('author_email', 'string', array('length' => 255, 'notnull' => false));
-        $table->addColumn('author_phone', 'string', array('length' => 20, 'notnull' => false));
-        $table->addColumn('author_url', 'string', array('length' => 300, 'notnull' => false));
-        $table->addColumn('rating', 'decimal', array('precision' => 2, 'scale' => 1));
-        $table->addColumn('body', 'text');
-        $table->addColumn('language', 'string', array('length' => 10, 'notnull' => false));
-        $table->addColumn('locale', 'string', array('length' => 10, 'notnull' => false));
-        $table->addColumn('visited_month', 'string', array('length' => 7, 'notnull' => false));
-        $table->addColumn('source', 'string', array(
-            'length' => 20,
-            'default' => 'manual',
-            'comment' => "ENUM('manual','google','yelp','facebook','other')",
-        ));
-        $table->addColumn('source_id', 'string', array('length' => 160, 'notnull' => false));
-        $table->addColumn('status', 'string', array(
-            'length' => 20,
-            'default' => 'approved',
-            'comment' => "ENUM('pending','approved','rejected','flagged')",
-        ));
-        $table->addColumn('is_email_verified', 'boolean', array('default' => false));
-        $table->addColumn('is_phone_verified', 'boolean', array('default' => false));
-        $table->addColumn('helpful_count', 'integer', array('default' => 0));
-        $table->addColumn('spam_score', 'decimal', array('precision' => 3, 'scale' => 2, 'notnull' => false));
-        $table->addColumn('sentiment_score', 'decimal', array('precision' => 3, 'scale' => 2, 'notnull' => false));
-        $table->addColumn('display_order', 'integer', array('notnull' => false));
-        $table->addColumn('published_at', 'datetime', array('notnull' => false));
-        $table->addColumn('moderation_reason', 'string', array('length' => 200, 'notnull' => false));
-        $table->addColumn('moderated_by', 'bigint', array('unsigned' => true, 'notnull' => false));
-        $table->addColumn('created_at', 'datetime_immutable', array(
-            'notnull' => true,
-            'default' => 'CURRENT_TIMESTAMP',
-        ));
-        $table->addColumn('updated_at', 'datetime_immutable', array(
-            'notnull' => true,
-            'default' => 'CURRENT_TIMESTAMP',
-            'comment' => 'ON UPDATE CURRENT_TIMESTAMP',
-        ));
-        $table->addColumn('created_by', 'bigint', array('unsigned' => true, 'notnull' => false));
-
-        $table->setPrimaryKey(array('id'));
-        $table->addIndex(array('minisite_id'), 'idx_minisite');
-        $table->addIndex(array('status', 'created_at'), 'idx_status_date');
-        $table->addIndex(array('rating'), 'idx_rating');
     }
 
     public function down(Schema $schema): void
     {
         global $wpdb;
 
-        $tableName = $wpdb->prefix . 'minisite_reviews';
+        $this->logger->info('down() - starting');
 
-        // Use direct SQL to drop table (more reliable than Schema API for down migrations)
-        $connection = $this->connection;
-        $tableExists = $connection->executeQuery(
-            "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = ?",
-            array($connection->getDatabase(), $tableName)
-        )->fetchOne() > 0;
+        try {
+            $tableName = $wpdb->prefix . 'minisite_reviews';
 
-        if ($tableExists) {
-            $this->addSql("DROP TABLE IF EXISTS `{$tableName}`");
+            // In down(), $schema is CURRENT (already introspected), so use directly
+            if ($schema->hasTable($tableName)) {
+                $dropSql = "DROP TABLE IF EXISTS `{$tableName}`";
+                $this->logger->info('down() - about to drop table', array('table' => $tableName));
+                $this->logger->debug('down() - SQL', array('sql' => $dropSql));
+                $this->addSql($dropSql);
+                $this->logger->info('down() - completed');
+            } else {
+                $this->logger->info('down() - table does not exist, skipping', array('table' => $tableName));
+            }
+        } catch (\Exception $e) {
+            $this->logger->error(
+                'down() - failed',
+                array('error' => $e->getMessage(), 'trace' => $e->getTraceAsString())
+            );
+
+            throw $e;
         }
     }
 
     /**
-     * Indicate if this migration is transactional
+     * MySQL doesn't support transactional DDL (CREATE TABLE causes implicit commit).
+     * Return false to avoid Doctrine SAVEPOINT exception errors.
+     *
+     * @see https://www.doctrine-project.org/projects/doctrine-migrations/en/3.9/explanation/implicit-commits.html
      */
     public function isTransactional(): bool
     {
-        return true;
+        return false;
     }
 }

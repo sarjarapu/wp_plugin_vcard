@@ -2,10 +2,13 @@
 
 namespace Minisite\Domain\Services;
 
-use Minisite\Domain\Entities\Version;
+use Minisite\Domain\Interfaces\TransactionManagerInterface;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,7 +25,10 @@ class MinisiteDatabaseCoordinator
     private LoggerInterface $logger;
 
     public function __construct(
-        private WordPressManagerInterface $wordPressManager
+        private WordPressManagerInterface $wordPressManager,
+        private VersionRepositoryInterface $versionRepository,
+        private MinisiteRepository $minisiteRepository,
+        private TransactionManagerInterface $transactionManager
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('database-coordinator');
     }
@@ -40,7 +46,7 @@ class MinisiteDatabaseCoordinator
     ): object {
         // Determine hasBeenPublished if not provided
         if ($hasBeenPublished === null) {
-            $hasBeenPublished = $this->wordPressManager->hasBeenPublished($minisiteId);
+            $hasBeenPublished = $this->versionRepository->findPublishedVersion($minisiteId) !== null;
         }
 
         switch ($operationType) {
@@ -103,7 +109,7 @@ class MinisiteDatabaseCoordinator
         }
 
         // Build site JSON from form data
-        $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
+        $formProcessor = new MinisiteFormProcessor($this->wordPressManager, $this->minisiteRepository);
         $siteJson = $formProcessor->buildSiteJsonFromForm($formData, $minisiteId);
 
         $this->logger->debug('Site JSON built successfully', array(
@@ -144,7 +150,7 @@ class MinisiteDatabaseCoordinator
             'operation_type' => 'start_transaction',
         ));
 
-        $this->wordPressManager->startTransaction();
+        $this->transactionManager->startTransaction();
 
         try {
             // Create main minisite entity first (like the old implementation)
@@ -219,7 +225,7 @@ class MinisiteDatabaseCoordinator
                 'operation_type' => 'insert_minisite',
                 ));
 
-                $savedMinisite = $this->wordPressManager->getMinisiteRepository()->insert($minisite);
+                $savedMinisite = $this->minisiteRepository->insert($minisite);
 
                 $this->logger->info('Minisite database insert completed successfully', array(
                 'minisite_id' => $minisiteId,
@@ -254,7 +260,7 @@ class MinisiteDatabaseCoordinator
 
             // Create initial draft version
             $nextVersion = 1; // First version for new minisite
-            $version = new \Minisite\Domain\Entities\Version(
+            $version = new Version(
                 id: null,
                 minisiteId: $minisiteId,
                 versionNumber: $nextVersion,
@@ -322,7 +328,7 @@ class MinisiteDatabaseCoordinator
                     'operation_type' => 'save_version',
                 ));
 
-                $savedVersion = $this->wordPressManager->saveVersion($version);
+                $savedVersion = $this->versionRepository->save($version);
 
                 $this->logger->info('Version database save completed successfully', array(
                     'minisite_id' => $minisiteId,
@@ -361,14 +367,14 @@ class MinisiteDatabaseCoordinator
                 'operation_type' => 'update_current_version',
             ));
 
-            $this->wordPressManager->getMinisiteRepository()->updateCurrentVersionId($minisiteId, $savedVersion->id);
+            $this->minisiteRepository->updateCurrentVersionId($minisiteId, $savedVersion->id);
 
             $this->logger->info('Committing database transaction', array(
                 'minisite_id' => $minisiteId,
                 'operation_type' => 'commit_transaction',
             ));
 
-            $this->wordPressManager->commitTransaction();
+            $this->transactionManager->commitTransaction();
 
             $this->logger->info('New draft created successfully', array(
                 'minisite_id' => $minisiteId,
@@ -387,10 +393,10 @@ class MinisiteDatabaseCoordinator
                 'saved_version_id' => $savedVersion->id ?? 'UNKNOWN',
                 'saved_version_status' => $savedVersion->status ?? 'UNKNOWN',
                 'saved_version_label' => $savedVersion->label ?? 'UNKNOWN',
-                'site_json_size' => strlen(json_encode($savedVersion->siteJson ?? array())),
-                'seo_title_in_version' => $savedVersion->siteJson['seo']['title'] ?? 'NOT_SET',
-                'brand_name_in_version' => $savedVersion->siteJson['brand']['name'] ?? 'NOT_SET',
-                'hero_heading_in_version' => $savedVersion->siteJson['hero']['heading'] ?? 'NOT_SET',
+                'site_json_size' => strlen($savedVersion->siteJson ?? '{}'),
+                'seo_title_in_version' => $this->getSiteJsonValue($savedVersion->siteJson, 'seo', 'title'),
+                'brand_name_in_version' => $this->getSiteJsonValue($savedVersion->siteJson, 'brand', 'name'),
+                'hero_heading_in_version' => $this->getSiteJsonValue($savedVersion->siteJson, 'hero', 'heading'),
             ));
 
             return (object) array(
@@ -413,7 +419,7 @@ class MinisiteDatabaseCoordinator
                 'operation_type' => 'rollback_transaction',
             ));
 
-            $this->wordPressManager->rollbackTransaction();
+            $this->transactionManager->rollbackTransaction();
 
             throw $e;
         }
@@ -434,7 +440,7 @@ class MinisiteDatabaseCoordinator
         }
 
         // Build site JSON from form data
-        $formProcessor = new MinisiteFormProcessor($this->wordPressManager);
+        $formProcessor = new MinisiteFormProcessor($this->wordPressManager, $this->minisiteRepository);
         $siteJson = $formProcessor->buildSiteJsonFromForm($formData, $minisiteId, $minisite);
 
         // Handle coordinate fields
@@ -442,11 +448,11 @@ class MinisiteDatabaseCoordinator
         $lng = ! empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : null;
 
         // Start transaction
-        $this->wordPressManager->startTransaction();
+        $this->transactionManager->startTransaction();
 
         try {
             // Create new draft version
-            $nextVersion = $this->wordPressManager->getNextVersionNumber($minisiteId);
+            $nextVersion = $this->versionRepository->getNextVersionNumber($minisiteId);
             $slugs = $minisite->slugs;
 
             // Create GeoPoint from form data
@@ -539,7 +545,7 @@ class MinisiteDatabaseCoordinator
                 searchTerms: $formProcessor->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms')
             );
 
-            $savedVersion = $this->wordPressManager->saveVersion($version);
+            $savedVersion = $this->versionRepository->save($version);
 
             // Update main table for unpublished minisites
             $this->updateMainTableIfNeeded(
@@ -553,14 +559,14 @@ class MinisiteDatabaseCoordinator
                 $hasBeenPublished
             );
 
-            $this->wordPressManager->commitTransaction();
+            $this->transactionManager->commitTransaction();
 
             return (object) array(
                 'success' => true,
                 'redirectUrl' => $this->wordPressManager->getHomeUrl("/account/sites/{$minisiteId}/edit?draft_saved=1"),
             );
         } catch (\Exception $e) {
-            $this->wordPressManager->rollbackTransaction();
+            $this->transactionManager->rollbackTransaction();
 
             throw $e;
         }
@@ -689,7 +695,29 @@ class MinisiteDatabaseCoordinator
                 $allUpdateFields['title'] = $newTitle;
             }
 
-            $this->wordPressManager->updateMinisiteFields($siteId, $allUpdateFields, (int) $currentUser->ID);
+            $this->minisiteRepository->updateMinisiteFields($siteId, $allUpdateFields, (int) $currentUser->ID);
         }
+    }
+
+    /**
+     * Safely extract a nested value from siteJson string
+     *
+     * @param string|null $siteJson JSON string
+     * @param string $key1 First level key
+     * @param string $key2 Second level key
+     * @return string
+     */
+    private function getSiteJsonValue(?string $siteJson, string $key1, string $key2): string
+    {
+        if ($siteJson === null) {
+            return 'NOT_SET';
+        }
+
+        $decoded = json_decode($siteJson, true);
+        if (! is_array($decoded)) {
+            return 'NOT_SET';
+        }
+
+        return $decoded[$key1][$key2] ?? 'NOT_SET';
     }
 }

@@ -5,9 +5,6 @@ namespace Minisite\Features\NewMinisite\WordPress;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
  * WordPress New Minisite Manager
@@ -19,9 +16,6 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
  */
 class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPressManagerInterface
 {
-    private ?MinisiteRepository $minisiteRepository = null;
-    private ?VersionRepository $versionRepository = null;
-
     /**
      * Constructor
      *
@@ -30,30 +24,6 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
     public function __construct(TerminationHandlerInterface $terminationHandler)
     {
         parent::__construct($terminationHandler);
-    }
-
-    /**
-     * Get minisite repository instance
-     */
-    public function getMinisiteRepository(): MinisiteRepository
-    {
-        if ($this->minisiteRepository === null) {
-            $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
-        }
-
-        return $this->minisiteRepository;
-    }
-
-    /**
-     * Get version repository instance
-     */
-    public function getVersionRepository(): VersionRepository
-    {
-        if ($this->versionRepository === null) {
-            $this->versionRepository = new VersionRepository(db::getWpdb());
-        }
-
-        return $this->versionRepository;
     }
 
     /**
@@ -177,102 +147,5 @@ class WordPressNewMinisiteManager extends BaseWordPressManager implements WordPr
         // For now, allow all logged-in users to create minisites
         // This can be extended with subscription checks, limits, etc.
         return user_can($userId, 'read');
-    }
-
-    /**
-     * Get user's minisite count
-     */
-    public function getUserMinisiteCount(int $userId): int
-    {
-        return $this->getMinisiteRepository()->countByOwner($userId);
-    }
-
-    /**
-     * Get next version number for new minisite
-     */
-    public function getNextVersionNumber(string $minisiteId): int
-    {
-        return $this->getVersionRepository()->getNextVersionNumber($minisiteId);
-    }
-
-    /**
-     * Save version
-     */
-    public function saveVersion(object $version): object
-    {
-        return $this->getVersionRepository()->save($version);
-    }
-
-    /**
-     * Update business info
-     */
-    public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateBusinessInfo($siteId, $fields, $userId);
-    }
-
-    /**
-     * Update coordinates
-     */
-    public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateCoordinates($siteId, $lat, $lng, $userId);
-    }
-
-    /**
-     * Update title
-     */
-    public function updateTitle(string $siteId, string $title): void
-    {
-        $this->getMinisiteRepository()->updateTitle($siteId, $title);
-    }
-
-    /**
-     * Update multiple minisite fields in a single operation
-     */
-    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateMinisiteFields($siteId, $fields, $userId);
-    }
-
-    /**
-     * Start database transaction
-     */
-    public function startTransaction(): void
-    {
-        db::query('START TRANSACTION');
-    }
-
-    /**
-     * Commit database transaction
-     */
-    public function commitTransaction(): void
-    {
-        db::query('COMMIT');
-    }
-
-    /**
-     * Rollback database transaction
-     */
-    public function rollbackTransaction(): void
-    {
-        db::query('ROLLBACK');
-    }
-
-    /**
-     * Find minisite by ID
-     */
-    public function findMinisiteById(string $siteId): ?object
-    {
-        return $this->getMinisiteRepository()->findById($siteId);
-    }
-
-    /**
-     * Check if minisite has been published (always false for new minisites)
-     */
-    public function hasBeenPublished(string $siteId): bool
-    {
-        // New minisites have never been published
-        return false;
     }
 }

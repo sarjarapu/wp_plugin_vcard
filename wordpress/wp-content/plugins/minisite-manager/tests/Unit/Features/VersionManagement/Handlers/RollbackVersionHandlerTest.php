@@ -24,7 +24,7 @@ class RollbackVersionHandlerTest extends TestCase
     public function test_handle_delegates_to_service(): void
     {
         $command = new RollbackVersionCommand('test-site', 123, 456);
-        $expectedResult = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $expectedResult = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $expectedResult->id = 789;
         $expectedResult->versionNumber = 3;
 

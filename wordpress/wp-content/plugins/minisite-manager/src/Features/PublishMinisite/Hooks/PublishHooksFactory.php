@@ -34,13 +34,18 @@ class PublishHooksFactory
         // Create WordPress manager (requires TerminationHandlerInterface)
         $wordPressManager = new WordPressPublishManager($terminationHandler);
 
+        // Get MinisiteRepository
+        global $wpdb;
+        $minisiteRepository = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+
         // Create services
-        $slugAvailabilityService = new SlugAvailabilityService($wordPressManager);
-        $reservationService = new ReservationService($wordPressManager);
-        $subscriptionActivationService = new SubscriptionActivationService($wordPressManager);
+        $slugAvailabilityService = new SlugAvailabilityService($wordPressManager, $minisiteRepository);
+        $reservationService = new ReservationService($wordPressManager, $minisiteRepository);
+        $subscriptionActivationService = new SubscriptionActivationService($wordPressManager, $minisiteRepository);
         $wooCommerceIntegration = new WooCommerceIntegration($wordPressManager, $subscriptionActivationService);
         $publishService = new PublishService(
             $wordPressManager,
+            $minisiteRepository,
             $slugAvailabilityService,
             $reservationService
         );

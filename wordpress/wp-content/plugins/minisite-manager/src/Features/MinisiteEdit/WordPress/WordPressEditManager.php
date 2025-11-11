@@ -5,9 +5,6 @@ namespace Minisite\Features\MinisiteEdit\WordPress;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
-use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
  * WordPress Edit Manager
@@ -19,9 +16,6 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
  */
 class WordPressEditManager extends BaseWordPressManager implements WordPressManagerInterface
 {
-    private ?MinisiteRepository $minisiteRepository = null;
-    private ?VersionRepository $versionRepository = null;
-
     /**
      * Constructor
      *
@@ -30,30 +24,6 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
     public function __construct(TerminationHandlerInterface $terminationHandler)
     {
         parent::__construct($terminationHandler);
-    }
-
-    /**
-     * Get minisite repository instance
-     */
-    public function getMinisiteRepository(): MinisiteRepository
-    {
-        if ($this->minisiteRepository === null) {
-            $this->minisiteRepository = new MinisiteRepository(db::getWpdb());
-        }
-
-        return $this->minisiteRepository;
-    }
-
-    /**
-     * Get version repository instance
-     */
-    public function getVersionRepository(): VersionRepository
-    {
-        if ($this->versionRepository === null) {
-            $this->versionRepository = new VersionRepository(db::getWpdb());
-        }
-
-        return $this->versionRepository;
     }
 
     /**
@@ -170,126 +140,6 @@ class WordPressEditManager extends BaseWordPressManager implements WordPressMana
             sanitize_text_field(wp_unslash($_SERVER['REQUEST_URI'])) : '';
 
         return $this->getHomeUrl('/account/login?redirect_to=' . urlencode($currentUrl));
-    }
-
-    /**
-     * Find minisite by ID
-     */
-    public function findMinisiteById(string $siteId): ?object
-    {
-        return $this->getMinisiteRepository()->findById($siteId);
-    }
-
-    /**
-     * Find version by ID
-     */
-    public function findVersionById(int $versionId): ?object
-    {
-        return $this->getVersionRepository()->findById($versionId);
-    }
-
-    /**
-     * Get latest draft for editing
-     */
-    public function getLatestDraftForEditing(string $siteId): ?object
-    {
-        return $this->getVersionRepository()->getLatestDraftForEditing($siteId);
-    }
-
-    /**
-     * Find latest draft
-     */
-    public function findLatestDraft(string $siteId): ?object
-    {
-        return $this->getVersionRepository()->findLatestDraft($siteId);
-    }
-
-    /**
-     * Get next version number
-     */
-    public function getNextVersionNumber(string $siteId): int
-    {
-        return $this->getVersionRepository()->getNextVersionNumber($siteId);
-    }
-
-    /**
-     * Save version
-     */
-    public function saveVersion(object $version): object
-    {
-        return $this->getVersionRepository()->save($version);
-    }
-
-    /**
-     * Update business info
-     */
-    public function updateBusinessInfo(string $siteId, array $fields, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateBusinessInfo($siteId, $fields, $userId);
-    }
-
-    /**
-     * Update coordinates
-     */
-    public function updateCoordinates(string $siteId, float $lat, float $lng, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateCoordinates($siteId, $lat, $lng, $userId);
-    }
-
-    /**
-     * Update title
-     */
-    public function updateTitle(string $siteId, string $title): void
-    {
-        $this->getMinisiteRepository()->updateTitle($siteId, $title);
-    }
-
-    /**
-     * Update multiple minisite fields in a single operation
-     */
-    public function updateMinisiteFields(string $siteId, array $fields, int $userId): void
-    {
-        $this->getMinisiteRepository()->updateMinisiteFields($siteId, $fields, $userId);
-    }
-
-    /**
-     * Find published version
-     */
-    public function findPublishedVersion(string $siteId): ?object
-    {
-        return $this->getVersionRepository()->findPublishedVersion($siteId);
-    }
-
-    /**
-     * Start database transaction
-     */
-    public function startTransaction(): void
-    {
-        db::query('START TRANSACTION');
-    }
-
-    /**
-     * Commit database transaction
-     */
-    public function commitTransaction(): void
-    {
-        db::query('COMMIT');
-    }
-
-    /**
-     * Rollback database transaction
-     */
-    public function rollbackTransaction(): void
-    {
-        db::query('ROLLBACK');
-    }
-
-    /**
-     * Check if minisite has been published
-     */
-    public function hasBeenPublished(string $siteId): bool
-    {
-        return $this->findPublishedVersion($siteId) !== null;
     }
 
     /**

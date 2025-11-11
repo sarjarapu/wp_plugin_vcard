@@ -8,7 +8,7 @@ use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -25,9 +25,9 @@ class VersionServiceTest extends TestCase
     protected function setUp(): void
     {
         $this->minisiteRepository = $this->createMock(MinisiteRepository::class);
-        $this->versionRepository = $this->createMock(VersionRepository::class);
+        $this->versionRepository = $this->createMock(VersionRepositoryInterface::class);
         $this->wordPressManager = $this->createMock(WordPressVersionManager::class);
-        
+
         $this->versionService = new VersionService(
             $this->minisiteRepository,
             $this->versionRepository,
@@ -110,7 +110,7 @@ class VersionServiceTest extends TestCase
         $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
         $nextVersion = 3;
-        $savedVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $savedVersion = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $savedVersion->id = 789;
         $savedVersion->versionNumber = $nextVersion;
 
@@ -141,7 +141,7 @@ class VersionServiceTest extends TestCase
         $command = new PublishVersionCommand('test-site', 123, 456);
         $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
         $minisite->createdBy = 456;
-        $version = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $version = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $version->status = 'published';
         $version->minisiteId = 'test-site';
 
@@ -171,10 +171,10 @@ class VersionServiceTest extends TestCase
 
         $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
-        $sourceVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $sourceVersion = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $sourceVersion->versionNumber = 2;
         $sourceVersion->minisiteId = $siteId;
-        $sourceVersion->siteJson = ['test' => 'data'];
+        $sourceVersion->siteJson = json_encode(['test' => 'data']);
         $sourceVersion->slugs = new \Minisite\Domain\ValueObjects\SlugPair('test-business', 'test-location');
         $sourceVersion->title = 'Test Title';
         $sourceVersion->name = 'Test Name';
@@ -190,9 +190,9 @@ class VersionServiceTest extends TestCase
         $sourceVersion->schemaVersion = 1;
         $sourceVersion->siteVersion = 1;
         $sourceVersion->searchTerms = 'test';
-        
+
         $nextVersion = 3;
-        $savedVersion = $this->createMock(\Minisite\Domain\Entities\Version::class);
+        $savedVersion = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $savedVersion->id = 999;
         $savedVersion->versionNumber = $nextVersion;
 

@@ -1,0 +1,57 @@
+{
+  "versions": [
+    {
+      "versionNumber": 1,
+      "status": "published",
+      "label": "Initial Published Version",
+      "comment": "Initial published version of Lotus Textiles Mumbai",
+      "businessSlug": "lotus-textiles",
+      "locationSlug": "mumbai",
+      "title": "Lotus Textiles — Mumbai",
+      "name": "Lotus Textiles",
+      "city": "Mumbai",
+      "region": "MH",
+      "countryCode": "IN",
+      "postalCode": "400001",
+      "location": {
+        "latitude": 19.0760,
+        "longitude": 72.8777
+      },
+      "siteTemplate": "v2025",
+      "palette": "rose",
+      "industry": "textile",
+      "defaultLocale": "en-IN",
+      "schemaVersion": 1,
+      "siteVersion": 1,
+      "searchTerms": "lotus textiles fabric mumbai india showroom boutique",
+      "createdAt": "2025-09-29T12:51:33+00:00",
+      "publishedAt": "2025-09-29T12:51:33+00:00",
+      "createdBy": null,
+      "siteJson": {
+        "seo": {
+          "title": "Lotus Textiles — Mumbai",
+          "description": "Premium textiles and fabrics in Mumbai",
+          "keywords": "lotus textiles, fabric, mumbai, india"
+        },
+        "brand": {
+          "palette": "rose",
+          "industry": "textile",
+          "name": "Lotus Textiles"
+        },
+        "hero": {
+          "heading": "Lotus Textiles",
+          "subheading": "Premium textiles and fabrics in Mumbai"
+        },
+        "contact": {
+          "phone": {
+            "text": "+91 22 1234 5678",
+            "link": "+912212345678"
+          },
+          "email": "info@lotustextiles.in",
+          "address": "Mumbai, Maharashtra 400001, India"
+        }
+      }
+    }
+  ]
+}
+

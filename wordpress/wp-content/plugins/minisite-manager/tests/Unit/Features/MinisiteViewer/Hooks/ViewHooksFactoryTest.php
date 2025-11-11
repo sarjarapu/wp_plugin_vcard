@@ -12,10 +12,11 @@ use Minisite\Features\MinisiteViewer\Http\ViewResponseHandler;
 use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 use PHPUnit\Framework\TestCase;
+use Tests\Support\FakeWpdb;
 
 /**
  * Test ViewHooksFactory
- * 
+ *
  * Tests the ViewHooksFactory for proper dependency injection and object creation
  */
 final class ViewHooksFactoryTest extends TestCase
@@ -24,7 +25,25 @@ final class ViewHooksFactoryTest extends TestCase
 
     protected function setUp(): void
     {
+        // Mock global $wpdb
+        global $wpdb;
+        $wpdb = $this->createMock(FakeWpdb::class);
+        $wpdb->prefix = 'wp_';
+
+        // Mock $GLOBALS for repositories (required by factory)
+        $GLOBALS['minisite_version_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface::class);
+
         $this->viewHooksFactory = new ViewHooksFactory();
+    }
+
+    protected function tearDown(): void
+    {
+        // Clean up globals
+        unset($GLOBALS['minisite_version_repository']);
+        global $wpdb;
+        $wpdb = null;
+
+        parent::tearDown();
     }
 
     /**
@@ -80,10 +99,10 @@ final class ViewHooksFactoryTest extends TestCase
         // Verify controller has all required dependencies
         $controllerReflection = new \ReflectionClass($controller);
         $constructor = $controllerReflection->getConstructor();
-        
+
         $this->assertNotNull($constructor);
         $this->assertEquals(6, $constructor->getNumberOfParameters());
-        
+
         $params = $constructor->getParameters();
         $expectedTypes = [
             ViewHandler::class,
@@ -93,7 +112,7 @@ final class ViewHooksFactoryTest extends TestCase
             ViewRenderer::class,
             \Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager::class
         ];
-        
+
         foreach ($params as $index => $param) {
             $this->assertEquals($expectedTypes[$index], $param->getType()->getName());
         }
@@ -216,7 +235,7 @@ final class ViewHooksFactoryTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->viewHooksFactory);
         $constructor = $reflection->getConstructor();
-        
+
         // ViewHooksFactory uses PHP's default constructor (no explicit constructor)
         $this->assertNull($constructor);
     }
@@ -228,7 +247,7 @@ final class ViewHooksFactoryTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->viewHooksFactory);
         $method = $reflection->getMethod('create');
-        
+
         $this->assertTrue($method->isPublic());
     }
 
@@ -239,7 +258,7 @@ final class ViewHooksFactoryTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->viewHooksFactory);
         $method = $reflection->getMethod('create');
-        
+
         $this->assertTrue($method->isStatic());
     }
 }

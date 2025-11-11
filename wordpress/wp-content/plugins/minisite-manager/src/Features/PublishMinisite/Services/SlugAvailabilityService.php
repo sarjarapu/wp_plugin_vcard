@@ -4,6 +4,7 @@ namespace Minisite\Features\PublishMinisite\Services;
 
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Psr\Log\LoggerInterface;
@@ -22,7 +23,8 @@ class SlugAvailabilityService
     private LoggerInterface $logger;
 
     public function __construct(
-        private WordPressPublishManager $wordPressManager
+        private WordPressPublishManager $wordPressManager,
+        private MinisiteRepository $minisiteRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('slug-availability-service');
     }
@@ -60,8 +62,7 @@ class SlugAvailabilityService
 
         try {
             // Check if combination already exists in minisites table
-            $minisiteRepository = $this->wordPressManager->getMinisiteRepository();
-            $existingMinisite = $minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
+            $existingMinisite = $this->minisiteRepository->findBySlugParams($businessSlug, $locationSlug);
 
             if ($existingMinisite) {
                 return (object) array(
@@ -79,13 +80,13 @@ class SlugAvailabilityService
             // Use proper NULL handling for location_slug
             if ($locationSlugForQuery === null) {
                 $reservation = db::get_row(
-                    "SELECT * FROM {$reservationsTable} 
+                    "SELECT * FROM {$reservationsTable}
                      WHERE business_slug = %s AND (location_slug IS NULL OR location_slug = '') AND expires_at > NOW()",
                     array($businessSlug)
                 );
             } else {
                 $reservation = db::get_row(
-                    "SELECT * FROM {$reservationsTable} 
+                    "SELECT * FROM {$reservationsTable}
                      WHERE business_slug = %s AND location_slug = %s AND expires_at > NOW()",
                     array($businessSlug, $locationSlug)
                 );

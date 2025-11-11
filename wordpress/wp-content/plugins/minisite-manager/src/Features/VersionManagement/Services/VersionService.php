@@ -6,9 +6,10 @@ use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;
 use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**
@@ -18,7 +19,7 @@ class VersionService
 {
     public function __construct(
         private MinisiteRepository $minisiteRepository,
-        private VersionRepository $versionRepository,
+        private VersionRepositoryInterface $versionRepository,
         private WordPressVersionManager $wordPressManager
     ) {
     }
@@ -44,7 +45,7 @@ class VersionService
     /**
      * Create a new draft version
      */
-    public function createDraft(CreateDraftCommand $command): \Minisite\Domain\Entities\Version
+    public function createDraft(CreateDraftCommand $command): Version
     {
         // Verify minisite exists and user has access
         $minisite = $this->minisiteRepository->findById($command->siteId);
@@ -58,7 +59,7 @@ class VersionService
 
         $nextVersion = $this->versionRepository->getNextVersionNumber($command->siteId);
 
-        $version = new \Minisite\Domain\Entities\Version(
+        $version = new Version(
             id: null,
             minisiteId: $command->siteId,
             versionNumber: $nextVersion,
@@ -105,7 +106,7 @@ class VersionService
     /**
      * Create a rollback version from a source version
      */
-    public function createRollbackVersion(RollbackVersionCommand $command): \Minisite\Domain\Entities\Version
+    public function createRollbackVersion(RollbackVersionCommand $command): Version
     {
         // Verify minisite exists and user has access
         $minisite = $this->minisiteRepository->findById($command->siteId);
@@ -131,7 +132,7 @@ class VersionService
     private function performPublishVersion(
         string $minisiteId,
         int $versionId,
-        \Minisite\Domain\Entities\Version $version
+        Version $version
     ): void {
         global $wpdb;
 
@@ -140,8 +141,8 @@ class VersionService
         try {
             // Move current published version to draft
             db::query(
-                "UPDATE {$wpdb->prefix}minisite_versions 
-                 SET status = 'draft' 
+                "UPDATE {$wpdb->prefix}minisite_versions
+                 SET status = 'draft'
                  WHERE minisite_id = %s AND status = 'published'",
                 array($minisiteId)
             );
@@ -154,14 +155,14 @@ class VersionService
 
             // Update profile with published version data and current version ID
             db::query(
-                "UPDATE {$wpdb->prefix}minisites 
-                 SET site_json = %s, title = %s, name = %s, city = %s, region = %s, 
-                     country_code = %s, postal_code = %s, site_template = %s, palette = %s, 
-                     industry = %s, default_locale = %s, schema_version = %d, site_version = %d, 
-                     search_terms = %s, _minisite_current_version_id = %d, updated_at = NOW() 
+                "UPDATE {$wpdb->prefix}minisites
+                 SET site_json = %s, title = %s, name = %s, city = %s, region = %s,
+                     country_code = %s, postal_code = %s, site_template = %s, palette = %s,
+                     industry = %s, default_locale = %s, schema_version = %d, site_version = %d,
+                     search_terms = %s, _minisite_current_version_id = %d, updated_at = NOW()
                  WHERE id = %s",
                 array(
-                    $this->wordPressManager->jsonEncode($version->siteJson),
+                    $this->wordPressManager->jsonEncode($version->getSiteJsonAsArray()),
                     $version->title,
                     $version->name,
                     $version->city,
@@ -203,11 +204,11 @@ class VersionService
         string $minisiteId,
         int $sourceVersionId,
         int $userId
-    ): \Minisite\Domain\Entities\Version {
+    ): Version {
         $sourceVersion = $this->versionRepository->findById($sourceVersionId);
         $nextVersion = $this->versionRepository->getNextVersionNumber($minisiteId);
 
-        $rollbackVersion = new \Minisite\Domain\Entities\Version(
+        $rollbackVersion = new Version(
             id: null,
             minisiteId: $minisiteId,
             versionNumber: $nextVersion,
@@ -218,7 +219,7 @@ class VersionService
             createdAt: null,
             publishedAt: null,
             sourceVersionId: $sourceVersionId,
-            siteJson: $sourceVersion->siteJson,
+            siteJson: $sourceVersion->getSiteJsonAsArray(),
             // Copy all profile fields from source version to ensure preview works correctly
             slugs: $sourceVersion->slugs,
             title: $sourceVersion->title,

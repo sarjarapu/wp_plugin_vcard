@@ -2,8 +2,11 @@
 
 namespace Minisite\Features\MinisiteViewer\Services;
 
+use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 
 /**
  * Minisite View Service
@@ -16,7 +19,9 @@ use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 class MinisiteViewService
 {
     public function __construct(
-        private WordPressMinisiteManager $wordPressManager
+        private WordPressMinisiteManager $wordPressManager,
+        private MinisiteRepository $minisiteRepository,
+        private VersionRepositoryInterface $versionRepository
     ) {
     }
 
@@ -29,10 +34,8 @@ class MinisiteViewService
     public function getMinisiteForView(ViewMinisiteCommand $command): array
     {
         try {
-            $minisite = $this->wordPressManager->findMinisiteBySlugs(
-                $command->businessSlug,
-                $command->locationSlug
-            );
+            $slugPair = new SlugPair($command->businessSlug, $command->locationSlug);
+            $minisite = $this->minisiteRepository->findBySlugs($slugPair);
 
             if (! $minisite) {
                 return array(
@@ -61,10 +64,9 @@ class MinisiteViewService
      */
     public function minisiteExists(ViewMinisiteCommand $command): bool
     {
-        return $this->wordPressManager->minisiteExists(
-            $command->businessSlug,
-            $command->locationSlug
-        );
+        $slugPair = new SlugPair($command->businessSlug, $command->locationSlug);
+
+        return $this->minisiteRepository->findBySlugs($slugPair) !== null;
     }
 
     /**
@@ -78,7 +80,7 @@ class MinisiteViewService
     public function getMinisiteForVersionSpecificPreview(string $siteId, ?string $versionId): object
     {
         // Get minisite and verify access
-        $minisite = $this->wordPressManager->findMinisiteById($siteId);
+        $minisite = $this->minisiteRepository->findById($siteId);
         if (! $minisite) {
             throw new \RuntimeException('Minisite not found');
         }
@@ -90,7 +92,6 @@ class MinisiteViewService
         }
 
         // Handle version-specific preview
-        $versionRepo = $this->wordPressManager->getVersionRepository();
         $siteJson = null;
         $version = null;
 
@@ -99,14 +100,15 @@ class MinisiteViewService
             $siteJson = $minisite->siteJson;
         } else {
             // Show specific version
-            $version = $versionRepo->findById((int) $versionId);
+            $version = $this->versionRepository->findById((int) $versionId);
             if (! $version) {
                 throw new \RuntimeException('Version not found');
             }
             if ($version->minisiteId !== $siteId) {
                 throw new \RuntimeException('Version not found');
             }
-            $siteJson = $version->siteJson;
+            // Version stores siteJson as JSON string, decode it for Minisite (which expects array)
+            $siteJson = json_decode($version->siteJson, true);
         }
 
         // Update profile with version-specific data for rendering

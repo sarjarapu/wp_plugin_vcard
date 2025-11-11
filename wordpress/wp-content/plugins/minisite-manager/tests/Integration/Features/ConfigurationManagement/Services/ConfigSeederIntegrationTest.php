@@ -74,6 +74,7 @@ final class ConfigSeederIntegrationTest extends TestCase
         $config = ORMSetup::createAttributeMetadataConfiguration(
             paths: array(
                 __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
             ),
             isDevMode: true
         );
@@ -128,18 +129,8 @@ final class ConfigSeederIntegrationTest extends TestCase
             $connection->connect();
         }
 
-        // Ensure we're not in a transaction
-        if ($connection->isTransactionActive()) {
-            try {
-                $connection->commit();
-            } catch (\Exception $e) {
-                try {
-                    $connection->rollBack();
-                } catch (\Exception $e2) {
-                    // Ignore
-                }
-            }
-        }
+
+        // EntityManager will automatically reconnect when needed
 
         // Get repository
         $classMetadata = $this->em->getClassMetadata(Config::class);

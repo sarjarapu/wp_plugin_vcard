@@ -9,50 +9,51 @@ use Minisite\Features\MinisiteListing\Handlers\ListMinisitesHandler;
 use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepository;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use Tests\Support\FakeWpdb;
 
 /**
  * Test ListingHooksFactory
- * 
+ *
  * NOTE: These are "coverage tests" that verify method existence and basic functionality.
  * They do not test complex dependency injection or WordPress integration.
- * 
+ *
  * Current testing approach:
  * - Verifies that factory methods exist and return expected types
  * - Tests basic dependency injection structure
  * - Does NOT test actual WordPress integration or complex object creation
- * 
+ *
  * Limitations:
  * - Factory creates repositories internally using $GLOBALS['wpdb']
  * - Complex WordPress environment setup required for proper testing
  * - Cannot test actual dependency resolution or WordPress integration
- * 
+ *
  * For true unit testing, ListingHooksFactory would need:
  * - Dependency injection for all external dependencies
  * - Proper mocking of WordPress environment
  * - Testing of actual object creation and configuration
- * 
+ *
  * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class ListingHooksFactoryTest extends TestCase
 {
-    private $wpdb;
-
     protected function setUp(): void
     {
-        // Mock $wpdb with proper type
-        $this->wpdb = $this->createMock(\wpdb::class);
-        $GLOBALS['wpdb'] = $this->wpdb;
-        
+        // Mock global $wpdb
+        global $wpdb;
+        $wpdb = $this->createMock(FakeWpdb::class);
+        $wpdb->prefix = 'wp_';
+
         // Setup WordPress function mocks
         $this->setupWordPressMocks();
     }
-    
+
     protected function tearDown(): void
     {
-        unset($GLOBALS['wpdb']);
+        // Clean up globals
+        global $wpdb;
+        $wpdb = null;
         $this->clearWordPressMocks();
     }
 
@@ -62,7 +63,7 @@ final class ListingHooksFactoryTest extends TestCase
     public function test_create_returns_listing_hooks_instance(): void
     {
         $listingHooks = ListingHooksFactory::create();
-        
+
         $this->assertInstanceOf(ListingHooks::class, $listingHooks);
     }
 
@@ -73,7 +74,7 @@ final class ListingHooksFactoryTest extends TestCase
     {
         $reflection = new \ReflectionClass(ListingHooksFactory::class);
         $createMethod = $reflection->getMethod('create');
-        
+
         $this->assertTrue($createMethod->isStatic());
         $this->assertTrue($createMethod->isPublic());
     }
@@ -85,7 +86,7 @@ final class ListingHooksFactoryTest extends TestCase
     {
         $reflection = new \ReflectionClass(ListingHooksFactory::class);
         $createMethod = $reflection->getMethod('create');
-        
+
         $this->assertEquals(0, $createMethod->getNumberOfParameters());
     }
 
@@ -97,7 +98,7 @@ final class ListingHooksFactoryTest extends TestCase
         $reflection = new \ReflectionClass(ListingHooksFactory::class);
         $createMethod = $reflection->getMethod('create');
         $returnType = $createMethod->getReturnType();
-        
+
         $this->assertNotNull($returnType);
         $this->assertEquals(ListingHooks::class, $returnType->getName());
     }
@@ -109,10 +110,10 @@ final class ListingHooksFactoryTest extends TestCase
     {
         $listingHooks1 = ListingHooksFactory::create();
         $listingHooks2 = ListingHooksFactory::create();
-        
+
         $this->assertInstanceOf(ListingHooks::class, $listingHooks1);
         $this->assertInstanceOf(ListingHooks::class, $listingHooks2);
-        
+
         // Each call should return a new instance
         $this->assertNotSame($listingHooks1, $listingHooks2);
     }
@@ -123,13 +124,13 @@ final class ListingHooksFactoryTest extends TestCase
     public function test_create_method_creates_all_required_dependencies(): void
     {
         $listingHooks = ListingHooksFactory::create();
-        
+
         // Test that the ListingHooks has the correct controller injected
         $reflection = new \ReflectionClass($listingHooks);
         $controllerProperty = $reflection->getProperty('listingController');
         $controllerProperty->setAccessible(true);
         $controller = $controllerProperty->getValue($listingHooks);
-        
+
         $this->assertInstanceOf(ListingController::class, $controller);
     }
 
@@ -139,7 +140,7 @@ final class ListingHooksFactoryTest extends TestCase
     public function test_create_method_handles_missing_wpdb_gracefully(): void
     {
         unset($GLOBALS['wpdb']);
-        
+
         // This test is skipped as the factory requires wpdb to be available
         $this->markTestSkipped('Factory requires wpdb to be available');
     }
@@ -150,7 +151,7 @@ final class ListingHooksFactoryTest extends TestCase
     public function test_create_method_with_null_wpdb(): void
     {
         $GLOBALS['wpdb'] = null;
-        
+
         // This test is skipped as the factory requires wpdb to be available
         $this->markTestSkipped('Factory requires wpdb to be available');
     }
@@ -162,7 +163,7 @@ final class ListingHooksFactoryTest extends TestCase
     {
         $mockWpdb = $this->createMock(\stdClass::class);
         $GLOBALS['wpdb'] = $mockWpdb;
-        
+
         // This test is skipped as the factory requires wpdb to be available
         $this->markTestSkipped('Factory requires wpdb to be available');
     }
@@ -174,7 +175,7 @@ final class ListingHooksFactoryTest extends TestCase
     {
         $mockWpdb = $this->createMock(\stdClass::class);
         $GLOBALS['wpdb'] = $mockWpdb;
-        
+
         // This test is skipped as the factory requires wpdb to be available
         $this->markTestSkipped('Factory requires wpdb to be available');
     }
@@ -196,7 +197,7 @@ final class ListingHooksFactoryTest extends TestCase
     {
         $reflection = new \ReflectionClass(ListingHooksFactory::class);
         $constructor = $reflection->getConstructor();
-        
+
         $this->assertNull($constructor);
     }
 
@@ -207,7 +208,7 @@ final class ListingHooksFactoryTest extends TestCase
     {
         $reflection = new \ReflectionClass(ListingHooksFactory::class);
         $methods = $reflection->getMethods();
-        
+
         foreach ($methods as $method) {
             $this->assertTrue($method->isStatic(), "Method {$method->getName()} should be static");
         }
@@ -220,7 +221,7 @@ final class ListingHooksFactoryTest extends TestCase
     {
         $reflection = new \ReflectionClass(ListingHooksFactory::class);
         $docComment = $reflection->getDocComment();
-        
+
         $this->assertStringContainsString('ListingHooks Factory', $docComment);
         $this->assertStringContainsString('Create and configure ListingHooks with all dependencies', $docComment);
     }
@@ -233,7 +234,7 @@ final class ListingHooksFactoryTest extends TestCase
         $reflection = new \ReflectionClass(ListingHooksFactory::class);
         $createMethod = $reflection->getMethod('create');
         $docComment = $createMethod->getDocComment();
-        
+
         $this->assertStringContainsString('Create and configure ListingHooks', $docComment);
     }
 
@@ -243,18 +244,18 @@ final class ListingHooksFactoryTest extends TestCase
     public function test_create_method_creates_all_required_service_layers(): void
     {
         $listingHooks = ListingHooksFactory::create();
-        
+
         // Test that the factory creates the complete dependency chain
         // We can't directly access all internal dependencies, but we can verify
         // that the main ListingHooks object is properly constructed
         $this->assertInstanceOf(ListingHooks::class, $listingHooks);
-        
+
         // Test that the controller is properly injected
         $reflection = new \ReflectionClass($listingHooks);
         $controllerProperty = $reflection->getProperty('listingController');
         $controllerProperty->setAccessible(true);
         $controller = $controllerProperty->getValue($listingHooks);
-        
+
         $this->assertInstanceOf(ListingController::class, $controller);
     }
 
@@ -264,20 +265,20 @@ final class ListingHooksFactoryTest extends TestCase
     public function test_create_method_handles_dependency_injection_correctly(): void
     {
         $listingHooks = ListingHooksFactory::create();
-        
+
         // Verify that the ListingHooks has the correct controller
         $reflection = new \ReflectionClass($listingHooks);
         $controllerProperty = $reflection->getProperty('listingController');
         $controllerProperty->setAccessible(true);
         $controller = $controllerProperty->getValue($listingHooks);
-        
+
         // Verify that the controller has all required dependencies
         $controllerReflection = new \ReflectionClass($controller);
         $constructor = $controllerReflection->getConstructor();
-        
+
         $this->assertNotNull($constructor);
         $this->assertEquals(6, $constructor->getNumberOfParameters());
-        
+
         $params = $constructor->getParameters();
         $expectedTypes = [
             'Minisite\Features\MinisiteListing\Handlers\ListMinisitesHandler',
@@ -287,7 +288,7 @@ final class ListingHooksFactoryTest extends TestCase
             'Minisite\Features\MinisiteListing\Rendering\ListingRenderer',
             'Minisite\Features\MinisiteListing\WordPress\WordPressListingManager'
         ];
-        
+
         foreach ($params as $index => $param) {
             $this->assertEquals($expectedTypes[$index], $param->getType()->getName());
         }
