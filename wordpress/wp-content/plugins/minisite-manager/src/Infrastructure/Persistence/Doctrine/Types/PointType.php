@@ -81,14 +81,9 @@ final class PointType extends Type
         }
 
         if (! $value instanceof GeoPoint) {
-            $type = gettype($value);
-
-            // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
-            // Exception message for internal use, not user-facing output
             throw new \InvalidArgumentException(
-                'Expected GeoPoint value object, got: ' . $type
+                'Expected GeoPoint value object, got invalid type'
             );
-            // phpcs:enable
         }
 
         if (! $value->isSet()) {
