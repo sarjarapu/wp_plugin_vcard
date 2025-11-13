@@ -26,11 +26,13 @@ class VersionRequestHandlerTest extends TestCase
         $this->formSecurityHelper = $this->createMock(FormSecurityHelper::class);
         $this->requestHandler = new VersionRequestHandler($this->wordPressManager, $this->formSecurityHelper);
         $this->setupWordPressMocks();
-        $this->setupFormSecurityHelperMocks();
     }
 
     protected function tearDown(): void
     {
+        // Clean up global variables
+        unset($_SERVER['REQUEST_METHOD']);
+        $_POST = array();
         $this->clearWordPressMocks();
     }
 
@@ -48,6 +50,45 @@ class VersionRequestHandlerTest extends TestCase
             ->method('getQueryVar')
             ->with('minisite_id')
             ->willReturn('');
+
+        $command = $this->requestHandler->parseListVersionsRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_list_versions_request_returns_null_when_user_not_logged_in(): void
+    {
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getQueryVar')
+            ->with('minisite_id')
+            ->willReturn('test-site-123');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn(null);
+
+        $command = $this->requestHandler->parseListVersionsRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_list_versions_request_returns_null_when_user_id_is_zero(): void
+    {
+        $user = $this->createMock(\WP_User::class);
+        $user->ID = 0;
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getQueryVar')
+            ->with('minisite_id')
+            ->willReturn('test-site-123');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($user);
 
         $command = $this->requestHandler->parseListVersionsRequest();
 
@@ -72,7 +113,7 @@ class VersionRequestHandlerTest extends TestCase
             ->expects($this->once())
             ->method('verifyNonce')
             ->willReturn(true);
-        
+
         $this->formSecurityHelper
             ->expects($this->atLeast(3))
             ->method('getPostData')
@@ -82,11 +123,11 @@ class VersionRequestHandlerTest extends TestCase
                 ['label', '', 'Test Version'],
                 ['version_comment', '', 'Test comment']
             ]);
-        
+
         // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
-        
+
         // Note: sanitizeTextareaField is now handled by helper functions, not directly called
-        
+
         $this->wordPressManager
             ->expects($this->once())
             ->method('getCurrentUser')
@@ -117,21 +158,21 @@ class VersionRequestHandlerTest extends TestCase
             ->expects($this->once())
             ->method('verifyNonce')
             ->willReturn(true);
-        
+
         $this->formSecurityHelper
             ->expects($this->exactly(1))
             ->method('getPostData')
             ->with('site_id', '')
             ->willReturn('test-site-123');
-        
+
         $this->formSecurityHelper
             ->expects($this->exactly(1))
             ->method('getPostDataInt')
             ->with('version_id', 0)
             ->willReturn(789);
-        
+
         // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
-        
+
         $this->wordPressManager
             ->expects($this->once())
             ->method('getCurrentUser')
@@ -161,21 +202,21 @@ class VersionRequestHandlerTest extends TestCase
             ->expects($this->once())
             ->method('verifyNonce')
             ->willReturn(true);
-        
+
         $this->formSecurityHelper
             ->expects($this->exactly(1))
             ->method('getPostData')
             ->with('site_id', '')
             ->willReturn('test-site-123');
-        
+
         $this->formSecurityHelper
             ->expects($this->exactly(1))
             ->method('getPostDataInt')
             ->with('source_version_id', 0)
             ->willReturn(789);
-        
+
         // Note: unslash is now handled by wp_unslash() directly, not through WordPressManager
-        
+
         $this->wordPressManager
             ->expects($this->once())
             ->method('getCurrentUser')
@@ -187,6 +228,342 @@ class VersionRequestHandlerTest extends TestCase
         $this->assertEquals('test-site-123', $command->siteId);
         $this->assertEquals(789, $command->sourceVersionId);
         $this->assertEquals(456, $command->userId);
+    }
+
+    // ===== ERROR PATH TESTS =====
+
+    public function test_parse_create_draft_request_returns_null_when_not_post(): void
+    {
+        unset($_SERVER['REQUEST_METHOD']);
+
+        $command = $this->requestHandler->parseCreateDraftRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_create_draft_request_returns_null_when_get_request(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+
+        $command = $this->requestHandler->parseCreateDraftRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_create_draft_request_returns_null_when_nonce_invalid(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(false);
+
+        $command = $this->requestHandler->parseCreateDraftRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_create_draft_request_returns_null_when_site_id_missing(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('');
+
+        $command = $this->requestHandler->parseCreateDraftRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_create_draft_request_returns_null_when_user_not_logged_in(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('test-site-123');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn(null);
+
+        $command = $this->requestHandler->parseCreateDraftRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_publish_version_request_returns_null_when_not_post(): void
+    {
+        unset($_SERVER['REQUEST_METHOD']);
+
+        $command = $this->requestHandler->parsePublishVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_publish_version_request_returns_null_when_nonce_invalid(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(false);
+
+        $command = $this->requestHandler->parsePublishVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_publish_version_request_returns_null_when_site_id_missing(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('');
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostDataInt')
+            ->with('version_id', 0)
+            ->willReturn(789);
+
+        $command = $this->requestHandler->parsePublishVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_publish_version_request_returns_null_when_version_id_missing(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('test-site-123');
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostDataInt')
+            ->with('version_id', 0)
+            ->willReturn(0);
+
+        $command = $this->requestHandler->parsePublishVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_publish_version_request_returns_null_when_user_not_logged_in(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('test-site-123');
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostDataInt')
+            ->with('version_id', 0)
+            ->willReturn(789);
+
+        // User check happens after site_id and version_id validation
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn(null);
+
+        $command = $this->requestHandler->parsePublishVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_rollback_version_request_returns_null_when_not_post(): void
+    {
+        unset($_SERVER['REQUEST_METHOD']);
+
+        $command = $this->requestHandler->parseRollbackVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_rollback_version_request_returns_null_when_nonce_invalid(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(false);
+
+        $command = $this->requestHandler->parseRollbackVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_rollback_version_request_returns_null_when_site_id_missing(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('');
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostDataInt')
+            ->with('source_version_id', 0)
+            ->willReturn(789);
+
+        $command = $this->requestHandler->parseRollbackVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_rollback_version_request_returns_null_when_source_version_id_missing(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('test-site-123');
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostDataInt')
+            ->with('source_version_id', 0)
+            ->willReturn(0);
+
+        $command = $this->requestHandler->parseRollbackVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_rollback_version_request_returns_null_when_user_not_logged_in(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostData')
+            ->with('site_id', '')
+            ->willReturn('test-site-123');
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('getPostDataInt')
+            ->with('source_version_id', 0)
+            ->willReturn(789);
+
+        // User check happens after site_id and source_version_id validation
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn(null);
+
+        $command = $this->requestHandler->parseRollbackVersionRequest();
+
+        $this->assertNull($command);
+    }
+
+    public function test_parse_create_draft_request_handles_missing_form_fields(): void
+    {
+        $_SERVER['REQUEST_METHOD'] = 'POST';
+        $_POST = [
+            'nonce' => 'valid-nonce',
+            'site_id' => 'test-site-123',
+            // Missing label, version_comment, and all form fields
+        ];
+
+        $user = $this->createMock(\WP_User::class);
+        $user->ID = 456;
+
+        $this->formSecurityHelper
+            ->expects($this->once())
+            ->method('verifyNonce')
+            ->willReturn(true);
+
+        $this->formSecurityHelper
+            ->expects($this->atLeast(2))
+            ->method('getPostData')
+            ->willReturnMap([
+                ['site_id', '', 'test-site-123'],
+                ['label', '', ''],
+                ['version_comment', '', ''],
+            ]);
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getCurrentUser')
+            ->willReturn($user);
+
+        $command = $this->requestHandler->parseCreateDraftRequest();
+
+        // Should still create command with empty/default values
+        $this->assertInstanceOf(CreateDraftCommand::class, $command);
+        $this->assertEquals('test-site-123', $command->siteId);
+        $this->assertEquals(456, $command->userId);
+        $this->assertEquals('', $command->label);
+        $this->assertEquals('', $command->comment);
+        // siteJson should have default structure even with missing fields
+        $this->assertIsArray($command->siteJson);
     }
 
     private function setupWordPressMocks(): void
@@ -214,25 +591,6 @@ class VersionRequestHandlerTest extends TestCase
         }
     }
 
-    private function setupFormSecurityHelperMocks(): void
-    {
-        $this->formSecurityHelper
-            ->expects($this->any())
-            ->method('verifyNonce')
-            ->willReturn(true);
-        $this->formSecurityHelper
-            ->expects($this->any())
-            ->method('getPostData')
-            ->willReturnCallback(function($key, $default = '') {
-                return $_POST[$key] ?? $default;
-            });
-        $this->formSecurityHelper
-            ->expects($this->any())
-            ->method('getPostDataInt')
-            ->willReturnCallback(function($key, $default = 0) {
-                return (int) ($_POST[$key] ?? $default);
-            });
-    }
 
     private function mockWordPressFunction(string $functionName, mixed $returnValue, ?string $param = null): void
     {

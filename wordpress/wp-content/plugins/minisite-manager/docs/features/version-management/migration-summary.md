@@ -230,6 +230,6 @@ There was a previous critical bug where longitude/latitude values kept swapping,
 - [ ] All existing functionality works with Doctrine
 - [ ] Integration tests exist and pass
 - [ ] Unit tests updated for Doctrine
-- [ ] Test coverage ≥ 80% for VersionManagement
+- [ ] Test coverage ≥ 90% for VersionManagement
 - [ ] Old SQL-based code commented out (not deleted)
 

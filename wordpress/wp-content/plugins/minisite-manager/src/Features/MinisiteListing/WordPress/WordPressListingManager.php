@@ -14,6 +14,8 @@ use Minisite\Infrastructure\Http\TerminationHandlerInterface;
  * - Handles listing minisites by owner
  * - Provides WordPress-specific data formatting
  * - Acts as a bridge between the listing service and WordPress
+ *
+ * All common WordPress operations are inherited from BaseWordPressManager.
  */
 class WordPressListingManager extends BaseWordPressManager
 {
@@ -27,24 +29,13 @@ class WordPressListingManager extends BaseWordPressManager
         parent::__construct($terminationHandler);
     }
 
-    /**
-     * Check if user is logged in
-     */
-    public function isUserLoggedIn(): bool
-    {
-        return is_user_logged_in();
-    }
-
-    /**
-     * Get current user
-     */
-    public function getCurrentUser()
-    {
-        return wp_get_current_user();
-    }
+    // ===== LISTING-SPECIFIC METHODS ONLY =====
 
     /**
      * Check if current user has capability
+     *
+     * @param string $capability Capability to check
+     * @return bool True if user has capability
      */
     public function currentUserCan(string $capability): bool
     {
@@ -52,19 +43,16 @@ class WordPressListingManager extends BaseWordPressManager
     }
 
     /**
-     * Get home URL
+     * Get home URL with optional scheme
+     *
+     * Override to support scheme parameter (not in base class).
+     *
+     * @param string $path Optional path to append
+     * @param string|null $scheme Optional URL scheme
+     * @return string Home URL
      */
     public function getHomeUrl(string $path = '', ?string $scheme = null): string
     {
         return home_url($path, $scheme);
-    }
-
-    /**
-     * Redirect to URL
-     * Uses base class redirect() method which handles termination
-     */
-    public function redirect(string $location, int $status = 302): void
-    {
-        parent::redirect($location, $status);
     }
 }

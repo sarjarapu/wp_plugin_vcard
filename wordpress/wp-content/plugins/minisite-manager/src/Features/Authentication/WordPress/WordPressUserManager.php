@@ -11,9 +11,13 @@ use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 /**
  * WordPress User Manager
  *
- * Wraps WordPress user-related functions for better testability and dependency injection.
- * This class provides a clean interface to WordPress user management functions,
- * allowing us to mock them easily in tests.
+ * SINGLE RESPONSIBILITY: Handle WordPress-specific authentication operations
+ * - User authentication and session management
+ * - User creation and retrieval
+ * - Password management
+ * - Template and query utilities
+ *
+ * All common WordPress operations are inherited from BaseWordPressManager.
  * Implements WordPressManagerInterface for compatibility with FormSecurityHelper.
  */
 class WordPressUserManager extends BaseWordPressManager implements WordPressManagerInterface
@@ -143,105 +147,7 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
         return is_email($email);
     }
 
-    /**
-     * Sanitize text field
-     *
-     * @param string $text Text to sanitize
-     * @return string Sanitized text
-     */
-    public function sanitizeText(string $text): string
-    {
-        return sanitize_text_field($text);
-    }
-
-    /**
-     * Sanitize email
-     *
-     * @param string|null $email Email to sanitize
-     * @return string Sanitized email
-     */
-    public function sanitizeEmail(?string $email): string
-    {
-        if ($email === null) {
-            return '';
-        }
-
-        return sanitize_email($email);
-    }
-
-    /**
-     * Sanitize URL
-     *
-     * @param string|null $url URL to sanitize
-     * @return string Sanitized URL
-     */
-    public function sanitizeUrl(?string $url): string
-    {
-        if ($url === null) {
-            return '';
-        }
-
-        return sanitize_url($url);
-    }
-
-    /**
-     * Remove slashes from string
-     *
-     * @param string $string String to unslash
-     * @return string Unslashed string
-     */
-    public function unslash(string $string): string
-    {
-        return wp_unslash($string);
-    }
-
-    /**
-     * Verify nonce
-     *
-     * @param string $nonce Nonce to verify
-     * @param string $action Action name
-     * @return bool True if valid, false otherwise
-     */
-    public function verifyNonce(string $nonce, string $action): bool
-    {
-        return wp_verify_nonce($nonce, $action) !== false;
-    }
-
-    /**
-     * Redirect to URL
-     * Uses base class redirect() method which handles termination
-     *
-     * @param string $location URL to redirect to
-     * @param int $status HTTP status code
-     * @return void
-     */
-    public function redirect(string $location, int $status = 302): void
-    {
-        parent::redirect($location, $status);
-    }
-
-    /**
-     * Get home URL
-     *
-     * @param string $path Optional path to append
-     * @return string Home URL
-     */
-    public function getHomeUrl(string $path = ''): string
-    {
-        return home_url($path);
-    }
-
-    /**
-     * Get query variable
-     *
-     * @param string $var Variable name
-     * @param mixed $default Default value
-     * @return mixed Query variable value
-     */
-    public function getQueryVar(string $var, $default = '')
-    {
-        return get_query_var($var, $default);
-    }
+    // ===== AUTHENTICATION-SPECIFIC METHODS ONLY =====
 
     /**
      * Set HTTP status header
@@ -287,39 +193,5 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
     public function retrievePassword(string $user_login)
     {
         return retrieve_password($user_login);
-    }
-
-    // WordPressManagerInterface methods - Authentication-specific implementations
-
-    /**
-     * Sanitize text field (required by WordPressManagerInterface)
-     */
-    public function sanitizeTextField(?string $text): string
-    {
-        if ($text === null) {
-            return '';
-        }
-
-        return sanitize_text_field(wp_unslash($text));
-    }
-
-    /**
-     * Sanitize textarea field (required by WordPressManagerInterface)
-     */
-    public function sanitizeTextareaField(?string $text): string
-    {
-        if ($text === null) {
-            return '';
-        }
-
-        return sanitize_textarea_field(wp_unslash($text));
-    }
-
-    /**
-     * Create nonce (required by WordPressManagerInterface)
-     */
-    public function createNonce(string $action): string
-    {
-        return wp_create_nonce($action);
     }
 }
