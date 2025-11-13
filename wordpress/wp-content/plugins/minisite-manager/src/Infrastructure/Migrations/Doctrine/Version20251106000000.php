@@ -23,7 +23,6 @@ use Doctrine\DBAL\Schema\Schema;
  */
 final class Version20251106000000 extends BaseDoctrineMigration
 {
-
     public function getDescription(): string
     {
         return 'Create minisites table for minisite management '
@@ -129,5 +128,4 @@ final class Version20251106000000 extends BaseDoctrineMigration
             throw $e;
         }
     }
-
 }

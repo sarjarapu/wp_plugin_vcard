@@ -14,7 +14,6 @@ use Doctrine\DBAL\Schema\Schema;
  */
 final class Version20251103000000 extends BaseDoctrineMigration
 {
-
     public function getDescription(): string
     {
         return 'Create minisite_config table for configuration management';
@@ -100,5 +99,4 @@ final class Version20251103000000 extends BaseDoctrineMigration
             throw $e;
         }
     }
-
 }

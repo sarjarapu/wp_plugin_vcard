@@ -154,5 +154,4 @@ final class Version20251110000000 extends BaseDoctrineMigration
             $this->logger->info('up() - event already exists, skipping', array('event' => $eventName));
         }
     }
-
 }

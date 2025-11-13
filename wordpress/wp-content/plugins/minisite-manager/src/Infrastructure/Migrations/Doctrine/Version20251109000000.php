@@ -48,7 +48,14 @@ final class Version20251109000000 extends BaseDoctrineMigration
                 `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
                 `minisite_id` VARCHAR(32) NOT NULL,
                 `payment_id` BIGINT UNSIGNED NULL,
-                `action` ENUM('initial_payment','renewal','expiration','grace_period_start','grace_period_end','reclamation') NOT NULL,
+                `action` ENUM(
+                    'initial_payment',
+                    'renewal',
+                    'expiration',
+                    'grace_period_start',
+                    'grace_period_end',
+                    'reclamation'
+                ) NOT NULL,
                 `amount` DECIMAL(10,2) NULL,
                 `currency` CHAR(3) NULL,
                 `payment_reference` VARCHAR(255) NULL,
@@ -128,5 +135,4 @@ final class Version20251109000000 extends BaseDoctrineMigration
             throw $e;
         }
     }
-
 }

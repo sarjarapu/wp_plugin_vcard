@@ -7,7 +7,6 @@ parameters:
     - vendor
   ignoreErrors:
     - '#Function .* not found#'
-    - '#PHPDoc tag .* references unknown parameter#'
     - '#Right side of && is always false#'
     - '#Negated boolean expression is always true#'
     - '#Result of \|\| is always true#'

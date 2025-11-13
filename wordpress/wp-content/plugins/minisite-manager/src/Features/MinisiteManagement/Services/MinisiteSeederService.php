@@ -297,4 +297,3 @@ class MinisiteSeederService
         return $minisiteIds;
     }
 }
-

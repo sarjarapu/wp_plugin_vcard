@@ -28,7 +28,6 @@ use Doctrine\DBAL\Schema\Schema;
  */
 final class Version20251104000000 extends BaseDoctrineMigration
 {
-
     public function getDescription(): string
     {
         return 'Create minisite_reviews table with all MVP fields (fresh start, replaces old SQL file-based creation)';
@@ -134,5 +133,4 @@ final class Version20251104000000 extends BaseDoctrineMigration
             throw $e;
         }
     }
-
 }

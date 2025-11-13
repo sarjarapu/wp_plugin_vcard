@@ -69,7 +69,8 @@ final class ActivationHandler
     public static function seedTestData(): void
     {
         // Ensure repositories are initialized first
-        if (! isset($GLOBALS['minisite_repository']) ||
+        if (
+            ! isset($GLOBALS['minisite_repository']) ||
             ! isset($GLOBALS['minisite_version_repository']) ||
             ! isset($GLOBALS['minisite_review_repository'])
         ) {
@@ -79,7 +80,8 @@ final class ActivationHandler
             }
 
             // If still not available, retry on next init hook
-            if (! isset($GLOBALS['minisite_repository']) ||
+            if (
+                ! isset($GLOBALS['minisite_repository']) ||
                 ! isset($GLOBALS['minisite_version_repository']) ||
                 ! isset($GLOBALS['minisite_review_repository'])
             ) {

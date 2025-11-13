@@ -1,6 +1,10 @@
 # `_1_0_0_CreateBase.php` Status Report
 
-## Current State (After Phase 3 Completion)
+## ✅ **PHASE 4 COMPLETE** - All Legacy Code Archived
+
+**Status**: All table creation and seeding has been migrated to Doctrine migrations and seeder services. The legacy `_1_0_0_CreateBase.php` file and entire legacy migration system have been moved to `delete_me/` folder.
+
+## Current State (After Phase 4 Completion)
 
 ### ✅ **Already Migrated to Doctrine Migrations**
 
@@ -17,148 +21,79 @@ The following table creations have been **completely moved** to Doctrine migrati
 
 All foreign keys have also been moved to Doctrine migrations.
 
-### ⚠️ **Still in `_1_0_0_CreateBase.php`**
+### ✅ **All Legacy Code Archived**
 
-#### 1. **Minisites Table Creation** (Line 48-51)
-```php
-SqlLoader::loadAndExecute(
-    'minisites.sql',
-    SqlLoader::createStandardVariables($wpdb)
-);
-```
-**Status**: ⚠️ **DUPLICATE** - This table is already created by `Version20251106000000.php`
-**Action Needed**: Remove this SQL file loading since Doctrine migration handles it
+**Status**: All code from `_1_0_0_CreateBase.php` has been migrated or archived:
 
-#### 2. **Test Data Seeding** (`seedTestData()` method, Line 508-904)
-**What it does**:
-- Inserts 4 test minisites using `insertMinisite()` (direct SQL via `$wpdb`)
-- Inserts versions using direct SQL via `$wpdb` (lines 564-675)
-- Uses `ReviewSeederService` for reviews (lines 677-719) ✅ **Already using seeder!**
+1. ✅ **Table Creation**: All tables now created by Doctrine migrations
+2. ✅ **Test Data Seeding**: All seeding now uses seeder services:
+   - `MinisiteSeederService` for minisites
+   - `VersionSeederService` for versions
+   - `ReviewSeederService` for reviews
+3. ✅ **Helper Methods**: All moved to appropriate seeder services
+4. ✅ **Legacy File**: Moved to `delete_me/src/Infrastructure/Versioning/Migrations/`
+5. ✅ **Legacy System**: Entire migration system moved to `delete_me/`
 
-**Status**: ⚠️ **PARTIALLY MIGRATED**
-- ✅ Reviews: Already using `ReviewSeederService`
-- ❌ Minisites: Still using direct SQL (`insertMinisite()`)
-- ❌ Versions: Still using direct SQL (should use `VersionSeederService`)
+## ✅ Phase 4 Complete
 
-#### 3. **Helper Methods** (Still needed for seeding, but should be in seeder service)
-- `loadMinisiteFromJson()` (Line 281-316) - Loads JSON from `data/json/minisites/`
-- `convertLocationFormat()` (Line 321-335) - Converts location format
-- `setComputedFields()` (Line 340-361) - Sets computed/audit fields
-- `insertMinisite()` (Line 366-423) - Direct SQL insertion via `$wpdb`
+### What Was Accomplished
 
-**Status**: ⚠️ **Should be moved to MinisiteSeederService**
-
-#### 4. **Unused Methods** (Can be removed)
-- `addForeignKeyIfNotExists()` (Line 254-276) - No longer needed (Doctrine migrations handle this)
-- `insertReview()` (Line 437-467) - Already commented out, uses ReviewSeederService
-
-## What's Pending
-
-### Phase 4: Create MinisiteSeederService (NOT STARTED)
-
-**Goal**: Move test data seeding from `_1_0_0_CreateBase.php` to dedicated seeder service
-
-**Tasks**:
-
-1. **Create `MinisiteSeederService`**:
+1. ✅ **Created `MinisiteSeederService`**:
    - Location: `src/Features/MinisiteManagement/Services/MinisiteSeederService.php`
-   - Pattern: Follow `ReviewSeederService` and `VersionSeederService`
-   - Inject: `MinisiteRepository` and `VersionRepository`
-   - Methods needed:
-     - `loadMinisiteFromJson(string $jsonFile): array` - Load from JSON
-     - `createMinisiteFromJsonData(array $minisiteData): Minisite` - Create entity from JSON
-     - `seedAllTestMinisites(): array` - Seed all 4 test minisites, returns minisite IDs
-     - Helper methods: `convertLocationFormat()`, `setComputedFields()`
+   - Implements: `loadMinisiteFromJson()`, `createMinisiteFromJsonData()`, `seedAllTestMinisites()`
+   - Uses: `MinisiteRepository` for persistence
 
-2. **Update `seedTestData()` in `_1_0_0_CreateBase.php`**:
-   - Replace `insertMinisite()` calls with `MinisiteSeederService`
-   - Replace direct version SQL insertion with `VersionSeederService`
-   - Keep `ReviewSeederService` call (already working)
-   - Simplify to orchestrate seeders only
+2. ✅ **Updated `ActivationHandler`**:
+   - Replaced legacy migration calls with seeder services
+   - Refactored `seedTestData()` into modular methods:
+     - `seedTestMinisites()` - Uses `MinisiteSeederService`
+     - `seedTestVersions()` - Uses `VersionSeederService::createInitialVersionFromMinisite()`
+     - `seedTestReviews()` - Uses `ReviewSeederService`
 
-3. **Remove helper methods from `_1_0_0_CreateBase.php`**:
-   - Move `loadMinisiteFromJson()` to `MinisiteSeederService`
-   - Move `convertLocationFormat()` to `MinisiteSeederService`
-   - Move `setComputedFields()` to `MinisiteSeederService`
-   - Remove `insertMinisite()` (replaced by repository)
-   - Remove `addForeignKeyIfNotExists()` (no longer needed)
+3. ✅ **Archived Legacy Code**:
+   - Moved `_1_0_0_CreateBase.php` to `delete_me/`
+   - Moved entire legacy migration system to `delete_me/`:
+     - `VersioningController`
+     - `MigrationRunner`
+     - `MigrationLocator`
+     - `Migration` interface
+     - `DbDelta` support class
+     - `SqlLoader` utility
+   - Moved all related tests to `delete_me/`
 
-4. **Remove duplicate minisites table creation**:
-   - Remove `SqlLoader::loadAndExecute('minisites.sql', ...)` call
-   - Table is already created by `Version20251106000000.php`
-
-## Current File Breakdown
-
-### What `_1_0_0_CreateBase.php` Currently Does:
-
-1. **Table Creation** (Line 48-51):
-   - ❌ Creates `minisites` table via SQL file (DUPLICATE - already in Doctrine migration)
-
-2. **Test Data Seeding** (Line 508-904):
-   - ✅ Reviews: Uses `ReviewSeederService` (already migrated)
-   - ❌ Minisites: Uses direct SQL `insertMinisite()` (needs MinisiteSeederService)
-   - ❌ Versions: Uses direct SQL `db::insert()` (should use VersionSeederService)
-
-3. **Helper Methods** (Lines 251-423):
-   - `addForeignKeyIfNotExists()` - No longer needed
-   - `loadMinisiteFromJson()` - Should move to MinisiteSeederService
-   - `convertLocationFormat()` - Should move to MinisiteSeederService
-   - `setComputedFields()` - Should move to MinisiteSeederService
-   - `insertMinisite()` - Should be replaced with MinisiteRepository
+4. ✅ **Updated All References**:
+   - `ActivationHandler` now uses Doctrine migrations + seeder services
+   - `DeactivationHandler` updated to remove legacy references
+   - All active code now uses Doctrine-based services
 
 ## Migration Status Summary
 
-| Component                      | Status        | Location                                                |
-| ------------------------------ | ------------- | ------------------------------------------------------- |
-| minisites table                | ✅ Migrated    | `Version20251106000000.php`                             |
-| minisite_reviews table         | ✅ Migrated    | `Version20251104000000.php`                             |
-| minisite_versions table        | ✅ Migrated    | `Version20251105000000.php`                             |
-| minisite_bookmarks table       | ✅ Migrated    | `Version20251107000000.php`                             |
-| minisite_payments table        | ✅ Migrated    | `Version20251108000000.php`                             |
-| minisite_payment_history table | ✅ Migrated    | `Version20251109000000.php`                             |
-| minisite_reservations table    | ✅ Migrated    | `Version20251110000000.php`                             |
-| purge_reservations event       | ✅ Migrated    | `Version20251110000000.php`                             |
-| All foreign keys               | ✅ Migrated    | In respective Doctrine migrations                       |
-| Review seeding                 | ✅ Migrated    | `ReviewSeederService`                                   |
-| Minisite seeding               | ❌ **PENDING** | Still in `_1_0_0_CreateBase.php`                        |
-| Version seeding                | ⚠️ **PARTIAL** | `VersionSeederService` exists but not used in migration |
+| Component                      | Status     | Location                                                   |
+| ------------------------------ | ---------- | ---------------------------------------------------------- |
+| minisites table                | ✅ Migrated | `Version20251106000000.php`                                |
+| minisite_reviews table         | ✅ Migrated | `Version20251104000000.php`                                |
+| minisite_versions table        | ✅ Migrated | `Version20251105000000.php`                                |
+| minisite_bookmarks table       | ✅ Migrated | `Version20251107000000.php`                                |
+| minisite_payments table        | ✅ Migrated | `Version20251108000000.php`                                |
+| minisite_payment_history table | ✅ Migrated | `Version20251109000000.php`                                |
+| minisite_reservations table    | ✅ Migrated | `Version20251110000000.php`                                |
+| purge_reservations event       | ✅ Migrated | `Version20251110000000.php`                                |
+| All foreign keys               | ✅ Migrated | In respective Doctrine migrations                          |
+| Review seeding                 | ✅ Migrated | `ReviewSeederService`                                      |
+| Minisite seeding               | ✅ Migrated | `MinisiteSeederService`                                    |
+| Version seeding                | ✅ Migrated | `VersionSeederService::createInitialVersionFromMinisite()` |
 
-## Next Steps (Phase 4)
+## ✅ Migration Complete
 
-1. **Create `MinisiteSeederService`**:
-   - Follow pattern from `ReviewSeederService`
-   - Use `MinisiteRepository` for persistence
-   - Handle location_point via repository (raw SQL)
+**All blockers removed**:
+1. ✅ `MinisiteSeederService` created and functional
+2. ✅ `seedTestData()` now uses seeder services exclusively
+3. ✅ Activation/deactivation handlers updated to use Doctrine migrations + seeders
 
-2. **Update `seedTestData()`**:
-   - Use `MinisiteSeederService::seedAllTestMinisites()` → returns minisite IDs
-   - Use `VersionSeederService::seedAllTestVersions($minisiteIds)`
-   - Keep `ReviewSeederService::seedAllTestReviews($minisiteIds)` (already working)
+**Legacy code status**:
+- `_1_0_0_CreateBase.php` → Moved to `delete_me/src/Infrastructure/Versioning/Migrations/`
+- Entire legacy migration system → Moved to `delete_me/`
+- All active code → Uses Doctrine-based services
 
-3. **Remove duplicate table creation**:
-   - Remove `SqlLoader::loadAndExecute('minisites.sql', ...)`
-   - Add comment noting table is created by Doctrine migration
-
-4. **Clean up helper methods**:
-   - Move JSON loading/formatting to seeder service
-   - Remove direct SQL insertion methods
-
-## Estimated Remaining Work
-
-- **MinisiteSeederService creation**: 2-3 hours
-- **Update seedTestData()**: 1 hour
-- **Remove duplicate code**: 30 minutes
-- **Testing**: 1 hour
-- **Total**: ~4-5 hours
-
-## Blockers to Removing `_1_0_0_CreateBase.php`
-
-Once Phase 4 is complete, `_1_0_0_CreateBase.php` can potentially be:
-- **Simplified** to only call seeder services (if still needed for activation)
-- **Or removed entirely** if activation handlers call seeders directly
-
-**Current blockers**:
-1. ❌ No `MinisiteSeederService` exists yet
-2. ⚠️ `seedTestData()` still uses direct SQL for minisites and versions
-3. ⚠️ Activation/deactivation handlers may still reference this migration
+**Next Steps**: See `PENDING-AFTER-PHASE4.md` for remaining tasks (Phase 5, Phase 6, future refactoring)
 

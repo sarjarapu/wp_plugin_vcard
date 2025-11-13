@@ -31,7 +31,6 @@ use Doctrine\DBAL\Schema\Schema;
  */
 final class Version20251105000000 extends BaseDoctrineMigration
 {
-
     public function getDescription(): string
     {
         return 'Create minisite_versions table for version management '
@@ -139,5 +138,4 @@ final class Version20251105000000 extends BaseDoctrineMigration
             throw $e;
         }
     }
-
 }

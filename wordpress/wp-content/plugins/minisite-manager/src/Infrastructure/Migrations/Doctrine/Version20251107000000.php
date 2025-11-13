@@ -105,5 +105,4 @@ final class Version20251107000000 extends BaseDoctrineMigration
             throw $e;
         }
     }
-
 }
