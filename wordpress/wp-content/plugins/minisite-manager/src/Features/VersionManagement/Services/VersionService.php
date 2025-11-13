@@ -8,7 +8,7 @@ use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
@@ -18,7 +18,7 @@ use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 class VersionService
 {
     public function __construct(
-        private MinisiteRepository $minisiteRepository,
+        private MinisiteRepositoryInterface $minisiteRepository,
         private VersionRepositoryInterface $versionRepository,
         private WordPressVersionManager $wordPressManager
     ) {

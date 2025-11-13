@@ -7,7 +7,7 @@ use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Domain\Services\MinisiteIdGenerator;
 use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Minisite\Infrastructure\Persistence\WordPressTransactionManager;
 use Psr\Log\LoggerInterface;
@@ -26,7 +26,7 @@ class NewMinisiteService
 
     public function __construct(
         private WordPressNewMinisiteManager $wordPressManager,
-        private MinisiteRepository $minisiteRepository,
+        private MinisiteRepositoryInterface $minisiteRepository,
         private VersionRepositoryInterface $versionRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('new-minisite');

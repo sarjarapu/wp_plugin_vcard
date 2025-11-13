@@ -34,9 +34,13 @@ class PublishHooksFactory
         // Create WordPress manager (requires TerminationHandlerInterface)
         $wordPressManager = new WordPressPublishManager($terminationHandler);
 
-        // Get MinisiteRepository
-        global $wpdb;
-        $minisiteRepository = new \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository($wpdb);
+        // Require Doctrine-based MinisiteRepository from global (initialized by PluginBootstrap)
+        if (! isset($GLOBALS['minisite_repository'])) {
+            throw new \RuntimeException(
+                'MinisiteRepository not initialized. Ensure PluginBootstrap::initializeConfigSystem() is called.'
+            );
+        }
+        $minisiteRepository = $GLOBALS['minisite_repository'];
 
         // Create services
         $slugAvailabilityService = new SlugAvailabilityService($wordPressManager, $minisiteRepository);

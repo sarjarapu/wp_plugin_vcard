@@ -4,7 +4,7 @@ namespace Minisite\Features\PublishMinisite\Services;
 
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Minisite\Infrastructure\Utils\ReservationCleanup;
 use Psr\Log\LoggerInterface;
@@ -24,7 +24,7 @@ class SlugAvailabilityService
 
     public function __construct(
         private WordPressPublishManager $wordPressManager,
-        private MinisiteRepository $minisiteRepository
+        private MinisiteRepositoryInterface $minisiteRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('slug-availability-service');
     }

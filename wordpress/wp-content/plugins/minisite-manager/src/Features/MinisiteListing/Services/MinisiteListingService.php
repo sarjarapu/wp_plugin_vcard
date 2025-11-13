@@ -4,7 +4,7 @@ namespace Minisite\Features\MinisiteListing\Services;
 
 use Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
 
 /**
  * Minisite Listing Service
@@ -15,7 +15,7 @@ class MinisiteListingService
 {
     public function __construct(
         private WordPressListingManager $listingManager,
-        private MinisiteRepository $minisiteRepository
+        private MinisiteRepositoryInterface $minisiteRepository
     ) {
     }
 

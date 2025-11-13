@@ -2,8 +2,8 @@
 
 namespace Minisite\Infrastructure\Persistence\Repositories;
 
-use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 
 interface MinisiteRepositoryInterface
 {

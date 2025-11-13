@@ -2,12 +2,12 @@
 
 namespace Minisite\Features\MinisiteEdit\Services;
 
-use Minisite\Domain\Entities\Version;
 use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
 use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
 use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Minisite\Infrastructure\Persistence\WordPressTransactionManager;
 use Psr\Log\LoggerInterface;
@@ -26,7 +26,7 @@ class EditService
 
     public function __construct(
         private WordPressEditManager $wordPressManager,
-        private MinisiteRepository $minisiteRepository,
+        private MinisiteRepositoryInterface $minisiteRepository,
         private VersionRepositoryInterface $versionRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('minisite-edit-service');

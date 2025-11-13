@@ -4,7 +4,7 @@ namespace Minisite\Features\PublishMinisite\Services;
 
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,7 +22,7 @@ class PublishService
 
     public function __construct(
         private WordPressPublishManager $wordPressManager,
-        private MinisiteRepository $minisiteRepository,
+        private MinisiteRepositoryInterface $minisiteRepository,
         private SlugAvailabilityService $slugAvailabilityService,
         private ReservationService $reservationService
     ) {

@@ -4,7 +4,7 @@ namespace Minisite\Domain\Services;
 
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,7 +22,7 @@ class MinisiteFormProcessor
 
     public function __construct(
         private WordPressManagerInterface $wordPressManager,
-        private MinisiteRepository $minisiteRepository
+        private MinisiteRepositoryInterface $minisiteRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('form-processor');
     }

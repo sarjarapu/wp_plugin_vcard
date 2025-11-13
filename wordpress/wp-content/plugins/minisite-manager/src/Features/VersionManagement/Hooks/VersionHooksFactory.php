@@ -13,7 +13,6 @@ use Minisite\Features\VersionManagement\Http\VersionResponseHandler;
 use Minisite\Features\VersionManagement\Rendering\VersionRenderer;
 use Minisite\Features\VersionManagement\Services\VersionService;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Minisite\Infrastructure\Security\FormSecurityHelper;
 
 /**
@@ -26,16 +25,18 @@ class VersionHooksFactory
      */
     public static function create(): VersionHooks
     {
-        // Create repositories
-        global $wpdb;
-        $minisiteRepository = new MinisiteRepository($wpdb);
-
-        // Require Doctrine-based VersionRepository from global (initialized by PluginBootstrap)
+        // Require Doctrine-based repositories from global (initialized by PluginBootstrap)
+        if (! isset($GLOBALS['minisite_repository'])) {
+            throw new \RuntimeException(
+                'MinisiteRepository not initialized. Ensure PluginBootstrap::initializeConfigSystem() is called.'
+            );
+        }
         if (! isset($GLOBALS['minisite_version_repository'])) {
             throw new \RuntimeException(
                 'VersionRepository not initialized. Ensure PluginBootstrap::initializeConfigSystem() is called.'
             );
         }
+        $minisiteRepository = $GLOBALS['minisite_repository'];
         $versionRepository = $GLOBALS['minisite_version_repository'];
 
         // Create termination handler for WordPress manager
