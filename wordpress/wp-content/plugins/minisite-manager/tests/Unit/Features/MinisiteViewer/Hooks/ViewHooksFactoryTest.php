@@ -31,6 +31,7 @@ final class ViewHooksFactoryTest extends TestCase
         $wpdb->prefix = 'wp_';
 
         // Mock $GLOBALS for repositories (required by factory)
+        $GLOBALS['minisite_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface::class);
         $GLOBALS['minisite_version_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface::class);
 
         $this->viewHooksFactory = new ViewHooksFactory();
@@ -39,6 +40,7 @@ final class ViewHooksFactoryTest extends TestCase
     protected function tearDown(): void
     {
         // Clean up globals
+        unset($GLOBALS['minisite_repository']);
         unset($GLOBALS['minisite_version_repository']);
         global $wpdb;
         $wpdb = null;

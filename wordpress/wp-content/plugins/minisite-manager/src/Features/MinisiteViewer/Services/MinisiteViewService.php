@@ -96,8 +96,8 @@ class MinisiteViewService
         $version = null;
 
         if ($versionId === 'current' || ! $versionId) {
-            // Show current published version (from profile.siteJson)
-            $siteJson = $minisite->siteJson;
+            // Show current published version - get as array for return value
+            $siteJson = $minisite->getSiteJsonAsArray();
         } else {
             // Show specific version
             $version = $this->versionRepository->findById((int) $versionId);
@@ -107,12 +107,12 @@ class MinisiteViewService
             if ($version->minisiteId !== $siteId) {
                 throw new \RuntimeException('Version not found');
             }
-            // Version stores siteJson as JSON string, decode it for Minisite (which expects array)
+            // Version stores siteJson as JSON string, decode it for return value
             $siteJson = json_decode($version->siteJson, true);
-        }
 
-        // Update profile with version-specific data for rendering
-        $minisite->siteJson = $siteJson;
+            // Update minisite with version-specific siteJson for rendering
+            $minisite->setSiteJsonFromArray($siteJson);
+        }
 
         // If showing a specific version, also update the profile fields from version data
         if ($version) {

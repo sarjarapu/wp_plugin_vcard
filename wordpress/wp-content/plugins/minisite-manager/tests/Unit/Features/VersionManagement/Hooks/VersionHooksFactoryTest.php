@@ -17,6 +17,7 @@ class VersionHooksFactoryTest extends TestCase
         $wpdb->prefix = 'wp_';
 
         // Mock $GLOBALS for repositories (required by factory)
+        $GLOBALS['minisite_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface::class);
         $GLOBALS['minisite_version_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface::class);
 
         $hooks = VersionHooksFactory::create();
@@ -24,6 +25,7 @@ class VersionHooksFactoryTest extends TestCase
         $this->assertInstanceOf(VersionHooks::class, $hooks);
 
         // Cleanup
+        unset($GLOBALS['minisite_repository']);
         unset($GLOBALS['minisite_version_repository']);
         $wpdb = null;
     }

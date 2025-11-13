@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Infrastructure\Persistence\Repositories;
 
 use DateTimeImmutable;
-use Minisite\Domain\Entities\Minisite;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Domain\Entities\Version;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;

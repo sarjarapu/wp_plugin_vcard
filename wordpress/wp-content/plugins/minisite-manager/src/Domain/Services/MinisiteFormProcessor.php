@@ -130,11 +130,16 @@ class MinisiteFormProcessor
             ));
             $siteJson = $this->buildEmptySiteJson();
         } else {
+            // Handle both array (old entity) and string (new Doctrine entity)
+            if (is_string($minisite->siteJson)) {
+                $siteJson = json_decode($minisite->siteJson, true) ?: array();
+            } else {
+                $siteJson = $minisite->siteJson;
+            }
             $this->logger->debug('Using existing siteJson as base', array(
                 'site_id' => $siteId,
-                'existing_site_json_size' => strlen(json_encode($minisite->siteJson)),
+                'existing_site_json_size' => is_string($minisite->siteJson) ? strlen($minisite->siteJson) : strlen(json_encode($minisite->siteJson)),
             ));
-            $siteJson = $minisite->siteJson;
         }
 
         // Update each section if form data is provided

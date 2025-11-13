@@ -45,6 +45,9 @@ final class ListingHooksFactoryTest extends TestCase
         $wpdb = $this->createMock(FakeWpdb::class);
         $wpdb->prefix = 'wp_';
 
+        // Mock $GLOBALS for repositories (required by factory)
+        $GLOBALS['minisite_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface::class);
+
         // Setup WordPress function mocks
         $this->setupWordPressMocks();
     }
@@ -52,6 +55,7 @@ final class ListingHooksFactoryTest extends TestCase
     protected function tearDown(): void
     {
         // Clean up globals
+        unset($GLOBALS['minisite_repository']);
         global $wpdb;
         $wpdb = null;
         $this->clearWordPressMocks();
