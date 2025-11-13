@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Entities;
 
 use DateTimeImmutable;
-use Minisite\Domain\Entities\Version;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use PHPUnit\Framework\Attributes\CoversClass;
@@ -26,16 +26,16 @@ final class VersionTest extends TestCase
 
         $expected = [
             ['id', 'int', true],
-            ['minisiteId', 'string', false],
-            ['versionNumber', 'int', false],
-            ['status', 'string', false],
+            ['minisiteId', 'string', true],
+            ['versionNumber', 'int', true],
+            ['status', 'string', true],
             ['label', 'string', true],
             ['comment', 'string', true],
-            ['createdBy', 'int', false],
+            ['createdBy', 'int', true],
             ['createdAt', DateTimeImmutable::class, true],
             ['publishedAt', DateTimeImmutable::class, true],
             ['sourceVersionId', 'int', true],
-            ['siteJson', 'array', false],
+            ['siteJson', 'array', true],
             // Optional minisite fields
             ['slugs', SlugPair::class, true],
             ['title', 'string', true],
@@ -112,8 +112,10 @@ final class VersionTest extends TestCase
         $this->assertSame($now, $v->createdAt);
         $this->assertSame($pub, $v->publishedAt);
         $this->assertSame(6, $v->sourceVersionId);
-        $this->assertSame(['a' => 1], $v->siteJson);
+        $this->assertSame(['a' => 1], $v->getSiteJsonAsArray());
         $this->assertSame($slugs, $v->slugs);
+        $this->assertSame('biz', $v->businessSlug);
+        $this->assertSame('loc', $v->locationSlug);
         $this->assertSame('Title', $v->title);
         $this->assertSame('Name', $v->name);
         $this->assertSame('City', $v->city);
@@ -164,7 +166,7 @@ final class VersionTest extends TestCase
         $this->assertNull($v->id);
         $this->assertNull($v->label);
         $this->assertNull($v->comment);
-        $this->assertNull($v->createdAt);
+        $this->assertInstanceOf(DateTimeImmutable::class, $v->createdAt);
         $this->assertNull($v->publishedAt);
         $this->assertNull($v->sourceVersionId);
         $this->assertNull($v->slugs);
@@ -182,6 +184,7 @@ final class VersionTest extends TestCase
         $this->assertNull($v->schemaVersion);
         $this->assertNull($v->siteVersion);
         $this->assertNull($v->searchTerms);
+        $this->assertSame(array(), $v->getSiteJsonAsArray());
     }
 
     #[DataProvider('dpTypeErrorsOnInvalidTypes')]
