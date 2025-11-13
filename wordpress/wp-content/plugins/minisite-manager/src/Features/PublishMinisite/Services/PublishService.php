@@ -2,9 +2,9 @@
 
 namespace Minisite\Features\PublishMinisite\Services;
 
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\PublishMinisite\WordPress\WordPressPublishManager;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**

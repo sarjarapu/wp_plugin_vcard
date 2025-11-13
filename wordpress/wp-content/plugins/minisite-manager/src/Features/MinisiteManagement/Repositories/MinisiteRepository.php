@@ -10,8 +10,8 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -386,7 +386,8 @@ class MinisiteRepository extends EntityRepository implements MinisiteRepositoryI
                 $connection = $this->getEntityManager()->getConnection();
                 $tableName = $this->getClassMetadata()->getTableName();
                 $connection->executeStatement(
-                    "UPDATE `{$tableName}` SET location_point = POINT(?, ?) WHERE business_slug = ? AND location_slug = ?",
+                    "UPDATE `{$tableName}` SET location_point = POINT(?, ?) "
+                    . "WHERE business_slug = ? AND location_slug = ?",
                     array(
                         $m->geo->getLng(),  // FIRST = longitude
                         $m->geo->getLat(),  // SECOND = latitude
@@ -1022,4 +1023,3 @@ class MinisiteRepository extends EntityRepository implements MinisiteRepositoryI
         }
     }
 }
-

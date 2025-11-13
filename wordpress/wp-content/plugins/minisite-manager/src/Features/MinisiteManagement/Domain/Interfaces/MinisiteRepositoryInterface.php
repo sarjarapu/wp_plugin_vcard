@@ -47,6 +47,13 @@ interface MinisiteRepositoryInterface
     public function updatePublishStatus(string $id, string $publishStatus): void;
 
     /**
+     * Update minisite status (status field and publishedAt timestamp)
+     *
+     * @return bool True if update was successful
+     */
+    public function updateStatus(string $minisiteId, string $status): bool;
+
+    /**
      * Update the current version ID for a minisite
      */
     public function updateCurrentVersionId(string $id, int $versionId): void;

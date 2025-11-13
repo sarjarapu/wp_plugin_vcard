@@ -7,8 +7,8 @@ namespace Minisite\Features\VersionManagement\Services;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
 /**

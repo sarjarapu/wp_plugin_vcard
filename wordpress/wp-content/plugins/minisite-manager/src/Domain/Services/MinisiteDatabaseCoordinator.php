@@ -5,10 +5,10 @@ namespace Minisite\Domain\Services;
 use Minisite\Domain\Interfaces\TransactionManagerInterface;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Domain\ValueObjects\GeoPoint;
-use Minisite\Features\VersionManagement\Domain\Entities\Version;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
 /**

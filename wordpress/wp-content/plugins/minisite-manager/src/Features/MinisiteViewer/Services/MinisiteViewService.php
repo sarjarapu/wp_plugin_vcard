@@ -3,9 +3,9 @@
 namespace Minisite\Features\MinisiteViewer\Services;
 
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
-use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 
 /**

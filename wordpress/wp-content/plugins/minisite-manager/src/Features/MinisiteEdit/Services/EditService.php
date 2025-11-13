@@ -5,10 +5,10 @@ namespace Minisite\Features\MinisiteEdit\Services;
 use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
 use Minisite\Domain\Services\MinisiteFormProcessor;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
-use Minisite\Features\VersionManagement\Domain\Entities\Version;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Persistence\WordPressTransactionManager;
 use Psr\Log\LoggerInterface;
 

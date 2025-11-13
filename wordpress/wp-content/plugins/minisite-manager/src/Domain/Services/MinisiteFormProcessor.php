@@ -3,8 +3,8 @@
 namespace Minisite\Domain\Services;
 
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -136,9 +136,12 @@ class MinisiteFormProcessor
             } else {
                 $siteJson = $minisite->siteJson;
             }
+            $siteJsonSize = is_string($minisite->siteJson)
+                ? strlen($minisite->siteJson)
+                : strlen(json_encode($minisite->siteJson));
             $this->logger->debug('Using existing siteJson as base', array(
                 'site_id' => $siteId,
-                'existing_site_json_size' => is_string($minisite->siteJson) ? strlen($minisite->siteJson) : strlen(json_encode($minisite->siteJson)),
+                'existing_site_json_size' => $siteJsonSize,
             ));
         }
 

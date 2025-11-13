@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\Entities;
+namespace Tests\Unit\Features\VersionManagement\Domain\Entities;
 
 use DateTimeImmutable;
-use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
@@ -24,35 +24,35 @@ final class VersionTest extends TestCase
         $ctor = new ReflectionMethod(Version::class, '__construct');
         $params = $ctor->getParameters();
 
-        $expected = [
-            ['id', 'int', true],
-            ['minisiteId', 'string', true],
-            ['versionNumber', 'int', true],
-            ['status', 'string', true],
-            ['label', 'string', true],
-            ['comment', 'string', true],
-            ['createdBy', 'int', true],
-            ['createdAt', DateTimeImmutable::class, true],
-            ['publishedAt', DateTimeImmutable::class, true],
-            ['sourceVersionId', 'int', true],
-            ['siteJson', 'array', true],
+        $expected = array(
+            array('id', 'int', true),
+            array('minisiteId', 'string', true),
+            array('versionNumber', 'int', true),
+            array('status', 'string', true),
+            array('label', 'string', true),
+            array('comment', 'string', true),
+            array('createdBy', 'int', true),
+            array('createdAt', DateTimeImmutable::class, true),
+            array('publishedAt', DateTimeImmutable::class, true),
+            array('sourceVersionId', 'int', true),
+            array('siteJson', 'array', true),
             // Optional minisite fields
-            ['slugs', SlugPair::class, true],
-            ['title', 'string', true],
-            ['name', 'string', true],
-            ['city', 'string', true],
-            ['region', 'string', true],
-            ['countryCode', 'string', true],
-            ['postalCode', 'string', true],
-            ['geo', GeoPoint::class, true],
-            ['siteTemplate', 'string', true],
-            ['palette', 'string', true],
-            ['industry', 'string', true],
-            ['defaultLocale', 'string', true],
-            ['schemaVersion', 'int', true],
-            ['siteVersion', 'int', true],
-            ['searchTerms', 'string', true],
-        ];
+            array('slugs', SlugPair::class, true),
+            array('title', 'string', true),
+            array('name', 'string', true),
+            array('city', 'string', true),
+            array('region', 'string', true),
+            array('countryCode', 'string', true),
+            array('postalCode', 'string', true),
+            array('geo', GeoPoint::class, true),
+            array('siteTemplate', 'string', true),
+            array('palette', 'string', true),
+            array('industry', 'string', true),
+            array('defaultLocale', 'string', true),
+            array('schemaVersion', 'int', true),
+            array('siteVersion', 'int', true),
+            array('searchTerms', 'string', true),
+        );
 
         $this->assertSame(count($expected), count($params), 'Constructor parameter count changed');
 
@@ -84,7 +84,7 @@ final class VersionTest extends TestCase
             createdAt: $now,
             publishedAt: $pub,
             sourceVersionId: 6,
-            siteJson: ['a' => 1],
+            siteJson: array('a' => 1),
             slugs: $slugs,
             title: 'Title',
             name: 'Name',
@@ -112,7 +112,7 @@ final class VersionTest extends TestCase
         $this->assertSame($now, $v->createdAt);
         $this->assertSame($pub, $v->publishedAt);
         $this->assertSame(6, $v->sourceVersionId);
-        $this->assertSame(['a' => 1], $v->getSiteJsonAsArray());
+        $this->assertSame(array('a' => 1), $v->getSiteJsonAsArray());
         $this->assertSame($slugs, $v->slugs);
         $this->assertSame('biz', $v->businessSlug);
         $this->assertSame('loc', $v->locationSlug);
@@ -145,7 +145,7 @@ final class VersionTest extends TestCase
             createdAt: null,
             publishedAt: null,
             sourceVersionId: null,
-            siteJson: [],
+            siteJson: array(),
             slugs: null,
             title: null,
             name: null,
@@ -196,42 +196,42 @@ final class VersionTest extends TestCase
 
     public static function dpTypeErrorsOnInvalidTypes(): array
     {
-        return [
-            'minisiteId must be string' => [function (): void {
+        return array(
+            'minisiteId must be string' => array(function (): void {
                 /** @phpstan-ignore-next-line */
-                new Version(id: null, minisiteId: 1, versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: []);
-            }],
-            'versionNumber must be int' => [function (): void {
+                new Version(id: null, minisiteId: 1, versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: array());
+            }),
+            'versionNumber must be int' => array(function (): void {
                 /** @phpstan-ignore-next-line */
-                new Version(id: null, minisiteId: 'm', versionNumber: '1', status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: []);
-            }],
-            'siteJson must be array' => [function (): void {
+                new Version(id: null, minisiteId: 'm', versionNumber: '1', status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: array());
+            }),
+            'siteJson must be array' => array(function (): void {
                 /** @phpstan-ignore-next-line */
-                new Version(id: null, minisiteId: 'm', versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: (object)['a' => 1]);
-            }],
-            'slugs must be SlugPair|null' => [function (): void {
+                new Version(id: null, minisiteId: 'm', versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: (object)array('a' => 1));
+            }),
+            'slugs must be SlugPair|null' => array(function (): void {
                 /** @phpstan-ignore-next-line */
-                new Version(id: null, minisiteId: 'm', versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: [], slugs: 'bad');
-            }],
-            'geo must be GeoPoint|null' => [function (): void {
+                new Version(id: null, minisiteId: 'm', versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: array(), slugs: 'bad');
+            }),
+            'geo must be GeoPoint|null' => array(function (): void {
                 /** @phpstan-ignore-next-line */
-                new Version(id: null, minisiteId: 'm', versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: [], slugs: null, title: null, name: null, city: null, region: null, countryCode: null, postalCode: null, geo: 'bad');
-            }],
-        ];
+                new Version(id: null, minisiteId: 'm', versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: array(), slugs: null, title: null, name: null, city: null, region: null, countryCode: null, postalCode: null, geo: 'bad');
+            }),
+        );
     }
 
     public function testHelperMethods(): void
     {
-        $draft = new Version(id: null, minisiteId: 'm', versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: []);
+        $draft = new Version(id: null, minisiteId: 'm', versionNumber: 1, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: null, siteJson: array());
         $this->assertTrue($draft->isDraft());
         $this->assertFalse($draft->isPublished());
         $this->assertFalse($draft->isRollback());
 
-        $published = new Version(id: null, minisiteId: 'm', versionNumber: 2, status: 'published', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: new DateTimeImmutable('2025-01-01T00:00:00Z'), sourceVersionId: null, siteJson: []);
+        $published = new Version(id: null, minisiteId: 'm', versionNumber: 2, status: 'published', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: new DateTimeImmutable('2025-01-01T00:00:00Z'), sourceVersionId: null, siteJson: array());
         $this->assertTrue($published->isPublished());
         $this->assertFalse($published->isDraft());
 
-        $rollback = new Version(id: null, minisiteId: 'm', versionNumber: 3, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: 1, siteJson: []);
+        $rollback = new Version(id: null, minisiteId: 'm', versionNumber: 3, status: 'draft', label: null, comment: null, createdBy: 1, createdAt: null, publishedAt: null, sourceVersionId: 1, siteJson: array());
         $this->assertTrue($rollback->isRollback());
     }
 
@@ -241,14 +241,16 @@ final class VersionTest extends TestCase
     private function normalizeType(ReflectionParameter $param): array
     {
         $type = $param->getType();
-        if (!$type instanceof ReflectionType) {
-            return ['mixed', true];
+        if (! $type instanceof ReflectionType) {
+            return array('mixed', true);
         }
         $allowsNull = $type->allowsNull();
         if ($type instanceof ReflectionNamedType) {
             $name = $type->getName();
-            return [$name, $allowsNull];
+
+            return array($name, $allowsNull);
         }
-        return ['complex', $allowsNull];
+
+        return array('complex', $allowsNull);
     }
 }

@@ -110,7 +110,12 @@ class Minisite
     #[ORM\Column(name: 'updated_by', type: 'bigint', nullable: true, options: array('unsigned' => true))]
     public ?int $updatedBy = null;
 
-    #[ORM\Column(name: '_minisite_current_version_id', type: 'bigint', nullable: true, options: array('unsigned' => true))]
+    #[ORM\Column(
+        name: '_minisite_current_version_id',
+        type: 'bigint',
+        nullable: true,
+        options: array('unsigned' => true)
+    )]
     public ?int $currentVersionId = null; // Points to currently published version
 
     /**
@@ -258,4 +263,3 @@ class Minisite
         $this->locationSlug = $slugs?->location;
     }
 }
-

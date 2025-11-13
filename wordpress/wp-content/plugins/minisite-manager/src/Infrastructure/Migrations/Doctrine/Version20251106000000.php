@@ -83,8 +83,10 @@ final class Version20251106000000 extends AbstractMigration
                 `site_version` INT UNSIGNED NOT NULL DEFAULT 1,
                 `site_json` LONGTEXT NOT NULL,
                 `search_terms` TEXT NULL,
-                `status` VARCHAR(20) NOT NULL DEFAULT 'published' COMMENT 'ENUM(''draft'',''published'',''archived'')',
-                `publish_status` VARCHAR(20) NOT NULL DEFAULT 'draft' COMMENT 'ENUM(''draft'',''reserved'',''published'')',
+                `status` VARCHAR(20) NOT NULL DEFAULT 'published'
+                    COMMENT 'ENUM(''draft'',''published'',''archived'')',
+                `publish_status` VARCHAR(20) NOT NULL DEFAULT 'draft'
+                    COMMENT 'ENUM(''draft'',''reserved'',''published'')',
                 `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 `published_at` DATETIME NULL,
@@ -149,4 +151,3 @@ final class Version20251106000000 extends AbstractMigration
         return false;
     }
 }
-
