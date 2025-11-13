@@ -2,7 +2,7 @@
 
 namespace Minisite\Application\Rendering;
 
-use Minisite\Domain\Entities\Minisite;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 class TimberRenderer
@@ -77,39 +77,12 @@ class TimberRenderer
 
     protected function fetchMinisiteWithUserData(Minisite $minisite): Minisite
     {
-        $isBookmarked = $this->checkIfBookmarked($minisite->id);
-        $canEdit = $this->checkIfCanEdit($minisite->id);
+        // Set user-specific runtime properties directly on the Doctrine entity
+        // These properties are public and not persisted to the database
+        $minisite->isBookmarked = $this->checkIfBookmarked($minisite->id);
+        $minisite->canEdit = $this->checkIfCanEdit($minisite->id);
 
-        return new Minisite(
-            id: $minisite->id,
-            slug: $minisite->slug,
-            slugs: $minisite->slugs,
-            title: $minisite->title,
-            name: $minisite->name,
-            city: $minisite->city,
-            region: $minisite->region,
-            countryCode: $minisite->countryCode,
-            postalCode: $minisite->postalCode,
-            geo: $minisite->geo,
-            siteTemplate: $minisite->siteTemplate,
-            palette: $minisite->palette,
-            industry: $minisite->industry,
-            defaultLocale: $minisite->defaultLocale,
-            schemaVersion: $minisite->schemaVersion,
-            siteVersion: $minisite->siteVersion,
-            siteJson: $minisite->siteJson,
-            searchTerms: $minisite->searchTerms,
-            status: $minisite->status,
-            publishStatus: $minisite->publishStatus,
-            createdAt: $minisite->createdAt,
-            updatedAt: $minisite->updatedAt,
-            publishedAt: $minisite->publishedAt,
-            createdBy: $minisite->createdBy,
-            updatedBy: $minisite->updatedBy,
-            currentVersionId: $minisite->currentVersionId,
-            isBookmarked: $isBookmarked,
-            canEdit: $canEdit
-        );
+        return $minisite;
     }
 
     protected function checkIfBookmarked(string $minisiteId): bool

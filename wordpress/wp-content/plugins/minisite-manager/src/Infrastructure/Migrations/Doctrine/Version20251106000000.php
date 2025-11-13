@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Psr\Log\LoggerInterface;
 
 /**
  * Migration: Create minisites table for minisite management
@@ -24,15 +21,8 @@ use Psr\Log\LoggerInterface;
  * - If table exists: It was created by this migration, so skip gracefully (idempotent)
  * - No upgrade scenario: Old SQL-based tables are not supported
  */
-final class Version20251106000000 extends AbstractMigration
+final class Version20251106000000 extends BaseDoctrineMigration
 {
-    private LoggerInterface $logger;
-
-    public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
-    {
-        parent::__construct($connection, $logger);
-        $this->logger = LoggingServiceProvider::getFeatureLogger('Version20251106000000');
-    }
 
     public function getDescription(): string
     {
@@ -140,14 +130,4 @@ final class Version20251106000000 extends AbstractMigration
         }
     }
 
-    /**
-     * MySQL doesn't support transactional DDL (CREATE TABLE causes implicit commit).
-     * Return false to avoid Doctrine SAVEPOINT exception errors.
-     *
-     * @see https://www.doctrine-project.org/projects/doctrine-migrations/en/3.9/explanation/implicit-commits.html
-     */
-    public function isTransactional(): bool
-    {
-        return false;
-    }
 }

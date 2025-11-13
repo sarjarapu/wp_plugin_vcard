@@ -1,8 +1,15 @@
 <?php
 
-namespace Minisite\Infrastructure\Utils;
+/**
+ * @deprecated This utility has been replaced by Doctrine migrations.
+ * All SQL file loading is now handled by Doctrine migrations.
+ * This file is archived in delete_me/ and will be removed in a future version.
+ *
+ * DO NOT USE THIS CLASS IN NEW CODE.
+ */
+namespace delete_me\Minisite\Infrastructure\Utils;
 
-use Minisite\Infrastructure\Versioning\Support\DbDelta;
+use delete_me\Minisite\Infrastructure\Versioning\Support\DbDelta;
 
 class SqlLoader
 {

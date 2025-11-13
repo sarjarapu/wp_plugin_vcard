@@ -7,17 +7,21 @@ namespace Minisite\Infrastructure\Migrations\Doctrine;
 use Doctrine\DBAL\Schema\Schema;
 
 /**
- * Auto-generated Migration: Please modify to your needs!
+ * Migration: Create minisite_bookmarks table
+ * Date: 2025-11-07
  *
- * Migration: Create minisite_config table for configuration management
- * Date: 2025-11-03
+ * This migration creates the wp_minisite_bookmarks table.
+ *
+ * Assumptions:
+ * - Fresh start: This migration creates the complete table
+ * - If table exists: It was created by this migration, so skip gracefully (idempotent)
+ * - No upgrade scenario: Old SQL-based tables are not supported
  */
-final class Version20251103000000 extends BaseDoctrineMigration
+final class Version20251107000000 extends BaseDoctrineMigration
 {
-
     public function getDescription(): string
     {
-        return 'Create minisite_config table for configuration management';
+        return 'Create minisite_bookmarks table (fresh start, replaces old SQL file-based creation)';
     }
 
     public function up(Schema $schema): void
@@ -27,10 +31,9 @@ final class Version20251103000000 extends BaseDoctrineMigration
         $this->logger->info('up() - starting');
 
         try {
-            // Get table name with WordPress prefix
-            $tableName = $wpdb->prefix . 'minisite_config';
+            $tableName = $wpdb->prefix . 'minisite_bookmarks';
 
-            // In up(), $schema is TARGET (empty), so introspect DB to check if table exists
+            // Check if table already exists
             $schemaManager = $this->connection->createSchemaManager();
             if ($schemaManager->introspectSchema()->hasTable($tableName)) {
                 $this->logger->info('up() - table already exists, skipping', array('table' => $tableName));
@@ -40,27 +43,30 @@ final class Version20251103000000 extends BaseDoctrineMigration
 
             $this->logger->info('up() - about to create table', array('table' => $tableName));
 
-            // Table doesn't exist - create complete table with all columns using raw SQL
-            // Using raw SQL for better readability and easier manual table creation
+            // Create table using raw SQL for better readability
             $createTableSql = "CREATE TABLE IF NOT EXISTS `{$tableName}` (
                 `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                `config_key` VARCHAR(100) NOT NULL,
-                `config_value` TEXT NULL,
-                `config_type` VARCHAR(20) NOT NULL DEFAULT 'string'
-                    COMMENT 'string|integer|boolean|json|encrypted|secret',
-                `description` TEXT NULL,
-                `is_sensitive` TINYINT(1) NOT NULL DEFAULT 0,
-                `is_required` TINYINT(1) NOT NULL DEFAULT 0,
-                `created_at` DATETIME NOT NULL,
-                `updated_at` DATETIME NOT NULL,
+                `user_id` BIGINT UNSIGNED NOT NULL,
+                `minisite_id` VARCHAR(32) NOT NULL,
+                `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY (`id`),
-                UNIQUE KEY `uniq_config_key` (`config_key`),
-                KEY `idx_sensitive` (`is_sensitive`),
-                KEY `idx_required` (`is_required`)
+                UNIQUE KEY `uniq_user_minisite` (`user_id`, `minisite_id`),
+                KEY `idx_user` (`user_id`),
+                KEY `idx_minisite` (`minisite_id`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
 
             $this->logger->debug('up() - SQL', array('sql' => $createTableSql));
             $this->addSql($createTableSql);
+
+            // Add foreign key constraint
+            $this->addForeignKeyIfNotExists(
+                $tableName,
+                'fk_bookmarks_minisite_id',
+                'minisite_id',
+                $wpdb->prefix . 'minisites',
+                'id'
+            );
+
             $this->logger->info('up() - completed');
         } catch (\Exception $e) {
             $this->logger->error(
@@ -79,9 +85,8 @@ final class Version20251103000000 extends BaseDoctrineMigration
         $this->logger->info('down() - starting');
 
         try {
-            $tableName = $wpdb->prefix . 'minisite_config';
+            $tableName = $wpdb->prefix . 'minisite_bookmarks';
 
-            // In down(), $schema is CURRENT (already introspected), so use directly
             if ($schema->hasTable($tableName)) {
                 $dropSql = "DROP TABLE IF EXISTS `{$tableName}`";
                 $this->logger->info('down() - about to drop table', array('table' => $tableName));

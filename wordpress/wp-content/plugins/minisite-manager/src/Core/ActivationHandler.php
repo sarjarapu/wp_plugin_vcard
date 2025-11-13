@@ -31,7 +31,7 @@ final class ActivationHandler
 
     private static function runMigrations(): void
     {
-        // Run Doctrine migrations first (for new tables like minisite_config)
+        // Run Doctrine migrations (all tables are now managed by Doctrine)
         try {
             // Check if Doctrine is available before attempting migration
             if (! class_exists(\Doctrine\ORM\EntityManager::class)) {
@@ -55,14 +55,124 @@ final class ActivationHandler
             ));
         }
 
-        // Run custom migrations (for existing tables - to be migrated to Doctrine later)
-        if (class_exists(\Minisite\Infrastructure\Versioning\VersioningController::class)) {
-            $versioningController = new \Minisite\Infrastructure\Versioning\VersioningController(
-                MINISITE_DB_VERSION,
-                MINISITE_DB_OPTION
-            );
-            $versioningController->activate();
+        // Seed test data in non-production environments
+        // NOTE: Legacy migration system (_1_0_0_CreateBase) has been replaced by seeder services
+        if (! defined('MINISITE_LIVE_PRODUCTION') || ! MINISITE_LIVE_PRODUCTION) {
+            add_action('init', array(self::class, 'seedTestData'), 20);
         }
+    }
+
+    /**
+     * Seed test data using Doctrine-based seeder services
+     * Called on 'init' hook after Doctrine is initialized
+     */
+    public static function seedTestData(): void
+    {
+        // Ensure repositories are initialized first
+        if (! isset($GLOBALS['minisite_repository']) ||
+            ! isset($GLOBALS['minisite_version_repository']) ||
+            ! isset($GLOBALS['minisite_review_repository'])
+        ) {
+            // Try to initialize them now (might not have run yet)
+            if (class_exists(\Doctrine\ORM\EntityManager::class)) {
+                \Minisite\Core\PluginBootstrap::initializeConfigSystem();
+            }
+
+            // If still not available, retry on next init hook
+            if (! isset($GLOBALS['minisite_repository']) ||
+                ! isset($GLOBALS['minisite_version_repository']) ||
+                ! isset($GLOBALS['minisite_review_repository'])
+            ) {
+                // Prevent infinite loop - only retry once
+                static $retryCount = 0;
+                if ($retryCount < 2) {
+                    $retryCount++;
+                    add_action('init', array(self::class, 'seedTestData'), 25);
+                }
+
+                return;
+            }
+        }
+
+        try {
+            // Seed minisites first
+            $minisiteIds = self::seedTestMinisites();
+
+            // Seed versions for each minisite
+            self::seedTestVersions($minisiteIds);
+
+            // Seed reviews for each minisite
+            self::seedTestReviews($minisiteIds);
+        } catch (\Exception $e) {
+            // Log error with full details
+            $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('activation');
+            $logger->error('Failed to seed test data', array(
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ));
+        }
+    }
+
+    /**
+     * Seed test minisites
+     *
+     * @return array Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT' => minisite IDs
+     */
+    private static function seedTestMinisites(): array
+    {
+        /** @var \Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface $minisiteRepo */
+        $minisiteRepo = $GLOBALS['minisite_repository'];
+
+        $minisiteSeeder = new \Minisite\Features\MinisiteManagement\Services\MinisiteSeederService($minisiteRepo);
+
+        return $minisiteSeeder->seedAllTestMinisites();
+    }
+
+    /**
+     * Seed test versions for minisites
+     *
+     * @param array $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT' => minisite IDs
+     */
+    private static function seedTestVersions(array $minisiteIds): void
+    {
+        /** @var \Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface $minisiteRepo */
+        $minisiteRepo = $GLOBALS['minisite_repository'];
+        /** @var \Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface $versionRepo */
+        $versionRepo = $GLOBALS['minisite_version_repository'];
+
+        $versionSeeder = new \Minisite\Features\VersionManagement\Services\VersionSeederService($versionRepo);
+
+        foreach ($minisiteIds as $minisiteId) {
+            if (empty($minisiteId)) {
+                continue;
+            }
+
+            $minisite = $minisiteRepo->findById($minisiteId);
+            if (! $minisite) {
+                continue;
+            }
+
+            $version = $versionSeeder->createInitialVersionFromMinisite($minisite);
+            $savedVersion = $versionRepo->save($version);
+            $minisiteRepo->updateCurrentVersionId($minisiteId, $savedVersion->id);
+        }
+    }
+
+    /**
+     * Seed test reviews for minisites
+     *
+     * @param array $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT' => minisite IDs
+     */
+    private static function seedTestReviews(array $minisiteIds): void
+    {
+        /** @var \Minisite\Features\ReviewManagement\Repositories\ReviewRepositoryInterface $reviewRepo */
+        $reviewRepo = $GLOBALS['minisite_review_repository'];
+
+        $reviewSeeder = new \Minisite\Features\ReviewManagement\Services\ReviewSeederService($reviewRepo);
+        $reviewSeeder->seedAllTestReviews($minisiteIds);
     }
 
     /**

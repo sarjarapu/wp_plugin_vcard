@@ -1,6 +1,13 @@
 <?php
 
-namespace Minisite\Infrastructure\Versioning\Contracts;
+/**
+ * @deprecated This interface has been replaced by Doctrine migrations.
+ * This file is archived in delete_me/ and will be removed in a future version.
+ *
+ * DO NOT USE THIS INTERFACE IN NEW CODE.
+ */
+
+namespace delete_me\Minisite\Infrastructure\Versioning\Contracts;
 
 interface Migration
 {

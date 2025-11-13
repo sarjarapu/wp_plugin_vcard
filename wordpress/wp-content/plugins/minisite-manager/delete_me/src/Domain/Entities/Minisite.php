@@ -1,6 +1,19 @@
 <?php
 
-namespace Minisite\Domain\Entities;
+/**
+ * @deprecated This is a legacy entity. Use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite instead.
+ * This file is archived in delete_me/ and will be removed in a future version.
+ *
+ * Legacy Minisite Entity - Plain PHP class (non-Doctrine)
+ *
+ * This entity has been replaced by the Doctrine ORM entity at:
+ * src/Features/MinisiteManagement/Domain/Entities/Minisite.php
+ *
+ * DO NOT USE THIS CLASS IN NEW CODE.
+ * All active code should use the Doctrine entity.
+ */
+
+namespace delete_me\Minisite\Domain\Entities;
 
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;

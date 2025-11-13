@@ -1,6 +1,12 @@
 <?php
 
-namespace Minisite\Infrastructure\Versioning\Support;
+/**
+ * @deprecated This utility has been replaced by Doctrine migrations.
+ * This file is archived in delete_me/ and will be removed in a future version.
+ *
+ * DO NOT USE THIS CLASS IN NEW CODE.
+ */
+namespace delete_me\Minisite\Infrastructure\Versioning\Support;
 
 /**
  * Thin wrapper around WordPress dbDelta()

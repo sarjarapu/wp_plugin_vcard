@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Psr\Log\LoggerInterface;
 
 /**
  * Migration: Create minisite_reviews table with all MVP fields (fresh start)
@@ -29,15 +26,8 @@ use Psr\Log\LoggerInterface;
  * - Display: display_order, published_at
  * - Moderation: moderation_reason, moderated_by
  */
-final class Version20251104000000 extends AbstractMigration
+final class Version20251104000000 extends BaseDoctrineMigration
 {
-    private LoggerInterface $logger;
-
-    public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
-    {
-        parent::__construct($connection, $logger);
-        $this->logger = LoggingServiceProvider::getFeatureLogger('Version20251104000000');
-    }
 
     public function getDescription(): string
     {
@@ -145,14 +135,4 @@ final class Version20251104000000 extends AbstractMigration
         }
     }
 
-    /**
-     * MySQL doesn't support transactional DDL (CREATE TABLE causes implicit commit).
-     * Return false to avoid Doctrine SAVEPOINT exception errors.
-     *
-     * @see https://www.doctrine-project.org/projects/doctrine-migrations/en/3.9/explanation/implicit-commits.html
-     */
-    public function isTransactional(): bool
-    {
-        return false;
-    }
 }

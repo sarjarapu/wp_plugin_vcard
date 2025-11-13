@@ -25,13 +25,11 @@ final class DeactivationHandler
 
     private static function cleanupNonProduction(): void
     {
-        // Drop plugin tables
-        if (class_exists(\Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase::class)) {
-            $migration = new \Minisite\Infrastructure\Versioning\Migrations\_1_0_0_CreateBase();
-            $migration->down();
-        }
+        // NOTE: Legacy migration system (_1_0_0_CreateBase) has been replaced by Doctrine migrations.
+        // Table cleanup is now handled by Doctrine migrations if needed.
+        // For non-production cleanup, tables are typically left in place for development convenience.
 
-        // Clear version option
+        // Clear legacy version option (if it exists)
         delete_option(MINISITE_DB_OPTION);
 
         // Remove custom roles
