@@ -17,13 +17,15 @@ class VersionHooksFactoryTest extends TestCase
         $wpdb->prefix = 'wp_';
 
         // Mock $GLOBALS for repositories (required by factory)
-        $GLOBALS['minisite_version_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface::class);
+        $GLOBALS['minisite_repository'] = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface::class);
+        $GLOBALS['minisite_version_repository'] = $this->createMock(\Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface::class);
 
         $hooks = VersionHooksFactory::create();
 
         $this->assertInstanceOf(VersionHooks::class, $hooks);
 
         // Cleanup
+        unset($GLOBALS['minisite_repository']);
         unset($GLOBALS['minisite_version_repository']);
         $wpdb = null;
     }

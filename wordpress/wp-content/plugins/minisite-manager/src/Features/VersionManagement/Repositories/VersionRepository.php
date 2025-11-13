@@ -8,8 +8,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**

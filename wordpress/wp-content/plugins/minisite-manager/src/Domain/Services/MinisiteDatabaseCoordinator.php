@@ -5,10 +5,10 @@ namespace Minisite\Domain\Services;
 use Minisite\Domain\Interfaces\TransactionManagerInterface;
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
 use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -27,7 +27,7 @@ class MinisiteDatabaseCoordinator
     public function __construct(
         private WordPressManagerInterface $wordPressManager,
         private VersionRepositoryInterface $versionRepository,
-        private MinisiteRepository $minisiteRepository,
+        private MinisiteRepositoryInterface $minisiteRepository,
         private TransactionManagerInterface $transactionManager
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('database-coordinator');
@@ -154,7 +154,7 @@ class MinisiteDatabaseCoordinator
 
         try {
             // Create main minisite entity first (like the old implementation)
-            $minisite = new \Minisite\Domain\Entities\Minisite(
+            $minisite = new \Minisite\Features\MinisiteManagement\Domain\Entities\Minisite(
                 id: $minisiteId,
                 slug: $slugs->full(), // Use SlugPair's full() method for formatted slug
                 slugs: $slugs,

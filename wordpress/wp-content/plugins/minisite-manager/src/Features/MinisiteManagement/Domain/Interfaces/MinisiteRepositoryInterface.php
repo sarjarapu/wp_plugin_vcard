@@ -1,9 +1,9 @@
 <?php
 
-namespace Minisite\Infrastructure\Persistence\Repositories;
+namespace Minisite\Features\MinisiteManagement\Domain\Interfaces;
 
-use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 
 interface MinisiteRepositoryInterface
 {
@@ -45,4 +45,38 @@ interface MinisiteRepositoryInterface
      * Update the publish status for a minisite
      */
     public function updatePublishStatus(string $id, string $publishStatus): void;
+
+    /**
+     * Update minisite status (status field and publishedAt timestamp)
+     *
+     * @return bool True if update was successful
+     */
+    public function updateStatus(string $minisiteId, string $status): bool;
+
+    /**
+     * Update the current version ID for a minisite
+     */
+    public function updateCurrentVersionId(string $id, int $versionId): void;
+
+    /**
+     * List minisites owned by a user
+     *
+     * @return Minisite[]
+     */
+    public function listByOwner(int $userId, int $limit = 50, int $offset = 0): array;
+
+    /**
+     * Count minisites by owner
+     */
+    public function countByOwner(int $userId): int;
+
+    /**
+     * Update multiple minisite fields in a single operation
+     */
+    public function updateMinisiteFields(string $minisiteId, array $fields, int $updatedBy): void;
+
+    /**
+     * Publish a minisite using the versioning system
+     */
+    public function publishMinisite(string $id): void;
 }

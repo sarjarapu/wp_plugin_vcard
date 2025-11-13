@@ -13,6 +13,7 @@ use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
+use Tests\Support\MinisiteRepositoryGlobals;
 
 /**
  * Test ViewHooksFactory
@@ -21,17 +22,21 @@ use Tests\Support\FakeWpdb;
  */
 final class ViewHooksFactoryTest extends TestCase
 {
+    use MinisiteRepositoryGlobals;
+
     private ViewHooksFactory $viewHooksFactory;
 
     protected function setUp(): void
     {
+        parent::setUp();
+
         // Mock global $wpdb
         global $wpdb;
         $wpdb = $this->createMock(FakeWpdb::class);
         $wpdb->prefix = 'wp_';
 
         // Mock $GLOBALS for repositories (required by factory)
-        $GLOBALS['minisite_version_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface::class);
+        $this->setUpMinisiteRepositoryGlobals();
 
         $this->viewHooksFactory = new ViewHooksFactory();
     }
@@ -39,7 +44,7 @@ final class ViewHooksFactoryTest extends TestCase
     protected function tearDown(): void
     {
         // Clean up globals
-        unset($GLOBALS['minisite_version_repository']);
+        $this->tearDownMinisiteRepositoryGlobals();
         global $wpdb;
         $wpdb = null;
 

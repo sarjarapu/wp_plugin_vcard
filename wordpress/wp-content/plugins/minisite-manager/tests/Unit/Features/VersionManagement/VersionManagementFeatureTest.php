@@ -27,6 +27,7 @@ final class VersionManagementFeatureTest extends TestCase
         parent::tearDown();
         $this->clearWordPressMocks();
         // Clean up global mocks
+        unset($GLOBALS['minisite_repository']);
         unset($GLOBALS['minisite_version_repository']);
     }
 
@@ -65,7 +66,12 @@ final class VersionManagementFeatureTest extends TestCase
             $wpdb = $this->createMock(\wpdb::class);
         }
 
-        // Mock VersionRepository in global (required by VersionHooksFactory)
+        // Mock repositories in global (required by VersionHooksFactory)
+        if (! isset($GLOBALS['minisite_repository'])) {
+            $GLOBALS['minisite_repository'] = $this->createMock(
+                \Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface::class
+            );
+        }
         if (! isset($GLOBALS['minisite_version_repository'])) {
             // Use the actual repository class instead of interface
             $GLOBALS['minisite_version_repository'] = $this->createMock(
@@ -97,6 +103,7 @@ final class VersionManagementFeatureTest extends TestCase
             }
         } finally {
             // Clean up global mocks
+            unset($GLOBALS['minisite_repository']);
             unset($GLOBALS['minisite_version_repository']);
         }
     }

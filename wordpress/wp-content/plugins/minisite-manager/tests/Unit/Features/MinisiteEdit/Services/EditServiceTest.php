@@ -2,13 +2,13 @@
 
 namespace Minisite\Tests\Unit\Features\MinisiteEdit\Services;
 
-use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
 
@@ -35,7 +35,7 @@ class EditServiceTest extends TestCase
         $wpdb->method('prepare')->willReturnArgument(0);
 
         $this->mockWordPressManager = $this->createMock(WordPressEditManager::class);
-        $this->mockMinisiteRepository = $this->createMock(MinisiteRepository::class);
+        $this->mockMinisiteRepository = $this->createMock(MinisiteRepositoryInterface::class);
         $this->mockVersionRepository = $this->createMock(VersionRepositoryInterface::class);
         $this->service = new EditService(
             $this->mockWordPressManager,

@@ -8,10 +8,10 @@ use Minisite\Features\MinisiteListing\Controllers\ListingController;
 use Minisite\Features\MinisiteListing\Handlers\ListMinisitesHandler;
 use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Tests\Support\FakeWpdb;
+use Tests\Support\MinisiteRepositoryGlobals;
 
 /**
  * Test ListingHooksFactory
@@ -38,12 +38,19 @@ use Tests\Support\FakeWpdb;
  */
 final class ListingHooksFactoryTest extends TestCase
 {
+    use MinisiteRepositoryGlobals;
+
     protected function setUp(): void
     {
+        parent::setUp();
+
         // Mock global $wpdb
         global $wpdb;
         $wpdb = $this->createMock(FakeWpdb::class);
         $wpdb->prefix = 'wp_';
+
+        // Mock $GLOBALS for repositories (required by factory)
+        $this->setUpMinisiteRepositoryGlobals();
 
         // Setup WordPress function mocks
         $this->setupWordPressMocks();
@@ -52,6 +59,7 @@ final class ListingHooksFactoryTest extends TestCase
     protected function tearDown(): void
     {
         // Clean up globals
+        $this->tearDownMinisiteRepositoryGlobals();
         global $wpdb;
         $wpdb = null;
         $this->clearWordPressMocks();

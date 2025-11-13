@@ -9,8 +9,8 @@ use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -26,7 +26,7 @@ class VersionServiceTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->minisiteRepository = $this->createMock(MinisiteRepository::class);
+        $this->minisiteRepository = $this->createMock(MinisiteRepositoryInterface::class);
         $this->versionRepository = $this->createMock(VersionRepositoryInterface::class);
         $this->wordPressManager = $this->createMock(WordPressVersionManager::class);
 
@@ -56,7 +56,7 @@ class VersionServiceTest extends TestCase
         $userId = 456;
         $command = new ListVersionsCommand($siteId, $userId);
 
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
         $versions = array(
             (object) array('id' => 1, 'versionNumber' => 1),
@@ -99,7 +99,7 @@ class VersionServiceTest extends TestCase
     public function test_list_versions_throws_exception_when_access_denied(): void
     {
         $command = new ListVersionsCommand('test-site', 123);
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 999; // Different user
 
         $this->minisiteRepository
@@ -122,7 +122,7 @@ class VersionServiceTest extends TestCase
         $siteJson = array('test' => 'data');
         $command = new CreateDraftCommand($siteId, $userId, $label, $comment, $siteJson);
 
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
         $nextVersion = 3;
         $savedVersion = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
@@ -170,7 +170,7 @@ class VersionServiceTest extends TestCase
     public function test_create_draft_throws_exception_when_access_denied(): void
     {
         $command = new CreateDraftCommand('test-site', 123, 'Label', 'Comment', array());
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 999; // Different user
 
         $this->minisiteRepository
@@ -203,7 +203,7 @@ class VersionServiceTest extends TestCase
     public function test_publish_version_throws_exception_when_access_denied(): void
     {
         $command = new PublishVersionCommand('test-site', 123, 456);
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 999; // Different user
 
         $this->minisiteRepository
@@ -220,7 +220,7 @@ class VersionServiceTest extends TestCase
     public function test_publish_version_throws_exception_when_version_not_found(): void
     {
         $command = new PublishVersionCommand('test-site', 123, 456);
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 456;
 
         $this->minisiteRepository
@@ -243,7 +243,7 @@ class VersionServiceTest extends TestCase
     public function test_publish_version_throws_exception_when_version_minisite_id_mismatch(): void
     {
         $command = new PublishVersionCommand('test-site', 123, 456);
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 456;
         $version = $this->createMock(Version::class);
         $version->status = 'draft';
@@ -269,7 +269,7 @@ class VersionServiceTest extends TestCase
     public function test_publish_version_throws_exception_when_version_not_draft(): void
     {
         $command = new PublishVersionCommand('test-site', 123, 456);
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 456;
         $version = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $version->status = 'published';
@@ -299,7 +299,7 @@ class VersionServiceTest extends TestCase
         $userId = 456;
         $command = new RollbackVersionCommand($siteId, $sourceVersionId, $userId);
 
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
         $sourceVersion = $this->createMock(\Minisite\Features\VersionManagement\Domain\Entities\Version::class);
         $sourceVersion->versionNumber = 2;
@@ -373,7 +373,7 @@ class VersionServiceTest extends TestCase
     public function test_create_rollback_version_throws_exception_when_access_denied(): void
     {
         $command = new RollbackVersionCommand('test-site', 789, 456);
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 999; // Different user
 
         $this->minisiteRepository
@@ -390,7 +390,7 @@ class VersionServiceTest extends TestCase
     public function test_create_rollback_version_throws_exception_when_source_version_not_found(): void
     {
         $command = new RollbackVersionCommand('test-site', 789, 456);
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 456;
 
         $this->minisiteRepository
@@ -413,7 +413,7 @@ class VersionServiceTest extends TestCase
     public function test_create_rollback_version_throws_exception_when_source_version_minisite_id_mismatch(): void
     {
         $command = new RollbackVersionCommand('test-site', 789, 456);
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 456;
         $sourceVersion = $this->createMock(Version::class);
         $sourceVersion->minisiteId = 'different-site'; // Mismatch
@@ -446,7 +446,7 @@ class VersionServiceTest extends TestCase
         $userId = 456;
         $command = new PublishVersionCommand($siteId, $versionId, $userId);
 
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
 
         $version = $this->createMock(Version::class);
@@ -518,7 +518,7 @@ class VersionServiceTest extends TestCase
         $userId = 456;
         $command = new PublishVersionCommand($siteId, $versionId, $userId);
 
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
 
         $version = $this->createMock(Version::class);
@@ -603,7 +603,7 @@ class VersionServiceTest extends TestCase
         $userId = 456;
         $command = new PublishVersionCommand($siteId, $versionId, $userId);
 
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
 
         $version = $this->createMock(Version::class);
@@ -672,7 +672,7 @@ class VersionServiceTest extends TestCase
     public function test_getMinisiteForRendering_returns_null_when_user_not_logged_in(): void
     {
         $siteId = 'test-site-123';
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
 
         $this->minisiteRepository
             ->expects($this->once())
@@ -697,7 +697,7 @@ class VersionServiceTest extends TestCase
     public function test_getMinisiteForRendering_returns_null_when_user_mismatch(): void
     {
         $siteId = 'test-site-123';
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = 123; // Different user
 
         $currentUser = (object) array('ID' => 456); // Current user
@@ -730,7 +730,7 @@ class VersionServiceTest extends TestCase
     {
         $siteId = 'test-site-123';
         $userId = 456;
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
 
         $currentUser = (object) array('ID' => $userId); // Same user
@@ -767,7 +767,7 @@ class VersionServiceTest extends TestCase
         $userId = 456;
         $command = new RollbackVersionCommand($siteId, $sourceVersionId, $userId);
 
-        $minisite = $this->createMock(\Minisite\Domain\Entities\Minisite::class);
+        $minisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
         $minisite->createdBy = $userId;
 
         $sourceVersion = $this->createMock(Version::class);

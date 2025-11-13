@@ -2,7 +2,7 @@
 
 namespace Minisite\Infrastructure\Persistence\Repositories;
 
-use Minisite\Domain\Entities\Minisite;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
@@ -618,7 +618,7 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             }
         }
 
-        return new Minisite(
+        $minisite = new Minisite(
             id:            (string) $r['id'],
             slug:          $r['slug'] ?: null,
             slugs:         new SlugPair($r['business_slug'], $r['location_slug']),
@@ -645,9 +645,13 @@ class MinisiteRepository implements MinisiteRepositoryInterface
             createdBy:     $r['created_by'] ? (int) $r['created_by'] : null,
             updatedBy:     $r['updated_by'] ? (int) $r['updated_by'] : null,
             currentVersionId: $r['_minisite_current_version_id'] ? (int) $r['_minisite_current_version_id'] : null,
-            isBookmarked:  false,  // Will be set by TimberRenderer
-            canEdit:       false   // Will be set by TimberRenderer
         );
+
+        // Set runtime properties (not in constructor)
+        $minisite->isBookmarked = false;  // Will be set by TimberRenderer
+        $minisite->canEdit = false;       // Will be set by TimberRenderer
+
+        return $minisite;
     }
 
     /**

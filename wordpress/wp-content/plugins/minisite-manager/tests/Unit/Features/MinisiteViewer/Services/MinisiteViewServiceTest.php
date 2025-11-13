@@ -2,13 +2,13 @@
 
 namespace Tests\Unit\Features\MinisiteViewer\Services;
 
-use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use Minisite\Features\MinisiteViewer\Services\MinisiteViewService;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -23,13 +23,13 @@ final class MinisiteViewServiceTest extends TestCase
 {
     private MinisiteViewService $viewService;
     private WordPressMinisiteManager|MockObject $wordPressManager;
-    private MinisiteRepository|MockObject $minisiteRepository;
+    private MinisiteRepositoryInterface|MockObject $minisiteRepository;
     private VersionRepositoryInterface|MockObject $versionRepository;
 
     protected function setUp(): void
     {
         $this->wordPressManager = $this->createMock(WordPressMinisiteManager::class);
-        $this->minisiteRepository = $this->createMock(MinisiteRepository::class);
+        $this->minisiteRepository = $this->createMock(MinisiteRepositoryInterface::class);
         $this->versionRepository = $this->createMock(VersionRepositoryInterface::class);
         $this->viewService = new MinisiteViewService(
             $this->wordPressManager,
@@ -240,7 +240,7 @@ final class MinisiteViewServiceTest extends TestCase
 
         $params = $constructor->getParameters();
         $this->assertEquals(WordPressMinisiteManager::class, $params[0]->getType()->getName());
-        $this->assertEquals(MinisiteRepository::class, $params[1]->getType()->getName());
+        $this->assertEquals(MinisiteRepositoryInterface::class, $params[1]->getType()->getName());
         $this->assertEquals(VersionRepositoryInterface::class, $params[2]->getType()->getName());
     }
 

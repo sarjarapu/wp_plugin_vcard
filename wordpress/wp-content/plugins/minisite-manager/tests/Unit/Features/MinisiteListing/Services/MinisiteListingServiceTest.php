@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Features\MinisiteListing\Services;
 
-use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand;
 use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -21,12 +21,12 @@ final class MinisiteListingServiceTest extends TestCase
 {
     private MinisiteListingService $listingService;
     private WordPressListingManager|MockObject $listingManager;
-    private MinisiteRepository|MockObject $minisiteRepository;
+    private MinisiteRepositoryInterface|MockObject $minisiteRepository;
 
     protected function setUp(): void
     {
         $this->listingManager = $this->createMock(WordPressListingManager::class);
-        $this->minisiteRepository = $this->createMock(MinisiteRepository::class);
+        $this->minisiteRepository = $this->createMock(MinisiteRepositoryInterface::class);
         $this->listingService = new MinisiteListingService($this->listingManager, $this->minisiteRepository);
 
         // Default URL generation mock

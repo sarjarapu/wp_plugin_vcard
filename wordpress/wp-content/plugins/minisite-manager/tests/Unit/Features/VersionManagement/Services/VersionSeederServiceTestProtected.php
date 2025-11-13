@@ -72,7 +72,7 @@ final class VersionSeederServiceTestProtected extends TestCase
         parent::setUp();
         \Brain\Monkey\setUp();
 
-        $this->versionRepository = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface::class);
+        $this->versionRepository = $this->createMock(\Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface::class);
         $this->service = new TestableVersionSeederService($this->versionRepository);
     }
 

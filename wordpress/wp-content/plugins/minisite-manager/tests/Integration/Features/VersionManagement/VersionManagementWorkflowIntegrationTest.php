@@ -8,8 +8,9 @@ use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Events;
 use Doctrine\ORM\ORMSetup;
-use Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
+use Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository;
 use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;
 use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
@@ -22,7 +23,6 @@ use Minisite\Infrastructure\Http\WordPressTerminationHandler;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
 use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
@@ -127,9 +127,20 @@ final class VersionManagementWorkflowIntegrationTest extends TestCase
             $this->em->getClassMetadata(Version::class)
         );
 
-        // Create MinisiteRepository using FakeWpdb bridge to Doctrine connection
-        // Reuse the same FakeWpdb instance that's already in $GLOBALS['wpdb']
-        $this->minisiteRepository = new MinisiteRepository($GLOBALS['wpdb']);
+        // Ensure MinisiteRepository is available via global (matching plugin bootstrap behaviour)
+        $GLOBALS['minisite_entity_manager'] = $this->em;
+        $GLOBALS['minisite_repository'] = new MinisiteRepository(
+            $this->em,
+            $this->em->getClassMetadata(Minisite::class)
+        );
+
+        // Use Doctrine-based MinisiteRepository from global (initialized by PluginBootstrap)
+        if (! isset($GLOBALS['minisite_repository'])) {
+            throw new \RuntimeException(
+                'MinisiteRepository not initialized. Ensure PluginBootstrap::initializeConfigSystem() is called.'
+            );
+        }
+        $this->minisiteRepository = $GLOBALS['minisite_repository'];
 
         // Create service
         $wordPressManager = new WordPressVersionManager(new WordPressTerminationHandler());

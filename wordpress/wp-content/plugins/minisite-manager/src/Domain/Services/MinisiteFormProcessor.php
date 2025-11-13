@@ -3,8 +3,8 @@
 namespace Minisite\Domain\Services;
 
 use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -22,7 +22,7 @@ class MinisiteFormProcessor
 
     public function __construct(
         private WordPressManagerInterface $wordPressManager,
-        private MinisiteRepository $minisiteRepository
+        private MinisiteRepositoryInterface $minisiteRepository
     ) {
         $this->logger = LoggingServiceProvider::getFeatureLogger('form-processor');
     }
@@ -130,11 +130,19 @@ class MinisiteFormProcessor
             ));
             $siteJson = $this->buildEmptySiteJson();
         } else {
+            // Handle both array (old entity) and string (new Doctrine entity)
+            if (is_string($minisite->siteJson)) {
+                $siteJson = json_decode($minisite->siteJson, true) ?: array();
+            } else {
+                $siteJson = $minisite->siteJson;
+            }
+            $siteJsonSize = is_string($minisite->siteJson)
+                ? strlen($minisite->siteJson)
+                : strlen(json_encode($minisite->siteJson));
             $this->logger->debug('Using existing siteJson as base', array(
                 'site_id' => $siteId,
-                'existing_site_json_size' => strlen(json_encode($minisite->siteJson)),
+                'existing_site_json_size' => $siteJsonSize,
             ));
-            $siteJson = $minisite->siteJson;
         }
 
         // Update each section if form data is provided
