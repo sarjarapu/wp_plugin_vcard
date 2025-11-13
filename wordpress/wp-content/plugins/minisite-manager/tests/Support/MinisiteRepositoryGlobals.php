@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Support;
 
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 
 /**
  * Helper trait to ensure globals-based repository dependencies are available.

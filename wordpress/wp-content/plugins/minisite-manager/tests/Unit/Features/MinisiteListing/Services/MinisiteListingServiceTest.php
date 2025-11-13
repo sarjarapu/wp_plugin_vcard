@@ -7,7 +7,7 @@ use Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand;
 use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 

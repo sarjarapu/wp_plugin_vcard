@@ -5,8 +5,8 @@ namespace Minisite\Features\MinisiteViewer\Services;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteViewer\Commands\ViewMinisiteCommand;
 use Minisite\Features\MinisiteViewer\WordPress\WordPressMinisiteManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 
 /**
  * Minisite View Service

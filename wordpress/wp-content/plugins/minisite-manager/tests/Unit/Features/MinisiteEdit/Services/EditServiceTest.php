@@ -7,8 +7,8 @@ use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
 

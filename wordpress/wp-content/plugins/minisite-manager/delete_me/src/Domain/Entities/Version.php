@@ -1,6 +1,9 @@
 <?php
 
-namespace Minisite\Domain\Entities;
+namespace delete_me\Minisite\Domain\Entities;
+
+// Legacy Version entity retained for backwards compatibility during cleanup.
+// Use Minisite\Features\VersionManagement\Domain\Entities\Version instead.
 
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
@@ -11,15 +14,14 @@ class Version
         public ?int $id,
         public string $minisiteId,
         public int $versionNumber,
-        public string $status,        // draft|published
+        public string $status,
         public ?string $label,
         public ?string $comment,
         public int $createdBy,
         public ?\DateTimeImmutable $createdAt,
         public ?\DateTimeImmutable $publishedAt,
-        public ?int $sourceVersionId,  // For rollbacks: tracks what version was rolled back from
-        public array $siteJson,  // Required - contains the form data
-        // Minisite fields for complete versioning (all optional)
+        public ?int $sourceVersionId,
+        public array $siteJson,
         public ?SlugPair $slugs = null,
         public ?string $title = null,
         public ?string $name = null,

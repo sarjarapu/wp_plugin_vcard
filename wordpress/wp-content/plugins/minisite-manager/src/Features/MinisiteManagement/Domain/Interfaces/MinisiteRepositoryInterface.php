@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Infrastructure\Persistence\Repositories;
+namespace Minisite\Features\MinisiteManagement\Domain\Interfaces;
 
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;

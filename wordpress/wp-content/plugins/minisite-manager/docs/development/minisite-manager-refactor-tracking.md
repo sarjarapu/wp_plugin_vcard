@@ -116,8 +116,8 @@ The `minisite-manager.php` file requires major refactoring to complete the migra
 
 ### WordPressManager Interface & Implementation Refactoring
 
-**Status**: TODO - Tracked for future refactoring  
-**Priority**: Medium  
+**Status**: TODO - Tracked for future refactoring
+**Priority**: Medium
 **Created**: November 2025
 
 #### Current Issues
@@ -131,7 +131,7 @@ The `minisite-manager.php` file requires major refactoring to complete the migra
   - Methods like `updateBusinessInfo()` might not be needed in all features
   - Forces implementation of stub methods that do nothing or return default values
 
-- [ ] **Maintenance Burden**: 
+- [ ] **Maintenance Burden**:
   - Adding new methods to interface requires updating all implementations
   - Risk of forgetting to update one of the managers
   - Difficult to understand which methods are actually used per feature
@@ -157,11 +157,11 @@ The `minisite-manager.php` file requires major refactoring to complete the migra
   ```php
   // Base class with common operations
   abstract class BaseWordPressManager implements WordPressManagerInterface
-  
+
   // Edit manager uses version operations
-  class WordPressEditManager extends BaseWordPressManager 
+  class WordPressEditManager extends BaseWordPressManager
     implements WordPressVersionManagerInterface
-  
+
   // Publish manager doesn't need version operations
   class WordPressPublishManager extends BaseWordPressManager
     // Only implements what it needs
@@ -206,6 +206,11 @@ The `minisite-manager.php` file requires major refactoring to complete the migra
   - [ ] Mixed responsibilities (schema creation, data migration, cleanup)
   - [ ] Hard to maintain and extend
   - [ ] Difficult to test individual components
+- [ ] **Why We Still Need CreateBase.php (Blockers to Removal)**:
+  - [ ] **Legacy table creation**: still provisions `wp_minisites`, `minisite_bookmarks`, `minisite_payments`, `minisite_payment_history`, and `minisite_reservations` via SQL loaders. These tables have not been ported to Doctrine migrations yet.
+  - [ ] **Foreign key + event setup**: owns `addForeignKeyIfNotExists()` calls and the MySQL event `event_purge_reservations.sql`; no replacement exists in Doctrine migrations or separate installers.
+  - [ ] **Dev/test seed data**: `seedTestData()` inserts the four sample minisites and bootstraps initial versions. There is no dedicated `MinisiteSeederService` yet, so deleting the migration would drop seeded content.
+  - [ ] **Plugin activation/deactivation**: `ActivationHandler` / `DeactivationHandler` still instantiate `_1_0_0_CreateBase` for the legacy migration path. Those flows must be updated to call Doctrine migrations / new seeders first.
 
 - [ ] **Refactoring Tasks**:
   - [ ] Split into separate migration classes by concern

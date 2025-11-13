@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Infrastructure\Persistence\Repositories;
+namespace Minisite\Features\VersionManagement\Domain\Interfaces;
 
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
 

@@ -69,7 +69,7 @@ final class VersionManagementFeatureTest extends TestCase
         // Mock repositories in global (required by VersionHooksFactory)
         if (! isset($GLOBALS['minisite_repository'])) {
             $GLOBALS['minisite_repository'] = $this->createMock(
-                \Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface::class
+                \Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface::class
             );
         }
         if (! isset($GLOBALS['minisite_version_repository'])) {

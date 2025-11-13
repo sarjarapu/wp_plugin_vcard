@@ -4,7 +4,7 @@ namespace Minisite\Features\MinisiteListing\Services;
 
 use Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;
-use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 
 /**
  * Minisite Listing Service

@@ -5,14 +5,12 @@ declare(strict_types=1);
 namespace Tests\Unit\Infrastructure\Persistence\Repositories;
 
 use DateTimeImmutable;
-use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
-use Minisite\Domain\Entities\Version;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Infrastructure\Persistence\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
 
@@ -53,8 +51,9 @@ final class MinisiteRepositoryTest extends TestCase
             ->method('get_row')
             ->willReturnCallback(function ($query, $output) use ($row) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
-                    return ['lat' => '40.7128', 'lng' => '-74.0060'];
+                    return array('lat' => '40.7128', 'lng' => '-74.0060');
                 }
+
                 return $row;
             });
 
@@ -97,8 +96,9 @@ final class MinisiteRepositoryTest extends TestCase
             ->method('get_row')
             ->willReturnCallback(function ($query, $output) use ($row) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
-                    return ['lat' => '40.7128', 'lng' => '-74.0060'];
+                    return array('lat' => '40.7128', 'lng' => '-74.0060');
                 }
+
                 return $row;
             });
 
@@ -120,8 +120,9 @@ final class MinisiteRepositoryTest extends TestCase
             ->method('get_row')
             ->willReturnCallback(function ($query, $output) use ($row) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
-                    return ['lat' => '40.7128', 'lng' => '-74.0060'];
+                    return array('lat' => '40.7128', 'lng' => '-74.0060');
                 }
+
                 return $row;
             });
 
@@ -149,10 +150,10 @@ final class MinisiteRepositoryTest extends TestCase
 
     public function testListByOwnerReturnsArrayOfMinisites(): void
     {
-        $rows = [
-            $this->createTestRow(['id' => 'test-1', 'title' => 'Business 1']),
-            $this->createTestRow(['id' => 'test-2', 'title' => 'Business 2'])
-        ];
+        $rows = array(
+            $this->createTestRow(array('id' => 'test-1', 'title' => 'Business 1')),
+            $this->createTestRow(array('id' => 'test-2', 'title' => 'Business 2')),
+        );
 
         $this->mockDb->expects($this->exactly(3))
             ->method('prepare')
@@ -168,8 +169,9 @@ final class MinisiteRepositoryTest extends TestCase
             ->method('get_row')
             ->willReturnCallback(function ($query, $output) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
-                    return ['lat' => '40.7128', 'lng' => '-74.0060'];
+                    return array('lat' => '40.7128', 'lng' => '-74.0060');
                 }
+
                 return null;
             });
 
@@ -198,7 +200,7 @@ final class MinisiteRepositoryTest extends TestCase
         $this->mockDb->expects($this->once())
             ->method('get_results')
             ->with('prepared query', \ARRAY_A)
-            ->willReturn([]);
+            ->willReturn(array());
 
         $result = $this->repository->listByOwner(456, 10, 20);
 
@@ -378,7 +380,7 @@ final class MinisiteRepositoryTest extends TestCase
                            $data['created_by'] === 123 &&
                            $data['updated_by'] === 123;
                 }),
-                ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d']
+                array('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s', '%s', '%s', '%s', '%d', '%d')
             )
             ->willReturn(1);
 
@@ -396,8 +398,9 @@ final class MinisiteRepositoryTest extends TestCase
             ->method('get_row')
             ->willReturnCallback(function ($query, $output) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
-                    return ['lat' => '40.7128', 'lng' => '-74.0060'];
+                    return array('lat' => '40.7128', 'lng' => '-74.0060');
                 }
+
                 return $this->createTestRow();
             });
 
@@ -441,8 +444,9 @@ final class MinisiteRepositoryTest extends TestCase
             ->method('get_row')
             ->willReturnCallback(function ($query, $output) {
                 if (strpos($query, 'SELECT ST_Y(location_point) as lng, ST_X(location_point) as lat') !== false) {
-                    return ['lat' => '40.7128', 'lng' => '-74.0060'];
+                    return array('lat' => '40.7128', 'lng' => '-74.0060');
                 }
+
                 return $this->createTestRow();
             });
 
@@ -479,10 +483,10 @@ final class MinisiteRepositoryTest extends TestCase
             ->method('update')
             ->with(
                 'wp_minisites',
-                ['title' => 'New Title'],
-                ['id' => 'test-123'],
-                ['%s'],
-                ['%s']
+                array('title' => 'New Title'),
+                array('id' => 'test-123'),
+                array('%s'),
+                array('%s')
             )
             ->willReturn(1);
 
@@ -511,9 +515,9 @@ final class MinisiteRepositoryTest extends TestCase
                 $this->callback(function ($data) {
                     return $data['status'] === 'published' && isset($data['published_at']);
                 }),
-                ['id' => 'test-123'],
-                ['%s', '%s'],
-                ['%s']
+                array('id' => 'test-123'),
+                array('%s', '%s'),
+                array('%s')
             )
             ->willReturn(1);
 
@@ -524,11 +528,11 @@ final class MinisiteRepositoryTest extends TestCase
 
     public function testUpdateBusinessInfoSuccess(): void
     {
-        $fields = [
+        $fields = array(
             'title' => 'New Title',
             'name' => 'New Name',
-            'city' => 'New City'
-        ];
+            'city' => 'New City',
+        );
 
         $this->mockDb->expects($this->once())
             ->method('update')
@@ -541,9 +545,9 @@ final class MinisiteRepositoryTest extends TestCase
                            $data['name'] === 'New Name' &&
                            $data['city'] === 'New City';
                 }),
-                ['id' => 'test-123'],
-                ['%d', '%s', '%s', '%s', '%s'],
-                ['%s']
+                array('id' => 'test-123'),
+                array('%d', '%s', '%s', '%s', '%s'),
+                array('%s')
             )
             ->willReturn(1);
 
@@ -555,7 +559,7 @@ final class MinisiteRepositoryTest extends TestCase
 
     public function testUpdateBusinessInfoThrowsExceptionOnFailure(): void
     {
-        $fields = ['title' => 'New Title'];
+        $fields = array('title' => 'New Title');
 
         $this->mockDb->expects($this->once())
             ->method('update')
@@ -593,7 +597,7 @@ final class MinisiteRepositoryTest extends TestCase
             defaultLocale: 'en-US',
             schemaVersion: 1,
             siteVersion: 1,
-            siteJson: ['test' => 'data'],
+            siteJson: array('test' => 'data'),
             searchTerms: 'test business name new york blue test business',
             status: 'draft',
             publishStatus: 'draft',
@@ -632,14 +636,14 @@ final class MinisiteRepositoryTest extends TestCase
             defaultLocale: 'en-US',
             schemaVersion: 1,
             siteVersion: 1,
-            siteJson: ['test' => 'data'],
+            siteJson: array('test' => 'data'),
             searchTerms: 'test business name new york blue test business'
         );
     }
 
-    private function createTestRow(array $overrides = []): array
+    private function createTestRow(array $overrides = array()): array
     {
-        return array_merge([
+        return array_merge(array(
             'id' => 'test-123',
             'slug' => 'test-slug',
             'business_slug' => 'test-business',
@@ -666,7 +670,7 @@ final class MinisiteRepositoryTest extends TestCase
             'published_at' => null,
             'created_by' => '123',
             'updated_by' => '123',
-            '_minisite_current_version_id' => null
-        ], $overrides);
+            '_minisite_current_version_id' => null,
+        ), $overrides);
     }
 }
