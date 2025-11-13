@@ -12,12 +12,15 @@ use Minisite\Application\Rendering\TimberRenderer;
 use PHPUnit\Framework\TestCase;
 use Brain\Monkey\Functions;
 use Tests\Support\FakeWpdb;
+use Tests\Support\MinisiteRepositoryGlobals;
 
 /**
  * Test EditHooksFactory
  */
 class EditHooksFactoryTest extends TestCase
 {
+    use MinisiteRepositoryGlobals;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -29,8 +32,7 @@ class EditHooksFactoryTest extends TestCase
         $wpdb->prefix = 'wp_';
 
         // Mock $GLOBALS for repositories (required by factory)
-        $GLOBALS['minisite_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\MinisiteRepositoryInterface::class);
-        $GLOBALS['minisite_version_repository'] = $this->createMock(\Minisite\Infrastructure\Persistence\Repositories\VersionRepositoryInterface::class);
+        $this->setUpMinisiteRepositoryGlobals();
 
         // Mock constants
         Functions\when('MINISITE_DEFAULT_TEMPLATE')->justReturn('v2025');
@@ -39,8 +41,7 @@ class EditHooksFactoryTest extends TestCase
     protected function tearDown(): void
     {
         // Clean up globals
-        unset($GLOBALS['minisite_repository']);
-        unset($GLOBALS['minisite_version_repository']);
+        $this->tearDownMinisiteRepositoryGlobals();
         global $wpdb;
         $wpdb = null;
 
