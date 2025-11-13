@@ -34,4 +34,3 @@ class WordPressReviewManager extends BaseWordPressManager implements WordPressMa
     // Add any review-specific WordPress operations here
     // All common methods inherited from BaseWordPressManager
 }
-

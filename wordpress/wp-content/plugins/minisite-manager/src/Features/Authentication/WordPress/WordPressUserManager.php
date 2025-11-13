@@ -194,5 +194,4 @@ class WordPressUserManager extends BaseWordPressManager implements WordPressMana
     {
         return retrieve_password($user_login);
     }
-
 }
