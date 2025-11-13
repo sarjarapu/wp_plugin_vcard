@@ -12,6 +12,8 @@ use Minisite\Infrastructure\Http\TerminationHandlerInterface;
  * - Manages minisite data retrieval
  * - Handles WordPress database interactions
  * - Provides clean interface for minisite operations
+ *
+ * All common WordPress operations are inherited from BaseWordPressManager.
  */
 class WordPressMinisiteManager extends BaseWordPressManager
 {
@@ -25,70 +27,7 @@ class WordPressMinisiteManager extends BaseWordPressManager
         parent::__construct($terminationHandler);
     }
 
-    /**
-     * Get query variable
-     *
-     * @param string $var Variable name
-     * @param mixed $default Default value
-     * @return mixed Query variable value
-     */
-    public function getQueryVar(string $var, $default = '')
-    {
-        return get_query_var($var, $default);
-    }
-
-    /**
-     * Sanitize text field
-     *
-     * @param string $text Text to sanitize
-     * @return string Sanitized text
-     */
-    public function sanitizeTextField(string $text): string
-    {
-        return sanitize_text_field($text);
-    }
-
-    // ===== AUTHENTICATION METHODS =====
-
-    /**
-     * Check if user is logged in
-     *
-     * @return bool
-     */
-    public function isUserLoggedIn(): bool
-    {
-        return is_user_logged_in();
-    }
-
-    /**
-     * Get current user
-     *
-     * @return object|null
-     */
-    public function getCurrentUser(): ?object
-    {
-        return wp_get_current_user();
-    }
-
-    /**
-     * Redirect to URL
-     * Uses base class redirect() method which handles termination
-     */
-    public function redirect(string $url, int $status = 302): void
-    {
-        parent::redirect($url, $status);
-    }
-
-    /**
-     * Get home URL
-     *
-     * @param string $path
-     * @return string
-     */
-    public function getHomeUrl(string $path = ''): string
-    {
-        return home_url($path);
-    }
+    // ===== MINISITEVIEWER-SPECIFIC METHODS ONLY =====
 
     /**
      * Get login redirect URL

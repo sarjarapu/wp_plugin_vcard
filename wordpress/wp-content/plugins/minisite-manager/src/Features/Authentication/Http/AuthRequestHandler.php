@@ -144,7 +144,7 @@ class AuthRequestHandler
      */
     private function sanitizeInput(string $input): string
     {
-        return $this->wordPressManager->sanitizeText($this->wordPressManager->unslash($input));
+        return $this->wordPressManager->sanitizeTextField($this->wordPressManager->unslash($input));
     }
 
     /**

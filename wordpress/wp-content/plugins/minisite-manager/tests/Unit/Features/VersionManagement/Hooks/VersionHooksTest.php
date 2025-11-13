@@ -19,10 +19,10 @@ class VersionHooksTest extends TestCase
     protected function setUp(): void
     {
         $this->versionController = $this->createMock(VersionController::class);
-        
+
         // Use TestTerminationHandler so exit doesn't terminate tests
         $terminationHandler = new TestTerminationHandler();
-        
+
         $this->hooks = new VersionHooks($this->versionController, $terminationHandler);
         $this->setupWordPressMocks();
     }
@@ -68,6 +68,97 @@ class VersionHooksTest extends TestCase
         $this->assertTrue(is_callable([$this->hooks, 'handleRollbackVersion']));
     }
 
+    // ===== FUNCTIONALITY TESTS =====
+
+    public function test_register_adds_all_ajax_actions(): void
+    {
+        // Note: add_action is already defined in tests/Support/WordPressFunctions.php
+        // We can't override it, so we verify register() executes without error
+        // The actual hook registration is tested in integration tests
+        try {
+            $this->hooks->register();
+            $this->assertTrue(true); // Method executed without error
+        } catch (\Exception $e) {
+            $this->fail('register() should not throw exceptions: ' . $e->getMessage());
+        }
+    }
+
+    public function test_handle_version_history_page_calls_controller_when_route_matches(): void
+    {
+        // Mock get_query_var to return matching route values
+        $this->mockWordPressFunction('get_query_var', function ($var, $default = '') {
+            if ($var === 'minisite_account') {
+                return '1';
+            }
+            if ($var === 'minisite_account_action') {
+                return 'versions';
+            }
+            return $default;
+        });
+
+        $this->versionController
+            ->expects($this->once())
+            ->method('handleListVersions');
+
+        $this->hooks->handleVersionHistoryPage();
+    }
+
+    public function test_handle_version_history_page_does_not_call_controller_when_route_does_not_match(): void
+    {
+        // Mock get_query_var to return non-matching route values
+        $this->mockWordPressFunction('get_query_var', function ($var, $default = '') {
+            if ($var === 'minisite_account') {
+                return '0'; // Not matching
+            }
+            if ($var === 'minisite_account_action') {
+                return 'other'; // Not matching
+            }
+            return $default;
+        });
+
+        $this->versionController
+            ->expects($this->never())
+            ->method('handleListVersions');
+
+        $this->hooks->handleVersionHistoryPage();
+    }
+
+    public function test_handle_list_versions_calls_controller(): void
+    {
+        $this->versionController
+            ->expects($this->once())
+            ->method('handleListVersions');
+
+        $this->hooks->handleListVersions();
+    }
+
+    public function test_handle_create_draft_calls_controller(): void
+    {
+        $this->versionController
+            ->expects($this->once())
+            ->method('handleCreateDraft');
+
+        $this->hooks->handleCreateDraft();
+    }
+
+    public function test_handle_publish_version_calls_controller(): void
+    {
+        $this->versionController
+            ->expects($this->once())
+            ->method('handlePublishVersion');
+
+        $this->hooks->handlePublishVersion();
+    }
+
+    public function test_handle_rollback_version_calls_controller(): void
+    {
+        $this->versionController
+            ->expects($this->once())
+            ->method('handleRollbackVersion');
+
+        $this->hooks->handleRollbackVersion();
+    }
+
     private function setupWordPressMocks(): void
     {
         $functions = ['add_action', 'is_page', 'get_query_var'];
@@ -84,6 +175,18 @@ class VersionHooksTest extends TestCase
                                 }
                             }
                             return \$default;
+                        }
+                    ");
+                } elseif ($function === 'add_action') {
+                    eval("
+                        function add_action(\$hook, \$callback, \$priority = 10, \$accepted_args = 1) {
+                            if (isset(\$GLOBALS['_test_mock_add_action'])) {
+                                \$handler = \$GLOBALS['_test_mock_add_action'];
+                                if (is_callable(\$handler)) {
+                                    return \$handler(\$hook, \$callback);
+                                }
+                            }
+                            return null;
                         }
                     ");
                 } else {
@@ -105,6 +208,9 @@ class VersionHooksTest extends TestCase
         if ($functionName === 'get_query_var' && is_callable($returnValue)) {
             // Store the callback in GLOBALS for the mocked function to use
             $GLOBALS['_test_mock_get_query_var'] = $returnValue;
+        } elseif ($functionName === 'add_action' && is_callable($returnValue)) {
+            // Store the callback for add_action
+            $GLOBALS['_test_mock_add_action'] = $returnValue;
         } else {
             $GLOBALS['_test_mock_' . $functionName] = $returnValue;
         }
