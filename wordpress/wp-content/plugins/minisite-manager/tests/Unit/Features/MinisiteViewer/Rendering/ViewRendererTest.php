@@ -4,6 +4,8 @@ namespace Tests\Unit\Features\MinisiteViewer\Rendering;
 
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewDataService;
+use Minisite\Features\MinisiteViewer\ViewModels\MinisiteViewModel;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -42,17 +44,23 @@ final class ViewRendererTest extends TestCase
     private ViewRenderer $displayRenderer;
     private $mockTimberRenderer;
     private $mockWordPressManager;
+    private $mockDataService;
 
     protected function setUp(): void
     {
         $this->mockTimberRenderer = $this->createMock(\Minisite\Application\Rendering\TimberRenderer::class);
         $this->mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
+        $this->mockDataService = $this->createMock(MinisiteViewDataService::class);
 
         // Mock the getReviewsForMinisite method
         $this->mockWordPressManager->method('getReviewsForMinisite')
             ->willReturn(array());
 
-        $this->displayRenderer = new ViewRenderer($this->mockTimberRenderer, $this->mockWordPressManager);
+        $this->displayRenderer = new ViewRenderer(
+            $this->mockTimberRenderer,
+            $this->mockWordPressManager,
+            $this->mockDataService
+        );
         $this->setupWordPressMocks();
     }
 
@@ -68,11 +76,24 @@ final class ViewRendererTest extends TestCase
     {
         // Create a proper Minisite entity mock
         $mockMinisite = $this->createMock(Minisite::class);
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
+        );
+
+        // Mock data service to return view model
+        $this->mockDataService
+            ->expects($this->once())
+            ->method('prepareViewModel')
+            ->with($mockMinisite)
+            ->willReturn($mockViewModel);
 
         $this->mockTimberRenderer
             ->expects($this->once())
             ->method('render')
-            ->with($mockMinisite);
+            ->with($mockViewModel);
 
         $this->displayRenderer->renderMinisite($mockMinisite);
     }
@@ -85,13 +106,24 @@ final class ViewRendererTest extends TestCase
         $mockRenderer = new \stdClass(); // Object without render method
         $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         $mockWordPressManager->method('getReviewsForMinisite')->willReturn(array());
-        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
-        $mockMinisite = (object)array(
-            'id' => '123',
-            'name' => 'Coffee Shop',
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown',
+        $mockDataService = $this->createMock(MinisiteViewDataService::class);
+        $mockMinisite = $this->createMock(Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = 'Coffee Shop';
+        $mockMinisite->title = 'Coffee Shop Title';
+
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
         );
+
+        $mockDataService
+            ->method('prepareViewModel')
+            ->willReturn($mockViewModel);
+
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager, $mockDataService);
 
         // Capture output
         ob_start();
@@ -111,13 +143,24 @@ final class ViewRendererTest extends TestCase
         $mockRenderer = new \stdClass(); // Object without render method
         $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         $mockWordPressManager->method('getReviewsForMinisite')->willReturn(array());
-        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
-        $mockMinisite = (object)array(
-            'id' => '123',
-            'name' => '',
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown',
+        $mockDataService = $this->createMock(MinisiteViewDataService::class);
+        $mockMinisite = $this->createMock(Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = '';
+        $mockMinisite->title = '';
+
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
         );
+
+        $mockDataService
+            ->method('prepareViewModel')
+            ->willReturn($mockViewModel);
+
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager, $mockDataService);
 
         // Capture output
         ob_start();
@@ -130,29 +173,40 @@ final class ViewRendererTest extends TestCase
     }
 
     /**
-     * Test renderMinisite with null minisite name
+     * Test renderMinisite with null minisite name (treated as empty string)
      */
     public function test_render_minisite_with_null_minisite_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
         $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         $mockWordPressManager->method('getReviewsForMinisite')->willReturn(array());
-        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
-        $mockMinisite = (object)array(
-            'id' => '123',
-            'name' => null,
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown',
+        $mockDataService = $this->createMock(MinisiteViewDataService::class);
+        $mockMinisite = $this->createMock(Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = ''; // Empty string instead of null (Minisite entity doesn't allow null)
+        $mockMinisite->title = '';
+
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
         );
+
+        $mockDataService
+            ->method('prepareViewModel')
+            ->willReturn($mockViewModel);
+
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager, $mockDataService);
 
         // Capture output
         ob_start();
         $displayRenderer->renderMinisite($mockMinisite);
         $output = ob_get_clean();
 
-        // Verify fallback rendering with null name
+        // Verify fallback rendering with empty name (fallback shows empty h1)
         $this->assertStringContainsString('<!doctype html>', $output);
-        $this->assertStringContainsString('<h1>Minisite</h1>', $output);
+        $this->assertStringContainsString('<h1></h1>', $output);
     }
 
     /**
@@ -163,13 +217,24 @@ final class ViewRendererTest extends TestCase
         $mockRenderer = new \stdClass(); // Object without render method
         $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
         $mockWordPressManager->method('getReviewsForMinisite')->willReturn(array());
-        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
-        $mockMinisite = (object)array(
-            'id' => '123',
-            'name' => 'Café & Restaurant <script>alert("xss")</script>',
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown',
+        $mockDataService = $this->createMock(MinisiteViewDataService::class);
+        $mockMinisite = $this->createMock(Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = 'Café & Restaurant <script>alert("xss")</script>';
+        $mockMinisite->title = 'Café & Restaurant';
+
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
         );
+
+        $mockDataService
+            ->method('prepareViewModel')
+            ->willReturn($mockViewModel);
+
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager, $mockDataService);
 
         // Capture output
         ob_start();
@@ -299,11 +364,12 @@ final class ViewRendererTest extends TestCase
         $constructor = $reflection->getConstructor();
 
         $this->assertNotNull($constructor);
-        $this->assertEquals(2, $constructor->getNumberOfParameters());
+        $this->assertEquals(3, $constructor->getNumberOfParameters());
 
         $params = $constructor->getParameters();
         $this->assertEquals('object', $params[0]->getType()->getName());
         $this->assertEquals('object', $params[1]->getType()->getName());
+        $this->assertTrue($params[2]->allowsNull()); // Third parameter is optional
     }
 
     /**
@@ -313,11 +379,24 @@ final class ViewRendererTest extends TestCase
     {
         // Create a proper Minisite entity mock
         $mockMinisite = $this->createMock(Minisite::class);
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
+        );
+
+        // Mock data service to return view model
+        $this->mockDataService
+            ->expects($this->once())
+            ->method('prepareViewModel')
+            ->with($mockMinisite)
+            ->willReturn($mockViewModel);
 
         $this->mockTimberRenderer
             ->expects($this->once())
             ->method('render')
-            ->with($mockMinisite)
+            ->with($mockViewModel)
             ->willThrowException(new \Exception('Template error'));
 
         // The exception should be caught and fallback rendering should be used
