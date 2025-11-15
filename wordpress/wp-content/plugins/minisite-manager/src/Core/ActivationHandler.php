@@ -43,6 +43,13 @@ final class ActivationHandler
 
             $doctrineRunner = new \Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner();
             $doctrineRunner->migrate();
+
+            // After migrations complete, seed test data in non-production environments
+            // This integrates seeding with the migration flow for better cohesion
+            // NOTE: Legacy migration system (_1_0_0_CreateBase) has been replaced by seeder services
+            if (! defined('MINISITE_LIVE_PRODUCTION') || ! MINISITE_LIVE_PRODUCTION) {
+                self::seedTestDataAfterMigrations();
+            }
         } catch (\Exception $e) {
             // Log error with full details
             $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('activation');
@@ -54,20 +61,91 @@ final class ActivationHandler
                 'trace' => $e->getTraceAsString(),
             ));
         }
+    }
 
-        // Seed test data in non-production environments
-        // NOTE: Legacy migration system (_1_0_0_CreateBase) has been replaced by seeder services
-        if (! defined('MINISITE_LIVE_PRODUCTION') || ! MINISITE_LIVE_PRODUCTION) {
-            add_action('init', array(self::class, 'seedTestData'), 20);
+    /**
+     * Seed test data immediately after migrations complete
+     *
+     * This method is called directly after migrations to ensure seeding happens
+     * as part of the activation flow, not as a separate async process.
+     * Ensures repositories are initialized before seeding.
+     */
+    private static function seedTestDataAfterMigrations(): void
+    {
+        $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('activation');
+
+        try {
+            // Ensure repositories are initialized (migrations may have created EntityManager)
+            if (
+                ! isset($GLOBALS['minisite_repository']) ||
+                ! isset($GLOBALS['minisite_version_repository']) ||
+                ! isset($GLOBALS['minisite_review_repository'])
+            ) {
+                // Initialize repositories now (migrations should have created EntityManager)
+                if (class_exists(\Doctrine\ORM\EntityManager::class)) {
+                    \Minisite\Core\PluginBootstrap::initializeConfigSystem();
+                }
+
+                // If still not available after initialization attempt, log and skip seeding
+                if (
+                    ! isset($GLOBALS['minisite_repository']) ||
+                    ! isset($GLOBALS['minisite_version_repository']) ||
+                    ! isset($GLOBALS['minisite_review_repository'])
+                ) {
+                    $logger->warning('Repositories not available after migration - skipping test data seeding', array(
+                        'minisite_repo' => isset($GLOBALS['minisite_repository']),
+                        'version_repo' => isset($GLOBALS['minisite_version_repository']),
+                        'review_repo' => isset($GLOBALS['minisite_review_repository']),
+                    ));
+
+                    return;
+                }
+            }
+
+            $logger->info('Starting test data seeding after migrations');
+
+            // Seed minisites first
+            $minisiteIds = self::seedTestMinisites();
+
+            // Seed versions for each minisite
+            self::seedTestVersions($minisiteIds);
+
+            // Seed reviews for each minisite
+            self::seedTestReviews($minisiteIds);
+
+            $logger->info('Test data seeding completed', array(
+                'minisites_seeded' => count(array_filter($minisiteIds)),
+            ));
+        } catch (\Exception $e) {
+            // Log error with full details
+            $logger->error('Failed to seed test data after migrations', array(
+                'error' => $e->getMessage(),
+                'exception' => get_class($e),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ));
         }
     }
 
     /**
      * Seed test data using Doctrine-based seeder services
-     * Called on 'init' hook after Doctrine is initialized
+     *
+     * @deprecated This method is kept for backward compatibility but is no longer used.
+     * Seeding now happens directly after migrations via seedTestDataAfterMigrations().
+     * This method may be called via WordPress hooks in some edge cases.
+     *
+     * Called on 'init' hook after Doctrine is initialized (legacy fallback)
      */
     public static function seedTestData(): void
     {
+        // This is now a fallback method - primary seeding happens in seedTestDataAfterMigrations()
+        // Check if seeding already happened (via direct call after migrations)
+        static $seedingAttempted = false;
+        if ($seedingAttempted) {
+            return;
+        }
+
         // Ensure repositories are initialized first
         if (
             ! isset($GLOBALS['minisite_repository']) ||
@@ -95,6 +173,8 @@ final class ActivationHandler
                 return;
             }
         }
+
+        $seedingAttempted = true;
 
         try {
             // Seed minisites first
