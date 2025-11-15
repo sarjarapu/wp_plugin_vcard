@@ -88,6 +88,10 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
         $this->wpdb = $GLOBALS['wpdb'];
         $this->wpdb->prefix = 'wp_'; // Set the prefix that migrations will read
 
+        // Create minimal wp_users table stub for foreign key tests
+        // This is needed because some migrations create foreign keys to wp_users
+        $this->createWordPressUsersTableStub();
+
         // Clean up any existing test tables before running tests
         $this->cleanupTables();
 
@@ -98,6 +102,25 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
             define('DB_PASSWORD', $pass);
             define('DB_NAME', $dbName);
         }
+    }
+
+    /**
+     * Create a minimal wp_users table stub for foreign key tests
+     * This allows migrations that reference wp_users to work in tests
+     */
+    protected function createWordPressUsersTableStub(): void
+    {
+        if ($this->tableExists('wp_users')) {
+            return; // Already exists
+        }
+
+        // Create minimal wp_users table with just ID column (required for foreign keys)
+        $this->connection->executeStatement(
+            "CREATE TABLE IF NOT EXISTS `wp_users` (
+                `ID` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                PRIMARY KEY (`ID`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
     }
 
     protected function tearDown(): void

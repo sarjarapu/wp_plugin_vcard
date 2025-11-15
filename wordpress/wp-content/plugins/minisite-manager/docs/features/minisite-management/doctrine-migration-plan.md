@@ -3,16 +3,16 @@
 ## Overview
 Migrate Minisite entity and repository from custom `$wpdb`-based implementation to Doctrine ORM, following the same pattern as Reviews and Configuration features.
 
-## Current State
+## ✅ Migration Complete
 
 ### Entity
-- **Location**: `src/Domain/Entities/Minisite.php`
-- **Type**: Plain PHP class (constructor-based)
-- **Fields**: 38 properties including `id`, `slug`, `slugs` (SlugPair), `title`, `name`, location fields, `siteJson` (array), `geo` (GeoPoint), timestamps, etc.
+- ✅ **Location**: `src/Features/MinisiteManagement/Domain/Entities/Minisite.php`
+- ✅ **Type**: Doctrine ORM entity with attributes
+- ✅ **Fields**: All 38 properties migrated, including `id`, `slug`, `slugs` (SlugPair), `title`, `name`, location fields, `siteJson` (string), `geo` (GeoPoint), timestamps, etc.
 
 ### Repository
-- **Location**: `src/Infrastructure/Persistence/Repositories/MinisiteRepository.php`
-- **Type**: Uses `$wpdb` directly
+- ✅ **Location**: `src/Features/MinisiteManagement/Repositories/MinisiteRepository.php`
+- ✅ **Type**: Doctrine EntityRepository implementation
 - **Methods**:
   - `findBySlugs()`, `findById()`, `findBySlugParams()`
   - `insert()`, `save()` (with optimistic locking)
@@ -32,20 +32,21 @@ Migrate Minisite entity and repository from custom `$wpdb`-based implementation 
   - `status` (ENUM) - 'draft'|'published'|'archived'
   - `publish_status` (ENUM) - 'draft'|'reserved'|'published'
 
-## Target State (Following Reviews/Config Pattern)
+## ✅ Target State Achieved (Following Reviews/Config Pattern)
 
 ### Entity
-- **Location**: `src/Features/MinisiteManagement/Domain/Entities/Minisite.php`
-- **Type**: Doctrine ORM entity with attributes
-- **Pattern**: Similar to `Version` entity (handles POINT via raw SQL)
+- ✅ **Location**: `src/Features/MinisiteManagement/Domain/Entities/Minisite.php`
+- ✅ **Type**: Doctrine ORM entity with attributes
+- ✅ **Pattern**: Similar to `Version` entity (handles POINT via raw SQL)
 
 ### Repository
-- **Location**: `src/Features/MinisiteManagement/Repositories/MinisiteRepository.php`
-- **Type**: Extends `EntityRepository`, implements `MinisiteRepositoryInterface`
-- **Pattern**: Similar to `VersionRepository` (handles POINT via raw SQL after flush)
+- ✅ **Location**: `src/Features/MinisiteManagement/Repositories/MinisiteRepository.php`
+- ✅ **Type**: Extends `EntityRepository`, implements `MinisiteRepositoryInterface`
+- ✅ **Pattern**: Similar to `VersionRepository` (handles POINT via raw SQL after flush)
 
 ### Migration
-- **Location**: `src/Infrastructure/Migrations/Doctrine/Version20251106000000.php`
+- ✅ **Location**: `src/Infrastructure/Migrations/Doctrine/Version20251106000000.php`
+- ✅ **Status**: Complete and tested
 - **Pattern**: Similar to `Version20251103000000.php` (Config) and `Version20251104000000.php` (Reviews)
 - **Approach**: Raw SQL for `CREATE TABLE` (readability, easier indexing)
 

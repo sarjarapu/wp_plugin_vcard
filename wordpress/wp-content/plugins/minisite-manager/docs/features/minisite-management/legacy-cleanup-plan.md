@@ -14,19 +14,16 @@ This plan addresses the cleanup of legacy code remnants from the Doctrine migrat
 - `PluginBootstrap.php` - Uses Doctrine entity
 - `MinisiteRepository` - Uses Doctrine entity
 
-### ❌ Still Using Legacy Entity
-- `TimberRenderer.php` - Uses `Minisite\Domain\Entities\Minisite` (line 5)
-  - Also has data fetching mixed with rendering (needs refactoring per TODO)
+### ✅ All Using Doctrine Entity
+- `TimberRenderer.php` - ✅ Now uses `MinisiteViewModel` (Phase 5 complete)
+- All services and repositories use Doctrine entity
 
-### Legacy Files Status
-- `src/Domain/Entities/Minisite.php` - Legacy entity (42 lines, plain PHP class)
-- `tests/Unit/Domain/Entities/MinisiteTest.php` - Legacy test file
-- `_1_0_0_CreateBase.php` - Still creates 5 tables via SQL files:
-  - `minisites` (already has Doctrine migration)
-  - `minisite_bookmarks` (needs Doctrine migration)
-  - `minisite_payments` (needs Doctrine migration)
-  - `minisite_payment_history` (needs Doctrine migration)
-  - `minisite_reservations` (needs Doctrine migration)
+### ✅ Legacy Files Status (All Archived)
+- ✅ `src/Domain/Entities/Minisite.php` - Moved to `delete_me/` (Phase 2 complete)
+- ✅ `tests/Unit/Domain/Entities/MinisiteTest.php` - Moved to `delete_me/` (Phase 2 complete)
+- ✅ `_1_0_0_CreateBase.php` - Moved to `delete_me/` (Phase 4 complete)
+- ✅ All tables now created by Doctrine migrations (Phase 3 complete)
+- ✅ All seeding now uses seeder services (Phase 4 complete)
 
 ## Execution Plan
 
