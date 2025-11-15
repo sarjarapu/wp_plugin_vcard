@@ -93,15 +93,15 @@ class MinisiteViewDataService
      */
     protected function checkIfBookmarked(string $minisiteId): bool
     {
-        if (! is_user_logged_in()) {
+        if (! \is_user_logged_in()) {
             return false;
         }
 
         try {
             global $wpdb;
-            $userId = get_current_user_id();
+            $userId = \get_current_user_id();
             $bookmarkExists = db::get_var(
-                "SELECT id FROM {$wpdb->prefix}minisite_bookmarks WHERE user_id = %d AND minisite_id = %d",
+                "SELECT id FROM {$wpdb->prefix}minisite_bookmarks WHERE user_id = %d AND minisite_id = %s",
                 array($userId, $minisiteId)
             );
 
@@ -124,12 +124,12 @@ class MinisiteViewDataService
      */
     protected function checkIfCanEdit(string $minisiteId): bool
     {
-        if (! is_user_logged_in()) {
+        if (! \is_user_logged_in()) {
             return false;
         }
 
         try {
-            return current_user_can('minisite_edit_profile', $minisiteId);
+            return \current_user_can('minisite_edit_profile', $minisiteId);
         } catch (\Exception $e) {
             $this->logger->error('Failed to check edit permission', array(
                 'minisite_id' => $minisiteId,
