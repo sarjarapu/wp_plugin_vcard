@@ -13,7 +13,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Unit tests for ReviewSeederService::seedAllSampleReviews()
- * 
+ *
  * Tests the seedAllSampleReviews method which loads JSON files and seeds sample reviews
  * for multiple minisites.
  */
@@ -30,12 +30,12 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
         \Brain\Monkey\setUp();
 
         $this->reviewRepository = $this->createMock(ReviewRepositoryInterface::class);
-        
+
         // Use global variable approach for get_current_user_id
         $GLOBALS['_test_mock_get_current_user_id'] = 0;
-        
+
         $this->service = new ReviewSeederService($this->reviewRepository);
-        
+
         // Create a testable subclass that can override loadReviewsFromJson
         $this->testJsonDir = sys_get_temp_dir() . '/minisite-test-reviews-' . uniqid();
         mkdir($this->testJsonDir, 0755, true);
@@ -46,12 +46,12 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
     {
         // Clean up global mocks
         unset($GLOBALS['_test_mock_get_current_user_id']);
-        
+
         // Clean up test JSON directory
         if (is_dir($this->testJsonDir)) {
             $this->deleteDirectory($this->testJsonDir);
         }
-        
+
         \Brain\Monkey\tearDown();
         parent::tearDown();
     }
@@ -87,7 +87,7 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             protected function loadReviewsFromJson(string $jsonFile): array
             {
                 $jsonPath = $this->testJsonDir . '/data/json/reviews/' . $jsonFile;
-                
+
                 if (!file_exists($jsonPath)) {
                     throw new \RuntimeException('JSON file not found: ' . $jsonPath);
                 }
@@ -170,7 +170,7 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             protected function loadReviewsFromJson(string $jsonFile): array
             {
                 $jsonPath = $this->testJsonDir . '/data/json/reviews/' . $jsonFile;
-                
+
                 if (!file_exists($jsonPath)) {
                     throw new \RuntimeException('JSON file not found: ' . $jsonPath);
                 }
@@ -234,7 +234,7 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             protected function loadReviewsFromJson(string $jsonFile): array
             {
                 $jsonPath = $this->testJsonDir . '/data/json/reviews/' . $jsonFile;
-                
+
                 if (!file_exists($jsonPath)) {
                     throw new \RuntimeException('JSON file not found: ' . $jsonPath);
                 }
@@ -313,12 +313,12 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             protected function loadReviewsFromJson(string $jsonFile): array
             {
                 $jsonPath = $this->testJsonDir . '/data/json/reviews/' . $jsonFile;
-                
+
                 // Simulate failure for LOTUS file
                 if ($jsonFile === 'lotus-textiles-reviews.json') {
                     throw new \RuntimeException('Simulated failure for LOTUS');
                 }
-                
+
                 if (!file_exists($jsonPath)) {
                     throw new \RuntimeException('JSON file not found: ' . $jsonPath);
                 }

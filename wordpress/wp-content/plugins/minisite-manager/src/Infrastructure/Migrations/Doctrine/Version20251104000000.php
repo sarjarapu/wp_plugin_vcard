@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
+use Minisite\Domain\ValueObjects\SlugPair;
 
 /**
  * Migration: Create minisite_reviews table with all MVP fields (fresh start)
@@ -164,7 +165,11 @@ final class Version20251104000000 extends BaseDoctrineMigration
             );
 
             foreach ($seededMinisites as $key => $slugs) {
-                $minisite = $minisiteRepo->findBySlugParams($slugs['business_slug'], $slugs['location_slug']);
+                $slugPair = new SlugPair(
+                    business: $slugs['business_slug'],
+                    location: $slugs['location_slug']
+                );
+                $minisite = $minisiteRepo->findBySlugs($slugPair);
                 if ($minisite) {
                     $minisiteIds[$key] = $minisite->id;
                 }
