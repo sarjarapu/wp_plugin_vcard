@@ -269,6 +269,31 @@ class MinisiteSeederService
                 // Load JSON data
                 $minisiteData = $this->loadMinisiteFromJson($jsonFile);
 
+                // Check if minisite already exists by slugs (idempotent seeding)
+                $businessSlug = $minisiteData['minisite']['business_slug'] ?? null;
+                $locationSlug = $minisiteData['minisite']['location_slug'] ?? null;
+
+                if ($businessSlug !== null && $locationSlug !== null) {
+                    $slugPair = new \Minisite\Domain\ValueObjects\SlugPair(
+                        business: $businessSlug,
+                        location: $locationSlug
+                    );
+                    $existingMinisite = $this->minisiteRepository->findBySlugs($slugPair);
+
+                    if ($existingMinisite !== null) {
+                        // Minisite already exists - use existing ID
+                        $minisiteIds[$key] = $existingMinisite->id;
+
+                        $this->logger->info('Minisite already exists, skipping insert', array(
+                            'key' => $key,
+                            'minisite_id' => $existingMinisite->id,
+                            'business_slug' => $businessSlug,
+                            'location_slug' => $locationSlug,
+                        ));
+                        continue;
+                    }
+                }
+
                 // Generate new ID for each minisite (override JSON ID)
                 $minisiteData['id'] = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
 
@@ -293,6 +318,33 @@ class MinisiteSeederService
                     'minisite_key' => $key,
                     'error' => $e->getMessage(),
                 ));
+            } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException $e) {
+                // Handle duplicate entry gracefully (might happen in race conditions)
+                $this->logger->warning('Duplicate minisite detected, attempting to find existing', array(
+                    'json_file' => $jsonFile,
+                    'minisite_key' => $key,
+                    'error' => $e->getMessage(),
+                ));
+
+                // Try to find existing minisite by slugs
+                $businessSlug = $minisiteData['minisite']['business_slug'] ?? null;
+                $locationSlug = $minisiteData['minisite']['location_slug'] ?? null;
+
+                if ($businessSlug !== null && $locationSlug !== null) {
+                    $slugPair = new \Minisite\Domain\ValueObjects\SlugPair(
+                        business: $businessSlug,
+                        location: $locationSlug
+                    );
+                    $existingMinisite = $this->minisiteRepository->findBySlugs($slugPair);
+
+                    if ($existingMinisite !== null) {
+                        $minisiteIds[$key] = $existingMinisite->id;
+                        $this->logger->info('Found existing minisite after duplicate error', array(
+                            'key' => $key,
+                            'minisite_id' => $existingMinisite->id,
+                        ));
+                    }
+                }
             }
         }
 

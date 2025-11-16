@@ -208,6 +208,7 @@ final class Version20251105000000 extends BaseDoctrineMigration
                             $minisiteRepo->updateCurrentVersionId($minisiteId, $latestVersion->id);
                         }
                     }
+
                     continue;
                 }
 
