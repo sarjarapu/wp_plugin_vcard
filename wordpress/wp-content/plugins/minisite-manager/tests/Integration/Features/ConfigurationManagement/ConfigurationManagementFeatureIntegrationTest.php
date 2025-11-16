@@ -6,6 +6,7 @@ namespace Tests\Integration\Features\ConfigurationManagement;
 
 use Minisite\Features\ConfigurationManagement\ConfigurationManagementFeature;
 use PHPUnit\Framework\Attributes\CoversClass;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Integration tests for ConfigurationManagementFeature
@@ -14,11 +15,39 @@ use PHPUnit\Framework\Attributes\CoversClass;
  *
  * Prerequisites:
  * - MySQL test database must be running (Docker container on port 3307)
- * - Database constants must be defined (handled by bootstrap.php)
+ * - Migrations will be run automatically in setUp()
  */
 #[CoversClass(ConfigurationManagementFeature::class)]
-final class ConfigurationManagementFeatureIntegrationTest extends BaseConfigurationManagementIntegrationTest
+final class ConfigurationManagementFeatureIntegrationTest extends BaseIntegrationTest
 {
+    /**
+     * Get entity paths for ORM configuration
+     * Note: This test doesn't directly use EntityManager, but BaseIntegrationTest requires it
+     */
+    protected function getEntityPaths(): array
+    {
+        return array(
+            __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+            __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
+        );
+    }
+
+    /**
+     * Setup test-specific services
+     * Note: This test uses feature initialization that creates its own dependencies
+     */
+    protected function setupTestSpecificServices(): void
+    {
+        // No specific services needed - tests use feature initialization
+    }
+
+    /**
+     * Clean up test data
+     */
+    protected function cleanupTestData(): void
+    {
+        // No test data to clean up - tests only verify feature initialization
+    }
     /**
      * Test initialize can be called successfully
      */
