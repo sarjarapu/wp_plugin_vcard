@@ -290,6 +290,7 @@ class MinisiteSeederService
                             'business_slug' => $businessSlug,
                             'location_slug' => $locationSlug,
                         ));
+
                         continue;
                     }
                 }
