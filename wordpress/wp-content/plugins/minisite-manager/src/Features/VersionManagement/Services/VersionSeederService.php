@@ -270,7 +270,7 @@ class VersionSeederService
     }
 
     /**
-     * Seed all sample versions for the standard test minisites
+     * Seed all sample versions for the standard minisites
      *
      * This seeds versions for:
      * - ACME Dental (Dallas)
@@ -280,9 +280,11 @@ class VersionSeederService
      *
      * Versions are loaded from JSON files in data/json/versions/
      *
+     * Note: This is sample data (not test data). The "Test" keyword is reserved for testing phases.
+     *
      * @param array $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT'
      */
-    public function seedAllTestVersions(array $minisiteIds): void
+    public function seedAllSampleVersions(array $minisiteIds): void
     {
         // Map of minisite keys to their JSON version files
         $versionFiles = array(

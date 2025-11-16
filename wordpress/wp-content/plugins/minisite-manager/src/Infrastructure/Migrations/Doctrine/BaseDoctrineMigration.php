@@ -73,4 +73,58 @@ abstract class BaseDoctrineMigration extends AbstractMigration
     {
         return false;
     }
+
+    /**
+     * Seed sample data for this migration
+     *
+     * Called automatically after up() completes successfully.
+     * Override in subclasses to provide sample seed data.
+     *
+     * Note: This is sample data (not test data). The "Test" keyword is reserved for testing phases.
+     *
+     * @return void
+     */
+    public function seedSampleData(): void
+    {
+        // Default: no seed data
+        // Override in subclasses that need sample seed data
+    }
+
+    /**
+     * Check if sample seed data should be executed
+     *
+     * By default, sample data seeds in all environments (this is live sample data).
+     * Can be overridden to skip in specific environments if needed.
+     *
+     * Note: This is sample data, not test data. The "Test" keyword is reserved for testing phases.
+     *
+     * @return bool
+     */
+    public function shouldSeedSampleData(): bool
+    {
+        // Sample data can run in all environments by default
+        // Override if you need environment-specific logic
+        return true;
+    }
+
+    /**
+     * Ensure repositories are initialized for seeding
+     *
+     * Helper method to ensure repositories are available before seeding sample data.
+     *
+     * @return void
+     */
+    protected function ensureRepositoriesInitialized(): void
+    {
+        if (
+            ! isset($GLOBALS['minisite_repository']) ||
+            ! isset($GLOBALS['minisite_version_repository']) ||
+            ! isset($GLOBALS['minisite_review_repository'])
+        ) {
+            // Initialize repositories if not already available
+            if (class_exists(\Doctrine\ORM\EntityManager::class)) {
+                \Minisite\Core\PluginBootstrap::initializeConfigSystem();
+            }
+        }
+    }
 }

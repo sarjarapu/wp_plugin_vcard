@@ -281,7 +281,7 @@ final class MinisiteSeederServiceTest extends TestCase
         // This test assumes JSON files exist - if they don't, it will fail
         // In a real scenario, we'd mock the file system or use test fixtures
         try {
-            $result = $this->seederService->seedAllTestMinisites();
+            $result = $this->seederService->seedAllSampleMinisites();
 
             $this->assertIsArray($result);
             // Should have keys for each minisite
@@ -304,7 +304,7 @@ final class MinisiteSeederServiceTest extends TestCase
             ->willThrowException(new \RuntimeException('File not found'));
 
         // Method should handle errors gracefully and return partial results
-        $result = $this->seederService->seedAllTestMinisites();
+        $result = $this->seederService->seedAllSampleMinisites();
 
         $this->assertIsArray($result);
         // Should return empty array or partial results if files are missing

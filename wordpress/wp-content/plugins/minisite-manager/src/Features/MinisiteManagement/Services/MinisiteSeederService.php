@@ -238,7 +238,7 @@ class MinisiteSeederService
     }
 
     /**
-     * Seed all sample minisites for the standard test data
+     * Seed all sample minisites
      *
      * This seeds minisites for:
      * - ACME Dental (Dallas)
@@ -248,9 +248,11 @@ class MinisiteSeederService
      *
      * Minisites are loaded from JSON files in data/json/minisites/
      *
+     * Note: This is sample data (not test data). The "Test" keyword is reserved for testing phases.
+     *
      * @return array Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT' => minisite IDs
      */
-    public function seedAllTestMinisites(): array
+    public function seedAllSampleMinisites(): array
     {
         // Map of minisite keys to their JSON files
         $minisiteFiles = array(

@@ -128,4 +128,36 @@ final class Version20251106000000 extends BaseDoctrineMigration
             throw $e;
         }
     }
+
+    public function seedSampleData(): void
+    {
+        if (! $this->shouldSeedSampleData()) {
+            $this->logger->info('Skipping sample seed data for minisites table');
+
+            return;
+        }
+
+        $this->logger->info('Starting sample seed data for minisites table');
+
+        try {
+            // Ensure repositories are initialized
+            $this->ensureRepositoriesInitialized();
+
+            // Seed sample minisites using existing JSON files in data/json/minisites/
+            /** @var \Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface $minisiteRepo */
+            $minisiteRepo = $GLOBALS['minisite_repository'];
+            $seeder = new \Minisite\Features\MinisiteManagement\Services\MinisiteSeederService($minisiteRepo);
+            $minisiteIds = $seeder->seedAllSampleMinisites();
+
+            $this->logger->info('Sample seed data completed for minisites table', array(
+                'minisites_seeded' => count(array_filter($minisiteIds)),
+            ));
+        } catch (\Exception $e) {
+            $this->logger->error('Sample seed data failed for minisites table', array(
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ));
+            // Don't throw - migration succeeded, sample seed data is optional
+        }
+    }
 }

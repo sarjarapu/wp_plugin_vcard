@@ -12,9 +12,9 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Unit tests for VersionSeederService::seedAllTestVersions()
+ * Unit tests for VersionSeederService::seedAllSampleVersions()
  *
- * Tests the seedAllTestVersions method which loads JSON files and seeds versions
+ * Tests the seedAllSampleVersions method which loads JSON files and seeds sample versions
  * for multiple minisites.
  */
 #[CoversClass(VersionSeederService::class)]
@@ -79,9 +79,9 @@ final class VersionSeederServiceSeedAllTest extends TestCase
     }
 
     /**
-     * Test seedAllTestVersions with all minisite IDs
+     * Test seedAllSampleVersions with all minisite IDs
      */
-    public function test_seedAllTestVersions_with_all_minisite_ids(): void
+    public function test_seedAllSampleVersions_with_all_minisite_ids(): void
     {
         // Define MINISITE_PLUGIN_DIR to point to test directory
         if (! defined('MINISITE_PLUGIN_DIR')) {
@@ -126,13 +126,13 @@ final class VersionSeederServiceSeedAllTest extends TestCase
             }))
             ->willReturnArgument(0);
 
-        $this->service->seedAllTestVersions($minisiteIds);
+        $this->service->seedAllSampleVersions($minisiteIds);
     }
 
     /**
-     * Test seedAllTestVersions with partial minisite IDs
+     * Test seedAllSampleVersions with partial minisite IDs
      */
-    public function test_seedAllTestVersions_with_partial_minisite_ids(): void
+    public function test_seedAllSampleVersions_with_partial_minisite_ids(): void
     {
         // Define MINISITE_PLUGIN_DIR to point to test directory
         if (! defined('MINISITE_PLUGIN_DIR')) {
@@ -156,13 +156,13 @@ final class VersionSeederServiceSeedAllTest extends TestCase
             ->method('save')
             ->willReturnArgument(0);
 
-        $this->service->seedAllTestVersions($minisiteIds);
+        $this->service->seedAllSampleVersions($minisiteIds);
     }
 
     /**
-     * Test seedAllTestVersions handles exception and continues with other minisites
+     * Test seedAllSampleVersions handles exception and continues with other minisites
      */
-    public function test_seedAllTestVersions_handles_exception_and_continues(): void
+    public function test_seedAllSampleVersions_handles_exception_and_continues(): void
     {
         // Define MINISITE_PLUGIN_DIR to point to test directory
         if (! defined('MINISITE_PLUGIN_DIR')) {
@@ -220,16 +220,16 @@ final class VersionSeederServiceSeedAllTest extends TestCase
             ->willReturnArgument(0);
 
         // Should not throw exception, should continue after ACME fails
-        $this->service->seedAllTestVersions($minisiteIds);
+        $this->service->seedAllSampleVersions($minisiteIds);
 
         // Verify LOTUS was saved (may be called multiple times due to test isolation, but should include LOTUS)
         $this->assertContains('test-minisite-lotus', $savedMinisiteIds, 'LOTUS should be saved');
     }
 
     /**
-     * Test seedAllTestVersions with empty minisite IDs
+     * Test seedAllSampleVersions with empty minisite IDs
      */
-    public function test_seedAllTestVersions_with_empty_minisite_ids(): void
+    public function test_seedAllSampleVersions_with_empty_minisite_ids(): void
     {
         $minisiteIds = array(
             'ACME' => '',
@@ -240,6 +240,6 @@ final class VersionSeederServiceSeedAllTest extends TestCase
             ->expects($this->never())
             ->method('save');
 
-        $this->service->seedAllTestVersions($minisiteIds);
+        $this->service->seedAllSampleVersions($minisiteIds);
     }
 }

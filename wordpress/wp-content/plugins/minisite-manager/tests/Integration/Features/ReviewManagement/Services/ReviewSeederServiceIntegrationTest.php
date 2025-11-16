@@ -439,15 +439,15 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
     }
 
     /**
-     * Test seedAllTestReviews with empty minisite IDs (should skip)
+     * Test seedAllSampleReviews with empty minisite IDs (should skip)
      */
-    public function test_seedAllTestReviews_with_empty_minisite_ids(): void
+    public function test_seedAllSampleReviews_with_empty_minisite_ids(): void
     {
         // Should not throw an exception when all minisite IDs are empty
-        $this->service->seedAllTestReviews(array());
+        $this->service->seedAllSampleReviews(array());
 
         // Also test with some keys but empty values
-        $this->service->seedAllTestReviews(array(
+        $this->service->seedAllSampleReviews(array(
             'ACME' => '',
             'LOTUS' => null,
             'GREEN' => '',
@@ -459,9 +459,9 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
     }
 
     /**
-     * Test seedAllTestReviews handles file not found gracefully
+     * Test seedAllSampleReviews handles file not found gracefully
      */
-    public function test_seedAllTestReviews_handles_file_not_found(): void
+    public function test_seedAllSampleReviews_handles_file_not_found(): void
     {
         // Define MINISITE_PLUGIN_DIR to a non-existent path
         if (! defined('MINISITE_PLUGIN_DIR')) {
@@ -469,7 +469,7 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
         }
 
         // Should not throw exception, should log error and continue
-        $this->service->seedAllTestReviews(array(
+        $this->service->seedAllSampleReviews(array(
             'ACME' => 'test-minisite-acme',
             'LOTUS' => 'test-minisite-lotus',
         ));

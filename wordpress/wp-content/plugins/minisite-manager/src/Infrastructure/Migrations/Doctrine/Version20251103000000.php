@@ -99,4 +99,42 @@ final class Version20251103000000 extends BaseDoctrineMigration
             throw $e;
         }
     }
+
+    public function seedSampleData(): void
+    {
+        if (! $this->shouldSeedSampleData()) {
+            $this->logger->info('Skipping sample seed data for config table');
+
+            return;
+        }
+
+        $this->logger->info('Starting sample seed data for config table');
+
+        try {
+            // Ensure ConfigManager is initialized
+            if (! isset($GLOBALS['minisite_config_manager'])) {
+                if (class_exists(\Doctrine\ORM\EntityManager::class)) {
+                    \Minisite\Core\PluginBootstrap::initializeConfigSystem();
+                }
+
+                if (! isset($GLOBALS['minisite_config_manager'])) {
+                    $this->logger->warning('ConfigManager not available - skipping config seeding');
+
+                    return;
+                }
+            }
+
+            // Seed default configs using existing seeder
+            $seeder = new \Minisite\Features\ConfigurationManagement\Services\ConfigSeeder();
+            $seeder->seedDefaults($GLOBALS['minisite_config_manager']);
+
+            $this->logger->info('Sample seed data completed for config table');
+        } catch (\Exception $e) {
+            $this->logger->error('Sample seed data failed for config table', array(
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ));
+            // Don't throw - migration succeeded, sample seed data is optional
+        }
+    }
 }
