@@ -190,10 +190,29 @@ final class Version20251105000000 extends BaseDoctrineMigration
             $versionSeeder = new \Minisite\Features\VersionManagement\Services\VersionSeederService($versionRepo);
             $versionSeeder->seedAllSampleVersions($minisiteIds);
 
-            // Also create initial versions for each minisite (if not already created by JSON)
+            // Also create initial versions for each minisite (only if no versions exist from JSON)
+            // Check if versions were already seeded from JSON before creating initial versions
             foreach ($minisiteIds as $minisiteId) {
                 $minisite = $minisiteRepo->findById($minisiteId);
-                if ($minisite && ! $minisite->currentVersionId) {
+                if (! $minisite) {
+                    continue;
+                }
+
+                // Check if any versions already exist for this minisite (from JSON seeding)
+                $existingVersions = $versionRepo->findByMinisiteId($minisiteId, 1);
+                if (! empty($existingVersions)) {
+                    // Versions already exist from JSON - just ensure currentVersionId is set
+                    if (! $minisite->currentVersionId) {
+                        $latestVersion = $versionRepo->findLatestVersion($minisiteId);
+                        if ($latestVersion) {
+                            $minisiteRepo->updateCurrentVersionId($minisiteId, $latestVersion->id);
+                        }
+                    }
+                    continue;
+                }
+
+                // No versions exist - create initial version
+                if (! $minisite->currentVersionId) {
                     $version = $versionSeeder->createInitialVersionFromMinisite($minisite);
                     $savedVersion = $versionRepo->save($version);
                     $minisiteRepo->updateCurrentVersionId($minisiteId, $savedVersion->id);
