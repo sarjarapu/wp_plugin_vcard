@@ -6,6 +6,9 @@ namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
 use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
+use Minisite\Features\VersionManagement\Services\VersionSeederService;
 
 /**
  * Migration: Create minisite_versions table for version management
@@ -155,30 +158,13 @@ final class Version20251105000000 extends BaseDoctrineMigration
             $this->ensureRepositoriesInitialized();
 
             // Get minisite IDs from repository (seeded by previous migration)
-            /** @var \Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface $minisiteRepo */
+            /** @var MinisiteRepositoryInterface $minisiteRepo */
             $minisiteRepo = $GLOBALS['minisite_repository'];
-            /** @var \Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface $versionRepo */
+            /** @var VersionRepositoryInterface $versionRepo */
             $versionRepo = $GLOBALS['minisite_version_repository'];
 
             // Get seeded minisites by their slugs (ACME, LOTUS, GREEN, SWIFT)
-            $minisiteIds = array();
-            $seededMinisites = array(
-                'ACME' => array('business_slug' => 'acme-dental', 'location_slug' => 'dallas'),
-                'LOTUS' => array('business_slug' => 'lotus-textiles', 'location_slug' => 'mumbai'),
-                'GREEN' => array('business_slug' => 'green-bites', 'location_slug' => 'london'),
-                'SWIFT' => array('business_slug' => 'swift-transit', 'location_slug' => 'sydney'),
-            );
-
-            foreach ($seededMinisites as $key => $slugs) {
-                $slugPair = new SlugPair(
-                    business: $slugs['business_slug'],
-                    location: $slugs['location_slug']
-                );
-                $minisite = $minisiteRepo->findBySlugs($slugPair);
-                if ($minisite) {
-                    $minisiteIds[$key] = $minisite->id;
-                }
-            }
+            $minisiteIds = $this->getSeededMinisiteIds($minisiteRepo);
 
             if (empty($minisiteIds)) {
                 $this->logger->warning('No seeded minisites found for versions - skipping version seeding');
@@ -186,39 +172,12 @@ final class Version20251105000000 extends BaseDoctrineMigration
                 return;
             }
 
-            // Seed versions using existing JSON files
-            $versionSeeder = new \Minisite\Features\VersionManagement\Services\VersionSeederService($versionRepo);
+            // Seed versions from JSON files (table is empty - first time seeding)
+            $versionSeeder = new VersionSeederService($versionRepo);
             $versionSeeder->seedAllSampleVersions($minisiteIds);
 
-            // Also create initial versions for each minisite (only if no versions exist from JSON)
-            // Check if versions were already seeded from JSON before creating initial versions
-            foreach ($minisiteIds as $minisiteId) {
-                $minisite = $minisiteRepo->findById($minisiteId);
-                if (! $minisite) {
-                    continue;
-                }
-
-                // Check if any versions already exist for this minisite (from JSON seeding)
-                $existingVersions = $versionRepo->findByMinisiteId($minisiteId, 1);
-                if (! empty($existingVersions)) {
-                    // Versions already exist from JSON - just ensure currentVersionId is set
-                    if (! $minisite->currentVersionId) {
-                        $latestVersion = $versionRepo->findLatestVersion($minisiteId);
-                        if ($latestVersion) {
-                            $minisiteRepo->updateCurrentVersionId($minisiteId, $latestVersion->id);
-                        }
-                    }
-
-                    continue;
-                }
-
-                // No versions exist - create initial version
-                if (! $minisite->currentVersionId) {
-                    $version = $versionSeeder->createInitialVersionFromMinisite($minisite);
-                    $savedVersion = $versionRepo->save($version);
-                    $minisiteRepo->updateCurrentVersionId($minisiteId, $savedVersion->id);
-                }
-            }
+            // Ensure currentVersionId is set on minisites after seeding
+            $this->ensureCurrentVersionIdSet($minisiteIds, $minisiteRepo, $versionRepo);
 
             $this->logger->info('Sample seed data completed for versions table', array(
                 'versions_seeded_for_minisites' => count($minisiteIds),
@@ -229,6 +188,61 @@ final class Version20251105000000 extends BaseDoctrineMigration
                 'trace' => $e->getTraceAsString(),
             ));
             // Don't throw - migration succeeded, sample seed data is optional
+        }
+    }
+
+    /**
+     * Get minisite IDs for seeded minisites by looking them up by slugs
+     *
+     * @param MinisiteRepositoryInterface $minisiteRepo
+     * @return array<string, string> Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT' and values: minisite IDs
+     */
+    private function getSeededMinisiteIds(
+        MinisiteRepositoryInterface $minisiteRepo
+    ): array {
+        $minisiteIds = array();
+        $seededMinisites = array(
+            'ACME' => array('business_slug' => 'acme-dental', 'location_slug' => 'dallas'),
+            'LOTUS' => array('business_slug' => 'lotus-textiles', 'location_slug' => 'mumbai'),
+            'GREEN' => array('business_slug' => 'green-bites', 'location_slug' => 'london'),
+            'SWIFT' => array('business_slug' => 'swift-transit', 'location_slug' => 'sydney'),
+        );
+
+        foreach ($seededMinisites as $key => $slugs) {
+            $slugPair = new SlugPair(
+                business: $slugs['business_slug'],
+                location: $slugs['location_slug']
+            );
+            $minisite = $minisiteRepo->findBySlugs($slugPair);
+            if ($minisite) {
+                $minisiteIds[$key] = $minisite->id;
+            }
+        }
+
+        return $minisiteIds;
+    }
+
+    /**
+     * Ensure currentVersionId is set on minisites after version seeding
+     *
+     * @param array<string, string> $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT' and values: minisite IDs
+     * @param MinisiteRepositoryInterface $minisiteRepo
+     * @param VersionRepositoryInterface $versionRepo
+     * @return void
+     */
+    private function ensureCurrentVersionIdSet(
+        array $minisiteIds,
+        MinisiteRepositoryInterface $minisiteRepo,
+        VersionRepositoryInterface $versionRepo
+    ): void {
+        foreach ($minisiteIds as $minisiteId) {
+            $minisite = $minisiteRepo->findById($minisiteId);
+            if ($minisite && ! $minisite->currentVersionId) {
+                $latestVersion = $versionRepo->findLatestVersion($minisiteId);
+                if ($latestVersion) {
+                    $minisiteRepo->updateCurrentVersionId($minisiteId, $latestVersion->id);
+                }
+            }
         }
     }
 }

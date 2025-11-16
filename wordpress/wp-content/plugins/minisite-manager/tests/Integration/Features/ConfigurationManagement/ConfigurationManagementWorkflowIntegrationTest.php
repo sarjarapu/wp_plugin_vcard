@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\ConfigurationManagement;
 
-use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
-use Minisite\Features\ConfigurationManagement\Commands\SaveConfigCommand;
-use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
-use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
-use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
-use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
-use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Events;
+use Doctrine\ORM\ORMSetup;
+use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
+use Minisite\Features\ConfigurationManagement\Commands\SaveConfigCommand;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
+use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
+use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
+use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
+use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
+use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
+use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -45,7 +45,7 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
 
         // Define encryption key for tests that use encrypted type
-        if (!defined('MINISITE_ENCRYPTION_KEY')) {
+        if (! defined('MINISITE_ENCRYPTION_KEY')) {
             define('MINISITE_ENCRYPTION_KEY', base64_encode(random_bytes(32)));
         }
 
@@ -56,8 +56,31 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $user = getenv('MYSQL_USER') ?: 'minisite';
         $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
 
+        // Define WordPress DB constants (required by DoctrineFactory when migrations call ensureRepositoriesInitialized())
+        if (! defined('DB_HOST')) {
+            define('DB_HOST', $host);
+        }
+        if (! defined('DB_PORT')) {
+            define('DB_PORT', $port);
+        }
+        if (! defined('DB_USER')) {
+            define('DB_USER', $user);
+        }
+        if (! defined('DB_PASSWORD')) {
+            define('DB_PASSWORD', $pass);
+        }
+        if (! defined('DB_NAME')) {
+            define('DB_NAME', $dbName);
+        }
+
+        // Ensure $wpdb is set (required by TablePrefixListener)
+        if (! isset($GLOBALS['wpdb'])) {
+            $GLOBALS['wpdb'] = new \wpdb();
+        }
+        $GLOBALS['wpdb']->prefix = 'wp_';
+
         // Create real MySQL connection via Doctrine
-        $connection = DriverManager::getConnection([
+        $connection = DriverManager::getConnection(array(
             'driver' => 'pdo_mysql',
             'host' => $host,
             'port' => (int)$port,
@@ -65,14 +88,14 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
             'password' => $pass,
             'dbname' => $dbName,
             'charset' => 'utf8mb4',
-        ]);
+        ));
 
         // Create EntityManager with MySQL connection
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [
+            paths: array(
                 __DIR__ . '/../../../../src/Features/ConfigurationManagement/Domain/Entities',
                 __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
-            ],
+            ),
             isDevMode: true
         );
 
@@ -99,7 +122,7 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $this->em->clear();
 
         // Set up $wpdb object for TablePrefixListener
-        if (!isset($GLOBALS['wpdb'])) {
+        if (! isset($GLOBALS['wpdb'])) {
             $GLOBALS['wpdb'] = new \wpdb();
         }
         $GLOBALS['wpdb']->prefix = 'wp_';
@@ -113,6 +136,17 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
 
         // Drop tables and migration tracking to ensure clean slate
         $this->cleanupTables();
+
+        // Create minimal wp_users table stub for foreign key tests
+        // Some migrations create foreign keys to wp_users (payments, reservations, etc.)
+        $this->createWordPressUsersTableStub();
+
+        // Create a test user for foreign key constraints
+        // Integration tests need at least one user record for migrations that reference wp_users
+        // Always delete and recreate to ensure clean state
+        $connection = $this->em->getConnection();
+        $connection->executeStatement("DELETE FROM wp_users WHERE ID = 1");
+        $connection->executeStatement("INSERT INTO wp_users (ID) VALUES (1)");
 
         // Ensure migrations have run
         $migrationRunner = new DoctrineMigrationRunner($this->em);
@@ -169,15 +203,64 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
     private function cleanupTables(): void
     {
         $connection = $this->em->getConnection();
-        $tables = ['wp_minisite_config', 'wp_minisite_migrations'];
+        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
 
-        foreach ($tables as $table) {
+        // Find all tables with wp_minisite prefix that were created by migrations
+        $tables = $connection->fetchFirstColumn(
+            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+             WHERE TABLE_SCHEMA = ? AND (TABLE_NAME LIKE 'wp_minisite_%' OR TABLE_NAME = 'wp_minisites')",
+            array($dbName)
+        );
+
+        // Always include the migration tracking table
+        if (! in_array('wp_minisite_migrations', $tables, true)) {
+            $tables[] = 'wp_minisite_migrations';
+        }
+
+        // Always include wp_users table (created for foreign key tests)
+        $tables[] = 'wp_users';
+
+        // Disable foreign key checks to allow dropping tables in any order
+        // This is safe in test cleanup since we're dropping all tables anyway
+        try {
+            $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+
+            foreach ($tables as $table) {
+                try {
+                    $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
+                } catch (\Exception $e) {
+                    // Ignore errors - table might not exist
+                }
+            }
+
+            // Re-enable foreign key checks
+            $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+        } catch (\Exception $e) {
+            // Ensure foreign key checks are re-enabled even if cleanup fails
             try {
-                $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
-            } catch (\Exception $e) {
-                // Ignore errors - table might not exist
+                $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+            } catch (\Exception $e2) {
+                // Ignore
             }
         }
+    }
+
+    /**
+     * Create a minimal wp_users table stub for foreign key tests
+     * This allows migrations that reference wp_users to work in tests
+     * Always creates the table (no existence check) since this is an integration test
+     */
+    private function createWordPressUsersTableStub(): void
+    {
+        $connection = $this->em->getConnection();
+
+        // Always create wp_users table (no existence check needed for integration tests)
+        $connection->executeStatement(
+            "CREATE TABLE IF NOT EXISTS `wp_users` (
+                `ID` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                PRIMARY KEY (`ID`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        );
     }
 
     /**
@@ -284,7 +367,7 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $this->assertTrue($this->service->get('test_bool'));
 
         // JSON
-        $jsonData = ['key' => 'value', 'number' => 123];
+        $jsonData = array('key' => 'value', 'number' => 123);
         $jsonCommand = new SaveConfigCommand('test_json', $jsonData, 'json');
         $this->saveHandler->handle($jsonCommand);
         $result = $this->service->get('test_json');
@@ -313,4 +396,3 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $this->assertTrue($config->isSensitive);
     }
 }
-

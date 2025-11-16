@@ -150,6 +150,7 @@
 - [ ] Additional unit tests for edge cases
 - [ ] Integration tests for complete workflows
 - [ ] Performance testing
+- [ ] **Create base class for integration tests**: Consolidate repetitive database connection setup and `DB_*` constant definitions across all integration tests. Currently, `BaseConfigurationManagementIntegrationTest` exists but only for ConfigurationManagement tests. Many other integration tests duplicate the connection setup code. Need to create a universal `BaseIntegrationTest` class that all integration tests can extend to reduce duplication and ensure consistent setup (especially `DB_*` constants required by `DoctrineFactory` when migrations call `ensureRepositoriesInitialized()`).
 
 #### Documentation
 - [ ] Update README with current architecture
