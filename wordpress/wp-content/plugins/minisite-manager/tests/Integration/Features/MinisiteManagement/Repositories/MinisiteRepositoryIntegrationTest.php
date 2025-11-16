@@ -4,19 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\MinisiteManagement\Repositories;
 
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\ORMSetup;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Integration tests for MinisiteRepository
@@ -26,113 +19,41 @@ use PHPUnit\Framework\TestCase;
  *
  * Prerequisites:
  * - MySQL test database must be running (Docker container on port 3307)
- * - Migrations will ensure table exists
+ * - Migrations will be run automatically in setUp()
  */
 #[CoversClass(MinisiteRepository::class)]
-final class MinisiteRepositoryIntegrationTest extends TestCase
+final class MinisiteRepositoryIntegrationTest extends BaseIntegrationTest
 {
-    private \Doctrine\ORM\EntityManager $em;
     private MinisiteRepository $repository;
 
-    protected function setUp(): void
+    /**
+     * Get entity paths for ORM configuration
+     */
+    protected function getEntityPaths(): array
     {
-        parent::setUp();
-
-        // Initialize LoggingServiceProvider (required by MinisiteRepository)
-        LoggingServiceProvider::register();
-
-        // Get database configuration from environment (same as AbstractDoctrineMigrationTest)
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
-        $port = getenv('MYSQL_PORT') ?: '3307';
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-        $user = getenv('MYSQL_USER') ?: 'minisite';
-        $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-
-        // Create real MySQL connection via Doctrine
-        $connection = DriverManager::getConnection(array(
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'port' => (int) $port,
-            'user' => $user,
-            'password' => $pass,
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-        ));
-
-        // Create EntityManager with MySQL connection
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: array(
-                __DIR__ . '/../../../../../src/Features/MinisiteManagement/Domain/Entities',
-                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
-            ),
-            isDevMode: true
+        return array(
+            __DIR__ . '/../../../../../src/Features/MinisiteManagement/Domain/Entities',
+            __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
         );
+    }
 
-        $this->em = new EntityManager($connection, $config);
-
-        // Reset connection state to ensure clean transaction state
-        try {
-            $connection->executeStatement('ROLLBACK');
-        } catch (\Exception $e) {
-            // Ignore - connection might already be clean
-        }
-
-        try {
-            $connection->beginTransaction();
-            $connection->commit();
-        } catch (\Exception $e) {
-            try {
-                $connection->rollBack();
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        // Clear any UnitOfWork state
-        $this->em->clear();
-
-        // Set up $wpdb object for TablePrefixListener (needed for prefix)
-        if (! isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-
-        // Register TablePrefixListener (required for wp_minisites table)
-        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
-        $this->em->getEventManager()->addEventListener(
-            Events::loadClassMetadata,
-            $tablePrefixListener
-        );
-
-        // Run migrations to ensure table exists
-        $migrationRunner = new DoctrineMigrationRunner($this->em);
-        try {
-            $migrationRunner->migrate();
-        } catch (\Exception $e) {
-            // Migrations might already be run, ignore
-        }
-
+    /**
+     * Setup test-specific services and repositories
+     */
+    protected function setupTestSpecificServices(): void
+    {
         // Create repository instance
         $this->repository = new MinisiteRepository(
             $this->em,
             $this->em->getClassMetadata(Minisite::class)
         );
-
-        $this->cleanupTestData();
-    }
-
-    protected function tearDown(): void
-    {
-        $this->cleanupTestData();
-        $this->em->close();
-        parent::tearDown();
     }
 
     /**
      * Clean up test data (but keep table structure)
      * Deletes only test minisites, not the table itself
      */
-    private function cleanupTestData(): void
+    protected function cleanupTestData(): void
     {
         try {
             $this->em->getConnection()->executeStatement(
