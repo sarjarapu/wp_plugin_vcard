@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\ConfigurationManagement;
 
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\ORMSetup;
 use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
 use Minisite\Features\ConfigurationManagement\Commands\SaveConfigCommand;
 use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
@@ -15,9 +11,7 @@ use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
 use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
 use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
 use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Integration tests for ConfigurationManagement workflow
@@ -29,130 +23,29 @@ use PHPUnit\Framework\TestCase;
  * - MySQL test database must be running (Docker container on port 3307)
  * - Migrations will be run automatically in setUp()
  */
-final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
+final class ConfigurationManagementWorkflowIntegrationTest extends BaseIntegrationTest
 {
-    private \Doctrine\ORM\EntityManager $em;
     private ConfigRepository $repository;
     private ConfigurationManagementService $service;
     private SaveConfigHandler $saveHandler;
     private DeleteConfigHandler $deleteHandler;
 
-    protected function setUp(): void
+    /**
+     * Get entity paths for ORM configuration
+     */
+    protected function getEntityPaths(): array
     {
-        parent::setUp();
-
-        // Initialize LoggingServiceProvider if not already initialized
-        \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
-
-        // Define encryption key for tests that use encrypted type
-        if (! defined('MINISITE_ENCRYPTION_KEY')) {
-            define('MINISITE_ENCRYPTION_KEY', base64_encode(random_bytes(32)));
-        }
-
-        // Get database configuration from environment
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
-        $port = getenv('MYSQL_PORT') ?: '3307';
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-        $user = getenv('MYSQL_USER') ?: 'minisite';
-        $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-
-        // Define WordPress DB constants (required by DoctrineFactory when migrations call ensureRepositoriesInitialized())
-        if (! defined('DB_HOST')) {
-            define('DB_HOST', $host);
-        }
-        if (! defined('DB_PORT')) {
-            define('DB_PORT', $port);
-        }
-        if (! defined('DB_USER')) {
-            define('DB_USER', $user);
-        }
-        if (! defined('DB_PASSWORD')) {
-            define('DB_PASSWORD', $pass);
-        }
-        if (! defined('DB_NAME')) {
-            define('DB_NAME', $dbName);
-        }
-
-        // Ensure $wpdb is set (required by TablePrefixListener)
-        if (! isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-
-        // Create real MySQL connection via Doctrine
-        $connection = DriverManager::getConnection(array(
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'port' => (int)$port,
-            'user' => $user,
-            'password' => $pass,
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-        ));
-
-        // Create EntityManager with MySQL connection
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: array(
-                __DIR__ . '/../../../../src/Features/ConfigurationManagement/Domain/Entities',
-                __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
-            ),
-            isDevMode: true
+        return array(
+            __DIR__ . '/../../../../src/Features/ConfigurationManagement/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
         );
+    }
 
-        $this->em = new EntityManager($connection, $config);
-
-        // Reset connection state
-        try {
-            $connection->executeStatement('ROLLBACK');
-        } catch (\Exception $e) {
-            // Ignore
-        }
-
-        try {
-            $connection->beginTransaction();
-            $connection->commit();
-        } catch (\Exception $e) {
-            try {
-                $connection->rollBack();
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
-        // Set up $wpdb object for TablePrefixListener
-        if (! isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-
-        // Add TablePrefixListener
-        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
-        $this->em->getEventManager()->addEventListener(
-            Events::loadClassMetadata,
-            $tablePrefixListener
-        );
-
-        // Drop tables and migration tracking to ensure clean slate
-        $this->cleanupTables();
-
-        // Create minimal wp_users table stub for foreign key tests
-        // Some migrations create foreign keys to wp_users (payments, reservations, etc.)
-        $this->createWordPressUsersTableStub();
-
-        // Create a test user for foreign key constraints
-        // Integration tests need at least one user record for migrations that reference wp_users
-        // Always delete and recreate to ensure clean state
-        $connection = $this->em->getConnection();
-        $connection->executeStatement("DELETE FROM wp_users WHERE ID = 1");
-        $connection->executeStatement("INSERT INTO wp_users (ID) VALUES (1)");
-
-        // Ensure migrations have run
-        $migrationRunner = new DoctrineMigrationRunner($this->em);
-        $migrationRunner->migrate();
-
-
+    /**
+     * Setup test-specific services, repositories, and handlers
+     */
+    protected function setupTestSpecificServices(): void
+    {
         // Get repository
         $classMetadata = $this->em->getClassMetadata(Config::class);
         $this->repository = new ConfigRepository($this->em, $classMetadata);
@@ -163,16 +56,10 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         // Create handlers
         $this->saveHandler = new SaveConfigHandler($this->service);
         $this->deleteHandler = new DeleteConfigHandler($this->service);
-
-        // Clean up test data
-        $this->cleanupTestData();
     }
 
     protected function tearDown(): void
     {
-        // Clean up test data
-        $this->cleanupTestData();
-
         // Reset static cache
         $reflection = new \ReflectionClass(ConfigurationManagementService::class);
         $cacheProperty = $reflection->getProperty('cache');
@@ -183,90 +70,13 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $loadedProperty->setAccessible(true);
         $loadedProperty->setValue(null, false);
 
-        try {
-            $this->em->clear();
-            $connection = $this->em->getConnection();
-            if ($connection->isTransactionActive()) {
-                $connection->rollBack();
-            }
-        } catch (\Exception $e) {
-            // Ignore errors during cleanup
-        }
-
-        $this->em->close();
-        parent::tearDown();
-    }
-
-    /**
-     * Drop tables and migration tracking to ensure clean slate
-     */
-    private function cleanupTables(): void
-    {
-        $connection = $this->em->getConnection();
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-
-        // Find all tables with wp_minisite prefix that were created by migrations
-        $tables = $connection->fetchFirstColumn(
-            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
-             WHERE TABLE_SCHEMA = ? AND (TABLE_NAME LIKE 'wp_minisite_%' OR TABLE_NAME = 'wp_minisites')",
-            array($dbName)
-        );
-
-        // Always include the migration tracking table
-        if (! in_array('wp_minisite_migrations', $tables, true)) {
-            $tables[] = 'wp_minisite_migrations';
-        }
-
-        // Always include wp_users table (created for foreign key tests)
-        $tables[] = 'wp_users';
-
-        // Disable foreign key checks to allow dropping tables in any order
-        // This is safe in test cleanup since we're dropping all tables anyway
-        try {
-            $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
-
-            foreach ($tables as $table) {
-                try {
-                    $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
-                } catch (\Exception $e) {
-                    // Ignore errors - table might not exist
-                }
-            }
-
-            // Re-enable foreign key checks
-            $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
-        } catch (\Exception $e) {
-            // Ensure foreign key checks are re-enabled even if cleanup fails
-            try {
-                $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-    }
-
-    /**
-     * Create a minimal wp_users table stub for foreign key tests
-     * This allows migrations that reference wp_users to work in tests
-     * Always creates the table (no existence check) since this is an integration test
-     */
-    private function createWordPressUsersTableStub(): void
-    {
-        $connection = $this->em->getConnection();
-
-        // Always create wp_users table (no existence check needed for integration tests)
-        $connection->executeStatement(
-            "CREATE TABLE IF NOT EXISTS `wp_users` (
-                `ID` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                PRIMARY KEY (`ID`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-        );
+        parent::tearDown(); // This calls cleanupTestData() from base class
     }
 
     /**
      * Clean up test data (but keep table structure)
      */
-    private function cleanupTestData(): void
+    protected function cleanupTestData(): void
     {
         try {
             $this->em->getConnection()->executeStatement(
