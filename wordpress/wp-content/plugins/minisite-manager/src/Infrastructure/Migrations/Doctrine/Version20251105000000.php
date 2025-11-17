@@ -225,7 +225,8 @@ final class Version20251105000000 extends BaseDoctrineMigration
     /**
      * Ensure currentVersionId is set on minisites after version seeding
      *
-     * @param array<string, string> $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT' and values: minisite IDs
+     * @param array<string, string> $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT'
+     *                                            and values: minisite IDs
      * @param MinisiteRepositoryInterface $minisiteRepo
      * @param VersionRepositoryInterface $versionRepo
      * @return void
