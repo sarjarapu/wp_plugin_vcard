@@ -116,7 +116,28 @@ abstract class BaseDoctrineMigration extends AbstractMigration
      */
     protected function ensureRepositoriesInitialized(): void
     {
+        // Check if EntityManager exists and is open
+        $emIsValid = false;
+        if (isset($GLOBALS['minisite_entity_manager'])) {
+            try {
+                // Try to use the EntityManager - if it's closed, this will throw an exception
+                $GLOBALS['minisite_entity_manager']->getConnection();
+                $emIsValid = true;
+            } catch (\Doctrine\ORM\Exception\EntityManagerClosed $e) {
+                // EntityManager is closed - unset it and clear repositories
+                // This ensures PluginBootstrap will create a fresh EntityManager
+                $emIsValid = false;
+                unset($GLOBALS['minisite_entity_manager']);
+                // Clear repositories (they're tied to the closed EntityManager)
+                unset($GLOBALS['minisite_repository']);
+                unset($GLOBALS['minisite_version_repository']);
+                unset($GLOBALS['minisite_review_repository']);
+            }
+        }
+
+        // Initialize repositories if not already available or if EntityManager was closed
         if (
+            ! $emIsValid ||
             ! isset($GLOBALS['minisite_repository']) ||
             ! isset($GLOBALS['minisite_version_repository']) ||
             ! isset($GLOBALS['minisite_review_repository'])
@@ -125,6 +146,13 @@ abstract class BaseDoctrineMigration extends AbstractMigration
             if (class_exists(\Doctrine\ORM\EntityManager::class)) {
                 \Minisite\Core\PluginBootstrap::initializeConfigSystem();
             }
+        }
+
+        // Clear EntityManager's identity map BEFORE seeding to prevent collisions
+        // This ensures we don't have stale entities from previous operations or queries
+        // Must be done AFTER repositories are initialized so they use the cleared EntityManager
+        if (isset($GLOBALS['minisite_entity_manager']) && $emIsValid) {
+            $GLOBALS['minisite_entity_manager']->clear();
         }
     }
 }

@@ -71,6 +71,14 @@ abstract class BaseIntegrationTest extends TestCase
         $this->createEntityManager();
         $this->resetConnectionState();
         $this->registerTablePrefixListener();
+
+        // Set EntityManager in globals BEFORE migrations run
+        // This ensures ensureRepositoriesInitialized() uses the test's EntityManager
+        $GLOBALS['minisite_entity_manager'] = $this->em;
+
+        // Clear EntityManager's identity map to prevent collisions from previous tests
+        $this->em->clear();
+
         $this->cleanupTables();
         $this->createWordPressUsersTableStub();
         $this->createTestUser();
@@ -93,6 +101,19 @@ abstract class BaseIntegrationTest extends TestCase
         }
 
         $this->em->close();
+
+        // Clean up globals to prevent affecting next test
+        // ALWAYS unset the global EntityManager - even if it doesn't match $this->em,
+        // it might be a closed EntityManager from a previous test that wasn't properly cleaned up
+        // This ensures each test starts with a completely clean global state
+        unset($GLOBALS['minisite_entity_manager']);
+
+        // Unset repositories - they're tied to the closed EntityManager
+        // Next test will recreate them with its own EntityManager
+        unset($GLOBALS['minisite_repository']);
+        unset($GLOBALS['minisite_version_repository']);
+        unset($GLOBALS['minisite_review_repository']);
+
         parent::tearDown();
     }
 
