@@ -35,8 +35,9 @@ echo -e "${GRAY} 💡 This includes unit tests, integration tests, and coverage 
 echo ""
 
 # Run phpunit and capture exit code (temporarily disable set -e to allow capture)
+# Increase memory limit for coverage generation (HTML reports can be memory-intensive)
 set +e
-vendor/bin/phpunit --testsuite=Unit,Integration --coverage-text --coverage-html=build/coverage
+php -d memory_limit=512M vendor/bin/phpunit --testsuite=Unit,Integration --coverage-text --coverage-html=build/coverage
 PHPUNIT_EXIT_CODE=$?
 set -e
 

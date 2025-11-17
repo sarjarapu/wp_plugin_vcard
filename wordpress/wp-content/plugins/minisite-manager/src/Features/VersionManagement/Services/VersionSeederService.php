@@ -146,6 +146,80 @@ class VersionSeederService
     }
 
     /**
+     * Create an initial version from a minisite entity
+     *
+     * This creates version 1 as published with all fields copied from the minisite.
+     * Used for seeding test data where we want version 1 to match the minisite.
+     *
+     * @param \Minisite\Features\MinisiteManagement\Domain\Entities\Minisite $minisite The minisite entity
+     * @param string $label Optional label for the version (default: 'Initial version')
+     * @param string $comment Optional comment for the version (default: 'Migrated from existing data')
+     * @return Version The created version entity
+     */
+    public function createInitialVersionFromMinisite(
+        \Minisite\Features\MinisiteManagement\Domain\Entities\Minisite $minisite,
+        string $label = 'Initial version',
+        string $comment = 'Migrated from existing data'
+    ): Version {
+        $nowUser = get_current_user_id() ?: null;
+
+        // Create Version entity
+        $version = new Version();
+
+        // Core required fields
+        $version->minisiteId = $minisite->id;
+        $version->versionNumber = 1;
+        $version->status = 'published';
+        $version->label = $label;
+        $version->comment = $comment;
+        $version->createdBy = $nowUser ?? $minisite->createdBy ?? 0;
+        $version->sourceVersionId = null;
+
+        // Timestamps
+        $version->createdAt = $minisite->createdAt ?? new \DateTimeImmutable();
+        $version->publishedAt = $minisite->publishedAt ?? $version->createdAt;
+
+        // Copy all profile fields from minisite
+        $version->businessSlug = $minisite->businessSlug;
+        $version->locationSlug = $minisite->locationSlug;
+        if ($minisite->slugs !== null) {
+            $version->slugs = new SlugPair(
+                business: $minisite->slugs->business,
+                location: $minisite->slugs->location
+            );
+        }
+
+        $version->title = $minisite->title;
+        $version->name = $minisite->name;
+        $version->city = $minisite->city;
+        $version->region = $minisite->region;
+        $version->countryCode = $minisite->countryCode;
+        $version->postalCode = $minisite->postalCode;
+
+        // Copy geo point
+        if ($minisite->geo !== null) {
+            $version->geo = new GeoPoint(
+                lat: $minisite->geo->getLat(),
+                lng: $minisite->geo->getLng()
+            );
+        }
+
+        // Copy site configuration
+        $version->siteTemplate = $minisite->siteTemplate;
+        $version->palette = $minisite->palette;
+        $version->industry = $minisite->industry;
+        $version->defaultLocale = $minisite->defaultLocale;
+        $version->schemaVersion = $minisite->schemaVersion;
+        $version->siteVersion = $minisite->siteVersion;
+        $version->searchTerms = $minisite->searchTerms;
+
+        // Copy siteJson
+        $version->siteJson = $minisite->siteJson;
+
+        return $version;
+    }
+
+    /**
      * Seed sample versions for a minisite
      *
      * This is the Doctrine-based replacement for the old version seeding.
@@ -196,7 +270,7 @@ class VersionSeederService
     }
 
     /**
-     * Seed all sample versions for the standard test minisites
+     * Seed all sample versions for the standard minisites
      *
      * This seeds versions for:
      * - ACME Dental (Dallas)
@@ -206,9 +280,11 @@ class VersionSeederService
      *
      * Versions are loaded from JSON files in data/json/versions/
      *
+     * Note: This is sample data (not test data). The "Test" keyword is reserved for testing phases.
+     *
      * @param array $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT'
      */
-    public function seedAllTestVersions(array $minisiteIds): void
+    public function seedAllSampleVersions(array $minisiteIds): void
     {
         // Map of minisite keys to their JSON version files
         $versionFiles = array(

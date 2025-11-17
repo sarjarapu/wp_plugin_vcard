@@ -4,9 +4,10 @@
 The `minisite-manager.php` file requires major refactoring to complete the migration from old controller-based architecture to the new feature-based architecture. This document tracks all the work needed to clean up and modernize the main plugin file.
 
 ## Current Status
-- **File**: `minisite-manager.php` (1,415 lines)
-- **Architecture**: Hybrid (old controllers + new features)
-- **Priority**: Medium (system is functional but needs cleanup)
+- **File**: `minisite-manager.php` (45 lines) ✅ **CLEANED UP**
+- **Architecture**: Feature-based (all functionality migrated to features)
+- **Priority**: Low (file is clean, remaining work is feature creation)
+- **Last Updated**: After Phase 5 completion
 
 ## ✅ Completed Tasks
 
@@ -26,35 +27,22 @@ The `minisite-manager.php` file requires major refactoring to complete the migra
 
 ## 🔄 In Progress Tasks
 
-### 1. Remove Old Controller Dependencies
-- [ ] **Remove commented imports** (lines 20-26)
-  - [ ] `SubscriptionController`
-  - [ ] `AuthController`
-  - [ ] `MinisitePageController`
-  - [ ] `NewMinisiteController`
-  - [ ] `SitesController`
-  - [ ] `VersionController`
+### 1. Remove Old Controller Dependencies ✅ **COMPLETE**
+- [x] **Remove commented imports** - Already removed
+  - [x] All old controllers moved to `delete_me/`
+  - [x] No commented imports in current file
 
-### 2. Migrate Remaining AJAX Handlers
-- [ ] **Slug Management** (lines 1027-1065)
-  - [ ] `wp_ajax_check_slug_availability` → Move to `MinisiteListingFeature`
-  - [ ] `wp_ajax_reserve_slug` → Move to `MinisiteListingFeature`
-  - [ ] Remove `NewMinisiteController` references
+### 2. Migrate Remaining AJAX Handlers ✅ **COMPLETE**
+- [x] **Slug Management** - Migrated to `PublishMinisiteFeature`
+  - [x] `wp_ajax_check_slug_availability` → `PublishMinisite/Hooks/PublishHooks.php`
+  - [x] `wp_ajax_reserve_slug` → `PublishMinisite/Hooks/PublishHooks.php`
+  - [x] All `NewMinisiteController` references removed
 
-- [ ] **Subscription Activation** (lines 1173-1193)
-  - [ ] `wp_ajax_activate_minisite_subscription` → Move to `MinisiteListingFeature`
-  - [ ] Remove `NewMinisiteController` references
-
-- [ ] **WooCommerce Integration** (lines 1195-1250)
-  - [ ] `woocommerce_checkout_create_order` → Move to `MinisiteListingFeature` or new `MinisiteCommerceFeature`
-  - [ ] `woocommerce_checkout_create_order_line_item` → Move to `MinisiteListingFeature` or new `MinisiteCommerceFeature`
-  - [ ] `woocommerce_order_status_completed` → Move to `MinisiteListingFeature` or new `MinisiteCommerceFeature`
-  - [ ] Remove `NewMinisiteController` references
-
-- [ ] **Admin Subscription Management** (lines 1252-1270)
-  - [ ] `wp_ajax_activate_minisite_subscription_admin` → Move to `MinisiteListingFeature` or new `MinisiteAdminFeature`
-  - [ ] Admin menu for subscription management → Move to `MinisiteListingFeature` or new `MinisiteAdminFeature`
-  - [ ] Remove `SubscriptionController` references
+- [x] **WooCommerce Integration** - Migrated to `PublishMinisiteFeature`
+  - [x] `woocommerce_checkout_create_order` → `PublishMinisite/Hooks/PublishHooks.php`
+  - [x] `woocommerce_checkout_create_order_line_item` → `PublishMinisite/Hooks/PublishHooks.php`
+  - [x] `woocommerce_order_status_completed` → `PublishMinisite/Hooks/PublishHooks.php`
+  - [x] All controller references removed
 
 ### 3. Complete Route Migration
 - [ ] **Add Missing Routes**
@@ -104,13 +92,11 @@ The `minisite-manager.php` file requires major refactoring to complete the migra
   - [ ] Remove `NewMinisiteController` references in new/publish cases
   - [ ] Remove `MinisitePageController` references in minisite display
 
-### 7. Remove Commented Code
-- [ ] **Delete Commented AJAX Handlers**
-  - [ ] Remove commented version management handlers (lines 803-961)
-  - [ ] Remove commented minisite creation handler (lines 1003-1025)
-  - [ ] Remove commented publishing handler (lines 1067-1087)
-  - [ ] Remove commented export/import handlers (lines 1089-1149)
-  - [ ] Remove commented WooCommerce order creation (lines 1151-1171)
+### 7. Remove Commented Code ✅ **COMPLETE**
+- [x] **Delete Commented AJAX Handlers** - All removed
+  - [x] All commented code removed from `minisite-manager.php`
+  - [x] File reduced from 1,415 lines to 45 lines
+  - [x] Old version archived in `delete_me/backups/`
 
 ## 🔧 Related Refactoring: WordPressManager Classes
 

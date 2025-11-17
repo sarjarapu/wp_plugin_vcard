@@ -2,8 +2,10 @@
 
 namespace Tests\Unit\Features\MinisiteViewer\Rendering;
 
-use Minisite\Domain\Entities\Minisite;
+use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteViewer\Rendering\ViewRenderer;
+use Minisite\Features\MinisiteViewer\Services\MinisiteViewDataService;
+use Minisite\Features\MinisiteViewer\ViewModels\MinisiteViewModel;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -16,25 +18,25 @@ interface WordPressManagerInterface
 
 /**
  * Test ViewRenderer
- * 
+ *
  * NOTE: These are "coverage tests" that verify method existence and basic functionality.
  * They do not test actual template rendering or Timber integration.
- * 
+ *
  * Current testing approach:
  * - Verifies that methods exist and accept correct parameters
  * - Tests method signatures and basic callability
  * - Does NOT test actual Timber rendering or template functionality
- * 
+ *
  * Limitations:
  * - ViewRenderer directly calls Timber::render() which requires full WordPress environment
  * - Templates must exist and be properly configured
  * - Cannot test actual rendering output or template context
- * 
+ *
  * For true unit testing, ViewRenderer would need:
  * - Dependency injection for rendering engine
  * - Interface abstraction for template rendering
  * - Proper mocking of template dependencies
- * 
+ *
  * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class ViewRendererTest extends TestCase
@@ -42,17 +44,23 @@ final class ViewRendererTest extends TestCase
     private ViewRenderer $displayRenderer;
     private $mockTimberRenderer;
     private $mockWordPressManager;
+    private $mockDataService;
 
     protected function setUp(): void
     {
         $this->mockTimberRenderer = $this->createMock(\Minisite\Application\Rendering\TimberRenderer::class);
         $this->mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
-        
+        $this->mockDataService = $this->createMock(MinisiteViewDataService::class);
+
         // Mock the getReviewsForMinisite method
         $this->mockWordPressManager->method('getReviewsForMinisite')
-            ->willReturn([]);
-            
-        $this->displayRenderer = new ViewRenderer($this->mockTimberRenderer, $this->mockWordPressManager);
+            ->willReturn(array());
+
+        $this->displayRenderer = new ViewRenderer(
+            $this->mockTimberRenderer,
+            $this->mockWordPressManager,
+            $this->mockDataService
+        );
         $this->setupWordPressMocks();
     }
 
@@ -68,11 +76,24 @@ final class ViewRendererTest extends TestCase
     {
         // Create a proper Minisite entity mock
         $mockMinisite = $this->createMock(Minisite::class);
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
+        );
+
+        // Mock data service to return view model
+        $this->mockDataService
+            ->expects($this->once())
+            ->method('prepareViewModel')
+            ->with($mockMinisite)
+            ->willReturn($mockViewModel);
 
         $this->mockTimberRenderer
             ->expects($this->once())
             ->method('render')
-            ->with($mockMinisite);
+            ->with($mockViewModel);
 
         $this->displayRenderer->renderMinisite($mockMinisite);
     }
@@ -84,14 +105,25 @@ final class ViewRendererTest extends TestCase
     {
         $mockRenderer = new \stdClass(); // Object without render method
         $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
-        $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
-        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
-        $mockMinisite = (object)[
-            'id' => '123',
-            'name' => 'Coffee Shop',
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown'
-        ];
+        $mockWordPressManager->method('getReviewsForMinisite')->willReturn(array());
+        $mockDataService = $this->createMock(MinisiteViewDataService::class);
+        $mockMinisite = $this->createMock(Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = 'Coffee Shop';
+        $mockMinisite->title = 'Coffee Shop Title';
+
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
+        );
+
+        $mockDataService
+            ->method('prepareViewModel')
+            ->willReturn($mockViewModel);
+
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager, $mockDataService);
 
         // Capture output
         ob_start();
@@ -110,14 +142,25 @@ final class ViewRendererTest extends TestCase
     {
         $mockRenderer = new \stdClass(); // Object without render method
         $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
-        $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
-        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
-        $mockMinisite = (object)[
-            'id' => '123',
-            'name' => '',
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown'
-        ];
+        $mockWordPressManager->method('getReviewsForMinisite')->willReturn(array());
+        $mockDataService = $this->createMock(MinisiteViewDataService::class);
+        $mockMinisite = $this->createMock(Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = '';
+        $mockMinisite->title = '';
+
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
+        );
+
+        $mockDataService
+            ->method('prepareViewModel')
+            ->willReturn($mockViewModel);
+
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager, $mockDataService);
 
         // Capture output
         ob_start();
@@ -130,29 +173,40 @@ final class ViewRendererTest extends TestCase
     }
 
     /**
-     * Test renderMinisite with null minisite name
+     * Test renderMinisite with null minisite name (treated as empty string)
      */
     public function test_render_minisite_with_null_minisite_name(): void
     {
         $mockRenderer = new \stdClass(); // Object without render method
         $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
-        $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
-        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
-        $mockMinisite = (object)[
-            'id' => '123',
-            'name' => null,
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown'
-        ];
+        $mockWordPressManager->method('getReviewsForMinisite')->willReturn(array());
+        $mockDataService = $this->createMock(MinisiteViewDataService::class);
+        $mockMinisite = $this->createMock(Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = ''; // Empty string instead of null (Minisite entity doesn't allow null)
+        $mockMinisite->title = '';
+
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
+        );
+
+        $mockDataService
+            ->method('prepareViewModel')
+            ->willReturn($mockViewModel);
+
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager, $mockDataService);
 
         // Capture output
         ob_start();
         $displayRenderer->renderMinisite($mockMinisite);
         $output = ob_get_clean();
 
-        // Verify fallback rendering with null name
+        // Verify fallback rendering with empty name (fallback shows empty h1)
         $this->assertStringContainsString('<!doctype html>', $output);
-        $this->assertStringContainsString('<h1>Minisite</h1>', $output);
+        $this->assertStringContainsString('<h1></h1>', $output);
     }
 
     /**
@@ -162,14 +216,25 @@ final class ViewRendererTest extends TestCase
     {
         $mockRenderer = new \stdClass(); // Object without render method
         $mockWordPressManager = $this->createMock(WordPressManagerInterface::class);
-        $mockWordPressManager->method('getReviewsForMinisite')->willReturn([]);
-        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager);
-        $mockMinisite = (object)[
-            'id' => '123',
-            'name' => 'Café & Restaurant <script>alert("xss")</script>',
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown'
-        ];
+        $mockWordPressManager->method('getReviewsForMinisite')->willReturn(array());
+        $mockDataService = $this->createMock(MinisiteViewDataService::class);
+        $mockMinisite = $this->createMock(Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = 'Café & Restaurant <script>alert("xss")</script>';
+        $mockMinisite->title = 'Café & Restaurant';
+
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
+        );
+
+        $mockDataService
+            ->method('prepareViewModel')
+            ->willReturn($mockViewModel);
+
+        $displayRenderer = new ViewRenderer($mockRenderer, $mockWordPressManager, $mockDataService);
 
         // Capture output
         ob_start();
@@ -246,7 +311,7 @@ final class ViewRendererTest extends TestCase
 
         // This should throw a TypeError since the method expects a string
         $this->expectException(\TypeError::class);
-        
+
         $this->displayRenderer->render404(null);
     }
 
@@ -297,13 +362,14 @@ final class ViewRendererTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->displayRenderer);
         $constructor = $reflection->getConstructor();
-        
+
         $this->assertNotNull($constructor);
-        $this->assertEquals(2, $constructor->getNumberOfParameters());
-        
+        $this->assertEquals(3, $constructor->getNumberOfParameters());
+
         $params = $constructor->getParameters();
         $this->assertEquals('object', $params[0]->getType()->getName());
         $this->assertEquals('object', $params[1]->getType()->getName());
+        $this->assertTrue($params[2]->allowsNull()); // Third parameter is optional
     }
 
     /**
@@ -313,15 +379,29 @@ final class ViewRendererTest extends TestCase
     {
         // Create a proper Minisite entity mock
         $mockMinisite = $this->createMock(Minisite::class);
+        $mockViewModel = new MinisiteViewModel(
+            minisite: $mockMinisite,
+            reviews: array(),
+            isBookmarked: false,
+            canEdit: false
+        );
+
+        // Mock data service to return view model
+        $this->mockDataService
+            ->expects($this->once())
+            ->method('prepareViewModel')
+            ->with($mockMinisite)
+            ->willReturn($mockViewModel);
 
         $this->mockTimberRenderer
             ->expects($this->once())
             ->method('render')
-            ->with($mockMinisite)
+            ->with($mockViewModel)
             ->willThrowException(new \Exception('Template error'));
 
         // The exception should be caught and fallback rendering should be used
         $output = '';
+
         try {
             ob_start();
             $this->displayRenderer->renderMinisite($mockMinisite);
@@ -347,24 +427,24 @@ final class ViewRendererTest extends TestCase
      */
     public function test_render_version_specific_preview_with_valid_data_and_timber_renderer(): void
     {
-        $previewData = (object)[
-            'minisite' => (object)[
+        $previewData = (object)array(
+            'minisite' => (object)array(
                 'id' => '123',
                 'name' => 'Test Minisite',
-                'siteJson' => ['test' => 'data']
-            ],
-            'version' => (object)[
+                'siteJson' => array('test' => 'data'),
+            ),
+            'version' => (object)array(
                 'id' => 5,
                 'label' => 'Version 5',
-                'siteJson' => ['test' => 'version data']
-            ],
-            'siteJson' => ['test' => 'version data'],
-            'versionId' => '5'
-        ];
+                'siteJson' => array('test' => 'version data'),
+            ),
+            'siteJson' => array('test' => 'version data'),
+            'versionId' => '5',
+        );
 
         // Mock Timber class
         $mockTimber = $this->createMock(\stdClass::class);
-        $mockTimber->locations = [];
+        $mockTimber->locations = array();
 
         // This will fail with Timber integration issues, but we can test the method signature
         try {
@@ -378,7 +458,7 @@ final class ViewRendererTest extends TestCase
 
     /**
      * Test renderVersionSpecificPreview without timber renderer (fallback)
-     * 
+     *
      * Note: This test requires Timber to be available but will fail in unit test environment.
      * Skipping until Timber dependency is properly mocked.
      */
@@ -389,7 +469,7 @@ final class ViewRendererTest extends TestCase
 
     /**
      * Test renderVersionSpecificPreview with current version (no specific version)
-     * 
+     *
      * Note: This test requires Timber to be available but will fail in unit test environment.
      * Skipping until Timber dependency is properly mocked.
      */
@@ -400,7 +480,7 @@ final class ViewRendererTest extends TestCase
 
     /**
      * Test renderVersionSpecificPreview with empty minisite name
-     * 
+     *
      * Note: This test requires Timber to be available but will fail in unit test environment.
      * Skipping until Timber dependency is properly mocked.
      */
@@ -411,7 +491,7 @@ final class ViewRendererTest extends TestCase
 
     /**
      * Test renderVersionSpecificPreview with special characters
-     * 
+     *
      * Note: This test requires Timber to be available but will fail in unit test environment.
      * Skipping until Timber dependency is properly mocked.
      */
@@ -425,20 +505,20 @@ final class ViewRendererTest extends TestCase
      */
     public function test_prepare_version_specific_preview_template_data(): void
     {
-        $previewData = (object)[
-            'minisite' => (object)[
+        $previewData = (object)array(
+            'minisite' => (object)array(
                 'id' => '123',
                 'name' => 'Test Minisite',
-                'siteJson' => ['test' => 'data']
-            ],
-            'version' => (object)[
+                'siteJson' => array('test' => 'data'),
+            ),
+            'version' => (object)array(
                 'id' => 5,
                 'label' => 'Version 5',
-                'siteJson' => ['test' => 'version data']
-            ],
-            'siteJson' => ['test' => 'version data'],
-            'versionId' => '5'
-        ];
+                'siteJson' => array('test' => 'version data'),
+            ),
+            'siteJson' => array('test' => 'version data'),
+            'versionId' => '5',
+        );
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($this->displayRenderer);
@@ -448,7 +528,7 @@ final class ViewRendererTest extends TestCase
         $result = $method->invoke($this->displayRenderer, $previewData);
 
         $this->assertEquals($previewData->minisite, $result['minisite']);
-        $this->assertEquals([], $result['reviews']); // Empty reviews array for preview
+        $this->assertEquals(array(), $result['reviews']); // Empty reviews array for preview
         $this->assertEquals($previewData->version, $result['version']);
         $this->assertEquals('5', $result['versionId']);
         $this->assertTrue($result['isVersionSpecificPreview']);
@@ -460,16 +540,16 @@ final class ViewRendererTest extends TestCase
      */
     public function test_prepare_version_specific_preview_template_data_with_current_version(): void
     {
-        $previewData = (object)[
-            'minisite' => (object)[
+        $previewData = (object)array(
+            'minisite' => (object)array(
                 'id' => '123',
                 'name' => 'Test Minisite',
-                'siteJson' => ['test' => 'data']
-            ],
+                'siteJson' => array('test' => 'data'),
+            ),
             'version' => null, // Current version
-            'siteJson' => ['test' => 'current data'],
-            'versionId' => 'current'
-        ];
+            'siteJson' => array('test' => 'current data'),
+            'versionId' => 'current',
+        );
 
         // Use reflection to test private method
         $reflection = new \ReflectionClass($this->displayRenderer);
@@ -479,7 +559,7 @@ final class ViewRendererTest extends TestCase
         $result = $method->invoke($this->displayRenderer, $previewData);
 
         $this->assertEquals($previewData->minisite, $result['minisite']);
-        $this->assertEquals([], $result['reviews']); // Empty reviews array for preview
+        $this->assertEquals(array(), $result['reviews']); // Empty reviews array for preview
         $this->assertNull($result['version']);
         $this->assertEquals('current', $result['versionId']);
         $this->assertTrue($result['isVersionSpecificPreview']);
@@ -491,12 +571,12 @@ final class ViewRendererTest extends TestCase
      */
     private function setupWordPressMocks(): void
     {
-        $functions = [
-            'status_header', 'nocache_headers', 'esc_html'
-        ];
+        $functions = array(
+            'status_header', 'nocache_headers', 'esc_html',
+        );
 
         foreach ($functions as $function) {
-            if (!function_exists($function)) {
+            if (! function_exists($function)) {
                 eval("
                     function {$function}(...\$args) {
                         if (isset(\$GLOBALS['_test_mock_{$function}'])) {
@@ -522,9 +602,9 @@ final class ViewRendererTest extends TestCase
      */
     private function clearWordPressMocks(): void
     {
-        $functions = [
-            'status_header', 'nocache_headers', 'esc_html'
-        ];
+        $functions = array(
+            'status_header', 'nocache_headers', 'esc_html',
+        );
 
         foreach ($functions as $func) {
             unset($GLOBALS['_test_mock_' . $func]);

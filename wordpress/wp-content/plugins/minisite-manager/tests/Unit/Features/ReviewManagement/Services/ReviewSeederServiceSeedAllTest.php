@@ -12,9 +12,9 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
 /**
- * Unit tests for ReviewSeederService::seedAllTestReviews()
- * 
- * Tests the seedAllTestReviews method which loads JSON files and seeds reviews
+ * Unit tests for ReviewSeederService::seedAllSampleReviews()
+ *
+ * Tests the seedAllSampleReviews method which loads JSON files and seeds sample reviews
  * for multiple minisites.
  */
 #[CoversClass(ReviewSeederService::class)]
@@ -30,12 +30,12 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
         \Brain\Monkey\setUp();
 
         $this->reviewRepository = $this->createMock(ReviewRepositoryInterface::class);
-        
+
         // Use global variable approach for get_current_user_id
         $GLOBALS['_test_mock_get_current_user_id'] = 0;
-        
+
         $this->service = new ReviewSeederService($this->reviewRepository);
-        
+
         // Create a testable subclass that can override loadReviewsFromJson
         $this->testJsonDir = sys_get_temp_dir() . '/minisite-test-reviews-' . uniqid();
         mkdir($this->testJsonDir, 0755, true);
@@ -46,12 +46,12 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
     {
         // Clean up global mocks
         unset($GLOBALS['_test_mock_get_current_user_id']);
-        
+
         // Clean up test JSON directory
         if (is_dir($this->testJsonDir)) {
             $this->deleteDirectory($this->testJsonDir);
         }
-        
+
         \Brain\Monkey\tearDown();
         parent::tearDown();
     }
@@ -70,9 +70,9 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
     }
 
     /**
-     * Test seedAllTestReviews with all minisite IDs
+     * Test seedAllSampleReviews with all minisite IDs
      */
-    public function test_seedAllTestReviews_with_all_minisite_ids(): void
+    public function test_seedAllSampleReviews_with_all_minisite_ids(): void
     {
         // Create testable service that uses temp directory
         $service = new class($this->reviewRepository, $this->testJsonDir) extends ReviewSeederService {
@@ -87,7 +87,7 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             protected function loadReviewsFromJson(string $jsonFile): array
             {
                 $jsonPath = $this->testJsonDir . '/data/json/reviews/' . $jsonFile;
-                
+
                 if (!file_exists($jsonPath)) {
                     throw new \RuntimeException('JSON file not found: ' . $jsonPath);
                 }
@@ -150,13 +150,13 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
                 return $review;
             });
 
-        $service->seedAllTestReviews($minisiteIds);
+        $service->seedAllSampleReviews($minisiteIds);
     }
 
     /**
-     * Test seedAllTestReviews with partial minisite IDs
+     * Test seedAllSampleReviews with partial minisite IDs
      */
-    public function test_seedAllTestReviews_with_partial_minisite_ids(): void
+    public function test_seedAllSampleReviews_with_partial_minisite_ids(): void
     {
         $service = new class($this->reviewRepository, $this->testJsonDir) extends ReviewSeederService {
             private string $testJsonDir;
@@ -170,7 +170,7 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             protected function loadReviewsFromJson(string $jsonFile): array
             {
                 $jsonPath = $this->testJsonDir . '/data/json/reviews/' . $jsonFile;
-                
+
                 if (!file_exists($jsonPath)) {
                     throw new \RuntimeException('JSON file not found: ' . $jsonPath);
                 }
@@ -214,13 +214,13 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
                 return $review;
             });
 
-        $service->seedAllTestReviews($minisiteIds);
+        $service->seedAllSampleReviews($minisiteIds);
     }
 
     /**
-     * Test seedAllTestReviews handles missing JSON files gracefully
+     * Test seedAllSampleReviews handles missing JSON files gracefully
      */
-    public function test_seedAllTestReviews_handles_missing_json_files(): void
+    public function test_seedAllSampleReviews_handles_missing_json_files(): void
     {
         $service = new class($this->reviewRepository, $this->testJsonDir) extends ReviewSeederService {
             private string $testJsonDir;
@@ -234,7 +234,7 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             protected function loadReviewsFromJson(string $jsonFile): array
             {
                 $jsonPath = $this->testJsonDir . '/data/json/reviews/' . $jsonFile;
-                
+
                 if (!file_exists($jsonPath)) {
                     throw new \RuntimeException('JSON file not found: ' . $jsonPath);
                 }
@@ -281,25 +281,25 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             });
 
         // Should not throw exception, should continue processing
-        $service->seedAllTestReviews($minisiteIds);
+        $service->seedAllSampleReviews($minisiteIds);
     }
 
     /**
-     * Test seedAllTestReviews with empty minisite IDs array
+     * Test seedAllSampleReviews with empty minisite IDs array
      */
-    public function test_seedAllTestReviews_with_empty_array(): void
+    public function test_seedAllSampleReviews_with_empty_array(): void
     {
         $this->reviewRepository
             ->expects($this->never())
             ->method('save');
 
-        $this->service->seedAllTestReviews([]);
+        $this->service->seedAllSampleReviews([]);
     }
 
     /**
-     * Test seedAllTestReviews continues when one minisite fails
+     * Test seedAllSampleReviews continues when one minisite fails
      */
-    public function test_seedAllTestReviews_continues_when_one_fails(): void
+    public function test_seedAllSampleReviews_continues_when_one_fails(): void
     {
         $service = new class($this->reviewRepository, $this->testJsonDir) extends ReviewSeederService {
             private string $testJsonDir;
@@ -313,12 +313,12 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             protected function loadReviewsFromJson(string $jsonFile): array
             {
                 $jsonPath = $this->testJsonDir . '/data/json/reviews/' . $jsonFile;
-                
+
                 // Simulate failure for LOTUS file
                 if ($jsonFile === 'lotus-textiles-reviews.json') {
                     throw new \RuntimeException('Simulated failure for LOTUS');
                 }
-                
+
                 if (!file_exists($jsonPath)) {
                     throw new \RuntimeException('JSON file not found: ' . $jsonPath);
                 }
@@ -369,7 +369,7 @@ final class ReviewSeederServiceSeedAllTest extends TestCase
             });
 
         // Should not throw exception, should continue processing
-        $service->seedAllTestReviews($minisiteIds);
+        $service->seedAllSampleReviews($minisiteIds);
     }
 }
 

@@ -1,6 +1,14 @@
 <?php
 
-namespace Minisite\Infrastructure\Versioning\Migrations;
+/**
+ * @deprecated This legacy migration has been replaced by Doctrine migrations and seeder services.
+ * All table creation is now handled by Doctrine migrations (Version20251103000000 through Version20251110000000).
+ * All test data seeding is now handled by MinisiteSeederService, VersionSeederService, and ReviewSeederService.
+ * This file is archived in delete_me/ and will be removed in a future version.
+ *
+ * DO NOT USE THIS CLASS IN NEW CODE.
+ */
+namespace delete_me\Minisite\Infrastructure\Versioning\Migrations;
 
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 use Minisite\Infrastructure\Utils\SqlLoader;
@@ -16,13 +24,15 @@ class _1_0_0_CreateBase implements Migration
 
     public function description(): string
     {
-        // NOTE: Review table creation has been moved to Doctrine migrations
-        // Review operations are no longer handled by this migration
-        // NOTE: Version table creation has been moved to Doctrine migrations (Version20251105000000)
-        return 'Create base tables: minisites, minisite_bookmarks, minisite_payments, minisite_payment_history, ' .
-               'minisite_reservations + auto-cleanup event + seed dev data. ' .
+        // NOTE: Most table creation has been moved to Doctrine migrations
+        // This migration now only creates the minisites table and seeds test data
+        return 'Create base table: minisites + seed dev data. ' .
                'NOTE: minisite_reviews table is now created by Doctrine migrations (Version20251104000000). ' .
-               'NOTE: minisite_versions table is now created by Doctrine migrations (Version20251105000000)';
+               'NOTE: minisite_versions table is now created by Doctrine migrations (Version20251105000000). ' .
+               'NOTE: minisite_bookmarks table is now created by Doctrine migrations (Version20251107000000). ' .
+               'NOTE: minisite_payments table is now created by Doctrine migrations (Version20251108000000). ' .
+               'NOTE: minisite_payment_history table is now created by Doctrine migrations (Version20251109000000). ' .
+               'NOTE: minisite_reservations table and purge event are now created by Doctrine migrations (Version20251110000000)';
     }
 
     public function up(): void
@@ -33,10 +43,14 @@ class _1_0_0_CreateBase implements Migration
         // $reviews        = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
         // NOTE: Versions table is now managed by Doctrine migrations - do NOT create it here
         // $versions = $wpdb->prefix . 'minisite_versions'; // COMMENTED OUT - Use Doctrine migrations instead
-        $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
-        $payments = $wpdb->prefix . 'minisite_payments';
-        $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
-        $reservations = $wpdb->prefix . 'minisite_reservations';
+        // NOTE: Bookmarks table is now managed by Doctrine migrations - do NOT create it here
+        // $bookmarks = $wpdb->prefix . 'minisite_bookmarks'; // COMMENTED OUT - Use Doctrine migrations instead
+        // NOTE: Payments table is now managed by Doctrine migrations - do NOT create it here
+        // $payments = $wpdb->prefix . 'minisite_payments'; // COMMENTED OUT - Use Doctrine migrations instead
+        // NOTE: Payment history table is now managed by Doctrine migrations - do NOT create it here
+        // $paymentHistory = $wpdb->prefix . 'minisite_payment_history'; // COMMENTED OUT - Use Doctrine migrations instead
+        // NOTE: Reservations table is now managed by Doctrine migrations - do NOT create it here
+        // $reservations = $wpdb->prefix . 'minisite_reservations'; // COMMENTED OUT - Use Doctrine migrations instead
 
         // ——— minisites (live) ———
         SqlLoader::loadAndExecute(
@@ -79,28 +93,68 @@ class _1_0_0_CreateBase implements Migration
         */
 
         // ——— bookmarks ———
+        // NOTE: Bookmarks table creation has been moved to Doctrine-based migrations.
+        // The old SQL-based table creation is commented out below.
+        // All bookmarks table operations should now use Doctrine migrations.
+        //
+        // Table creation: See Version20251107000000 in Doctrine migrations
+        // (Creates complete table with foreign keys if table doesn't exist)
+        //
+        // OLD SQL FILE LOADING - COMMENTED OUT - DO NOT USE
+        /*
         SqlLoader::loadAndExecute(
             'minisite_bookmarks.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
+        */
 
         // ——— payments (single payment for slug ownership + 1 year public access) ———
+        // NOTE: Payments table creation has been moved to Doctrine-based migrations.
+        // The old SQL-based table creation is commented out below.
+        // All payments table operations should now use Doctrine migrations.
+        //
+        // Table creation: See Version20251108000000 in Doctrine migrations
+        // (Creates complete table with foreign keys if table doesn't exist)
+        //
+        // OLD SQL FILE LOADING - COMMENTED OUT - DO NOT USE
+        /*
         SqlLoader::loadAndExecute(
             'minisite_payments.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
+        */
 
         // ——— payment history (for renewals and reclamations) ———
+        // NOTE: Payment history table creation has been moved to Doctrine-based migrations.
+        // The old SQL-based table creation is commented out below.
+        // All payment history table operations should now use Doctrine migrations.
+        //
+        // Table creation: See Version20251109000000 in Doctrine migrations
+        // (Creates complete table with foreign keys if table doesn't exist)
+        //
+        // OLD SQL FILE LOADING - COMMENTED OUT - DO NOT USE
+        /*
         SqlLoader::loadAndExecute(
             'minisite_payment_history.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
+        */
 
         // Reservations table for 5-minute slug reservations
+        // NOTE: Reservations table creation has been moved to Doctrine-based migrations.
+        // The old SQL-based table creation is commented out below.
+        // All reservations table operations should now use Doctrine migrations.
+        //
+        // Table creation: See Version20251110000000 in Doctrine migrations
+        // (Creates complete table with foreign keys and purge event if table doesn't exist)
+        //
+        // OLD SQL FILE LOADING - COMMENTED OUT - DO NOT USE
+        /*
         SqlLoader::loadAndExecute(
             'minisite_reservations.sql',
             SqlLoader::createStandardVariables($wpdb)
         );
+        */
 
         // Add foreign key constraints after table creation (only if they don't exist)
         // NOTE: Versions table foreign key is now managed by Doctrine migrations
@@ -121,65 +175,82 @@ class _1_0_0_CreateBase implements Migration
         //     $minisites,
         //     'id'
         // );
-        $this->addForeignKeyIfNotExists(
-            $bookmarks,
-            'fk_bookmarks_minisite_id',
-            'minisite_id',
-            $minisites,
-            'id'
-        );
-        $this->addForeignKeyIfNotExists(
-            $payments,
-            'fk_payments_minisite_id',
-            'minisite_id',
-            $minisites,
-            'id'
-        );
-        $this->addForeignKeyIfNotExists(
-            $payments,
-            'fk_payments_user_id',
-            'user_id',
-            $wpdb->prefix . 'users',
-            'ID'
-        );
-        $this->addForeignKeyIfNotExists(
-            $paymentHistory,
-            'fk_payment_history_minisite_id',
-            'minisite_id',
-            $minisites,
-            'id'
-        );
-        $this->addForeignKeyIfNotExists(
-            $paymentHistory,
-            'fk_payment_history_payment_id',
-            'payment_id',
-            $payments,
-            'id'
-        );
-        $this->addForeignKeyIfNotExists(
-            $paymentHistory,
-            'fk_payment_history_new_owner_user_id',
-            'new_owner_user_id',
-            $wpdb->prefix . 'users',
-            'ID'
-        );
-        $this->addForeignKeyIfNotExists(
-            $reservations,
-            'fk_reservations_user_id',
-            'user_id',
-            $wpdb->prefix . 'users',
-            'ID'
-        );
-        $this->addForeignKeyIfNotExists(
-            $reservations,
-            'fk_reservations_minisite_id',
-            'minisite_id',
-            $minisites,
-            'id'
-        );
+        // NOTE: Bookmarks table foreign keys are now managed by Doctrine migrations
+        // See Version20251107000000 in Doctrine migrations
+        // $bookmarks = $wpdb->prefix . 'minisite_bookmarks'; // COMMENTED OUT - Use Doctrine migrations instead
+        // $this->addForeignKeyIfNotExists(
+        //     $bookmarks,
+        //     'fk_bookmarks_minisite_id',
+        //     'minisite_id',
+        //     $minisites,
+        //     'id'
+        // );
+        // NOTE: Payments table foreign keys are now managed by Doctrine migrations
+        // See Version20251108000000 in Doctrine migrations
+        // $payments = $wpdb->prefix . 'minisite_payments'; // COMMENTED OUT - Use Doctrine migrations instead
+        // $this->addForeignKeyIfNotExists(
+        //     $payments,
+        //     'fk_payments_minisite_id',
+        //     'minisite_id',
+        //     $minisites,
+        //     'id'
+        // );
+        // $this->addForeignKeyIfNotExists(
+        //     $payments,
+        //     'fk_payments_user_id',
+        //     'user_id',
+        //     $wpdb->prefix . 'users',
+        //     'ID'
+        // );
+        // NOTE: Payment history table foreign keys are now managed by Doctrine migrations
+        // See Version20251109000000 in Doctrine migrations
+        // $paymentHistory = $wpdb->prefix . 'minisite_payment_history'; // COMMENTED OUT - Use Doctrine migrations instead
+        // $this->addForeignKeyIfNotExists(
+        //     $paymentHistory,
+        //     'fk_payment_history_minisite_id',
+        //     'minisite_id',
+        //     $minisites,
+        //     'id'
+        // );
+        // $this->addForeignKeyIfNotExists(
+        //     $paymentHistory,
+        //     'fk_payment_history_payment_id',
+        //     'payment_id',
+        //     $payments,
+        //     'id'
+        // );
+        // $this->addForeignKeyIfNotExists(
+        //     $paymentHistory,
+        //     'fk_payment_history_new_owner_user_id',
+        //     'new_owner_user_id',
+        //     $wpdb->prefix . 'users',
+        //     'ID'
+        // );
+        // NOTE: Reservations table foreign keys are now managed by Doctrine migrations
+        // See Version20251110000000 in Doctrine migrations
+        // $reservations = $wpdb->prefix . 'minisite_reservations'; // COMMENTED OUT - Use Doctrine migrations instead
+        // $this->addForeignKeyIfNotExists(
+        //     $reservations,
+        //     'fk_reservations_user_id',
+        //     'user_id',
+        //     $wpdb->prefix . 'users',
+        //     'ID'
+        // );
+        // $this->addForeignKeyIfNotExists(
+        //     $reservations,
+        //     'fk_reservations_minisite_id',
+        //     'minisite_id',
+        //     $minisites,
+        //     'id'
+        // );
 
         // Create MySQL event for auto-cleanup of expired reservations
+        // NOTE: Event creation has been moved to Doctrine-based migrations.
+        // See Version20251110000000 in Doctrine migrations
+        // OLD SQL FILE LOADING - COMMENTED OUT - DO NOT USE
+        /*
         SqlLoader::loadAndExecute('event_purge_reservations.sql', SqlLoader::createStandardVariables($wpdb));
+        */
 
         // —— dev seed: insert two test minisites + revisions + reviews ——
         $this->seedTestData();
@@ -407,23 +478,31 @@ class _1_0_0_CreateBase implements Migration
     {
         global $wpdb;
         $minisites = $wpdb->prefix . 'minisites';
-        $versions = $wpdb->prefix . 'minisite_versions';
+        // NOTE: Versions table is now managed by Doctrine migrations - do NOT drop it here
+        // $versions = $wpdb->prefix . 'minisite_versions'; // COMMENTED OUT - Use Doctrine migrations instead
         // NOTE: Reviews table is now managed by Doctrine migrations - do NOT drop it here
-        // $reviews        = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
-        $bookmarks = $wpdb->prefix . 'minisite_bookmarks';
-        $payments = $wpdb->prefix . 'minisite_payments';
-        $paymentHistory = $wpdb->prefix . 'minisite_payment_history';
-        $reservations = $wpdb->prefix . 'minisite_reservations';
+        // $reviews = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine migrations instead
+        // NOTE: Bookmarks table is now managed by Doctrine migrations - do NOT drop it here
+        // $bookmarks = $wpdb->prefix . 'minisite_bookmarks'; // COMMENTED OUT - Use Doctrine migrations instead
+        // NOTE: Payments table is now managed by Doctrine migrations - do NOT drop it here
+        // $payments = $wpdb->prefix . 'minisite_payments'; // COMMENTED OUT - Use Doctrine migrations instead
+        // NOTE: Payment history table is now managed by Doctrine migrations - do NOT drop it here
+        // $paymentHistory = $wpdb->prefix . 'minisite_payment_history'; // COMMENTED OUT - Use Doctrine migrations instead
+        // NOTE: Reservations table is now managed by Doctrine migrations - do NOT drop it here
+        // $reservations = $wpdb->prefix . 'minisite_reservations'; // COMMENTED OUT - Use Doctrine migrations instead
 
         // Drop MySQL event
-        db::query("DROP EVENT IF EXISTS {$wpdb->prefix}minisite_purge_reservations_event");
+        // NOTE: Event is now managed by Doctrine migrations - do NOT drop it here
+        // See Version20251110000000 in Doctrine migrations
+        // db::query("DROP EVENT IF EXISTS {$wpdb->prefix}minisite_purge_reservations_event");
 
-        db::query("DROP TABLE IF EXISTS {$reservations}");
-        db::query("DROP TABLE IF EXISTS {$paymentHistory}");
-        db::query("DROP TABLE IF EXISTS {$payments}");
-        db::query("DROP TABLE IF EXISTS {$bookmarks}");
-        // db::query("DROP TABLE IF EXISTS {$reviews}"); // COMMENTED OUT - Reviews table managed by Doctrine migrations
-        db::query("DROP TABLE IF EXISTS {$versions}");
+        // NOTE: All table drops are now managed by Doctrine migrations
+        // db::query("DROP TABLE IF EXISTS {$reservations}"); // COMMENTED OUT - Use Doctrine migrations instead
+        // db::query("DROP TABLE IF EXISTS {$paymentHistory}"); // COMMENTED OUT - Use Doctrine migrations instead
+        // db::query("DROP TABLE IF EXISTS {$payments}"); // COMMENTED OUT - Use Doctrine migrations instead
+        // db::query("DROP TABLE IF EXISTS {$bookmarks}"); // COMMENTED OUT - Use Doctrine migrations instead
+        // db::query("DROP TABLE IF EXISTS {$reviews}"); // COMMENTED OUT - Use Doctrine migrations instead
+        // db::query("DROP TABLE IF EXISTS {$versions}"); // COMMENTED OUT - Use Doctrine migrations instead
         db::query("DROP TABLE IF EXISTS {$minisites}");
     }
 
@@ -433,13 +512,16 @@ class _1_0_0_CreateBase implements Migration
      * - 'lotus-textiles' / 'mumbai'
      * - 'green-bites' / 'london'
      * - 'swift-transit' / 'sydney'
+     *
+     * NOTE: This method now uses Doctrine-based seeder services:
+     * - MinisiteSeederService for minisites
+     * - VersionSeederService for versions
+     * - ReviewSeederService for reviews
      */
     protected function seedTestData(): void
     {
         global $wpdb;
         $minisitesT = $wpdb->prefix . 'minisites';
-        // NOTE: Reviews table operations have been moved to Doctrine ReviewSeederService
-        // $reviewsT   = $wpdb->prefix . 'minisite_reviews'; // COMMENTED OUT - Use Doctrine ReviewSeederService instead
 
         // Avoid duplicate seeding (check any of our seeded slugs)
         $exists = (int) db::get_var(
@@ -463,87 +545,122 @@ class _1_0_0_CreateBase implements Migration
             return;
         }
 
-        // Insert minisite profiles
-        $minisiteIds = array();
-        $minisiteConfigs = array(
-            'acme-dental.json' => 'ACME',
-            'lotus-textiles.json' => 'LOTUS',
-            'green-bites.json' => 'GREEN',
-            'swift-transit.json' => 'SWIFT',
-        );
+        // Ensure Doctrine is initialized and repositories are available
+        // If not in global, try to initialize it (migration might run before PluginBootstrap)
+        if (! isset($GLOBALS['minisite_entity_manager'])) {
+            if (class_exists(\Doctrine\ORM\EntityManager::class)) {
+                $GLOBALS['minisite_entity_manager'] =
+                    \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
+            } else {
+                error_log('Doctrine ORM not available - skipping minisite seeding');
 
-        foreach ($minisiteConfigs as $filename => $prefix) {
-            $id = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
-            $minisite = $this->loadMinisiteFromJson(
-                $filename,
-                array(
-                    'id' => $id,
-                )
-            );
-            // error_log("SEEDING DATA for $prefix: " . print_r($minisite, true));
-            $minisiteIds[$prefix] = $this->insertMinisite($minisite, $prefix);
+                return;
+            }
         }
 
+        // Ensure Doctrine migrations have run (create tables if needed)
+        /** @var \Doctrine\ORM\EntityManager $em */
+        $em = $GLOBALS['minisite_entity_manager'];
+        $migrationRunner = new \Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner($em);
+        $migrationRunner->migrate();
+
+        // Create repositories if not already in globals
+        if (! isset($GLOBALS['minisite_repository'])) {
+            $minisiteRepo = new \Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository(
+                $em,
+                $em->getClassMetadata(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class)
+            );
+            $GLOBALS['minisite_repository'] = $minisiteRepo;
+        }
+
+        if (! isset($GLOBALS['minisite_version_repository'])) {
+            $versionRepo = new \Minisite\Features\VersionManagement\Repositories\VersionRepository(
+                $em,
+                $em->getClassMetadata(\Minisite\Features\VersionManagement\Domain\Entities\Version::class)
+            );
+            $GLOBALS['minisite_version_repository'] = $versionRepo;
+        }
+
+        if (! isset($GLOBALS['minisite_review_repository'])) {
+            $reviewRepo = new \Minisite\Features\ReviewManagement\Repositories\ReviewRepository(
+                $em,
+                $em->getClassMetadata(\Minisite\Features\ReviewManagement\Domain\Entities\Review::class)
+            );
+            $GLOBALS['minisite_review_repository'] = $reviewRepo;
+        }
+
+        // Get repositories
+        /** @var \Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface $minisiteRepo */
+        $minisiteRepo = $GLOBALS['minisite_repository'];
+        /** @var \Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface $versionRepo */
+        $versionRepo = $GLOBALS['minisite_version_repository'];
+        /** @var \Minisite\Features\ReviewManagement\Repositories\ReviewRepositoryInterface $reviewRepo */
+        $reviewRepo = $GLOBALS['minisite_review_repository'];
+
+        // Seed minisites using MinisiteSeederService
+        $minisiteSeeder = new \Minisite\Features\MinisiteManagement\Services\MinisiteSeederService($minisiteRepo);
+        $minisiteIds = $minisiteSeeder->seedAllTestMinisites();
+
         // Extract individual IDs for backward compatibility
-        $acmeId = $minisiteIds['ACME'];
-        $lotusId = $minisiteIds['LOTUS'];
-        $greenId = $minisiteIds['GREEN'];
-        $swiftId = $minisiteIds['SWIFT'];
+        $acmeId = $minisiteIds['ACME'] ?? null;
+        $lotusId = $minisiteIds['LOTUS'] ?? null;
+        $greenId = $minisiteIds['GREEN'] ?? null;
+        $swiftId = $minisiteIds['SWIFT'] ?? null;
 
         // ——— Versions for each profile (version 1 as published) ———
-        $versionsT = $wpdb->prefix . 'minisite_versions';
-        $nowUser = get_current_user_id() ?: null;
-        foreach (
-            array(
-            $acmeId => 'US',
-            $lotusId => 'IN',
-            $greenId => 'GB',
-            $swiftId => 'AU',
-            ) as $pid => $cc
-        ) {
-            if (! $pid) {
+        // NOTE: Version seeding now uses Doctrine-based VersionSeederService
+        // All version operations use VersionRepository through VersionSeederService
+        $versionSeeder = new \Minisite\Features\VersionManagement\Services\VersionSeederService($versionRepo);
+
+        // Create version 1 for each minisite (published, with all minisite fields)
+        $minisiteIdMap = array(
+            'ACME' => $acmeId,
+            'LOTUS' => $lotusId,
+            'GREEN' => $greenId,
+            'SWIFT' => $swiftId,
+        );
+
+        foreach ($minisiteIdMap as $key => $minisiteId) {
+            if (empty($minisiteId)) {
                 continue;
             }
 
-            // Get the profile data for the initial version
-            $minisite = db::get_row("SELECT * FROM {$minisitesT} WHERE id = %s", array($pid));
-            $siteJson = $minisite ? $minisite['site_json'] : wp_json_encode(
-                array(
-                    'note' => 'initial version',
-                    'country' => $cc,
-                )
-            );
+            // Get the minisite entity
+            $minisite = $minisiteRepo->findById($minisiteId);
+            if (! $minisite) {
+                continue;
+            }
 
             // Create version 1 as published with all profile fields
             $versionData = array(
-                'minisite_id' => $pid,
+                'minisite_id' => $minisiteId,
                 'version_number' => 1,
                 'status' => 'published',
                 'label' => 'Initial version',
                 'comment' => 'Migrated from existing data',
-                'created_by' => $nowUser,
+                'created_by' => get_current_user_id() ?: null,
                 'created_at' => current_time('mysql'),
                 'published_at' => current_time('mysql'),
                 'source_version_id' => null,
 
                 // Profile fields (exact match with profiles table order)
-                'business_slug' => $minisite['business_slug'] ?? null,
-                'location_slug' => $minisite['location_slug'] ?? null,
-                'title' => $minisite['title'] ?? null,
-                'name' => $minisite['name'] ?? null,
-                'city' => $minisite['city'] ?? null,
-                'region' => $minisite['region'] ?? null,
-                'country_code' => $minisite['country_code'] ?? null,
-                'postal_code' => $minisite['postal_code'] ?? null,
+                'business_slug' => $minisite->businessSlug ?? null,
+                'location_slug' => $minisite->locationSlug ?? null,
+                'title' => $minisite->title ?? null,
+                'name' => $minisite->name ?? null,
+                'city' => $minisite->city ?? null,
+                'region' => $minisite->region ?? null,
+                'country_code' => $minisite->countryCode ?? null,
+                'postal_code' => $minisite->postalCode ?? null,
                 'location_point' => null, // Will be set separately if needed
-                'site_template' => $minisite['site_template'] ?? null,
-                'palette' => $minisite['palette'] ?? null,
-                'industry' => $minisite['industry'] ?? null,
-                'default_locale' => $minisite['default_locale'] ?? null,
-                'schema_version' => $minisite['schema_version'] ?? null,
-                'site_version' => $minisite['site_version'] ?? null,
-                'site_json' => $siteJson,
-                'search_terms' => $minisite['search_terms'] ?? null,
+                'site_template' => $minisite->siteTemplate ?? null,
+                'palette' => $minisite->palette ?? null,
+                'industry' => $minisite->industry ?? null,
+                'default_locale' => $minisite->defaultLocale ?? null,
+                'schema_version' => $minisite->schemaVersion ?? null,
+                'site_version' => $minisite->siteVersion ?? null,
+                'site_json' => $minisite->siteJson ?? '{}',
+                'search_terms' => $minisite->searchTerms ?? null,
             );
 
             db::insert(
@@ -588,19 +705,12 @@ class _1_0_0_CreateBase implements Migration
                 $swiftId => array( 151.2093, -33.8688 ),   // Sydney, AU
             );
 
-            if (isset($coordinates[ $pid ])) {
-                [$lng, $lat] = $coordinates[ $pid ];
-                db::query(
-                    "UPDATE {$versionsT} SET location_point = POINT(%f, %f) WHERE id = %d",
-                    array($lng, $lat, $versionId)
-                );
-            }
+            // Create initial version from minisite using VersionSeederService
+            $version = $versionSeeder->createInitialVersionFromMinisite($minisite);
+            $savedVersion = $versionRepo->save($version);
 
-            // Update profile with current version ID
-            db::query(
-                "UPDATE {$minisitesT} SET _minisite_current_version_id = %d WHERE id = %s",
-                array($versionId, $pid)
-            );
+            // Update minisite with current version ID
+            $minisiteRepo->updateCurrentVersionId($minisiteId, $savedVersion->id);
         }
 
         // ——— Reviews (5 per minisite) ———

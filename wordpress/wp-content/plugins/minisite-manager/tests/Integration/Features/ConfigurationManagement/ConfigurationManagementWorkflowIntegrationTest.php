@@ -6,18 +6,12 @@ namespace Tests\Integration\Features\ConfigurationManagement;
 
 use Minisite\Features\ConfigurationManagement\Commands\DeleteConfigCommand;
 use Minisite\Features\ConfigurationManagement\Commands\SaveConfigCommand;
+use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 use Minisite\Features\ConfigurationManagement\Handlers\DeleteConfigHandler;
 use Minisite\Features\ConfigurationManagement\Handlers\SaveConfigHandler;
-use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
 use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
-use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
-use Doctrine\ORM\Events;
-use PHPUnit\Framework\TestCase;
+use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Integration tests for ConfigurationManagement workflow
@@ -29,96 +23,29 @@ use PHPUnit\Framework\TestCase;
  * - MySQL test database must be running (Docker container on port 3307)
  * - Migrations will be run automatically in setUp()
  */
-final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
+final class ConfigurationManagementWorkflowIntegrationTest extends BaseIntegrationTest
 {
-    private \Doctrine\ORM\EntityManager $em;
     private ConfigRepository $repository;
     private ConfigurationManagementService $service;
     private SaveConfigHandler $saveHandler;
     private DeleteConfigHandler $deleteHandler;
 
-    protected function setUp(): void
+    /**
+     * Get entity paths for ORM configuration
+     */
+    protected function getEntityPaths(): array
     {
-        parent::setUp();
-
-        // Initialize LoggingServiceProvider if not already initialized
-        \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
-
-        // Define encryption key for tests that use encrypted type
-        if (!defined('MINISITE_ENCRYPTION_KEY')) {
-            define('MINISITE_ENCRYPTION_KEY', base64_encode(random_bytes(32)));
-        }
-
-        // Get database configuration from environment
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
-        $port = getenv('MYSQL_PORT') ?: '3307';
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-        $user = getenv('MYSQL_USER') ?: 'minisite';
-        $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-
-        // Create real MySQL connection via Doctrine
-        $connection = DriverManager::getConnection([
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'port' => (int)$port,
-            'user' => $user,
-            'password' => $pass,
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-        ]);
-
-        // Create EntityManager with MySQL connection
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [
-                __DIR__ . '/../../../../src/Features/ConfigurationManagement/Domain/Entities',
-                __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
-            ],
-            isDevMode: true
+        return array(
+            __DIR__ . '/../../../../src/Features/ConfigurationManagement/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
         );
+    }
 
-        $this->em = new EntityManager($connection, $config);
-
-        // Reset connection state
-        try {
-            $connection->executeStatement('ROLLBACK');
-        } catch (\Exception $e) {
-            // Ignore
-        }
-
-        try {
-            $connection->beginTransaction();
-            $connection->commit();
-        } catch (\Exception $e) {
-            try {
-                $connection->rollBack();
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
-        // Set up $wpdb object for TablePrefixListener
-        if (!isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-
-        // Add TablePrefixListener
-        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
-        $this->em->getEventManager()->addEventListener(
-            Events::loadClassMetadata,
-            $tablePrefixListener
-        );
-
-        // Drop tables and migration tracking to ensure clean slate
-        $this->cleanupTables();
-
-        // Ensure migrations have run
-        $migrationRunner = new DoctrineMigrationRunner($this->em);
-        $migrationRunner->migrate();
-
-
+    /**
+     * Setup test-specific services, repositories, and handlers
+     */
+    protected function setupTestSpecificServices(): void
+    {
         // Get repository
         $classMetadata = $this->em->getClassMetadata(Config::class);
         $this->repository = new ConfigRepository($this->em, $classMetadata);
@@ -129,16 +56,10 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         // Create handlers
         $this->saveHandler = new SaveConfigHandler($this->service);
         $this->deleteHandler = new DeleteConfigHandler($this->service);
-
-        // Clean up test data
-        $this->cleanupTestData();
     }
 
     protected function tearDown(): void
     {
-        // Clean up test data
-        $this->cleanupTestData();
-
         // Reset static cache
         $reflection = new \ReflectionClass(ConfigurationManagementService::class);
         $cacheProperty = $reflection->getProperty('cache');
@@ -149,41 +70,13 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $loadedProperty->setAccessible(true);
         $loadedProperty->setValue(null, false);
 
-        try {
-            $this->em->clear();
-            $connection = $this->em->getConnection();
-            if ($connection->isTransactionActive()) {
-                $connection->rollBack();
-            }
-        } catch (\Exception $e) {
-            // Ignore errors during cleanup
-        }
-
-        $this->em->close();
-        parent::tearDown();
-    }
-
-    /**
-     * Drop tables and migration tracking to ensure clean slate
-     */
-    private function cleanupTables(): void
-    {
-        $connection = $this->em->getConnection();
-        $tables = ['wp_minisite_config', 'wp_minisite_migrations'];
-
-        foreach ($tables as $table) {
-            try {
-                $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
-            } catch (\Exception $e) {
-                // Ignore errors - table might not exist
-            }
-        }
+        parent::tearDown(); // This calls cleanupTestData() from base class
     }
 
     /**
      * Clean up test data (but keep table structure)
      */
-    private function cleanupTestData(): void
+    protected function cleanupTestData(): void
     {
         try {
             $this->em->getConnection()->executeStatement(
@@ -284,7 +177,7 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $this->assertTrue($this->service->get('test_bool'));
 
         // JSON
-        $jsonData = ['key' => 'value', 'number' => 123];
+        $jsonData = array('key' => 'value', 'number' => 123);
         $jsonCommand = new SaveConfigCommand('test_json', $jsonData, 'json');
         $this->saveHandler->handle($jsonCommand);
         $result = $this->service->get('test_json');
@@ -313,4 +206,3 @@ final class ConfigurationManagementWorkflowIntegrationTest extends TestCase
         $this->assertTrue($config->isSensitive);
     }
 }
-

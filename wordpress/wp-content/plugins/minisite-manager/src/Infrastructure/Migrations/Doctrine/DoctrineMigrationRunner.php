@@ -202,13 +202,92 @@ class DoctrineMigrationRunner
         $planCalculator = $dependencyFactory->getMigrationPlanCalculator();
         $plan = $planCalculator->getPlanUntilVersion($latestVersion);
 
+        // Track which migrations will be executed (before execution)
+        // Use the available migrations that are in the plan
+        $migrationsToSeed = array();
+        $statusCalculator = $dependencyFactory->getMigrationStatusCalculator();
+        $newMigrations = $statusCalculator->getNewMigrations();
+
+        // Get migration class names from new migrations (these are the ones that will be executed)
+        foreach ($newMigrations->getItems() as $availableMigration) {
+            $migrationInstance = $availableMigration->getMigration();
+            $migrationsToSeed[] = get_class($migrationInstance);
+        }
+
         $migrator = $dependencyFactory->getMigrator();
         $migratorConfig = new MigratorConfiguration();
         $migrator->migrate($plan, $migratorConfig);
 
+        // After migrations complete successfully, call seedSampleData() on each executed migration
+        $this->executeSeedDataForMigrations($dependencyFactory, $migrationsToSeed);
+
         $this->logger->info("migrate() exit - migrations completed", array(
             'count' => count($availableMigrations),
         ));
+    }
+
+    /**
+     * Execute seed sample data for successfully executed migrations
+     *
+     * @param DependencyFactory $dependencyFactory
+     * @param array<string> $migrationClassNames Array of migration class names that were executed
+     * @return void
+     */
+    private function executeSeedDataForMigrations(
+        DependencyFactory $dependencyFactory,
+        array $migrationClassNames
+    ): void {
+        $connection = $dependencyFactory->getConnection();
+
+        foreach ($migrationClassNames as $migrationClassName) {
+            try {
+                // Create migration instance
+                $migration = new $migrationClassName($connection, $this->logger);
+
+                // Check if migration has seedSampleData method and should execute it
+                if (method_exists($migration, 'seedSampleData')) {
+                    // Type check for PHPStan - ensure it's a BaseDoctrineMigration
+                    if ($migration instanceof \Minisite\Infrastructure\Migrations\Doctrine\BaseDoctrineMigration) {
+                        if ($migration->shouldSeedSampleData()) {
+                            $this->logger->info('Executing seed sample data for migration', array(
+                                'class' => $migrationClassName,
+                            ));
+
+                            $migration->seedSampleData();
+                        } else {
+                            $this->logger->info('Skipping seed sample data for migration', array(
+                                'class' => $migrationClassName,
+                            ));
+                        }
+                    } else {
+                        // Fallback for migrations that don't extend BaseDoctrineMigration
+                        // Use reflection to safely call shouldSeedSampleData if it exists
+                        if (method_exists($migration, 'shouldSeedSampleData')) {
+                            $reflection = new \ReflectionMethod($migration, 'shouldSeedSampleData');
+                            if ($reflection->isPublic() && $migration->shouldSeedSampleData()) {
+                                $this->logger->info('Executing seed sample data for migration', array(
+                                    'class' => $migrationClassName,
+                                ));
+                                $migration->seedSampleData();
+                            }
+                        } else {
+                            // No shouldSeedSampleData method, call seedSampleData directly
+                            $this->logger->info('Executing seed sample data for migration', array(
+                                'class' => $migrationClassName,
+                            ));
+                            $migration->seedSampleData();
+                        }
+                    }
+                }
+            } catch (\Exception $e) {
+                // Log error but don't fail migration - seed data is optional
+                $this->logger->warning('Sample seed data failed for migration', array(
+                    'class' => $migrationClassName,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                ));
+            }
+        }
     }
 
     /**

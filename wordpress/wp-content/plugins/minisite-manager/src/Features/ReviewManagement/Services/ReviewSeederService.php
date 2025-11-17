@@ -254,7 +254,7 @@ class ReviewSeederService
     }
 
     /**
-     * Seed all sample reviews for the standard test minisites
+     * Seed all sample reviews for the standard minisites
      *
      * This seeds reviews for:
      * - ACME Dental (Dallas)
@@ -264,9 +264,11 @@ class ReviewSeederService
      *
      * Reviews are loaded from JSON files in data/json/reviews/
      *
+     * Note: This is sample data (not test data). The "Test" keyword is reserved for testing phases.
+     *
      * @param array $minisiteIds Array with keys: 'ACME', 'LOTUS', 'GREEN', 'SWIFT'
      */
-    public function seedAllTestReviews(array $minisiteIds): void
+    public function seedAllSampleReviews(array $minisiteIds): void
     {
         // Map of minisite keys to their JSON review files
         $reviewFiles = array(

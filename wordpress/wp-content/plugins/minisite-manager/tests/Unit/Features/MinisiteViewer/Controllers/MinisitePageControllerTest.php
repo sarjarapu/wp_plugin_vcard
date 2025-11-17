@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test MinisitePageController
- * 
+ *
  * Tests the MinisitePageController for proper coordination of minisite display flow
  */
 final class MinisitePageControllerTest extends TestCase
@@ -62,12 +62,11 @@ final class MinisitePageControllerTest extends TestCase
     public function test_handle_display_with_successful_minisite_display(): void
     {
         $command = new ViewMinisiteCommand('coffee-shop', 'downtown');
-        $mockMinisite = (object)[
-            'id' => '123',
-            'name' => 'Coffee Shop',
-            'business_slug' => 'coffee-shop',
-            'location_slug' => 'downtown'
-        ];
+        $mockMinisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
+        $mockMinisite->id = '123';
+        $mockMinisite->name = 'Coffee Shop';
+        $mockMinisite->businessSlug = 'coffee-shop';
+        $mockMinisite->locationSlug = 'downtown';
 
         // Mock request handler to return a display command
         $this->requestHandler->method('handleViewRequest')
@@ -202,12 +201,11 @@ final class MinisitePageControllerTest extends TestCase
     public function test_handle_display_with_special_characters(): void
     {
         $command = new ViewMinisiteCommand('café-&-restaurant', 'main-street-123');
-        $mockMinisite = (object)[
-            'id' => '456',
-            'name' => 'Café & Restaurant',
-            'business_slug' => 'café-&-restaurant',
-            'location_slug' => 'main-street-123'
-        ];
+        $mockMinisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
+        $mockMinisite->id = '456';
+        $mockMinisite->name = 'Café & Restaurant';
+        $mockMinisite->businessSlug = 'café-&-restaurant';
+        $mockMinisite->locationSlug = 'main-street-123';
 
         // Mock request handler to return a command
         $this->requestHandler->method('handleViewRequest')
@@ -234,10 +232,10 @@ final class MinisitePageControllerTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->minisitePageController);
         $constructor = $reflection->getConstructor();
-        
+
         $this->assertNotNull($constructor);
         $this->assertEquals(6, $constructor->getNumberOfParameters());
-        
+
         $params = $constructor->getParameters();
         $expectedTypes = [
             ViewHandler::class,
@@ -247,7 +245,7 @@ final class MinisitePageControllerTest extends TestCase
             ViewRenderer::class,
             WordPressMinisiteManager::class
         ];
-        
+
         foreach ($params as $index => $param) {
             $this->assertEquals($expectedTypes[$index], $param->getType()->getName());
         }

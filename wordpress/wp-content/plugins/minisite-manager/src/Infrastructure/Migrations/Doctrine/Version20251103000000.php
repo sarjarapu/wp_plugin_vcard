@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Psr\Log\LoggerInterface;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
@@ -15,16 +12,8 @@ use Psr\Log\LoggerInterface;
  * Migration: Create minisite_config table for configuration management
  * Date: 2025-11-03
  */
-final class Version20251103000000 extends AbstractMigration
+final class Version20251103000000 extends BaseDoctrineMigration
 {
-    private LoggerInterface $logger;
-
-    public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
-    {
-        parent::__construct($connection, $logger);
-        $this->logger = LoggingServiceProvider::getFeatureLogger('Version20251103000000');
-    }
-
     public function getDescription(): string
     {
         return 'Create minisite_config table for configuration management';
@@ -111,14 +100,41 @@ final class Version20251103000000 extends AbstractMigration
         }
     }
 
-    /**
-     * MySQL doesn't support transactional DDL (CREATE TABLE causes implicit commit).
-     * Return false to avoid Doctrine SAVEPOINT exception errors.
-     *
-     * @see https://www.doctrine-project.org/projects/doctrine-migrations/en/3.9/explanation/implicit-commits.html
-     */
-    public function isTransactional(): bool
+    public function seedSampleData(): void
     {
-        return false;
+        if (! $this->shouldSeedSampleData()) {
+            $this->logger->info('Skipping sample seed data for config table');
+
+            return;
+        }
+
+        $this->logger->info('Starting sample seed data for config table');
+
+        try {
+            // Ensure ConfigManager is initialized
+            if (! isset($GLOBALS['minisite_config_manager'])) {
+                if (class_exists(\Doctrine\ORM\EntityManager::class)) {
+                    \Minisite\Core\PluginBootstrap::initializeConfigSystem();
+                }
+
+                if (! isset($GLOBALS['minisite_config_manager'])) {
+                    $this->logger->warning('ConfigManager not available - skipping config seeding');
+
+                    return;
+                }
+            }
+
+            // Seed default configs using existing seeder
+            $seeder = new \Minisite\Features\ConfigurationManagement\Services\ConfigSeeder();
+            $seeder->seedDefaults($GLOBALS['minisite_config_manager']);
+
+            $this->logger->info('Sample seed data completed for config table');
+        } catch (\Exception $e) {
+            $this->logger->error('Sample seed data failed for config table', array(
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ));
+            // Don't throw - migration succeeded, sample seed data is optional
+        }
     }
 }

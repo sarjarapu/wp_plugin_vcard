@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Domain\Entities;
 
 use DateTimeImmutable;
-use Minisite\Domain\Entities\Minisite;
+use delete_me\Minisite\Domain\Entities\Minisite;
 use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use PHPUnit\Framework\Attributes\CoversClass;

@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\ReviewManagement;
 
-use Minisite\Features\ReviewManagement\Domain\Entities\Review;
-use Minisite\Features\ReviewManagement\Repositories\ReviewRepository;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
 use Doctrine\ORM\Events;
-use PHPUnit\Framework\TestCase;
+use Doctrine\ORM\ORMSetup;
+use Minisite\Features\ReviewManagement\Domain\Entities\Review;
+use Minisite\Features\ReviewManagement\Repositories\ReviewRepository;
+use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
+use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Integration tests for Review Management Workflow
@@ -41,13 +41,13 @@ final class ReviewWorkflowIntegrationTest extends TestCase
 
         LoggingServiceProvider::register();
 
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
+        $host = getenv('MYSQL_HOST') ?: 'localhost';
         $port = getenv('MYSQL_PORT') ?: '3307';
         $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
         $user = getenv('MYSQL_USER') ?: 'minisite';
         $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
 
-        $connection = DriverManager::getConnection([
+        $connection = DriverManager::getConnection(array(
             'driver' => 'pdo_mysql',
             'host' => $host,
             'port' => (int)$port,
@@ -55,13 +55,13 @@ final class ReviewWorkflowIntegrationTest extends TestCase
             'password' => $pass,
             'dbname' => $dbName,
             'charset' => 'utf8mb4',
-        ]);
+        ));
 
         $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [
+            paths: array(
                 __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
                 __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
-            ],
+            ),
             isDevMode: true
         );
 
@@ -88,7 +88,7 @@ final class ReviewWorkflowIntegrationTest extends TestCase
         $this->em->clear();
 
         // Set up $wpdb object
-        if (!isset($GLOBALS['wpdb'])) {
+        if (! isset($GLOBALS['wpdb'])) {
             $GLOBALS['wpdb'] = new \wpdb();
         }
         $GLOBALS['wpdb']->prefix = 'wp_';
@@ -121,7 +121,7 @@ final class ReviewWorkflowIntegrationTest extends TestCase
     private function cleanupTables(): void
     {
         $connection = $this->em->getConnection();
-        $tables = ['wp_minisite_reviews', 'wp_minisite_migrations'];
+        $tables = array('wp_minisite_reviews', 'wp_minisite_migrations');
 
         foreach ($tables as $table) {
             try {
@@ -246,7 +246,7 @@ final class ReviewWorkflowIntegrationTest extends TestCase
         $minisiteId = 'test-minisite-filter';
 
         // Create reviews with different statuses
-        $statuses = ['pending', 'approved', 'rejected', 'flagged'];
+        $statuses = array('pending', 'approved', 'rejected', 'flagged');
         foreach ($statuses as $status) {
             $review = new Review();
             $review->minisiteId = $minisiteId;
@@ -331,4 +331,3 @@ final class ReviewWorkflowIntegrationTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $flaggedCount);
     }
 }
-

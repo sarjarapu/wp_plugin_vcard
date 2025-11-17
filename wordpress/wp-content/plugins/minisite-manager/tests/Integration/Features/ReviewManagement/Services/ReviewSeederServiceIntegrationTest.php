@@ -4,18 +4,11 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\ReviewManagement\Services;
 
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\ORMSetup;
 use Minisite\Features\ReviewManagement\Domain\Entities\Review;
 use Minisite\Features\ReviewManagement\Repositories\ReviewRepository;
 use Minisite\Features\ReviewManagement\Services\ReviewSeederService;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Integration tests for ReviewSeederService
@@ -28,87 +21,21 @@ use PHPUnit\Framework\TestCase;
  * - JSON files in data/json/reviews/ directory (optional, some tests will skip if missing)
  */
 #[CoversClass(ReviewSeederService::class)]
-final class ReviewSeederServiceIntegrationTest extends TestCase
+final class ReviewSeederServiceIntegrationTest extends BaseIntegrationTest
 {
-    private \Doctrine\ORM\EntityManager $em;
     private ReviewRepository $repository;
     private ReviewSeederService $service;
 
-    protected function setUp(): void
+    protected function getEntityPaths(): array
     {
-        parent::setUp();
-
-        // Initialize LoggingServiceProvider
-        LoggingServiceProvider::register();
-
-        // Get database configuration from environment
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
-        $port = getenv('MYSQL_PORT') ?: '3307';
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-        $user = getenv('MYSQL_USER') ?: 'minisite';
-        $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-
-        // Create real MySQL connection
-        $connection = DriverManager::getConnection(array(
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'port' => (int)$port,
-            'user' => $user,
-            'password' => $pass,
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-        ));
-
-        // Create EntityManager
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: array(
-                __DIR__ . '/../../../../../src/Features/ReviewManagement/Domain/Entities',
-                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
-            ),
-            isDevMode: true
+        return array(
+            __DIR__ . '/../../../../../src/Features/ReviewManagement/Domain/Entities',
+            __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
         );
+    }
 
-        $this->em = new EntityManager($connection, $config);
-
-        // Reset connection state
-        try {
-            $connection->executeStatement('ROLLBACK');
-        } catch (\Exception $e) {
-            // Ignore
-        }
-
-        try {
-            $connection->beginTransaction();
-            $connection->commit();
-        } catch (\Exception $e) {
-            try {
-                $connection->rollBack();
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
-        // Set up $wpdb object for TablePrefixListener
-        if (! isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-
-        // Add TablePrefixListener
-        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
-        $this->em->getEventManager()->addEventListener(
-            Events::loadClassMetadata,
-            $tablePrefixListener
-        );
-
-        // Ensure migrations have run
-        $this->cleanupTables();
-        $migrationRunner = new DoctrineMigrationRunner($this->em);
-        $migrationRunner->migrate();
-
-        // Create repository and service
+    protected function setupTestSpecificServices(): void
+    {
         $this->repository = new ReviewRepository(
             $this->em,
             $this->em->getClassMetadata(Review::class)
@@ -116,48 +43,27 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
 
         $this->service = new ReviewSeederService($this->repository);
 
-        // Clean up test data
-        $this->cleanupTestData();
-
         // Set up WordPress function mocks
         $GLOBALS['_test_mock_get_current_user_id'] = 0;
     }
 
-    protected function tearDown(): void
-    {
-        // Clean up test data
-        $this->cleanupTestData();
-
-        // Clean up global mocks
-        unset($GLOBALS['_test_mock_get_current_user_id']);
-
-        $this->em->close();
-        parent::tearDown();
-    }
-
-    private function cleanupTables(): void
-    {
-        $connection = $this->em->getConnection();
-        $tables = array('wp_minisite_reviews', 'wp_minisite_migrations');
-
-        foreach ($tables as $table) {
-            try {
-                $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
-            } catch (\Exception $e) {
-                // Ignore
-            }
-        }
-    }
-
-    private function cleanupTestData(): void
+    protected function cleanupTestData(): void
     {
         try {
             $this->em->getConnection()->executeStatement(
                 "DELETE FROM wp_minisite_reviews WHERE minisite_id LIKE 'test_%' OR minisite_id = 'test-minisite%'"
             );
         } catch (\Exception $e) {
-            // Ignore
+            // Ignore errors - table might not exist or connection might be closed
         }
+    }
+
+    protected function tearDown(): void
+    {
+        // Clean up global mocks
+        unset($GLOBALS['_test_mock_get_current_user_id']);
+
+        parent::tearDown();
     }
 
     /**
@@ -439,15 +345,15 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
     }
 
     /**
-     * Test seedAllTestReviews with empty minisite IDs (should skip)
+     * Test seedAllSampleReviews with empty minisite IDs (should skip)
      */
-    public function test_seedAllTestReviews_with_empty_minisite_ids(): void
+    public function test_seedAllSampleReviews_with_empty_minisite_ids(): void
     {
         // Should not throw an exception when all minisite IDs are empty
-        $this->service->seedAllTestReviews(array());
+        $this->service->seedAllSampleReviews(array());
 
         // Also test with some keys but empty values
-        $this->service->seedAllTestReviews(array(
+        $this->service->seedAllSampleReviews(array(
             'ACME' => '',
             'LOTUS' => null,
             'GREEN' => '',
@@ -459,9 +365,9 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
     }
 
     /**
-     * Test seedAllTestReviews handles file not found gracefully
+     * Test seedAllSampleReviews handles file not found gracefully
      */
-    public function test_seedAllTestReviews_handles_file_not_found(): void
+    public function test_seedAllSampleReviews_handles_file_not_found(): void
     {
         // Define MINISITE_PLUGIN_DIR to a non-existent path
         if (! defined('MINISITE_PLUGIN_DIR')) {
@@ -469,7 +375,7 @@ final class ReviewSeederServiceIntegrationTest extends TestCase
         }
 
         // Should not throw exception, should log error and continue
-        $this->service->seedAllTestReviews(array(
+        $this->service->seedAllSampleReviews(array(
             'ACME' => 'test-minisite-acme',
             'LOTUS' => 'test-minisite-lotus',
         ));

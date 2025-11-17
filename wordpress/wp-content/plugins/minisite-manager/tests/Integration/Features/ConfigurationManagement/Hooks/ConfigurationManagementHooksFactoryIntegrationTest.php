@@ -7,7 +7,7 @@ namespace Tests\Integration\Features\ConfigurationManagement\Hooks;
 use Minisite\Features\ConfigurationManagement\Hooks\ConfigurationManagementHooks;
 use Minisite\Features\ConfigurationManagement\Hooks\ConfigurationManagementHooksFactory;
 use PHPUnit\Framework\Attributes\CoversClass;
-use Tests\Integration\Features\ConfigurationManagement\BaseConfigurationManagementIntegrationTest;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Integration tests for ConfigurationManagementHooksFactory
@@ -16,11 +16,39 @@ use Tests\Integration\Features\ConfigurationManagement\BaseConfigurationManageme
  *
  * Prerequisites:
  * - MySQL test database must be running (Docker container on port 3307)
- * - Database constants must be defined (handled by bootstrap.php)
+ * - Migrations will be run automatically in setUp()
  */
 #[CoversClass(ConfigurationManagementHooksFactory::class)]
-final class ConfigurationManagementHooksFactoryIntegrationTest extends BaseConfigurationManagementIntegrationTest
+final class ConfigurationManagementHooksFactoryIntegrationTest extends BaseIntegrationTest
 {
+    /**
+     * Get entity paths for ORM configuration
+     * Note: This test doesn't directly use EntityManager, but BaseIntegrationTest requires it
+     */
+    protected function getEntityPaths(): array
+    {
+        return array(
+            __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+            __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
+        );
+    }
+
+    /**
+     * Setup test-specific services
+     * Note: This test uses factory methods that create their own dependencies
+     */
+    protected function setupTestSpecificServices(): void
+    {
+        // No specific services needed - tests use factory methods
+    }
+
+    /**
+     * Clean up test data
+     */
+    protected function cleanupTestData(): void
+    {
+        // No test data to clean up - tests only verify factory creation
+    }
     /**
      * Test create returns ConfigurationManagementHooks instance
      */

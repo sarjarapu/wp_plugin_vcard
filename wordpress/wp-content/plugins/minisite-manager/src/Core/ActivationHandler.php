@@ -31,7 +31,7 @@ final class ActivationHandler
 
     private static function runMigrations(): void
     {
-        // Run Doctrine migrations first (for new tables like minisite_config)
+        // Run Doctrine migrations (all tables are now managed by Doctrine)
         try {
             // Check if Doctrine is available before attempting migration
             if (! class_exists(\Doctrine\ORM\EntityManager::class)) {
@@ -43,6 +43,9 @@ final class ActivationHandler
 
             $doctrineRunner = new \Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner();
             $doctrineRunner->migrate();
+
+            // NOTE: Sample data seeding is now handled by individual migrations via seedSampleData() methods.
+            // Each migration is responsible for seeding its own sample data after table creation.
         } catch (\Exception $e) {
             // Log error with full details
             $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('activation');
@@ -54,16 +57,8 @@ final class ActivationHandler
                 'trace' => $e->getTraceAsString(),
             ));
         }
-
-        // Run custom migrations (for existing tables - to be migrated to Doctrine later)
-        if (class_exists(\Minisite\Infrastructure\Versioning\VersioningController::class)) {
-            $versioningController = new \Minisite\Infrastructure\Versioning\VersioningController(
-                MINISITE_DB_VERSION,
-                MINISITE_DB_OPTION
-            );
-            $versioningController->activate();
-        }
     }
+
 
     /**
      * Seed default configurations

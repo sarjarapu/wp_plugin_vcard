@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
-use Doctrine\Migrations\AbstractMigration;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Psr\Log\LoggerInterface;
 
 /**
  * Migration: Create minisites table for minisite management
@@ -24,16 +21,8 @@ use Psr\Log\LoggerInterface;
  * - If table exists: It was created by this migration, so skip gracefully (idempotent)
  * - No upgrade scenario: Old SQL-based tables are not supported
  */
-final class Version20251106000000 extends AbstractMigration
+final class Version20251106000000 extends BaseDoctrineMigration
 {
-    private LoggerInterface $logger;
-
-    public function __construct(\Doctrine\DBAL\Connection $connection, \Psr\Log\LoggerInterface $logger)
-    {
-        parent::__construct($connection, $logger);
-        $this->logger = LoggingServiceProvider::getFeatureLogger('Version20251106000000');
-    }
-
     public function getDescription(): string
     {
         return 'Create minisites table for minisite management '
@@ -140,14 +129,35 @@ final class Version20251106000000 extends AbstractMigration
         }
     }
 
-    /**
-     * MySQL doesn't support transactional DDL (CREATE TABLE causes implicit commit).
-     * Return false to avoid Doctrine SAVEPOINT exception errors.
-     *
-     * @see https://www.doctrine-project.org/projects/doctrine-migrations/en/3.9/explanation/implicit-commits.html
-     */
-    public function isTransactional(): bool
+    public function seedSampleData(): void
     {
-        return false;
+        if (! $this->shouldSeedSampleData()) {
+            $this->logger->info('Skipping sample seed data for minisites table');
+
+            return;
+        }
+
+        $this->logger->info('Starting sample seed data for minisites table');
+
+        try {
+            // Ensure repositories are initialized
+            $this->ensureRepositoriesInitialized();
+
+            // Seed sample minisites using existing JSON files in data/json/minisites/
+            /** @var \Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface $minisiteRepo */
+            $minisiteRepo = $GLOBALS['minisite_repository'];
+            $seeder = new \Minisite\Features\MinisiteManagement\Services\MinisiteSeederService($minisiteRepo);
+            $minisiteIds = $seeder->seedAllSampleMinisites();
+
+            $this->logger->info('Sample seed data completed for minisites table', array(
+                'minisites_seeded' => count(array_filter($minisiteIds)),
+            ));
+        } catch (\Exception $e) {
+            $this->logger->error('Sample seed data failed for minisites table', array(
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ));
+            // Don't throw - migration succeeded, sample seed data is optional
+        }
     }
 }
