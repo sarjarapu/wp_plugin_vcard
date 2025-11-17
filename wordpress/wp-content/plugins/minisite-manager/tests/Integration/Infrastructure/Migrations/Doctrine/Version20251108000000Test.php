@@ -76,7 +76,9 @@ final class Version20251108000000Test extends AbstractDoctrineMigrationTest
             "INSERT INTO wp_minisites (id, title, name, city, country_code) VALUES (?, ?, ?, ?, ?)",
             array('test-payment', 'Test Minisite', 'Test', 'Test City', 'US')
         );
-        $this->connection->executeStatement("INSERT INTO wp_users (ID) VALUES (1)");
+        // User with ID=1 is already created by BaseIntegrationTest::createTestUser()
+        // Just ensure it exists (it should already exist from setUp())
+        // No need to insert - it's already there
 
         // Verify we can insert payments with all status values
         $statuses = array('active', 'expired', 'grace_period', 'reclaimed');
@@ -105,7 +107,8 @@ final class Version20251108000000Test extends AbstractDoctrineMigrationTest
 
         // Clean up test data
         $this->connection->executeStatement("DELETE FROM wp_minisites WHERE id = 'test-payment'");
-        $this->connection->executeStatement("DELETE FROM wp_users WHERE ID = 1");
+        // Note: Don't delete wp_users ID=1 - it's created by BaseIntegrationTest::createTestUser()
+        // and is needed for other tests
     }
 
     /**

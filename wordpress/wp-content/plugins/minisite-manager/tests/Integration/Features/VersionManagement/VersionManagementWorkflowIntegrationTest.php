@@ -69,9 +69,8 @@ final class VersionManagementWorkflowIntegrationTest extends BaseIntegrationTest
         $fakeWpdb->prefix = 'wp_';
         $GLOBALS['wpdb'] = $fakeWpdb;
 
-        // Set EntityManager in globals BEFORE migrations run
-        // This ensures ensureRepositoriesInitialized() uses the test's EntityManager
-        $GLOBALS['minisite_entity_manager'] = $this->em;
+        // Note: $GLOBALS['minisite_entity_manager'] is set by BaseIntegrationTest::setUp()
+        // before migrations run, so ensureRepositoriesInitialized() will use the test's EntityManager
 
         // Now register TablePrefixListener with FakeWpdb
         parent::registerTablePrefixListener();

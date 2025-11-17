@@ -76,7 +76,22 @@ final class PluginBootstrap
             }
 
             // Initialize Doctrine EntityManager
-            if (! isset($GLOBALS['minisite_entity_manager'])) {
+            // Check if EntityManager exists and is still open
+            $needsNewEm = true;
+            if (isset($GLOBALS['minisite_entity_manager'])) {
+                try {
+                    // Try to use the EntityManager - if it's closed, this will throw an exception
+                    $GLOBALS['minisite_entity_manager']->getConnection();
+                    $needsNewEm = false; // EntityManager is valid and open
+                } catch (\Doctrine\ORM\Exception\EntityManagerClosed $e) {
+                    // EntityManager is closed - need to create a new one
+                    $needsNewEm = true;
+                    // Clear the closed EntityManager
+                    unset($GLOBALS['minisite_entity_manager']);
+                }
+            }
+
+            if ($needsNewEm) {
                 $GLOBALS['minisite_entity_manager'] =
                     \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
             }

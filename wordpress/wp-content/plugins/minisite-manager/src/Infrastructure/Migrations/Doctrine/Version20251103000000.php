@@ -124,6 +124,12 @@ final class Version20251103000000 extends BaseDoctrineMigration
                 }
             }
 
+            // Clear EntityManager's identity map right before seeding to prevent collisions
+            // This ensures we don't have stale entities from previous operations
+            if (isset($GLOBALS['minisite_entity_manager'])) {
+                $GLOBALS['minisite_entity_manager']->clear();
+            }
+
             // Seed default configs using existing seeder
             $seeder = new \Minisite\Features\ConfigurationManagement\Services\ConfigSeeder();
             $seeder->seedDefaults($GLOBALS['minisite_config_manager']);
