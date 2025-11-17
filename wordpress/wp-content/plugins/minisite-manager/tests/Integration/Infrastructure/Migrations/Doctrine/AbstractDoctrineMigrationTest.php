@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Infrastructure\Migrations\Doctrine;
 
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMSetup;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Base class for Doctrine migration integration tests
  *
  * Provides common functionality:
- * - Database connection setup
- * - EntityManager creation
- * - WordPress $wpdb stub setup
+ * - Database connection setup (inherited from BaseIntegrationTest)
+ * - EntityManager creation (inherited from BaseIntegrationTest)
+ * - WordPress $wpdb stub setup (inherited from BaseIntegrationTest)
  * - Helper methods for table/column verification
- * - Test cleanup
+ * - Test cleanup (overrides BaseIntegrationTest to use getMigrationTables())
  *
  * Each migration should extend this class and test its specific migration.
  *
@@ -25,11 +22,8 @@ use PHPUnit\Framework\TestCase;
  * and harmless. Abstract base test classes are not executed as tests themselves.
  */
 #[PHPUnit\Framework\Attributes\ExcludeFromClassCodeCoverage]
-abstract class AbstractDoctrineMigrationTest extends TestCase
+abstract class AbstractDoctrineMigrationTest extends BaseIntegrationTest
 {
-    protected \Doctrine\DBAL\Connection $connection;
-    protected EntityManager $em;
-    protected string $dbName;
     protected \wpdb $wpdb;
 
     /**
@@ -40,87 +34,120 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
      */
     abstract protected function getMigrationTables(): array;
 
-    protected function setUp(): void
+    /**
+     * Get entity paths for ORM configuration
+     * Migration tests need access to all entities
+     */
+    protected function getEntityPaths(): array
     {
-        parent::setUp();
-
-        // Get database configuration from environment
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
-        $port = getenv('MYSQL_PORT') ?: '3307';
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-        $user = getenv('MYSQL_USER') ?: 'minisite';
-        $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-
-        $this->dbName = $dbName;
-
-        // Create real MySQL connection via Doctrine
-        $this->connection = DriverManager::getConnection([
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'port' => (int)$port,
-            'user' => $user,
-            'password' => $pass,
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-        ]);
-
-        // Create EntityManager with MySQL connection
-        // In dev mode, Doctrine automatically uses ArrayCache if no cache is provided
-        // We don't need to manually configure Symfony cache for tests
-        // Include both legacy Domain/Entities and new feature-based entities
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: [
-                __DIR__ . '/../../../../src/Domain/Entities',
-                __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
-                __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
-            ],
-            isDevMode: true
+        return array(
+            __DIR__ . '/../../../../src/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/MinisiteManagement/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/ConfigurationManagement/Domain/Entities',
         );
-
-        $this->em = new EntityManager($this->connection, $config);
-
-        // Set up $wpdb object (stub from bootstrap.php is fine - we only need the prefix)
-        // Note: The wpdb stub doesn't actually connect to database - we use Doctrine for that.
-        // Migrations only read $wpdb->prefix, they don't use wpdb for queries.
-        if (!isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $this->wpdb = $GLOBALS['wpdb'];
-        $this->wpdb->prefix = 'wp_'; // Set the prefix that migrations will read
-
-        // Create minimal wp_users table stub for foreign key tests
-        // This is needed because some migrations create foreign keys to wp_users
-        $this->createWordPressUsersTableStub();
-
-        // Clean up any existing test tables before running tests
-        $this->cleanupTables();
-
-        // Define WordPress database constants (for DoctrineFactory if needed)
-        if (!defined('DB_HOST')) {
-            define('DB_HOST', $host);
-            define('DB_USER', $user);
-            define('DB_PASSWORD', $pass);
-            define('DB_NAME', $dbName);
-        }
     }
 
     /**
-     * Create a minimal wp_users table stub for foreign key tests
-     * This allows migrations that reference wp_users to work in tests
+     * Setup test-specific services
+     * Migration tests don't need services - they test migrations directly
      */
-    protected function createWordPressUsersTableStub(): void
+    protected function setupTestSpecificServices(): void
     {
-        if ($this->tableExists('wp_users')) {
-            return; // Already exists
+        // No services needed for migration tests
+    }
+
+    /**
+     * Clean up test-specific data
+     * Migration tests clean up tables, not data
+     */
+    protected function cleanupTestData(): void
+    {
+        // No test data to clean - tables are dropped in cleanupTables()
+    }
+
+    protected function setUp(): void
+    {
+        // Call parent setUp() methods but skip migrations (we're testing migrations)
+        // We need to replicate parent's setUp() but skip runMigrations() and setupTestSpecificServices()
+        $this->initializeLogging();
+        $this->defineConstants();
+        $this->setupWordPressGlobals();
+        $this->createDatabaseConnection();
+        $this->createEntityManager();
+        $this->resetConnectionState();
+        $this->registerTablePrefixListener();
+
+        // Set EntityManager in globals (needed for migrations that call ensureRepositoriesInitialized())
+        $GLOBALS['minisite_entity_manager'] = $this->em;
+
+        // Clear EntityManager's identity map
+        $this->em->clear();
+
+        // Clean up tables and create wp_users stub
+        $this->cleanupTables();
+        $this->createWordPressUsersTableStub();
+        $this->createTestUser();
+
+        // Store wpdb reference for convenience
+        $this->wpdb = $GLOBALS['wpdb'];
+
+        // NOTE: We intentionally skip:
+        // - runMigrations() - migration tests run migrations manually
+        // - setupTestSpecificServices() - migration tests don't need services
+        // - cleanupTestData() - migration tests clean up tables, not data
+    }
+
+    /**
+     * Clean up test tables (drop if they exist)
+     * Overrides BaseIntegrationTest to drop ALL migration tables
+     *
+     * Note: Migration tests run ALL migrations (not just the one being tested),
+     * so we need to clean up ALL migration tables to prevent duplicate data errors.
+     * The getMigrationTables() method is still used for documentation purposes.
+     */
+    protected function cleanupTables(): void
+    {
+        // Find all tables with wp_minisite prefix that were created by migrations
+        // This ensures we clean up ALL migration tables, not just the one being tested
+        $tables = $this->connection->fetchFirstColumn(
+            "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
+             WHERE TABLE_SCHEMA = ? AND (TABLE_NAME LIKE 'wp_minisite_%' OR TABLE_NAME = 'wp_minisites')",
+            array($this->dbName)
+        );
+
+        // Always include the migration tracking table
+        if (! in_array('wp_minisite_migrations', $tables, true)) {
+            $tables[] = 'wp_minisite_migrations';
         }
 
-        // Create minimal wp_users table with just ID column (required for foreign keys)
-        $this->connection->executeStatement(
-            "CREATE TABLE IF NOT EXISTS `wp_users` (
-                `ID` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                PRIMARY KEY (`ID`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
-        );
+        // Always include wp_users table (created for foreign key tests)
+        $tables[] = 'wp_users';
+
+        // Disable foreign key checks to allow dropping tables in any order
+        // This is safe in test cleanup since we're dropping all tables anyway
+        try {
+            $this->connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+
+            foreach ($tables as $table) {
+                try {
+                    $this->connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
+                } catch (\Exception $e) {
+                    // Ignore errors - table might not exist
+                }
+            }
+
+            // Re-enable foreign key checks
+            $this->connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+        } catch (\Exception $e) {
+            // Ensure foreign key checks are re-enabled even if cleanup fails
+            try {
+                $this->connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+            } catch (\Exception $e2) {
+                // Ignore
+            }
+        }
     }
 
     protected function tearDown(): void
@@ -128,33 +155,8 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
         // Clean up test tables after each test
         $this->cleanupTables();
 
-        $this->connection->close();
-        $this->em->close();
-
-        // Note: Don't unset $GLOBALS['wpdb'] - it's shared with other tests
-        // The cleanupTables() already ran, so we're good
-
+        // Call parent tearDown() to clean up EntityManager and globals
         parent::tearDown();
-    }
-
-    /**
-     * Clean up test tables (drop if they exist)
-     * Uses getMigrationTables() to determine which tables to clean
-     */
-    protected function cleanupTables(): void
-    {
-        $tables = $this->getMigrationTables();
-
-        // Always include the migration tracking table
-        $tables[] = 'wp_minisite_migrations';
-
-        foreach ($tables as $table) {
-            try {
-                $this->connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
-            } catch (\Exception $e) {
-                // Ignore errors - table might not exist
-            }
-        }
     }
 
     /**
@@ -168,10 +170,10 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
         $tables = $this->connection->fetchFirstColumn(
             "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES
              WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
-            [$this->dbName, $tableName]
+            array($this->dbName, $tableName)
         );
 
-        return !empty($tables);
+        return ! empty($tables);
     }
 
     /**
@@ -187,11 +189,11 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
              FROM INFORMATION_SCHEMA.COLUMNS
              WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
              ORDER BY ORDINAL_POSITION",
-            [$this->dbName, $tableName]
+            array($this->dbName, $tableName)
         );
 
         // Convert to keyed array by column name for easier checking
-        $columnMap = [];
+        $columnMap = array();
         foreach ($columns as $column) {
             $columnMap[$column['COLUMN_NAME']] = $column;
         }
@@ -270,8 +272,8 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
      */
     protected function getExecutedMigrations(): array
     {
-        if (!$this->tableExists('wp_minisite_migrations')) {
-            return [];
+        if (! $this->tableExists('wp_minisite_migrations')) {
+            return array();
         }
 
         return $this->connection->fetchAllAssociative(
@@ -294,6 +296,7 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
         foreach ($executedMigrations as $migration) {
             if (str_contains($migration['version'], $version)) {
                 $found = true;
+
                 break;
             }
         }
@@ -313,7 +316,7 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
             "SELECT CONSTRAINT_NAME, CONSTRAINT_TYPE
              FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
              WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?",
-            [$this->dbName, $tableName]
+            array($this->dbName, $tableName)
         );
     }
 
@@ -329,8 +332,7 @@ abstract class AbstractDoctrineMigrationTest extends TestCase
             "SELECT kcu.CONSTRAINT_NAME, kcu.REFERENCED_TABLE_NAME, kcu.REFERENCED_COLUMN_NAME
              FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
              WHERE kcu.TABLE_SCHEMA = ? AND kcu.TABLE_NAME = ? AND kcu.REFERENCED_TABLE_NAME IS NOT NULL",
-            [$this->dbName, $tableName]
+            array($this->dbName, $tableName)
         );
     }
 }
-
