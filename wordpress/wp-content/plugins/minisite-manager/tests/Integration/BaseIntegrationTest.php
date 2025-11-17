@@ -114,6 +114,10 @@ abstract class BaseIntegrationTest extends TestCase
         unset($GLOBALS['minisite_version_repository']);
         unset($GLOBALS['minisite_review_repository']);
 
+        // Unset config manager - it's tied to the closed EntityManager
+        // Migrations will recreate it with the current test's EntityManager if needed
+        unset($GLOBALS['minisite_config_manager']);
+
         parent::tearDown();
     }
 
