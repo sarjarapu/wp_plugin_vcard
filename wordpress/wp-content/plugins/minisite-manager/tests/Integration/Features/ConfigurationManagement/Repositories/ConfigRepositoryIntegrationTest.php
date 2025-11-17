@@ -4,16 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\ConfigurationManagement\Repositories;
 
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\ORMSetup;
 use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Integration tests for ConfigRepository
@@ -26,150 +20,26 @@ use PHPUnit\Framework\TestCase;
  * - Migrations will be run automatically in setUp()
  */
 #[CoversClass(ConfigRepository::class)]
-final class ConfigRepositoryIntegrationTest extends TestCase
+final class ConfigRepositoryIntegrationTest extends BaseIntegrationTest
 {
-    private \Doctrine\ORM\EntityManager $em;
     private ConfigRepository $repository;
 
-    protected function setUp(): void
+    protected function getEntityPaths(): array
     {
-        parent::setUp();
-
-        // Initialize LoggingServiceProvider if not already initialized
-        \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
-
-        // Get database configuration from environment (same as AbstractDoctrineMigrationTest)
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
-        $port = getenv('MYSQL_PORT') ?: '3307';
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-        $user = getenv('MYSQL_USER') ?: 'minisite';
-        $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-
-        // Create real MySQL connection via Doctrine (same as AbstractDoctrineMigrationTest)
-        $connection = DriverManager::getConnection(array(
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'port' => (int)$port,
-            'user' => $user,
-            'password' => $pass,
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-        ));
-
-        // Create EntityManager with MySQL connection (same as AbstractDoctrineMigrationTest)
-        // Use the new feature-based entity path
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: array(
-                __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
-                __DIR__ . '/../../../../../src/Features/ReviewManagement/Domain/Entities',
-                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
-            ),
-            isDevMode: true
+        return array(
+            __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+            __DIR__ . '/../../../../../src/Features/ReviewManagement/Domain/Entities',
+            __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
         );
+    }
 
-        $this->em = new EntityManager($connection, $config);
-
-        // Reset connection state to ensure clean transaction state
-        // This prevents savepoint/transaction errors from previous tests
-        try {
-            // Clear any existing savepoints and transactions by executing ROLLBACK
-            // This is safe even if no transaction is active
-            $connection->executeStatement('ROLLBACK');
-        } catch (\Exception $e) {
-            // Ignore - connection might already be clean or ROLLBACK might not be needed
-        }
-
-        // Ensure connection is ready for new operations
-        try {
-            // Reset any savepoint counter by starting and immediately committing a transaction
-            $connection->beginTransaction();
-            $connection->commit();
-        } catch (\Exception $e) {
-            // If this fails, try to rollback
-            try {
-                $connection->rollBack();
-            } catch (\Exception $e2) {
-                // Ignore - just continue
-            }
-        }
-
-        // Clear any UnitOfWork state
-        $this->em->clear();
-
-        // Set up $wpdb object for TablePrefixListener (needed for prefix)
-        if (! isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-
-        // Add TablePrefixListener (required for wp_minisite_config table)
-        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
-        $this->em->getEventManager()->addEventListener(
-            Events::loadClassMetadata,
-            $tablePrefixListener
-        );
-
-        // Drop tables and migration tracking to ensure clean slate
-        // This ensures migrations will run fresh every time
-        $this->cleanupTables();
-
-        // Ensure migrations have run (table exists)
-        // Now that tables are dropped, migrations will run fresh
-        $migrationRunner = new DoctrineMigrationRunner($this->em);
-        $migrationRunner->migrate();
-
-        // Get repository (automatically uses wp_minisite_config via TablePrefixListener)
-        // Use the new feature-based repository
+    protected function setupTestSpecificServices(): void
+    {
         $classMetadata = $this->em->getClassMetadata(Config::class);
         $this->repository = new ConfigRepository($this->em, $classMetadata);
-
-        // Clean up test data (but keep table structure)
-        $this->cleanupTestData();
     }
 
-    protected function tearDown(): void
-    {
-        // Clean up test data (but keep table structure)
-        $this->cleanupTestData();
-
-        // Clear EntityManager state and close connection properly
-        try {
-            $this->em->clear();
-            $connection = $this->em->getConnection();
-            if ($connection->isTransactionActive()) {
-                $connection->rollBack();
-            }
-        } catch (\Exception $e) {
-            // Ignore errors during cleanup
-        }
-
-        $this->em->close();
-        parent::tearDown();
-    }
-
-    /**
-     * Drop tables and migration tracking to ensure clean slate
-     * This ensures migrations can run fresh before each test
-     */
-    private function cleanupTables(): void
-    {
-        $connection = $this->em->getConnection();
-        $tables = array('wp_minisite_config', 'wp_minisite_migrations');
-
-        foreach ($tables as $table) {
-            try {
-                $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
-            } catch (\Exception $e) {
-                // Ignore errors - table might not exist
-            }
-        }
-    }
-
-    /**
-     * Clean up test data (but keep table structure)
-     * Deletes only test configs, not the table itself
-     */
-    private function cleanupTestData(): void
+    protected function cleanupTestData(): void
     {
         try {
             $this->em->getConnection()->executeStatement(

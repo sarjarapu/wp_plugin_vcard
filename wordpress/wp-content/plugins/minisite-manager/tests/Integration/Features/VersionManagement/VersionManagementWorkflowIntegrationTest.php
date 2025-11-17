@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\VersionManagement;
 
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\ORMSetup;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository;
@@ -20,11 +16,8 @@ use Minisite\Features\VersionManagement\Repositories\VersionRepository;
 use Minisite\Features\VersionManagement\Services\VersionService;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Infrastructure\Http\WordPressTerminationHandler;
-use Minisite\Infrastructure\Logging\LoggingServiceProvider;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\BaseIntegrationTest;
 use Tests\Support\FakeWpdb;
 
 /**
@@ -41,82 +34,51 @@ use Tests\Support\FakeWpdb;
 #[CoversClass(Version::class)]
 #[CoversClass(VersionRepository::class)]
 #[CoversClass(VersionService::class)]
-final class VersionManagementWorkflowIntegrationTest extends TestCase
+final class VersionManagementWorkflowIntegrationTest extends BaseIntegrationTest
 {
-    private \Doctrine\ORM\EntityManager $em;
     private VersionRepository $versionRepository;
     private MinisiteRepository $minisiteRepository;
     private VersionService $versionService;
 
-    protected function setUp(): void
+    protected function getEntityPaths(): array
     {
-        parent::setUp();
-
-        LoggingServiceProvider::register();
-
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
-        $port = getenv('MYSQL_PORT') ?: '3307';
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-        $user = getenv('MYSQL_USER') ?: 'minisite';
-        $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-
-        $connection = DriverManager::getConnection(array(
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'port' => (int)$port,
-            'user' => $user,
-            'password' => $pass,
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-        ));
-
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: array(
-                __DIR__ . '/../../../../src/Domain/Entities',
-                __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
-                __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
-            ),
-            isDevMode: true
+        return array(
+            __DIR__ . '/../../../../src/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/ReviewManagement/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/VersionManagement/Domain/Entities',
+            __DIR__ . '/../../../../src/Features/MinisiteManagement/Domain/Entities',
         );
+    }
 
-        $this->em = new EntityManager($connection, $config);
-
-        // Reset connection state
-        try {
-            $connection->executeStatement('ROLLBACK');
-        } catch (\Exception $e) {
-            // Ignore
+    protected function setupWordPressGlobals(): void
+    {
+        // Set up a temporary $wpdb for migrations (will be replaced with FakeWpdb later)
+        // Migrations need $wpdb to be available, but we'll use FakeWpdb after EntityManager is created
+        if (! isset($GLOBALS['wpdb'])) {
+            $GLOBALS['wpdb'] = new \wpdb();
         }
+        $GLOBALS['wpdb']->prefix = 'wp_';
+    }
 
-        try {
-            $connection->beginTransaction();
-            $connection->commit();
-        } catch (\Exception $e) {
-            try {
-                $connection->rollBack();
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
-        // Set up $wpdb object using FakeWpdb bridge to Doctrine connection
+    protected function registerTablePrefixListener(): void
+    {
+        // Replace regular wpdb with FakeWpdb bridge to Doctrine connection
         // This ensures db::query() uses the same connection as Doctrine
         $pdo = $this->em->getConnection()->getNativeConnection();
         $fakeWpdb = new FakeWpdb($pdo);
         $fakeWpdb->prefix = 'wp_';
         $GLOBALS['wpdb'] = $fakeWpdb;
 
-        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
-        $this->em->getEventManager()->addEventListener(
-            Events::loadClassMetadata,
-            $tablePrefixListener
-        );
+        // Set EntityManager in globals BEFORE migrations run
+        // This ensures ensureRepositoriesInitialized() uses the test's EntityManager
+        $GLOBALS['minisite_entity_manager'] = $this->em;
 
-        $this->cleanupTables();
-        $migrationRunner = new DoctrineMigrationRunner($this->em);
-        $migrationRunner->migrate();
+        // Now register TablePrefixListener with FakeWpdb
+        parent::registerTablePrefixListener();
+    }
+
+    protected function setupTestSpecificServices(): void
+    {
 
         // Ensure wp_minisites table exists (temporary until MinisiteRepository is migrated to Doctrine)
         $this->ensureMinisitesTableExists();
@@ -128,7 +90,7 @@ final class VersionManagementWorkflowIntegrationTest extends TestCase
         );
 
         // Ensure MinisiteRepository is available via global (matching plugin bootstrap behaviour)
-        $GLOBALS['minisite_entity_manager'] = $this->em;
+        // Note: $GLOBALS['minisite_entity_manager'] is already set in registerTablePrefixListener()
         $GLOBALS['minisite_repository'] = new MinisiteRepository(
             $this->em,
             $this->em->getClassMetadata(Minisite::class)
@@ -149,32 +111,9 @@ final class VersionManagementWorkflowIntegrationTest extends TestCase
             $this->versionRepository,
             $wordPressManager
         );
-
-        $this->cleanupTestData();
     }
 
-    protected function tearDown(): void
-    {
-        $this->cleanupTestData();
-        $this->em->close();
-        parent::tearDown();
-    }
-
-    private function cleanupTables(): void
-    {
-        $connection = $this->em->getConnection();
-        $tables = array('wp_minisite_versions', 'wp_minisite_migrations');
-
-        foreach ($tables as $table) {
-            try {
-                $connection->executeStatement("DROP TABLE IF EXISTS `{$table}`");
-            } catch (\Exception $e) {
-                // Ignore
-            }
-        }
-    }
-
-    private function cleanupTestData(): void
+    protected function cleanupTestData(): void
     {
         try {
             // Clean up using Doctrine connection
@@ -185,7 +124,7 @@ final class VersionManagementWorkflowIntegrationTest extends TestCase
                 "DELETE FROM wp_minisites WHERE id LIKE 'test-%' OR id LIKE 'test_%'"
             );
         } catch (\Exception $e) {
-            // Ignore
+            // Ignore errors - table might not exist or connection might be closed
         }
     }
 

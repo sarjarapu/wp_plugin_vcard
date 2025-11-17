@@ -4,18 +4,12 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\ConfigurationManagement\Services;
 
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Events;
-use Doctrine\ORM\ORMSetup;
 use Minisite\Features\ConfigurationManagement\Domain\Entities\Config;
 use Minisite\Features\ConfigurationManagement\Repositories\ConfigRepository;
 use Minisite\Features\ConfigurationManagement\Services\ConfigSeeder;
 use Minisite\Features\ConfigurationManagement\Services\ConfigurationManagementService;
-use Minisite\Infrastructure\Migrations\Doctrine\DoctrineMigrationRunner;
-use Minisite\Infrastructure\Persistence\Doctrine\TablePrefixListener;
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\TestCase;
+use Tests\Integration\BaseIntegrationTest;
 
 /**
  * Integration tests for ConfigSeeder
@@ -28,129 +22,40 @@ use PHPUnit\Framework\TestCase;
  * - Migrations will be run automatically in setUp()
  */
 #[CoversClass(ConfigSeeder::class)]
-final class ConfigSeederIntegrationTest extends TestCase
+final class ConfigSeederIntegrationTest extends BaseIntegrationTest
 {
-    private \Doctrine\ORM\EntityManager $em;
     private ConfigRepository $repository;
     private ConfigurationManagementService $configService;
     private ConfigSeeder $seeder;
 
-    protected function setUp(): void
+    protected function getEntityPaths(): array
     {
-        parent::setUp();
-
-        // Initialize LoggingServiceProvider if not already initialized
-        \Minisite\Infrastructure\Logging\LoggingServiceProvider::register();
-
-        // Define encryption key for tests that use encrypted type
-        if (! defined('MINISITE_ENCRYPTION_KEY')) {
-            define('MINISITE_ENCRYPTION_KEY', base64_encode(random_bytes(32)));
-        }
-
-        // Ensure MINISITE_PLUGIN_DIR is defined
-        if (! defined('MINISITE_PLUGIN_DIR')) {
-            define('MINISITE_PLUGIN_DIR', dirname(__DIR__, 4) . '/');
-        }
-
-        // Get database configuration from environment
-        $host = getenv('MYSQL_HOST') ?: '127.0.0.1';
-        $port = getenv('MYSQL_PORT') ?: '3307';
-        $dbName = getenv('MYSQL_DATABASE') ?: 'minisite_test';
-        $user = getenv('MYSQL_USER') ?: 'minisite';
-        $pass = getenv('MYSQL_PASSWORD') ?: 'minisite';
-
-        // Create real MySQL connection via Doctrine
-        $connection = DriverManager::getConnection(array(
-            'driver' => 'pdo_mysql',
-            'host' => $host,
-            'port' => (int) $port,
-            'user' => $user,
-            'password' => $pass,
-            'dbname' => $dbName,
-            'charset' => 'utf8mb4',
-        ));
-
-        // Create EntityManager with MySQL connection
-        $config = ORMSetup::createAttributeMetadataConfiguration(
-            paths: array(
-                __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
-                __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
-            ),
-            isDevMode: true
+        return array(
+            __DIR__ . '/../../../../../src/Features/ConfigurationManagement/Domain/Entities',
+            __DIR__ . '/../../../../../src/Features/VersionManagement/Domain/Entities',
         );
+    }
 
-        $this->em = new EntityManager($connection, $config);
-
-        // Reset connection state
-        try {
-            $connection->executeStatement('ROLLBACK');
-        } catch (\Exception $e) {
-            // Ignore
-        }
-
-        try {
-            $connection->beginTransaction();
-            $connection->commit();
-        } catch (\Exception $e) {
-            try {
-                $connection->rollBack();
-            } catch (\Exception $e2) {
-                // Ignore
-            }
-        }
-
-        $this->em->clear();
-
-        // Set up $wpdb object BEFORE migrations (migrations need it)
-        if (! isset($GLOBALS['wpdb'])) {
-            $GLOBALS['wpdb'] = new \wpdb();
-        }
-        $GLOBALS['wpdb']->prefix = 'wp_';
-
-        // Add TablePrefixListener
-        $tablePrefixListener = new TablePrefixListener($GLOBALS['wpdb']->prefix);
-        $this->em->getEventManager()->addEventListener(
-            Events::loadClassMetadata,
-            $tablePrefixListener
-        );
-
-        // Drop tables and migration tracking to ensure clean slate
-        $this->cleanupTables();
-
-        // Ensure migrations have run (creates wp_minisite_config table)
-        $migrationRunner = new DoctrineMigrationRunner($this->em);
-        $migrationRunner->migrate();
-
-        // Clear EntityManager after migrations
-        $this->em->clear();
-
-        // Ensure connection is open and not in a transaction
-        if (! $connection->isConnected()) {
-            $connection->connect();
-        }
-
-
-        // EntityManager will automatically reconnect when needed
-
-        // Get repository
+    protected function setupTestSpecificServices(): void
+    {
         $classMetadata = $this->em->getClassMetadata(Config::class);
         $this->repository = new ConfigRepository($this->em, $classMetadata);
-
-        // Create service
         $this->configService = new ConfigurationManagementService($this->repository);
-
-        // Create seeder
         $this->seeder = new ConfigSeeder();
+    }
 
-        // Clean up test data
-        $this->cleanupTestData();
+    protected function cleanupTestData(): void
+    {
+        try {
+            $this->em->getConnection()->executeStatement('DELETE FROM wp_minisite_config');
+        } catch (\Exception $e) {
+            // Ignore errors - table might not exist or connection might be closed
+        }
     }
 
     protected function tearDown(): void
     {
-        $this->cleanupTestData();
-
-        // Reset service static cache
+        // Reset service static cache before parent cleanup
         $reflection = new \ReflectionClass(ConfigurationManagementService::class);
         $cacheProperty = $reflection->getProperty('cache');
         $cacheProperty->setAccessible(true);
@@ -161,33 +66,6 @@ final class ConfigSeederIntegrationTest extends TestCase
         $loadedProperty->setValue(null, false);
 
         parent::tearDown();
-    }
-
-    /**
-     * Clean up test data from database
-     */
-    private function cleanupTestData(): void
-    {
-        try {
-            $this->em->getConnection()->executeStatement('DELETE FROM wp_minisite_config');
-            $this->em->clear();
-        } catch (\Exception $e) {
-            // Ignore cleanup errors
-        }
-    }
-
-    /**
-     * Clean up tables (drop and recreate)
-     */
-    private function cleanupTables(): void
-    {
-        try {
-            $connection = $this->em->getConnection();
-            $connection->executeStatement('DROP TABLE IF EXISTS wp_minisite_config');
-            $connection->executeStatement('DROP TABLE IF EXISTS wp_minisite_migrations');
-        } catch (\Exception $e) {
-            // Ignore
-        }
     }
 
     /**

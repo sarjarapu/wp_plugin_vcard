@@ -114,6 +114,11 @@ abstract class BaseIntegrationTest extends TestCase
             define('MINISITE_ENCRYPTION_KEY', base64_encode(random_bytes(32)));
         }
 
+        // Define plugin directory (required by some seeders)
+        if (! defined('MINISITE_PLUGIN_DIR')) {
+            define('MINISITE_PLUGIN_DIR', dirname(__DIR__, 2) . '/');
+        }
+
         // Get database configuration from environment
         $dbConfig = $this->getDatabaseConfig();
 
