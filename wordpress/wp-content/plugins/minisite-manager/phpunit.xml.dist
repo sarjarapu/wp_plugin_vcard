@@ -33,6 +33,7 @@
            - Base class setUp() is called via parent::setUp()
            - Base class code is executed and covered when child tests run
            - Only prevents PHPUnit from trying to execute the abstract class directly -->
+      <exclude>tests/Integration/BaseIntegrationTest.php</exclude>
       <exclude>tests/Integration/Infrastructure/Migrations/Doctrine/AbstractDoctrineMigrationTest.php</exclude>
       <exclude>tests/Integration/Features/ConfigurationManagement/BaseConfigurationManagementIntegrationTest.php</exclude>
     </testsuite>
