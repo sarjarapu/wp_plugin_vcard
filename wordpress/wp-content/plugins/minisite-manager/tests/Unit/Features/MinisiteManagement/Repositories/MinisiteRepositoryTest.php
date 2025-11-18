@@ -9,9 +9,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\QueryBuilder;
+use Minisite\Domain\ValueObjects\GeoPoint;
 use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
+use Minisite\Features\VersionManagement\Repositories\VersionRepository as VersionRepositoryContract;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -57,6 +60,12 @@ final class MinisiteRepositoryTest extends TestCase
             ->willReturn($this->classMetadata);
 
         $this->repository = new MinisiteRepository($this->entityManager, $this->classMetadata);
+    }
+
+    protected function tearDown(): void
+    {
+        unset($GLOBALS['minisite_version_repository']);
+        parent::tearDown();
     }
 
     /**
@@ -507,6 +516,131 @@ final class MinisiteRepositoryTest extends TestCase
         $this->expectExceptionMessage('Failed to update minisite fields.');
 
         $this->repository->updateMinisiteFields('minisite-456', array('title' => 'Unused'), 7);
+    }
+
+    /**
+     * Test publishMinisite throws when version repository missing
+     */
+    public function test_publish_minisite_throws_when_version_repository_missing(): void
+    {
+        unset($GLOBALS['minisite_version_repository']);
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('beginTransaction');
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('rollback');
+
+        $repository = $this->repository;
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('VersionRepository not initialized');
+
+        $repository->publishMinisite('site-123');
+    }
+
+    /**
+     * Test publishMinisite promotes the latest draft version
+     */
+    public function test_publish_minisite_promotes_latest_draft_version(): void
+    {
+        $versionRepo = $this->createMock(VersionRepositoryContract::class);
+        $GLOBALS['minisite_version_repository'] = $versionRepo;
+
+        $version = new Version(
+            id: 101,
+            minisiteId: 'site-123',
+            versionNumber: 2,
+            status: 'draft',
+            siteJson: array('title' => 'Draft Title'),
+            slugs: new SlugPair('biz', 'loc'),
+            title: 'Draft Title',
+            name: 'Draft Name',
+            city: 'Draft City',
+            region: 'CA',
+            countryCode: 'US',
+            postalCode: '94016',
+            geo: new GeoPoint(37.0, -122.0),
+            siteTemplate: 'v2025',
+            palette: 'blue',
+            industry: 'services',
+            defaultLocale: 'en-US',
+            schemaVersion: 2,
+            siteVersion: 5,
+            searchTerms: 'draft search terms'
+        );
+
+        $minisite = new Minisite(
+            id: 'site-123',
+            name: 'Original Name',
+            city: 'Original City'
+        );
+
+        $repository = $this->getMockBuilder(MinisiteRepository::class)
+            ->setConstructorArgs(array($this->entityManager, $this->classMetadata))
+            ->onlyMethods(array('findById'))
+            ->getMock();
+
+        $repository
+            ->method('findById')
+            ->with('site-123')
+            ->willReturn($minisite);
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('beginTransaction');
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('commit');
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('persist')
+            ->with($minisite);
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('flush');
+
+        $versionRepo
+            ->expects($this->once())
+            ->method('findLatestDraft')
+            ->with('site-123')
+            ->willReturn($version);
+
+        $versionRepo
+            ->expects($this->never())
+            ->method('findLatestVersion');
+
+        $versionRepo
+            ->expects($this->once())
+            ->method('findPublishedVersion')
+            ->with('site-123')
+            ->willReturn(null);
+
+        $versionRepo
+            ->expects($this->once())
+            ->method('save')
+            ->with($version);
+
+        $this->connection
+            ->expects($this->once())
+            ->method('executeStatement')
+            ->with(
+                $this->stringContains('POINT'),
+                $this->equalTo(array(-122.0, 37.0, 'site-123'))
+            )
+            ->willReturn(1);
+
+        $repository->publishMinisite('site-123');
+
+        $this->assertEquals('Draft Title', $minisite->title);
+        $this->assertEquals('published', $minisite->status);
+        $this->assertEquals('site-123', $version->minisiteId);
+        $this->assertEquals($version->id, $minisite->currentVersionId);
     }
 
     /**
