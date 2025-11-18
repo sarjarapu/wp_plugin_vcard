@@ -104,9 +104,9 @@ fi
 
 # 5. Unit Tests Coverage Report
 echo -e "\n${YELLOW}[5/6] Running unit tests with coverage...${NC}"
-COVERAGE_DIR="coverage/unit"
+COVERAGE_DIR="build/coverage/unit"
 mkdir -p "$COVERAGE_DIR"
-COVERAGE_HTML_DIR="coverage/unit/html"
+COVERAGE_HTML_DIR="build/coverage/unit/html"
 mkdir -p "$COVERAGE_HTML_DIR"
 
 # Generate both text and HTML reports
@@ -141,9 +141,9 @@ fi
 
 # 6. Integration Tests Coverage Report
 echo -e "\n${YELLOW}[6/6] Running integration tests with coverage...${NC}"
-COVERAGE_DIR_INT="coverage/integration"
+COVERAGE_DIR_INT="build/integration"
 mkdir -p "$COVERAGE_DIR_INT"
-COVERAGE_HTML_DIR_INT="coverage/integration/html"
+COVERAGE_HTML_DIR_INT="build/coverage/integration/html"
 mkdir -p "$COVERAGE_HTML_DIR_INT"
 
 # Generate both text and HTML reports

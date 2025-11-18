@@ -9,25 +9,25 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test ListingResponseHandler
- * 
+ *
  * NOTE: These are "coverage tests" that verify method existence and basic functionality.
  * They use mocked WordPress functions but do not test complex response handling flows.
- * 
+ *
  * Current testing approach:
  * - Mocks WordPress functions to return pre-set values
  * - Verifies that response handlers exist and return expected data structures
  * - Does NOT test actual HTTP response handling or WordPress integration
- * 
+ *
  * Limitations:
  * - Response handling is simplified to basic data structure verification
  * - No testing of complex redirect scenarios
  * - No testing of actual HTTP response generation
- * 
+ *
  * For true unit testing, ListingResponseHandler would need:
  * - More comprehensive response handling testing
  * - Testing of redirect functionality
  * - Proper error handling verification
- * 
+ *
  * For integration testing, see: docs/testing/integration-testing-requirements.md
  */
 final class ListingResponseHandlerTest extends TestCase
@@ -46,10 +46,18 @@ final class ListingResponseHandlerTest extends TestCase
      */
     public function test_redirect_to_login_without_redirect_parameter(): void
     {
-        // Since redirect calls exit, we can't test the actual call
-        // but we can verify the method exists and is callable
-        $this->assertTrue(method_exists($this->responseHandler, 'redirectToLogin'));
-        $this->assertTrue(is_callable([$this->responseHandler, 'redirectToLogin']));
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/login')
+            ->willReturn('http://example.com/account/login');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with('http://example.com/account/login');
+
+        $this->responseHandler->redirectToLogin();
     }
 
     /**
@@ -57,10 +65,23 @@ final class ListingResponseHandlerTest extends TestCase
      */
     public function test_redirect_to_login_with_redirect_parameter(): void
     {
-        // Since redirect calls exit, we can't test the actual call
-        // but we can verify the method exists and is callable
-        $this->assertTrue(method_exists($this->responseHandler, 'redirectToLogin'));
-        $this->assertTrue(is_callable([$this->responseHandler, 'redirectToLogin']));
+        $redirectTo = '/account/sites';
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/login')
+            ->willReturn('http://example.com/account/login');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with($this->callback(function ($url) use ($redirectTo) {
+                return strpos($url, 'http://example.com/account/login') === 0 &&
+                       strpos($url, 'redirect_to=' . urlencode($redirectTo)) !== false;
+            }));
+
+        $this->responseHandler->redirectToLogin($redirectTo);
     }
 
     /**
@@ -68,10 +89,18 @@ final class ListingResponseHandlerTest extends TestCase
      */
     public function test_redirect_to_login_with_empty_redirect_parameter(): void
     {
-        // Since redirect calls exit, we can't test the actual call
-        // but we can verify the method exists and is callable
-        $this->assertTrue(method_exists($this->responseHandler, 'redirectToLogin'));
-        $this->assertTrue(is_callable([$this->responseHandler, 'redirectToLogin']));
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/login')
+            ->willReturn('http://example.com/account/login');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with('http://example.com/account/login');
+
+        $this->responseHandler->redirectToLogin('');
     }
 
     /**
@@ -79,10 +108,18 @@ final class ListingResponseHandlerTest extends TestCase
      */
     public function test_redirect_to_sites(): void
     {
-        // Since redirect calls exit, we can't test the actual call
-        // but we can verify the method exists and is callable
-        $this->assertTrue(method_exists($this->responseHandler, 'redirectToSites'));
-        $this->assertTrue(is_callable([$this->responseHandler, 'redirectToSites']));
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/sites')
+            ->willReturn('http://example.com/account/sites');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with('http://example.com/account/sites');
+
+        $this->responseHandler->redirectToSites();
     }
 
     /**
@@ -90,10 +127,14 @@ final class ListingResponseHandlerTest extends TestCase
      */
     public function test_redirect_with_custom_url(): void
     {
-        // Since redirect calls exit, we can't test the actual call
-        // but we can verify the method exists and is callable
-        $this->assertTrue(method_exists($this->responseHandler, 'redirect'));
-        $this->assertTrue(is_callable([$this->responseHandler, 'redirect']));
+        $url = 'http://example.com/custom/path';
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with($url);
+
+        $this->responseHandler->redirect($url);
     }
 
     /**
@@ -101,10 +142,14 @@ final class ListingResponseHandlerTest extends TestCase
      */
     public function test_redirect_with_relative_url(): void
     {
-        // Since redirect calls exit, we can't test the actual call
-        // but we can verify the method exists and is callable
-        $this->assertTrue(method_exists($this->responseHandler, 'redirect'));
-        $this->assertTrue(is_callable([$this->responseHandler, 'redirect']));
+        $url = '/relative/path';
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with($url);
+
+        $this->responseHandler->redirect($url);
     }
 
     /**
@@ -112,10 +157,14 @@ final class ListingResponseHandlerTest extends TestCase
      */
     public function test_redirect_with_empty_url(): void
     {
-        // Since redirect calls exit, we can't test the actual call
-        // but we can verify the method exists and is callable
-        $this->assertTrue(method_exists($this->responseHandler, 'redirect'));
-        $this->assertTrue(is_callable([$this->responseHandler, 'redirect']));
+        $url = '';
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with($url);
+
+        $this->responseHandler->redirect($url);
     }
 
     /**
@@ -125,7 +174,7 @@ final class ListingResponseHandlerTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->responseHandler);
         $method = $reflection->getMethod('redirectToLogin');
-        
+
         $this->assertTrue($method->isPublic());
     }
 
@@ -136,7 +185,7 @@ final class ListingResponseHandlerTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->responseHandler);
         $method = $reflection->getMethod('redirectToSites');
-        
+
         $this->assertTrue($method->isPublic());
     }
 
@@ -147,7 +196,7 @@ final class ListingResponseHandlerTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->responseHandler);
         $method = $reflection->getMethod('redirect');
-        
+
         $this->assertTrue($method->isPublic());
     }
 
@@ -159,7 +208,7 @@ final class ListingResponseHandlerTest extends TestCase
         $reflection = new \ReflectionClass($this->responseHandler);
         $method = $reflection->getMethod('redirectToLogin');
         $params = $method->getParameters();
-        
+
         $this->assertCount(1, $params);
         $this->assertEquals('redirectTo', $params[0]->getName());
         $this->assertTrue($params[0]->allowsNull());
@@ -173,7 +222,7 @@ final class ListingResponseHandlerTest extends TestCase
         $reflection = new \ReflectionClass($this->responseHandler);
         $method = $reflection->getMethod('redirect');
         $params = $method->getParameters();
-        
+
         $this->assertCount(1, $params);
         $this->assertEquals('url', $params[0]->getName());
         $this->assertFalse($params[0]->allowsNull());
@@ -186,75 +235,56 @@ final class ListingResponseHandlerTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->responseHandler);
         $methods = ['redirectToLogin', 'redirectToSites', 'redirect'];
-        
+
         foreach ($methods as $methodName) {
             $method = $reflection->getMethod($methodName);
             $returnType = $method->getReturnType();
-            
+
             $this->assertNotNull($returnType);
             $this->assertEquals('void', $returnType->getName());
         }
     }
 
     /**
-     * Test that all methods can be called without fatal errors
-     * TODO: Tentatively ignoring this test as its breaking all other tests
+     * Test redirectToLogin with special characters in redirect URL
      */
-
-    private function test_all_methods_can_be_called(): void
+    public function test_redirect_to_login_with_special_characters(): void
     {
-        $this->mockWordPressFunction('home_url', 'http://example.com/');
-        $this->mockWordPressFunction('urlencode', 'encoded');
-        $this->mockWordPressFunction('wp_redirect', null);
-        $this->mockWordPressFunction('exit', null);
+        $redirectTo = '/account/sites?param=value&other=test';
 
-        // Test redirectToLogin
-        try {
-            $this->responseHandler->redirectToLogin();
-        } catch (\Exception $e) {
-            // Expected due to exit
-        }
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/login')
+            ->willReturn('http://example.com/account/login');
 
-        // Test redirectToLogin with parameter
-        try {
-            $this->responseHandler->redirectToLogin('/test');
-        } catch (\Exception $e) {
-            // Expected due to exit
-        }
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with($this->callback(function ($url) {
+                return strpos($url, 'http://example.com/account/login') === 0 &&
+                       strpos($url, 'redirect_to=') !== false;
+            }));
 
-        // Test redirectToSites
-        try {
-            $this->responseHandler->redirectToSites();
-        } catch (\Exception $e) {
-            // Expected due to exit
-        }
-
-        // Test redirect
-        try {
-            $this->responseHandler->redirect('/test');
-        } catch (\Exception $e) {
-            // Expected due to exit
-        }
-
-        $this->assertTrue(true); // If we get here, all methods were callable
+        $this->responseHandler->redirectToLogin($redirectTo);
     }
 
     /**
-     * Mock WordPress function
+     * Test redirectToLogin with null redirect parameter
      */
-    private function mockWordPressFunction(string $functionName, mixed $returnValue): void
+    public function test_redirect_to_login_with_null_redirect_parameter(): void
     {
-        // Skip 'exit' as it's a language construct, not a function
-        if ($functionName === 'exit') {
-            return;
-        }
-        
-        if (!function_exists($functionName)) {
-            if (is_callable($returnValue)) {
-                eval("function {$functionName}(...\$args) { return call_user_func_array(" . var_export($returnValue, true) . ", \$args); }");
-            } else {
-                eval("function {$functionName}(...\$args) { return " . var_export($returnValue, true) . "; }");
-            }
-        }
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('getHomeUrl')
+            ->with('/account/login')
+            ->willReturn('http://example.com/account/login');
+
+        $this->wordPressManager
+            ->expects($this->once())
+            ->method('redirect')
+            ->with('http://example.com/account/login');
+
+        $this->responseHandler->redirectToLogin(null);
     }
 }
