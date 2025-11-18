@@ -37,12 +37,12 @@ echo ""
 # Run phpunit and capture exit code (temporarily disable set -e to allow capture)
 # Increase memory limit for coverage generation (HTML reports can be memory-intensive)
 set +e
-php -d memory_limit=512M vendor/bin/phpunit --testsuite=Unit,Integration --coverage-text --coverage-html=build/coverage
+php -d memory_limit=512M vendor/bin/phpunit --testsuite=Unit,Integration --coverage-text --coverage-html=build/coverage/full
 PHPUNIT_EXIT_CODE=$?
 set -e
 
 # Always run copy command (like finally block)
-cp data/styles/custom.css build/coverage/_css/custom.css
+cp data/styles/custom.css build/coverage/full/_css/custom.css
 
 # Echo completion messages only if PHPUnit succeeded
 if [ $PHPUNIT_EXIT_CODE -eq 0 ]; then

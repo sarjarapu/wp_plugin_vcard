@@ -8,18 +8,24 @@ namespace Minisite\Features\MinisiteListing\Rendering;
  * SINGLE RESPONSIBILITY: Handle template rendering with Timber for listing functionality
  * - Manages Timber template rendering
  * - Handles template context
+ *
+ * REQUIRES: Timber library must be installed via Composer
  */
 class ListingRenderer
 {
     /**
      * Render list page using Timber
+     *
+     * @param array $data Template data
+     * @throws \RuntimeException If Timber is not available
      */
     public function renderListPage(array $data): void
     {
         if (! class_exists('Timber\\Timber')) {
-            $this->renderFallback($data);
-
-            return;
+            throw new \RuntimeException(
+                'Timber library is required but not installed. ' .
+                'Please install it via Composer: composer require timber/timber'
+            );
         }
 
         $this->registerTimberLocations();
@@ -40,30 +46,5 @@ class ListingRenderer
                 )
             )
         );
-    }
-
-    /**
-     * Fallback rendering if Timber is not available
-     */
-    private function renderFallback(array $data): void
-    {
-        header('Content-Type: text/html; charset=utf-8');
-        echo '<!doctype html><meta charset="utf-8">';
-        echo '<title>' . esc_html($data['page_title'] ?? 'My Minisites') . '</title>';
-        echo '<h1>' . esc_html($data['page_title'] ?? 'My Minisites') . '</h1>';
-
-        if (! empty($data['error'])) {
-            echo '<p style="color: red;">Error: ' . esc_html($data['error']) . '</p>';
-        }
-
-        if (! empty($data['sites'])) {
-            echo '<ul>';
-            foreach ($data['sites'] as $site) {
-                echo '<li>' . esc_html($site['title'] ?? $site['name']) . ' - ' . esc_html($site['status']) . '</li>';
-            }
-            echo '</ul>';
-        } else {
-            echo '<p>No minisites found.</p>';
-        }
     }
 }
