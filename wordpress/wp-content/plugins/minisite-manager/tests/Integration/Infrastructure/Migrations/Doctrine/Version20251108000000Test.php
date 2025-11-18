@@ -22,7 +22,7 @@ final class Version20251108000000Test extends AbstractDoctrineMigrationTest
 {
     protected function getMigrationTables(): array
     {
-        return ['wp_minisite_payments'];
+        return array('wp_minisite_payments');
     }
 
     /**
@@ -73,8 +73,8 @@ final class Version20251108000000Test extends AbstractDoctrineMigrationTest
 
         // Create a test minisite and user for foreign key constraints
         $this->connection->executeStatement(
-            "INSERT INTO wp_minisites (id, title, name, city, country_code) VALUES (?, ?, ?, ?, ?)",
-            array('test-payment', 'Test Minisite', 'Test', 'Test City', 'US')
+            "INSERT INTO wp_minisites (id, title, name, city, country_code, site_json) VALUES (?, ?, ?, ?, ?, ?)",
+            array('test-payment', 'Test Minisite', 'Test', 'Test City', 'US', '{}')
         );
         // User with ID=1 is already created by BaseIntegrationTest::createTestUser()
         // Just ensure it exists (it should already exist from setUp())
@@ -169,4 +169,3 @@ final class Version20251108000000Test extends AbstractDoctrineMigrationTest
         $this->assertMigrationExecuted('Version20251108000000');
     }
 }
-
