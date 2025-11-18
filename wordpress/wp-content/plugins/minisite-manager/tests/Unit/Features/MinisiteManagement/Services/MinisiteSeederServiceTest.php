@@ -9,8 +9,34 @@ use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\MinisiteManagement\Services\MinisiteSeederService;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Testable subclass to expose protected methods for unit testing
+ */
+class TestableMinisiteSeederService extends MinisiteSeederService
+{
+    public function __construct(MinisiteRepositoryInterface $minisiteRepository)
+    {
+        parent::__construct($minisiteRepository);
+    }
+
+    public function callLoadMinisiteFromJson(string $jsonFile): array
+    {
+        return parent::loadMinisiteFromJson($jsonFile);
+    }
+
+    public function callConvertLocationFormat(array $data): array
+    {
+        return parent::convertLocationFormat($data);
+    }
+
+    public function callSetComputedFields(array $data): array
+    {
+        return parent::setComputedFields($data);
+    }
+}
 
 /**
  * Test MinisiteSeederService
@@ -21,12 +47,26 @@ final class MinisiteSeederServiceTest extends TestCase
 {
     private MinisiteRepositoryInterface|MockObject $repository;
     private MinisiteSeederService $seederService;
+    private TestableMinisiteSeederService $testableSeeder;
+    private array $tempJsonFiles = array();
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->repository = $this->createMock(MinisiteRepositoryInterface::class);
         $this->seederService = new MinisiteSeederService($this->repository);
+        $this->testableSeeder = new TestableMinisiteSeederService($this->repository);
+    }
+
+    protected function tearDown(): void
+    {
+        foreach ($this->tempJsonFiles as $filePath) {
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+        }
+        $this->tempJsonFiles = array();
+        parent::tearDown();
     }
 
     public function test_create_minisite_from_json_data_with_all_fields(): void
@@ -260,6 +300,113 @@ final class MinisiteSeederServiceTest extends TestCase
         $this->assertNotNull($minisite->publishedAt);
     }
 
+    /**
+     * Test convertLocationFormat converts JSON format to GeoPoint structure
+     */
+    public function test_convert_location_format_converts_location(): void
+    {
+        $data = array(
+            'location' => array(
+                'latitude' => '12.3456',
+                'longitude' => '-65.4321',
+            ),
+            'name' => 'Location Test',
+        );
+
+        $result = $this->testableSeeder->callConvertLocationFormat($data);
+
+        $this->assertArrayNotHasKey('location', $result);
+        $this->assertArrayHasKey('location_point', $result);
+        $this->assertEquals(12.3456, $result['location_point']['latitude']);
+        $this->assertEquals(-65.4321, $result['location_point']['longitude']);
+    }
+
+    /**
+     * Test convertLocationFormat leaves data unchanged when no location provided
+     */
+    public function test_convert_location_format_handles_missing_location(): void
+    {
+        $data = array(
+            'name' => 'No Location',
+        );
+
+        $result = $this->testableSeeder->callConvertLocationFormat($data);
+
+        $this->assertArrayNotHasKey('location_point', $result);
+        $this->assertEquals('No Location', $result['name']);
+    }
+
+    /**
+     * Test setComputedFields sets timestamps, user IDs, and slug defaults
+     */
+    public function test_set_computed_fields_sets_defaults(): void
+    {
+        $data = array(
+            'business_slug' => 'test-business',
+            'location_slug' => 'test-location',
+        );
+
+        $result = $this->testableSeeder->callSetComputedFields($data);
+
+        $this->assertArrayHasKey('created_at', $result);
+        $this->assertArrayHasKey('updated_at', $result);
+        $this->assertArrayHasKey('published_at', $result);
+        $this->assertEquals('test-business-test-location', $result['slug']);
+        $this->assertArrayHasKey('created_by', $result);
+        $this->assertArrayHasKey('updated_by', $result);
+        $this->assertArrayHasKey('_minisite_current_version_id', $result);
+        $this->assertNull($result['_minisite_current_version_id']);
+    }
+
+    /**
+     * Test loadMinisiteFromJson loads data from existing sample file
+     */
+    public function test_load_minisite_from_json_success(): void
+    {
+        $result = $this->testableSeeder->callLoadMinisiteFromJson('acme-dental.json');
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('id', $result);
+        $this->assertEquals('acme-dental', $result['business_slug']);
+    }
+
+    /**
+     * Test loadMinisiteFromJson throws when file not found
+     */
+    public function test_load_minisite_from_json_file_not_found(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('JSON file not found');
+
+        $this->testableSeeder->callLoadMinisiteFromJson('missing-file.json');
+    }
+
+    /**
+     * Test loadMinisiteFromJson throws when JSON is invalid
+     */
+    public function test_load_minisite_from_json_invalid_json(): void
+    {
+        $filename = $this->createTempJsonFile('invalid-json.json', '{invalid json');
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid JSON in file');
+
+        $this->testableSeeder->callLoadMinisiteFromJson($filename);
+    }
+
+    /**
+     * Test loadMinisiteFromJson throws when minisite key missing
+     */
+    public function test_load_minisite_from_json_missing_minisite_key(): void
+    {
+        $filename = $this->createTempJsonFile('missing-key.json', json_encode(array('not_minisite' => array())));
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Invalid JSON structure in file');
+
+        $this->testableSeeder->callLoadMinisiteFromJson($filename);
+    }
+
     public function test_seed_all_test_minisites_success(): void
     {
         // Mock repository to return saved minisites
@@ -309,5 +456,12 @@ final class MinisiteSeederServiceTest extends TestCase
         $this->assertIsArray($result);
         // Should return empty array or partial results if files are missing
     }
-}
+    private function createTempJsonFile(string $filename, string $contents): string
+    {
+        $path = MINISITE_PLUGIN_DIR . 'data/json/minisites/' . $filename;
+        file_put_contents($path, $contents);
+        $this->tempJsonFiles[] = $path;
 
+        return $filename;
+    }
+}

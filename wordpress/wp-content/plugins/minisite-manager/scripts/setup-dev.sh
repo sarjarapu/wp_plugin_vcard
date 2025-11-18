@@ -46,7 +46,9 @@ fi
 
 # Create build directory
 echo -e "${CYAN} 📁 Creating build directories...${NC}"
-mkdir -p build/coverage
+mkdir -p build/coverage/full
+mkdir -p build/coverage/unit
+mkdir -p build/coverage/integration
 mkdir -p build/logs
 
 # Set up git hooks (if not already set up)
