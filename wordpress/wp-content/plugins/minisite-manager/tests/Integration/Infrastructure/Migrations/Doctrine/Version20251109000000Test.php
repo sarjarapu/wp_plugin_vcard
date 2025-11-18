@@ -66,8 +66,8 @@ final class Version20251109000000Test extends AbstractDoctrineMigrationTest
 
         // Create a test minisite for foreign key constraints
         $this->connection->executeStatement(
-            "INSERT INTO wp_minisites (id, title, name, city, country_code) VALUES (?, ?, ?, ?, ?)",
-            array('test-history', 'Test Minisite', 'Test', 'Test City', 'US')
+            "INSERT INTO wp_minisites (id, title, name, city, country_code, site_json) VALUES (?, ?, ?, ?, ?, ?)",
+            array('test-history', 'Test Minisite', 'Test', 'Test City', 'US', '{}')
         );
 
         // Verify we can insert history records with all action values
