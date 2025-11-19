@@ -888,4 +888,887 @@ final class MinisiteRepositoryTest extends TestCase
         $this->assertStringContainsString('Failed to reload minisite after save', $sourceCode);
     }
 
+    /**
+     * Test findBySlugParams throws exception on database error
+     */
+    public function test_find_by_slug_params_throws_exception_on_database_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder
+            ->method('select')
+            ->willReturnSelf();
+
+        $queryBuilder
+            ->method('from')
+            ->willReturnSelf();
+
+        $queryBuilder
+            ->method('where')
+            ->willReturnSelf();
+
+        $queryBuilder
+            ->method('andWhere')
+            ->willReturnSelf();
+
+        $queryBuilder
+            ->method('setParameter')
+            ->willReturnSelf();
+
+        $queryBuilder
+            ->method('setMaxResults')
+            ->willReturnSelf();
+
+        $queryBuilder
+            ->method('getQuery')
+            ->willReturn($query);
+
+        $query
+            ->method('setLockMode')
+            ->willReturnSelf();
+
+        $query
+            ->method('getOneOrNullResult')
+            ->willThrowException(new \Exception('Database error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Database error');
+
+        $this->repository->findBySlugParams('business', 'location');
+    }
+
+    /**
+     * Test insert throws exception on persist error
+     */
+    public function test_insert_throws_exception_on_persist_error(): void
+    {
+        $minisite = new Minisite(
+            id: 'insert-test',
+            name: 'Test',
+            city: 'City'
+        );
+
+        $this->entityManager
+            ->method('persist')
+            ->willThrowException(new \Exception('Persist error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Persist error');
+
+        $this->repository->insert($minisite);
+    }
+
+    /**
+     * Test insert throws exception on flush error
+     */
+    public function test_insert_throws_exception_on_flush_error(): void
+    {
+        $minisite = new Minisite(
+            id: 'insert-test',
+            name: 'Test',
+            city: 'City'
+        );
+
+        $this->entityManager
+            ->method('persist')
+            ->willReturnCallback(function () {
+                // persist returns void
+            });
+
+        $this->entityManager
+            ->method('flush')
+            ->willThrowException(new \Exception('Flush error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Flush error');
+
+        $this->repository->insert($minisite);
+    }
+
+    /**
+     * Test insert throws exception on location_point update error
+     */
+    public function test_insert_throws_exception_on_location_point_error(): void
+    {
+        $minisite = new Minisite(
+            id: 'insert-test',
+            name: 'Test',
+            city: 'City'
+        );
+        $minisite->geo = new GeoPoint(40.7128, -74.0060);
+
+        $this->entityManager
+            ->method('persist')
+            ->willReturnCallback(function () {
+                // persist returns void
+            });
+
+        $this->entityManager
+            ->method('flush')
+            ->willReturnCallback(function () {
+                // flush returns void
+            });
+
+        $this->connection
+            ->method('executeStatement')
+            ->willThrowException(new \Exception('Location point error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Location point error');
+
+        $this->repository->insert($minisite);
+    }
+
+    /**
+     * Test save throws exception on query execute error
+     */
+    public function test_save_throws_exception_on_query_execute_error(): void
+    {
+        $minisite = new Minisite(
+            id: 'save-test',
+            name: 'Test',
+            city: 'City'
+        );
+        $minisite->slugs = new SlugPair('biz', 'loc');
+        $minisite->siteVersion = 1;
+
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('andWhere')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Query execute error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Query execute error');
+
+        $this->repository->save($minisite, 1);
+    }
+
+    /**
+     * Test save throws exception on location_point update error
+     */
+    public function test_save_throws_exception_on_location_point_error(): void
+    {
+        $minisite = new Minisite(
+            id: 'save-test',
+            name: 'Test',
+            city: 'City'
+        );
+        $minisite->slugs = new SlugPair('biz', 'loc');
+        $minisite->siteVersion = 1;
+        $minisite->geo = new GeoPoint(40.7128, -74.0060);
+
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('andWhere')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willReturn(1);
+
+        $this->connection
+            ->method('executeStatement')
+            ->willThrowException(new \Exception('Location point error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Location point error');
+
+        $this->repository->save($minisite, 1);
+    }
+
+    /**
+     * Test updateSlug throws exception on database error
+     */
+    public function test_update_slug_throws_exception_on_database_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Database error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Database error');
+
+        $this->repository->updateSlug('test-id', 'new-slug');
+    }
+
+    /**
+     * Test updateSlug throws exception when no rows affected
+     */
+    public function test_update_slug_throws_exception_when_no_rows_affected(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willReturn(0);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Minisite not found or update failed');
+
+        $this->repository->updateSlug('test-id', 'new-slug');
+    }
+
+    /**
+     * Test updateSlugs throws exception on database error
+     */
+    public function test_update_slugs_throws_exception_on_database_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Database error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Database error');
+
+        $this->repository->updateSlugs('test-id', 'biz', 'loc');
+    }
+
+    /**
+     * Test updateSlugs throws exception when no rows affected
+     */
+    public function test_update_slugs_throws_exception_when_no_rows_affected(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willReturn(0);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Minisite not found or update failed');
+
+        $this->repository->updateSlugs('test-id', 'biz', 'loc');
+    }
+
+    /**
+     * Test updatePublishStatus throws exception on database error
+     */
+    public function test_update_publish_status_throws_exception_on_database_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Database error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Database error');
+
+        $this->repository->updatePublishStatus('test-id', 'published');
+    }
+
+    /**
+     * Test updatePublishStatus throws exception when no rows affected
+     */
+    public function test_update_publish_status_throws_exception_when_no_rows_affected(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willReturn(0);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Minisite not found or update failed');
+
+        $this->repository->updatePublishStatus('test-id', 'published');
+    }
+
+    /**
+     * Test updateCurrentVersionId throws exception on database error
+     */
+    public function test_update_current_version_id_throws_exception_on_database_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Database error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Database error');
+
+        $this->repository->updateCurrentVersionId('test-id', 123);
+    }
+
+    /**
+     * Test updateCurrentVersionId throws exception when no rows affected
+     */
+    public function test_update_current_version_id_throws_exception_when_no_rows_affected(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willReturn(0);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Minisite not found or update failed');
+
+        $this->repository->updateCurrentVersionId('test-id', 123);
+    }
+
+    /**
+     * Test updateCoordinates throws exception on query execute error
+     */
+    public function test_update_coordinates_throws_exception_on_query_execute_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Query execute error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Query execute error');
+
+        $this->repository->updateCoordinates('test-id', 40.7128, -74.0060, 1);
+    }
+
+    /**
+     * Test updateCoordinates throws exception on location_point update error
+     */
+    public function test_update_coordinates_throws_exception_on_location_point_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willReturn(1);
+
+        $this->connection
+            ->method('executeStatement')
+            ->willThrowException(new \Exception('Location point error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Location point error');
+
+        $this->repository->updateCoordinates('test-id', 40.7128, -74.0060, 1);
+    }
+
+    /**
+     * Test updateMinisiteFields throws exception on query execute error
+     */
+    public function test_update_minisite_fields_throws_exception_on_query_execute_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Query execute error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Query execute error');
+
+        $this->repository->updateMinisiteFields('test-id', array('title' => 'Test'), 1);
+    }
+
+    /**
+     * Test updateMinisiteFields throws exception on location_point update error
+     */
+    public function test_update_minisite_fields_throws_exception_on_location_point_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willReturn(1);
+
+        $this->connection
+            ->method('executeStatement')
+            ->willThrowException(new \Exception('Location point error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Location point error');
+
+        $this->repository->updateMinisiteFields('test-id', array('location_point' => 'POINT(1, 2)'), 1);
+    }
+
+    /**
+     * Test publishMinisite throws exception when no version found
+     */
+    public function test_publish_minisite_throws_exception_when_no_version_found(): void
+    {
+        $versionRepo = $this->createMock(VersionRepositoryContract::class);
+        $GLOBALS['minisite_version_repository'] = $versionRepo;
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('beginTransaction');
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('rollback');
+
+        $versionRepo
+            ->method('findLatestDraft')
+            ->willReturn(null);
+
+        $versionRepo
+            ->method('findLatestVersion')
+            ->willReturn(null);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('No version found for minisite');
+
+        $this->repository->publishMinisite('site-123');
+    }
+
+    /**
+     * Test publishMinisite throws exception when minisite not found
+     */
+    public function test_publish_minisite_throws_exception_when_minisite_not_found(): void
+    {
+        $versionRepo = $this->createMock(VersionRepositoryContract::class);
+        $GLOBALS['minisite_version_repository'] = $versionRepo;
+
+        $version = new Version(
+            id: 101,
+            minisiteId: 'site-123',
+            versionNumber: 2,
+            status: 'draft',
+            siteJson: array('title' => 'Draft Title'),
+            slugs: new SlugPair('biz', 'loc'),
+            title: 'Draft Title',
+            name: 'Draft Name',
+            city: 'Draft City',
+            region: 'CA',
+            countryCode: 'US',
+            postalCode: '94016',
+            geo: new GeoPoint(37.0, -122.0),
+            siteTemplate: 'v2025',
+            palette: 'blue',
+            industry: 'services',
+            defaultLocale: 'en-US',
+            schemaVersion: 2,
+            siteVersion: 5,
+            searchTerms: 'draft search terms'
+        );
+
+        $repository = $this->getMockBuilder(MinisiteRepository::class)
+            ->setConstructorArgs(array($this->entityManager, $this->classMetadata))
+            ->onlyMethods(array('findById'))
+            ->getMock();
+
+        $repository
+            ->method('findById')
+            ->with('site-123')
+            ->willReturn(null);
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('beginTransaction');
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('rollback');
+
+        $versionRepo
+            ->method('findLatestDraft')
+            ->willReturn($version);
+
+        $versionRepo
+            ->method('findPublishedVersion')
+            ->willReturn(null);
+
+        $versionRepo
+            ->method('save')
+            ->willReturn($version);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Minisite not found');
+
+        $repository->publishMinisite('site-123');
+    }
+
+    /**
+     * Test publishMinisite throws exception on database error and rolls back
+     */
+    public function test_publish_minisite_throws_exception_on_database_error_and_rolls_back(): void
+    {
+        $versionRepo = $this->createMock(VersionRepositoryContract::class);
+        $GLOBALS['minisite_version_repository'] = $versionRepo;
+
+        $version = new Version(
+            id: 101,
+            minisiteId: 'site-123',
+            versionNumber: 2,
+            status: 'draft',
+            siteJson: array('title' => 'Draft Title'),
+            slugs: new SlugPair('biz', 'loc'),
+            title: 'Draft Title',
+            name: 'Draft Name',
+            city: 'Draft City',
+            region: 'CA',
+            countryCode: 'US',
+            postalCode: '94016',
+            geo: new GeoPoint(37.0, -122.0),
+            siteTemplate: 'v2025',
+            palette: 'blue',
+            industry: 'services',
+            defaultLocale: 'en-US',
+            schemaVersion: 2,
+            siteVersion: 5,
+            searchTerms: 'draft search terms'
+        );
+
+        $minisite = new Minisite(
+            id: 'site-123',
+            name: 'Original Name',
+            city: 'Original City'
+        );
+
+        $repository = $this->getMockBuilder(MinisiteRepository::class)
+            ->setConstructorArgs(array($this->entityManager, $this->classMetadata))
+            ->onlyMethods(array('findById'))
+            ->getMock();
+
+        $repository
+            ->method('findById')
+            ->with('site-123')
+            ->willReturn($minisite);
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('beginTransaction');
+
+        $this->entityManager
+            ->expects($this->once())
+            ->method('rollback');
+
+        $this->entityManager
+            ->expects($this->never())
+            ->method('commit');
+
+        $this->entityManager
+            ->method('persist')
+            ->willThrowException(new \Exception('Database error'));
+
+        $versionRepo
+            ->method('findLatestDraft')
+            ->willReturn($version);
+
+        $versionRepo
+            ->method('findPublishedVersion')
+            ->willReturn(null);
+
+        $versionRepo
+            ->method('save')
+            ->willReturn($version);
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Database error');
+
+        $repository->publishMinisite('site-123');
+    }
+
+    /**
+     * Test updateTitle throws exception on database error and returns false
+     */
+    public function test_update_title_throws_exception_on_database_error_and_returns_false(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Database error'));
+
+        $result = $this->repository->updateTitle('test-id', 'New Title');
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test updateStatus throws exception on database error and returns false
+     */
+    public function test_update_status_throws_exception_on_database_error_and_returns_false(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Database error'));
+
+        $result = $this->repository->updateStatus('test-id', 'published');
+
+        $this->assertFalse($result);
+    }
+
+    /**
+     * Test updateBusinessInfo throws exception on database error
+     */
+    public function test_update_business_info_throws_exception_on_database_error(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willThrowException(new \Exception('Database error'));
+
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Database error');
+
+        $this->repository->updateBusinessInfo('test-id', array('title' => 'Test'), 1);
+    }
+
+    /**
+     * Test updateBusinessInfo throws exception when no rows affected
+     */
+    public function test_update_business_info_throws_exception_when_no_rows_affected(): void
+    {
+        $queryBuilder = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $this->entityManager
+            ->method('createQueryBuilder')
+            ->willReturn($queryBuilder);
+
+        $queryBuilder->method('select')->willReturnSelf();
+        $queryBuilder->method('from')->willReturnSelf();
+        $queryBuilder->method('update')->willReturnSelf();
+        $queryBuilder->method('set')->willReturnSelf();
+        $queryBuilder->method('where')->willReturnSelf();
+        $queryBuilder->method('setParameter')->willReturnSelf();
+        $queryBuilder->method('getQuery')->willReturn($query);
+
+        $query
+            ->method('execute')
+            ->willReturn(0);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Failed to update business info fields');
+
+        $this->repository->updateBusinessInfo('test-id', array('title' => 'Test'), 1);
+    }
+
 }
