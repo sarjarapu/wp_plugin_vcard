@@ -47,7 +47,7 @@ cp data/styles/custom.css build/coverage/full/_css/custom.css
 # Echo completion messages only if PHPUnit succeeded
 if [ $PHPUNIT_EXIT_CODE -eq 0 ]; then
     echo -e "${GREEN} 🎉 All tests completed!${NC}"
-    echo -e "${GRAY} 📊 Coverage report generated in build/coverage/${NC}"
+    echo -e "${GRAY} 📊 Coverage report generated in build/coverage/full/${NC}"
 fi
 
 # Exit with phpunit's exit code if it failed, otherwise exit 0

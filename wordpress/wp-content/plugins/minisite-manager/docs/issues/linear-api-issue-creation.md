@@ -45,6 +45,33 @@ curl -X POST \
   https://api.linear.app/graphql
 ```
 
+### Find an Issue by Identifier (e.g., MIN-27)
+```bash
+API_KEY=$(grep "LINEAR_API_KEY" ~/.zshrc | cut -d'=' -f2 | tr -d '"') && \
+curl -s -X POST \
+  -H "Authorization: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"query":"query { team(id: \"5b5c2471-d25c-4b70-81bf-5b2707f6553f\") { issues(filter: { number: { eq: 27 } }, first: 1) { nodes { id identifier title url } } } }"}' \
+  https://api.linear.app/graphql
+```
+This returns the internal `id` plus the friendly identifier/title. Change `27` to any ticket number you need.
+
+### Create a Sub-Issue Under an Existing Ticket
+1. Use the command above to capture the parent ticket’s `id`.
+2. Use that `id` as `parentId` when creating the new issue:
+
+```bash
+PARENT_ID="d35ec35e-ed2f-4622-8938-dbd1bb8e187e" # replace with lookup result
+API_KEY=$(grep "LINEAR_API_KEY" ~/.zshrc | cut -d'=' -f2 | tr -d '"') && \
+curl -X POST \
+  -H "Authorization: $API_KEY" \
+  -H "Content-Type: application/json" \
+  -d "{\"query\":\"mutation { issueCreate(input: { teamId: \\\"5b5c2471-d25c-4b70-81bf-5b2707f6553f\\\", parentId: \\\"$PARENT_ID\\\", title: \\\"Feature: YOUR_SUBTASK_TITLE\\\", description: \\\"YOUR_ESCAPED_DESCRIPTION\\\", priority: 3 }) { success issue { id identifier title url } } }\"}" \
+  https://api.linear.app/graphql
+```
+
+Any new sub-task automatically appears under the parent in Linear once this mutation succeeds.
+
 ## Issue Templates
 
 ### Feature Issue Template
