@@ -11,9 +11,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Test ViewHooks
- * 
+ *
  * Tests the ViewHooks for proper WordPress hook registration
- * 
+ *
  */
 final class ViewHooksTest extends TestCase
 {
@@ -25,10 +25,10 @@ final class ViewHooksTest extends TestCase
     {
         $this->minisitePageController = $this->createMock(MinisitePageController::class);
         $this->wordPressManager = $this->createMock(WordPressMinisiteManager::class);
-        
+
         // Use TestTerminationHandler so exit doesn't terminate tests
         $terminationHandler = new TestTerminationHandler();
-        
+
         $this->viewHooks = new ViewHooks($this->minisitePageController, $this->wordPressManager, $terminationHandler);
     }
 
@@ -67,7 +67,7 @@ final class ViewHooksTest extends TestCase
         // This test verifies the method exists and can be called
         // In a real environment, WordPress functions would be available
         $this->assertTrue(method_exists($this->viewHooks, 'handleViewRoutes'));
-        
+
         // We can't easily test the actual functionality without WordPress environment
         // but we can verify the method exists and is callable
         $this->assertTrue(is_callable([$this->viewHooks, 'handleViewRoutes']));
@@ -157,7 +157,7 @@ final class ViewHooksTest extends TestCase
         // This test verifies the method exists and can be called
         // In a real environment, WordPress functions would be available
         $this->assertTrue(method_exists($this->viewHooks, 'handleViewRoutes'));
-        
+
         // We can't easily test the actual functionality without WordPress environment
         // but we can verify the method exists and is callable
         $this->assertTrue(is_callable([$this->viewHooks, 'handleViewRoutes']));
@@ -170,7 +170,7 @@ final class ViewHooksTest extends TestCase
     {
         $inputVars = ['existing_var' => 'value'];
         $result = $this->viewHooks->addQueryVars($inputVars);
-        
+
         $this->assertEquals($inputVars, $result);
     }
 
@@ -181,7 +181,7 @@ final class ViewHooksTest extends TestCase
     {
         $inputVars = [];
         $result = $this->viewHooks->addQueryVars($inputVars);
-        
+
         $this->assertEquals($inputVars, $result);
     }
 
@@ -201,11 +201,11 @@ final class ViewHooksTest extends TestCase
     {
         $reflection = new \ReflectionClass($this->viewHooks);
         $constructor = $reflection->getConstructor();
-        
+
         $this->assertNotNull($constructor);
         // Now expects 3 parameters: minisitePageController, wordPressManager, terminationHandler
         $this->assertEquals(3, $constructor->getNumberOfParameters());
-        
+
         $params = $constructor->getParameters();
         $this->assertEquals(MinisitePageController::class, $params[0]->getType()->getName());
         $this->assertEquals(WordPressMinisiteManager::class, $params[1]->getType()->getName());
@@ -213,17 +213,96 @@ final class ViewHooksTest extends TestCase
     }
 
     /**
+     * Test handleViewRoutes with valid route calls controller
+     */
+    public function test_handle_view_routes_with_valid_route_calls_controller(): void
+    {
+        // Mock WordPressManager to return valid slugs
+        $this->wordPressManager
+            ->method('getQueryVar')
+            ->willReturnCallback(function ($var) {
+                return match ($var) {
+                    'minisite_biz' => 'coffee-shop',
+                    'minisite_loc' => 'downtown',
+                    default => null
+                };
+            });
+
+        // Controller should be called
+        $this->minisitePageController
+            ->expects($this->once())
+            ->method('handleView');
+
+        $this->viewHooks->handleViewRoutes();
+    }
+
+    /**
      * Test handleViewRoutes with controller exception
      */
-    public function test_handle_display_routes_with_controller_exception(): void
+    public function test_handle_view_routes_with_controller_exception(): void
     {
-        // This test verifies the method exists and can be called
-        // In a real environment, WordPress functions would be available
-        $this->assertTrue(method_exists($this->viewHooks, 'handleViewRoutes'));
-        
-        // We can't easily test the actual functionality without WordPress environment
-        // but we can verify the method exists and is callable
-        $this->assertTrue(is_callable([$this->viewHooks, 'handleViewRoutes']));
+        // Mock WordPressManager to return valid slugs
+        $this->wordPressManager
+            ->method('getQueryVar')
+            ->willReturnCallback(function ($var) {
+                return match ($var) {
+                    'minisite_biz' => 'coffee-shop',
+                    'minisite_loc' => 'downtown',
+                    default => null
+                };
+            });
+
+        // Controller throws exception
+        $this->minisitePageController
+            ->expects($this->once())
+            ->method('handleView')
+            ->willThrowException(new \Exception('Controller error'));
+
+        // Should propagate exception
+        $this->expectException(\Exception::class);
+        $this->expectExceptionMessage('Controller error');
+
+        $this->viewHooks->handleViewRoutes();
+    }
+
+    /**
+     * Test addRewriteRules method exists and is callable
+     */
+    public function test_add_rewrite_rules_method_exists_and_callable(): void
+    {
+        $this->assertTrue(method_exists($this->viewHooks, 'addRewriteRules'));
+        $this->assertTrue(is_callable([$this->viewHooks, 'addRewriteRules']));
+    }
+
+    /**
+     * Test addRewriteRules can be called
+     */
+    public function test_add_rewrite_rules_can_be_called(): void
+    {
+        // Should not throw exception
+        $this->viewHooks->addRewriteRules();
+        $this->assertTrue(true);
+    }
+
+    /**
+     * Test getController returns the controller
+     */
+    public function test_get_controller_returns_controller(): void
+    {
+        $controller = $this->viewHooks->getController();
+
+        $this->assertSame($this->minisitePageController, $controller);
+        $this->assertInstanceOf(MinisitePageController::class, $controller);
+    }
+
+    /**
+     * Test register method can be called
+     */
+    public function test_register_can_be_called(): void
+    {
+        // Should not throw exception
+        $this->viewHooks->register();
+        $this->assertTrue(true);
     }
 
     /**
@@ -231,9 +310,17 @@ final class ViewHooksTest extends TestCase
      */
     private function mockWordPressFunctions(array $queryVars): void
     {
-        foreach ($queryVars as $key => $value) {
-            $this->mockWordPressFunction('get_query_var', $value, $key);
-        }
+        // Use WordPressManager mock instead of global functions
+        $this->wordPressManager
+            ->method('getQueryVar')
+            ->willReturnCallback(function ($var) use ($queryVars) {
+                $key = match ($var) {
+                    'minisite_biz' => 'minisite_biz',
+                    'minisite_loc' => 'minisite_loc',
+                    default => $var
+                };
+                return $queryVars[$key] ?? null;
+            });
     }
 
     /**
@@ -257,7 +344,7 @@ final class ViewHooksTest extends TestCase
                 ");
             }
         }
-        
+
         // Handle 'exit' separately since it's a language construct, not a function
         // In tests, we catch exceptions from redirect() instead
     }
