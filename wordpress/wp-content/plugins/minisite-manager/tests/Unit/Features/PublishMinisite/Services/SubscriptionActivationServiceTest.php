@@ -26,6 +26,14 @@ interface OrderInterface
 }
 
 /**
+ * Interface for mocking WooCommerce order items
+ */
+interface OrderItemInterface
+{
+    public function get_meta(string $key, bool $single = true, string $context = 'view'): mixed;
+}
+
+/**
  * Unit tests for SubscriptionActivationService
  */
 #[CoversClass(SubscriptionActivationService::class)]
@@ -54,20 +62,25 @@ final class SubscriptionActivationServiceTest extends TestCase
             public $prefix = 'wp_';
             public $insert_id = 0;
 
-            public function prepare($query, ...$args) {
+            public function prepare($query, ...$args)
+            {
                 return $query;
             }
 
-            public function query($query) {
+            public function query($query)
+            {
                 return true;
             }
 
-            public function get_var($query = null, $x = 0, $y = 0) {
+            public function get_var($query = null, $x = 0, $y = 0)
+            {
                 return null; // No existing expiration
             }
 
-            public function insert($table, $data, $format = null) {
+            public function insert($table, $data, $format = null)
+            {
                 $this->insert_id = 999;
+
                 return true;
             }
         };
@@ -124,7 +137,7 @@ final class SubscriptionActivationServiceTest extends TestCase
         $orderId = 123;
         $mockOrder = $this->createMockOrder();
         $mockOrder->method('get_meta')->willReturn('');
-        $mockOrder->method('get_items')->willReturn([]);
+        $mockOrder->method('get_items')->willReturn(array());
 
         // Mock WC()->session to return null
         $GLOBALS['_test_mock_wc_get_order'] = $mockOrder;
@@ -155,9 +168,10 @@ final class SubscriptionActivationServiceTest extends TestCase
             if ($key === '_slug') {
                 return ''; // Empty slug
             }
+
             return '';
         });
-        $mockOrder->method('get_items')->willReturn([]);
+        $mockOrder->method('get_items')->willReturn(array());
 
         $GLOBALS['_test_mock_wc_get_order'] = $mockOrder;
         $GLOBALS['_test_mock_wc_session'] = null;
@@ -179,7 +193,7 @@ final class SubscriptionActivationServiceTest extends TestCase
     public function test_activate_from_order_method_exists_and_callable(): void
     {
         $this->assertTrue(method_exists($this->service, 'activateFromOrder'));
-        $this->assertTrue(is_callable([$this->service, 'activateFromOrder']));
+        $this->assertTrue(is_callable(array($this->service, 'activateFromOrder')));
     }
 
     /**
@@ -188,7 +202,7 @@ final class SubscriptionActivationServiceTest extends TestCase
     public function test_publish_directly_method_exists_and_callable(): void
     {
         $this->assertTrue(method_exists($this->service, 'publishDirectly'));
-        $this->assertTrue(is_callable([$this->service, 'publishDirectly']));
+        $this->assertTrue(is_callable(array($this->service, 'publishDirectly')));
     }
 
     /**
@@ -227,11 +241,13 @@ final class SubscriptionActivationServiceTest extends TestCase
         $wpdb = new class () {
             public $prefix = 'wp_';
 
-            public function prepare($query, ...$args) {
+            public function prepare($query, ...$args)
+            {
                 return $query;
             }
 
-            public function query($query) {
+            public function query($query)
+            {
                 return true;
             }
         };
@@ -275,11 +291,13 @@ final class SubscriptionActivationServiceTest extends TestCase
         $wpdb = new class () {
             public $prefix = 'wp_';
 
-            public function prepare($query, ...$args) {
+            public function prepare($query, ...$args)
+            {
                 return $query;
             }
 
-            public function query($query) {
+            public function query($query)
+            {
                 return true;
             }
         };
@@ -318,11 +336,13 @@ final class SubscriptionActivationServiceTest extends TestCase
         $wpdb = new class () {
             public $prefix = 'wp_';
 
-            public function prepare($query, ...$args) {
+            public function prepare($query, ...$args)
+            {
                 return $query;
             }
 
-            public function query($query) {
+            public function query($query)
+            {
                 return true;
             }
         };
@@ -400,6 +420,130 @@ final class SubscriptionActivationServiceTest extends TestCase
     }
 
     /**
+     * Test activateFromOrder processes order meta successfully
+     */
+    public function test_activate_from_order_processes_order_meta_successfully(): void
+    {
+        $orderId = 123;
+        $reservationId = 'res-789';
+
+        $mockOrder = $this->createMockOrder();
+        $mockOrder->method('get_meta')->willReturnCallback(function (string $key, ...$args) use ($reservationId) {
+            return match ($key) {
+                '_minisite_id' => 'test-site-123',
+                '_slug' => 'business/location',
+                '_reservation_id' => $reservationId,
+                default => '',
+            };
+        });
+        $mockOrder->method('get_items')->willReturn(array());
+
+        $GLOBALS['_test_mock_wc_get_order'] = $mockOrder;
+        $GLOBALS['_test_mock_current_time'] = '2025-01-01 00:00:00';
+
+        global $wpdb;
+        $wpdb = $this->createWpdbStub();
+
+        $this->minisiteRepository
+            ->expects($this->once())
+            ->method('updateSlugs')
+            ->with('test-site-123', 'business', 'location');
+
+        $this->minisiteRepository
+            ->expects($this->once())
+            ->method('publishMinisite')
+            ->with('test-site-123');
+
+        try {
+            $this->service->activateFromOrder($orderId);
+
+            $tables = array_column($wpdb->insertedRows, 'table');
+            $this->assertContains('wp_minisite_payments', $tables);
+            $this->assertContains('wp_minisite_payment_history', $tables);
+
+            $deleteQueries = array_filter($wpdb->queries, fn ($query) => str_contains($query, 'DELETE FROM wp_minisite_reservations'));
+            $this->assertNotEmpty($deleteQueries, 'Reservation cleanup query should run');
+        } finally {
+            unset($GLOBALS['_test_mock_wc_get_order'], $GLOBALS['_test_mock_current_time']);
+        }
+    }
+
+    /**
+     * Test activateFromOrder uses order item metadata when order meta missing
+     */
+    public function test_activate_from_order_reads_from_order_items_when_meta_missing(): void
+    {
+        $orderId = 456;
+
+        $orderItem = $this->createOrderItem(array(
+            '_minisite_id' => 'item-site-999',
+            '_minisite_slug' => 'item-business/item-location',
+            '_minisite_reservation_id' => 'item-res-111',
+        ));
+
+        $orderWithItems = new class ($orderItem) implements OrderInterface {
+            public function __construct(private OrderItemInterface $item)
+            {
+            }
+
+            public function get_meta(string $key, ...$args): mixed
+            {
+                return '';
+            }
+
+            public function get_items(): array
+            {
+                return array($this->item);
+            }
+
+            public function get_customer_id(): int
+            {
+                return 789;
+            }
+
+            public function get_total(): float
+            {
+                return 49.99;
+            }
+
+            public function get_currency(): string
+            {
+                return 'USD';
+            }
+
+            public function get_transaction_id(): string
+            {
+                return 'txn_items';
+            }
+        };
+
+        $GLOBALS['_test_mock_wc_get_order'] = $orderWithItems;
+        $GLOBALS['_test_mock_current_time'] = '2025-03-01 00:00:00';
+
+        global $wpdb;
+        $wpdb = $this->createWpdbStub();
+
+        $this->minisiteRepository
+            ->expects($this->once())
+            ->method('updateSlugs')
+            ->with('item-site-999', 'item-business', 'item-location');
+
+        $this->minisiteRepository
+            ->expects($this->once())
+            ->method('publishMinisite')
+            ->with('item-site-999');
+
+        try {
+            $this->service->activateFromOrder($orderId);
+
+            $tables = array_column($wpdb->insertedRows, 'table');
+            $this->assertContains('wp_minisite_payments', $tables);
+        } finally {
+            unset($GLOBALS['_test_mock_wc_get_order'], $GLOBALS['_test_mock_current_time']);
+        }
+    }
+
+    /**
      * Create mock WooCommerce order
      */
     private function createMockOrder(): MockObject
@@ -412,7 +556,7 @@ final class SubscriptionActivationServiceTest extends TestCase
         $order->method('get_total')->willReturn(99.99);
         $order->method('get_currency')->willReturn('USD');
         $order->method('get_transaction_id')->willReturn('txn_123');
-        $order->method('get_items')->willReturn([]);
+        $order->method('get_items')->willReturn(array());
 
         return $order;
     }
@@ -422,7 +566,7 @@ final class SubscriptionActivationServiceTest extends TestCase
      */
     private function setupWordPressMocks(): void
     {
-        $functions = ['wc_get_order', 'current_time'];
+        $functions = array('wc_get_order', 'current_time', 'WC');
 
         foreach ($functions as $function) {
             if (! function_exists($function)) {
@@ -437,6 +581,15 @@ final class SubscriptionActivationServiceTest extends TestCase
                         }
                         if ('{$function}' === 'current_time') {
                             return date('Y-m-d H:i:s');
+                        }
+                        if ('{$function}' === 'WC') {
+                            if (isset(\$GLOBALS['_test_mock_{$function}'])) {
+                                return \$GLOBALS['_test_mock_{$function}'];
+                            }
+
+                            return (object) array(
+                                'session' => \$GLOBALS['_test_mock_wc_session'] ?? null,
+                            );
                         }
                         return null;
                     }
@@ -468,13 +621,84 @@ final class SubscriptionActivationServiceTest extends TestCase
      */
     private function clearWordPressMocks(): void
     {
-        $functions = ['wc_get_order', 'current_time'];
+        $functions = array('wc_get_order', 'current_time', 'WC');
 
         foreach ($functions as $func) {
             unset($GLOBALS['_test_mock_' . $func]);
         }
 
-        unset($GLOBALS['_test_mock_wc_session']);
+        unset($GLOBALS['_test_mock_wc_session'], $GLOBALS['_test_mock_WC']);
+    }
+
+    /**
+     * Create a simple $wpdb stub that records inserts and queries
+     */
+    private function createWpdbStub(): object
+    {
+        return new class () {
+            public $prefix = 'wp_';
+            public $insert_id = 1000;
+            public array $queries = array();
+            public array $insertedRows = array();
+
+            public function prepare($query, ...$args)
+            {
+                if (! empty($args)) {
+                    foreach ($args as $arg) {
+                        $replacement = is_numeric($arg) ? (string) $arg : "'" . $arg . "'";
+                        $query = preg_replace('/%[sd]/', $replacement, $query, 1);
+                    }
+                }
+
+                return $query;
+            }
+
+            public function query($query)
+            {
+                $this->queries[] = $query;
+
+                return true;
+            }
+
+            public function get_var($query = null, $x = 0, $y = 0)
+            {
+                return null;
+            }
+
+            public function get_row($query, $output = OBJECT)
+            {
+                return null;
+            }
+
+            public function insert($table, $data, $format = null)
+            {
+                $this->insertedRows[] = array(
+                    'table' => $table,
+                    'data' => $data,
+                );
+                $this->insert_id++;
+
+                return true;
+            }
+        };
+    }
+
+    /**
+     * Create a simple order item implementation with predefined meta values
+     *
+     * @param array<string, mixed> $meta
+     */
+    private function createOrderItem(array $meta): OrderItemInterface
+    {
+        return new class ($meta) implements OrderItemInterface {
+            public function __construct(private array $meta)
+            {
+            }
+
+            public function get_meta(string $key, bool $single = true, string $context = 'view'): mixed
+            {
+                return $this->meta[$key] ?? '';
+            }
+        };
     }
 }
-
