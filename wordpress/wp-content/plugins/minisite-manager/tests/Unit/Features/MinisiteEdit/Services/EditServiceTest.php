@@ -6,8 +6,8 @@ use Minisite\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
-use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
+use Minisite\Features\VersionManagement\Domain\Entities\Version;
 use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
@@ -240,7 +240,6 @@ class EditServiceTest extends TestCase
             ->with($siteId)
             ->willReturn(null);
 
-        // The actual save is handled by MinisiteDatabaseCoordinator
         // We need to mock the coordinator's behavior indirectly
         // Since we can't easily mock the coordinator, we'll test that the service
         // properly calls the coordinator and handles the result
@@ -252,7 +251,6 @@ class EditServiceTest extends TestCase
             ->method('getHomeUrl')
             ->willReturn("http://example.com/account/sites/{$siteId}/edit?draft_saved=1");
 
-        // Since saveDraft uses MinisiteDatabaseCoordinator which is complex,
         // we'll test that it properly validates and calls the coordinator
         // The actual save logic is tested in integration tests
         $result = $this->service->saveDraft($siteId, $formData);
