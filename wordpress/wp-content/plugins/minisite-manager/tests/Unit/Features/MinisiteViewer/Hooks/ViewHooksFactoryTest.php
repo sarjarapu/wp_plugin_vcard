@@ -266,4 +266,95 @@ final class ViewHooksFactoryTest extends TestCase
 
         $this->assertTrue($method->isStatic());
     }
+
+    /**
+     * Test create throws exception when minisite repository is missing
+     */
+    public function test_create_throws_exception_when_minisite_repository_missing(): void
+    {
+        // Remove minisite repository from globals
+        unset($GLOBALS['minisite_repository']);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('MinisiteRepository not initialized');
+
+        ViewHooksFactory::create();
+    }
+
+    /**
+     * Test create throws exception when version repository is missing
+     */
+    public function test_create_throws_exception_when_version_repository_missing(): void
+    {
+        // Remove version repository from globals
+        unset($GLOBALS['minisite_version_repository']);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('VersionRepository not initialized');
+
+        ViewHooksFactory::create();
+    }
+
+    /**
+     * Test create creates WordPressMinisiteManager
+     */
+    public function test_create_creates_wordpress_minisite_manager(): void
+    {
+        $viewHooks = ViewHooksFactory::create();
+
+        // Get the WordPressManager from ViewHooks
+        $reflection = new \ReflectionClass($viewHooks);
+        $managerProperty = $reflection->getProperty('wordPressManager');
+        $managerProperty->setAccessible(true);
+        $manager = $managerProperty->getValue($viewHooks);
+
+        $this->assertInstanceOf(WordPressMinisiteManager::class, $manager);
+    }
+
+    /**
+     * Test create creates ViewHooks with WordPressManager
+     */
+    public function test_create_creates_view_hooks_with_wordpress_manager(): void
+    {
+        $viewHooks = ViewHooksFactory::create();
+
+        // Verify ViewHooks has WordPressManager
+        $reflection = new \ReflectionClass($viewHooks);
+        $managerProperty = $reflection->getProperty('wordPressManager');
+        $managerProperty->setAccessible(true);
+        $manager = $managerProperty->getValue($viewHooks);
+
+        $this->assertInstanceOf(WordPressMinisiteManager::class, $manager);
+    }
+
+    /**
+     * Test create creates ViewRenderer with renderer property
+     */
+    public function test_create_creates_view_renderer_with_renderer_property(): void
+    {
+        $viewHooks = ViewHooksFactory::create();
+
+        // Get the controller from ViewHooks
+        $reflection = new \ReflectionClass($viewHooks);
+        $controllerProperty = $reflection->getProperty('minisitePageController');
+        $controllerProperty->setAccessible(true);
+        $controller = $controllerProperty->getValue($viewHooks);
+
+        // Get the ViewRenderer from controller
+        $controllerReflection = new \ReflectionClass($controller);
+        $rendererProperty = $controllerReflection->getProperty('renderer');
+        $rendererProperty->setAccessible(true);
+        $renderer = $rendererProperty->getValue($controller);
+
+        $this->assertInstanceOf(ViewRenderer::class, $renderer);
+
+        // Verify renderer has renderer property (may be null if Timber not available)
+        $rendererReflection = new \ReflectionClass($renderer);
+        $internalRendererProperty = $rendererReflection->getProperty('renderer');
+        $internalRendererProperty->setAccessible(true);
+        $internalRenderer = $internalRendererProperty->getValue($renderer);
+
+        // Renderer may be null if Timber is not available, or an object if it is
+        $this->assertTrue($internalRenderer === null || is_object($internalRenderer));
+    }
 }

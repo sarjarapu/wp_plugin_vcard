@@ -458,46 +458,161 @@ final class ViewRendererTest extends TestCase
 
     /**
      * Test renderVersionSpecificPreview without timber renderer (fallback)
-     *
-     * Note: This test requires Timber to be available but will fail in unit test environment.
-     * Skipping until Timber dependency is properly mocked.
      */
     public function test_render_version_specific_preview_without_timber_renderer(): void
     {
-        $this->markTestSkipped('Requires Timber integration - should be tested in integration tests');
+        $previewData = (object)array(
+            'minisite' => (object)array(
+                'id' => '123',
+                'name' => 'Test Minisite',
+                'city' => 'Test City',
+                'title' => 'Test Title',
+                'siteJson' => array('test' => 'data'),
+            ),
+            'version' => (object)array(
+                'id' => 5,
+                'label' => 'Version 5',
+            ),
+            'siteJson' => array('test' => 'version data'),
+            'versionId' => '5',
+        );
+
+        // Create renderer with empty object (fallback path - renderer property will be null internally)
+        $emptyRenderer = new \stdClass();
+        $renderer = new ViewRenderer($emptyRenderer, $this->mockWordPressManager);
+        // Use reflection to set renderer to null to trigger fallback
+        $reflection = new \ReflectionClass($renderer);
+        $property = $reflection->getProperty('renderer');
+        $property->setAccessible(true);
+        $property->setValue($renderer, null);
+
+        // Capture output
+        ob_start();
+        $renderer->renderVersionSpecificPreview($previewData);
+        $output = ob_get_clean();
+
+        // Verify fallback rendering
+        $this->assertStringContainsString('<!DOCTYPE html>', $output);
+        $this->assertStringContainsString('Preview: Test Minisite', $output);
+        $this->assertStringContainsString('Version: Version 5', $output);
+        $this->assertStringContainsString('Test Minisite', $output);
+        $this->assertStringContainsString('Test City', $output);
     }
 
     /**
-     * Test renderVersionSpecificPreview with current version (no specific version)
-     *
-     * Note: This test requires Timber to be available but will fail in unit test environment.
-     * Skipping until Timber dependency is properly mocked.
+     * Test renderVersionSpecificPreview with current version (no specific version) - fallback
      */
     public function test_render_version_specific_preview_with_current_version(): void
     {
-        $this->markTestSkipped('Requires Timber integration - should be tested in integration tests');
+        $previewData = (object)array(
+            'minisite' => (object)array(
+                'id' => '123',
+                'name' => 'Test Minisite',
+                'city' => 'Test City',
+                'title' => 'Test Title',
+                'siteJson' => array('test' => 'current data'),
+            ),
+            'version' => null, // Current version
+            'siteJson' => array('test' => 'current data'),
+            'versionId' => 'current',
+        );
+
+        // Create renderer with empty object (fallback path - renderer property will be null internally)
+        $emptyRenderer = new \stdClass();
+        $renderer = new ViewRenderer($emptyRenderer, $this->mockWordPressManager);
+        // Use reflection to set renderer to null to trigger fallback
+        $reflection = new \ReflectionClass($renderer);
+        $property = $reflection->getProperty('renderer');
+        $property->setAccessible(true);
+        $property->setValue($renderer, null);
+
+        // Capture output
+        ob_start();
+        $renderer->renderVersionSpecificPreview($previewData);
+        $output = ob_get_clean();
+
+        // Verify fallback rendering with current version
+        $this->assertStringContainsString('<!DOCTYPE html>', $output);
+        $this->assertStringContainsString('Preview: Test Minisite', $output);
+        $this->assertStringContainsString('Version: Current Version', $output);
     }
 
     /**
-     * Test renderVersionSpecificPreview with empty minisite name
-     *
-     * Note: This test requires Timber to be available but will fail in unit test environment.
-     * Skipping until Timber dependency is properly mocked.
+     * Test renderVersionSpecificPreview with empty minisite name - fallback
      */
     public function test_render_version_specific_preview_with_empty_minisite_name(): void
     {
-        $this->markTestSkipped('Requires Timber integration - should be tested in integration tests');
+        $previewData = (object)array(
+            'minisite' => (object)array(
+                'id' => '123',
+                'name' => '',
+                'city' => '',
+                'title' => '',
+                'siteJson' => array(),
+            ),
+            'version' => null,
+            'siteJson' => array(),
+            'versionId' => 'current',
+        );
+
+        // Create renderer with empty object (fallback path - renderer property will be null internally)
+        $emptyRenderer = new \stdClass();
+        $renderer = new ViewRenderer($emptyRenderer, $this->mockWordPressManager);
+        // Use reflection to set renderer to null to trigger fallback
+        $reflection = new \ReflectionClass($renderer);
+        $property = $reflection->getProperty('renderer');
+        $property->setAccessible(true);
+        $property->setValue($renderer, null);
+
+        // Capture output
+        ob_start();
+        $renderer->renderVersionSpecificPreview($previewData);
+        $output = ob_get_clean();
+
+        // Verify fallback rendering handles empty values
+        $this->assertStringContainsString('<!DOCTYPE html>', $output);
+        // When name is empty, it shows "Preview: " (empty) in title, but "Minisite" in the fallback
+        $this->assertStringContainsString('Preview:', $output);
     }
 
     /**
-     * Test renderVersionSpecificPreview with special characters
-     *
-     * Note: This test requires Timber to be available but will fail in unit test environment.
-     * Skipping until Timber dependency is properly mocked.
+     * Test renderVersionSpecificPreview with special characters - fallback
      */
     public function test_render_version_specific_preview_with_special_characters(): void
     {
-        $this->markTestSkipped('Requires Timber integration - should be tested in integration tests');
+        $previewData = (object)array(
+            'minisite' => (object)array(
+                'id' => '123',
+                'name' => 'Café & Restaurant <script>alert("xss")</script>',
+                'city' => 'Test City',
+                'title' => 'Test Title',
+                'siteJson' => array('test' => 'data'),
+            ),
+            'version' => (object)array(
+                'id' => 5,
+                'label' => 'Version 5',
+            ),
+            'siteJson' => array('test' => 'data'),
+            'versionId' => '5',
+        );
+
+        // Create renderer with empty object (fallback path - renderer property will be null internally)
+        $emptyRenderer = new \stdClass();
+        $renderer = new ViewRenderer($emptyRenderer, $this->mockWordPressManager);
+        // Use reflection to set renderer to null to trigger fallback
+        $reflection = new \ReflectionClass($renderer);
+        $property = $reflection->getProperty('renderer');
+        $property->setAccessible(true);
+        $property->setValue($renderer, null);
+
+        // Capture output
+        ob_start();
+        $renderer->renderVersionSpecificPreview($previewData);
+        $output = ob_get_clean();
+
+        // Verify special characters are escaped
+        $this->assertStringContainsString('Café &amp; Restaurant', $output);
+        $this->assertStringNotContainsString('<script>', $output);
     }
 
     /**
@@ -564,6 +679,267 @@ final class ViewRendererTest extends TestCase
         $this->assertEquals('current', $result['versionId']);
         $this->assertTrue($result['isVersionSpecificPreview']);
         $this->assertEquals('Preview: Current Version', $result['previewTitle']);
+    }
+
+    // ===== TESTS FOR render() METHOD =====
+
+    /**
+     * Test render method with valid template and context
+     * Note: The renderer's render method expects a ViewModel, but this generic render method
+     * passes template and context. This tests the fallback path when renderer doesn't match.
+     */
+    public function test_render_with_valid_template_and_context(): void
+    {
+        $template = 'test-template.twig';
+        $context = array('page_title' => 'Test Page');
+
+        // The TimberRenderer expects ViewModel, so this will fall back
+        // Create a renderer without the render method that accepts these params
+        $mockRenderer = $this->createMock(\stdClass::class);
+        $renderer = new ViewRenderer($mockRenderer, $this->mockWordPressManager);
+
+        // Capture output (should use fallback)
+        ob_start();
+        $renderer->render($template, $context);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('<!doctype html>', $output);
+        $this->assertStringContainsString('Test Page', $output);
+    }
+
+    /**
+     * Test render method with renderer without render method (fallback)
+     */
+    public function test_render_with_renderer_without_render_method(): void
+    {
+        $template = 'test-template.twig';
+        $context = array('page_title' => 'Test Page');
+
+        $mockRenderer = new \stdClass(); // Object without render method
+        $renderer = new ViewRenderer($mockRenderer, $this->mockWordPressManager);
+
+        // Capture output
+        ob_start();
+        $renderer->render($template, $context);
+        $output = ob_get_clean();
+
+        // Verify fallback rendering
+        $this->assertStringContainsString('<!doctype html>', $output);
+        $this->assertStringContainsString('Test Page', $output);
+    }
+
+    /**
+     * Test render method fallback with empty context
+     */
+    public function test_render_fallback_with_empty_context(): void
+    {
+        $template = 'test-template.twig';
+        $context = array();
+
+        $mockRenderer = new \stdClass();
+        $renderer = new ViewRenderer($mockRenderer, $this->mockWordPressManager);
+
+        // Capture output
+        ob_start();
+        $renderer->render($template, $context);
+        $output = ob_get_clean();
+
+        // Verify fallback rendering with default title
+        $this->assertStringContainsString('<!doctype html>', $output);
+        $this->assertStringContainsString('Page', $output); // Default fallback
+    }
+
+    // ===== TESTS FOR PRIVATE METHODS VIA REFLECTION =====
+
+    /**
+     * Test renderFallbackFromContext private method
+     */
+    public function test_render_fallback_from_context(): void
+    {
+        $context = array('page_title' => 'Test Page Title');
+
+        $reflection = new \ReflectionClass($this->displayRenderer);
+        $method = $reflection->getMethod('renderFallbackFromContext');
+        $method->setAccessible(true);
+
+        // Capture output
+        ob_start();
+        $method->invoke($this->displayRenderer, $context);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('<!doctype html>', $output);
+        $this->assertStringContainsString('Test Page Title', $output);
+    }
+
+    /**
+     * Test renderFallbackFromContext with empty context
+     */
+    public function test_render_fallback_from_context_with_empty_context(): void
+    {
+        $context = array();
+
+        $reflection = new \ReflectionClass($this->displayRenderer);
+        $method = $reflection->getMethod('renderFallbackFromContext');
+        $method->setAccessible(true);
+
+        // Capture output
+        ob_start();
+        $method->invoke($this->displayRenderer, $context);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('<!doctype html>', $output);
+        $this->assertStringContainsString('Page', $output); // Default fallback
+    }
+
+    /**
+     * Test fetchReviews private method
+     */
+    public function test_fetch_reviews(): void
+    {
+        $minisiteId = '123';
+        $mockReviews = array(
+            (object)array('id' => 1, 'rating' => 5.0),
+            (object)array('id' => 2, 'rating' => 4.0),
+        );
+
+        // Create a new renderer with properly mocked WordPressManager
+        $mockManager = $this->createMock(WordPressManagerInterface::class);
+        $mockManager
+            ->expects($this->once())
+            ->method('getReviewsForMinisite')
+            ->with($minisiteId)
+            ->willReturn($mockReviews);
+
+        $renderer = new ViewRenderer($this->mockTimberRenderer, $mockManager);
+
+        $reflection = new \ReflectionClass($renderer);
+        $method = $reflection->getMethod('fetchReviews');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($renderer, $minisiteId);
+
+        $this->assertCount(2, $result);
+        $this->assertEquals(1, $result[0]->id);
+        $this->assertEquals(2, $result[1]->id);
+    }
+
+    /**
+     * Test fetchReviews with exception handling
+     */
+    public function test_fetch_reviews_with_exception(): void
+    {
+        $minisiteId = '123';
+
+        $this->mockWordPressManager
+            ->expects($this->once())
+            ->method('getReviewsForMinisite')
+            ->with($minisiteId)
+            ->willThrowException(new \Exception('Database error'));
+
+        $reflection = new \ReflectionClass($this->displayRenderer);
+        $method = $reflection->getMethod('fetchReviews');
+        $method->setAccessible(true);
+
+        $result = $method->invoke($this->displayRenderer, $minisiteId);
+
+        // Should return empty array on exception
+        $this->assertEquals(array(), $result);
+    }
+
+    /**
+     * Test fetchReviews when method doesn't exist
+     * Note: This tests the exception handling when the method call fails
+     */
+    public function test_fetch_reviews_when_method_doesnt_exist(): void
+    {
+        $minisiteId = '123';
+
+        // Create a mock that throws an exception when getReviewsForMinisite is called
+        // This simulates the method not existing or failing
+        $mockManager = $this->createMock(WordPressManagerInterface::class);
+        $mockManager
+            ->expects($this->once())
+            ->method('getReviewsForMinisite')
+            ->with($minisiteId)
+            ->willThrowException(new \BadMethodCallException('Method does not exist'));
+
+        $renderer = new ViewRenderer($this->mockTimberRenderer, $mockManager);
+
+        $reflection = new \ReflectionClass($renderer);
+        $method = $reflection->getMethod('fetchReviews');
+        $method->setAccessible(true);
+
+        // Should return empty array when method throws exception
+        $result = $method->invoke($renderer, $minisiteId);
+
+        $this->assertEquals(array(), $result);
+    }
+
+    /**
+     * Test renderFallbackVersionSpecificPreview private method
+     */
+    public function test_render_fallback_version_specific_preview(): void
+    {
+        $previewData = (object)array(
+            'minisite' => (object)array(
+                'id' => '123',
+                'name' => 'Test Minisite',
+                'city' => 'Test City',
+                'title' => 'Test Title',
+                'siteJson' => array('test' => 'data'),
+            ),
+            'version' => (object)array(
+                'id' => 5,
+                'label' => 'Version 5',
+            ),
+            'siteJson' => array('test' => 'version data'),
+            'versionId' => '5',
+        );
+
+        $reflection = new \ReflectionClass($this->displayRenderer);
+        $method = $reflection->getMethod('renderFallbackVersionSpecificPreview');
+        $method->setAccessible(true);
+
+        // Capture output
+        ob_start();
+        $method->invoke($this->displayRenderer, $previewData);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('<!DOCTYPE html>', $output);
+        $this->assertStringContainsString('Preview: Test Minisite', $output);
+        $this->assertStringContainsString('Version: Version 5', $output);
+        $this->assertStringContainsString('Test Minisite', $output);
+        $this->assertStringContainsString('Test City', $output);
+        $this->assertStringContainsString('Test Title', $output);
+    }
+
+    /**
+     * Test renderFallbackVersionSpecificPreview with null version
+     */
+    public function test_render_fallback_version_specific_preview_with_null_version(): void
+    {
+        $previewData = (object)array(
+            'minisite' => (object)array(
+                'id' => '123',
+                'name' => 'Test Minisite',
+                'city' => 'Test City',
+                'title' => 'Test Title',
+            ),
+            'version' => null,
+            'siteJson' => array(),
+            'versionId' => 'current',
+        );
+
+        $reflection = new \ReflectionClass($this->displayRenderer);
+        $method = $reflection->getMethod('renderFallbackVersionSpecificPreview');
+        $method->setAccessible(true);
+
+        // Capture output
+        ob_start();
+        $method->invoke($this->displayRenderer, $previewData);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('Version: Current Version', $output);
     }
 
     /**
