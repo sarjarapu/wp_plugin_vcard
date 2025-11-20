@@ -28,13 +28,22 @@ final class MinisiteViewDataServiceTest extends TestCase
 
         // Define is_user_logged_in if not already defined (it's not in WordPressFunctions.php)
         // Note: current_user_can and get_current_user_id are already defined in WordPressFunctions.php
+        // Use the same global variable naming pattern as other tests: _test_mock_is_user_logged_in
         if (! function_exists('is_user_logged_in')) {
-            eval('function is_user_logged_in() { return isset($GLOBALS["_test_is_user_logged_in"]) && $GLOBALS["_test_is_user_logged_in"] === true; }');
+            eval('function is_user_logged_in() {
+                if (isset($GLOBALS["_test_mock_is_user_logged_in"])) {
+                    return $GLOBALS["_test_mock_is_user_logged_in"] === true;
+                }
+                // Fallback to old naming pattern for backward compatibility
+                return isset($GLOBALS["_test_is_user_logged_in"]) && $GLOBALS["_test_is_user_logged_in"] === true;
+            }');
         }
 
         // Always reset globals to defaults - use the global names that WordPressFunctions.php expects
+        // Use _test_mock_ prefix to match other test files for consistency
         // This ensures test isolation when running the full test suite
-        $GLOBALS['_test_is_user_logged_in'] = false;
+        $GLOBALS['_test_mock_is_user_logged_in'] = false;
+        $GLOBALS['_test_is_user_logged_in'] = false; // Keep for backward compatibility
         $GLOBALS['_test_mock_get_current_user_id'] = 0;
         $GLOBALS['_test_mock_current_user_can'] = false; // Default to false for tests
 
@@ -47,7 +56,8 @@ final class MinisiteViewDataServiceTest extends TestCase
         // Clean up globals - reset to defaults to prevent test interference
         unset($GLOBALS['minisite_review_repository']);
         // Reset to defaults (don't unset, as WordPressFunctions.php defaults to true if not set)
-        $GLOBALS['_test_is_user_logged_in'] = false;
+        $GLOBALS['_test_mock_is_user_logged_in'] = false;
+        $GLOBALS['_test_is_user_logged_in'] = false; // Keep for backward compatibility
         $GLOBALS['_test_mock_get_current_user_id'] = 0;
         $GLOBALS['_test_mock_current_user_can'] = false;
         global $wpdb;
@@ -105,16 +115,12 @@ final class MinisiteViewDataServiceTest extends TestCase
 
     public function test_prepare_view_model_when_review_repository_not_available(): void
     {
-        // Define WordPress functions for this test
-        if (! function_exists('is_user_logged_in')) {
-            eval('function is_user_logged_in() { return false; }');
-        }
-        if (! function_exists('get_current_user_id')) {
-            eval('function get_current_user_id() { return 0; }');
-        }
-        if (! function_exists('current_user_can')) {
-            eval('function current_user_can(...$args) { return false; }');
-        }
+        // Use globals to control function behavior (functions are already defined in setUp)
+        // Set defaults for this test - user not logged in
+        $GLOBALS['_test_mock_is_user_logged_in'] = false;
+        $GLOBALS['_test_is_user_logged_in'] = false; // Keep for backward compatibility
+        $GLOBALS['_test_mock_get_current_user_id'] = 0;
+        $GLOBALS['_test_mock_current_user_can'] = false;
 
         // Create service without repository (uses global)
         unset($GLOBALS['minisite_review_repository']);
@@ -173,7 +179,8 @@ final class MinisiteViewDataServiceTest extends TestCase
     public function test_prepare_view_model_bookmark_check_user_not_logged_in(): void
     {
         // Set globals - user not logged in (defaults are already set in setUp)
-        $GLOBALS['_test_is_user_logged_in'] = false;
+        $GLOBALS['_test_mock_is_user_logged_in'] = false;
+        $GLOBALS['_test_is_user_logged_in'] = false; // Keep for backward compatibility
         $GLOBALS['_test_mock_get_current_user_id'] = 0;
         $GLOBALS['_test_mock_current_user_can'] = false;
 
@@ -229,7 +236,8 @@ final class MinisiteViewDataServiceTest extends TestCase
         };
 
         // Set globals to control function behavior - use the global names WordPressFunctions.php expects
-        $GLOBALS['_test_is_user_logged_in'] = true;
+        $GLOBALS['_test_mock_is_user_logged_in'] = true;
+        $GLOBALS['_test_is_user_logged_in'] = true; // Keep for backward compatibility
         $GLOBALS['_test_mock_get_current_user_id'] = 1;
         // Use a callable that checks the capability and minisiteId
         // Store the minisite ID we're testing with for the callback
@@ -271,7 +279,8 @@ final class MinisiteViewDataServiceTest extends TestCase
         };
 
         // Set globals to control function behavior - use the global names WordPressFunctions.php expects
-        $GLOBALS['_test_is_user_logged_in'] = true;
+        $GLOBALS['_test_mock_is_user_logged_in'] = true;
+        $GLOBALS['_test_is_user_logged_in'] = true; // Keep for backward compatibility
         $GLOBALS['_test_mock_get_current_user_id'] = 1;
         $GLOBALS['_test_mock_current_user_can'] = false; // User cannot edit
 
@@ -292,7 +301,8 @@ final class MinisiteViewDataServiceTest extends TestCase
     public function test_prepare_view_model_edit_check_user_not_logged_in(): void
     {
         // Set globals - user not logged in (defaults are already set in setUp)
-        $GLOBALS['_test_is_user_logged_in'] = false;
+        $GLOBALS['_test_mock_is_user_logged_in'] = false;
+        $GLOBALS['_test_is_user_logged_in'] = false; // Keep for backward compatibility
         $GLOBALS['_test_mock_get_current_user_id'] = 0;
         $GLOBALS['_test_mock_current_user_can'] = false;
 
@@ -328,7 +338,8 @@ final class MinisiteViewDataServiceTest extends TestCase
         };
 
         // Set globals to control function behavior - use the global names WordPressFunctions.php expects
-        $GLOBALS['_test_is_user_logged_in'] = true;
+        $GLOBALS['_test_mock_is_user_logged_in'] = true;
+        $GLOBALS['_test_is_user_logged_in'] = true; // Keep for backward compatibility
         $GLOBALS['_test_mock_get_current_user_id'] = 1;
         $GLOBALS['_test_mock_current_user_can'] = function (...$args) {
             throw new \Exception('Permission check failed');
