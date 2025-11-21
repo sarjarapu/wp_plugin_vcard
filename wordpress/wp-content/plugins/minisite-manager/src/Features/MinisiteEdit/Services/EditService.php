@@ -2,8 +2,8 @@
 
 namespace Minisite\Features\MinisiteEdit\Services;
 
-use Minisite\Domain\Services\MinisiteDatabaseCoordinator;
-use Minisite\Domain\Services\MinisiteFormProcessor;
+use Minisite\Features\MinisiteManagement\Services\MinisiteFormProcessor;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
@@ -112,12 +112,6 @@ class EditService
             // Create shared components
             $formProcessor = new MinisiteFormProcessor($this->wordPressManager, $this->minisiteRepository);
             $transactionManager = new WordPressTransactionManager();
-            $dbCoordinator = new MinisiteDatabaseCoordinator(
-                $this->wordPressManager,
-                $this->versionRepository,
-                $this->minisiteRepository,
-                $transactionManager
-            );
 
             // Validate form data
             $errors = $formProcessor->validateFormData($formData);
@@ -145,32 +139,30 @@ class EditService
             $hasBeenPublished = $this->versionRepository->findPublishedVersion($siteId) !== null;
             $operationType = $hasBeenPublished ? 'edit_published' : 'edit_draft';
 
-            // Use shared database coordinator
-            $this->logger->info('Calling MinisiteDatabaseCoordinator::saveMinisiteData', array(
+            $this->logger->info('Saving minisite draft directly (inlined coordinator logic)', array(
                 'site_id' => $siteId,
                 'form_data_count' => count($formData),
                 'operation_type' => $operationType,
                 'has_been_published' => $hasBeenPublished,
                 'minisite_status' => $minisite->status ?? 'unknown',
-                'call_type' => 'call_database_coordinator',
             ));
 
-            $result = $dbCoordinator->saveMinisiteData(
+            $result = $this->saveDraftMinisite(
                 $siteId,
                 $formData,
-                $operationType,
+                $formProcessor,
+                $transactionManager,
                 $minisite,
                 $currentUser,
                 $hasBeenPublished
             );
 
-            $this->logger->info('MinisiteDatabaseCoordinator::saveMinisiteData completed', array(
+            $this->logger->info('Inline draft persistence completed', array(
                 'site_id' => $siteId,
                 'success' => $result->success ?? false,
                 'has_errors' => ! empty($result->errors ?? array()),
                 'error_count' => count($result->errors ?? array()),
                 'has_redirect_url' => ! empty($result->redirectUrl ?? ''),
-                'operation_type' => 'database_coordinator_result',
             ));
 
             return $result;
@@ -245,5 +237,154 @@ class EditService
         }
 
         return '';
+    }
+
+    /**
+     * Persist a draft update (logic migrated from MinisiteDatabaseCoordinator::updateDraftVersion)
+     */
+    private function saveDraftMinisite(
+        string $siteId,
+        array $formData,
+        MinisiteFormProcessor $formProcessor,
+        WordPressTransactionManager $transactionManager,
+        object $minisite,
+        object $currentUser,
+        bool $hasBeenPublished
+    ): object {
+        $siteJson = $formProcessor->buildSiteJsonFromForm($formData, $siteId, $minisite);
+
+        $lat = ! empty($formData['contact_lat']) ? (float) $formData['contact_lat'] : null;
+        $lng = ! empty($formData['contact_lng']) ? (float) $formData['contact_lng'] : null;
+
+        $transactionManager->startTransaction();
+
+        try {
+            $nextVersion = $this->versionRepository->getNextVersionNumber($siteId);
+            $slugs = $minisite->slugs;
+
+            $geo = null;
+            if ($lat !== null && $lng !== null) {
+                $geo = new GeoPoint(lat: $lat, lng: $lng);
+            }
+
+            $version = new Version(
+                id: null,
+                minisiteId: $siteId,
+                versionNumber: $nextVersion,
+                status: 'draft',
+                label: $this->wordPressManager->sanitizeTextField(
+                    $formData['version_label'] ?? "Version {$nextVersion}"
+                ),
+                comment: $this->wordPressManager->sanitizeTextareaField(
+                    $formData['version_comment'] ?? ''
+                ),
+                createdBy: (int) $currentUser->ID,
+                createdAt: null,
+                publishedAt: null,
+                sourceVersionId: null,
+                siteJson: $siteJson,
+                slugs: $slugs,
+                title: $formProcessor->getFormValueFromObject($formData, $minisite, 'seo_title', 'title'),
+                name: $formProcessor->getFormValueFromObject($formData, $minisite, 'business_name', 'name'),
+                city: $formProcessor->getFormValueFromObject($formData, $minisite, 'business_city', 'city'),
+                region: $formProcessor->getFormValueFromObject($formData, $minisite, 'business_region', 'region'),
+                countryCode: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_country',
+                    'countryCode'
+                ),
+                postalCode: $formProcessor->getFormValueFromObject(
+                    $formData,
+                    $minisite,
+                    'business_postal',
+                    'postalCode'
+                ),
+                geo: $geo,
+                siteTemplate: $formProcessor->getFormValueFromObject($formData, $minisite, 'site_template', 'siteTemplate'),
+                palette: $formProcessor->getFormValueFromObject($formData, $minisite, 'brand_palette', 'palette'),
+                industry: $formProcessor->getFormValueFromObject($formData, $minisite, 'brand_industry', 'industry'),
+                defaultLocale: $formProcessor->getFormValueFromObject($formData, $minisite, 'default_locale', 'defaultLocale'),
+                schemaVersion: $minisite->schemaVersion,
+                siteVersion: $minisite->siteVersion,
+                searchTerms: $formProcessor->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms')
+            );
+
+            $savedVersion = $this->versionRepository->save($version);
+
+            $this->updateMainTableIfNeeded(
+                $siteId,
+                $formData,
+                $minisite,
+                $currentUser,
+                $lat,
+                $lng,
+                $formProcessor,
+                $hasBeenPublished
+            );
+
+            $transactionManager->commitTransaction();
+
+            return (object) array(
+                'success' => true,
+                'redirectUrl' => $this->wordPressManager->getHomeUrl("/account/sites/{$siteId}/edit?draft_saved=1"),
+                'version_id' => $savedVersion->id ?? null,
+            );
+        } catch (\Exception $e) {
+            $transactionManager->rollbackTransaction();
+
+            throw $e;
+        }
+    }
+
+    private function updateMainTableIfNeeded(
+        string $siteId,
+        array $formData,
+        object $minisite,
+        object $currentUser,
+        ?float $lat,
+        ?float $lng,
+        MinisiteFormProcessor $formProcessor,
+        bool $hasBeenPublished
+    ): void {
+        if ($hasBeenPublished) {
+            return;
+        }
+
+        $businessInfoFields = array(
+            'name' => $formProcessor->getFormValueFromObject($formData, $minisite, 'business_name', 'name'),
+            'city' => $formProcessor->getFormValueFromObject($formData, $minisite, 'business_city', 'city'),
+            'region' => $formProcessor->getFormValueFromObject($formData, $minisite, 'business_region', 'region'),
+            'country_code' => $formProcessor->getFormValueFromObject(
+                $formData,
+                $minisite,
+                'business_country',
+                'countryCode'
+            ),
+            'postal_code' => $formProcessor->getFormValueFromObject($formData, $minisite, 'business_postal', 'postalCode'),
+            'site_template' => $formProcessor->getFormValueFromObject($formData, $minisite, 'site_template', 'siteTemplate'),
+            'palette' => $formProcessor->getFormValueFromObject($formData, $minisite, 'brand_palette', 'palette'),
+            'industry' => $formProcessor->getFormValueFromObject($formData, $minisite, 'brand_industry', 'industry'),
+            'default_locale' => $formProcessor->getFormValueFromObject(
+                $formData,
+                $minisite,
+                'default_locale',
+                'defaultLocale'
+            ),
+            'search_terms' => $formProcessor->getFormValueFromObject($formData, $minisite, 'search_terms', 'searchTerms'),
+        );
+
+        $allUpdateFields = $businessInfoFields;
+
+        if ($lat !== null && $lng !== null) {
+            $allUpdateFields['location_point'] = "POINT($lng, $lat)";
+        }
+
+        $newTitle = $formProcessor->getFormValue($formData, array(), 'seo_title', 'seo_title', '');
+        if (! empty($newTitle) && $newTitle !== $minisite->title) {
+            $allUpdateFields['title'] = $newTitle;
+        }
+
+        $this->minisiteRepository->updateMinisiteFields($siteId, $allUpdateFields, (int) $currentUser->ID);
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Minisite\Features\Authentication\WordPress;
 
-use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Infrastructure\WordPress\Contracts\WordPressManagerInterface;
 use Minisite\Features\BaseFeature\WordPress\BaseWordPressManager;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 

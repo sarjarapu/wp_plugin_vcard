@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Domain\ValueObjects;
+namespace Minisite\Features\MinisiteManagement\Domain\ValueObjects;
 
 final class SlugPair
 {
@@ -35,3 +35,4 @@ final class SlugPair
         return $this->location !== '' ? "{$this->business}/{$this->location}" : $this->business;
     }
 }
+

@@ -507,7 +507,7 @@ class VersionRepository extends EntityRepository implements VersionRepositoryInt
             );
 
             if ($pointResult && $pointResult['lat'] !== null && $pointResult['lng'] !== null) {
-                $version->geo = new \Minisite\Domain\ValueObjects\GeoPoint(
+                $version->geo = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint(
                     lat: (float) $pointResult['lat'],  // ST_Y() = latitude
                     lng: (float) $pointResult['lng']   // ST_X() = longitude
                 );
@@ -528,7 +528,7 @@ class VersionRepository extends EntityRepository implements VersionRepositoryInt
     private function populateSlugs(Version $version): void
     {
         if ($version->businessSlug !== null && $version->locationSlug !== null) {
-            $version->slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+            $version->slugs = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair(
                 business: $version->businessSlug,
                 location: $version->locationSlug
             );

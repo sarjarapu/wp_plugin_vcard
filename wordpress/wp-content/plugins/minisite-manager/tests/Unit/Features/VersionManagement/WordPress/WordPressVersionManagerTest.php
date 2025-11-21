@@ -366,7 +366,7 @@ final class WordPressVersionManagerTest extends TestCase
         $reflection = new \ReflectionClass(WordPressVersionManager::class);
         $interfaces = $reflection->getInterfaceNames();
 
-        $this->assertContains('Minisite\Domain\Interfaces\WordPressManagerInterface', $interfaces);
+        $this->assertContains('Minisite\Infrastructure\WordPress\Contracts\WordPressManagerInterface', $interfaces);
     }
 
     /**

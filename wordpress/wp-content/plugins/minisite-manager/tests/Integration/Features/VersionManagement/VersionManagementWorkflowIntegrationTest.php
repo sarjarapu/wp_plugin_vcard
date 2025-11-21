@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\VersionManagement;
 
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository;
 use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;

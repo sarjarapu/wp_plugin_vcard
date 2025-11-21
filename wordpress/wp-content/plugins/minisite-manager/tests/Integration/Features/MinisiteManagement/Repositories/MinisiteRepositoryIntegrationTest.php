@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Integration\Features\MinisiteManagement\Repositories;
 
-use Minisite\Domain\ValueObjects\GeoPoint;
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository;
 use PHPUnit\Framework\Attributes\CoversClass;

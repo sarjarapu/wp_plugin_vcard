@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Tests\Unit\Features\PublishMinisite\Rendering;
 
 use Minisite\Application\Rendering\TimberRenderer;
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;
 use PHPUnit\Framework\Attributes\CoversClass;

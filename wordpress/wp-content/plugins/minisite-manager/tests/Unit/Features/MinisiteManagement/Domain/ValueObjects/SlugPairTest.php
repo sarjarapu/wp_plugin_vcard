@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\ValueObjects;
+namespace Tests\Unit\Features\MinisiteManagement\Domain\ValueObjects;
 
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -101,3 +101,4 @@ final class SlugPairTest extends TestCase
         ];
     }
 }
+

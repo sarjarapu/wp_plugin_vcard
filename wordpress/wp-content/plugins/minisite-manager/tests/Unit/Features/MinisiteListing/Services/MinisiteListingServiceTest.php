@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Features\MinisiteListing\Services;
 
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteListing\Commands\ListMinisitesCommand;
 use Minisite\Features\MinisiteListing\Services\MinisiteListingService;
 use Minisite\Features\MinisiteListing\WordPress\WordPressListingManager;

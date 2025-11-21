@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Domain\Interfaces;
+namespace Minisite\Infrastructure\WordPress\Contracts;
 
 /**
  * WordPress Manager Interface
@@ -52,3 +52,4 @@ interface WordPressManagerInterface
      */
     public function getHomeUrl(string $path = ''): string;
 }
+
