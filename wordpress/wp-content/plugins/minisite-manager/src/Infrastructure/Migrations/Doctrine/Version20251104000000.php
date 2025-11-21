@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 
 /**
  * Migration: Create minisite_reviews table with all MVP fields (fresh start)

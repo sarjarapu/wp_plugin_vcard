@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Minisite\Infrastructure\Persistence;
 
-use Minisite\Domain\Interfaces\TransactionManagerInterface;
+use Minisite\Infrastructure\Persistence\Contracts\TransactionManagerInterface;
 use Minisite\Infrastructure\Utils\DatabaseHelper as db;
 
 /**

@@ -6,7 +6,7 @@ namespace Minisite\Infrastructure\Persistence\Doctrine\Types;
 
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
-use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
 
 /**
  * Custom Doctrine type for MySQL POINT geometry type

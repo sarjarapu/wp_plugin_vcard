@@ -1,13 +1,14 @@
 <?php
 
-namespace Minisite\Features\VersionManagement\Services;
+namespace Tests\Unit\Features\VersionManagement\Services;
 
-use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
 use Minisite\Features\VersionManagement\Commands\CreateDraftCommand;
 use Minisite\Features\VersionManagement\Commands\ListVersionsCommand;
 use Minisite\Features\VersionManagement\Commands\PublishVersionCommand;
 use Minisite\Features\VersionManagement\Commands\RollbackVersionCommand;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
+use Minisite\Features\VersionManagement\Services\VersionService;
 use Minisite\Features\VersionManagement\WordPress\WordPressVersionManager;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
@@ -305,7 +306,7 @@ class VersionServiceTest extends TestCase
         $sourceVersion->versionNumber = 2;
         $sourceVersion->minisiteId = $siteId;
         $sourceVersion->siteJson = json_encode(array('test' => 'data'));
-        $sourceVersion->slugs = new \Minisite\Domain\ValueObjects\SlugPair('test-business', 'test-location');
+        $sourceVersion->slugs = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair('test-business', 'test-location');
         $sourceVersion->title = 'Test Title';
         $sourceVersion->name = 'Test Name';
         $sourceVersion->city = 'Test City';
@@ -774,7 +775,7 @@ class VersionServiceTest extends TestCase
         $sourceVersion->versionNumber = 2;
         $sourceVersion->minisiteId = $siteId;
         $sourceVersion->siteJson = json_encode(array('test' => 'data'));
-        $sourceVersion->slugs = new \Minisite\Domain\ValueObjects\SlugPair('test-business', 'test-location');
+        $sourceVersion->slugs = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair('test-business', 'test-location');
         $sourceVersion->title = 'Source Title';
         $sourceVersion->name = 'Source Name';
         $sourceVersion->city = 'Source City';

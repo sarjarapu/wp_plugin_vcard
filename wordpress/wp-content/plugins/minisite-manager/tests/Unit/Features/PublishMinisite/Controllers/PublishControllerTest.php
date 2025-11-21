@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Features\PublishMinisite\Controllers;
 
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\PublishMinisite\Controllers\PublishController;
 use Minisite\Features\PublishMinisite\Rendering\PublishRenderer;

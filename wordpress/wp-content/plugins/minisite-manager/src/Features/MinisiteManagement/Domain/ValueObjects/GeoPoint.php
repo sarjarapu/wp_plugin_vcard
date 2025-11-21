@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Domain\ValueObjects;
+namespace Minisite\Features\MinisiteManagement\Domain\ValueObjects;
 
 final class GeoPoint
 {
@@ -53,3 +53,4 @@ final class GeoPoint
         return $this->lat !== null && $this->lng !== null;
     }
 }
+

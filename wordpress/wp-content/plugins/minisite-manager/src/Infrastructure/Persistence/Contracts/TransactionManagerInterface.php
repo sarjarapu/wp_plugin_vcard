@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Minisite\Domain\Interfaces;
+namespace Minisite\Infrastructure\Persistence\Contracts;
 
 /**
  * Transaction Manager Interface
@@ -27,3 +27,4 @@ interface TransactionManagerInterface
      */
     public function rollbackTransaction(): void;
 }
+

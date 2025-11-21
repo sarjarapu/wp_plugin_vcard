@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Features\PublishMinisite\Services;
 
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\PublishMinisite\Services\SlugAvailabilityService;

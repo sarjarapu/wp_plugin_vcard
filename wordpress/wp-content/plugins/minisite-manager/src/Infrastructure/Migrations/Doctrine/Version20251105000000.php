@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Minisite\Infrastructure\Migrations\Doctrine;
 
 use Doctrine\DBAL\Schema\Schema;
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\VersionManagement\Domain\Interfaces\VersionRepositoryInterface;
 use Minisite\Features\VersionManagement\Services\VersionSeederService;

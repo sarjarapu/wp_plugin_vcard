@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Minisite\Features\VersionManagement\Domain\Entities;
 
 use Doctrine\ORM\Mapping as ORM;
-use Minisite\Domain\ValueObjects\GeoPoint;
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 
 /**
  * Version Entity - Doctrine ORM

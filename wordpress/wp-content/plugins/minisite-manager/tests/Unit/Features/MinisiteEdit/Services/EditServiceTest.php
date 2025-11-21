@@ -2,7 +2,7 @@
 
 namespace Minisite\Tests\Unit\Features\MinisiteEdit\Services;
 
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteEdit\Services\EditService;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;

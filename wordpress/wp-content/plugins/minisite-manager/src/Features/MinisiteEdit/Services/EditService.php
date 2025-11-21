@@ -2,8 +2,8 @@
 
 namespace Minisite\Features\MinisiteEdit\Services;
 
-use Minisite\Domain\Services\MinisiteFormProcessor;
-use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Services\MinisiteFormProcessor;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
 use Minisite\Features\MinisiteEdit\WordPress\WordPressEditManager;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;

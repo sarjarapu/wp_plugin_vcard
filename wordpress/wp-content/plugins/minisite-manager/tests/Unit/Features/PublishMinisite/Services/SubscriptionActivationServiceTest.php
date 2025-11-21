@@ -215,7 +215,7 @@ final class SubscriptionActivationServiceTest extends TestCase
         $locationSlug = 'test-location';
 
         $mockMinisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
-        $mockMinisite->slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+        $mockMinisite->slugs = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair(
             business: 'old-business',
             location: 'old-location'
         );
@@ -265,7 +265,7 @@ final class SubscriptionActivationServiceTest extends TestCase
         $locationSlug = 'test-location';
 
         $mockMinisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
-        $mockMinisite->slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+        $mockMinisite->slugs = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair(
             business: 'test-business',
             location: 'test-location'
         );
@@ -316,7 +316,7 @@ final class SubscriptionActivationServiceTest extends TestCase
         $reservationId = '456';
 
         $mockMinisite = $this->createMock(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class);
-        $mockMinisite->slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+        $mockMinisite->slugs = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair(
             business: 'old-business',
             location: 'old-location'
         );

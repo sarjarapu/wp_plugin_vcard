@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Features\MinisiteManagement\Services;
 
-use Minisite\Domain\ValueObjects\GeoPoint;
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\MinisiteManagement\Services\MinisiteSeederService;

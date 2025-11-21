@@ -2,7 +2,7 @@
 
 namespace Minisite\Infrastructure\Security;
 
-use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Infrastructure\WordPress\Contracts\WordPressManagerInterface;
 
 /**
  * Form Security Helper

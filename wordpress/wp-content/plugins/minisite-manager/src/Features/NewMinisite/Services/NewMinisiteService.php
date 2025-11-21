@@ -2,8 +2,8 @@
 
 namespace Minisite\Features\NewMinisite\Services;
 
-use Minisite\Domain\Services\MinisiteFormProcessor;
-use Minisite\Domain\Services\MinisiteIdGenerator;
+use Minisite\Features\MinisiteManagement\Services\MinisiteFormProcessor;
+use Minisite\Features\MinisiteManagement\Services\MinisiteIdGenerator;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Features\NewMinisite\WordPress\WordPressNewMinisiteManager;
 use Minisite\Features\VersionManagement\Domain\Entities\Version;
@@ -247,14 +247,14 @@ class NewMinisiteService
 
         $draftBusinessSlug = 'biz-' . substr($minisiteId, 0, 8);
         $draftLocationSlug = 'loc-' . substr($minisiteId, 8, 8);
-        $slugs = new \Minisite\Domain\ValueObjects\SlugPair(
+        $slugs = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair(
             business: $draftBusinessSlug,
             location: $draftLocationSlug
         );
 
         $geo = null;
         if ($lat !== null && $lng !== null) {
-            $geo = new \Minisite\Domain\ValueObjects\GeoPoint(lat: $lat, lng: $lng);
+            $geo = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint(lat: $lat, lng: $lng);
         }
 
         $this->logger->info('Starting database transaction for new draft creation (inlined)', array(

@@ -2,7 +2,7 @@
 
 namespace Minisite\Features\BaseFeature\WordPress;
 
-use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Infrastructure\WordPress\Contracts\WordPressManagerInterface;
 use Minisite\Infrastructure\Http\TerminationHandlerInterface;
 
 /**

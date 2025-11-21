@@ -1,8 +1,8 @@
 <?php
 
-namespace Minisite\Domain\Services;
+namespace Minisite\Features\MinisiteManagement\Services;
 
-use Minisite\Domain\Interfaces\WordPressManagerInterface;
+use Minisite\Infrastructure\WordPress\Contracts\WordPressManagerInterface;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
 use Psr\Log\LoggerInterface;

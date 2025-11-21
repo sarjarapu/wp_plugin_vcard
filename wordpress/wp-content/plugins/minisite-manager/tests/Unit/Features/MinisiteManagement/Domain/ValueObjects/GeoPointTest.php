@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\ValueObjects;
+namespace Tests\Unit\Features\MinisiteManagement\Domain\ValueObjects;
 
-use Minisite\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -96,3 +96,4 @@ final class GeoPointTest extends TestCase
         ];
     }
 }
+

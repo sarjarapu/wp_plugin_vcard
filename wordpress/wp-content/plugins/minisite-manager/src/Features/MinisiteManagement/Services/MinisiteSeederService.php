@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Minisite\Features\MinisiteManagement\Services;
 
-use Minisite\Domain\ValueObjects\GeoPoint;
-use Minisite\Domain\ValueObjects\SlugPair;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\GeoPoint;
+use Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair;
 use Minisite\Features\MinisiteManagement\Domain\Entities\Minisite;
 use Minisite\Features\MinisiteManagement\Domain\Interfaces\MinisiteRepositoryInterface;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
@@ -141,7 +141,7 @@ class MinisiteSeederService
         $minisite = new Minisite();
 
         // Core required fields
-        $minisite->id = $minisiteData['id'] ?? \Minisite\Domain\Services\MinisiteIdGenerator::generate();
+        $minisite->id = $minisiteData['id'] ?? \Minisite\Features\MinisiteManagement\Services\MinisiteIdGenerator::generate();
         $minisite->slug = $minisiteData['slug'] ?? null;
         $minisite->businessSlug = $minisiteData['business_slug'] ?? null;
         $minisite->locationSlug = $minisiteData['location_slug'] ?? null;
@@ -274,7 +274,7 @@ class MinisiteSeederService
                 $locationSlug = $minisiteData['minisite']['location_slug'] ?? null;
 
                 if ($businessSlug !== null && $locationSlug !== null) {
-                    $slugPair = new \Minisite\Domain\ValueObjects\SlugPair(
+                    $slugPair = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair(
                         business: $businessSlug,
                         location: $locationSlug
                     );
@@ -296,7 +296,7 @@ class MinisiteSeederService
                 }
 
                 // Generate new ID for each minisite (override JSON ID)
-                $minisiteData['id'] = \Minisite\Domain\Services\MinisiteIdGenerator::generate();
+                $minisiteData['id'] = \Minisite\Features\MinisiteManagement\Services\MinisiteIdGenerator::generate();
 
                 // Create entity from JSON data
                 $minisite = $this->createMinisiteFromJsonData($minisiteData);
@@ -332,7 +332,7 @@ class MinisiteSeederService
                 $locationSlug = $minisiteData['minisite']['location_slug'] ?? null;
 
                 if ($businessSlug !== null && $locationSlug !== null) {
-                    $slugPair = new \Minisite\Domain\ValueObjects\SlugPair(
+                    $slugPair = new \Minisite\Features\MinisiteManagement\Domain\ValueObjects\SlugPair(
                         business: $businessSlug,
                         location: $locationSlug
                     );

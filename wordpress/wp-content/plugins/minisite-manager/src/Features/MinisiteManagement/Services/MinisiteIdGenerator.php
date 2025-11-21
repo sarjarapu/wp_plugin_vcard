@@ -1,6 +1,6 @@
 <?php
 
-namespace Minisite\Domain\Services;
+namespace Minisite\Features\MinisiteManagement\Services;
 
 /**
  * Service for generating unique IDs and managing slug generation for minisites
@@ -28,3 +28,4 @@ final class MinisiteIdGenerator
         return 'draft-' . substr($id, 0, 8);
     }
 }
+

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Domain\Services;
+namespace Tests\Unit\Features\MinisiteManagement\Services;
 
-use Minisite\Domain\Services\MinisiteIdGenerator;
+use Minisite\Features\MinisiteManagement\Services\MinisiteIdGenerator;
 use PHPUnit\Framework\TestCase;
 
 final class MinisiteIdGeneratorTest extends TestCase
@@ -38,3 +38,4 @@ final class MinisiteIdGeneratorTest extends TestCase
         $this->assertSame('draft-abc123', $slug);
     }
 }
+
