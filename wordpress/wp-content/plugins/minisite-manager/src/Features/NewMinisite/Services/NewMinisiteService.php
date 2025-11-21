@@ -193,17 +193,23 @@ class NewMinisiteService
         array $formData,
         MinisiteFormProcessor $formProcessor,
         WordPressTransactionManager $transactionManager,
-        object $currentUser
+        ?object $currentUser
     ): object {
+        if (! $currentUser) {
+            $this->logger->error('Current user is required for new minisite creation');
+
+            throw new \InvalidArgumentException('Current user is required for new minisite creation');
+        }
+
         $this->logger->info('Starting new draft creation', array(
             'minisite_id' => $minisiteId,
-            'user_id' => $currentUser?->ID,
+            'user_id' => $currentUser->ID,
             'form_fields_count' => count($formData),
         ));
 
         $this->logger->debug('Database coordinator - form data values (inlined)', array(
             'minisite_id' => $minisiteId,
-            'user_id' => $currentUser?->ID,
+            'user_id' => $currentUser->ID,
             'business_name' => $formData['business_name'] ?? 'NOT_SET',
             'business_city' => $formData['business_city'] ?? 'NOT_SET',
             'seo_title' => $formData['seo_title'] ?? 'NOT_SET',
@@ -221,12 +227,6 @@ class NewMinisiteService
             'default_locale' => $formData['default_locale'] ?? 'NOT_SET',
             'search_terms' => $formData['search_terms'] ?? 'NOT_SET',
         ));
-
-        if (! $currentUser) {
-            $this->logger->error('Current user is required for new minisite creation');
-
-            throw new \InvalidArgumentException('Current user is required for new minisite creation');
-        }
 
         $siteJson = $formProcessor->buildSiteJsonFromForm($formData, $minisiteId);
 
