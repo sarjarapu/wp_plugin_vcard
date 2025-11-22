@@ -71,14 +71,47 @@ if (! function_exists('add_action')) {
 if (! function_exists('add_filter')) {
     function add_filter($hook, $callback, $priority = 10, $accepted_args = 1)
     {
-        // Mock - do nothing in tests
+        // Reuse add_action storage to simplify hook assertions
+        add_action($hook, $callback, $priority, $accepted_args);
+    }
+}
+
+if (! function_exists('add_menu_page')) {
+    function add_menu_page($page_title, $menu_title, $capability, $menu_slug, $callback = '', $icon_url = '', $position = null)
+    {
+        if (! isset($GLOBALS['_test_admin_menus'])) {
+            $GLOBALS['_test_admin_menus'] = array('menu' => array(), 'submenu' => array());
+        }
+        $GLOBALS['_test_admin_menus']['menu'][] = array(
+            'page_title' => $page_title,
+            'menu_title' => $menu_title,
+            'capability' => $capability,
+            'menu_slug' => $menu_slug,
+            'callback' => $callback,
+            'icon_url' => $icon_url,
+            'position' => $position,
+        );
+
+        return $menu_slug;
     }
 }
 
 if (! function_exists('add_submenu_page')) {
     function add_submenu_page($parent_slug, $page_title, $menu_title, $capability, $menu_slug, $callback = '', $position = null)
     {
-        // Mock - do nothing in tests, just return a fake page hook
+        if (! isset($GLOBALS['_test_admin_menus'])) {
+            $GLOBALS['_test_admin_menus'] = array('menu' => array(), 'submenu' => array());
+        }
+        $GLOBALS['_test_admin_menus']['submenu'][] = array(
+            'parent_slug' => $parent_slug,
+            'page_title' => $page_title,
+            'menu_title' => $menu_title,
+            'capability' => $capability,
+            'menu_slug' => $menu_slug,
+            'callback' => $callback,
+            'position' => $position,
+        );
+
         return $menu_slug;
     }
 }
@@ -678,6 +711,65 @@ if (! function_exists('delete_option')) {
         unset($GLOBALS['_test_options'][$option]);
 
         return true;
+    }
+}
+
+if (! class_exists('WP_Role')) {
+    class WP_Role
+    {
+        public string $name;
+        public array $capabilities;
+
+        public function __construct(string $name, array $capabilities = array())
+        {
+            $this->name = $name;
+            $this->capabilities = $capabilities;
+        }
+
+        public function add_cap(string $cap): void
+        {
+            $this->capabilities[$cap] = true;
+        }
+
+        public function has_cap(string $cap): bool
+        {
+            return ! empty($this->capabilities[$cap]);
+        }
+    }
+}
+
+if (! function_exists('add_role')) {
+    function add_role($role, $display_name, $capabilities = array())
+    {
+        if (! isset($GLOBALS['_test_roles'])) {
+            $GLOBALS['_test_roles'] = array();
+        }
+        $roleObject = new WP_Role($display_name, $capabilities);
+        $GLOBALS['_test_roles'][$role] = $roleObject;
+
+        return $roleObject;
+    }
+}
+
+if (! function_exists('get_role')) {
+    function get_role($role)
+    {
+        if (! isset($GLOBALS['_test_roles'])) {
+            $GLOBALS['_test_roles'] = array();
+        }
+
+        return $GLOBALS['_test_roles'][$role] ?? null;
+    }
+}
+
+if (! function_exists('remove_role')) {
+    function remove_role($role)
+    {
+        if (! isset($GLOBALS['_test_roles'])) {
+            $GLOBALS['_test_roles'] = array();
+        }
+
+        unset($GLOBALS['_test_roles'][$role]);
     }
 }
 

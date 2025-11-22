@@ -12,13 +12,15 @@ namespace Minisite\Core;
  */
 final class DeactivationHandler
 {
+    private static ?bool $productionOverride = null;
+
     public static function handle(): void
     {
         // Flush rewrite rules
         flush_rewrite_rules();
 
         // Cleanup in non-production
-        if (! defined('MINISITE_LIVE_PRODUCTION') || ! MINISITE_LIVE_PRODUCTION) {
+        if (! self::isProductionEnvironment()) {
             self::cleanupNonProduction();
         }
     }
@@ -36,5 +38,30 @@ final class DeactivationHandler
         foreach (array('minisite_user', 'minisite_member', 'minisite_power', 'minisite_admin') as $roleSlug) {
             remove_role($roleSlug);
         }
+    }
+
+    /**
+     * @internal Testing utility - not part of the public API.
+     */
+    public static function setProductionOverride(?bool $isProduction): void
+    {
+        self::$productionOverride = $isProduction;
+    }
+
+    /**
+     * @internal Testing utility - not part of the public API.
+     */
+    public static function resetTestState(): void
+    {
+        self::$productionOverride = null;
+    }
+
+    private static function isProductionEnvironment(): bool
+    {
+        if (self::$productionOverride !== null) {
+            return self::$productionOverride;
+        }
+
+        return defined('MINISITE_LIVE_PRODUCTION') && MINISITE_LIVE_PRODUCTION;
     }
 }

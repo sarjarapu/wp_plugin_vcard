@@ -1,120 +1,85 @@
 <?php
 
-namespace Minisite\Tests\Unit\Core;
+declare(strict_types=1);
 
+namespace Tests\Unit\Core;
+
+use Brain\Monkey\Functions;
 use Minisite\Core\AdminMenuManager;
-use PHPUnit\Framework\TestCase;
+use Tests\Support\CoreTestCase;
 
-/**
- * Test class for AdminMenuManager
- */
-class AdminMenuManagerTest extends TestCase
+#[\PHPUnit\Framework\Attributes\CoversClass(AdminMenuManager::class)]
+final class AdminMenuManagerTest extends CoreTestCase
 {
-    /**
-     * Test initialize method is static
-     */
-    public function test_initialize_is_static_method(): void
+    public function testInitializeRegistersAdminMenuHook(): void
     {
-        $reflection = new \ReflectionClass(AdminMenuManager::class);
-        $initializeMethod = $reflection->getMethod('initialize');
-        
-        $this->assertTrue($initializeMethod->isStatic());
-        $this->assertTrue($initializeMethod->isPublic());
+        $callback = null;
+        Functions\when('add_action')->alias(function ($hook, $cb) use (&$callback): void {
+            if ($hook === 'admin_menu') {
+                $callback = $cb;
+            }
+        });
+
+        AdminMenuManager::initialize();
+
+        $this->assertIsCallable($callback);
+
+        // Execute the callback to simulate WordPress firing the hook.
+        $callback();
+
+        $this->assertNotEmpty($GLOBALS['_test_admin_menus']['menu'] ?? array());
     }
 
-    /**
-     * Test class can be instantiated
-     */
-    public function test_class_can_be_instantiated(): void
+    public function testRegisterAddsMenuAndSubmenus(): void
     {
-        $instance = new AdminMenuManager();
-        $this->assertInstanceOf(AdminMenuManager::class, $instance);
+        $manager = new AdminMenuManager();
+        $manager->register();
+
+        $menus = $GLOBALS['_test_admin_menus'];
+        $this->assertSame('minisite-manager', $menus['menu'][0]['menu_slug']);
+        $this->assertSame('Dashboard', $menus['submenu'][0]['page_title']);
+        $this->assertSame('My Sites', $menus['submenu'][1]['page_title']);
     }
 
-    /**
-     * Test register method is public
-     */
-    public function test_register_is_public_method(): void
+    public function testRenderDashboardPageRedirectsToFrontend(): void
     {
-        $reflection = new \ReflectionClass(AdminMenuManager::class);
-        $registerMethod = $reflection->getMethod('register');
-        
-        $this->assertTrue($registerMethod->isPublic());
+        $manager = new AdminMenuManager();
+        $capturedUrl = null;
+
+        Functions\when('home_url')->alias(static fn ($path) => 'http://example.com' . $path);
+        Functions\when('wp_redirect')->alias(function ($url) use (&$capturedUrl): void {
+            $capturedUrl = $url;
+        });
+
+        $terminated = false;
+        AdminMenuManager::setTerminationCallback(static function () use (&$terminated): void {
+            $terminated = true;
+        });
+
+        $manager->renderDashboardPage();
+
+        $this->assertSame('http://example.com/account/dashboard', $capturedUrl);
+        $this->assertTrue($terminated);
     }
 
-    /**
-     * Test addMainMenu method is public
-     */
-    public function test_addMainMenu_is_public_method(): void
+    public function testRenderMySitesPageRedirectsToFrontend(): void
     {
-        $reflection = new \ReflectionClass(AdminMenuManager::class);
-        $addMainMenuMethod = $reflection->getMethod('addMainMenu');
-        
-        $this->assertTrue($addMainMenuMethod->isPublic());
-    }
+        $manager = new AdminMenuManager();
+        $capturedUrl = null;
 
-    /**
-     * Test class is final
-     */
-    public function test_class_is_final(): void
-    {
-        $reflection = new \ReflectionClass(AdminMenuManager::class);
-        // Note: BypassFinals extension bypasses final keyword in tests
-        // The class is actually final in production
-        $this->assertTrue(true); // Always pass - class is final in production
-    }
+        Functions\when('home_url')->alias(static fn ($path) => 'http://example.com' . $path);
+        Functions\when('wp_redirect')->alias(function ($url) use (&$capturedUrl): void {
+            $capturedUrl = $url;
+        });
 
-    /**
-     * Test class has expected methods
-     */
-    public function test_class_has_expected_methods(): void
-    {
-        $reflection = new \ReflectionClass(AdminMenuManager::class);
-        
-        $this->assertTrue($reflection->hasMethod('initialize'));
-        $this->assertTrue($reflection->hasMethod('register'));
-        $this->assertTrue($reflection->hasMethod('addMainMenu'));
-    }
+        $terminated = false;
+        AdminMenuManager::setTerminationCallback(static function () use (&$terminated): void {
+            $terminated = true;
+        });
 
-    /**
-     * Test methods are callable
-     */
-    public function test_methods_are_callable(): void
-    {
-        $this->assertTrue(is_callable([AdminMenuManager::class, 'initialize']));
-        $instance = new AdminMenuManager();
-        $this->assertTrue(is_callable([$instance, 'register']));
-        $this->assertTrue(is_callable([$instance, 'addMainMenu']));
-    }
+        $manager->renderMySitesPage();
 
-    /**
-     * Test class has expected constants
-     */
-    public function test_class_has_expected_constants(): void
-    {
-        $reflection = new \ReflectionClass(AdminMenuManager::class);
-        
-        $this->assertTrue($reflection->hasConstant('MENU_SLUG'));
-        $this->assertTrue($reflection->hasConstant('MENU_TITLE'));
-        $this->assertTrue($reflection->hasConstant('MENU_ICON'));
-        $this->assertTrue($reflection->hasConstant('MENU_POSITION'));
-    }
-
-    /**
-     * Test constants have expected values (using reflection for private constants)
-     */
-    public function test_constants_have_expected_values(): void
-    {
-        $reflection = new \ReflectionClass(AdminMenuManager::class);
-        
-        $menuSlug = $reflection->getConstant('MENU_SLUG');
-        $menuTitle = $reflection->getConstant('MENU_TITLE');
-        $menuIcon = $reflection->getConstant('MENU_ICON');
-        $menuPosition = $reflection->getConstant('MENU_POSITION');
-        
-        $this->assertEquals('minisite-manager', $menuSlug);
-        $this->assertEquals('Minisite Manager', $menuTitle);
-        $this->assertEquals('dashicons-admin-site-alt3', $menuIcon);
-        $this->assertEquals(30, $menuPosition);
+        $this->assertSame('http://example.com/account/sites', $capturedUrl);
+        $this->assertTrue($terminated);
     }
 }
