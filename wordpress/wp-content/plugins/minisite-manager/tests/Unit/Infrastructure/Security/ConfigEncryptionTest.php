@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Tests\Unit\Infrastructure\Security;
 
 use Minisite\Infrastructure\Security\ConfigEncryption;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Unit tests for ConfigEncryption
  */
+#[CoversClass(ConfigEncryption::class)]
 final class ConfigEncryptionTest extends TestCase
 {
     private string $validKey;

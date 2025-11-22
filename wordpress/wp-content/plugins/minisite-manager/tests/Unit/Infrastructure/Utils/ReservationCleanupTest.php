@@ -3,10 +3,12 @@
 namespace Tests\Unit\Infrastructure\Utils;
 
 use Minisite\Infrastructure\Utils\ReservationCleanup;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
+#[CoversClass(ReservationCleanup::class)]
 class ReservationCleanupTest extends TestCase
 {
     private $originalWpdb;

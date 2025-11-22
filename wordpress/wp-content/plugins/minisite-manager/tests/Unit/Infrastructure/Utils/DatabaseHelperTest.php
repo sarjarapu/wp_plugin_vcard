@@ -3,6 +3,7 @@
 namespace Tests\Unit\Infrastructure\Utils;
 
 use Mockery;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Tests\Support\FakeWpdb;
 use Minisite\Infrastructure\Utils\DatabaseHelper;
@@ -10,6 +11,7 @@ use Minisite\Infrastructure\Utils\DatabaseHelper;
 /**
  * Unit tests for DatabaseHelper class
  */
+#[CoversClass(DatabaseHelper::class)]
 class DatabaseHelperTest extends TestCase
 {
     private FakeWpdb $mockWpdb;
