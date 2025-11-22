@@ -86,14 +86,39 @@ if (! function_exists('add_submenu_page')) {
 if (! function_exists('add_rewrite_tag')) {
     function add_rewrite_tag($tag, $regex, $query = '')
     {
-        // Mock - do nothing in tests
+        if (! isset($GLOBALS['_test_wp_rewrite_tags'])) {
+            $GLOBALS['_test_wp_rewrite_tags'] = array();
+        }
+
+        $GLOBALS['_test_wp_rewrite_tags'][$tag] = array(
+            'regex' => $regex,
+            'query' => $query,
+        );
     }
 }
 
 if (! function_exists('add_rewrite_rule')) {
     function add_rewrite_rule($regex, $redirect, $after = 'bottom')
     {
-        // Mock - do nothing in tests
+        if (! isset($GLOBALS['_test_wp_rewrite_rules'])) {
+            $GLOBALS['_test_wp_rewrite_rules'] = array();
+        }
+
+        $GLOBALS['_test_wp_rewrite_rules'][] = array(
+            'pattern' => $regex,
+            'redirect' => $redirect,
+            'after' => $after,
+        );
+
+        if (! isset($GLOBALS['wp_rewrite'])) {
+            $GLOBALS['wp_rewrite'] = new class () {
+                public array $rules = array();
+            };
+        } elseif (! isset($GLOBALS['wp_rewrite']->rules) || ! is_array($GLOBALS['wp_rewrite']->rules)) {
+            $GLOBALS['wp_rewrite']->rules = array();
+        }
+
+        $GLOBALS['wp_rewrite']->rules[$regex] = $redirect;
     }
 }
 

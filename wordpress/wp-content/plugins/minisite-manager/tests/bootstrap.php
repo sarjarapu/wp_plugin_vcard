@@ -240,6 +240,7 @@ if (! class_exists('WP_User')) {
 
 // Load WordPress function mocks
 require_once __DIR__ . '/Support/WordPressFunctions.php';
+require_once __DIR__ . '/Support/ApplicationRenderingTestStubs.php';
 
 // Mock global $wp_query
 $GLOBALS['wp_query'] = new class () {
@@ -254,8 +255,16 @@ if (! class_exists('Timber\Timber')) {
     eval('
         namespace Timber {
             class Timber {
+                public static array $locations = array();
+                public static array $renderCalls = array();
+
                 public static function render($template, $context = array())
                 {
+                    self::$renderCalls[] = array(
+                        'templates' => (array) $template,
+                        'context' => $context,
+                    );
+
                     // Output mock HTML based on context
                     $output = "<div class=\"auth-page\">";
                     if (isset($context["page_title"])) {
