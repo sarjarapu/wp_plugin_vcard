@@ -13,9 +13,9 @@ class ErrorHandler
     private LoggerInterface $logger;
     private bool $isRegistered = false;
 
-    public function __construct()
+    public function __construct(?LoggerInterface $logger = null)
     {
-        $this->logger = LoggingServiceProvider::getFeatureLogger('error-handler');
+        $this->logger = $logger ?? LoggingServiceProvider::getFeatureLogger('error-handler');
     }
 
     /**
@@ -102,7 +102,7 @@ class ErrorHandler
         }
 
         // In development, show detailed error
-        if (defined('WP_DEBUG') && WP_DEBUG) {
+        if ($this->isDebugMode()) {
             echo "<h1>Minisite Manager Error</h1>";
             echo "<p><strong>Error:</strong> " . esc_html($exception->getMessage()) . "</p>";
             echo "<p><strong>File:</strong> " . esc_html($exception->getFile()) . "</p>";
@@ -173,5 +173,18 @@ class ErrorHandler
         );
 
         return $severities[$severity] ?? 'UNKNOWN';
+    }
+
+    private function isDebugMode(): bool
+    {
+        if (array_key_exists('_minisite_error_handler_debug', $GLOBALS)) {
+            return (bool) $GLOBALS['_minisite_error_handler_debug'];
+        }
+
+        if (defined('MINISITE_ERROR_HANDLER_DEBUG')) {
+            return (bool) constant('MINISITE_ERROR_HANDLER_DEBUG');
+        }
+
+        return defined('WP_DEBUG') && WP_DEBUG;
     }
 }
