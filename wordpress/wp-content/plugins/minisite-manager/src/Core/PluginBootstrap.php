@@ -4,6 +4,7 @@ namespace Minisite\Core;
 
 use Minisite\Infrastructure\ErrorHandling\ErrorHandlingServiceProvider;
 use Minisite\Infrastructure\Logging\LoggingServiceProvider;
+use Psr\Log\LoggerInterface;
 
 /**
  * Plugin Bootstrap
@@ -15,6 +16,10 @@ use Minisite\Infrastructure\Logging\LoggingServiceProvider;
  */
 final class PluginBootstrap
 {
+    private static ?callable $entityManagerFactory = null;
+    private static ?callable $repositoryFactory = null;
+    private static ?callable $loggerFactory = null;
+    private static ?bool $doctrineAvailableOverride = null;
     public static function initialize(): void
     {
         // Register activation/deactivation hooks
@@ -67,9 +72,9 @@ final class PluginBootstrap
     {
         try {
             // Check if Doctrine is available
-            if (! class_exists(\Doctrine\ORM\EntityManager::class)) {
+            if (! self::isDoctrineAvailable()) {
                 // Doctrine not installed - skip initialization
-                $logger = LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
+                $logger = self::getBootstrapLogger();
                 $logger->warning('Doctrine ORM not available - ConfigManager will not be initialized');
 
                 return;
@@ -92,8 +97,7 @@ final class PluginBootstrap
             }
 
             if ($needsNewEm) {
-                $GLOBALS['minisite_entity_manager'] =
-                    \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
+                $GLOBALS['minisite_entity_manager'] = self::createEntityManager();
             }
 
             // Note: ConfigManager initialization is now handled by ConfigurationManagementFeature
@@ -102,9 +106,10 @@ final class PluginBootstrap
             // Initialize ReviewRepository
             // Create ReviewRepository instance directly (same pattern as ConfigRepository)
             $em = $GLOBALS['minisite_entity_manager'];
-            $reviewRepository = new \Minisite\Features\ReviewManagement\Repositories\ReviewRepository(
+            $reviewRepository = self::createRepository(
+                \Minisite\Features\ReviewManagement\Repositories\ReviewRepository::class,
                 $em,
-                $em->getClassMetadata(\Minisite\Features\ReviewManagement\Domain\Entities\Review::class)
+                \Minisite\Features\ReviewManagement\Domain\Entities\Review::class
             );
 
             // Store in global for easy access
@@ -112,9 +117,10 @@ final class PluginBootstrap
 
             // Initialize VersionRepository
             // Create VersionRepository instance directly (same pattern as ReviewRepository)
-            $versionRepository = new \Minisite\Features\VersionManagement\Repositories\VersionRepository(
+            $versionRepository = self::createRepository(
+                \Minisite\Features\VersionManagement\Repositories\VersionRepository::class,
                 $em,
-                $em->getClassMetadata(\Minisite\Features\VersionManagement\Domain\Entities\Version::class)
+                \Minisite\Features\VersionManagement\Domain\Entities\Version::class
             );
 
             // Store in global for backward compatibility
@@ -122,16 +128,17 @@ final class PluginBootstrap
 
             // Initialize MinisiteRepository
             // Create MinisiteRepository instance directly (same pattern as VersionRepository)
-            $minisiteRepository = new \Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository(
+            $minisiteRepository = self::createRepository(
+                \Minisite\Features\MinisiteManagement\Repositories\MinisiteRepository::class,
                 $em,
-                $em->getClassMetadata(\Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class)
+                \Minisite\Features\MinisiteManagement\Domain\Entities\Minisite::class
             );
 
             // Store in global for backward compatibility
             $GLOBALS['minisite_repository'] = $minisiteRepository;
         } catch (\Exception $e) {
             // Log error but don't fail initialization
-            $logger = \Minisite\Infrastructure\Logging\LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
+            $logger = self::getBootstrapLogger();
             $logger->error('Failed to initialize config system', array(
                 'error' => $e->getMessage(),
                 'exception' => get_class($e),
@@ -144,5 +151,86 @@ final class PluginBootstrap
     public static function initializeFeatures(): void
     {
         FeatureRegistry::initializeAll();
+    }
+
+    /**
+     * @internal Testing utility - not part of the public API.
+     */
+    public static function setEntityManagerFactory(?callable $factory): void
+    {
+        self::$entityManagerFactory = $factory;
+    }
+
+    /**
+     * @internal Testing utility - not part of the public API.
+     */
+    public static function setRepositoryFactory(?callable $factory): void
+    {
+        self::$repositoryFactory = $factory;
+    }
+
+    /**
+     * @internal Testing utility - not part of the public API.
+     */
+    public static function setLoggerFactory(?callable $factory): void
+    {
+        self::$loggerFactory = $factory;
+    }
+
+    /**
+     * @internal Testing utility - not part of the public API.
+     */
+    public static function setDoctrineAvailableOverride(?bool $isAvailable): void
+    {
+        self::$doctrineAvailableOverride = $isAvailable;
+    }
+
+    /**
+     * @internal Testing utility - not part of the public API.
+     */
+    public static function resetTestState(): void
+    {
+        self::$entityManagerFactory = null;
+        self::$repositoryFactory = null;
+        self::$loggerFactory = null;
+        self::$doctrineAvailableOverride = null;
+    }
+
+    private static function createEntityManager()
+    {
+        if (self::$entityManagerFactory !== null) {
+            return call_user_func(self::$entityManagerFactory);
+        }
+
+        return \Minisite\Infrastructure\Persistence\Doctrine\DoctrineFactory::createEntityManager();
+    }
+
+    private static function createRepository(string $repositoryClass, $entityManager, string $entityClass)
+    {
+        if (self::$repositoryFactory !== null) {
+            return call_user_func(self::$repositoryFactory, $repositoryClass, $entityManager, $entityClass);
+        }
+
+        $metadata = $entityManager->getClassMetadata($entityClass);
+
+        return new $repositoryClass($entityManager, $metadata);
+    }
+
+    private static function getBootstrapLogger(): LoggerInterface
+    {
+        if (self::$loggerFactory !== null) {
+            return call_user_func(self::$loggerFactory);
+        }
+
+        return LoggingServiceProvider::getFeatureLogger('plugin-bootstrap');
+    }
+
+    private static function isDoctrineAvailable(): bool
+    {
+        if (self::$doctrineAvailableOverride !== null) {
+            return self::$doctrineAvailableOverride;
+        }
+
+        return class_exists(\Doctrine\ORM\EntityManager::class);
     }
 }

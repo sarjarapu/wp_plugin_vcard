@@ -1,93 +1,59 @@
 <?php
 
-namespace Minisite\Tests\Unit\Core;
+declare(strict_types=1);
 
+namespace Tests\Unit\Core;
+
+use Brain\Monkey\Functions;
 use Minisite\Core\DeactivationHandler;
-use PHPUnit\Framework\TestCase;
+use Tests\Support\CoreTestCase;
 
-/**
- * Test class for DeactivationHandler
- */
-class DeactivationHandlerTest extends TestCase
+#[\PHPUnit\Framework\Attributes\CoversClass(DeactivationHandler::class)]
+final class DeactivationHandlerTest extends CoreTestCase
 {
-
-    /**
-     * Test handle method is static
-     */
-    public function test_handle_is_static_method(): void
+    public function testHandleFlushesRewritesAndCleansUpNonProduction(): void
     {
-        $reflection = new \ReflectionClass(DeactivationHandler::class);
-        $handleMethod = $reflection->getMethod('handle');
-        
-        $this->assertTrue($handleMethod->isStatic());
-        $this->assertTrue($handleMethod->isPublic());
+        DeactivationHandler::setProductionOverride(false);
+        Functions\expect('flush_rewrite_rules')->once()->andReturnNull();
+
+        // Seed roles/options
+        update_option(MINISITE_DB_OPTION, '1.0.0');
+        add_role('minisite_user', 'User');
+
+        DeactivationHandler::handle();
+
+        $this->assertArrayNotHasKey(MINISITE_DB_OPTION, $GLOBALS['_test_options'] ?? array());
+        $this->assertArrayNotHasKey('minisite_user', $GLOBALS['_test_roles'] ?? array());
     }
 
-    /**
-     * Test cleanupNonProduction method is private
-     */
-    public function test_cleanupNonProduction_is_private_method(): void
+    public function testHandleSkipsCleanupInProduction(): void
     {
-        $reflection = new \ReflectionClass(DeactivationHandler::class);
-        $cleanupMethod = $reflection->getMethod('cleanupNonProduction');
-        
-        $this->assertTrue($cleanupMethod->isPrivate());
-        $this->assertTrue($cleanupMethod->isStatic());
+        DeactivationHandler::setProductionOverride(true);
+        Functions\expect('flush_rewrite_rules')->once()->andReturnNull();
+
+        add_role('minisite_member', 'Member');
+        update_option(MINISITE_DB_OPTION, '1.0.0');
+
+        DeactivationHandler::handle();
+
+        $this->assertArrayHasKey('minisite_member', $GLOBALS['_test_roles']);
+        $this->assertSame('1.0.0', $GLOBALS['_test_options'][MINISITE_DB_OPTION]);
     }
 
-    /**
-     * Test class is final (bypassed in test environment)
-     */
-    public function test_class_is_final(): void
+    public function testCleanupRemovesAllCustomRoles(): void
     {
-        $reflection = new \ReflectionClass(DeactivationHandler::class);
-        // Note: BypassFinals extension bypasses final keyword in tests
-        // The class is actually final in production
-        $this->assertTrue(true); // Always pass - class is final in production
-    }
+        DeactivationHandler::setProductionOverride(false);
+        Functions\expect('flush_rewrite_rules')->once()->andReturnNull();
 
-    /**
-     * Test class has expected methods
-     */
-    public function test_class_has_expected_methods(): void
-    {
-        $reflection = new \ReflectionClass(DeactivationHandler::class);
-        
-        $this->assertTrue($reflection->hasMethod('handle'));
-        $this->assertTrue($reflection->hasMethod('cleanupNonProduction'));
-    }
+        add_role('minisite_user', 'User');
+        add_role('minisite_member', 'Member');
+        add_role('minisite_power', 'Power');
+        add_role('minisite_admin', 'Admin');
 
-    /**
-     * Test methods are callable
-     */
-    public function test_methods_are_callable(): void
-    {
-        $this->assertTrue(is_callable([DeactivationHandler::class, 'handle']));
-    }
+        DeactivationHandler::handle();
 
-    /**
-     * Test handle method exists and is accessible
-     */
-    public function test_handle_method_exists_and_accessible(): void
-    {
-        $reflection = new \ReflectionClass(DeactivationHandler::class);
-        $this->assertTrue($reflection->hasMethod('handle'));
-        
-        $method = $reflection->getMethod('handle');
-        $this->assertTrue($method->isPublic());
-        $this->assertTrue($method->isStatic());
-    }
-
-    /**
-     * Test cleanupNonProduction method exists and is private
-     */
-    public function test_cleanupNonProduction_method_exists_and_private(): void
-    {
-        $reflection = new \ReflectionClass(DeactivationHandler::class);
-        $this->assertTrue($reflection->hasMethod('cleanupNonProduction'));
-        
-        $method = $reflection->getMethod('cleanupNonProduction');
-        $this->assertTrue($method->isPrivate());
-        $this->assertTrue($method->isStatic());
+        foreach (array('minisite_user', 'minisite_member', 'minisite_power', 'minisite_admin') as $role) {
+            $this->assertArrayNotHasKey($role, $GLOBALS['_test_roles']);
+        }
     }
 }
