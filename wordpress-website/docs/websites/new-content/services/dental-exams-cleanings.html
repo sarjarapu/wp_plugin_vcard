@@ -216,7 +216,7 @@
         }
         
         .nav-menu a.has-dropdown::after {
-            content: '▼';
+            content: 'v';
             font-size: 0.7rem;
             margin-left: 5px;
             transition: transform 0.3s ease;
@@ -404,7 +404,7 @@
         }
         
         .mobile-menu-list > li > a.has-dropdown::after {
-            content: '▶';
+            content: '>';
             float: right;
             font-size: 0.8rem;
             transition: transform 0.3s ease;
@@ -689,12 +689,12 @@
         }
         
         .checklist li::before {
-            content: "•";
+            content: "-";
             position: absolute;
             left: 8px;
             top: 2px;
             color: #0F9D58;
-            font-size: 1.2rem;
+            font-weight: 700;
         }
         
         .bilingual-card {
@@ -738,6 +738,53 @@
             justify-content: space-between;
             font-size: 0.95rem;
             color: #0F9D58;
+        }
+        
+        .about-doctor {
+            background-color: #ffffff;
+        }
+        
+        .doctor-content {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .doctor-content p {
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #555;
+        }
+        
+        .section-neutral {
+            background-color: #f9f9f9;
+        }
+        
+        .section-text {
+            max-width: 900px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        .section-text p {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 20px;
+        }
+        
+        .section-text ol {
+            margin: 0 0 25px 20px;
+        }
+        
+        .section-text ol li {
+            font-size: 1.2rem;
+            color: #34495e;
+            margin-bottom: 12px;
+        }
+        
+        .insurance {
+            background-color: #f9f9f9;
         }
         
         .faq-list {
@@ -1102,18 +1149,20 @@
             </div>
         </section>
         
-        <section id="what-to-expect" style="background-color: #f9f9f9; padding: 60px 20px;">
+        <section class="section-neutral" id="what-to-expect">
             <div class="container">
                 <h2>What Happens During Your Dental Exam &amp; Cleaning</h2>
-                <p style="max-width: 900px; margin: 0 auto 25px; line-height: 1.8; color: #555;">From the first greeting to your personalized home-care plan, each appointment follows a consistent, comprehensive flow. We combine insights from leading Cedar Park competitors with Aviva's comfort-first approach so nothing feels rushed or confusing.</p>
-                <ol style="max-width: 900px; margin: 0 auto; line-height: 1.8; color: #34495e;">
-                    <li><strong>Warm welcome &amp; medical review.</strong> We discuss recent health changes, medications, and smile goals so today's visit addresses what matters most to you.</li>
-                    <li><strong>Digital diagnostics.</strong> Low-dose digital X-rays, 3D imaging when indicated, intraoral photos, and full periodontal charting help us see everything beneath the surface.</li>
-                    <li><strong>Doctor exam &amp; oral cancer screening.</strong> Dr. Arjarapu evaluates your TMJ, bite, airway, and soft tissues, then walks you through every image and measurement chairside.</li>
-                    <li><strong>Gentle cleaning &amp; fluoride.</strong> Ultrasonic scalers, hand instruments, and topical numbing (when needed) remove plaque and tartar comfortably. We finish with fluoride or varnish tailored to your risk level.</li>
-                    <li><strong>Personalized roadmap.</strong> You leave with home-care tips, product recommendations, and a recall interval that aligns with your cavity risk, ortho treatment, or periodontal history.</li>
-                </ol>
-                <p style="max-width: 900px; margin: 25px auto 0; line-height: 1.8; color: #555;">If periodontal measurements reveal infection, we explain the difference between a standard prophylaxis and scaling-and-root-planing-similar to the clarity highlighted by Parmer Oaks Dental-and review how topical anesthetic, localized antibiotic therapy, or nitrous oxide will keep you comfortable. You will always know when we are recommending a deeper cleaning, why it matters, and how we will help you maintain results.</p>
+                <div class="section-text">
+                    <p>From the first greeting to your personalized home-care plan, each appointment follows a consistent, comprehensive flow. We combine insights from leading Cedar Park competitors with Aviva's comfort-first approach so nothing feels rushed or confusing.</p>
+                    <ol>
+                        <li><strong>Warm welcome &amp; medical review.</strong> We discuss recent health changes, medications, and smile goals so today's visit addresses what matters most to you.</li>
+                        <li><strong>Digital diagnostics.</strong> Low-dose digital X-rays, 3D imaging when indicated, intraoral photos, and full periodontal charting help us see everything beneath the surface.</li>
+                        <li><strong>Doctor exam &amp; oral cancer screening.</strong> Dr. Arjarapu evaluates your TMJ, bite, airway, and soft tissues, then walks you through every image and measurement chairside.</li>
+                        <li><strong>Gentle cleaning &amp; fluoride.</strong> Ultrasonic scalers, hand instruments, and topical numbing (when needed) remove plaque and tartar comfortably. We finish with fluoride or varnish tailored to your risk level.</li>
+                        <li><strong>Personalized roadmap.</strong> You leave with home-care tips, product recommendations, and a recall interval that aligns with your cavity risk, ortho treatment, or periodontal history.</li>
+                    </ol>
+                    <p>If periodontal measurements reveal infection, we explain the difference between a standard prophylaxis and scaling-and-root-planing-similar to the clarity highlighted by Parmer Oaks Dental-and review how topical anesthetic, localized antibiotic therapy, or nitrous oxide will keep you comfortable. You will always know when we are recommending a deeper cleaning, why it matters, and how we will help you maintain results.</p>
+                </div>
                 <div style="text-align: center; margin-top: 30px;">
                     <a href="/contact" class="cta-button primary">Book Your Preventive Visit</a>
                 </div>
@@ -1128,7 +1177,7 @@
             </div>
         </section>
         
-        <section id="family-care" style="padding: 60px 20px;">
+        <section id="family-care">
             <div class="container">
                 <h2>Personalized Recall Schedules for Every Cedar Park Family</h2>
                 <div class="contact-info">
@@ -1159,12 +1208,12 @@
         <section class="insurance" id="insurance">
             <div class="container">
                 <h2 style="text-align: center; color: #34495e;">Insurance, Membership &amp; Financing Support</h2>
-                <p class="section-intro" style="color: #555;">Competitors such as New Hope Dentist and Cedar Park Dental &amp; Braces highlight that preventive care is often covered-so do we. Our front desk team verifies benefits before your visit, files claims electronically, and explains any estimated copay. No surprises, no guessing.</p>
-                <p class="section-intro" style="color: #555;">Uninsured or newly moved to Cedar Park? Ask about the Aviva Wellness Plan inspired by Prime Dental's membership model. It bundles two hygiene visits, exams, oral cancer screenings, and member-only savings on additional treatment. We also partner with CareCredit and offer in-office payment options for scaling and root planing or other therapy recommended after your exam.</p>
+                <p class="section-intro">Competitors such as New Hope Dentist and Cedar Park Dental &amp; Braces highlight that preventive care is often covered-so do we. Our front desk team verifies benefits before your visit, files claims electronically, and explains any estimated copay. No surprises, no guessing.</p>
+                <p class="section-intro">Uninsured or newly moved to Cedar Park? Ask about the Aviva Wellness Plan inspired by Prime Dental's membership model. It bundles two hygiene visits, exams, oral cancer screenings, and member-only savings on additional treatment. We also partner with CareCredit and offer in-office payment options for scaling and root planing or other therapy recommended after your exam.</p>
             </div>
         </section>
         
-        <section id="testimonials" style="padding: 60px 20px;">
+        <section id="testimonials">
             <div class="container">
                 <h2>What Patients Love About Our Preventive Visits</h2>
                 <div class="testimonials-grid">
@@ -1172,7 +1221,7 @@
                         <p>"The staff is so friendly and welcoming! Dr. Arjarapu took the time to explain everything clearly and made sure I was comfortable throughout my visit. The screens on the ceiling during treatment were a game-changer-I actually relaxed!"</p>
                         <div class="testimonial-meta">
                             <span>&mdash; Actual Aviva Dental Care review</span>
-                            <span>4.9 ★ average</span>
+                            <span>4.9-star average</span>
                         </div>
                     </article>
                     <article class="testimonial-card">
