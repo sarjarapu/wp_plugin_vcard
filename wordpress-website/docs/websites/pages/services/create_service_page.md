@@ -59,10 +59,11 @@ To keep every service page consistent (even when different agents tackle tickets
 
 1. **Mirror `home.html` / `about.html` layout:** reuse the same container structure, typography, spacing, and section rhythm (hero → narrative sections → CTA). Avoid introducing experimental card layouts, stat blocks, or icon grids unless those elements already exist in the reference files.
 2. **Depth & word count:** each major section (H2/H3) must contain 2–4 full sentences (100–200 words). Total page length should stay within 1,100–1,400 words unless the strategy explicitly states otherwise.
-3. **Competitor + strategy integration:** explicitly weave in the best practices captured in `strategy.md` (ADA recall guidance, deep-cleaning vs. prophy explanation, topical anesthetic language, insurance notes, bilingual reassurance, etc.). Treat the strategy as a checklist and ensure every recommendation appears in the final copy.
-4. **Aviva-specific trust:** pull real differentiators from existing content (review quotes, 4.9★ average, Dr. Arjarapu details, technology already mentioned on home/about). Do not invent testimonials or statistics.
-5. **Keyword coverage:** include the service name + “Cedar Park, TX” in the title, H1, hero intro, and multiple H2s. Use long-tail phrases highlighted in the strategy throughout paragraphs (not just bullets).
-6. **CTA discipline:** replicate the CTA styles from home/about (primary/secondary buttons) and ensure every CTA routes to consultation/contact. Include phone + form options at least three times (hero, mid-page, final CTA).
+3. **Typography & width discipline:** narrative paragraphs must use the existing classes (`.container`, `.about-doctor`, `.section-intro`, `.section-text`, etc.) so body copy stays ~1.2rem with ~900px max width. Only use card/grid styles that already exist in home/about (`.contact-info`, `.services-grid`, etc.), and keep card text at the smaller 1.0–1.1rem sizes matching those references.
+4. **Competitor + strategy integration:** explicitly weave in the best practices captured in `strategy.md` (ADA recall guidance, deep-cleaning vs. prophy explanation, topical anesthetic language, insurance notes, bilingual reassurance, etc.). Treat the strategy as a checklist and ensure every recommendation appears in the final copy.
+5. **Aviva-specific trust:** pull real differentiators from existing content (review quotes, 4.9-star average, Dr. Arjarapu details, technology already mentioned on home/about). Do not invent testimonials or statistics.
+6. **Keyword coverage:** include the service name + “Cedar Park, TX” in the title, H1, hero intro, and multiple H2s. Use long-tail phrases highlighted in the strategy throughout paragraphs (not just bullets).
+7. **CTA discipline:** replicate the CTA styles from home/about (primary/secondary buttons) and ensure every CTA routes to consultation/contact. Include phone + form options at least three times (hero, mid-page, final CTA).
 
 If the output diverges from these guardrails, stop and realign before continuing—future automation depends on every page matching this template.
 
@@ -896,6 +897,7 @@ Preferably avoid any discussion about the pricing. If the general theme across g
      }
    }
    ```
+6. **Reuse proven classes:** copy/paste layout wrappers from `home.html`/`about.html` (e.g., `.hero`, `.about-doctor`, `.section-intro`, `.section-text`, `.contact-info`, `.cta-button`). Do **not** invent new card grids or inline font-size/width rules. Narrative sections should sit in the same 900px-wide containers with ~1.2rem body text; cards should reuse the existing `.service-card`/`.contact-item` patterns so they inherit the correct 1.0–1.1rem typography.
 
 ### Step 6.3: Content Writing Guidelines
 
