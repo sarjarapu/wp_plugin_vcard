@@ -1,0 +1,39 @@
+---
+services:
+  wordpress:
+    container_name: aviva-wordpress
+    image: wordpress:latest
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      TAR_OPTIONS: --no-same-owner
+      WORDPRESS_FS_METHOD: direct
+      WORDPRESS_CONFIG_EXTRA: "define('FS_METHOD', 'direct');"
+    ports:
+      - "8000:80"
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+      - ./docs/config/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    container_name: aviva-mysql
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+      MYSQL_ROOT_PASSWORD: example
+    ports:
+      - "3306:3306"
+    volumes:
+      - awp_db_data:/var/lib/mysql
+    restart: always
+
+volumes:
+  awp_db_data:
+  # html_data:
