@@ -1191,18 +1191,26 @@ Exclude: `/blog/`, `/landing/`, `/articles/`
 8. **Analyze deeply** - surface-level analysis won't work
 9. **Think like a visitor** - what would convert you?
 
-**Success Metrics:**
-- ✅ Branch created correctly: `feature/{service_name}` from `aviva-website`
-- ✅ Pull request targets `aviva-website` (not `main`)
-- ✅ 12+ competitor pages analyzed
-- ✅ Comprehensive strategy.md created
-- ✅ Content matches style and converts
-- ✅ No pricing information included
-- ✅ All CTAs lead to consultation
-
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: November 26, 2025  
+## Final Operational Checklist
+
+1. ✅ Branch created from `aviva-website` (`feature/{service_name}`)
+2. ✅ 12+ competitor URLs captured in TSV + HTML downloads retained
+3. ✅ strategy.md completed with actionable recommendations
+4. ✅ Final HTML matches home/about style, follows strategy, no pricing
+5. ✅ All CTAs route to consultation/phone, Cedar Park, TX mentioned throughout
+6. ✅ Run `git status -sb` and verify only service-specific files changed
+7. ✅ Run:
+   ```bash
+   git add wordpress-website/docs/websites/pages/services/{service_name}/ \
+           wordpress-website/docs/websites/new-content/services/{service_name}.html
+   git commit -m "Add {service name} service page"
+   git push origin feature/{service_name}
+   ```
+8. ✅ Create PR from `feature/{service_name}` → `aviva-website`
+
+**Document Version**: 1.1  
+**Last Updated**: November 27, 2025  
 **For Use By**: Automated Content Creation Agent
 
