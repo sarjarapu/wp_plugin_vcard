@@ -53,6 +53,19 @@ Service Name Input
 9. ⚠️ CREATE PR: feature/{service_name} → aviva-website (NOT main)
 ```
 
+### ⚠️ Non-Negotiable Content & Style Requirements
+
+To keep every service page consistent (even when different agents tackle tickets in parallel), follow these guardrails without exception:
+
+1. **Mirror `home.html` / `about.html` layout:** reuse the same container structure, typography, spacing, and section rhythm (hero → narrative sections → CTA). Avoid introducing experimental card layouts, stat blocks, or icon grids unless those elements already exist in the reference files.
+2. **Depth & word count:** each major section (H2/H3) must contain 2–4 full sentences (100–200 words). Total page length should stay within 1,100–1,400 words unless the strategy explicitly states otherwise.
+3. **Competitor + strategy integration:** explicitly weave in the best practices captured in `strategy.md` (ADA recall guidance, deep-cleaning vs. prophy explanation, topical anesthetic language, insurance notes, bilingual reassurance, etc.). Treat the strategy as a checklist and ensure every recommendation appears in the final copy.
+4. **Aviva-specific trust:** pull real differentiators from existing content (review quotes, 4.9★ average, Dr. Arjarapu details, technology already mentioned on home/about). Do not invent testimonials or statistics.
+5. **Keyword coverage:** include the service name + “Cedar Park, TX” in the title, H1, hero intro, and multiple H2s. Use long-tail phrases highlighted in the strategy throughout paragraphs (not just bullets).
+6. **CTA discipline:** replicate the CTA styles from home/about (primary/secondary buttons) and ensure every CTA routes to consultation/contact. Include phone + form options at least three times (hero, mid-page, final CTA).
+
+If the output diverges from these guardrails, stop and realign before continuing—future automation depends on every page matching this template.
+
 ### Directory Structure
 
 ```
@@ -134,6 +147,27 @@ All work (TSV files, HTML downloads, strategy.md, final HTML) should be committe
 **Example PR Title:**
 - `Add Teeth Whitening service page`
 - `Add Dental Implants service page`
+
+### ⚠️ MANDATORY: Stage → Commit → Push
+
+After you’ve completed all files for a service page (TSV, downloaded HTML archives, strategy.md, final HTML), you **must** commit and push before handing off. Use this exact flow on every ticket:
+
+```bash
+# Review the state
+git status -sb
+
+# Stage ONLY the files for this service (TSV, downloaded HTML files, strategy.md, new-content HTML)
+git add wordpress-website/docs/websites/pages/services/{service_name}/ \
+        wordpress-website/docs/websites/new-content/services/{service_name}.html
+
+# Craft a descriptive commit message
+git commit -m "Add {service name} service page"
+
+# Push your branch so reviewers can see the work
+git push origin feature/{service_name}
+```
+
+Do **not** skip these steps. Every PR reviewer expects to see the commit history plus all artifacts (URL TSV, downloaded competitor HTML, strategy, final page) on the branch.
 
 ### ⚠️ Common Mistakes to Avoid
 
@@ -392,6 +426,7 @@ chmod +x scripts/download_service.sh
 2. Verify file sizes are reasonable (> 1KB, typically 10-200KB)
 3. Verify files contain HTML (check for `<html>` or `<!DOCTYPE` tags)
 4. Count downloaded files matches TSV entries (minus any failures)
+5. **Retention requirement:** Do **not** delete or relocate these raw HTML files after analysis. Reviewers expect every downloaded competitor page to remain in `wordpress-website/docs/websites/pages/services/{service_name}/` alongside the TSV and strategy.
 
 ---
 
