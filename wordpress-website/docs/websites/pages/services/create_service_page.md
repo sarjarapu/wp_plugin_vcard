@@ -12,15 +12,16 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Phase 1: Service URL Discovery & Pattern Analysis](#phase-1-service-url-discovery--pattern-analysis)
-3. [Phase 2: TSV File Creation](#phase-2-tsv-file-creation)
-4. [Phase 3: HTML Download](#phase-3-html-download)
-5. [Phase 4: Deep Content Analysis](#phase-4-deep-content-analysis)
-6. [Phase 5: Strategy Document Creation](#phase-5-strategy-document-creation)
-7. [Phase 6: Content Creation](#phase-6-content-creation)
-8. [Phase 7: Lead Conversion Optimization](#phase-7-lead-conversion-optimization)
-9. [Quality Checklist](#quality-checklist)
-10. [Troubleshooting](#troubleshooting)
+2. [Git Workflow - CRITICAL](#git-workflow---critical)
+3. [Phase 1: Service URL Discovery & Pattern Analysis](#phase-1-service-url-discovery--pattern-analysis)
+4. [Phase 2: TSV File Creation](#phase-2-tsv-file-creation)
+5. [Phase 3: HTML Download](#phase-3-html-download)
+6. [Phase 4: Deep Content Analysis](#phase-4-deep-content-analysis)
+7. [Phase 5: Strategy Document Creation](#phase-5-strategy-document-creation)
+8. [Phase 6: Content Creation](#phase-6-content-creation)
+9. [Phase 7: Lead Conversion Optimization](#phase-7-lead-conversion-optimization)
+10. [Quality Checklist](#quality-checklist)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -30,6 +31,8 @@
 
 ```
 Service Name Input
+    ↓
+0. ⚠️ CREATE BRANCH: feature/{service_name} from aviva-website (NOT main)
     ↓
 1. Analyze sitemaps → Find service URLs → Create regex pattern
     ↓
@@ -46,12 +49,14 @@ Service Name Input
 7. Create final HTML content matching home.html/about.html style
     ↓
 8. Optimize for lead conversion
+    ↓
+9. ⚠️ CREATE PR: feature/{service_name} → aviva-website (NOT main)
 ```
 
 ### Directory Structure
 
 ```
-docs/websites/pages/services/
+wordpress-website/docs/websites/pages/services/
 ├── create_service_page.md (this file)
 ├── {service_name}/
 │   ├── {service_name}_urls.tsv
@@ -60,12 +65,97 @@ docs/websites/pages/services/
 │   └── {service_name}.html (final output)
 └── listing/ (services listing pages)
 
-docs/websites/new-content/
+wordpress-website/docs/websites/new-content/
 ├── home.html (style reference)
 ├── about.html (style reference)
 └── services/
     └── {service_name}.html (final output location)
 ```
+
+---
+
+## Git Workflow - CRITICAL
+
+### ⚠️ MANDATORY: Branch Creation Instructions
+
+**BEFORE starting any work on a service page, you MUST create a new branch following these EXACT steps:**
+
+#### Step 1: Ensure You're on the Correct Base Branch
+
+```bash
+# Check current branch
+git branch
+
+# If not on aviva-website, switch to it
+git checkout aviva-website
+
+# Pull latest changes
+git pull origin aviva-website
+```
+
+#### Step 2: Create Feature Branch from `aviva-website`
+
+**CRITICAL RULE**: The new branch MUST be created from `aviva-website`, NOT from `main`.
+
+```bash
+# Create and switch to new feature branch
+# Replace {service_name} with the actual service name (e.g., teeth_whitening, dental_implants)
+git checkout -b feature/{service_name} aviva-website
+```
+
+**Examples:**
+- For "teeth whitening": `git checkout -b feature/teeth_whitening aviva-website`
+- For "dental implants": `git checkout -b feature/dental_implants aviva-website`
+- For "root canal": `git checkout -b feature/root_canal aviva-website`
+
+**VERIFY the branch was created correctly:**
+```bash
+# Verify you're on the new branch
+git branch
+
+# Verify the branch is based on aviva-website (should show aviva-website in the log)
+git log --oneline --graph -5
+```
+
+#### Step 3: Work on Your Feature Branch
+
+All work (TSV files, HTML downloads, strategy.md, final HTML) should be committed to this feature branch.
+
+#### Step 4: Create Pull Request
+
+**CRITICAL RULE**: When creating a pull request, the target/base branch MUST be `aviva-website`, NOT `main`.
+
+**Pull Request Details:**
+- **Source branch**: `feature/{service_name}`
+- **Target branch**: `aviva-website` ⚠️ **NOT main**
+- **Title**: `Add {Service Name} service page`
+- **Description**: Include summary of work completed, files created, and any notes
+
+**Example PR Title:**
+- `Add Teeth Whitening service page`
+- `Add Dental Implants service page`
+
+### ⚠️ Common Mistakes to Avoid
+
+1. **DO NOT** create branch from `main`
+   - ❌ `git checkout -b feature/{service_name} main` (WRONG)
+   - ✅ `git checkout -b feature/{service_name} aviva-website` (CORRECT)
+
+2. **DO NOT** merge into `main`
+   - ❌ PR from `feature/{service_name}` → `main` (WRONG)
+   - ✅ PR from `feature/{service_name}` → `aviva-website` (CORRECT)
+
+3. **DO NOT** work directly on `aviva-website` branch
+   - Always create a feature branch first
+
+### Verification Checklist
+
+Before starting work, verify:
+- [ ] Currently on `aviva-website` branch
+- [ ] `aviva-website` branch is up to date (`git pull origin aviva-website`)
+- [ ] New feature branch created from `aviva-website`
+- [ ] Feature branch name follows pattern: `feature/{service_name}`
+- [ ] Ready to create PR targeting `aviva-website` (not `main`)
 
 ---
 
@@ -95,7 +185,7 @@ For a given service (e.g., "teeth whitening"), identify all possible URL variati
 
 ### Step 1.2: Analyze Sitemap Files
 
-**Location**: `docs/websites/pages/sitemap/`
+**Location**: `wordpress-website/docs/websites/pages/sitemap/`
 
 **Process:**
 1. Read all `*_sitemap.xml` files
@@ -182,7 +272,7 @@ patterns = [
 
 ### Step 2.1: Create TSV File
 
-**File Path**: `docs/websites/pages/services/{service_name}/{service_name}_urls.tsv`
+**File Path**: `wordpress-website/docs/websites/pages/services/{service_name}/{service_name}_urls.tsv`
 
 **Format** (tab-separated):
 ```
@@ -200,7 +290,7 @@ rank<TAB>practice_name<TAB>url
 - Use tab character (`\t`) for separation
 - No header row needed
 - Rank should be zero-padded (01, 02, ..., 24)
-- Practice name should match exactly from `docs/strategy/competitor/top_competitors_home.tsv`
+- Practice name should match exactly from `wordpress-website/docs/strategy/competitor/top_competitors_home.tsv`
 - URL should be the full, absolute URL
 
 ### Step 2.2: Validate TSV File
@@ -237,7 +327,7 @@ fi
 
 TSV_FILE="$1"
 SERVICE_NAME="$2"
-OUTPUT_DIR="docs/websites/pages/services/${SERVICE_NAME}"
+OUTPUT_DIR="wordpress-website/docs/websites/pages/services/${SERVICE_NAME}"
 
 # Create output directory
 mkdir -p "${OUTPUT_DIR}"
@@ -289,11 +379,11 @@ echo "Total files: $(ls -1 ${OUTPUT_DIR}/*.html 2>/dev/null | wc -l | tr -d ' ')
 **Command:**
 ```bash
 chmod +x scripts/download_service.sh
-./scripts/download_service.sh docs/websites/pages/services/{service_name}/{service_name}_urls.tsv {service_name}
+./scripts/download_service.sh wordpress-website/docs/websites/pages/services/{service_name}/{service_name}_urls.tsv {service_name}
 ```
 
 **Expected Output:**
-- HTML files in `docs/websites/pages/services/{service_name}/`
+- HTML files in `wordpress-website/docs/websites/pages/services/{service_name}/`
 - File naming: `{rank}_{practice_name_slugified}_{service_name}.html`
 - Example: `07_mosaic_dentistry_teeth_whitening.html`
 
@@ -309,7 +399,7 @@ chmod +x scripts/download_service.sh
 
 ### Step 4.1: Analyze Each Downloaded HTML File
 
-For each HTML file in `docs/websites/pages/services/{service_name}/`, perform comprehensive analysis:
+For each HTML file in `wordpress-website/docs/websites/pages/services/{service_name}/`, perform comprehensive analysis:
 
 #### 4.1.1: Structural Analysis
 
@@ -480,7 +570,7 @@ For each HTML file in `docs/websites/pages/services/{service_name}/`, perform co
 
 ### Step 5.1: Analyze Aviva's Existing Service Page
 
-**Location**: Check `docs/websites/pages/sitemap/16_aviva_dental_care_sitemap.xml`
+**Location**: Check `wordpress-website/docs/websites/pages/sitemap/16_aviva_dental_care_sitemap.xml`
 
 **Process:**
 1. Search sitemap for service URL
@@ -498,7 +588,7 @@ For each HTML file in `docs/websites/pages/services/{service_name}/`, perform co
 
 ### Step 5.2: Create strategy.md
 
-**File Path**: `docs/websites/pages/services/{service_name}/strategy.md`
+**File Path**: `wordpress-website/docs/websites/pages/services/{service_name}/strategy.md`
 
 **Document Structure:**
 
@@ -690,8 +780,8 @@ Preferably avoid any discussion about the pricing. If the general theme across g
 ### Step 6.1: Reference Existing Aviva Pages
 
 **Files to Reference:**
-- `docs/websites/new-content/home.html`
-- `docs/websites/new-content/about.html`
+- `wordpress-website/docs/websites/new-content/home.html`
+- `wordpress-website/docs/websites/new-content/about.html`
 
 **Analyze:**
 1. **HTML Structure:**
@@ -716,7 +806,7 @@ Preferably avoid any discussion about the pricing. If the general theme across g
 
 ### Step 6.2: Create Service Page HTML
 
-**File Path**: `docs/websites/new-content/services/{service_name}.html`
+**File Path**: `wordpress-website/docs/websites/new-content/services/{service_name}.html`
 
 **Process:**
 1. Start with template from `home.html` or `about.html`
@@ -995,6 +1085,16 @@ Before finalizing, verify:
 
 ## Example Workflow: Teeth Whitening
 
+### Step 0: Create Feature Branch (CRITICAL FIRST STEP)
+```bash
+# Ensure you're on aviva-website
+git checkout aviva-website
+git pull origin aviva-website
+
+# Create feature branch from aviva-website (NOT main)
+git checkout -b feature/teeth_whitening aviva-website
+```
+
 ### Step 1: Service Variations
 - teeth-whitening
 - tooth-whitening
@@ -1022,7 +1122,7 @@ Exclude: `/blog/`, `/landing/`, `/articles/`
 
 ### Step 4: Download
 ```bash
-./scripts/download_service.sh docs/websites/pages/services/teeth_whitening/teeth_whitening_urls.tsv teeth_whitening
+./scripts/download_service.sh wordpress-website/docs/websites/pages/services/teeth_whitening/teeth_whitening_urls.tsv teeth_whitening
 ```
 
 ### Step 5: Analysis
@@ -1046,20 +1146,24 @@ Exclude: `/blog/`, `/landing/`, `/articles/`
 ## Final Notes
 
 **Remember:**
-1. **Goal is lead conversion**, not just information
-2. **Never include pricing** - always redirect to consultation
-3. **Match existing style** from home.html/about.html
-4. **Be specific** in strategy.md - include examples
-5. **Test pattern** thoroughly before downloading
-6. **Analyze deeply** - surface-level analysis won't work
-7. **Think like a visitor** - what would convert you?
+1. **⚠️ CRITICAL: Create branch `feature/{service_name}` from `aviva-website` (NOT `main`)**
+2. **⚠️ CRITICAL: Pull request must target `aviva-website` (NOT `main`)**
+3. **Goal is lead conversion**, not just information
+4. **Never include pricing** - always redirect to consultation
+5. **Match existing style** from home.html/about.html
+6. **Be specific** in strategy.md - include examples
+7. **Test pattern** thoroughly before downloading
+8. **Analyze deeply** - surface-level analysis won't work
+9. **Think like a visitor** - what would convert you?
 
 **Success Metrics:**
-- 12+ competitor pages analyzed
-- Comprehensive strategy.md created
-- Content matches style and converts
-- No pricing information included
-- All CTAs lead to consultation
+- ✅ Branch created correctly: `feature/{service_name}` from `aviva-website`
+- ✅ Pull request targets `aviva-website` (not `main`)
+- ✅ 12+ competitor pages analyzed
+- ✅ Comprehensive strategy.md created
+- ✅ Content matches style and converts
+- ✅ No pricing information included
+- ✅ All CTAs lead to consultation
 
 ---
 
